@@ -1,19 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const allowedMethods = ["POST", "GET"];
 export default async function middleware(request: NextRequest) {
+  if (!allowedMethods.includes(request.method)) {
+    return NextResponse.json({}, { status: 400 });
+  }
+  
   const rootUrl = process.env.ADMIN_ORIGIN;
 
   const pathname = request.nextUrl.pathname;
-
-  if (pathname === "/login/secret") {
-    const isLoggedIn =
-      request.cookies.get("Authenticated")?.value ===
-      process.env.SECRET_COOKIE_VALUE;
-
-    if (!isLoggedIn) {
-      return NextResponse.redirect(`${rootUrl}/login`, { status: 307 });
-    }
-  }
 
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/api")) {
     if (pathname.endsWith("session-end")) {
@@ -25,7 +20,11 @@ export default async function middleware(request: NextRequest) {
       process.env.SECRET_COOKIE_VALUE2;
 
     if (!isLoggedIn) {
-      return NextResponse.redirect(`${rootUrl}/login`, { status: 307 });
+      const response = NextResponse.redirect(rootUrl as string, {
+        status: 307,
+      });
+      response.cookies.delete("Authenticated");
+      return response;
     }
   }
 
@@ -36,5 +35,5 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login/:path*", "/api/:path*", "/dashboard/:path*"],
+  matcher: ["/", "/api/:path*", "/dashboard/:path*"],
 };

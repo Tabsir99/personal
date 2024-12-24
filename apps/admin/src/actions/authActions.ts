@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 
 import { formatResponse } from "@/utils/utils";
+import { redirect } from "next/navigation";
 
 export async function logInAction(formData: FormData) {
   const username = formData.get("username");
@@ -32,13 +33,14 @@ export async function logInAction(formData: FormData) {
 }
 
 export async function secretAction(secret: string) {
+  const cookieStore = await cookies();
+
   if (secret !== process.env.ADMIN_SECRET_CODE) {
-    return formatResponse("error", "Incorrect Key");
+    cookieStore.delete("Authenticated");
+    redirect("/");
   }
 
   const cookieValue = process.env.SECRET_COOKIE_VALUE2;
-
-  const cookieStore = await cookies();
 
   cookieStore.set({
     name: "Authenticated",
