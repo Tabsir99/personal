@@ -43,7 +43,7 @@ export const Collections = {
 };
 
 export const env = {
-  BLOGSITE_HOSTNAME: process.env.BLOGSITE_HOSTNAME as string,
+  BLOGSITE_HOSTNAME: process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME as string,
   ADMIN_ORIGIN: process.env.ADMIN_ORIGIN as string,
 };
 
