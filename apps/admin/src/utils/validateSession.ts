@@ -35,14 +35,8 @@ const SessionSchema = z.object({
   country: z.string().optional(), // Optional string for country
 });
 
-export async function validateSession(
-  request: NextRequest,
-  rateLimiter: RateLimiterRedis
-) {
-  const ipAdd = request.headers.get("CF-Connecting-IP") || "unknown";
-
+export async function validateSession(request: NextRequest) {
   try {
-    await rateLimiter.consume(ipAdd);
     const session = await request.json();
     await SessionSchema.parseAsync(session);
     return true;
