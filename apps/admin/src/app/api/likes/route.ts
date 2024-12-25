@@ -8,6 +8,7 @@ export async function POST(request: NextRequest) {
     blogId: string;
     willLike: string;
   };
+
   try {
     await updateData(Collections.BLOG_METADATA, blogId, {
       "pageMetrics.blogMetrics.totalLikes": firestore.FieldValue.increment(

@@ -1,20 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
+import { authLimiter, sessionLimiter } from "./config/redisConfig";
 
 const allowedMethods = ["POST", "GET"];
 export default async function middleware(request: NextRequest) {
   if (!allowedMethods.includes(request.method)) {
     return NextResponse.json({}, { status: 400 });
   }
-  
-  const rootUrl = process.env.ADMIN_ORIGIN;
 
+  const rootUrl = process.env.ADMIN_ORIGIN;
+  const ipAdd = request.headers.get("CF-Connecting-IP") || "unknown";
   const pathname = request.nextUrl.pathname;
 
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/api")) {
+  if (pathname === "/" && request.method === "POST") {
+    const { success } = await authLimiter.limit(ipAdd);
+    return success
+      ? NextResponse.next()
+      : NextResponse.json({}, { status: 429 });
+  }
+
+  if (pathname.startsWith("/api")) {
     if (pathname.endsWith("session-end")) {
-      // const body = await request.json()
+      const { success } = await sessionLimiter.limit(ipAdd);
+      if (!success) {
+        return NextResponse.json({}, { status: 429 });
+      }
+      try {
+        // const body = await request.json()
+        return NextResponse.next();
+      } catch (error) {
+        console.log(error);
+        return NextResponse.json({}, { status: 429 });
+      }
+    }
+
+    if (pathname.endsWith("likes") || pathname.endsWith("comments")) {
+      const isLoggedIn =
+        request.headers.get("acs_tkn") === process.env.ACCESS_TOKEN;
+
+      if (!isLoggedIn) {
+        return NextResponse.json({}, { status: 401 });
+      }
       return NextResponse.next();
     }
+
     const isLoggedIn =
       request.cookies.get("Authenticated")?.value ===
       process.env.SECRET_COOKIE_VALUE2;
@@ -28,12 +56,9 @@ export default async function middleware(request: NextRequest) {
     }
   }
 
-  const response = NextResponse.next();
-  response.headers.set("x-pathname", pathname);
-
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/", "/api/:path*", "/dashboard/:path*"],
+  matcher: ["/", "/api/:path*"],
 };

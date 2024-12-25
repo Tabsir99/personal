@@ -3,8 +3,9 @@ export type TrafficSources =
   | "facebook"
   | "reddit"
   | "linkedin"
-  | "devto"
-  | "twitter";
+  | "twitter"
+  | "direct"
+  | "email";
 
 interface ITrafficSources {
   organic: number;
