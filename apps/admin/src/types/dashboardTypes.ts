@@ -90,6 +90,7 @@ export interface Session {
       depthScrolled: number;
       recommendationClicks: number;
       recommendationVisible: number;
+      pageViews: number;
     }
   >;
   ipAdd?: string;
