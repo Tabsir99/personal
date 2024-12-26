@@ -139,7 +139,7 @@ export default function CategoryCard({ category }: { category: BlogCategory }) {
               <FaTrash className="h-6 w-6" />
             </button>
             <Link
-              href={`/admin/dashboard/manage-posts?category=${Category.categoryName}`}
+              href={`/dashboard/manage-posts?category=${Category.categoryName}`}
               className="text-gray-400 hover:text-gray-500 inline-block translate-y-2 transition-colors duration-200 px-2 py-2"
             >
               <FaEye className="h-6 w-6" />
