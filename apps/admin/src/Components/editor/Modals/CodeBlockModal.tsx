@@ -1,19 +1,19 @@
 import { Editor } from "@tiptap/react";
 import { FaJava } from "react-icons/fa";
 import {
-  SiJavascript,
   SiPython,
   SiRust,
   SiGo,
   SiTypescript,
+  SiGnometerminal,
 } from "react-icons/si";
 
 const languages = [
   {
-    name: "JavaScript",
-    icon: <SiJavascript color="#f7df1e" />,
-    iconName: "SiJavascript",
-    value: "javascript",
+    name: "Bash",
+    icon: <SiGnometerminal color="" />,
+    iconName: "SiShell",
+    value: "Bash",
     color: "black",
   },
   {
