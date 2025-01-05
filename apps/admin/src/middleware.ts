@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authLimiter, sessionLimiter } from "./config/redisConfig";
 
-const allowedMethods = ["POST", "GET"];
+const allowedMethods = ["POST", "GET", "OPTIONS"];
 export default async function middleware(request: NextRequest) {
   if (!allowedMethods.includes(request.method)) {
     return NextResponse.json({}, { status: 400 });
@@ -22,13 +22,6 @@ export default async function middleware(request: NextRequest) {
     if (pathname.endsWith("session-end")) {
       const { success } = await sessionLimiter.limit(ipAdd);
       if (!success) {
-        return NextResponse.json({}, { status: 429 });
-      }
-      try {
-        // const body = await request.json()
-        return NextResponse.next();
-      } catch (error) {
-        console.log(error);
         return NextResponse.json({}, { status: 429 });
       }
     }
