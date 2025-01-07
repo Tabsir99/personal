@@ -24,6 +24,8 @@ export default async function middleware(request: NextRequest) {
       if (!success) {
         return NextResponse.json({}, { status: 429 });
       }
+      
+      return NextResponse.next();
     }
 
     if (pathname.endsWith("likes") || pathname.endsWith("comments")) {
