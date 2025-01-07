@@ -13,15 +13,10 @@ const getRedis = () => {
   return redis;
 };
 
-const sessionLimiter = new Ratelimit({
-  redis: getRedis(),
-  limiter: Ratelimit.slidingWindow(6, "1800 s"),
-  analytics: true,
-});
 
 const authLimiter = new Ratelimit({
   redis: getRedis(),
   limiter: Ratelimit.slidingWindow(3, "1 d"),
   analytics: true,
 });
-export { getRedis, sessionLimiter, authLimiter };
+export { getRedis, authLimiter };

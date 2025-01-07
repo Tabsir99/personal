@@ -22,23 +22,10 @@ export async function POST(request: NextRequest) {
       data: newSession,
     });
 
-    console.log("Session created,",ipAdd)
+    console.log("Session created,", ipAdd);
     return NextResponse.json({});
   } catch (error) {
     console.error(error.message);
     return NextResponse.json({}, { status: 500 });
   }
 }
-// export async function OPTIONS(_: NextRequest) {
-//   console.log("Options method executin,")
-//   return new NextResponse(null, {
-//     status: 200,
-//     headers: {
-//       'Access-Control-Allow-Origin': 'http://localhost:3000',
-//       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-//       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-//       'Access-Control-Allow-Credentials': 'true',
-//       'Access-Control-Max-Age': '86400',
-//     },
-//   })
-// }
