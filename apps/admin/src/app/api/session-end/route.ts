@@ -4,8 +4,8 @@ import { Collections } from "@/utils/utils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
-  const countryCode = request.headers.get("CF-IPCountry") || "unknown";
-  const ipAdd = request.headers.get("CF-Connecting-IP") || "unknown";
+  const countryCode = request.headers.get("xCountry") || "unknown";
+  const ipAdd = request.headers.get("xIp") || "unknown";
 
   try {
     const session = await request.json();

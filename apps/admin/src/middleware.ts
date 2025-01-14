@@ -7,7 +7,7 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.json({}, { status: 400 });
   }
 
-  const ipAdd = request.headers.get("CF-Connecting-IP") || "unknown";
+  const ipAdd = request.headers.get("xIp") || "unknown";
   const pathname = request.nextUrl.pathname;
 
   if (pathname === "/" && request.method === "POST") {
