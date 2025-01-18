@@ -11,10 +11,10 @@ export const invalidateBlogOverview = ({
   type: "delete" | "add" | "status" | "update";
 }) => {
   const matchingPatterns = [
-    `/api/blogOverview`,
+    `/api/local/blogOverview`,
     ...categories.map(
       (category) =>
-        `/api/blogOverview?categoryId=${category.categoryId}&status=`
+        `/api/local/blogOverview?categoryId=${category.categoryId}&status=`
     ),
   ];
 

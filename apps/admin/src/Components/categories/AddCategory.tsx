@@ -41,7 +41,7 @@ export default function AddCategory() {
         return addNotification({ message: "Category description is required" });
       }
       const response = await addNewCategory(newCategory);
-      mutate(`/api/categories`, (current: BlogCategory[] | undefined) => {
+      mutate(`/api/local/categories`, (current: BlogCategory[] | undefined) => {
         if (!current) return current;
         return [newCategory, ...current];
       });

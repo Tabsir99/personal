@@ -4,7 +4,6 @@ import { createData, readSingleDoc } from "@/lib/commonQuery";
 import { Blog } from "@/types/blogTypes";
 import { buildAdminBlog, env, fetcher, formatResponse } from "@/utils/utils";
 import { Collections } from "@/utils/utils";
-import { Timestamp } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 
 export async function saveDraft(draftBlog: Blog) {
@@ -12,8 +11,8 @@ export async function saveDraft(draftBlog: Blog) {
     draftBlog.blogName.toLowerCase().replace(/\s/g, "-")
   );
   draftBlog.link = docId;
-  draftBlog.blogMetadata.createdAt = Timestamp.now();
-  draftBlog.blogMetadata.updatedAt = Timestamp.now();
+  draftBlog.blogMetadata.createdAt = new Date().toISOString()
+  draftBlog.blogMetadata.updatedAt = new Date().toISOString()
 
   try {
     await createData({

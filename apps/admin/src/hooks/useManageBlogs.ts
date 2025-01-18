@@ -81,7 +81,7 @@ export default function useManageBlogs({
   const handleBlogEdit = async () => {
     setSelectedBlog(null);
     document.body.style.cursor = "wait";
-    const res = await fetch(`/api/blogs?blogId=${selectedBlog?.link}`);
+    const res = await fetch(`/api/local/blogs?blogId=${selectedBlog?.link}`);
     if (!res.ok) {
       document.body.style.removeProperty("cursor");
       return addNotification({ message: res.statusText });

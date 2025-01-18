@@ -55,7 +55,7 @@ export const BlogMetadataProvider: React.FC<{ children: ReactNode }> = ({
     useState<UnstructuredBlogData>(defaultBlogData);
 
   const blogEditingTools = useMetadata({ blogData, setBlogData });
-  const { data } = useCustomSWR<BlogCategory[]>(`/api/categories`);
+  const { data } = useCustomSWR<BlogCategory[]>(`/api/local/categories`);
 
   useEffect(() => {
     const storedData = localStorage.getItem("metaData");

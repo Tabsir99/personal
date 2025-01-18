@@ -31,7 +31,7 @@ const BlogOverview = () => {
     status: BlogStatus | "";
   }>({ categoryId: "", status: "" });
   const { data, isLoading } = useCustomSWR<AdminBlogMetadata[]>(
-    `/api/blogOverview${filterBy.categoryId || filterBy.status ? `?categoryId=${filterBy.categoryId}&status=${filterBy.status}` : ""}`
+    `/api/local/blogOverview${filterBy.categoryId || filterBy.status ? `?categoryId=${filterBy.categoryId}&status=${filterBy.status}` : ""}`
   );
 
   const filteredPosts = useMemo(() => {

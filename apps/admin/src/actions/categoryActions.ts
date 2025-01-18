@@ -2,7 +2,6 @@
 
 import { env, fetcher, formatResponse } from "@/utils/utils";
 
-import { Timestamp } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 import { BlogCategory } from "@/types/blogTypes";
 import { Collections } from "@/utils/utils";
@@ -10,7 +9,6 @@ import { addCategorydb, deleteCategorydb } from "@/lib/categoryQuery";
 import { updateData } from "@/lib/commonQuery";
 import { v4 as uuid4 } from "uuid";
 import { bucket } from "@/config/firebaseAdminBlog";
-import { firestore } from "firebase-admin";
 
 export async function deleteCategory(categoryId: string) {
   try {
@@ -34,8 +32,7 @@ export async function deleteCategory(categoryId: string) {
 
 export async function updateCategory(category: Partial<BlogCategory>) {
   try {
-    const currentTime = Timestamp.now();
-    category.updatedAt = currentTime;
+    category.updatedAt = new Date().toISOString();
 
     await updateData(
       Collections.CATEGORY_METADATA,
@@ -75,7 +72,7 @@ export const uploadImage = async (formData: any) => {
 };
 
 export async function addNewCategory(category: BlogCategory) {
-  const currentTime = firestore.Timestamp.now();
+  const currentTime = new Date().toISOString();
   category.createdAt = currentTime;
   category.updatedAt = currentTime;
   category.categoryId = encodeURIComponent(
