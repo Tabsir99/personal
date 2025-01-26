@@ -1,49 +1,157 @@
-import React from "react";
-import { Card, CardContent } from "../../../components/ui/card";
-import {
-  SiTypescript,
-  SiNodedotjs,
-  SiNodemon,
-  SiLightning,
-} from "react-icons/si";
+"use client"
 
-const ThumbnailDesign = () => {
+import React, { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  LayoutDashboard, 
+  Globe, 
+  Bell, 
+  Save, 
+  ChevronRight 
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+
+interface SettingsSectionProps {
+  title: string;
+  description?: string;
+  icon: React.ElementType;
+  children: React.ReactNode;
+}
+
+const SettingsSection: React.FC<SettingsSectionProps> = ({
+  title,
+  description,
+  icon: Icon,
+  children,
+}) => (
+  <Card className="w-full bg-neutral-900 border-neutral-800">
+    <CardHeader className="flex flex-row items-center space-x-4 space-y-0 pb-2">
+      <Icon className="w-6 h-6 text-neutral-200" />
+      <div>
+        <CardTitle className="text-neutral-100">{title}</CardTitle>
+        {description && <CardDescription className="text-neutral-400">{description}</CardDescription>}
+      </div>
+    </CardHeader>
+    <Separator className="mb-4 bg-neutral-800" />
+    <CardContent>{children}</CardContent>
+  </Card>
+);
+
+const SettingsPage: React.FC = () => {
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [siteTitle, setSiteTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+
+  const handleSaveChanges = () => {
+    console.log({
+      siteTitle,
+      metaDescription,
+      notificationsEnabled,
+      analyticsEnabled,
+      maintenanceMode,
+    });
+  };
+
   return (
-    <div className="w-full h-full fixed z-[100] top-0 left-0 flex justify-center items-center bg-black/80">
-      <div className="relative w-[1300px] h-[675px] bg-gradient-to-br from-gray-900 to-gray-950 flex items-center justify-center">
-        <Card className="w-full h-full bg-gray-800/50 backdrop-blur-xl border-gray-700 rounded-3xl shadow-2xl overflow-hidden flex justify-center items-center">
-          <CardContent className="flex flex-col items-center justify-center gap-20 p-12 relative">
-            {/* Background Glow Effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-50 blur-3xl"></div>
+    <div className="min-h-screen bg-neutral-950 text-neutral-100 p-6 md:p-8 lg:p-12">
+      <div className="container max-w-5xl mx-auto space-y-8">
+        <header className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <LayoutDashboard className="w-10 h-10 text-neutral-200" />
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-neutral-100">
+              Admin Dashboard
+            </h1>
+          </div>
+        </header>
 
-            {/* Technology Icons */}
-            <div className="flex items-center space-x-8 relative z-10">
-              <SiTypescript className="text-[#3178C6] w-20 h-20 transform hover:scale-110 transition-transform" />
-              <div className="w-16 h-1 bg-gray-600"></div>
-              <SiNodedotjs className="text-[#339933] w-20 h-20 transform hover:scale-110 transition-transform" />
-              <div className="w-16 h-1 bg-gray-600"></div>
-              <SiNodemon className="text-[#76D04B] w-20 h-20 transform hover:scale-110 transition-transform" />
-            </div>
-
-            {/* Main Headline */}
-            <div className="flex flex-col items-center space-y-4 relative z-10">
-              <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-200 text-center leading-tight relative z-10">
-                TypeScript + Node.js + Nodemon
-              </h1>
-
-              {/* Subtitle */}
-              <div className="flex items-center space-x-4 bg-gray-700/40 px-6 py-3 rounded-full relative z-10">
-                <SiLightning className="text-blue-400 w-10 h-10" />
-                <h2 className="text-3xl font-semibold text-white">
-                  Dev Setup in 2 Minutes
-                </h2>
+        <div className="space-y-6">
+          <SettingsSection
+            title="General Settings"
+            description="Configure your blog's core information"
+            icon={Globe}
+          >
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="text-neutral-300">Site Title</Label>
+                <Input
+                  value={siteTitle}
+                  onChange={(e) => setSiteTitle(e.target.value)}
+                  placeholder="Enter your blog name"
+                  className="w-full bg-neutral-900 border-neutral-800 text-neutral-100 placeholder-neutral-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-neutral-300">Meta Description</Label>
+                <Textarea
+                  value={metaDescription}
+                  onChange={(e) => setMetaDescription(e.target.value)}
+                  placeholder="Describe your blog for search engines"
+                  className="min-h-[120px] bg-neutral-900 border-neutral-800 text-neutral-100 placeholder-neutral-500"
+                />
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </SettingsSection>
+
+          <SettingsSection
+            title="Site Preferences"
+            description="Customize your blog's behavior"
+            icon={Bell}
+          >
+            <div className="space-y-4">
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center space-x-2 text-neutral-300">
+                    <span>Notifications</span>
+                  </Label>
+                  <Switch
+                    checked={notificationsEnabled}
+                    onCheckedChange={setNotificationsEnabled}
+                    
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center space-x-2 text-neutral-300">
+                    <span>Analytics</span>
+                  </Label>
+                  <Switch
+                    checked={analyticsEnabled}
+                    onCheckedChange={setAnalyticsEnabled}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center space-x-2 text-neutral-300">
+                    <span>Maintenance Mode</span>
+                  </Label>
+                  <Switch
+                    checked={maintenanceMode}
+                    onCheckedChange={setMaintenanceMode}
+                  />
+                </div>
+              </div>
+            </div>
+          </SettingsSection>
+
+          <div className="flex justify-end">
+            <Button 
+              onClick={handleSaveChanges} 
+              className="group bg-neutral-800 hover:bg-neutral-700 text-neutral-100"
+            >
+              <Save className="mr-2 h-4 w-4 group-hover:animate-pulse" />
+              Save Changes
+              <ChevronRight className="ml-2 h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default ThumbnailDesign;
+export default SettingsPage;
