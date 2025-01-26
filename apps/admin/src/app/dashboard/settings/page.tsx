@@ -1,70 +1,49 @@
-"use client";
+import React from "react";
+import { Card, CardContent } from "../../../components/ui/card";
+import {
+  SiTypescript,
+  SiNodedotjs,
+  SiNodemon,
+  SiLightning,
+} from "react-icons/si";
 
-import React, { useState } from "react";
-
-const Settings = () => {
-  const [siteTitle, setSiteTitle] = useState(
-    "Build To Learn: Development Tips, Personal Insights & Case Studies | Tabsir's Blog"
-  );
-  const [siteDescription, setSiteDescription] = useState(
-    "Explore practical development tips, personal insights & case studies on Tabsir's blog. Learn from personal stories, find helpful tech content & get solutions to common web development challenges."
-  );
-  const [metaTags, setMetaTags] = useState(
-    "personal tech blog, web development tips, coding solutions, tech case studies, programming tutorials, technology insights, personal development stories, developer experiences, coding best practices, tech blog for enthusiasts, software engineering advice, coding examples, technology trends, programming guides"
-  );
-
-  const handleSaveSettings = () => {
-    
-  };
-
+const ThumbnailDesign = () => {
   return (
-    <div className="p-6 bg-gray-900 min-h-screen text-white">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Homepage Metadata Settings</h1>
+    <div className="w-full h-full fixed z-[100] top-0 left-0 flex justify-center items-center bg-black/80">
+      <div className="relative w-[1300px] h-[675px] bg-gradient-to-br from-gray-900 to-gray-950 flex items-center justify-center">
+        <Card className="w-full h-full bg-gray-800/50 backdrop-blur-xl border-gray-700 rounded-3xl shadow-2xl overflow-hidden flex justify-center items-center">
+          <CardContent className="flex flex-col items-center justify-center gap-20 p-12 relative">
+            {/* Background Glow Effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-50 blur-3xl"></div>
 
-        {/* Site Title */}
-        <div className="mb-4">
-          <label className="block mb-2">Site Title</label>
-          <input
-            type="text"
-            className="w-full px-3 py-2 bg-gray-800 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-            value={siteTitle}
-            onChange={(e) => setSiteTitle(e.target.value)}
-          />
-        </div>
+            {/* Technology Icons */}
+            <div className="flex items-center space-x-8 relative z-10">
+              <SiTypescript className="text-[#3178C6] w-20 h-20 transform hover:scale-110 transition-transform" />
+              <div className="w-16 h-1 bg-gray-600"></div>
+              <SiNodedotjs className="text-[#339933] w-20 h-20 transform hover:scale-110 transition-transform" />
+              <div className="w-16 h-1 bg-gray-600"></div>
+              <SiNodemon className="text-[#76D04B] w-20 h-20 transform hover:scale-110 transition-transform" />
+            </div>
 
-        {/* Site Description */}
-        <div className="mb-4">
-          <label className="block mb-2">Site Description</label>
-          <textarea
-            className="w-full px-3 py-2 bg-gray-800 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-            value={siteDescription}
-            onChange={(e) => setSiteDescription(e.target.value)}
-          />
-        </div>
+            {/* Main Headline */}
+            <div className="flex flex-col items-center space-y-4 relative z-10">
+              <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-200 text-center leading-tight relative z-10">
+                TypeScript + Node.js + Nodemon
+              </h1>
 
-        {/* Meta Tags */}
-        <div className="mb-4">
-          <label className="block mb-2">Meta Tags (comma-separated)</label>
-          <input
-            type="text"
-            className="w-full px-3 py-2 bg-gray-800 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-            value={metaTags}
-            onChange={(e) => setMetaTags(e.target.value)}
-          />
-        </div>
-
-        <div className="flex justify-end">
-          <button
-            onClick={handleSaveSettings}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-          >
-            Save Settings
-          </button>
-        </div>
+              {/* Subtitle */}
+              <div className="flex items-center space-x-4 bg-gray-700/40 px-6 py-3 rounded-full relative z-10">
+                <SiLightning className="text-blue-400 w-10 h-10" />
+                <h2 className="text-3xl font-semibold text-white">
+                  Dev Setup in 2 Minutes
+                </h2>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 };
 
-export default Settings;
+export default ThumbnailDesign;

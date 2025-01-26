@@ -60,8 +60,8 @@ export default async function middleware(request: NextRequest) {
   }
 
   // API route handling
-  if (pathname.startsWith("/api")) {
-    if (pathname.includes("local")) {
+  if (pathname !== "/") {
+    if (pathname.includes("local") || pathname.includes("dashboard")) {
       return handleLocalApiAccess(cookie);
     }
     return handleApiAccess(request.headers.get("acs_tkn"));
@@ -71,5 +71,5 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/api/:path*"],
+  matcher: ["/", "/api/:path*","/dashboard","/dashboard/:path*"],
 };

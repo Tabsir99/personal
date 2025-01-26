@@ -7,8 +7,8 @@ import { BlogCategory } from "@/types/blogTypes";
 import { Collections } from "@/utils/utils";
 import { addCategorydb, deleteCategorydb } from "@/lib/categoryQuery";
 import { updateData } from "@/lib/commonQuery";
-import { v4 as uuid4 } from "uuid";
-import { bucket } from "@/config/firebaseAdminBlog";
+import s3 from "@/config/cloudflareS3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 export async function deleteCategory(categoryId: string) {
   try {
@@ -49,26 +49,31 @@ export async function updateCategory(category: Partial<BlogCategory>) {
   }
 }
 
-export const uploadImage = async (formData: any) => {
-  const imageFile = formData.get("file");
-  const category = formData.get("category") || "";
-  const isDefault = formData.get("default") || false;
+export const uploadImage = async (
+  formData: FormData,
+  isThumbnail: boolean = false
+) => {
+  const imageFile = formData.get("file") as File;
+  const blogLink = formData.get("blogLink");
   const imageArrayBuffer = await imageFile.arrayBuffer();
 
   const imageBuffer = Buffer.from(new Uint8Array(imageArrayBuffer));
 
-  const fileName = isDefault
-    ? `${category}/${uuid4()}-default.png`
-    : `${category}/${uuid4()}-${imageFile.name}`;
+  const fileName = `${blogLink}/${isThumbnail ? "thumbnail" : imageFile.name}`;
 
-  const fileRef = bucket.file(fileName);
-  await fileRef.save(imageBuffer, {
-    contentType: imageFile.type,
-    public: true,
+  const putImage = new PutObjectCommand({
+    Bucket: "tabsir-s-blog",
+    Key: fileName,
+    Body: imageBuffer,
+    ContentType: imageFile.type,
+    ACL: "public-read",
+    CacheControl: "public, max-age=31536000, immutable",
   });
-  const publicUrl = fileRef.publicUrl();
 
-  return formatResponse("success", "Image uploaded successfullly", publicUrl);
+  await s3.send(putImage);
+  const publicUrl = `https://images.tabsircg.com/${fileName}`;
+
+  return formatResponse("success", publicUrl);
 };
 
 export async function addNewCategory(category: BlogCategory) {

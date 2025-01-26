@@ -14,7 +14,9 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { invalidateBlogOverview } from "./useInvalidateCache";
 
 interface UseManageBlogsProps {
-  setIsModalOpen: Dispatch<SetStateAction<boolean>>;
+  setIsModalOpen: Dispatch<
+    SetStateAction<{ confirm: boolean; share: boolean; thumbnail: boolean }>
+  >;
 }
 export default function useManageBlogs({
   setIsModalOpen,
@@ -47,7 +49,7 @@ export default function useManageBlogs({
   };
 
   const handleBlogDelete = () => {
-    setIsModalOpen(true);
+    setIsModalOpen({ confirm: true, share: false, thumbnail: false });
   };
 
   const confirmDelete = async () => {
@@ -75,7 +77,7 @@ export default function useManageBlogs({
       type: "delete",
     });
 
-    setIsModalOpen(false);
+    closeModal();
   };
 
   const handleBlogEdit = async () => {
@@ -107,7 +109,7 @@ export default function useManageBlogs({
     localStorage.setItem("metaData", JSON.stringify(unstructuredData));
     localStorage.setItem("blogHTML", data.content);
     setBlogData(unstructuredData);
-    router.push("./write-post");
+    router.push("./write-blog");
   };
 
   const handleStatus = async () => {
@@ -133,6 +135,19 @@ export default function useManageBlogs({
     });
   };
 
+  const closeModal = () => {
+    setIsModalOpen({ confirm: false, share: false, thumbnail: false });
+    setSelectedBlog(null);
+  };
+
+  const handleShareBlog = () => {
+    setIsModalOpen({ confirm: false, share: true, thumbnail: false });
+  };
+
+  const handleThumbnail = () => {
+    setIsModalOpen({ confirm: false, share: false, thumbnail: true });
+  };
+
   return {
     handleCategoryChange,
     toggleToolbar,
@@ -140,7 +155,9 @@ export default function useManageBlogs({
     handleBlogEdit,
     handleStatus,
     handleBlogDelete,
-    setSelectedBlog,
+    closeModal,
+    handleShareBlog,
+    handleThumbnail,
     selectedBlog,
   };
 }

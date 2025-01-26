@@ -72,11 +72,11 @@ export const ImageModal = ({
             const { blogName } = JSON.parse(
               localStorage.getItem("metaData") || ""
             );
-            const id = blogName.toLowerCase().replace(/\s/g, "-");
+            const id = blogName.trim().toLowerCase().replace(/\s/g, "-");
 
             const formData = new FormData();
             formData.append("file", imageFile!);
-            formData.append("category", id);
+            formData.append("blogLink", id);
             const response = await uploadImage(formData);
 
             setUploadAlt((prev) => ({

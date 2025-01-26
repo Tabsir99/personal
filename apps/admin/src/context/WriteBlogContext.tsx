@@ -15,12 +15,10 @@ import {
 
 interface BlogMetadataContextType {
   resetBlogData: () => void;
-  isLoading: boolean;
   blogData: UnstructuredBlogData;
   tagInput: string;
   setTagInput: Dispatch<SetStateAction<string>>;
   setBlogData: Dispatch<SetStateAction<UnstructuredBlogData>>;
-  handleWriteBlog: (showEditor: boolean) => void;
   addTag: () => void;
   removeTag: (tagToRemove: string) => void;
   handleOptionChange: (option: string) => void;
@@ -39,7 +37,7 @@ const defaultBlogData: UnstructuredBlogData = {
   blogDescription: "",
   blogTags: [],
   categoryId: "",
-  recommendationTitle: "",
+  recommendationTitle: "Keep reading...",
   socialTitle: "",
   thumbnailUrl: "",
   type: "",

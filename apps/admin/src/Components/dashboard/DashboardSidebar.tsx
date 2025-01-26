@@ -30,8 +30,8 @@ const DashBoardSidebar = () => {
     },
     {
       Icon: MdEdit, // Updated icon
-      menuName: "Write Post",
-      menuLink: `${rootDashBoardUrl}/write-post`,
+      menuName: "Write Blog",
+      menuLink: `${rootDashBoardUrl}/write-blog`,
     },
     {
       Icon: MdViewList, // Updated icon
@@ -65,7 +65,6 @@ const DashBoardSidebar = () => {
             menuLink={sidebarItem.menuLink}
             isPathActive={
               pathname === sidebarItem.menuLink ||
-              pathname === `${sidebarItem.menuLink}/write-blog` ||
               pathname === `${sidebarItem.menuLink}/write-blog/preview-blog`
             }
           >

@@ -117,13 +117,14 @@ export async function fetcher({
 export function buildAdminBlog(
   blog: Blog,
   shouldUpdate: boolean
-): AdminBlogMetadata | Partial<AdminBlogMetadata> {
+): Partial<AdminBlogMetadata> {
   return {
     blogName: blog.blogName,
     categoryId: blog.categoryId,
     createdAt: blog.blogMetadata.createdAt,
     link: blog.link,
     status: blog.status,
+    thumbnailUrl: blog.blogMetadata.thumbnailUrl,
     ...(!shouldUpdate && {
       pageMetrics: {
         totalVisitors: 0,

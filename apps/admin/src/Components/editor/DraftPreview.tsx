@@ -18,10 +18,6 @@ import {
 import { useBlogMetadata } from "@/context/WriteBlogContext";
 import { Blog, UnstructuredBlogData } from "@/types/blogTypes";
 
-
-
-
-
 const DraftPreview = ({ editor }: { editor: Editor }) => {
   const router = useRouter();
   const { addNotification } = useNotification();
@@ -76,14 +72,16 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
           onClick={() => {
             const estReadTime = measureEstReadTime(editor.getText());
 
-            let currentData: UnstructuredBlogData | null = null;
+            let currentDataStr = localStorage.getItem("metaData");
+            const currentData = JSON.parse(
+              currentDataStr || "{}"
+            ) as UnstructuredBlogData;
 
             setBlogData((prev) => {
-              currentData = { ...prev, estReadTime };
-              return currentData
+              return { ...prev, estReadTime };
             });
 
-            localStorage.setItem("metaData", JSON.stringify(currentData));
+            localStorage.setItem("metaData", JSON.stringify({...currentData, estReadTime}));
             localStorage.setItem("blogHTML", editor.getHTML());
             router.push("write-blog/preview-blog");
           }}
@@ -106,8 +104,8 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
       )}
 
       <div
-        className={`fixed min-h-screen top-0 right-0 bg-neutral-950 max-w-5xl mx-auto flex flex-col gap-4
-          p-8 justify-center transition duration-300 ${showSidebar ? "" : "translate-x-1/2 opacity-0 pointer-events-none"}`}
+        className={`fixed h-screen overflow-scroll top-0 right-0 bg-neutral-950 w-full max-w-4xl mx-auto flex flex-col gap-4
+          p-8 transition duration-300 ${showSidebar ? "" : "translate-x-1/2 opacity-0 pointer-events-none"}`}
       >
         <FaArrowRight
           onClick={() => {
@@ -117,7 +115,6 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
         />
         <h1 className="text-2xl font-bold mb-4">Edit Metadata</h1>
         <WriteMetadataComp
-          isSidebar={true}
           closeSidebar={() => {
             setShowSidebar(false);
             addNotification({

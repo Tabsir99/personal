@@ -1,22 +1,26 @@
-import React from "react";
-import { FaPencil, FaTrash, FaPowerOff } from "react-icons/fa6";
-
-import { BlogStatus } from "@/types/blogTypes";
+import { AdminBlogMetadata } from "@/types/blogTypes";
+import {
+  FaPencil,
+  FaTrash,
+  FaPowerOff,
+  FaShare,
+  FaImage,
+} from "react-icons/fa6";
 
 export default function BlogMenu({
   selectedBlog,
   blogId,
-  handleBlogEdit,
-  handleBlogDelete,
-  handleStatus,
-  status,
+  menuActions,
 }: {
-  selectedBlog: { link: string; categoryId: string } | null;
+  selectedBlog: AdminBlogMetadata | null;
   blogId: string;
-  handleBlogEdit: () => void;
-  handleBlogDelete: () => void;
-  handleStatus: () => void;
-  status: BlogStatus;
+  menuActions: {
+    handleBlogEdit: () => void;
+    handleBlogDelete: () => void;
+    handleStatus: () => void;
+    handleShareBlog: () => void;
+    handleThumbnail: () => void;
+  };
 }) {
   const menuItemStyle =
     "flex items-center justify-start space-x-2 px-4 py-3 w-full text-left transition-all text-gray-300 hover:bg-neutral-800 duration-300 ease-in-out";
@@ -30,25 +34,54 @@ export default function BlogMenu({
       }`}
     >
       <div className="bg-gray-900/40 backdrop-blur-md">
-        <button onClick={handleBlogEdit} className={`${menuItemStyle}`}>
+        <button
+          onClick={menuActions.handleBlogEdit}
+          className={`${menuItemStyle}`}
+        >
           <FaPencil className="w-5 h-5" />
           <span>Edit</span>
         </button>
 
         <div className="border-t border-gray-700/30"></div>
 
-        <button onClick={handleBlogDelete} className={`${menuItemStyle}`}>
-          <FaTrash className="w-5 h-5" />
-          <span>Delete</span>
+        <button
+          onClick={menuActions.handleThumbnail}
+          className={`${menuItemStyle}`}
+        >
+          <FaImage className="w-5 h-5" />
+          <span>Thumbnail</span>
         </button>
 
         <div className="border-t border-gray-700/30"></div>
 
-        <button onClick={handleStatus} className={`${menuItemStyle}`}>
+        <button
+          onClick={menuActions.handleStatus}
+          className={`${menuItemStyle}`}
+        >
           <FaPowerOff className="w-5 h-5" />
-          <span>{status === "active" ? "Deactivate" : "Activate"}</span>
+          <span>
+            {selectedBlog?.status === "active" ? "Deactivate" : "Activate"}
+          </span>
+        </button>
+
+        <button
+          onClick={menuActions.handleShareBlog}
+          className={`${menuItemStyle}`}
+        >
+          <FaShare className="w-5 h-5" />
+          <span> Share </span>
         </button>
       </div>
+
+      <div className="border-t border-gray-700/30"></div>
+
+      <button
+        onClick={menuActions.handleBlogDelete}
+        className={`${menuItemStyle}`}
+      >
+        <FaTrash className="w-5 h-5" />
+        <span>Delete</span>
+      </button>
     </div>
   );
 }

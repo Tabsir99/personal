@@ -8,20 +8,12 @@ import FloatingLabelInput from "../ui/Components/FloatingLabelInput";
 import { useBlogMetadata } from "@/context/WriteBlogContext";
 
 export default function WriteMetadataComp({
-  isSidebar,
   closeSidebar,
 }: {
-  isSidebar: boolean;
   closeSidebar?: () => void;
 }) {
-  const {
-    blogData,
-    setBlogData,
-    handleOptionChange,
-    handleWriteBlog,
-    isLoading,
-    categories,
-  } = useBlogMetadata();
+  const { blogData, setBlogData, handleOptionChange, categories } =
+    useBlogMetadata();
 
   return (
     <>
@@ -92,19 +84,14 @@ export default function WriteMetadataComp({
       <button
         type="button"
         onClick={() => {
-          handleWriteBlog(!isSidebar);
           if (closeSidebar) closeSidebar();
+          localStorage.setItem("metaData", JSON.stringify(blogData))
         }}
         className={
-          "p-3 bg-[var(--highlight-bg-color)] hover:bg-[var(--highlight-bg-hover-color)] rounded-md text-gray-300 block " +
-          (isLoading ? "cursor-wait" : "cursor-pointer")
+          "p-3 bg-[var(--highlight-bg-color)] hover:bg-[var(--highlight-bg-hover-color)] rounded-md text-gray-300 block "
         }
       >
-        {!isSidebar
-          ? isLoading
-            ? "Loading..."
-            : "Write Blog"
-          : "Save Metadata"}
+        Save Metadata
       </button>
     </>
   );

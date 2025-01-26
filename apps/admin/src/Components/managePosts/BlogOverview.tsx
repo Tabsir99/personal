@@ -11,10 +11,17 @@ import useManageBlogs from "@/hooks/useManageBlogs";
 import ConfirmationModal from "../ui/Components/ConfirmationModal";
 import { AdminBlogMetadata, BlogStatus } from "@/types/blogTypes";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
+import BlogShareModal from "./BlogShareModal";
+import SkeletonLoader from "../ui/Skeletons/BlogCardSkeleton";
+import ThumbnailModal from "./ThumbnailModal";
 
 const BlogOverview = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState({
+    share: false,
+    confirm: false,
+    thumbnail: false,
+  });
 
   const {
     confirmDelete,
@@ -22,8 +29,10 @@ const BlogOverview = () => {
     handleStatus,
     toggleToolbar,
     handleBlogDelete,
+    closeModal,
+    handleShareBlog,
+    handleThumbnail,
     selectedBlog,
-    setSelectedBlog,
   } = useManageBlogs({ setIsModalOpen });
 
   const [filterBy, setFilterBy] = useState<{
@@ -45,14 +54,25 @@ const BlogOverview = () => {
   return (
     <>
       <ConfirmationModal
-        isOpen={isModalOpen}
+        isOpen={isModalOpen.confirm}
         message="This will permanently delete the blog, Are you sure?"
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedBlog(null);
-        }}
+        onClose={closeModal}
         onConfirm={confirmDelete}
       />
+
+      <ThumbnailModal
+        isOpen={isModalOpen.thumbnail}
+        onClose={closeModal}
+        blogLink={selectedBlog?.link!}
+        currentThumbnail={selectedBlog?.thumbnailUrl!}
+      />
+
+      {isModalOpen.share && (
+        <BlogShareModal
+          onClose={closeModal}
+          url={`${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${selectedBlog?.link}`}
+        />
+      )}
 
       <ManagePostHead
         handleCategoryChange={(categoryId) => {
@@ -67,31 +87,35 @@ const BlogOverview = () => {
 
       <div className="w-full max-w-7xl mx-auto py-5">
         <div className=" grid grid-cols-2 gap-3">
-          {isLoading ||
-            filteredPosts?.map((post) => {
-              return (
-                <div
-                  key={post.link}
-                  className="bg-neutral-900 rounded-lg h-[13rem] max-w-[35rem] shadow-md py-4 px-6
+          {isLoading
+            ? [1, 2, 3, 4].map((num) => <SkeletonLoader key={num} />)
+            : filteredPosts?.map((post) => {
+                return (
+                  <div
+                    key={post.link}
+                    className="bg-neutral-900 rounded-lg h-[13rem] max-w-[35rem] shadow-md py-4 px-6
                  hover:shadow-xl transition-shadow duration-200 relative flex flex-col gap-5
                  justify-between
                  "
-                >
-                  <CMSBlogCard blog={post} toggleToolbar={toggleToolbar} />
+                  >
+                    <CMSBlogCard blog={post} toggleToolbar={toggleToolbar} />
 
-                  <BlogMenu
-                    blogId={post.link}
-                    handleBlogDelete={handleBlogDelete}
-                    handleBlogEdit={handleBlogEdit}
-                    handleStatus={async () => {
-                      await handleStatus();
-                    }}
-                    status={post.status}
-                    selectedBlog={selectedBlog}
-                  />
-                </div>
-              );
-            })}
+                    {isModalOpen.confirm || isModalOpen.share || (
+                      <BlogMenu
+                        blogId={post.link}
+                        menuActions={{
+                          handleBlogDelete,
+                          handleBlogEdit,
+                          handleStatus,
+                          handleShareBlog,
+                          handleThumbnail,
+                        }}
+                        selectedBlog={selectedBlog}
+                      />
+                    )}
+                  </div>
+                );
+              })}
         </div>
 
         {/* Footer */}

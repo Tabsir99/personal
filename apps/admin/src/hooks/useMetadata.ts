@@ -1,8 +1,6 @@
 "use client";
 
-import { useNotification } from "@/context/NotificationContext";
 import { UnstructuredBlogData } from "@/types/blogTypes";
-import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 export default function useMetadata({
@@ -12,9 +10,6 @@ export default function useMetadata({
   blogData: UnstructuredBlogData;
   setBlogData: Dispatch<SetStateAction<UnstructuredBlogData>>;
 }) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const { addNotification } = useNotification();
 
   const [tagInput, setTagInput] = useState("");
 
@@ -43,28 +38,6 @@ export default function useMetadata({
     }
   }, []);
 
-  const handleWriteBlog = (showEditor: boolean) => {
-    if (blogData.categoryId === "") {
-      return addNotification({ message: "Category Id is required" });
-    }
-    if (blogData.blogName === "") {
-      return addNotification({ message: "Blogname is missing" });
-    }
-
-    setIsLoading(true);
-
-    if (!blogData.socialTitle) {
-      blogData.socialTitle = blogData.blogName;
-    }
-    const metaDataString = JSON.stringify(blogData);
-    localStorage.setItem("metaData", metaDataString);
-
-    if (showEditor) {
-      router.push("/dashboard/write-post/write-blog");
-    } else {
-      setIsLoading(false);
-    }
-  };
 
   const addTag = () => {
     if (tagInput && !blogData.blogTags.includes(tagInput)) {
@@ -88,14 +61,12 @@ export default function useMetadata({
   };
 
   return {
-    isLoading,
     blogData,
     tagInput,
     setTagInput,
 
     setBlogData,
 
-    handleWriteBlog,
     addTag,
     removeTag,
     handleOptionChange,

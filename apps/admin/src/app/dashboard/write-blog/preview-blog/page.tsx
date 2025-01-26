@@ -45,12 +45,14 @@ export default function PreviewBlog() {
     if (!blogMetadata)
       return addNotification({ message: "Blogmetadata is missing" });
 
-    // for (const [key, value] of Object.entries(blogMetadata)) {
-    //   if (!value) {
-    //     addNotification({ message: `${key} is required` });
-    //     return;
-    //   }
-    // }
+    console.log(blogMetadata);
+    for (const [key, value] of Object.entries(blogMetadata)) {
+      if (key === "createdAt") continue;
+      if (!value) {
+        addNotification({ message: `${key} is required in metadata` });
+        return;
+      }
+    }
 
     if (!blogHTML)
       return addNotification({ message: "There is no blog content" });

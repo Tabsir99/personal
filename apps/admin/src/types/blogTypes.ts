@@ -63,4 +63,5 @@ export interface AdminBlogMetadata {
   link: string;
   status: BlogStatus;
   pageMetrics: PageMetrics;
+  thumbnailUrl: string
 }
