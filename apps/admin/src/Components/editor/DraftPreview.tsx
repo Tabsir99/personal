@@ -15,27 +15,26 @@ import {
   NotificationType,
   useNotification,
 } from "@/context/NotificationContext";
-import { useBlogMetadata } from "@/context/WriteBlogContext";
+import { useBlogContext } from "@/context/WriteBlogContext";
 import { Blog, UnstructuredBlogData } from "@/types/blogTypes";
+import { preHighlight } from "@/utils/highlighter";
 
 const DraftPreview = ({ editor }: { editor: Editor }) => {
   const router = useRouter();
   const { addNotification } = useNotification();
-  const { setBlogData } = useBlogMetadata();
+  const { setBlogData } = useBlogContext();
 
   const [showSidebar, setShowSidebar] = useState(false);
 
   async function draftBlog() {
     const html = editor.getHTML();
     const sanitizedHTML = DOMPurify.sanitize(html);
-    const blogText = editor.getText();
-    const estReadTime = measureEstReadTime(blogText);
 
     const blogData = JSON.parse(localStorage.getItem("metaData") || "") as
       | UnstructuredBlogData
       | undefined;
     if (blogData) {
-      const blog: Blog = buildBlog(blogData, sanitizedHTML, estReadTime);
+      const blog: Blog = buildBlog(blogData, sanitizedHTML);
 
       try {
         const res = await saveDraft(blog);
@@ -77,12 +76,16 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
               currentDataStr || "{}"
             ) as UnstructuredBlogData;
 
-            setBlogData((prev) => {
-              return { ...prev, estReadTime };
-            });
+            currentData.estReadTime = estReadTime;
 
-            localStorage.setItem("metaData", JSON.stringify({...currentData, estReadTime}));
-            localStorage.setItem("blogHTML", editor.getHTML());
+            setBlogData(currentData);
+
+            localStorage.setItem("metaData", JSON.stringify(currentData));
+
+            const htmlstr = editor.getHTML();
+            const highlightedHtml = preHighlight(htmlstr);
+            localStorage.setItem("highlightedHTML", highlightedHtml);
+
             router.push("write-blog/preview-blog");
           }}
           title="Preview"

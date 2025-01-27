@@ -12,8 +12,7 @@ import {
   NotificationType,
   useNotification,
 } from "@/context/NotificationContext";
-import { useBlogMetadata } from "@/context/WriteBlogContext";
-import { highlightAll } from "@/utils/highlighter";
+import { useBlogContext } from "@/context/WriteBlogContext";
 import { invalidateBlogOverview } from "@/hooks/useInvalidateCache";
 import { AdminBlogMetadata } from "@/types/blogTypes";
 
@@ -26,26 +25,21 @@ export default function PreviewBlog() {
     blogData: blogMetadata,
     resetBlogData,
     categories,
-  } = useBlogMetadata();
+  } = useBlogContext();
 
   const router = useRouter();
 
   useEffect(() => {
-    const blogContent = localStorage.getItem("blogHTML");
+    const blogContent = localStorage.getItem("highlightedHTML");
     if (blogContent) {
       setBlogHTML(blogContent);
     }
   }, []);
 
-  useEffect(() => {
-    highlightAll();
-  }, [blogHTML]);
-
   const handleUpload = async () => {
     if (!blogMetadata)
       return addNotification({ message: "Blogmetadata is missing" });
 
-    console.log(blogMetadata);
     for (const [key, value] of Object.entries(blogMetadata)) {
       if (key === "createdAt") continue;
       if (!value) {
@@ -59,8 +53,9 @@ export default function PreviewBlog() {
     const sanitizedHTML = DOMPurify.sanitize(blogHTML);
 
     setIsUploading(true);
+
     const res = await uploadBlog(
-      buildBlog(blogMetadata, sanitizedHTML, blogMetadata.estReadTime || "1m")
+      buildBlog(blogMetadata, sanitizedHTML)
     );
     setIsUploading(false);
     addNotification({

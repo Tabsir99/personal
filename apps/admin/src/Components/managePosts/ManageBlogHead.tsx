@@ -1,7 +1,7 @@
 import { BlogStatus } from "@/types/blogTypes";
 import CustomSelect from "../ui/Components/CustomSelect";
 import SearchInput from "../ui/Components/SearchInput";
-import { useBlogMetadata } from "@/context/WriteBlogContext";
+import { useBlogContext } from "@/context/WriteBlogContext";
 
 export default function ManagePostHead({
   handleCategoryChange,
@@ -14,7 +14,7 @@ export default function ManagePostHead({
   setSearchTerm: any;
   handleStatusChange: (status: BlogStatus) => void;
 }) {
-  const { categories } = useBlogMetadata();
+  const { categories } = useBlogContext();
   return (
     <>
       <div className="flex gap-4 relative z-30">

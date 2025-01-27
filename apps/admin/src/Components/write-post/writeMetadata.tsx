@@ -5,7 +5,7 @@ import BlogThumbnailInput from "./BlogThumbnail";
 
 import CustomSelect from "../ui/Components/CustomSelect";
 import FloatingLabelInput from "../ui/Components/FloatingLabelInput";
-import { useBlogMetadata } from "@/context/WriteBlogContext";
+import { useBlogContext } from "@/context/WriteBlogContext";
 
 export default function WriteMetadataComp({
   closeSidebar,
@@ -13,7 +13,7 @@ export default function WriteMetadataComp({
   closeSidebar?: () => void;
 }) {
   const { blogData, setBlogData, handleOptionChange, categories } =
-    useBlogMetadata();
+    useBlogContext();
 
   return (
     <>
@@ -85,7 +85,7 @@ export default function WriteMetadataComp({
         type="button"
         onClick={() => {
           if (closeSidebar) closeSidebar();
-          localStorage.setItem("metaData", JSON.stringify(blogData))
+          localStorage.setItem("metaData", JSON.stringify(blogData));
         }}
         className={
           "p-3 bg-[var(--highlight-bg-color)] hover:bg-[var(--highlight-bg-hover-color)] rounded-md text-gray-300 block "

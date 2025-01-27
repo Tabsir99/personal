@@ -3,7 +3,7 @@ import {
   NotificationType,
   useNotification,
 } from "@/context/NotificationContext";
-import { useBlogMetadata } from "@/context/WriteBlogContext";
+import { useBlogContext } from "@/context/WriteBlogContext";
 import {
   AdminBlogMetadata,
   Blog,
@@ -28,7 +28,7 @@ export default function useManageBlogs({
     null
   );
 
-  const { setBlogData, categories } = useBlogMetadata();
+  const { setBlogData, categories } = useBlogContext();
 
   const handleCategoryChange = (newCategory = "") => {
     if (!newCategory) {

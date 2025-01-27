@@ -1,11 +1,11 @@
 import { FaPlus } from "react-icons/fa6";
 
 import FloatingLabelInput from "@/Components/ui/Components/FloatingLabelInput";
-import { useBlogMetadata } from "@/context/WriteBlogContext";
+import { useBlogContext } from "@/context/WriteBlogContext";
 
 export default function BlogTagInput() {
   const { addTag, tagInput, setTagInput, blogData, removeTag, setBlogData } =
-    useBlogMetadata();
+    useBlogContext();
   return (
     <>
       <div className="flex">

@@ -1,11 +1,10 @@
 "use client";
 
 import { useCustomSWR } from "@/hooks/useCustomSwr";
-import useMetadata from "@/hooks/useMetadata";
+import useBlogData from "@/hooks/useMetadata";
 import { BlogCategory, UnstructuredBlogData } from "@/types/blogTypes";
 import {
   createContext,
-  useState,
   useContext,
   ReactNode,
   Dispatch,
@@ -26,33 +25,14 @@ interface BlogMetadataContextType {
   categories: BlogCategory[] | undefined;
 }
 
-// Create context with default values
 const BlogMetadataContext = createContext<BlogMetadataContextType | undefined>(
   undefined
 );
 
-// Default initial state
-const defaultBlogData: UnstructuredBlogData = {
-  blogName: "",
-  blogDescription: "",
-  blogTags: [],
-  categoryId: "",
-  recommendationTitle: "Keep reading...",
-  socialTitle: "",
-  thumbnailUrl: "",
-  type: "",
-  createdAt: "",
-  estReadTime: "",
-};
-
-// Provider component
 export const BlogMetadataProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [blogData, setBlogData] =
-    useState<UnstructuredBlogData>(defaultBlogData);
-
-  const blogEditingTools = useMetadata({ blogData, setBlogData });
+  const blogTools = useBlogData();
   const { data } = useCustomSWR<BlogCategory[]>(`/api/local/categories`);
 
   useEffect(() => {
@@ -60,25 +40,20 @@ export const BlogMetadataProvider: React.FC<{ children: ReactNode }> = ({
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        setBlogData(parsedData);
+        blogTools.setBlogData(parsedData);
       } catch (error) {
         console.error("Failed to parse stored metadata", error);
       }
     }
   }, []);
 
-  const resetBlogData = () => {
-    setBlogData(defaultBlogData);
-    localStorage.removeItem("metaData");
-    localStorage.removeItem("blogHTML");
-  };
+  
 
   return (
     <BlogMetadataContext.Provider
       value={{
-        resetBlogData,
         categories: data,
-        ...blogEditingTools,
+        ...blogTools,
       }}
     >
       {children}
@@ -87,7 +62,7 @@ export const BlogMetadataProvider: React.FC<{ children: ReactNode }> = ({
 };
 
 // Custom hook to use the context
-export const useBlogMetadata = () => {
+export const useBlogContext = () => {
   const context = useContext(BlogMetadataContext);
   if (!context) {
     throw new Error(

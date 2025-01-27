@@ -63,8 +63,7 @@ export const measureEstReadTime = (blogText = "") => {
 
 export const buildBlog = (
   blogData: UnstructuredBlogData,
-  content: string,
-  estReadTime: string
+  content: string
 ): Blog => {
   return {
     blogMetadata: {
@@ -72,7 +71,7 @@ export const buildBlog = (
 
       blogTags: blogData.blogTags,
       createdAt: blogData.createdAt,
-      estReadTime: estReadTime,
+      estReadTime: blogData.estReadTime,
       recommendationTitle: blogData.recommendationTitle,
       socialTitle: blogData.socialTitle,
       thumbnailUrl: blogData.thumbnailUrl,

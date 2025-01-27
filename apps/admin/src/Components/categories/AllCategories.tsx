@@ -1,10 +1,10 @@
 "use client";
 
-import { useBlogMetadata } from "@/context/WriteBlogContext";
+import { useBlogContext } from "@/context/WriteBlogContext";
 import CategoryCard from "./CategoryCard";
 
 export default function AllCategories() {
-  const { categories } = useBlogMetadata();
+  const { categories } = useBlogContext();
   if (!categories) return null;
   return (
     <>

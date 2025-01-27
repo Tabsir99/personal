@@ -1,16 +1,23 @@
 "use client";
 
 import { UnstructuredBlogData } from "@/types/blogTypes";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function useMetadata({
-  blogData,
-  setBlogData,
-}: {
-  blogData: UnstructuredBlogData;
-  setBlogData: Dispatch<SetStateAction<UnstructuredBlogData>>;
-}) {
-
+const defaultBlogData: UnstructuredBlogData = {
+  blogName: "",
+  blogDescription: "",
+  blogTags: [],
+  categoryId: "",
+  recommendationTitle: "Keep reading...",
+  socialTitle: "",
+  thumbnailUrl: "",
+  type: "",
+  createdAt: "",
+  estReadTime: "",
+};
+export default function useBlogData() {
+  const [blogData, setBlogData] =
+    useState<UnstructuredBlogData>(defaultBlogData);
   const [tagInput, setTagInput] = useState("");
 
   useEffect(() => {
@@ -38,7 +45,6 @@ export default function useMetadata({
     }
   }, []);
 
-
   const addTag = () => {
     if (tagInput && !blogData.blogTags.includes(tagInput)) {
       setBlogData((prev) => ({
@@ -60,13 +66,20 @@ export default function useMetadata({
     setBlogData((prev) => ({ ...prev, categoryId: option }));
   };
 
+  const resetBlogData = () => {
+    // Not passing any argument causes it to use default data
+    setBlogData(defaultBlogData);
+    localStorage.removeItem("metaData");
+    localStorage.removeItem("blogHTML");
+  };
+
   return {
     blogData,
     tagInput,
+
     setTagInput,
-
+    resetBlogData,
     setBlogData,
-
     addTag,
     removeTag,
     handleOptionChange,
