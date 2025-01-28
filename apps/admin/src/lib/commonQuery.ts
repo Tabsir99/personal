@@ -158,3 +158,18 @@ export const readSingleDoc = async <T = any>({
     return null;
   }
 };
+
+export const deleteData = async ({
+  collectionName,
+  docId,
+}: {
+  collectionName: string;
+  docId: string;
+}) => {
+  try {
+    const docRef = db.collection(collectionName).doc(docId);
+    await docRef.delete();
+  } catch (err) {
+    throw err;
+  }
+};

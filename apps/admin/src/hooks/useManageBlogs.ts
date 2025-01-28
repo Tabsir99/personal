@@ -32,10 +32,10 @@ export default function useManageBlogs({
 
   const handleCategoryChange = (newCategory = "") => {
     if (!newCategory) {
-      return router.push(`/admin/dashboard/manage-posts`);
+      return router.push(`/dashboard/manage-posts`);
     }
     router.push(
-      `/admin/dashboard/manage-posts?category=${newCategory.toLowerCase()}`
+      `/dashboard/manage-posts?category=${newCategory.toLowerCase()}`
     );
   };
 
@@ -59,6 +59,7 @@ export default function useManageBlogs({
     const res = await deleteBlog({
       blogId: selectedBlog.link,
       categoryId: selectedBlog.categoryId,
+      isDraft: selectedBlog.status === "draft",
     });
     document.body.removeAttribute("style");
     if (res.status === "success") {
@@ -83,7 +84,9 @@ export default function useManageBlogs({
   const handleBlogEdit = async () => {
     setSelectedBlog(null);
     document.body.style.cursor = "wait";
-    const res = await fetch(`/api/local/blogs?blogId=${selectedBlog?.link}`);
+    const res = await fetch(
+      `/api/local/blogs?blogId=${selectedBlog?.link}&status=${selectedBlog?.status}`
+    );
     if (!res.ok) {
       document.body.style.removeProperty("cursor");
       return addNotification({ message: res.statusText });

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaArrowRight, FaCloud, FaEye, FaTag } from "react-icons/fa6";
 
-import { buildBlog, measureEstReadTime } from "@/utils/utils";
+import { buildAdminBlog, buildBlog, measureEstReadTime } from "@/utils/utils";
 
 import WriteMetadataComp from "../write-post/writeMetadata";
 
@@ -16,7 +16,10 @@ import {
   useNotification,
 } from "@/context/NotificationContext";
 import { useBlogContext } from "@/context/WriteBlogContext";
-import { Blog, UnstructuredBlogData } from "@/types/blogTypes";
+import {
+  Blog,
+  UnstructuredBlogData,
+} from "@/types/blogTypes";
 import { preHighlight } from "@/utils/highlighter";
 
 const DraftPreview = ({ editor }: { editor: Editor }) => {
@@ -35,15 +38,18 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
       | undefined;
     if (blogData) {
       const blog: Blog = buildBlog(blogData, sanitizedHTML);
+      const adminBlog = buildAdminBlog(blog, false);
+
 
       try {
-        const res = await saveDraft(blog);
+        const res = await saveDraft(blog, adminBlog);
         if (res.status === "success") {
           addNotification({
             message: res.message,
             type: NotificationType.SUCCESS,
           });
           localStorage.clear();
+          router.push("/dashboard/manage-posts");
         } else {
           addNotification({ message: res.message });
         }

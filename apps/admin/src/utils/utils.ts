@@ -25,7 +25,7 @@ export const formatResponse = <T>(
 };
 
 export const Collections = {
-  BLOGS: "blogs",
+  DRAFTS: "draft_blogs",
   CATEGORY_METADATA: "category-metadata",
   STATS: {
     collectionName: "stats",

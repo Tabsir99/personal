@@ -2,75 +2,8 @@ import { Collections, env, fetcher } from "@/utils/utils";
 import { firestore } from "firebase-admin";
 
 import { db } from "@/config/firebaseAdminBlog";
-import { Blog } from "@/types/blogTypes";
 import { formatResponse } from "@/utils/utils";
 
-export const uploadBlogdb = async (blog: Blog) => {
-  try {
-    const batch = db.batch();
-
-    const blogDocRef = db.collection(Collections.BLOGS).doc(blog.link);
-
-    batch.set(blogDocRef, blog, { merge: true });
-
-    const blogDocument = await blogDocRef.get();
-
-    if (!blogDocument.exists) {
-      const categoryMetadataDocRef = db
-        .collection(Collections.CATEGORY_METADATA)
-        .doc(blog.categoryId);
-      const validLinksRef = db.collection(Collections.VALID_LINKS).doc("links");
-      const dashBoardRef = db
-        .collection(Collections.STATS.collectionName)
-        .doc(Collections.STATS.documents.DASHBOARD);
-      const sitemapLinksRef = db
-        .collection(Collections.VALID_LINKS)
-        .doc("sitemap-links");
-
-      batch.set(
-        categoryMetadataDocRef,
-        {
-          updatedAt: blog.blogMetadata.createdAt,
-          totalPosts: firestore.FieldValue.increment(1),
-        },
-        { merge: true }
-      );
-      batch.set(
-        validLinksRef,
-        {
-          blogLinks: firestore.FieldValue.arrayUnion(blog.link),
-        },
-        { merge: true }
-      );
-
-      batch.set(
-        dashBoardRef,
-        {
-          totalPosts: firestore.FieldValue.increment(1),
-          updatedAt: blog.blogMetadata.updatedAt,
-        },
-        { merge: true }
-      );
-      batch.set(
-        sitemapLinksRef,
-        {
-          blogLinks: firestore.FieldValue.arrayUnion({
-            link: `/blogs/${blog.link}`,
-            updatedAt: new Date().toISOString(),
-          }),
-        },
-        {
-          merge: true,
-        }
-      );
-    }
-    await batch.commit();
-
-    return formatResponse("success", "Blog Uploaded Successfully!");
-  } catch (error) {
-    return formatResponse("error", "Blog Uploaded Successfully!");
-  }
-};
 
 export const deleteBlogdb = async ({
   blogId,
