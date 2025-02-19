@@ -173,3 +173,35 @@ export const deleteData = async ({
     throw err;
   }
 };
+
+export const moveDocument = async ({
+  sourceCollection,
+  sourceDocId,
+  targetCollection,
+  targetDocId,
+}: {
+  sourceCollection: string;
+  sourceDocId: string;
+  targetCollection: string;
+  targetDocId: string;
+}) => {
+  try {
+    const sourceDoc = await db
+      .collection(sourceCollection)
+      .doc(sourceDocId)
+      .get();
+
+    if (!sourceDoc.exists) {
+      throw new Error("Source document does not exist");
+    }
+
+    const data = sourceDoc.data();
+    await db.collection(targetCollection).doc(targetDocId).set(data!);
+    await db.collection(sourceCollection).doc(sourceDocId).delete();
+
+    console.log("Document moved successfully");
+  } catch (err) {
+    throw err;
+  }
+};
+

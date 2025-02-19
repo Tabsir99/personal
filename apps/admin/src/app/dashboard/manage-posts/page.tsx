@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { FaPlus } from "react-icons/fa6";
-
+import { Plus } from "lucide-react";
 import BlogOverview from "@/Components/managePosts/BlogOverview";
 
 export const metadata = {
@@ -13,10 +12,11 @@ const ManagePosts = async () => {
       <div className="col-span-1 md:col-span-2 lg:col-span-3 flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Manage Posts</h1>
         <Link
-          href="write-post"
-          className="bg-[var(--highlight-bg-color)] hover:bg-[var(--highlight-bg-hover-color)] text-gray-200 py-2 px-4 rounded flex items-center"
+          href="write-blog"
+          className="bg-blue-600 hover:bg-blue-600/90 active:scale-95 text-white font-medium py-2 px-4 rounded-md flex items-center gap-2 transition duration-200 shadow-md hover:shadow-lg"
         >
-          <FaPlus className="h-6 w-6 mr-2" /> Create New Post
+          <Plus className="h-5 w-5" />
+          <span>Create New Post</span>
         </Link>
       </div>
       <BlogOverview />
@@ -25,4 +25,3 @@ const ManagePosts = async () => {
 };
 
 export default ManagePosts;
-

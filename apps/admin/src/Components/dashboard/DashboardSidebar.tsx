@@ -1,112 +1,124 @@
 "use client";
 import { usePathname } from "next/navigation";
 import {
-  MdHome,
-  MdEdit,
-  MdFolder,
-  MdGroup,
-  MdSettings,
-  MdExitToApp,
-  MdViewList,
-  MdSearch,
-} from "react-icons/md";
-
-import SideBarItem from "./SidebarItem";
+  Home,
+  Edit,
+  Folder,
+  Users,
+  Settings,
+  List,
+  LogOut,
+} from "lucide-react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+// @ts-ignore
+import logo from "../../../public/o-min.png";
 
 const DashBoardSidebar = () => {
   const rootDashBoardUrl = "/dashboard";
   const pathname = usePathname();
-
+  const [isExpanded, setIsExpanded] = useState(false);
   const sidebarItems = [
     {
-      Icon: MdHome, // Updated icon
+      Icon: Home,
       menuName: "Dashboard",
       menuLink: rootDashBoardUrl,
     },
     {
-      Icon: MdFolder, // Updated icon
+      Icon: Folder,
       menuName: "Categories",
       menuLink: `${rootDashBoardUrl}/categories`,
     },
     {
-      Icon: MdEdit, // Updated icon
+      Icon: Edit,
       menuName: "Write Blog",
       menuLink: `${rootDashBoardUrl}/write-blog`,
     },
     {
-      Icon: MdViewList, // Updated icon
+      Icon: List,
       menuName: "Manage Posts",
       menuLink: `${rootDashBoardUrl}/manage-posts`,
     },
     {
-      Icon: MdGroup, // Updated icon
+      Icon: Users,
       menuName: "Subscribers",
       menuLink: `${rootDashBoardUrl}/users`,
     },
     {
-      Icon: MdSettings, // Updated icon
+      Icon: Settings,
       menuName: "Settings",
       menuLink: `${rootDashBoardUrl}/settings`,
     },
   ];
-
   return (
-    <div className="h-screen bg-neutral-950 p-4 text-neutral-300 border-r border-neutral-800 shadow-lg">
-      <div className="flex items-center justify-between mb-4 border-b border-neutral-800 pb-3">
-        <Logo />
-        <MdSearch className="w-7 h-7 cursor-pointer text-neutral-400 hover:text-neutral-300 transition-colors duration-200" />
-      </div>
-
-      <nav className="flex-1 gap-2 overflow-y-auto flex flex-col h-full mt-4 pb-10">
-        {sidebarItems.map((sidebarItem) => (
-          <SideBarItem
-            key={sidebarItem.menuLink}
-            menuName={sidebarItem.menuName}
-            menuLink={sidebarItem.menuLink}
-            isPathActive={
-              pathname === sidebarItem.menuLink ||
-              pathname === `${sidebarItem.menuLink}/write-blog/preview-blog`
-            }
+    <aside
+      className={cn(
+        "fixed left-0 top-0 z-[60] shadow-lg h-screen dark bg-zinc-950 border-r border-zinc-800 transition-all duration-300 ease-in-out",
+        isExpanded ? "w-52 shadow-[5px_0px_25px_rgba(0,0,0,0.8)]" : "w-16"
+      )}
+      onMouseEnter={() => setIsExpanded(true)}
+      onMouseLeave={() => setIsExpanded(false)}
+    >
+      <div className="flex flex-col h-full py-2">
+        <div className="mb-4 flex justify-center h-16 items-center border-b-2 border-zinc-800">
+          <Image
+            src={logo}
+            alt="Logo"
+            width={isExpanded ? 72 : 48}
+            height={48}
+            className="transition-all duration-300"
+          />
+        </div>
+        <ul className="flex flex-col gap-1 px-2">
+          {sidebarItems.map((item, index) => {
+            const isActive = pathname === item.menuLink;
+            return (
+              <li key={index}>
+                <Link href={item.menuLink}>
+                  <Button
+                    variant={isActive ? "secondary" : "ghost"}
+                    className={cn(
+                      " h-12 justify-start gap-3 text-[16px] text-zinc-100 transition-all duration-300 ease-in-out overflow-hidden",
+                      isActive
+                        ? "bg-blue-600/80 hover:bg-blue-600/80 "
+                        : "hover:bg-zinc-800/70",
+                      isExpanded ? "w-full" : "w-12 "
+                    )}
+                  >
+                    <item.Icon className=" w-6 h-6" />
+                    <span
+                      className={`transition-all duration-300 ${isExpanded ? "" : "opacity-30 translate-x-6 scale-75"}`}
+                    >
+                      {item.menuName}
+                    </span>
+                  </Button>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="mt-auto px-2">
+          <Button
+            variant="ghost"
+            className={cn(
+              "h-10 justify-start gap-3 px-3 text-zinc-100 transition-all duration-300 ease-in-out overflow-hidden hover:bg-red-900/30 hover:text-red-200",
+              isExpanded ? "w-full" : "w-10"
+            )}
+            onClick={() => console.log("Logout clicked")}
           >
-            <sidebarItem.Icon className="h-6 w-6 text-gray-400 group-hover:text-gray-300 mr-3" />{" "}
-          </SideBarItem>
-        ))}
-      </nav>
-
-      <div className="px-4 py-6 border-t border-neutral-800">
-        <button
-          className="w-full flex items-center justify-center space-x-3 px-4 py-2 
-            bg-neutral-800 text-neutral-300 hover:bg-neutral-700 
-            rounded-md transition-colors duration-200 group"
-        >
-          <MdExitToApp className="h-6 w-6 text-neutral-500 group-hover:text-red-500" />{" "}
-          {/* Updated icon */}
-          <span className="group-hover:text-white">Log Out</span>
-        </button>
+            <LogOut className="h-5 w-5" />
+            <span
+              className={`transition-all duration-300 ${isExpanded ? "" : "opacity-30 translate-x-6 scale-75"}`}
+            >
+              Logout
+            </span>
+          </Button>
+        </div>
       </div>
-    </div>
+    </aside>
   );
 };
-
 export default DashBoardSidebar;
-
-import Image from "next/image";
-import Link from "next/link";
-// @ts-ignore
-import logo from "../../../public/o-min.png";
-
-const Logo = () => {
-  return (
-    <Link href="/">
-      <Image
-        placeholder="blur"
-        priority
-        loading="eager"
-        draggable="false"
-        src={logo}
-        alt="Logo"
-        className=" w-[64px] max-md:w-[52px] mt-1 h-auto cursor-pointer hover:scale-110 transition-transform duration-300 "
-      />
-    </Link>
-  );
-};

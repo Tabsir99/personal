@@ -18,19 +18,25 @@ export default function ManagePostHead({
   return (
     <>
       <div className="flex gap-4 relative z-30">
-        <CustomSelect
-          onOptionChange={handleCategoryChange}
-          options={[
-            "Select Category...",
-            ...(categories
-              ? categories.map((category) => category.categoryId)
-              : []),
-          ]}
-        />
-        <CustomSelect
-          onOptionChange={handleStatusChange}
-          options={["All Status", "active", "inactive", "draft"]}
-        />
+        <div className="flex gap-4 w-full">
+          <CustomSelect
+            onOptionChange={handleCategoryChange}
+            defaultActiveOption="All Categories"
+            options={[
+              "All Categories",
+              ...(categories
+                ? categories.map((category) => category.categoryId)
+                : []),
+            ]}
+            placeholder="Select Category..."
+          />
+          <CustomSelect
+            defaultActiveOption="All Status"
+            onOptionChange={handleStatusChange}
+            placeholder="Select status..."
+            options={["All Status", "active", "inactive", "draft"]}
+          />
+        </div>
         <SearchInput
           searchTerm={searchTerm}
           handleChange={(e) => {

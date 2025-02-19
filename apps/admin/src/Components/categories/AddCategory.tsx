@@ -1,19 +1,30 @@
 "use client";
-
 import { FormEvent, useRef, useState } from "react";
-import { FaUpload } from "react-icons/fa6";
-
+import { Plus, Upload, Loader2 } from "lucide-react";
 import { addNewCategory } from "@/actions/categoryActions";
 import {
   NotificationType,
   useNotification,
 } from "@/context/NotificationContext";
 import { BlogCategory } from "@/types/blogTypes";
-import FloatingLabelInput from "../ui/Components/FloatingLabelInput";
-import FloatingLabelTxtArea from "../ui/Components/FloatingLabelTxtArea";
 import { mutate } from "swr";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
 export default function AddCategory() {
+  const [open, setOpen] = useState(false);
   const [newCategory, setNewCategory] = useState<BlogCategory>({
     categoryName: "",
     description: "",
@@ -23,19 +34,31 @@ export default function AddCategory() {
     updatedAt: null,
     status: "active",
   });
-  const [showLoading, setShowLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const { addNotification } = useNotification();
+
+  const resetForm = () => {
+    setNewCategory({
+      categoryName: "",
+      description: "",
+      totalPosts: 0,
+      categoryId: "",
+      createdAt: null,
+      updatedAt: null,
+      status: "active",
+    });
+  };
+
   const handleCategorySubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      setShowLoading(true);
+      setIsLoading(true);
       if (!newCategory.categoryName) {
         inputRef.current?.focus();
         return addNotification({ message: "Category name is required" });
       }
-
       if (!newCategory.description) {
         textAreaRef.current?.focus();
         return addNotification({ message: "Category description is required" });
@@ -45,15 +68,8 @@ export default function AddCategory() {
         if (!current) return current;
         return [newCategory, ...current];
       });
-      setNewCategory({
-        categoryName: "",
-        description: "",
-        totalPosts: 0,
-        categoryId: "",
-        createdAt: null,
-        updatedAt: null,
-        status: "active",
-      });
+      resetForm();
+      setOpen(false);
 
       if (response.status === "success") {
         addNotification({
@@ -64,67 +80,104 @@ export default function AddCategory() {
     } catch (error) {
       addNotification({ message: "Failed to add category" });
     } finally {
-      setShowLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <>
-      <form
-        onSubmit={handleCategorySubmit}
-        className="flex flex-col gap-4 mb-6 text-xl leading-relaxed"
-        autoSave=""
-        autoComplete="on"
-      >
-        <FloatingLabelInput
-          label="Category Name"
-          value={newCategory.categoryName}
-          onChange={(e) =>
-            setNewCategory((prev) => ({
-              ...prev,
-              categoryName: e.target.value,
-            }))
-          }
-          ref={inputRef}
-        />
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        setOpen(newOpen);
+        if (!newOpen) resetForm();
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Plus className="h-4 w-4" /> New Category
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="bg-neutral-900 border-neutral-800 text-white sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-medium">
+            Add New Category
+          </DialogTitle>
+          <DialogDescription className="text-gray-400">
+            Create a new category for your blog posts.
+          </DialogDescription>
+        </DialogHeader>
 
-        <FloatingLabelTxtArea
-          label="Category Description"
-          value={newCategory.description}
-          onChange={(e) =>
-            setNewCategory((prev) => ({ ...prev, description: e.target.value }))
-          }
-          ref={textAreaRef}
-        />
-
-        <button
-          type="submit"
-          className="px-12 w-80 h-12 py-2 active:scale-95 transition duration-200 gap-3 bg-[var(--highlight-bg-color)] self-end hover:bg-[var(--highlight-bg-hover-color)] text-white rounded-md flex items-center justify-center"
+        <form
+          onSubmit={handleCategorySubmit}
+          className="space-y-6 py-4"
+          autoComplete="on"
         >
-          {showLoading ? (
-            <PulsingDotSpinner />
-          ) : (
-            <>
-              <FaUpload className="h-5 w-5" /> Upload Category
-            </>
-          )}
-        </button>
-      </form>
-    </>
+          <div className="space-y-2">
+            <Label htmlFor="categoryName" className="text-gray-200">
+              Category Name
+            </Label>
+            <Input
+              id="categoryName"
+              ref={inputRef}
+              value={newCategory.categoryName}
+              onChange={(e) =>
+                setNewCategory((prev) => ({
+                  ...prev,
+                  categoryName: e.target.value,
+                }))
+              }
+              className="bg-neutral-800 border-neutral-700 text-white focus:ring-offset-neutral-900"
+              placeholder="Enter category name"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description" className="text-gray-200">
+              Category Description
+            </Label>
+            <Textarea
+              id="description"
+              ref={textAreaRef}
+              value={newCategory.description}
+              onChange={(e) =>
+                setNewCategory((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
+              className="bg-neutral-800 border-neutral-700 text-white focus:ring-offset-neutral-900 min-h-[120px]"
+              placeholder="Enter category description"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className="bg-transparent border-gray-700 text-gray-200 hover:bg-neutral-800 hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" /> Create Category
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
-
-const PulsingDotSpinner = () => (
-  <div className="flex space-x-2">
-    {[1, 2, 3].map((dot) => (
-      <div
-        key={dot}
-        className="w-3 h-3 bg-gray-300 rounded-full animate-pulse"
-        style={{
-          animationDelay: `${(dot - 1) * 0.2}s`,
-          animationDuration: "1.5s",
-        }}
-      />
-    ))}
-  </div>
-);

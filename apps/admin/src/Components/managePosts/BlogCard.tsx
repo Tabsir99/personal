@@ -1,80 +1,93 @@
 import Link from "next/link";
-import { MdSettings, MdLink } from "react-icons/md";
-
+import { Settings, ExternalLink } from "lucide-react";
 import { AdminBlogMetadata } from "@/types/blogTypes";
 import { env } from "@/utils/utils";
 
-export default function CMSBlogCard({
-  blog,
-  toggleToolbar,
-}: {
-  blog: AdminBlogMetadata;
-  toggleToolbar: (blogMetadata: AdminBlogMetadata) => void;
-}) {
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
+export default function CMSBlogCard({ blog }: { blog: AdminBlogMetadata }) {
   return (
-    <>
-      <div className="flex justify-between items-center">
-        {/* Blog Title */}
-        <div className="flex flex-col">
-          <h2 className="text-xl font-bold text-gray-100 capitalize">
-            {blog.blogName}
-          </h2>
-          <div className="flex space-x-3 mt-2 text-gray-400">
-            <span>{blog.categoryId}</span>
-            <span>|</span>
-            <time>{new Date(blog.createdAt).toDateString()}</time>
+    <Card className="bg-zinc-900 border-zinc-800 text-white">
+      <CardContent className="pt-5 pr-1">
+        <div className="flex justify-between items-start gap-3">
+          {/* Blog Title */}
+          <div className="flex flex-col">
+            <h2 className="text-xl font-bold text-gray-100 capitalize">
+              {blog.blogName}
+            </h2>
+            <div className="flex space-x-3 mt-2 text-gray-400 text-sm">
+              <span>{blog.categoryId}</span>
+              <span>|</span>
+              <time>{new Date(blog.createdAt).toDateString()}</time>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-0 -mt-1">
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="text-gray-400 hover:text-gray-200 hover:bg-zinc-800"
+            >
+              <Link
+                href={`${env.BLOGSITE_HOSTNAME}/blogs/${blog.link}`}
+                target="_blank"
+                title="View Blog"
+              >
+                <ExternalLink className="w-5 h-5" />
+              </Link>
+            </Button>
           </div>
         </div>
-
-        {/* Actions */}
-        <div className="flex flex-col gap-2">
-          <button
-            onClick={() => toggleToolbar(blog)}
-            className="text-gray-400 hover:text-gray-500 hover:rotate-45 transition duration-200"
-          >
-            <MdSettings className="w-7 h-7" />
-          </button>
-          <Link
-            href={`${env.BLOGSITE_HOSTNAME}/blogs/${blog.link}`}
-            target="_blank"
-            className="text-gray-400 hover:text-gray-200"
-          >
-            <MdLink className="w-7 h-7" />
-          </Link>
-        </div>
-      </div>
+      </CardContent>
 
       {/* Post Stats */}
-      <div className="grid grid-cols-4 gap-0 border-t-2 border-gray-700 pt-3">
+      <CardFooter className="border-t border-gray-700 pt-4 grid grid-cols-4 gap-0">
+        <MetricItem label="Views" value={blog.pageMetrics.totalVisitors} />
+        <MetricItem
+          label="Likes"
+          value={blog.pageMetrics.blogMetrics?.totalLikes}
+        />
+        <MetricItem
+          label="Comments"
+          value={blog.pageMetrics.blogMetrics?.totalComments}
+        />
         <div className="flex flex-col text-gray-400">
-          <span className="text-lg font-semibold text-gray-200">
-            {blog.pageMetrics.totalVisitors}
-          </span>
-          <span>Views</span>
-        </div>
-        <div className="flex flex-col text-gray-400">
-          <span className="text-lg font-semibold text-gray-200">
-            {blog.pageMetrics.blogMetrics?.totalLikes}
-          </span>
-          <span>Likes</span>
-        </div>
-        <div className="flex flex-col text-gray-400">
-          <span className="text-lg font-semibold text-gray-200">
-            {blog.pageMetrics.blogMetrics?.totalComments}
-          </span>
-          <span>Comments</span>
-        </div>
-        <div className="flex flex-col text-gray-400">
-          <span
-            className={`text-lg font-semibold ${
-              blog.status === "active" ? "text-green-500" : "text-red-500"
-            }`}
+          <Badge
+            variant={blog.status === "active" ? "secondary" : "destructive"}
+            className="w-fit text-[16px] translate-x-8 capitalize"
           >
             {blog.status}
-          </span>
-          <span>Status</span>
+          </Badge>
         </div>
-      </div>
-    </>
+      </CardFooter>
+    </Card>
   );
 }
+
+// Helper component for metrics
+const MetricItem = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | undefined;
+}) => (
+  <div className="flex flex-col text-gray-400">
+    <span className="text-lg font-semibold text-gray-200">{value ?? 0}</span>
+    <span className="text-sm">{label}</span>
+  </div>
+);

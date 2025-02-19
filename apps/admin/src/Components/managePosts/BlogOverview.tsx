@@ -14,6 +14,7 @@ import { useCustomSWR } from "@/hooks/useCustomSwr";
 import BlogShareModal from "./BlogShareModal";
 import SkeletonLoader from "../ui/Skeletons/BlogCardSkeleton";
 import ThumbnailModal from "./ThumbnailModal";
+import { DropdownMenu } from "@/components/ui/dropdown-menu";
 
 const BlogOverview = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,7 +28,7 @@ const BlogOverview = () => {
     confirmDelete,
     handleBlogEdit,
     handleStatus,
-    toggleToolbar,
+    setSelectedBlog,
     handleBlogDelete,
     closeModal,
     handleShareBlog,
@@ -39,6 +40,7 @@ const BlogOverview = () => {
     categoryId: string;
     status: BlogStatus | "";
   }>({ categoryId: "", status: "" });
+
   const { data, isLoading } = useCustomSWR<AdminBlogMetadata[]>(
     `/api/local/blogOverview${filterBy.categoryId || filterBy.status ? `?categoryId=${filterBy.categoryId}&status=${filterBy.status}` : ""}`
   );
@@ -67,12 +69,11 @@ const BlogOverview = () => {
         currentThumbnail={selectedBlog?.thumbnailUrl!}
       />
 
-      {isModalOpen.share && (
         <BlogShareModal
           onClose={closeModal}
           url={`${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${selectedBlog?.link}`}
+          open={isModalOpen.share}
         />
-      )}
 
       <ManagePostHead
         handleCategoryChange={(categoryId) => {
@@ -86,43 +87,47 @@ const BlogOverview = () => {
       />
 
       <div className="w-full max-w-7xl mx-auto py-5">
-        <div className=" grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {isLoading
             ? [1, 2, 3, 4].map((num) => <SkeletonLoader key={num} />)
             : filteredPosts?.map((post) => {
                 return (
-                  <div
-                    key={post.link}
-                    className="bg-neutral-900 rounded-lg h-[13rem] max-w-[35rem] shadow-md py-4 px-6
-                 hover:shadow-xl transition-shadow duration-200 relative flex flex-col gap-5
-                 justify-between
-                 "
-                  >
-                    <CMSBlogCard blog={post} toggleToolbar={toggleToolbar} />
+                  <div key={post.link} className="relative">
+                    <DropdownMenu
+                      onOpenChange={(open) => {
+                        if (open) {
+                          setSelectedBlog(post);
+                        }
+                      }}
+                    >
+                      <CMSBlogCard blog={post} />
 
-                    {isModalOpen.confirm || isModalOpen.share || (
-                      <BlogMenu
-                        blogId={post.link}
-                        menuActions={{
-                          handleBlogDelete,
-                          handleBlogEdit,
-                          handleStatus,
-                          handleShareBlog,
-                          handleThumbnail,
-                        }}
-                        selectedBlog={selectedBlog}
-                      />
-                    )}
+                      {isModalOpen.confirm || isModalOpen.share || (
+                        <BlogMenu
+                          menuActions={{
+                            handleBlogDelete,
+                            handleBlogEdit,
+                            handleStatus,
+                            handleShareBlog,
+                            handleThumbnail,
+                          }}
+                          selectedBlog={selectedBlog}
+                        />
+                      )}
+                    </DropdownMenu>
                   </div>
                 );
               })}
         </div>
 
         {/* Footer */}
-        <p className="text-gray-300 font-semibold w-fit bg-neutral-800/40 backdrop-blur-md leading-relaxed mt-10  py-3 px-5 rounded-lg">
-          Total Posts: {0} <br />
-          Showing: {filteredPosts.length ? "1" : "0"} - {filteredPosts.length}
-        </p>
+        <div className="mt-10 bg-neutral-850 rounded-lg p-4 inline-block">
+          <p className="text-gray-300 font-medium">
+            Total Posts: {data?.length || 0} <br />
+            Showing: {filteredPosts.length > 0 ? "1" : "0"} -{" "}
+            {filteredPosts.length}
+          </p>
+        </div>
       </div>
     </>
   );

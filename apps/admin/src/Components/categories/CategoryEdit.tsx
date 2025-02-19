@@ -1,4 +1,9 @@
 import React from "react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 // Define types for props
 interface EditNameProps {
@@ -7,6 +12,7 @@ interface EditNameProps {
   categoryName: string;
   description: string;
   ModifyCategory: React.Dispatch<React.SetStateAction<Category>>;
+  isEditing: boolean;
 }
 
 interface SaveEditProps {
@@ -20,6 +26,7 @@ interface SaveEditProps {
 interface Category {
   categoryName: string;
   description: string;
+  status?: "active" | "inactive";
 }
 
 interface EditingState {
@@ -33,12 +40,33 @@ export const EditName = ({
   categoryName,
   description,
   ModifyCategory,
+  isEditing,
 }: EditNameProps) => {
   return (
-    <>
-      <div className="flex gap-5 items-start justify-between">
-        <input
-          type="text"
+    <div
+      className={`transition-opacity duration-300 ease-in-out ${isEditing ? "opacity-100" : "opacity-0 max-h-0 overflow-hidden"}`}
+    >
+      <div className="flex flex-col space-y-1">
+        <div className="flex justify-between items-center">
+          <Label htmlFor="categoryName" className="text-sm text-gray-300">
+            Category Name
+          </Label>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="status-switch"
+              checked={status === "active"}
+              onCheckedChange={toggleStatus}
+            />
+            <Label
+              htmlFor="status-switch"
+              className={`text-sm ${status === "active" ? "text-green-500" : "text-red-500"}`}
+            >
+              {status === "active" ? "Active" : "Inactive"}
+            </Label>
+          </div>
+        </div>
+        <Input
+          id="categoryName"
           value={categoryName}
           onChange={(e) => {
             ModifyCategory((prev) => ({
@@ -46,34 +74,28 @@ export const EditName = ({
               categoryName: e.target.value,
             }));
           }}
-          className="px-2 py-1 rounded-md bg-neutral-800/60 text-white border-none focus:ring-1 outline-none focus:ring-green-600 mb-2"
+          className={`bg-neutral-800/60 border-neutral-700 text-white focus-visible:ring-blue-600 focus-visible:ring-1 ${isEditing ? "opacity-100" : "opacity-0 h-0 overflow-hidden"}`}
         />
-
-        <button
-          onClick={() => toggleStatus()}
-          className="relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-300 ease-in-out bg-neutral-800/60 focus:outline-none"
-        >
-          <span
-            className={`${
-              status === "active"
-                ? "translate-x-6 bg-green-600"
-                : "translate-x-1 bg-red-500"
-            } inline-block w-4 h-4 transform rounded-full transition-transform duration-300 ease-in-out`}
-          />
-        </button>
       </div>
-      <textarea
-        value={description}
-        onChange={(e) => {
-          ModifyCategory((prev) => ({
-            ...prev,
-            description: e.target.value,
-          }));
-        }}
-        rows={2}
-        className="px-2 py-1 w-full resize-none rounded-md mb-5 bg-neutral-800/60 text-white border-none focus:ring-1 outline-none focus:ring-green-600"
-      />
-    </>
+
+      <div className="flex flex-col space-y-1">
+        <Label htmlFor="description" className="text-sm text-gray-300">
+          Description
+        </Label>
+        <Textarea
+          id="description"
+          value={description}
+          onChange={(e) => {
+            ModifyCategory((prev) => ({
+              ...prev,
+              description: e.target.value,
+            }));
+          }}
+          rows={3}
+          className={`w-full resize-none bg-neutral-800/60 border-neutral-700 text-white focus-visible:ring-green-600 focus-visible:ring-1 ${isEditing ? "opacity-100" : "opacity-0 h-0 overflow-hidden"}`}
+        />
+      </div>
+    </div>
   );
 };
 
@@ -83,31 +105,36 @@ export const SaveEdit = ({
   ModifyCategory,
   unModifiedCategory,
 }: SaveEditProps) => {
+  const cancelEdit = () => {
+    setEditing((prev) => ({
+      ...prev,
+      editing: false,
+    }));
+    ModifyCategory((prev) => ({
+      ...prev,
+      categoryName: unModifiedCategory.categoryName,
+      description: unModifiedCategory.description,
+      status: unModifiedCategory.status!,
+    }));
+  };
+
   return (
-    <div className="flex justify-end space-x-2">
-      <button
-        onClick={() => {
-          setEditing((prev) => ({
-            ...prev,
-            editing: false,
-          }));
-          ModifyCategory((prev) => ({
-            ...prev,
-            categoryName: unModifiedCategory.categoryName,
-            description: unModifiedCategory.description,
-          }));
-        }}
-        className="bg-gray-400 text-gray-800 transition-colors duration-300 active:scale-90 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-md px-4 py-2 text-sm font-medium"
+    <div className="flex justify-end gap-3">
+      <Button
+        variant="secondary"
+        onClick={cancelEdit}
+        className="bg-neutral-700 text-white hover:bg-neutral-600 focus-visible:ring-offset-neutral-900"
+        size="sm"
       >
         Cancel
-      </button>
-      <button
+      </Button>
+      <Button
         onClick={handleSave}
-        className="bg-green-700 transition-colors duration-300 active:scale-90 text-white hover:bg-gray-600 focus:outline-none rounded-md px-4 py-2 text-sm font-medium"
+        className="bg-green-600 hover:bg-green-700 text-white focus-visible:ring-offset-neutral-900"
+        size="sm"
       >
         Save
-      </button>
+      </Button>
     </div>
   );
 };
-

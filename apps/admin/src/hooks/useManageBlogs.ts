@@ -39,15 +39,6 @@ export default function useManageBlogs({
     );
   };
 
-  const toggleToolbar = (blogMetadata: AdminBlogMetadata) => {
-    setSelectedBlog((prev) => {
-      if (prev?.link === blogMetadata.link) {
-        return null;
-      }
-      return blogMetadata;
-    });
-  };
-
   const handleBlogDelete = () => {
     setIsModalOpen({ confirm: true, share: false, thumbnail: false });
   };
@@ -153,7 +144,7 @@ export default function useManageBlogs({
 
   return {
     handleCategoryChange,
-    toggleToolbar,
+    setSelectedBlog,
     confirmDelete,
     handleBlogEdit,
     handleStatus,

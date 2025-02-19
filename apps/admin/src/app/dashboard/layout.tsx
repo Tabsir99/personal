@@ -21,15 +21,11 @@ export default function DashBoardLayout({
   return (
     <NotificationProvider>
       <BlogMetadataProvider>
-        <div className="grid grid-cols-6 h-screen w-screen bg-black overflow-hidden  ">
-          <div className="col-[1/1]">
-            <DashBoardSidebar />
-          </div>
+        <DashBoardSidebar />
 
-          <main className=" overflow-y-scroll col-[2/-1] bg-transparent pb-0 ">
-            {children}
-          </main>
-        </div>
+        <main className=" overflow-y-scroll bg-zinc-950 pl-16 w-screen h-screen">
+          {children}
+        </main>
       </BlogMetadataProvider>
     </NotificationProvider>
   );

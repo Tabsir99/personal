@@ -1,74 +1,71 @@
 "use client";
-
-import { useState, useCallback, useEffect } from "react";
-import { FaCircleCheck, FaChevronDown } from "react-icons/fa6";
+import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CustomSelectProps {
   onOptionChange?: (option: string) => void;
   options: string[];
   className?: string;
-  optionsClass?: string;
-  defaultActiveOption?: string;
+  placeholder?: string;
+  defaultActiveOption: string;
 }
+
 const CustomSelect = ({
-  className = " w-full",
+  className,
   options,
-  optionsClass = "h-12 px-8 flex items-center justify-between border-t border-gray-900 cursor-pointer hover:bg-neutral-800 transition duration-150",
   onOptionChange,
   defaultActiveOption,
+  placeholder = "Select an option",
 }: CustomSelectProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeOption, setActiveOption] = useState(options[0]);
-
-  const toggleDropdown = useCallback(() => {
-    setIsOpen((prev) => !prev);
-  }, []);
-
-  const selectOption = useCallback(
-    (option: string) => {
-      setActiveOption(option);
-      setIsOpen(false);
-      if (onOptionChange && option === options[0]) onOptionChange("");
-      if (onOptionChange && option !== options[0]) onOptionChange(option);
-    },
-    [onOptionChange, options]
-  );
+  const [activeOption, setActiveOption] = useState<string>(defaultActiveOption);
 
   useEffect(() => {
-    setActiveOption(defaultActiveOption || options[0]);
+    setActiveOption(defaultActiveOption);
   }, [defaultActiveOption]);
 
+  const handleValueChange = (value: string) => {
+    setActiveOption(value);
+    if (onOptionChange) {
+      onOptionChange(value === options[0] ? "" : value);
+    }
+  };
+
   return (
-    <div className={"relative text-white capitalize z-40 " + className}>
-      <button
-        type="button"
-        className="px-8 h-12 w-full items-center capitalize bg-neutral-800/70 rounded-md flex justify-between"
-        onClick={toggleDropdown}
+    <Select value={activeOption} onValueChange={handleValueChange}>
+      <SelectTrigger
+        className={cn(
+          "h-12 px-4 bg-neutral-800/70 border-neutral-700 rounded-md text-white capitalize hover:bg-neutral-700/70 focus:ring-neutral-600 focus:border-neutral-600 transition-all duration-200",
+          className
+        )}
       >
-        {activeOption} <FaChevronDown className="w-6 h-6" />
-      </button>
-      <ul
-        className={
-          "absolute overflow-hidden shadow-lg shadow-black left-0 bg-neutral-800/70 backdrop-blur-md rounded-xl border-t  border-neutral-800 top-12 w-full " +
-          (isOpen
-            ? " transition-transform origin-top duration-150"
-            : " scale-y-0 ")
-        }
+        <SelectValue placeholder={placeholder} className="text-neutral-300" />
+      </SelectTrigger>
+      <SelectContent
+        className="bg-neutral-800 border-neutral-700 text-white rounded-md shadow-xl backdrop-blur-md"
+        position="popper"
+        sideOffset={4}
       >
-        {options.map((option) => (
-          <li
-            key={option}
-            className={optionsClass}
-            onClick={() => selectOption(option)}
-          >
-            {option}
-            {option === activeOption && (
-              <FaCircleCheck className="w-5 h-5 text-green-500 absolute right-2" />
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
+        <SelectGroup className="capitalize">
+          {options.map((option) => (
+            <SelectItem
+              key={option}
+              value={option}
+              className="h-11 px-4 py-6 flex items-center justify-between cursor-pointer hover:bg-neutral-700 focus:bg-neutral-700 focus:text-white data-[highlighted]:bg-neutral-700 data-[highlighted]:text-white transition-colors duration-150"
+            >
+              <span>{option}</span>
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   );
 };
 

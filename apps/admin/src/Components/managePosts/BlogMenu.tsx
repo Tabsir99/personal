@@ -1,19 +1,23 @@
+import React from "react";
 import { AdminBlogMetadata } from "@/types/blogTypes";
 import {
-  FaPencil,
-  FaTrash,
-  FaPowerOff,
-  FaShare,
-  FaImage,
-} from "react-icons/fa6";
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Pencil,
+  Trash2,
+  Power,
+  Share2,
+  Image,
+} from "lucide-react";
 
 export default function BlogMenu({
   selectedBlog,
-  blogId,
   menuActions,
 }: {
   selectedBlog: AdminBlogMetadata | null;
-  blogId: string;
   menuActions: {
     handleBlogEdit: () => void;
     handleBlogDelete: () => void;
@@ -22,66 +26,56 @@ export default function BlogMenu({
     handleThumbnail: () => void;
   };
 }) {
-  const menuItemStyle =
-    "flex items-center justify-start space-x-2 px-4 py-3 w-full text-left transition-all text-gray-300 hover:bg-neutral-800 duration-300 ease-in-out";
-
   return (
-    <div
-      className={`absolute right-14 top-4 z-50 w-36 bg-neutral-900  rounded-xl shadow-2xl border border-gray-700/50 overflow-hidden transition-all duration-300 ease-in-out ${
-        selectedBlog?.link === blogId
-          ? "opacity-100 scale-100 translate-y-0"
-          : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
-      }`}
+    <DropdownMenuContent
+      align="end"
+      className="w-48 bg-neutral-900 border-neutral-800"
     >
-      <div className="bg-gray-900/40 backdrop-blur-md">
-        <button
-          onClick={menuActions.handleBlogEdit}
-          className={`${menuItemStyle}`}
-        >
-          <FaPencil className="w-5 h-5" />
-          <span>Edit</span>
-        </button>
-
-        <div className="border-t border-gray-700/30"></div>
-
-        <button
-          onClick={menuActions.handleThumbnail}
-          className={`${menuItemStyle}`}
-        >
-          <FaImage className="w-5 h-5" />
-          <span>Thumbnail</span>
-        </button>
-
-        <div className="border-t border-gray-700/30"></div>
-
-        <button
-          onClick={menuActions.handleStatus}
-          className={`${menuItemStyle}`}
-        >
-          <FaPowerOff className="w-5 h-5" />
-          <span>
-            {selectedBlog?.status === "active" ? "Deactivate" : "Activate"}
-          </span>
-        </button>
-
-        <button
-          onClick={menuActions.handleShareBlog}
-          className={`${menuItemStyle}`}
-        >
-          <FaShare className="w-5 h-5" />
-          <span> Share </span>
-        </button>
-      </div>
-
-      <div className="border-t border-gray-700/30"></div>
-
-      <button
-        onClick={menuActions.handleBlogDelete}
-        className={`${menuItemStyle}`}
+      <DropdownMenuItem
+        onClick={menuActions.handleBlogEdit}
+        className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-neutral-800 focus:bg-neutral-800"
       >
-        <FaTrash className="w-5 h-5" />
-        <span>Delete</span>
-      </button>
-    </div>
+        <Pencil className="w-4 h-4" />
+        <span>Edit Post</span>
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
+        onClick={menuActions.handleThumbnail}
+        className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-neutral-800 focus:bg-neutral-800"
+      >
+        <Image className="w-4 h-4" />
+        <span>Change Thumbnail</span>
+      </DropdownMenuItem>
+
+      <DropdownMenuSeparator className="bg-neutral-800" />
+
+      <DropdownMenuItem
+        onClick={menuActions.handleStatus}
+        className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-neutral-800 focus:bg-neutral-800"
+      >
+        <Power className="w-4 h-4" />
+        <span>
+          {selectedBlog?.status === "active" ? "Deactivate" : "Activate"} Post
+        </span>
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
+        onClick={menuActions.handleShareBlog}
+        className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-neutral-800 focus:bg-neutral-800"
+      >
+        <Share2 className="w-4 h-4" />
+        <span>Share Post</span>
+      </DropdownMenuItem>
+
+      <DropdownMenuSeparator className="bg-neutral-800" />
+
+      <DropdownMenuItem
+        onClick={menuActions.handleBlogDelete}
+        className="flex items-center space-x-2 text-red-400 hover:text-red-300 focus:text-red-300 hover:bg-neutral-800 focus:bg-neutral-800"
+      >
+        <Trash2 className="w-4 h-4" />
+        <span>Delete Post</span>
+      </DropdownMenuItem>
+    </DropdownMenuContent>
   );
 }

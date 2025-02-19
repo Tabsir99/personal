@@ -44,7 +44,6 @@ export default function WriteMetadataComp({
           ]}
           defaultActiveOption={blogData.categoryId}
           onOptionChange={handleOptionChange}
-          optionsClass="capitalize h-14 px-4 flex items-center justify-between border-t border-gray-900 cursor-pointer hover:bg-slate-700 transition duration-150"
         />
         <CustomSelect
           options={[
@@ -60,7 +59,6 @@ export default function WriteMetadataComp({
             }));
           }}
           defaultActiveOption={blogData.type}
-          optionsClass="capitalize h-14 px-4 flex items-center justify-between border-t border-gray-900 cursor-pointer hover:bg-slate-700 transition duration-150"
         />
       </div>
 
