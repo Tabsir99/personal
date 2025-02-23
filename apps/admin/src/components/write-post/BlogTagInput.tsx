@@ -1,6 +1,6 @@
 import { FaPlus } from "react-icons/fa6";
 
-import FloatingLabelInput from "@/Components/ui/Components/FloatingLabelInput";
+import FloatingLabelInput from "@/components/ui/common/FloatingLabelInput";
 import { useWriteBlogContext } from "@/context/WriteBlogContext";
 
 export default function BlogTagInput() {

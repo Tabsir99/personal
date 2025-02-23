@@ -8,7 +8,7 @@ import ManagePostHead from "./ManageBlogHead";
 
 import useManageBlogs from "@/hooks/useManageBlogs";
 
-import ConfirmationModal from "../ui/Components/ConfirmationModal";
+import ConfirmationModal from "../ui/common/ConfirmationModal";
 import { AdminBlogListItem, BlogStatus } from "@/types/blogTypes";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import BlogShareModal from "./BlogShareModal";

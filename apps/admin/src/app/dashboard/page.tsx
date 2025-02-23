@@ -4,8 +4,8 @@ import { FaChartBar } from "react-icons/fa6";
 // import { DailyTrendsChart } from "@/Components/graphs/dailytrends";
 // import DashboardStats from "@/Components/dashboard/DashboardCard";
 // import TrafficSourcesBarChart from "@/Components/graphs/socialGraph";
-import RefreshBtn from "@/Components/dashboard/RefreshBtn";
-import CustomSelect from "@/Components/ui/Components/CustomSelect";
+import RefreshBtn from "@/components/dashboard/RefreshBtn";
+import CustomSelect from "@/components/ui/common/CustomSelect";
 
 const Heading = ({ text }: { text: string }) => {
   return (

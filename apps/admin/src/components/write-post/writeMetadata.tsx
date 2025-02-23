@@ -3,11 +3,11 @@
 import BlogTagInput from "./BlogTagInput";
 import BlogThumbnailInput from "./BlogThumbnail";
 
-import CustomSelect from "../ui/Components/CustomSelect";
-import FloatingLabelInput from "../ui/Components/FloatingLabelInput";
+import CustomSelect from "../ui/common/CustomSelect";
+import FloatingLabelInput from "../ui/common/FloatingLabelInput";
 import { useWriteBlogContext } from "@/context/WriteBlogContext";
 import { BlogType } from "@/types/blogTypes";
-import FloatingLabelTxtArea from "../ui/Components/FloatingLabelTxtArea";
+import FloatingLabelTxtArea from "../ui/common/FloatingLabelTxtArea";
 import { LocalStorageKeys } from "@/types/types";
 
 export default function WriteMetadataComp({

@@ -1,6 +1,6 @@
 "use client";
 
-import Notification from "@/Components/ui/Notification";
+import Notification from "@/components/ui/Notification";
 import { useState, createContext, ReactNode, useContext } from "react";
 
 export enum NotificationType {

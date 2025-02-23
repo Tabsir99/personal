@@ -3,16 +3,16 @@
 import { useEditor, EditorContent, AnyExtension } from "@tiptap/react";
 import { useEffect, useState } from "react";
 
-import DraftPreview from "./DraftPreview";
+import DraftPreview from "./Toolbar/DraftPreview";
 import CodeBlockModal from "./Modals/CodeBlockModal";
 import ColorModal from "./Modals/ColorModal";
 import { ImageModal } from "./Modals/ImageModal";
 import LinkModal from "./Modals/LinkModal";
-import { starterKitOptions } from "./starterKit";
+import { starterKitOptions } from "./Toolbar/starterKit";
 import Toolbar from "./Toolbar/Toolbar";
 
 import "./Editor.css";
-import CustomSpinner from "../ui/Components/LoadingAnimation";
+import CustomSpinner from "../ui/common/LoadingAnimation";
 import { useWriteBlogContext } from "@/context/WriteBlogContext";
 import { LocalStorageKeys } from "@/types/types";
 import { BlogFormData } from "@/types/blogTypes";

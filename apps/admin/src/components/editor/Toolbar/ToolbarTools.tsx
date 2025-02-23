@@ -23,7 +23,7 @@ import {
 
 import { ActiveModal } from "../Editor";
 import HeadingModal from "../Modals/HeadingModal";
-import { ToggleNode } from "../starterKit";
+import { ToggleNode } from "./starterKit";
 
 export const getTools = (
   editor: Editor,

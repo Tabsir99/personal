@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 
-import DashBoardSidebar from "@/Components/dashboard/DashboardSidebar";
+import DashBoardSidebar from "@/components/dashboard/DashboardSidebar";
 
 import { BlogMetadataProvider } from "@/context/WriteBlogContext";
 import { NotificationProvider } from "@/context/NotificationContext";

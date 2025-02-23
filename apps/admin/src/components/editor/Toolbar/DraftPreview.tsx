@@ -4,7 +4,7 @@ import { Editor } from "@tiptap/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaArrowRight, FaCloud, FaEye, FaTag } from "react-icons/fa6";
-import WriteMetadataComp from "../write-post/writeMetadata";
+import WriteMetadataComp from "../../write-post/writeMetadata";
 import { saveDraft } from "@/actions/blogActions";
 import {
   NotificationType,

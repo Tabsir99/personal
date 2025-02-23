@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { MdUploadFile } from "react-icons/md";
 
 import { uploadImage } from "@/actions/categoryActions";
-import ConfirmationModal from "../ui/Components/ConfirmationModal";
+import ConfirmationModal from "../ui/common/ConfirmationModal";
 import { useWriteBlogContext } from "@/context/WriteBlogContext";
 
 export default function BlogThumbnailInput() {

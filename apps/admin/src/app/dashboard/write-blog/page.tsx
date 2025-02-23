@@ -1,4 +1,4 @@
-import TextEditor from "@/Components/editor/Editor";
+import TextEditor from "@/components/editor/Editor";
 
 export const metadata = {
   title: "Write Blog",

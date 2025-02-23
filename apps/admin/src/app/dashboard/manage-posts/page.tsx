@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import BlogOverview from "@/Components/managePosts/BlogOverview";
+import BlogOverview from "@/components/managePosts/BlogOverview";
 
 export const metadata = {
   title: "Manage Posts",

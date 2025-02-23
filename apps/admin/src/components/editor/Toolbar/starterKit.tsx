@@ -30,9 +30,9 @@ import {
   LineBreak,
   Cite,
   CustomBlockquote,
-} from "./CustomNodes/customNodes";
+} from "../CustomNodes/customNodes";
 import Text from "@tiptap/extension-text";
-import { TextColor } from "./customMarks";
+import { TextColor } from "../CustomMarks/customMarks";
 import { Editor } from "@tiptap/react";
 
 const lowlight = createLowlight();

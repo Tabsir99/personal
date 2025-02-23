@@ -1,6 +1,6 @@
 import { BlogStatus } from "@/types/blogTypes";
-import CustomSelect from "../ui/Components/CustomSelect";
-import SearchInput from "../ui/Components/SearchInput";
+import CustomSelect from "../ui/common/CustomSelect";
+import SearchInput from "../ui/common/SearchInput";
 import { useWriteBlogContext } from "@/context/WriteBlogContext";
 
 export default function ManagePostHead({

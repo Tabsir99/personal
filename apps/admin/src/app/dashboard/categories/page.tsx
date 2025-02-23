@@ -1,5 +1,5 @@
-import AddCategory from "@/Components/categories/AddCategory";
-import AllCategories from "@/Components/categories/AllCategories";
+import AddCategory from "@/components/categories/AddCategory";
+import AllCategories from "@/components/categories/AllCategories";
 
 export const metadata = {
   title: "Manage Categories",
