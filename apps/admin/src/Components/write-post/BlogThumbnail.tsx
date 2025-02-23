@@ -1,34 +1,29 @@
 import Image from "next/image";
-import { Dispatch, SetStateAction, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { MdUploadFile } from "react-icons/md";
 
 import { uploadImage } from "@/actions/categoryActions";
-import { UnstructuredBlogData } from "@/types/blogTypes";
 import ConfirmationModal from "../ui/Components/ConfirmationModal";
+import { useWriteBlogContext } from "@/context/WriteBlogContext";
 
-export default function BlogThumbnailInput({
-  blogData,
-  setBlogData,
-}: {
-  blogData: UnstructuredBlogData;
-  setBlogData: Dispatch<SetStateAction<UnstructuredBlogData>>;
-}) {
+export default function BlogThumbnailInput() {
+  const { blogFormData, setBlogFormData } = useWriteBlogContext();
   const uploadRef = useRef<HTMLInputElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   const handleThumbnailUpload = async (image?: File) => {
     const formData = new FormData();
-    formData.append("file", image || thumbnail as any);
+    formData.append("file", image || (thumbnail as any));
     formData.append(
       "blogLink",
-      blogData.blogName.trim().toLowerCase().replace(/\s/g, "-")
+      blogFormData.blogName.trim().toLowerCase().replace(/\s/g, "-")
     );
-    const response = await uploadImage(formData,true);
+    const response = await uploadImage(formData, true);
 
-    setBlogData((prev) => ({
+    setBlogFormData((prev) => ({
       ...prev,
-      thumbnailUrl: response.data as any,
+      featuredImageUrl: response.data as any,
     }));
     setIsOpen(false);
   };
@@ -50,7 +45,9 @@ export default function BlogThumbnailInput({
         }
       >
         <MdUploadFile className="h-7 w-12" />{" "}
-        {blogData.thumbnailUrl ? "Change Thumbnail" : "Upload Thumbnail"}
+        {blogFormData.featuredImageUrl
+          ? "Change Thumbnail"
+          : "Upload Thumbnail"}
         <input
           ref={uploadRef}
           type="file"
@@ -60,7 +57,7 @@ export default function BlogThumbnailInput({
 
             if (!imageFile) return;
             setThumbnail(imageFile);
-            if (blogData.thumbnailUrl) {
+            if (blogFormData.featuredImageUrl) {
               setIsOpen(true);
             } else {
               await handleThumbnailUpload(imageFile);
@@ -69,9 +66,9 @@ export default function BlogThumbnailInput({
           className=" hidden"
         />
       </div>
-      {blogData.thumbnailUrl && (
+      {blogFormData.featuredImageUrl && (
         <Image
-          src={blogData.thumbnailUrl}
+          src={blogFormData.featuredImageUrl}
           alt="whatever"
           className="border-2 border-gray-700 rounded-lg"
           width={600}

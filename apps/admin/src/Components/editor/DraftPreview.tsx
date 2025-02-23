@@ -1,61 +1,66 @@
 // DraftPreview.js
 "use client";
 import { Editor } from "@tiptap/react";
-import DOMPurify from "dompurify";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaArrowRight, FaCloud, FaEye, FaTag } from "react-icons/fa6";
-
-import { buildAdminBlog, buildBlog, measureEstReadTime } from "@/utils/utils";
-
 import WriteMetadataComp from "../write-post/writeMetadata";
-
 import { saveDraft } from "@/actions/blogActions";
 import {
   NotificationType,
   useNotification,
 } from "@/context/NotificationContext";
-import { useBlogContext } from "@/context/WriteBlogContext";
-import {
-  Blog,
-  UnstructuredBlogData,
-} from "@/types/blogTypes";
+import { BlogFormData } from "@/types/blogTypes";
 import { preHighlight } from "@/utils/highlighter";
+import { LocalStorageKeys } from "@/types/types";
+import { useWriteBlogContext } from "@/context/WriteBlogContext";
 
 const DraftPreview = ({ editor }: { editor: Editor }) => {
   const router = useRouter();
   const { addNotification } = useNotification();
-  const { setBlogData } = useBlogContext();
+  const { resetBlogFormData, setBlogFormData } = useWriteBlogContext();
 
   const [showSidebar, setShowSidebar] = useState(false);
 
-  async function draftBlog() {
+  async function draftBlog(clearLocalStorage: boolean) {
     const html = editor.getHTML();
-    const sanitizedHTML = DOMPurify.sanitize(html);
 
-    const blogData = JSON.parse(localStorage.getItem("metaData") || "") as
-      | UnstructuredBlogData
-      | undefined;
-    if (blogData) {
-      const blog: Blog = buildBlog(blogData, sanitizedHTML);
-      const adminBlog = buildAdminBlog(blog, false);
+    const blogFormDataStr = localStorage.getItem(LocalStorageKeys.BlogFormData);
+    if (!blogFormDataStr) throw new Error("BlogFormData is missing");
 
-
-      try {
-        const res = await saveDraft(blog, adminBlog);
-        if (res.status === "success") {
+    const blogFormData = JSON.parse(blogFormDataStr) as BlogFormData;
+    try {
+      const res = await saveDraft(blogFormData);
+      if (res.status === "success") {
+        if (clearLocalStorage) {
+          localStorage.clear();
+          resetBlogFormData();
           addNotification({
             message: res.message,
             type: NotificationType.SUCCESS,
           });
-          localStorage.clear();
-          router.push("/dashboard/manage-posts");
         } else {
-          addNotification({ message: res.message });
+          localStorage.setItem(
+            LocalStorageKeys.BlogFormData,
+            JSON.stringify({
+              ...blogFormData,
+              blogId: res.data?.blogId,
+              link: res.data?.link,
+              estReadTime: res.data?.blogMetadata.estReadTime,
+              content: preHighlight(html),
+            } as BlogFormData)
+          );
         }
-      } catch (error) {
-        addNotification({ message: "An error occurred" });
+
+        return res.data;
+      } else {
+        throw new Error(res.message);
       }
+    } catch (error) {
+      addNotification({
+        message: (error as Error).message || "An error occurred",
+      });
+      return null;
     }
   }
 
@@ -66,7 +71,10 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
       <div className="flex items-center gap-[2px]">
         <button
           className=" toolbar-btns px-2 py-2 w-8 h-8 relative rounded-md hover:bg-gray-700 transition duration-100 active:scale-95 "
-          onClick={draftBlog}
+          onClick={async () => {
+            await draftBlog(true);
+            router.push("/dashboard/manage-posts");
+          }}
           title="Draft"
         >
           <FaCloud />
@@ -74,23 +82,18 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
 
         <button
           className=" toolbar-btns px-2 py-2 rounded-md w-8 h-8 relative hover:bg-gray-700 transition duration-100 active:scale-95 "
-          onClick={() => {
-            const estReadTime = measureEstReadTime(editor.getText());
+          onClick={async () => {
+            const data = await draftBlog(false);
+            if (!data) return;
 
-            let currentDataStr = localStorage.getItem("metaData");
-            const currentData = JSON.parse(
-              currentDataStr || "{}"
-            ) as UnstructuredBlogData;
-
-            currentData.estReadTime = estReadTime;
-
-            setBlogData(currentData);
-
-            localStorage.setItem("metaData", JSON.stringify(currentData));
-
-            const htmlstr = editor.getHTML();
-            const highlightedHtml = preHighlight(htmlstr);
-            localStorage.setItem("highlightedHTML", highlightedHtml);
+            const highlightedHtml = preHighlight(editor.getHTML());
+            setBlogFormData((prev) => ({
+              ...prev,
+              blogId: data.blogId,
+              estReadTime: data.blogMetadata.estReadTime,
+              link: data.link,
+              content: highlightedHtml,
+            }));
 
             router.push("write-blog/preview-blog");
           }}

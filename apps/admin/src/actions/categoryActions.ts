@@ -3,7 +3,7 @@
 import { env, fetcher, formatResponse } from "@/utils/utils";
 
 import { revalidatePath } from "next/cache";
-import { BlogCategory } from "@/types/blogTypes";
+import { BlogCategory, CategoryStatus } from "@/types/blogTypes";
 import { Collections } from "@/utils/utils";
 import { addCategorydb, deleteCategorydb } from "@/lib/categoryQuery";
 import { updateData } from "@/lib/commonQuery";
@@ -20,10 +20,11 @@ export async function deleteCategory(categoryId: string) {
     });
     await Promise.all([deletePromise, fetchPromise]);
     revalidatePath("/dashboard", "layout");
-    return formatResponse(
-      "success",
-      `'Category Deleted Successfully' ${categoryId}`
-    );
+    return formatResponse({
+      status: "success",
+      message: `'Category Deleted Successfully' ${categoryId}`,
+      data: null,
+    });
   } catch (error) {
     console.error(error);
     return false;
@@ -40,12 +41,17 @@ export async function updateCategory(category: Partial<BlogCategory>) {
       category
     );
     revalidatePath("/dashboard", "layout");
-    return formatResponse("success", "Category Updated Successfully");
+    return formatResponse({
+      status: "success",
+      message: "Category Updated Successfully",
+      data: null,
+    });
   } catch (error) {
-    return formatResponse(
-      "error",
-      "There was an error saving the document, please try again"
-    );
+    return formatResponse({
+      status: "error",
+      message: "There was an error saving the document, please try again",
+      data: null,
+    });
   }
 }
 
@@ -73,17 +79,25 @@ export const uploadImage = async (
   await s3.send(putImage);
   const publicUrl = `https://images.tabsircg.com/${fileName}`;
 
-  return formatResponse("success", publicUrl);
+  return formatResponse<string>({ status: "success", data: publicUrl });
 };
 
-export async function addNewCategory(category: BlogCategory) {
-  const currentTime = new Date().toISOString();
-  category.createdAt = currentTime;
-  category.updatedAt = currentTime;
-  category.categoryId = encodeURIComponent(
-    category.categoryName.replace(/\s/g, "-").toLowerCase()
-  );
-
+export async function addNewCategory({
+  categoryName,
+  description,
+}: {
+  categoryName: string;
+  description: string;
+}) {
+  const category: BlogCategory = {
+    categoryId: categoryName.trim().toLowerCase().replace(/\s/g, "-"),
+    categoryName,
+    description,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: CategoryStatus.Active,
+    totalPosts: 0,
+  };
   try {
     const fetchPromise = fetcher({
       url: `${env.BLOGSITE_HOSTNAME}/api/categories`,
@@ -92,8 +106,13 @@ export async function addNewCategory(category: BlogCategory) {
     const addCategoryPromise = addCategorydb(category);
     await Promise.all([fetchPromise, addCategoryPromise]);
     revalidatePath("/dashboard", "layout");
-    return formatResponse("success", "Category Created Successfully!");
+
+    return formatResponse<BlogCategory>({ data: category });
   } catch (error) {
-    return formatResponse("error", "error occured!");
+    return formatResponse({
+      data: null,
+      status: "error",
+      message: "Failed to create category",
+    });
   }
 }

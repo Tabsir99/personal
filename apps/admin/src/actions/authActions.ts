@@ -13,7 +13,11 @@ export async function logInAction(formData: FormData) {
     username !== process.env.ADMIN_USERNAME ||
     password !== process.env.ADMIN_PASSWORD
   ) {
-    return formatResponse("error", "Incorrect username or password");
+    return formatResponse({
+      status: "error",
+      message: "Incorrect username or password",
+      data: null,
+    });
   }
 
   const cookieStore = await cookies();
@@ -29,7 +33,11 @@ export async function logInAction(formData: FormData) {
     maxAge: 60 * 60 * 24 * 7,
   });
 
-  return formatResponse("success", "Successfully signed in");
+  return formatResponse({
+    status: "success",
+    message: "Successfully signed in",
+    data: null,
+  });
 }
 
 export async function secretAction(secret: string) {
@@ -52,5 +60,9 @@ export async function secretAction(secret: string) {
     maxAge: 60 * 60 * 24 * 7,
   });
 
-  return formatResponse("success", "Log in Successfull");
+  return formatResponse({
+    status: "success",
+    message: "Log in Successfull",
+    data: null,
+  });
 }

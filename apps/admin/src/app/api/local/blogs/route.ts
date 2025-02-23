@@ -8,16 +8,24 @@ export async function GET(request: NextRequest) {
   const status = request.nextUrl.searchParams.get("status") as BlogStatus;
   if (!blogId) return NextResponse.json({}, { status: 400 });
 
-  if (status === "draft"){
-    const res = await readSingleDoc<Blog>({collectionName: Collections.DRAFTS, docId: blogId})
-    if(!res) return NextResponse.json({}, { status: 404, statusText: "Blog not found" });
+  if (status === BlogStatus.Draft) {
+    const res = await readSingleDoc<Blog>({
+      collectionName: Collections.DRAFTS,
+      docId: blogId,
+    });
+    if (!res)
+      return NextResponse.json(
+        {},
+        { status: 404, statusText: "Blog not found" }
+      );
 
     return NextResponse.json(res);
   }
-    const res = await fetcher({
-      url: `${env.BLOGSITE_HOSTNAME}/api/blogs?blogId=${encodeURIComponent(blogId)}`,
-      method: "GET",
-    });
+
+  const res = await fetcher({
+    url: `${env.BLOGSITE_HOSTNAME}/api/blogs?blogId=${encodeURIComponent(blogId)}`,
+    method: "GET",
+  });
 
   if (!res.ok) {
     return NextResponse.json({}, { status: 404, statusText: "Blog not found" });

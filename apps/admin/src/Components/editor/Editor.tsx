@@ -13,6 +13,10 @@ import Toolbar from "./Toolbar/Toolbar";
 
 import "./Editor.css";
 import CustomSpinner from "../ui/Components/LoadingAnimation";
+import { useWriteBlogContext } from "@/context/WriteBlogContext";
+import { LocalStorageKeys } from "@/types/types";
+import { BlogFormData } from "@/types/blogTypes";
+import { preHighlight } from "@/utils/highlighter";
 
 export interface ActiveModal {
   link: boolean;
@@ -29,6 +33,7 @@ const TextEditor = () => {
   });
 
   const [activeTextColor, setActiveTextColor] = useState("#D1D5DB");
+  const { setBlogFormData, defaultBlogFormData } = useWriteBlogContext();
 
   function debounce(func: (content: any) => void, delay: number) {
     let timeoutId: NodeJS.Timeout;
@@ -37,8 +42,30 @@ const TextEditor = () => {
       timeoutId = setTimeout(() => func.apply(this, args), delay);
     };
   }
-  const debouncedSave = debounce((content) => {
-    localStorage.setItem("blogHTML", content);
+
+  const debouncedSave = debounce(async (content) => {
+    const highLightedContent = preHighlight(content);
+    setBlogFormData((prev) => ({ ...prev, content: highLightedContent }));
+    const blogFormDataStr = localStorage.getItem(LocalStorageKeys.BlogFormData);
+
+    if (!blogFormDataStr) {
+      localStorage.setItem(
+        LocalStorageKeys.BlogFormData,
+        JSON.stringify({
+          ...defaultBlogFormData,
+          content: highLightedContent,
+        } as BlogFormData)
+      );
+    } else {
+      const blogFormData = JSON.parse(blogFormDataStr) as BlogFormData;
+      localStorage.setItem(
+        LocalStorageKeys.BlogFormData,
+        JSON.stringify({
+          ...blogFormData,
+          content: highLightedContent,
+        } as BlogFormData)
+      );
+    }
   }, 1000);
 
   const editor = useEditor({
@@ -53,12 +80,12 @@ const TextEditor = () => {
   });
 
   useEffect(() => {
-    const blogHTML = localStorage.getItem("blogHTML");
-    if (blogHTML) {
-      editor?.commands.setContent(blogHTML);
+    const blogFormDataStr = localStorage.getItem(LocalStorageKeys.BlogFormData);
+    if (blogFormDataStr) {
+      const blogData = JSON.parse(blogFormDataStr) as BlogFormData;
+      editor?.commands.setContent(blogData.content);
     }
   }, [editor]);
-
 
   if (!editor)
     return (

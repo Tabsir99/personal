@@ -280,6 +280,7 @@ pre code.hljs {
   text-decoration: underline;
 }
 
+
 @media (min-width: 640px) {
   /* Scrollbar track */
   #root::-webkit-scrollbar {

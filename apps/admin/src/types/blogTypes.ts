@@ -1,14 +1,44 @@
 import { PageMetrics } from "./dashboardTypes";
 
+// Standardized enum naming using PascalCase consistently
+export enum BlogType {
+  Article = "Article",
+  NewsArticle = "NewsArticle",
+  BlogPosting = "BlogPosting",
+}
+
+export enum BlogStatus {
+  Active = "active",
+  Inactive = "inactive",
+  Draft = "draft",
+}
+
+// Convert string literal to enum for consistency
+export enum CategoryStatus {
+  Active = "active",
+  Inactive = "inactive",
+}
+
+// Base interface for shared blog properties
+export interface BaseBlogData {
+  blogId: string;
+  blogName: string;
+  categoryId: string;
+  type: BlogType;
+  status: BlogStatus;
+  link: string;
+}
+
+// Improved metadata interface with proper types
 export interface BlogMetadata {
-  blogDescription: string; // This is basically meta description as well
-  blogTags: string[];
-  createdAt: any;
-  estReadTime: string; // In Minutes
-  updatedAt: any;
-  recommendationTitle: string;
-  socialTitle: string; // Meta title but for social media platforms
-  thumbnailUrl: string; // Meta image
+  blogDescription: string; // SEO meta description
+  blogTags: string[]; // Content categorization tags
+  createdAt: string; // Publication timestamp
+  updatedAt: string; // Last modification timestamp
+  estReadTime: number; // Estimated reading time in minutes
+  recommendationTitle: string; // Title used in recommendation sections
+  socialTitle: string; // Title optimized for social media sharing
+  featuredImageUrl: string; // Image for thumbnails and social sharing
 }
 
 export interface BlogStats {
@@ -17,51 +47,50 @@ export interface BlogStats {
   totalComments: number;
   totalShares: number;
 }
-export type BlogStatus = "active" | "inactive" | "draft";
 
-export interface Blog {
-  blogName: string;
-  type: "Article" | "blogpost";
-  link: string;
-  content: string;
-  categoryId: string;
-  status: BlogStatus;
-  recommendations?: string[];
+// Main blog interface extending the base
+export interface Blog extends BaseBlogData {
+  content: string; // Full HTML/Markdown blog content
+  recommendations: string[]; // Array of related blog IDs
   blogMetadata: BlogMetadata;
   blogStats: BlogStats;
 }
 
+// Admin-specific category management
 export interface BlogCategory {
   categoryId: string;
   categoryName: string;
   description: string;
-  createdAt: any;
-  status: "active" | "inactive";
-  totalPosts: number;
-  updatedAt: any;
+  createdAt: string;
+  updatedAt: string;
+  status: CategoryStatus;
+  totalPosts: number; // Calculated field showing posts in category
 }
 
-export interface UnstructuredBlogData {
-  blogName: string;
+// Interface for blog draft/creation forms
+
+export interface BlogFormData extends BaseBlogData {
   blogDescription: string;
   blogTags: string[];
-  categoryId: string;
   recommendationTitle: string;
   socialTitle: string;
-  thumbnailUrl: string;
-  type: string;
-  createdAt: string;
-  estReadTime: string;
+  featuredImageUrl: string;
+  estReadTime: number | null;
+  content: string | null;
 }
 
-export type CategoryStatus = "active" | "inactive";
-
-export interface AdminBlogMetadata {
-  blogName: string;
-  categoryId: string;
+// Admin dashboard blog list item
+export interface AdminBlogListItem extends BaseBlogData {
   createdAt: string;
-  link: string;
-  status: BlogStatus;
+  featuredImageUrl: string;
   pageMetrics: PageMetrics;
-  thumbnailUrl: string
 }
+
+// // Detailed admin view of a blog
+// export interface AdminBlogDetail extends Blog {
+//   pageMetrics: PageMetrics;
+//   publishHistory: {
+//     publishedAt: string | Date;
+//     version: number;
+//   }[];
+// }

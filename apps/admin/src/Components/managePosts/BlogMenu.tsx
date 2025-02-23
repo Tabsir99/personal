@@ -1,5 +1,5 @@
 import React from "react";
-import { AdminBlogMetadata } from "@/types/blogTypes";
+import { AdminBlogListItem } from "@/types/blogTypes";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -17,7 +17,7 @@ export default function BlogMenu({
   selectedBlog,
   menuActions,
 }: {
-  selectedBlog: AdminBlogMetadata | null;
+  selectedBlog: AdminBlogListItem | null;
   menuActions: {
     handleBlogEdit: () => void;
     handleBlogDelete: () => void;

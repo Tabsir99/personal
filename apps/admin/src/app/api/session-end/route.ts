@@ -7,6 +7,10 @@ export async function POST(request: NextRequest) {
   const countryCode = request.headers.get("xCountry") || "unknown";
   const ipAdd = request.headers.get("xIp") || "unknown";
 
+
+  // console.log("Recived request in session end")
+  // return NextResponse.json({})
+  
   try {
     const session = await request.json();
 
@@ -22,7 +26,6 @@ export async function POST(request: NextRequest) {
       data: newSession,
     });
 
-    console.log("Session created,", ipAdd);
     return NextResponse.json({});
   } catch (error) {
     console.error(error.message);

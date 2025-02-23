@@ -23,14 +23,25 @@ export const preHighlight = (html: string) => {
         .replace(/&quot;/g, '"')
         .replace(/&#39;/g, "'");
 
-      const highlightedCode = hljs.highlight(decodedCode, {
-        language: lang,
-        ignoreIllegals: true,
-      }).value;
+      const highlightedCode = hljs
+        .highlight(decodedCode, {
+          language: lang,
+          ignoreIllegals: true,
+        })
+        .value.replace(/\n/g, "<br>");
 
-      return `<code>${highlightedCode}</code>`;
+      return `<code class="language-${lang}">${highlightedCode}</code>`;
     }
   );
 };
+
+// // The problem is, there is no, class being sent in the html to the input of preHighlight
+// console.log(
+//   preHighlight(
+//     `<section><p>Start...</p><pre style="--language: 'Bash'"><code class="language-typescript">well = "lol"
+// print("bash is trash"); lol
+// ok mal</code></pre></section>`
+//   )
+// );
 
 export const highlightAll = hljs.highlightAll;

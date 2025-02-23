@@ -25,14 +25,12 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function AddCategory() {
   const [open, setOpen] = useState(false);
-  const [newCategory, setNewCategory] = useState<BlogCategory>({
+  const [newCategory, setNewCategory] = useState<{
+    categoryName: string;
+    description: string;
+  }>({
     categoryName: "",
     description: "",
-    totalPosts: 0,
-    categoryId: "",
-    createdAt: null,
-    updatedAt: null,
-    status: "active",
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -43,11 +41,6 @@ export default function AddCategory() {
     setNewCategory({
       categoryName: "",
       description: "",
-      totalPosts: 0,
-      categoryId: "",
-      createdAt: null,
-      updatedAt: null,
-      status: "active",
     });
   };
 

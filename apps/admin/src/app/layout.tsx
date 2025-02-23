@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   referrer: "no-referrer",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;

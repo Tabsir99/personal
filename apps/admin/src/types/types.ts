@@ -16,3 +16,8 @@ export interface User {
   username: string;
   likedBlogs: string[];
 }
+
+export enum LocalStorageKeys {
+  BlogFormData = "blogFormData",
+  HighlightedHTML = "highlightedHTML",
+}

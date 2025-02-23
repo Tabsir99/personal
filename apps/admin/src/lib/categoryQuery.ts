@@ -2,7 +2,6 @@ import { firestore } from "firebase-admin";
 
 import { db } from "@/config/firebaseAdminBlog";
 import { BlogCategory } from "@/types/blogTypes";
-import { formatResponse } from "@/utils/utils";
 import { Collections } from "@/utils/utils";
 
 export async function addCategorydb(category: BlogCategory) {
@@ -25,9 +24,10 @@ export async function addCategorydb(category: BlogCategory) {
     );
 
     await batch.commit();
-    return formatResponse("success", "Category Added");
+    return "Category created successfully";
   } catch (error) {
-    return console.error(error);
+    console.error(error);
+    throw error;
   }
 }
 
@@ -50,7 +50,7 @@ export async function deleteCategorydb(categoryId: string) {
 
     await batch.commit();
 
-    return formatResponse("success", "Category deleted");
+    return "Category Deleted";
   } catch (error) {
     throw error;
   }

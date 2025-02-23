@@ -1,8 +1,12 @@
 import {
-  AdminBlogMetadata,
+  AdminBlogListItem,
   Blog,
-  UnstructuredBlogData,
+  BlogFormData,
+  BlogStatus,
+  BlogType,
 } from "@/types/blogTypes";
+import { load } from "cheerio";
+import { randomUUID } from "crypto";
 
 type ResponseStatus = "success" | "error" | "fail";
 
@@ -12,11 +16,11 @@ export interface ApiResponse<T> {
   message: string;
 }
 
-export const formatResponse = <T>(
-  status: ResponseStatus,
-  data: T | null = null,
-  message: string = ""
-): ApiResponse<T> => {
+export const formatResponse = <T>({
+  status = "success" as ResponseStatus,
+  data,
+  message = "",
+}): ApiResponse<T> => {
   return {
     status,
     data,
@@ -58,31 +62,37 @@ export const measureEstReadTime = (blogText = "") => {
 
   const estReadTime = Math.ceil(textsLength / 230);
 
-  return `${estReadTime}`;
+  return estReadTime;
 };
 
 export const buildBlog = (
-  blogData: UnstructuredBlogData,
-  content: string
+  blogFormData: BlogFormData,
+  isDraft: boolean,
+  blogId?: string
 ): Blog => {
+  if (!blogFormData.content) throw new Error("There is no blog content");
+  const $ = load(blogFormData.content);
   return {
+    blogId: blogId || randomUUID(),
     blogMetadata: {
-      blogDescription: blogData.blogDescription,
+      blogDescription: blogFormData.blogDescription,
 
-      blogTags: blogData.blogTags,
-      createdAt: blogData.createdAt,
-      estReadTime: blogData.estReadTime,
-      recommendationTitle: blogData.recommendationTitle,
-      socialTitle: blogData.socialTitle,
-      thumbnailUrl: blogData.thumbnailUrl,
-      updatedAt: blogData.createdAt,
+      blogTags: blogFormData.blogTags,
+      createdAt: new Date().toISOString(),
+      estReadTime: measureEstReadTime($("body").text()),
+      recommendationTitle: blogFormData.recommendationTitle,
+      socialTitle: blogFormData.socialTitle,
+      featuredImageUrl: blogFormData.featuredImageUrl,
+      updatedAt: new Date().toISOString(),
     },
-    blogName: blogData.blogName,
-    content: content,
-    type: "Article",
-    status: "active",
-    categoryId: blogData.categoryId,
-    link: "",
+    blogName: blogFormData.blogName,
+    content: blogFormData.content,
+    type: BlogType.Article,
+    status: isDraft ? BlogStatus.Draft : BlogStatus.Active,
+    categoryId: blogFormData.categoryId,
+    link: encodeURIComponent(
+      blogFormData.blogName.trim().toLowerCase().replace(/\s/g, "-")
+    ),
     recommendations: [],
     blogStats: {
       totalComments: 0,
@@ -116,14 +126,16 @@ export async function fetcher({
 export function buildAdminBlog(
   blog: Blog,
   shouldUpdate: boolean
-): Partial<AdminBlogMetadata> {
+): Partial<AdminBlogListItem> {
   return {
     blogName: blog.blogName,
     categoryId: blog.categoryId,
-    createdAt: blog.blogMetadata.createdAt,
     link: blog.link,
     status: blog.status,
-    thumbnailUrl: blog.blogMetadata.thumbnailUrl,
+    blogId: blog.blogId,
+    createdAt: blog.blogMetadata.createdAt,
+    type: blog.type,
+    featuredImageUrl: blog.blogMetadata.featuredImageUrl,
     ...(!shouldUpdate && {
       pageMetrics: {
         totalVisitors: 0,

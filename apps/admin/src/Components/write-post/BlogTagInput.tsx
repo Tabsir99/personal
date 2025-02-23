@@ -1,11 +1,17 @@
 import { FaPlus } from "react-icons/fa6";
 
 import FloatingLabelInput from "@/Components/ui/Components/FloatingLabelInput";
-import { useBlogContext } from "@/context/WriteBlogContext";
+import { useWriteBlogContext } from "@/context/WriteBlogContext";
 
 export default function BlogTagInput() {
-  const { addTag, tagInput, setTagInput, blogData, removeTag, setBlogData } =
-    useBlogContext();
+  const {
+    addTag,
+    tagInput,
+    setTagInput,
+    blogFormData,
+    removeTag,
+    setBlogFormData,
+  } = useWriteBlogContext();
   return (
     <>
       <div className="flex">
@@ -24,9 +30,9 @@ export default function BlogTagInput() {
 
         <FloatingLabelInput
           label="Recommendation Title"
-          value={blogData.recommendationTitle}
+          value={blogFormData.recommendationTitle}
           onChange={(e) =>
-            setBlogData((prev) => ({
+            setBlogFormData((prev) => ({
               ...prev,
               recommendationTitle: e.target.value,
             }))
@@ -34,7 +40,7 @@ export default function BlogTagInput() {
         />
       </div>
       <div className=" flex flex-wrap space-x-2">
-        {blogData.blogTags.map((tag) => (
+        {blogFormData.blogTags.map((tag) => (
           <span
             key={tag}
             className="bg-gray-700 px-3 py-1 rounded-full flex items-center space-x-2"

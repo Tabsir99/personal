@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Settings, ExternalLink } from "lucide-react";
-import { AdminBlogMetadata } from "@/types/blogTypes";
+import { AdminBlogListItem } from "@/types/blogTypes";
 import { env } from "@/utils/utils";
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -8,7 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-export default function CMSBlogCard({ blog }: { blog: AdminBlogMetadata }) {
+export default function CMSBlogCard({
+  adminBlogListItem,
+}: {
+  adminBlogListItem: AdminBlogListItem;
+}) {
   return (
     <Card className="bg-zinc-900 border-zinc-800 text-white">
       <CardContent className="pt-5 pr-1">
@@ -16,12 +20,14 @@ export default function CMSBlogCard({ blog }: { blog: AdminBlogMetadata }) {
           {/* Blog Title */}
           <div className="flex flex-col">
             <h2 className="text-xl font-bold text-gray-100 capitalize">
-              {blog.blogName}
+              {adminBlogListItem.blogName}
             </h2>
             <div className="flex space-x-3 mt-2 text-gray-400 text-sm">
-              <span>{blog.categoryId}</span>
+              <span>{adminBlogListItem.categoryId}</span>
               <span>|</span>
-              <time>{new Date(blog.createdAt).toDateString()}</time>
+              <time>
+                {new Date(adminBlogListItem.createdAt).toDateString()}
+              </time>
             </div>
           </div>
 
@@ -43,7 +49,7 @@ export default function CMSBlogCard({ blog }: { blog: AdminBlogMetadata }) {
               className="text-gray-400 hover:text-gray-200 hover:bg-zinc-800"
             >
               <Link
-                href={`${env.BLOGSITE_HOSTNAME}/blogs/${blog.link}`}
+                href={`${env.BLOGSITE_HOSTNAME}/blogs/${adminBlogListItem.link}`}
                 target="_blank"
                 title="View Blog"
               >
@@ -56,21 +62,28 @@ export default function CMSBlogCard({ blog }: { blog: AdminBlogMetadata }) {
 
       {/* Post Stats */}
       <CardFooter className="border-t border-gray-700 pt-4 grid grid-cols-4 gap-0">
-        <MetricItem label="Views" value={blog.pageMetrics.totalVisitors} />
+        <MetricItem
+          label="Views"
+          value={adminBlogListItem.pageMetrics.totalVisitors}
+        />
         <MetricItem
           label="Likes"
-          value={blog.pageMetrics.blogMetrics?.totalLikes}
+          value={adminBlogListItem.pageMetrics.blogMetrics?.totalLikes}
         />
         <MetricItem
           label="Comments"
-          value={blog.pageMetrics.blogMetrics?.totalComments}
+          value={adminBlogListItem.pageMetrics.blogMetrics?.totalComments}
         />
         <div className="flex flex-col text-gray-400">
           <Badge
-            variant={blog.status === "active" ? "secondary" : "destructive"}
+            variant={
+              adminBlogListItem.status === "active"
+                ? "secondary"
+                : "destructive"
+            }
             className="w-fit text-[16px] translate-x-8 capitalize"
           >
-            {blog.status}
+            {adminBlogListItem.status}
           </Badge>
         </div>
       </CardFooter>

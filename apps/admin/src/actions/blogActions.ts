@@ -1,112 +1,143 @@
 "use server";
-import { deleteBlogdb, toggleBlogStatusdb } from "@/lib/blogQuery";
-import { createData, deleteData } from "@/lib/commonQuery";
-import { AdminBlogMetadata, Blog } from "@/types/blogTypes";
-import { buildAdminBlog, env, fetcher, formatResponse } from "@/utils/utils";
+import { db } from "@/config/firebaseAdminBlog";
+import { deleteBlogdb } from "@/lib/blogQuery";
+import { createData, deleteData, readSingleDoc } from "@/lib/commonQuery";
+import { AdminBlogListItem, Blog, BlogFormData } from "@/types/blogTypes";
+import {
+  ApiResponse,
+  buildAdminBlog,
+  buildBlog,
+  env,
+  fetcher,
+  formatResponse,
+} from "@/utils/utils";
 import { Collections } from "@/utils/utils";
 import { revalidatePath } from "next/cache";
 
 export async function saveDraft(
-  draftBlog: Blog,
-  adminBlog: Partial<AdminBlogMetadata>
-) {
-  const docId = encodeURIComponent(
-    draftBlog.blogName.toLowerCase().replace(/\s/g, "-")
-  );
-  draftBlog.link = docId;
-  draftBlog.blogMetadata.createdAt = new Date().toISOString();
-  draftBlog.blogMetadata.updatedAt = new Date().toISOString();
-  draftBlog.status = "draft";
+  blogFormData: BlogFormData
+): Promise<ApiResponse<Blog>> {
+  const draftExists = await readSingleDoc<Blog>({
+    collectionName: Collections.BLOG_METADATA,
+    docId: blogFormData.blogId,
+    fieldsToRead: ["blogId"],
+  });
 
-  adminBlog.link = docId;
-  adminBlog.createdAt = new Date().toISOString();
-  adminBlog.status = "draft";
+  const draftBlog = buildBlog(blogFormData, true, draftExists?.blogId);
+  const adminBlogListItem = buildAdminBlog(draftBlog, !!draftExists);
 
   try {
     await Promise.all([
       createData({
         collectionName: Collections.BLOG_METADATA,
-        docId,
-        data: adminBlog,
+        docId: draftBlog.blogId,
+        data: adminBlogListItem,
       }),
       createData({
         collectionName: Collections.DRAFTS,
-        docId,
+        docId: draftBlog.blogId,
         data: draftBlog,
       }),
     ]);
     revalidatePath("/dashboard", "layout");
-    return formatResponse("success", null, "Draft saved succesfully");
+    return formatResponse({
+      status: "success",
+      data: draftBlog,
+      message: "Draft saved succesfully",
+    });
   } catch (error) {
-    return formatResponse("error", null, "There was a error saving the draft");
+    return formatResponse({
+      status: "error",
+      data: null,
+      message: "There was a error saving the draft",
+    });
   }
 }
 
-export async function uploadBlog(blog: Blog) {
-  const shouldUpdate = blog.blogMetadata.createdAt ? true : false;
-  const docId =
-    blog.link ||
-    encodeURIComponent(blog.blogName.toLowerCase().replace(/\s/g, "-"));
+export async function uploadBlog(
+  blogFormData: BlogFormData
+): Promise<ApiResponse<Blog>> {
+  const blog = buildBlog(blogFormData, false, blogFormData.blogId);
+  const blogDoc = await readSingleDoc<AdminBlogListItem>({
+    collectionName: Collections.BLOG_METADATA,
+    docId: blog.blogId,
+    fieldsToRead: ["status", "link"],
+  });
 
-  if (!blog.link) {
-    blog.link = docId;
-  }
+  if (!blogDoc)
+    throw new Error(
+      "Blog metadata does not exists. System error as it must exist before uploading"
+    );
 
-  if (!blog.blogMetadata.createdAt) {
-    blog.blogMetadata.createdAt = new Date().toISOString();
-  }
-  blog.blogMetadata.updatedAt = new Date().toISOString();
-
-  const adminBlogMetadata = buildAdminBlog(blog, shouldUpdate);
+  const adminBlogListItem = buildAdminBlog(blog, true);
 
   try {
     const uploadBlogPromise = createData({
       collectionName: Collections.BLOG_METADATA,
-      docId: blog.link,
-      data: adminBlogMetadata,
+      docId: blog.blogId,
+      data: adminBlogListItem,
     });
+
+    // Changes here, needs to be updated in the main blog site
+    // changed { blog: blog } to blog
     const fetchPromise = fetcher({
       url: `${env.BLOGSITE_HOSTNAME}/api/blogs`,
-      body: JSON.stringify({ blog, shouldUpdate }),
+      body: JSON.stringify(blog),
     });
     const deleteDraftPromise = deleteData({
       collectionName: Collections.DRAFTS,
-      docId,
+      docId: blog.blogId,
     });
 
     await Promise.all([uploadBlogPromise, fetchPromise, deleteDraftPromise]);
     revalidatePath("/", "layout");
-    return formatResponse(
-      "success",
-      adminBlogMetadata,
-      "Blog uploaded successfully"
-    );
+    return formatResponse({
+      status: "success",
+      data: adminBlogListItem,
+      message: "Blog uploaded successfully",
+    });
   } catch (error) {
     console.error(error);
-    return formatResponse("error", null, "Error occured while uploading");
+    return formatResponse({
+      status: "error",
+      data: null,
+      message: "Error occured while uploading",
+    });
   }
 }
 
 export async function deleteBlog({
   blogId,
   categoryId,
-  isDraft,
 }: {
   blogId: string;
   categoryId: string;
-  isDraft: boolean;
 }) {
   try {
+    const blogStatus = await readSingleDoc<AdminBlogListItem>({
+      docId: blogId,
+      collectionName: Collections.BLOG_METADATA,
+      fieldsToRead: ["status"],
+    });
+
+    if (!blogStatus) {
+      throw new Error("Blog not found, so not deleted");
+    }
+
     const deleteBlogPromise = deleteBlogdb({ blogId, categoryId });
 
-    if (isDraft) {
+    if (blogStatus.status === "draft") {
       await Promise.all([
         deleteBlogPromise,
         deleteData({ collectionName: Collections.DRAFTS, docId: blogId }),
       ]);
 
       revalidatePath("/dashboard", "layout");
-      return formatResponse("success", null, "Draft deleted successfully");
+      return formatResponse({
+        status: "success",
+        data: null,
+        message: "Draft deleted successfully",
+      });
     }
     const fetchPromise = fetcher({
       url: `${env.BLOGSITE_HOSTNAME}/api/blogs`,
@@ -114,25 +145,66 @@ export async function deleteBlog({
       method: "DELETE",
     });
 
-    const [deleteBLog, _] = await Promise.all([
-      deleteBlogPromise,
-      fetchPromise,
-    ]);
+    await Promise.all([deleteBlogPromise, fetchPromise]);
     revalidatePath("/", "layout");
-    return deleteBLog;
+    return formatResponse({
+      status: "success",
+      data: null,
+      message: "Blog deleted successfully",
+    });
   } catch (error) {
     console.error(error);
-    return formatResponse("error", null, "server error occured");
+    return formatResponse({
+      status: "error",
+      data: null,
+      message: "server error occured",
+    });
   }
 }
 
-export async function toggleBlogStatus(blogId: string) {
+export async function toggleBlogStatus(
+  blogId: string
+): Promise<ApiResponse<null>> {
   try {
-    const res = await toggleBlogStatusdb(blogId);
+    const docRef = db.collection(Collections.BLOG_METADATA).doc(blogId);
+    const blogDoc = await docRef.get();
 
-    revalidatePath("/", "layout");
-    return res;
+    if (!blogDoc.exists) {
+      return { message: "Blog does not exists!", data: null, status: "fail" };
+    }
+
+    const isActive = blogDoc.data()!.status === "active";
+    const newStatus = isActive ? "inactive" : "active";
+
+    const localPromise = docRef.set(
+      {
+        status: newStatus,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+
+    const fetchPromise = fetcher({
+      url: `${env.BLOGSITE_HOSTNAME}/api/blogs`,
+      body: JSON.stringify({ type: "status", status: newStatus, blogId }),
+      method: "PUT",
+    });
+
+    await Promise.all([localPromise, fetchPromise]);
+
+    return {
+      data: null,
+      message: isActive
+        ? "Blog deactivated successfully"
+        : "Blog activated successfully",
+      status: "success",
+    };
   } catch (error) {
-    return formatResponse("error", "server error occured");
+    console.error("Error while updating blog status:", error);
+    return {
+      data: null,
+      status: "error",
+      message: "Error occured during updating blog status",
+    };
   }
 }

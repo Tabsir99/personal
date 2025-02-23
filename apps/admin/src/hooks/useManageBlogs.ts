@@ -3,15 +3,12 @@ import {
   NotificationType,
   useNotification,
 } from "@/context/NotificationContext";
-import { useBlogContext } from "@/context/WriteBlogContext";
-import {
-  AdminBlogMetadata,
-  Blog,
-  UnstructuredBlogData,
-} from "@/types/blogTypes";
+import { useWriteBlogContext } from "@/context/WriteBlogContext";
+import { AdminBlogListItem, Blog, BlogFormData } from "@/types/blogTypes";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useState } from "react";
 import { invalidateBlogOverview } from "./useInvalidateCache";
+import { LocalStorageKeys } from "@/types/types";
 
 interface UseManageBlogsProps {
   setIsModalOpen: Dispatch<
@@ -24,11 +21,11 @@ export default function useManageBlogs({
   const { addNotification } = useNotification();
   const router = useRouter();
 
-  const [selectedBlog, setSelectedBlog] = useState<AdminBlogMetadata | null>(
+  const [selectedBlog, setSelectedBlog] = useState<AdminBlogListItem | null>(
     null
   );
 
-  const { setBlogData, categories } = useBlogContext();
+  const { setBlogFormData, categories } = useWriteBlogContext();
 
   const handleCategoryChange = (newCategory = "") => {
     if (!newCategory) {
@@ -45,12 +42,12 @@ export default function useManageBlogs({
 
   const confirmDelete = async () => {
     setSelectedBlog(null);
+
     if (!selectedBlog) return addNotification({ message: "No blog selected" });
     document.body.style.cursor = "wait";
     const res = await deleteBlog({
-      blogId: selectedBlog.link,
+      blogId: selectedBlog.blogId,
       categoryId: selectedBlog.categoryId,
-      isDraft: selectedBlog.status === "draft",
     });
     document.body.removeAttribute("style");
     if (res.status === "success") {
@@ -74,9 +71,11 @@ export default function useManageBlogs({
 
   const handleBlogEdit = async () => {
     setSelectedBlog(null);
+    localStorage.clear();
+
     document.body.style.cursor = "wait";
     const res = await fetch(
-      `/api/local/blogs?blogId=${selectedBlog?.link}&status=${selectedBlog?.status}`
+      `/api/local/blogs?blogId=${selectedBlog?.blogId}&status=${selectedBlog?.status}`
     );
     if (!res.ok) {
       document.body.style.removeProperty("cursor");
@@ -88,21 +87,27 @@ export default function useManageBlogs({
     if (!data) return addNotification({ message: "No blog found" });
     // Turn the metadata to unstructured blog data
     const metaData = data.blogMetadata;
-    const unstructuredData: UnstructuredBlogData = {
+    const blogFormData: BlogFormData = {
       blogDescription: metaData.blogDescription,
       blogName: data.blogName,
       blogTags: metaData.blogTags,
       categoryId: data.categoryId,
-      createdAt: metaData.createdAt,
-      estReadTime: metaData.estReadTime,
       recommendationTitle: metaData.recommendationTitle,
       socialTitle: metaData.socialTitle,
-      thumbnailUrl: metaData.thumbnailUrl,
+      featuredImageUrl: metaData.featuredImageUrl,
       type: data.type,
+      content: data.content,
+      estReadTime: metaData.estReadTime,
+      link: data.link,
+      status: data.status,
+      blogId: data.blogId,
     };
-    localStorage.setItem("metaData", JSON.stringify(unstructuredData));
-    localStorage.setItem("blogHTML", data.content);
-    setBlogData(unstructuredData);
+
+    localStorage.setItem(
+      LocalStorageKeys.BlogFormData,
+      JSON.stringify(blogFormData)
+    );
+    setBlogFormData(blogFormData);
     router.push("./write-blog");
   };
 

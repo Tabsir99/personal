@@ -9,7 +9,7 @@ import ManagePostHead from "./ManageBlogHead";
 import useManageBlogs from "@/hooks/useManageBlogs";
 
 import ConfirmationModal from "../ui/Components/ConfirmationModal";
-import { AdminBlogMetadata, BlogStatus } from "@/types/blogTypes";
+import { AdminBlogListItem, BlogStatus } from "@/types/blogTypes";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import BlogShareModal from "./BlogShareModal";
 import SkeletonLoader from "../ui/Skeletons/BlogCardSkeleton";
@@ -41,7 +41,7 @@ const BlogOverview = () => {
     status: BlogStatus | "";
   }>({ categoryId: "", status: "" });
 
-  const { data, isLoading } = useCustomSWR<AdminBlogMetadata[]>(
+  const { data, isLoading } = useCustomSWR<AdminBlogListItem[]>(
     `/api/local/blogOverview${filterBy.categoryId || filterBy.status ? `?categoryId=${filterBy.categoryId}&status=${filterBy.status}` : ""}`
   );
 
@@ -66,14 +66,14 @@ const BlogOverview = () => {
         isOpen={isModalOpen.thumbnail}
         onClose={closeModal}
         blogLink={selectedBlog?.link!}
-        currentThumbnail={selectedBlog?.thumbnailUrl!}
+        currentThumbnail={selectedBlog?.featuredImageUrl!}
       />
 
-        <BlogShareModal
-          onClose={closeModal}
-          url={`${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${selectedBlog?.link}`}
-          open={isModalOpen.share}
-        />
+      <BlogShareModal
+        onClose={closeModal}
+        url={`${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${selectedBlog?.link}`}
+        open={isModalOpen.share}
+      />
 
       <ManagePostHead
         handleCategoryChange={(categoryId) => {
@@ -100,7 +100,7 @@ const BlogOverview = () => {
                         }
                       }}
                     >
-                      <CMSBlogCard blog={post} />
+                      <CMSBlogCard adminBlogListItem={post} />
 
                       {isModalOpen.confirm || isModalOpen.share || (
                         <BlogMenu

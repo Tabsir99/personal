@@ -1,87 +1,95 @@
 "use client";
+import { BlogType, BlogFormData, BlogStatus } from "@/types/blogTypes";
+import { LocalStorageKeys } from "@/types/types";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
-import { UnstructuredBlogData } from "@/types/blogTypes";
-import { useEffect, useState } from "react";
+export interface UseBlogFormData {
+  blogFormData: BlogFormData;
+  tagInput: string;
+  setTagInput: Dispatch<SetStateAction<string>>;
+  resetBlogFormData: () => void;
+  setBlogFormData: Dispatch<SetStateAction<BlogFormData>>;
+  addTag: () => void;
+  removeTag: (tagToRemove: string) => void;
+  handleOptionChange: (option: string) => void;
+  defaultBlogFormData: BlogFormData;
+}
 
-const defaultBlogData: UnstructuredBlogData = {
-  blogName: "",
-  blogDescription: "",
-  blogTags: [],
-  categoryId: "",
-  recommendationTitle: "Keep reading...",
-  socialTitle: "",
-  thumbnailUrl: "",
-  type: "",
-  createdAt: "",
-  estReadTime: "",
-};
-export default function useBlogData() {
-  const [blogData, setBlogData] =
-    useState<UnstructuredBlogData>(defaultBlogData);
+export default function useBlogFormData(): UseBlogFormData {
+  const defaultBlogFormData = useRef<BlogFormData>({
+    blogName: "",
+    blogDescription: "",
+    blogTags: [],
+    categoryId: "",
+    recommendationTitle: "Keep reading...",
+    socialTitle: "",
+    featuredImageUrl: "",
+    type: BlogType.Article,
+    link: "",
+    content: null,
+    estReadTime: null,
+    status: BlogStatus.Draft,
+    blogId: "temp-id",
+  }).current;
+
+  const [blogFormData, setBlogFormData] =
+    useState<BlogFormData>(defaultBlogFormData);
   const [tagInput, setTagInput] = useState("");
 
   useEffect(() => {
-    const metadataString = localStorage.getItem("metaData");
-    if (!metadataString) return;
-    try {
-      const blogMetadataObject = JSON.parse(
-        metadataString
-      ) as UnstructuredBlogData;
+    const savedData = localStorage.getItem(LocalStorageKeys.BlogFormData);
+    if (!savedData) return;
 
-      setBlogData({
-        blogName: blogMetadataObject.blogName || "",
-        blogDescription: blogMetadataObject.blogDescription || "",
-        blogTags: blogMetadataObject.blogTags || [],
-        categoryId: blogMetadataObject.categoryId || "",
-        recommendationTitle: blogMetadataObject.recommendationTitle || "",
-        socialTitle: blogMetadataObject.socialTitle || "",
-        thumbnailUrl: blogMetadataObject.thumbnailUrl || "",
-        type: blogMetadataObject.type || "",
-        createdAt: blogMetadataObject.createdAt || "",
-        estReadTime: blogMetadataObject.estReadTime || "",
+    try {
+      const parsedData = JSON.parse(savedData) as Partial<BlogFormData>;
+      setBlogFormData({
+        ...defaultBlogFormData,
+        ...parsedData,
+        // Preserve these values from state if they exist
+        status: parsedData.status || BlogStatus.Draft,
+        content: parsedData.content || "",
       });
     } catch (error) {
-      return;
+      console.error("Error parsing saved blog data:", error);
     }
   }, []);
 
   const addTag = () => {
-    if (tagInput && !blogData.blogTags.includes(tagInput)) {
-      setBlogData((prev) => ({
+    const trimmedTag = tagInput.trim();
+    if (trimmedTag && !blogFormData.blogTags.includes(trimmedTag)) {
+      setBlogFormData((prev) => ({
         ...prev,
-        blogTags: [...prev.blogTags, tagInput],
+        blogTags: [...prev.blogTags, trimmedTag],
       }));
       setTagInput("");
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    setBlogData((prev) => ({
+    setBlogFormData((prev) => ({
       ...prev,
       blogTags: prev.blogTags.filter((tag) => tag !== tagToRemove),
     }));
   };
 
   const handleOptionChange = (option: string) => {
-    setBlogData((prev) => ({ ...prev, categoryId: option }));
+    setBlogFormData((prev) => ({ ...prev, categoryId: option }));
   };
 
-  const resetBlogData = () => {
-    // Not passing any argument causes it to use default data
-    setBlogData(defaultBlogData);
-    localStorage.removeItem("metaData");
-    localStorage.removeItem("blogHTML");
+  const resetBlogFormData = () => {
+    setBlogFormData(defaultBlogFormData);
+    localStorage.removeItem(LocalStorageKeys.BlogFormData);
   };
 
   return {
-    blogData,
+    blogFormData,
     tagInput,
-
     setTagInput,
-    resetBlogData,
-    setBlogData,
+    resetBlogFormData,
+    setBlogFormData,
     addTag,
     removeTag,
     handleOptionChange,
+    defaultBlogFormData,
   };
 }

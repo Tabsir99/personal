@@ -1,8 +1,5 @@
 import { firestore } from "firebase-admin";
-
 import { db } from "../config/firebaseAdminBlog";
-
-import { formatResponse } from "@/utils/utils";
 
 export const createData = async ({
   collectionName,
@@ -16,7 +13,7 @@ export const createData = async ({
   try {
     const docRef = db.collection(collectionName).doc(docId);
     await docRef.set(data, { merge: true });
-    return formatResponse("success", null, "Blog uploaded succesfully");
+    return "Blog uploaded succesfully";
   } catch (err) {
     throw err;
   }
@@ -142,20 +139,32 @@ export const readNDocs = async ({
 export const readSingleDoc = async <T = any>({
   collectionName,
   docId,
+  fieldsToRead,
 }: {
   collectionName: string;
   docId: string;
+  fieldsToRead?: (keyof T)[];
 }): Promise<T | null> => {
-  const docRef = db.collection(collectionName).doc(docId);
+  try {
+    const query = db
+      .collection(collectionName)
+      .where("blogId", "==", docId)
+      .limit(1);
 
-  const doc = await docRef.get();
+    const finalQuery = fieldsToRead
+      ? query.select(...(fieldsToRead as string[]))
+      : query;
 
-  if (doc.exists) {
-    const data = doc.data() as any;
+    const snapshot = await finalQuery.get();
 
-    return data;
-  } else {
-    return null;
+    if (snapshot.empty) {
+      return null;
+    }
+
+    return snapshot.docs[0].data() as T;
+  } catch (error) {
+    console.error(`Error reading document from ${collectionName}:`, error);
+    throw error; // Re-throw to allow handling at higher level
   }
 };
 
@@ -204,4 +213,3 @@ export const moveDocument = async ({
     throw err;
   }
 };
-

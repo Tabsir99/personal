@@ -1,5 +1,5 @@
 import { readNDocs } from "@/lib/commonQuery";
-import { AdminBlogMetadata } from "@/types/blogTypes";
+import { AdminBlogListItem } from "@/types/blogTypes";
 import { Collections } from "@/utils/utils";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     filter.filterValues.push(status);
   }
 
-  const data: AdminBlogMetadata[] = await readNDocs({
+  const data: AdminBlogListItem[] = await readNDocs({
     collectionName: Collections.BLOG_METADATA,
     limitNumber: 30,
     filter: filter,

@@ -1,4 +1,4 @@
-import { AdminBlogMetadata, BlogCategory } from "@/types/blogTypes";
+import { AdminBlogListItem, BlogCategory, BlogStatus } from "@/types/blogTypes";
 import { mutate } from "swr";
 
 export const invalidateBlogOverview = ({
@@ -6,7 +6,7 @@ export const invalidateBlogOverview = ({
   categories,
   type,
 }: {
-  selectedBlog: AdminBlogMetadata;
+  selectedBlog: AdminBlogListItem;
   categories: BlogCategory[];
   type: "delete" | "add" | "status" | "update";
 }) => {
@@ -21,7 +21,7 @@ export const invalidateBlogOverview = ({
   matchingPatterns.forEach((pattern) => {
     mutate(
       pattern,
-      (current: AdminBlogMetadata[] | undefined) => {
+      (current: AdminBlogListItem[] | undefined) => {
         if (!current) return current;
         switch (type) {
           case "add":
@@ -29,22 +29,26 @@ export const invalidateBlogOverview = ({
 
           case "update":
             return current.map((item) => {
-              if (item.link !== selectedBlog.link) {
+              if (item.blogId !== selectedBlog.blogId) {
                 return item;
               }
               return selectedBlog;
             });
 
           case "delete":
-            return current.filter((item) => item.link !== selectedBlog.link);
+            return current.filter(
+              (item) => item.blogId !== selectedBlog.blogId
+            );
 
           case "status":
             return current.map((item) => {
-              if (item.link !== selectedBlog.link) return item;
+              if (item.blogId !== selectedBlog.blogId) return item;
               return {
                 ...item,
                 status:
-                  selectedBlog.status === "active" ? "inactive" : "active",
+                  selectedBlog.status === BlogStatus.Active
+                    ? BlogStatus.Inactive
+                    : BlogStatus.Active,
               };
             });
         }

@@ -1,62 +1,39 @@
 "use client";
 
-import DOMPurify from "dompurify";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-import { buildBlog } from "@/utils/utils";
-
+import { useState } from "react";
 import { uploadBlog } from "@/actions/blogActions";
 import {
   NotificationType,
   useNotification,
 } from "@/context/NotificationContext";
-import { useBlogContext } from "@/context/WriteBlogContext";
-import { invalidateBlogOverview } from "@/hooks/useInvalidateCache";
-import { AdminBlogMetadata } from "@/types/blogTypes";
+import { useWriteBlogContext } from "@/context/WriteBlogContext";
 
 export default function PreviewBlog() {
-  const [blogHTML, setBlogHTML] = useState("");
-
   const { addNotification } = useNotification();
   const [isUploading, setIsUploading] = useState(false);
-  const {
-    blogData: blogMetadata,
-    resetBlogData,
-    categories,
-  } = useBlogContext();
+  const { resetBlogFormData, blogFormData } = useWriteBlogContext();
 
   const router = useRouter();
 
-  useEffect(() => {
-    const blogContent = localStorage.getItem("highlightedHTML");
-    if (blogContent) {
-      setBlogHTML(blogContent);
-    }
-  }, []);
-
   const handleUpload = async () => {
-    if (!blogMetadata)
+    if (!blogFormData)
       return addNotification({ message: "Blogmetadata is missing" });
 
-    for (const [key, value] of Object.entries(blogMetadata)) {
-      if (key === "createdAt") continue;
-      if (!value) {
-        addNotification({ message: `${key} is required in metadata` });
-        return;
-      }
-    }
+    // for (const [key, value] of Object.entries(blogFormData)) {
+    //   if (key === "createdAt") continue;
+    //   if (!value) {
+    //     addNotification({ message: `${key} is required in metadata` });
+    //     return;
+    //   }
+    // }
 
-    if (!blogHTML)
+    if (!blogFormData.content)
       return addNotification({ message: "There is no blog content" });
-    const sanitizedHTML = DOMPurify.sanitize(blogHTML);
-
     setIsUploading(true);
 
-    const res = await uploadBlog(
-      buildBlog(blogMetadata, sanitizedHTML)
-    );
+    const res = await uploadBlog(blogFormData);
     setIsUploading(false);
     addNotification({
       message: res.message,
@@ -66,12 +43,12 @@ export default function PreviewBlog() {
           : NotificationType.ERROR,
     });
     if (res.status === "success") {
-      invalidateBlogOverview({
-        selectedBlog: res.data as AdminBlogMetadata,
-        categories: categories!,
-        type: blogMetadata.createdAt ? "update" : "add",
-      });
-      resetBlogData();
+      // invalidateBlogOverview({
+      //   selectedBlog: res.data as AdminBlogListItem,
+      //   categories: categories!,
+      //   type: blogFormData.createdAt ? "update" : "add",
+      // });
+      resetBlogFormData();
       router.push("/dashboard/manage-posts");
     }
   };
@@ -83,7 +60,7 @@ export default function PreviewBlog() {
           <Link href="/"> blogs </Link> &gt;
           <Link href="#">
             {" "}
-            {blogMetadata?.blogName
+            {blogFormData.blogName
               ?.trim()
               .replace(/\s/g, "-")
               .toLowerCase()
@@ -107,7 +84,7 @@ export default function PreviewBlog() {
         </div>
 
         <h1 className="text-3xl max-sm:text-2xl text-blue-400 capitalize pr-24 w-fit mb-3">
-          {blogMetadata?.blogName}
+          {blogFormData.blogName}
         </h1>
         <p className="text-xl">Author: Tabsir</p>
         <time>{new Date().toLocaleDateString()}</time>
@@ -115,7 +92,7 @@ export default function PreviewBlog() {
 
       <article
         className="article-body text-[20px] max-sm:text-[18px] text-gray-300 w-full flex flex-col gap-[96px] max-sm:gap-[80px]"
-        dangerouslySetInnerHTML={{ __html: blogHTML }}
+        dangerouslySetInnerHTML={{ __html: blogFormData.content! }}
       />
     </section>
   );

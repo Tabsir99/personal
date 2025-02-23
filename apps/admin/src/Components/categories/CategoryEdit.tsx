@@ -4,34 +4,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { CategoryStatus } from "@/types/blogTypes";
 
 // Define types for props
 interface EditNameProps {
-  status: "active" | "inactive";
+  status: CategoryStatus;
   toggleStatus: () => void;
   categoryName: string;
   description: string;
-  ModifyCategory: React.Dispatch<React.SetStateAction<Category>>;
+  setCurrentCategory: React.Dispatch<React.SetStateAction<Category>>;
   isEditing: boolean;
-}
-
-interface SaveEditProps {
-  setEditing: React.Dispatch<React.SetStateAction<EditingState>>;
-  handleSave: () => void;
-  ModifyCategory: React.Dispatch<React.SetStateAction<Category>>;
-  unModifiedCategory: Category;
 }
 
 // Define types for the category and editing state
 interface Category {
   categoryName: string;
   description: string;
-  status?: "active" | "inactive";
-}
-
-interface EditingState {
-  editing: boolean;
-  deleting: boolean;
+  status: CategoryStatus;
 }
 
 export const EditName = ({
@@ -39,7 +28,7 @@ export const EditName = ({
   toggleStatus,
   categoryName,
   description,
-  ModifyCategory,
+  setCurrentCategory,
   isEditing,
 }: EditNameProps) => {
   return (
@@ -69,7 +58,7 @@ export const EditName = ({
           id="categoryName"
           value={categoryName}
           onChange={(e) => {
-            ModifyCategory((prev) => ({
+            setCurrentCategory((prev) => ({
               ...prev,
               categoryName: e.target.value,
             }));
@@ -86,7 +75,7 @@ export const EditName = ({
           id="description"
           value={description}
           onChange={(e) => {
-            ModifyCategory((prev) => ({
+            setCurrentCategory((prev) => ({
               ...prev,
               description: e.target.value,
             }));
@@ -99,25 +88,11 @@ export const EditName = ({
   );
 };
 
-export const SaveEdit = ({
-  setEditing,
-  handleSave,
-  ModifyCategory,
-  unModifiedCategory,
-}: SaveEditProps) => {
-  const cancelEdit = () => {
-    setEditing((prev) => ({
-      ...prev,
-      editing: false,
-    }));
-    ModifyCategory((prev) => ({
-      ...prev,
-      categoryName: unModifiedCategory.categoryName,
-      description: unModifiedCategory.description,
-      status: unModifiedCategory.status!,
-    }));
-  };
-
+interface SaveEditProps {
+  handleSave: () => void;
+  cancelEdit: () => void;
+}
+export const SaveEdit = ({ handleSave, cancelEdit }: SaveEditProps) => {
   return (
     <div className="flex justify-end gap-3">
       <Button

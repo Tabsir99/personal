@@ -1,58 +1,28 @@
 "use client";
 
 import { useCustomSWR } from "@/hooks/useCustomSwr";
-import useBlogData from "@/hooks/useMetadata";
-import { BlogCategory, UnstructuredBlogData } from "@/types/blogTypes";
-import {
-  createContext,
-  useContext,
-  ReactNode,
-  Dispatch,
-  SetStateAction,
-  useEffect,
-} from "react";
+import useBlogFormData, { UseBlogFormData } from "@/hooks/useMetadata";
+import { BlogCategory } from "@/types/blogTypes";
+import { createContext, useContext, ReactNode } from "react";
 
-interface BlogMetadataContextType {
-  resetBlogData: () => void;
-  blogData: UnstructuredBlogData;
-  tagInput: string;
-  setTagInput: Dispatch<SetStateAction<string>>;
-  setBlogData: Dispatch<SetStateAction<UnstructuredBlogData>>;
-  addTag: () => void;
-  removeTag: (tagToRemove: string) => void;
-  handleOptionChange: (option: string) => void;
-
-  categories: BlogCategory[] | undefined;
+interface WriteBlogContextType extends UseBlogFormData {
+  categories: BlogCategory[];
 }
 
-const BlogMetadataContext = createContext<BlogMetadataContextType | undefined>(
+const BlogMetadataContext = createContext<WriteBlogContextType | undefined>(
   undefined
 );
 
 export const BlogMetadataProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const blogTools = useBlogData();
+  const blogTools = useBlogFormData();
   const { data } = useCustomSWR<BlogCategory[]>(`/api/local/categories`);
-
-  useEffect(() => {
-    const storedData = localStorage.getItem("metaData");
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        blogTools.setBlogData(parsedData);
-      } catch (error) {
-        console.error("Failed to parse stored metadata", error);
-      }
-    }
-  }, []);
-
-  
 
   return (
     <BlogMetadataContext.Provider
       value={{
-        categories: data,
+        categories: data || [],
         ...blogTools,
       }}
     >
@@ -62,7 +32,7 @@ export const BlogMetadataProvider: React.FC<{ children: ReactNode }> = ({
 };
 
 // Custom hook to use the context
-export const useBlogContext = () => {
+export const useWriteBlogContext = () => {
   const context = useContext(BlogMetadataContext);
   if (!context) {
     throw new Error(

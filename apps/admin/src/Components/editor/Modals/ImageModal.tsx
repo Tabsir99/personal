@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { FaLink, FaUpload } from "react-icons/fa";
 
 import { uploadImage } from "@/actions/categoryActions";
+import { LocalStorageKeys } from "@/types/types";
 
 export const ImageModal = ({
   onClose,
@@ -70,7 +71,7 @@ export const ImageModal = ({
             const imageFile = e.target.files?.[0];
 
             const { blogName } = JSON.parse(
-              localStorage.getItem("metaData") || ""
+              localStorage.getItem(LocalStorageKeys.BlogFormData) || ""
             );
             const id = blogName.trim().toLowerCase().replace(/\s/g, "-");
 

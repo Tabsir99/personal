@@ -50,7 +50,7 @@ const SettingsPage: React.FC = () => {
   const [maintenanceMode, setMaintenanceMode] = useState(false);
 
   const handleSaveChanges = () => {
-    console.log({
+    console.info({
       siteTitle,
       metaDescription,
       notificationsEnabled,
