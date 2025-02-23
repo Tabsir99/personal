@@ -121,7 +121,7 @@ const BlogOverview = () => {
         </div>
 
         {/* Footer */}
-        <div className="mt-10 bg-neutral-850 rounded-lg p-4 inline-block">
+        <div className="mt-10 bg-zinc-850 rounded-lg p-4 inline-block">
           <p className="text-gray-300 font-medium">
             Total Posts: {data?.length || 0} <br />
             Showing: {filteredPosts.length > 0 ? "1" : "0"} -{" "}

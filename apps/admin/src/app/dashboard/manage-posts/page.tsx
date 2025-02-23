@@ -8,7 +8,7 @@ export const metadata = {
 
 const ManagePosts = async () => {
   return (
-    <div className="p-6 bg-neutral-900/60 text-white min-h-screen">
+    <div className="p-6 bg-zinc-900/60 text-white min-h-screen">
       <div className="col-span-1 md:col-span-2 lg:col-span-3 flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Manage Posts</h1>
         <Link

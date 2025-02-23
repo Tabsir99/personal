@@ -64,11 +64,11 @@ div.blogcard {
   margin: 0 auto;
   min-height: 130vh;
   border-radius: 1%;
-  background-color: rgba(24, 23, 23, 0.7);
-  border: 2px solid rgb(32, 33, 34);
+  background-color: rgba(24, 23, 23, 0.5);
+  border: 2px solid rgba(32, 33, 34, 0.5);
 }
 .ProseMirror:focus {
-  border-color: #30373c;
+  border-color: #30373c77
 }
 
 .ripple {

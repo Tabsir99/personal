@@ -29,11 +29,11 @@ export default function BlogMenu({
   return (
     <DropdownMenuContent
       align="end"
-      className="w-48 bg-neutral-900 border-neutral-800"
+      className="w-48 bg-zinc-900 border-neutral-800"
     >
       <DropdownMenuItem
         onClick={menuActions.handleBlogEdit}
-        className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-neutral-800 focus:bg-neutral-800"
+        className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-zinc-800 focus:bg-zinc-800"
       >
         <Pencil className="w-4 h-4" />
         <span>Edit Post</span>
@@ -41,17 +41,17 @@ export default function BlogMenu({
 
       <DropdownMenuItem
         onClick={menuActions.handleThumbnail}
-        className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-neutral-800 focus:bg-neutral-800"
+        className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-zinc-800 focus:bg-zinc-800"
       >
         <Image className="w-4 h-4" />
         <span>Change Thumbnail</span>
       </DropdownMenuItem>
 
-      <DropdownMenuSeparator className="bg-neutral-800" />
+      <DropdownMenuSeparator className="bg-zinc-800" />
 
       <DropdownMenuItem
         onClick={menuActions.handleStatus}
-        className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-neutral-800 focus:bg-neutral-800"
+        className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-zinc-800 focus:bg-zinc-800"
       >
         <Power className="w-4 h-4" />
         <span>
@@ -61,17 +61,17 @@ export default function BlogMenu({
 
       <DropdownMenuItem
         onClick={menuActions.handleShareBlog}
-        className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-neutral-800 focus:bg-neutral-800"
+        className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-zinc-800 focus:bg-zinc-800"
       >
         <Share2 className="w-4 h-4" />
         <span>Share Post</span>
       </DropdownMenuItem>
 
-      <DropdownMenuSeparator className="bg-neutral-800" />
+      <DropdownMenuSeparator className="bg-zinc-800" />
 
       <DropdownMenuItem
         onClick={menuActions.handleBlogDelete}
-        className="flex items-center space-x-2 text-red-400 hover:text-red-300 focus:text-red-300 hover:bg-neutral-800 focus:bg-neutral-800"
+        className="flex items-center space-x-2 text-red-400 hover:text-red-300 focus:text-red-300 hover:bg-zinc-800 focus:bg-zinc-800"
       >
         <Trash2 className="w-4 h-4" />
         <span>Delete Post</span>

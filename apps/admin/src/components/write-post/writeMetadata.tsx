@@ -76,7 +76,7 @@ export default function WriteMetadataComp({
         rows={3}
         label="Blog Description"
         placeholder="Enter a breif description about the blog...."
-        // className="w-full px-5 py-3 mb-6 bg-neutral-800/70 resize-none text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+        // className="w-full px-5 py-3 mb-6 bg-zinc-800/70 resize-none text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500"
         value={blogFormData.blogDescription}
         onChange={(e) =>
           setBlogFormData((prev) => ({

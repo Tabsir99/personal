@@ -7,7 +7,7 @@ export const metadata = {
 
 export default async function DashBoardCategories() {
   return (
-    <section className=" mx-auto p-6 bg-neutral-900/60 min-h-screen">
+    <section className=" mx-auto p-6 bg-zinc-900/60 min-h-screen">
       <h1 className="text-3xl font-semibold text-gray-100 mb-4 flex items-center justify-between">
         Categories <AddCategory />
       </h1>

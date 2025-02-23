@@ -23,7 +23,7 @@ const Dashboard = async () => {
   const timeOptions = ["LifeTime", "Last 30 days", "Last Year"];
 
   return (
-    <div className="p-3  bg-neutral-900 bg-opacity-60 min-h-[100dvh] ">
+    <div className="p-3  bg-zinc-900 bg-opacity-60 min-h-[100dvh] ">
       <div className=" mb-6  text-white pr-3  flex justify-between items-center">
         <Heading text="Key Metrics Overview" />
         <RefreshBtn />
@@ -40,7 +40,7 @@ const Dashboard = async () => {
             // onOptionChange={() => {}}
           />
 
-          <div className="flex-grow w-full px-6 py-3 bg-neutral-900 flex gap-6">
+          <div className="flex-grow w-full px-6 py-3 bg-zinc-900 flex gap-6">
             <p className="flex gap-1 justify-center items-center ">
               <span className="w-3 h-3 bg-gray-300 inline-block"></span> Total
               Visitors
@@ -56,7 +56,7 @@ const Dashboard = async () => {
           </div>
         </div>
 
-        <div className="relative w-full text-gray-300 font-bold bg-neutral-900 pt-3 pb-7 px-6 rounded-lg ">
+        <div className="relative w-full text-gray-300 font-bold bg-zinc-900 pt-3 pb-7 px-6 rounded-lg ">
           <div className=" text-sm rotate-90 absolute top-1/2 -translate-y-1/2 -left-9 ">
             Number of Visitors
           </div>

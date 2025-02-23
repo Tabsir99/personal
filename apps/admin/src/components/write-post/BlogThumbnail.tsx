@@ -41,7 +41,7 @@ export default function BlogThumbnailInput() {
           uploadRef.current?.click();
         }}
         className={
-          "gap-1 w-fit cursor-pointer hover:bg-gray-700 text-white px-5 py-3 rounded flex items-center bg-neutral-800/70 "
+          "gap-1 w-fit cursor-pointer hover:bg-gray-700 text-white px-5 py-3 rounded flex items-center bg-zinc-800/70 "
         }
       >
         <MdUploadFile className="h-7 w-12" />{" "}

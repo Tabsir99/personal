@@ -105,9 +105,9 @@ const TextEditor = () => {
   }
 
   return (
-    <section className=" text-gray-300 h-auto bg-[rgb(12,12,12)] pt-0 pb-3 px-12 relative   ">
-      <div className=" sticky z-50 top-0 py-4 bg-[rgb(12,12,12)]  w-full mx-auto ">
-        <div className="flex items-center px-4 w-fit mx-auto gap-[2px] rounded-full py-1 bg-neutral-800/50">
+    <section className=" text-gray-300 h-auto bg-[rgb(16,16,16)] pt-0 pb-3 px-12 relative   ">
+      <div className=" sticky z-50 top-0 py-4 bg-[rgb(16,16,16)] w-full mx-auto ">
+        <div className="flex items-center px-4 w-fit mx-auto gap-[2px] rounded-full py-1 bg-zinc-800/40">
           <Toolbar
             editor={editor}
             setActiveModal={setActiveModal}

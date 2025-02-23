@@ -238,7 +238,7 @@ export const DailyTrendsChart = ({
         }}
         width={width}
         height={400}
-        className="text-white mx-auto bg-neutral-900 rounded-lg "
+        className="text-white mx-auto bg-zinc-900 rounded-lg "
       ></svg>
       <div
         ref={tooltipRef}

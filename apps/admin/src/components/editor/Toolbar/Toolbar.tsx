@@ -25,7 +25,7 @@ const Toolbar = ({
   setActiveTextColor: Dispatch<SetStateAction<string>>;
 }) => {
   const buttonClass =
-    " toolbar-btns px-2 py-2 rounded-md hover:bg-gray-700 transition duration-100 active:scale-95 ";
+    " toolbar-btns px-2 py-2 rounded-md hover:bg-zinc-300/10 transition duration-100 active:scale-95 ";
 
   const [activeButton, setActiveButton] = useState({
     align: "left",

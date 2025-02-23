@@ -112,11 +112,11 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
       </div>
 
       {showSidebar && (
-        <div className="fixed bg-neutral-900/50 backdrop-blur-sm w-screen h-screen top-0 left-0" />
+        <div className="fixed bg-zinc-900/50 backdrop-blur-sm w-screen h-screen top-0 left-0" />
       )}
 
       <div
-        className={`fixed h-screen overflow-scroll top-0 right-0 bg-neutral-950 w-full max-w-4xl mx-auto flex flex-col gap-4
+        className={`fixed h-screen overflow-scroll top-0 right-0 bg-zinc-950 w-full max-w-4xl mx-auto flex flex-col gap-4
           p-8 transition duration-300 ${showSidebar ? "" : "translate-x-1/2 opacity-0 pointer-events-none"}`}
       >
         <FaArrowRight

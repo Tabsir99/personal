@@ -29,7 +29,7 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({
   icon: Icon,
   children,
 }) => (
-  <Card className="w-full bg-neutral-900 border-neutral-800">
+  <Card className="w-full bg-zinc-900 border-neutral-800">
     <CardHeader className="flex flex-row items-center space-x-4 space-y-0 pb-2">
       <Icon className="w-6 h-6 text-neutral-200" />
       <div>
@@ -37,7 +37,7 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({
         {description && <CardDescription className="text-neutral-400">{description}</CardDescription>}
       </div>
     </CardHeader>
-    <Separator className="mb-4 bg-neutral-800" />
+    <Separator className="mb-4 bg-zinc-800" />
     <CardContent>{children}</CardContent>
   </Card>
 );
@@ -60,7 +60,7 @@ const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 p-6 md:p-8 lg:p-12">
+    <div className="min-h-screen bg-zinc-950 text-neutral-100 p-6 md:p-8 lg:p-12">
       <div className="container max-w-5xl mx-auto space-y-8">
         <header className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -84,7 +84,7 @@ const SettingsPage: React.FC = () => {
                   value={siteTitle}
                   onChange={(e) => setSiteTitle(e.target.value)}
                   placeholder="Enter your blog name"
-                  className="w-full bg-neutral-900 border-neutral-800 text-neutral-100 placeholder-neutral-500"
+                  className="w-full bg-zinc-900 border-neutral-800 text-neutral-100 placeholder-neutral-500"
                 />
               </div>
               <div className="space-y-2">
@@ -93,7 +93,7 @@ const SettingsPage: React.FC = () => {
                   value={metaDescription}
                   onChange={(e) => setMetaDescription(e.target.value)}
                   placeholder="Describe your blog for search engines"
-                  className="min-h-[120px] bg-neutral-900 border-neutral-800 text-neutral-100 placeholder-neutral-500"
+                  className="min-h-[120px] bg-zinc-900 border-neutral-800 text-neutral-100 placeholder-neutral-500"
                 />
               </div>
             </div>
@@ -141,7 +141,7 @@ const SettingsPage: React.FC = () => {
           <div className="flex justify-end">
             <Button 
               onClick={handleSaveChanges} 
-              className="group bg-neutral-800 hover:bg-neutral-700 text-neutral-100"
+              className="group bg-zinc-800 hover:bg-zinc-700 text-neutral-100"
             >
               <Save className="mr-2 h-4 w-4 group-hover:animate-pulse" />
               Save Changes

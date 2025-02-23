@@ -63,7 +63,7 @@ export const EditName = ({
               categoryName: e.target.value,
             }));
           }}
-          className={`bg-neutral-800/60 border-neutral-700 text-white focus-visible:ring-blue-600 focus-visible:ring-1 ${isEditing ? "opacity-100" : "opacity-0 h-0 overflow-hidden"}`}
+          className={`bg-zinc-800/60 border-neutral-700 text-white focus-visible:ring-blue-600 focus-visible:ring-1 ${isEditing ? "opacity-100" : "opacity-0 h-0 overflow-hidden"}`}
         />
       </div>
 
@@ -81,7 +81,7 @@ export const EditName = ({
             }));
           }}
           rows={3}
-          className={`w-full resize-none bg-neutral-800/60 border-neutral-700 text-white focus-visible:ring-green-600 focus-visible:ring-1 ${isEditing ? "opacity-100" : "opacity-0 h-0 overflow-hidden"}`}
+          className={`w-full resize-none bg-zinc-800/60 border-neutral-700 text-white focus-visible:ring-green-600 focus-visible:ring-1 ${isEditing ? "opacity-100" : "opacity-0 h-0 overflow-hidden"}`}
         />
       </div>
     </div>
@@ -98,7 +98,7 @@ export const SaveEdit = ({ handleSave, cancelEdit }: SaveEditProps) => {
       <Button
         variant="secondary"
         onClick={cancelEdit}
-        className="bg-neutral-700 text-white hover:bg-neutral-600 focus-visible:ring-offset-neutral-900"
+        className="bg-zinc-700 text-white hover:bg-zinc-600 focus-visible:ring-offset-neutral-900"
         size="sm"
       >
         Cancel

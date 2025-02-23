@@ -16,14 +16,13 @@ import {
   FaAlignJustify,
   FaListUl,
   FaListOl,
-  FaQuoteLeft,
+  // FaQuoteLeft,
   FaCode,
   FaTextHeight,
 } from "react-icons/fa6";
 
 import { ActiveModal } from "../Editor";
 import HeadingModal from "../Modals/HeadingModal";
-import { ToggleNode } from "./starterKit";
 
 export const getTools = (
   editor: Editor,
@@ -157,12 +156,12 @@ export const getTools = (
     command: () => editor.chain().focus().toggleOrderedList().run(),
     activeType: "block",
   },
-  {
-    icon: <FaQuoteLeft />,
-    key: "quote",
-    command: () => ToggleNode("customBlockquote", editor),
-    activeType: "block",
-  },
+  // {
+  //   icon: <FaQuoteLeft />,
+  //   key: "quote",
+  //   command: () => ToggleNode("customBlockquote", editor),
+  //   activeType: "block",
+  // },
   {
     icon: <FaCode />,
     key: "code",

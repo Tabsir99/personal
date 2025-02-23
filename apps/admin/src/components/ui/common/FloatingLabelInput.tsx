@@ -17,7 +17,7 @@ const FloatingLabelInput = ({
     <div className="floating-label-input relative w-full">
       <input
         placeholder=" "
-        className="inputField w-full px-8 block py-2 text-lg bg-neutral-900 text-white rounded outline-none
+        className="inputField w-full px-8 block py-2 text-lg bg-zinc-900 text-white rounded outline-none
          border-2 border-transparent focus:border-blue-500/0"
         value={value}
         ref={ref}

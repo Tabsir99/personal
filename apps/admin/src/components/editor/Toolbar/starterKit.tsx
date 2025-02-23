@@ -33,7 +33,6 @@ import {
 } from "../CustomNodes/customNodes";
 import Text from "@tiptap/extension-text";
 import { TextColor } from "../CustomMarks/customMarks";
-import { Editor } from "@tiptap/react";
 
 const lowlight = createLowlight();
 lowlight.register("javascript", js);
@@ -126,51 +125,3 @@ export const starterKitOptions = [
   Cite,
   TextColor,
 ];
-
-export const ToggleNode = (node: string, editor: Editor) => {
-  const { selection, tr } = editor.view.state;
-  const { $from } = selection;
-
-  const nodeType = editor.schema.nodes[node];
-  const currentNode = $from.parent;
-  const text = currentNode.textContent;
-
-  const nodeContent = text ? editor.schema.text(text) : null;
-
-  if ($from.node(2).type.name === nodeType.name) {
-    //Move the Cursor out of the current Node, In this case it moves it out of all nodes untill the top to 2nd node.
-    const pos = $from.after(2);
-    tr.replaceRangeWith(
-      pos,
-      pos,
-      editor.schema.nodes.paragraph.createAndFill()!
-    );
-    editor.view.dispatch(
-      // tr.setSelection(selection.constructor.near(tr.doc.resolve(pos)))
-      // ERROROROROROOROROOROROROROORORORORORORORO
-      "" as any
-    );
-    return;
-  }
-
-  const schemaNodes = nodeType.spec
-    .content!.replace(/[\+\*]/g, "")
-    .split(" ")
-    .map((schemaNode) => {
-      const type = editor.schema.nodes[schemaNode];
-      return schemaNode === "paragraph" || schemaNode === "block"
-        ? editor.schema.node("paragraph", null, nodeContent!)
-        : type.createAndFill();
-    });
-
-  const start = $from.before();
-  const end = $from.after();
-  tr.replaceWith(
-    start,
-    end,
-    editor.schema.node(nodeType, null, schemaNodes as any)
-  );
-
-  editor.view.dispatch(tr);
-  editor.view.focus();
-};

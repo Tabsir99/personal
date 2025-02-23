@@ -70,13 +70,13 @@ export default function PreviewBlog() {
             <button
               onClick={handleUpload}
               type="button"
-              className="bg-neutral-800/90 flex justify-center items-center w-24 h-10 gap-3 justify-self-end hover:bg-neutral-800/50 text-white font-bold py-2 px-3 text-sm rounded-lg transition duration-300 ease-in-out"
+              className="bg-zinc-800/90 flex justify-center items-center w-24 h-10 gap-3 justify-self-end hover:bg-zinc-800/50 text-white font-bold py-2 px-3 text-sm rounded-lg transition duration-300 ease-in-out"
             >
               {!isUploading ? "UPLOAD" : <Spinner />}
             </button>
             <Link
               href="./"
-              className="bg-neutral-700/30 text-white font-bold py-2 px-3 text-sm rounded-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+              className="bg-zinc-700/30 text-white font-bold py-2 px-3 text-sm rounded-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
             >
               EDIT
             </Link>

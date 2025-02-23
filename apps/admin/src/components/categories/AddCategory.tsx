@@ -90,7 +90,7 @@ export default function AddCategory() {
           <Plus className="h-4 w-4" /> New Category
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-neutral-900 border-neutral-800 text-white sm:max-w-[500px]">
+      <DialogContent className="bg-zinc-900 border-neutral-800 text-white sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-medium">
             Add New Category
@@ -119,7 +119,7 @@ export default function AddCategory() {
                   categoryName: e.target.value,
                 }))
               }
-              className="bg-neutral-800 border-neutral-700 text-white focus:ring-offset-neutral-900"
+              className="bg-zinc-800 border-neutral-700 text-white focus:ring-offset-neutral-900"
               placeholder="Enter category name"
             />
           </div>
@@ -138,7 +138,7 @@ export default function AddCategory() {
                   description: e.target.value,
                 }))
               }
-              className="bg-neutral-800 border-neutral-700 text-white focus:ring-offset-neutral-900 min-h-[120px]"
+              className="bg-zinc-800 border-neutral-700 text-white focus:ring-offset-neutral-900 min-h-[120px]"
               placeholder="Enter category description"
             />
           </div>
@@ -148,7 +148,7 @@ export default function AddCategory() {
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              className="bg-transparent border-gray-700 text-gray-200 hover:bg-neutral-800 hover:text-white"
+              className="bg-transparent border-gray-700 text-gray-200 hover:bg-zinc-800 hover:text-white"
             >
               Cancel
             </Button>

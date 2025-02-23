@@ -75,16 +75,12 @@ export const Cite = Node.create({
 
 export const CustomBlockquote = Node.create({
   name: "customBlockquote",
-
   group: "block",
-
-  content: "paragraph+ cite", // Your custom content structure
-
+  content: "paragraph+ cite",
   selectable: true,
-
   defining: true,
-
   isolating: false,
+  
   parseHTML() {
     return [{ tag: "blockquote" }];
   },
@@ -98,7 +94,7 @@ export const CustomBlockquote = Node.create({
       Backspace: () => {
         const { selection } = this.editor.state;
         const { $from, empty } = selection;
-        if(!$from) return false
+        if (!$from) return false;
         if (!$from.node(2)) return false;
         if ($from.node(2).type.name !== this.type.name) {
           return false;
@@ -170,7 +166,6 @@ export const CustomBlockquote = Node.create({
     };
   },
 
-  
   // addCommands() {
   //   return {
   //     toggleCustomBlockquote: () => {
@@ -239,5 +234,3 @@ export const CustomBlockquote = Node.create({
   //   };
   // },
 });
-
-

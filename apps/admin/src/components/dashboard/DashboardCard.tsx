@@ -14,7 +14,7 @@ const DashboardCard = ({
   return (
     <div
       key={cardTitle}
-      className="w-full px-6 py-5 bg-neutral-900 rounded-lg shadow flex items-center min-h-28"
+      className="w-full px-6 py-5 bg-zinc-900 rounded-lg shadow flex items-center min-h-28"
     >
       <CardIcon className="h-8 w-8 text-gray-400 mr-4" />
       <div>

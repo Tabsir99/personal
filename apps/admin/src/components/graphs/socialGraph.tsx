@@ -222,12 +222,12 @@ const TrafficSourcesBarChart = ({ data }: { data: DashboardData }) => {
   return (
     <div className=" rounded-lg justify-between flex flex-col gap-3 border-t-2 border-gray-700 pt-6">
       <div className="flex justify-between items-center ">
-        <h2 className="pb-4 pt-3 px-8 flex gap-2 items-center rounded-full bg-neutral-900 text-2xl text-center text-white">
+        <h2 className="pb-4 pt-3 px-8 flex gap-2 items-center rounded-full bg-zinc-900 text-2xl text-center text-white">
           Traffic Source Analysis{" "}
           <FaChartPie className="w-9 h-9 text-gray-300" />
         </h2>
 
-        <div className=" px-6 py-3 bg-neutral-900 flex gap-6 text-white text-base w-fit">
+        <div className=" px-6 py-3 bg-zinc-900 flex gap-6 text-white text-base w-fit">
           <p className="flex gap-1 justify-center items-center">
             <span className="w-4 h-4 bg-blue-500 inline-block"></span> Facebook
           </p>
@@ -248,7 +248,7 @@ const TrafficSourcesBarChart = ({ data }: { data: DashboardData }) => {
           </p>
         </div>
       </div>
-      <div className="bg-neutral-900 p-4 rounded-lg justify-between flex">
+      <div className="bg-zinc-900 p-4 rounded-lg justify-between flex">
         <div ref={chartRef} className=" w-fit"></div>
         <div
           ref={piRef}

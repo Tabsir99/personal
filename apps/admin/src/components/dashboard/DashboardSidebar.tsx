@@ -56,7 +56,7 @@ const DashBoardSidebar = () => {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-[60] shadow-lg h-screen dark bg-zinc-950 border-r border-zinc-800 transition-all duration-300 ease-in-out",
+        "fixed left-0 top-0 z-[60] shadow-lg h-screen dark bg-zinc-900/50 border-r border-zinc-800 transition-all duration-300 ease-in-out",
         isExpanded ? "w-52 shadow-[5px_0px_25px_rgba(0,0,0,0.8)]" : "w-16"
       )}
       onMouseEnter={() => setIsExpanded(true)}

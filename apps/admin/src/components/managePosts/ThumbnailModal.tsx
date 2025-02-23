@@ -105,7 +105,7 @@ export default function ThumbnailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-3xl bg-neutral-900 border border-neutral-800 text-neutral-100 shadow-lg">
+      <DialogContent className="sm:max-w-3xl bg-zinc-900 border border-neutral-800 text-neutral-100 shadow-lg">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-white">
             Update Thumbnail
@@ -167,7 +167,7 @@ export default function ThumbnailModal({
             <Button
               variant="outline"
               onClick={resetSelection}
-              className="w-full sm:w-auto border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white"
+              className="w-full sm:w-auto border-neutral-700 text-neutral-300 hover:bg-zinc-800 hover:text-white"
             >
               Reset
             </Button>
@@ -175,7 +175,7 @@ export default function ThumbnailModal({
           <Button
             onClick={handleSubmit}
             disabled={!selectedFile || isLoading}
-            className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700 disabled:bg-neutral-700 disabled:text-neutral-400"
+            className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700 disabled:bg-zinc-700 disabled:text-neutral-400"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export default function ThumbnailModal({
           <Button
             onClick={onClose}
             variant="outline"
-            className="w-full sm:w-auto border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white"
+            className="w-full sm:w-auto border-neutral-700 text-neutral-300 hover:bg-zinc-800 hover:text-white"
           >
             Cancel
           </Button>
