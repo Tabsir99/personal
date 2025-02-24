@@ -16,7 +16,7 @@ import {
   FaAlignJustify,
   FaListUl,
   FaListOl,
-  // FaQuoteLeft,
+  FaQuoteLeft,
   FaCode,
   FaTextHeight,
 } from "react-icons/fa6";
@@ -156,12 +156,18 @@ export const getTools = (
     command: () => editor.chain().focus().toggleOrderedList().run(),
     activeType: "block",
   },
-  // {
-  //   icon: <FaQuoteLeft />,
-  //   key: "quote",
-  //   command: () => ToggleNode("customBlockquote", editor),
-  //   activeType: "block",
-  // },
+  {
+    icon: <FaQuoteLeft />,
+    key: "quote",
+    command: () => {
+      // THis one works but cant handle specific schema for the custom node
+      // editor.chain().focus().toggleWrap("customBlockquote").run()
+
+      editor.chain().focus().toggleBlockquote()
+      ;
+    },
+    activeType: "block",
+  },
   {
     icon: <FaCode />,
     key: "code",

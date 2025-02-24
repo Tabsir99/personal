@@ -32,7 +32,7 @@ const languages = [
   },
   {
     name: "Typescript",
-    icon: <SiTypescript color="#007ACC" />, // Corrected icon to SiCplusplus
+    icon: <SiTypescript color="#007ACC" />,
     iconName: "SiTypescript",
     value: "typescript",
     color: "white",
@@ -105,7 +105,6 @@ const CodeBlockModal = ({
           </div>
           <div className="items-center px-4 py-3">
             <button
-              id="ok-btn"
               className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
               onClick={onClose}
             >

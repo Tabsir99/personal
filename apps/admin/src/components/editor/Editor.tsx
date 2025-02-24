@@ -72,10 +72,14 @@ const TextEditor = () => {
     immediatelyRender: false,
     shouldRerenderOnTransaction: false,
 
-    content: "<section> <p> Start... </p> </section>",
+    content: "<section> <p></p> </section>",
+
     extensions: starterKitOptions as AnyExtension[],
     onUpdate: ({ editor }) => {
       debouncedSave(editor.getHTML());
+    },
+    onContentError: (error) => {
+      console.log(error.error);
     },
   });
 

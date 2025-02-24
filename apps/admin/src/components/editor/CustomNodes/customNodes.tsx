@@ -1,4 +1,5 @@
 import { Node, mergeAttributes } from "@tiptap/react";
+import { toggleNode } from "../CustomExtensions/toggleNode";
 
 export const MainSection = Node.create({
   name: "section",
@@ -15,6 +16,7 @@ export const MainSection = Node.create({
   renderHTML({ HTMLAttributes }) {
     return ["section", mergeAttributes(HTMLAttributes), 0];
   },
+  
   addKeyboardShortcuts() {
     return {
       "ctrl-Enter": () => {
@@ -80,7 +82,7 @@ export const CustomBlockquote = Node.create({
   selectable: true,
   defining: true,
   isolating: false,
-  
+
   parseHTML() {
     return [{ tag: "blockquote" }];
   },
@@ -89,6 +91,15 @@ export const CustomBlockquote = Node.create({
     return ["blockquote", HTMLAttributes, 0];
   },
 
+  addCommands() {
+    return {
+      toggleBlockquote:
+        () =>
+        ({ editor }) => {
+          return toggleNode(this.name, editor);
+        },
+    };
+  },
   addKeyboardShortcuts() {
     return {
       Backspace: () => {
@@ -165,72 +176,4 @@ export const CustomBlockquote = Node.create({
       },
     };
   },
-
-  // addCommands() {
-  //   return {
-  //     toggleCustomBlockquote: () => {
-  //       const editor = this.editor;
-  //       const { state, dispatch } = editor.view;
-  //       const { selection } = state;
-  //       const { $from, $to } = selection;
-  //       const nodeType = editor.schema.nodes.customBlockquote;
-  //       const paragraphType = editor.schema.nodes.paragraph;
-
-  //       const isCustomBlockquote = $from.node($from.depth).type === nodeType;
-
-  //       if (isCustomBlockquote) {
-  //         const currentBlockquote = $from.node($from.depth - 1);
-
-  //         // Check if we have multiple paragraphs inside the blockquote
-  //         if (currentBlockquote.childCount > 2) {
-  //           const { from, to } = selection;
-  //           const paragraphIndex = $from.index($from.depth) + 1;
-  //           const paragraphPos =
-  //             $from.start($from.depth) +
-  //             currentBlockquote.content.child(paragraphIndex - 1).nodeSize;
-
-  //           if (paragraphIndex < currentBlockquote.childCount) {
-  //             // Move the current paragraph outside of the blockquote
-  //             const tr = state.tr.split(paragraphPos).delete(from, to);
-  //             tr.insert(
-  //               paragraphPos,
-  //               paragraphType.createAndFill(
-  //                 null,
-  //                 $from.node($from.depth).content
-  //               )!
-  //             );
-  //             dispatch(tr);
-  //           } else {
-  //             // Remove the blockquote if it's the last paragraph
-  //             const tr = state.tr.replaceWith(
-  //               $from.before($from.depth),
-  //               $to.after($to.depth),
-  //               paragraphType.createAndFill(null, currentBlockquote.content)!
-  //             );
-  //             dispatch(tr);
-  //           }
-  //         } else {
-  //           // Remove the blockquote entirely
-  //           const tr = state.tr.replaceWith(
-  //             $from.before($from.depth),
-  //             $to.after($to.depth),
-  //             paragraphType.createAndFill(null, currentBlockquote.content)!
-  //           );
-  //           dispatch(tr);
-  //         }
-
-  //         return true;
-  //       } else {
-  //         // Convert to customBlockquote
-  //         const tr = state.tr.replaceWith(
-  //           $from.before(),
-  //           $to.after(),
-  //           nodeType.createAndFill(null, $from.node($from.depth).content)!
-  //         );
-  //         dispatch(tr);
-  //         return true;
-  //       }
-  //     },
-  //   };
-  // },
 });
