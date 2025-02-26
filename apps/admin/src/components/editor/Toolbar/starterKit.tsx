@@ -37,17 +37,6 @@ const CustomLink = Link.extend({
   exitable: true,
   inclusive: false,
 });
-const CustomUnderLine = Underline.extend({
-  exitable: true,
-  addAttributes() {
-    return {
-      ...this.parent?.(),
-      class: {
-        default: "underline",
-      },
-    };
-  },
-});
 
 export const starterKitOptions = [
   RootNode,
@@ -86,7 +75,7 @@ export const starterKitOptions = [
   OrderedList,
   Paragraph,
   Strike,
-  CustomUnderLine,
+  Underline.extend({ exitable: true }),
   CustomTextAlign,
   CustomLink,
   Image.extend({

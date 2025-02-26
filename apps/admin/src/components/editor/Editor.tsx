@@ -15,7 +15,6 @@ import LinkModal from "./Modals/LinkModal";
 import { starterKitOptions } from "./Toolbar/starterKit";
 import Toolbar from "./Toolbar/Toolbar";
 
-import "./Editor.css";
 import CustomSpinner from "../ui/common/LoadingAnimation";
 import { useWriteBlogContext } from "@/context/WriteBlogContext";
 import { LocalStorageKeys } from "@/types/types";
@@ -72,6 +71,7 @@ const TextEditor = () => {
   const editor = useEditor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: false,
+    editorProps: {attributes: {class: "", style: ""}},
 
     content: "<section> <p></p> </section>",
 
