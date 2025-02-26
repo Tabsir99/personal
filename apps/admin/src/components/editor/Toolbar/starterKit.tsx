@@ -26,6 +26,7 @@ import {
 } from "../CustomNodes";
 
 import { TextColor } from "../CustomMarks/customMarks";
+import { HeadingPlugin } from "../CustomPlugins/HeadingPlugin";
 
 const CustomTextAlign = TextAlign.configure({
   types: ["paragraph", "heading", "listItem"],
@@ -57,7 +58,27 @@ export const starterKitOptions = [
   Code,
   CodeblockHighlight,
   Dropcursor,
-  Heading,
+  Heading.extend({
+    addAttributes() {
+      return {
+        ...this.parent?.(),
+        id: {
+          default: null,
+          parseHTML: (element) => element.getAttribute("id"),
+          renderHTML: (attributes) => {
+            return { id: attributes.id };
+          },
+        },
+      };
+    },
+
+    addProseMirrorPlugins() {
+      const plugins = this.parent?.() || [];
+
+      // Add our custom plugin
+      return [...plugins, HeadingPlugin()];
+    },
+  }),
   History,
   HorizontalRule,
   Italic,

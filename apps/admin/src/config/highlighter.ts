@@ -10,24 +10,37 @@ import LangGo from "shiki/dist/langs/go.mjs";
 
 export type RealtimeHighlightResult = { text: string; style: string };
 
-const highlighterCore = await getSingletonHighlighterCore({
-  engine: createJavaScriptRegexEngine(),
-  langs: [
-    LangJavaScript,
-    LangTypeScript,
-    LangPython,
-    LangBash,
-    LangRust,
-    LangGo,
-  ],
-  themes: [DarkPlus],
-});
+// Create an async function to initialize the highlighter
+let highlighterCore: any;
 
+const initializeHighlighter = async () => {
+  highlighterCore = await getSingletonHighlighterCore({
+    engine: createJavaScriptRegexEngine(),
+    langs: [
+      LangJavaScript,
+      LangTypeScript,
+      LangPython,
+      LangBash,
+      LangRust,
+      LangGo,
+    ],
+    themes: [DarkPlus],
+  });
+};
+
+// Call the initialization function immediately
+initializeHighlighter();
+
+// Your highlightCodeblock function
 export const highlightCodeblock = (
   code: string,
   lang: string,
   realTime: boolean
 ) => {
+  if (!highlighterCore) {
+    throw new Error("Highlighter core not initialized yet.");
+  }
+
   const { tokens } = highlighterCore.codeToTokens(code, {
     lang: lang as any,
     theme: "dark-plus",

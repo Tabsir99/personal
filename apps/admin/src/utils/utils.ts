@@ -86,7 +86,7 @@ export const buildBlog = (
       updatedAt: new Date().toISOString(),
     },
     blogName: blogFormData.blogName,
-    content: blogFormData.content,
+    content: JSON.stringify(blogFormData.content),
     type: BlogType.Article,
     status: isDraft ? BlogStatus.Draft : BlogStatus.Active,
     categoryId: blogFormData.categoryId,

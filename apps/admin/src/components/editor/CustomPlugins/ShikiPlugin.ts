@@ -22,8 +22,6 @@ function getDecorations({ doc, name }: { doc: ProsemirrorNode; name: string }) {
         true
       ) as RealtimeHighlightResult[];
 
-      console.log("nodes: ", nodes);
-
       nodes.forEach((node) => {
         const to = from + node.text.length;
 

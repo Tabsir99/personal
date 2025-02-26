@@ -51,7 +51,7 @@ export interface BlogStats {
 
 // Main blog interface extending the base
 export interface Blog extends BaseBlogData {
-  content: JSONContent; // Full HTML/Markdown blog content
+  content: string; // Full HTML/Markdown blog content
   recommendations: string[]; // Array of related blog IDs
   blogMetadata: BlogMetadata;
   blogStats: BlogStats;

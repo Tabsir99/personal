@@ -96,7 +96,7 @@ export default function useManageBlogs({
       socialTitle: metaData.socialTitle,
       featuredImageUrl: metaData.featuredImageUrl,
       type: data.type,
-      content: data.content,
+      content: JSON.parse(data.content),
       estReadTime: metaData.estReadTime,
       link: data.link,
       status: data.status,

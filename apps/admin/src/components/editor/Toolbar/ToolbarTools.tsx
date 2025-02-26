@@ -1,4 +1,3 @@
-import { Level } from "@tiptap/extension-heading";
 import { Editor } from "@tiptap/react";
 import { Dispatch, SetStateAction } from "react";
 import {
@@ -18,81 +17,80 @@ import {
   FaListOl,
   FaQuoteLeft,
   FaCode,
-  FaTextHeight,
 } from "react-icons/fa6";
 
 import { ActiveModal } from "../Editor";
-import HeadingModal from "../Modals/HeadingModal";
 
+interface Tool {
+  icon?: React.ReactNode;
+  key: string;
+  command?: () => void;
+  type:
+    | "history"
+    | "mark"
+    | "node"
+    | "divider"
+    | "heading"
+    | "align"
+    | "textColor";
+}
 export const getTools = (
   editor: Editor,
   setActiveModal: Dispatch<SetStateAction<ActiveModal>>
-) => [
+): Tool[] => [
   {
     icon: <FaArrowRotateLeft />,
     key: "undo",
     command: () => editor.chain().focus().undo().run(),
+    type: "history",
   },
   {
     icon: <FaArrowRotateRight />,
     key: "redo",
     command: () => editor.chain().focus().redo().run(),
+    type: "history",
   },
   { type: "divider", key: "divider-1" },
   {
-    component: (
-      <HeadingModal
-        key="dropdown"
-        command={(level: Level) =>
-          editor.chain().focus().toggleHeading({ level }).run()
-        }
-      />
-    ),
+    type: "heading",
+    key: "heading",
   },
   { type: "divider", key: "divider-2" },
   {
     icon: <FaBold />,
     key: "bold",
     command: () => editor.chain().focus().toggleBold().run(),
-    activeType: "format",
+    type: "mark",
   },
   {
     icon: <FaItalic />,
     key: "italic",
     command: () => editor.chain().focus().toggleItalic().run(),
-    activeType: "format",
+    type: "mark",
   },
   {
     icon: <FaUnderline />,
     key: "underline",
     command: () => editor.chain().focus().toggleUnderline().run(),
-    activeType: "format",
+    type: "mark",
   },
   {
     icon: <FaStrikethrough />,
     key: "strikethrough",
     command: () => editor.chain().focus().toggleStrike().run(),
-    activeType: "format",
+    type: "mark",
   },
 
   {
-    icon: <FaTextHeight />,
-    key: "highlighter",
-    command: () =>
-      setActiveModal((prev) => ({
-        link: false,
-        image: false,
-        textColor: !prev.textColor,
-        programmingLanguage: false,
-      })),
-    activeType: "color",
+    key: "textColor",
+    type: "textColor",
   },
 
   {
     icon: <span className="font-extrabold">hr</span>,
     key: "horizontal",
     command: () => editor.chain().focus().setHorizontalRule().run(),
-    activeType: "format",
+    type: "mark",
   },
 
   { type: "divider", key: "divider-3" },
@@ -106,6 +104,7 @@ export const getTools = (
         textColor: false,
         programmingLanguage: false,
       })),
+    type: "mark",
   },
   {
     icon: <FaImage />,
@@ -117,56 +116,53 @@ export const getTools = (
         textColor: false,
         programmingLanguage: false,
       })),
+    type: "node",
   },
   { type: "divider", key: "divider-4" },
   {
     icon: <FaAlignLeft />,
     key: "left",
     command: () => editor.chain().focus().setTextAlign("left").run(),
-    activeType: "align",
+    type: "align",
   },
   {
     icon: <FaAlignCenter />,
     key: "center",
     command: () => editor.chain().focus().setTextAlign("center").run(),
-    activeType: "align",
+    type: "align",
   },
   {
     icon: <FaAlignRight />,
     key: "right",
     command: () => editor.chain().focus().setTextAlign("right").run(),
-    activeType: "align",
+    type: "align",
   },
   {
     icon: <FaAlignJustify />,
     key: "justify",
     command: () => editor.chain().focus().setTextAlign("justify").run(),
-    activeType: "align",
+    type: "align",
   },
   { type: "divider", key: "divider-5" },
   {
     icon: <FaListUl />,
     key: "ul",
     command: () => editor.chain().focus().toggleBulletList().run(),
-    activeType: "block",
+    type: "node",
   },
   {
     icon: <FaListOl />,
     key: "ol",
     command: () => editor.chain().focus().toggleOrderedList().run(),
-    activeType: "block",
+    type: "node",
   },
   {
     icon: <FaQuoteLeft />,
     key: "quote",
     command: () => {
-      // THis one works but cant handle specific schema for the custom node
-      // editor.chain().focus().toggleWrap("customBlockquote").run()
-
-      editor.chain().focus().toggleBlockquote()
-      ;
+      editor.chain().focus().toggleBlockquote();
     },
-    activeType: "block",
+    type: "node",
   },
   {
     icon: <FaCode />,
@@ -174,6 +170,6 @@ export const getTools = (
     command: () => {
       setActiveModal((prev) => ({ ...prev, programmingLanguage: true }));
     },
-    activeType: "block",
+    type: "node",
   },
 ];

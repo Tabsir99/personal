@@ -1,6 +1,8 @@
 import { PreviewCodeBlock } from "@/components/editor/NodeViews/CodeBlockHighlight";
 import { highlightCodeblock } from "@/config/highlighter";
 import { JSONContent } from "@tiptap/react";
+import Image from "next/image";
+import Link from "next/link";
 import { Fragment } from "react";
 
 export const parseContent = (content: JSONContent | null): React.ReactNode => {
@@ -26,10 +28,15 @@ export const parseContent = (content: JSONContent | null): React.ReactNode => {
             return <u>{node}</u>;
           case "link":
             return (
-              <a href={mark.attrs.href} target={mark.attrs.target || "_blank"}>
+              <Link
+                href={mark.attrs.href}
+                target={mark.attrs.target || "_blank"}
+              >
                 {node}
-              </a>
+              </Link>
             );
+          case "textColor":
+            return <span style={{ color: mark.attrs.color }}>{node}</span>;
           default:
             return node;
         }
@@ -85,9 +92,9 @@ export const parseContent = (content: JSONContent | null): React.ReactNode => {
 
     case "image":
       return (
-        <img
+        <Image
           src={content.attrs.src}
-          alt={content.attrs?.alt}
+          alt={content.attrs.alt}
           title={content.attrs?.title}
         />
       );

@@ -22,7 +22,7 @@ export const MainSection = Node.create({
       "ctrl-Enter": () => {
         this.editor
           .chain()
-          .insertContent("<section><p></p></section>")
+          .insertContent(`<section><h2></h2></section>`)
           .focus()
           .run();
         return true;

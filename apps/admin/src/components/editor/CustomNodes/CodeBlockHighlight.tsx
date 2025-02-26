@@ -16,7 +16,12 @@ export const CodeblockHighlight = CodeBlock.extend({
 
   addNodeView() {
     return ReactNodeViewRenderer(({ node }) => {
-      return <CodeBlockNodeview language={node.attrs.language || "plain"} />;
+      return (
+        <CodeBlockNodeview
+          code={node.textContent}
+          language={node.attrs.language || "plain"}
+        />
+      );
     });
   },
 

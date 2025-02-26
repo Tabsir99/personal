@@ -25,7 +25,6 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
     const blogFormDataStr = localStorage.getItem(LocalStorageKeys.BlogFormData);
     if (!blogFormDataStr) throw new Error("BlogFormData is missing");
 
-
     const blogFormData = JSON.parse(blogFormDataStr) as BlogFormData;
     try {
       const res = await saveDraft(blogFormData);
@@ -73,8 +72,8 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
             const { parseContent } = await import("@/lib/parseTiptapJson");
 
             const contentJson = editor.getJSON() as JSONContent;
-            console.log(contentJson)
             const c = parseContent(contentJson);
+            console.log(c)
 
             const { renderToString } = await import("react-dom/server");
             console.log(renderToString(c));

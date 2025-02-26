@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 
 import DraftPreview from "./Toolbar/DraftPreview";
 import CodeBlockModal from "./Modals/CodeBlockModal";
-import ColorModal from "./Modals/ColorModal";
 import { ImageModal } from "./Modals/ImageModal";
 import LinkModal from "./Modals/LinkModal";
 import { starterKitOptions } from "./Toolbar/starterKit";
@@ -36,7 +35,6 @@ const TextEditor = () => {
     programmingLanguage: false,
   });
 
-  const [activeTextColor, setActiveTextColor] = useState("#D1D5DB");
   const { setBlogFormData, defaultBlogFormData } = useWriteBlogContext();
 
   function debounce(func: (content: any) => void, delay: number) {
@@ -82,7 +80,7 @@ const TextEditor = () => {
       debouncedSave(editor.getJSON());
     },
     onContentError: (error) => {
-      console.log(error.error);
+      console.error(error.error);
     },
   });
 
@@ -112,15 +110,10 @@ const TextEditor = () => {
   }
 
   return (
-    <section className=" text-gray-300 h-auto bg-[rgb(16,16,16)] pt-0 pb-3 px-12 relative   ">
+    <section className=" text-[#E5E7EB] h-auto bg-[rgb(16,16,16)] pt-0 pb-3 px-12 relative   ">
       <div className=" sticky z-50 top-0 py-4 bg-[rgb(16,16,16)] w-full mx-auto ">
         <div className="flex items-center px-4 w-fit mx-auto gap-[2px] rounded-full py-1 bg-zinc-800/40">
-          <Toolbar
-            editor={editor}
-            setActiveModal={setActiveModal}
-            activeTextColor={activeTextColor}
-            setActiveTextColor={setActiveTextColor}
-          />
+          <Toolbar editor={editor} setActiveModal={setActiveModal} />
           <DraftPreview editor={editor} />
         </div>
       </div>
@@ -131,12 +124,6 @@ const TextEditor = () => {
         isOpen={activeModal.image}
         onClose={onClose}
         editor={editor}
-      />
-      <ColorModal
-        isOpen={activeModal.textColor}
-        onClose={onClose}
-        editor={editor}
-        setActiveTextColor={setActiveTextColor}
       />
       <CodeBlockModal
         isOpen={activeModal.programmingLanguage}

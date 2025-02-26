@@ -1,13 +1,56 @@
 import "@tiptap/core"; // Adjust this path if the package structure changes
 import { useEditor } from "@tiptap/react";
 
-type TipTapMarkType =
-  | "bold"
-  | "italic"
-  | "code"
-  | "strike"
-  | "underline"
-  | "link";
+type BoldMark = {
+  type: "bold";
+  attrs: never;
+  text?: string;
+};
+
+type ItalicMark = {
+  type: "italic";
+  attrs: never;
+  text?: string;
+};
+
+type CodeMark = {
+  type: "code";
+  attrs: never;
+  text?: string;
+};
+
+type StrikeMark = {
+  type: "strike";
+  attrs: never;
+  text?: string;
+};
+
+type UnderlineMark = {
+  type: "underline";
+  attrs: never;
+  text?: string;
+};
+
+type LinkMark = {
+  type: "link";
+  attrs: { href: string; target?: string };
+  text?: string;
+};
+
+type TextColorMark = {
+  type: "textColor";
+  attrs: { color: string };
+  text?: string;
+};
+
+type TipTapMarks =
+  | BoldMark
+  | ItalicMark
+  | CodeMark
+  | StrikeMark
+  | UnderlineMark
+  | LinkMark
+  | TextColorMark;
 
 interface HeadingAttrs {
   level: number;
@@ -19,13 +62,12 @@ interface CodeBlockAttrs {
 
 interface ImageAttrs {
   src: string;
-  alt?: string;
+  alt: string;
   title?: string;
 }
 
-interface LinkAttrs {
-  href: string;
-  target?: string;
+interface TextColorAttrs {
+  color: string;
 }
 
 interface ListItemAttrs {
@@ -36,6 +78,8 @@ interface SectionAttrs {
   id: string;
 }
 
+type TextAttrs = TextColorAttrs | LinkAttrs;
+
 declare module "@tiptap/core" {
   interface BaseNode {
     content?: JSONContent[]; // Default content structure for all nodes
@@ -45,23 +89,27 @@ declare module "@tiptap/core" {
 
   // Define node types
   type JSONContent =
-    | (BaseNode & { type: "heading"; attrs?: HeadingAttrs })
+    | (BaseNode & { type: "heading"; attrs: HeadingAttrs })
     | (BaseNode & { type: "codeBlock"; attrs: CodeBlockAttrs })
-    | (BaseNode & { type: "image"; attrs: ImageAttrs })
-    | (BaseNode & { type: "listItem"; attrs?: ListItemAttrs })
-    | (BaseNode & { type: "section"; attrs?: SectionAttrs })
-    | (BaseNode & { type: "paragraph"; attrs?: never })
-    | (BaseNode & { type: "horizontalRule"; attrs?: never })
+    | (BaseNode & {
+        type: "image";
+        attrs: ImageAttrs;
+        marks?: TipTapMarks[];
+      })
+    | (BaseNode & { type: "listItem"; attrs: ListItemAttrs })
+    | (BaseNode & { type: "section"; attrs: SectionAttrs })
+    | (BaseNode & { type: "paragraph"; attrs: never })
+    | (BaseNode & { type: "horizontalRule"; attrs: never })
     | (BaseNode & {
         type: "text";
-        marks?: { type: TipTapMarkType; attrs: LinkAttrs; text?: string }[];
+        marks?: TipTapMarks[];
       })
-    | (BaseNode & { type: "bulletList"; attrs?: never })
-    | (BaseNode & { type: "orderedList"; attrs?: never })
-    | (BaseNode & { type: "doc"; attrs?: never })
-    | (BaseNode & { type: "lineBreak"; attrs?: never })
-    | (BaseNode & { type: "customBlockquote"; attrs?: never })
-    | (BaseNode & { type: "cite"; attrs?: never });
+    | (BaseNode & { type: "bulletList"; attrs: never })
+    | (BaseNode & { type: "orderedList"; attrs: never })
+    | (BaseNode & { type: "doc"; attrs: never })
+    | (BaseNode & { type: "lineBreak"; attrs: never })
+    | (BaseNode & { type: "customBlockquote"; attrs: never })
+    | (BaseNode & { type: "cite"; attrs: never });
 
   interface Commands<ReturnType> {
     customCommands: {
