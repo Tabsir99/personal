@@ -9,6 +9,7 @@ import {
   useNotification,
 } from "@/context/NotificationContext";
 import { useWriteBlogContext } from "@/context/WriteBlogContext";
+import { parseContent } from "@/lib/parseTiptapJson";
 
 export default function PreviewBlog() {
   const { addNotification } = useNotification();
@@ -90,10 +91,9 @@ export default function PreviewBlog() {
         <time>{new Date().toLocaleDateString()}</time>
       </header>
 
-      <article
-        className="article-body text-[20px] max-sm:text-[18px] text-gray-300 w-full flex flex-col gap-[96px] max-sm:gap-[80px]"
-        dangerouslySetInnerHTML={{ __html: blogFormData.content! }}
-      />
+      <article className="article-body text-[20px] max-sm:text-[18px] text-gray-300 w-full flex flex-col gap-[96px] max-sm:gap-[80px]">
+        {parseContent(blogFormData.content)}
+      </article>
     </section>
   );
 }

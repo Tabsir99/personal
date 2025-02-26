@@ -1,3 +1,4 @@
+import { JSONContent } from "@tiptap/react";
 import { PageMetrics } from "./dashboardTypes";
 
 // Standardized enum naming using PascalCase consistently
@@ -50,7 +51,7 @@ export interface BlogStats {
 
 // Main blog interface extending the base
 export interface Blog extends BaseBlogData {
-  content: string; // Full HTML/Markdown blog content
+  content: JSONContent; // Full HTML/Markdown blog content
   recommendations: string[]; // Array of related blog IDs
   blogMetadata: BlogMetadata;
   blogStats: BlogStats;
@@ -76,7 +77,7 @@ export interface BlogFormData extends BaseBlogData {
   socialTitle: string;
   featuredImageUrl: string;
   estReadTime: number | null;
-  content: string | null;
+  content: JSONContent | null;
 }
 
 // Admin dashboard blog list item

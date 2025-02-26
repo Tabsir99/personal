@@ -169,48 +169,13 @@ div.blogcard {
   animation-delay: 0.4s;
 }
 
-pre {
-  position: relative; /* Enables positioning of the ::before pseudo-element */
-  max-height: 360px;
-  overflow: auto; /* Changed from scroll to auto for better UX */
-  border-radius: 6px;
-  background: #131920;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #e2e8f0; /* Light text color for better contrast */
-  box-sizing: border-box; /* Ensures padding is included in width/height calculation */
-  border: 1px solid #3b4952;
-}
 
-pre::before {
-  content: var(
-    --language,
-    "Code"
-  ); /* Default to 'Code' if --language is not set */
-  position: sticky;
-  top: 0;
-  left: 0;
-  right: 0;
-  background-color: #0e141c; /* Dark background for caption */
-  color: #afafaf; /* White text for contrast */
-  padding: 3px 20px 0;
-  height: 42px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  font-weight: bold;
-  border-bottom: 1px solid #3b4952; /* Border to separate caption from code */
-  border-top-left-radius: 6px; /* Match pre border radius */
-  border-top-right-radius: 6px; /* Match pre border radius */
-  box-sizing: border-box;
-  text-transform: capitalize; /* Makes the language label uppercase for consistency */
-}
 
-code {
-  padding: 15px 25px; /* Extra top padding to make space for the caption */
+/* code {
+  padding: 15px 25px;
   display: block;
-}
+} */
+ 
 pre code.hljs {
   display: block;
   overflow-x: auto;
@@ -557,6 +522,15 @@ hr {
 @layer base {
   * {
     @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;

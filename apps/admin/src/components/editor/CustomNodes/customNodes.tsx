@@ -16,7 +16,7 @@ export const MainSection = Node.create({
   renderHTML({ HTMLAttributes }) {
     return ["section", mergeAttributes(HTMLAttributes), 0];
   },
-  
+
   addKeyboardShortcuts() {
     return {
       "ctrl-Enter": () => {

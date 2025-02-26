@@ -5,7 +5,7 @@ import {
   BlogStatus,
   BlogType,
 } from "@/types/blogTypes";
-import { load } from "cheerio";
+import { JSONContent } from "@tiptap/react";
 import { randomUUID } from "crypto";
 
 type ResponseStatus = "success" | "error" | "fail";
@@ -71,7 +71,7 @@ export const buildBlog = (
   blogId?: string
 ): Blog => {
   if (!blogFormData.content) throw new Error("There is no blog content");
-  const $ = load(blogFormData.content);
+  const textContent = extractTextFromTipTapJSON(blogFormData.content);
   return {
     blogId: blogId || randomUUID(),
     blogMetadata: {
@@ -79,7 +79,7 @@ export const buildBlog = (
 
       blogTags: blogFormData.blogTags,
       createdAt: new Date().toISOString(),
-      estReadTime: measureEstReadTime($("body").text()),
+      estReadTime: measureEstReadTime(textContent),
       recommendationTitle: blogFormData.recommendationTitle,
       socialTitle: blogFormData.socialTitle,
       featuredImageUrl: blogFormData.featuredImageUrl,
@@ -162,4 +162,37 @@ export function buildAdminBlog(
       },
     }),
   };
+}
+
+function extractTextFromTipTapJSON(json: JSONContent) {
+  let text = "";
+
+  // If there's no content, return empty string
+  if (!json || !json.content) {
+    return text;
+  }
+
+  // Process each node in the content array
+  json.content.forEach((node) => {
+    // If the node has text, add it to our result
+    if (node.text) {
+      text += node.text;
+    }
+
+    // If the node has marks with text, add that text
+    if (node.type === "text" && node.marks) {
+      node.marks.forEach((mark) => {
+        if (mark.text) {
+          text += mark.text;
+        }
+      });
+    }
+
+    // If the node has nested content, recursively process it
+    if (node.content) {
+      text += extractTextFromTipTapJSON(node);
+    }
+  });
+
+  return text;
 }

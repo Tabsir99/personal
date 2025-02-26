@@ -17,6 +17,7 @@
     "@radix-ui/react-dropdown-menu": "^2.1.6",
     "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-popover": "^1.1.6",
+    "@radix-ui/react-scroll-area": "^1.2.3",
     "@radix-ui/react-select": "^2.1.6",
     "@radix-ui/react-separator": "^1.1.1",
     "@radix-ui/react-slot": "^1.1.2",
@@ -56,6 +57,7 @@
     "firebase-admin": "^12.2.0",
     "globby": "^14.0.2",
     "highlight.js": "^11.10.0",
+    "html-react-parser": "^5.2.2",
     "ip-range-check": "^0.2.0",
     "lowlight": "^3.1.0",
     "lucide-react": "^0.474.0",
@@ -85,6 +87,7 @@
     "firebase-tools": "^13.27.0",
     "postcss": "^8",
     "prettier": "^3.3.3",
+    "shiki": "^3.0.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.5.4"
   }

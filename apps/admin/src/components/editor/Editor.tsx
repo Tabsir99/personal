@@ -1,6 +1,11 @@
 "use client";
 
-import { useEditor, EditorContent, AnyExtension } from "@tiptap/react";
+import {
+  useEditor,
+  EditorContent,
+  AnyExtension,
+  JSONContent,
+} from "@tiptap/react";
 import { useEffect, useState } from "react";
 
 import DraftPreview from "./Toolbar/DraftPreview";
@@ -16,7 +21,6 @@ import CustomSpinner from "../ui/common/LoadingAnimation";
 import { useWriteBlogContext } from "@/context/WriteBlogContext";
 import { LocalStorageKeys } from "@/types/types";
 import { BlogFormData } from "@/types/blogTypes";
-import { preHighlight } from "@/utils/highlighter";
 
 export interface ActiveModal {
   link: boolean;
@@ -43,9 +47,8 @@ const TextEditor = () => {
     };
   }
 
-  const debouncedSave = debounce(async (content) => {
-    const highLightedContent = preHighlight(content);
-    setBlogFormData((prev) => ({ ...prev, content: highLightedContent }));
+  const debouncedSave = debounce(async (content: JSONContent) => {
+    setBlogFormData((prev) => ({ ...prev, content }));
     const blogFormDataStr = localStorage.getItem(LocalStorageKeys.BlogFormData);
 
     if (!blogFormDataStr) {
@@ -53,7 +56,7 @@ const TextEditor = () => {
         LocalStorageKeys.BlogFormData,
         JSON.stringify({
           ...defaultBlogFormData,
-          content: highLightedContent,
+          content,
         } as BlogFormData)
       );
     } else {
@@ -62,7 +65,7 @@ const TextEditor = () => {
         LocalStorageKeys.BlogFormData,
         JSON.stringify({
           ...blogFormData,
-          content: highLightedContent,
+          content,
         } as BlogFormData)
       );
     }
@@ -76,7 +79,7 @@ const TextEditor = () => {
 
     extensions: starterKitOptions as AnyExtension[],
     onUpdate: ({ editor }) => {
-      debouncedSave(editor.getHTML());
+      debouncedSave(editor.getJSON());
     },
     onContentError: (error) => {
       console.log(error.error);

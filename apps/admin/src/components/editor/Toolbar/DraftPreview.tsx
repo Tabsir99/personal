@@ -1,6 +1,6 @@
 // DraftPreview.js
 "use client";
-import { Editor } from "@tiptap/react";
+import { Editor, JSONContent } from "@tiptap/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaArrowRight, FaCloud, FaEye, FaTag } from "react-icons/fa6";
@@ -11,7 +11,6 @@ import {
   useNotification,
 } from "@/context/NotificationContext";
 import { BlogFormData } from "@/types/blogTypes";
-import { preHighlight } from "@/utils/highlighter";
 import { LocalStorageKeys } from "@/types/types";
 import { useWriteBlogContext } from "@/context/WriteBlogContext";
 
@@ -23,10 +22,9 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
   const [showSidebar, setShowSidebar] = useState(false);
 
   async function draftBlog(clearLocalStorage: boolean) {
-    const html = editor.getHTML();
-
     const blogFormDataStr = localStorage.getItem(LocalStorageKeys.BlogFormData);
     if (!blogFormDataStr) throw new Error("BlogFormData is missing");
+
 
     const blogFormData = JSON.parse(blogFormDataStr) as BlogFormData;
     try {
@@ -47,7 +45,7 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
               blogId: res.data?.blogId,
               link: res.data?.link,
               estReadTime: res.data?.blogMetadata.estReadTime,
-              content: preHighlight(html),
+              content: editor.getJSON(),
             } as BlogFormData)
           );
         }
@@ -72,8 +70,17 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
         <button
           className=" toolbar-btns px-2 py-2 w-8 h-8 relative rounded-md hover:bg-gray-700 transition duration-100 active:scale-95 "
           onClick={async () => {
-            await draftBlog(true);
-            router.push("/dashboard/manage-posts");
+            const { parseContent } = await import("@/lib/parseTiptapJson");
+
+            const contentJson = editor.getJSON() as JSONContent;
+            console.log(contentJson)
+            const c = parseContent(contentJson);
+
+            const { renderToString } = await import("react-dom/server");
+            console.log(renderToString(c));
+            return;
+            // await draftBlog(true);
+            // router.push("/dashboard/manage-posts");
           }}
           title="Draft"
         >
@@ -86,13 +93,12 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
             const data = await draftBlog(false);
             if (!data) return;
 
-            const highlightedHtml = preHighlight(editor.getHTML());
             setBlogFormData((prev) => ({
               ...prev,
               blogId: data.blogId,
               estReadTime: data.blogMetadata.estReadTime,
               link: data.link,
-              content: highlightedHtml,
+              content: editor.getJSON() as JSONContent,
             }));
 
             router.push("write-blog/preview-blog");

@@ -41,13 +41,13 @@ export default function useBlogFormData(): UseBlogFormData {
     if (!savedData) return;
 
     try {
-      const parsedData = JSON.parse(savedData) as Partial<BlogFormData>;
+      const parsedData = JSON.parse(savedData) as BlogFormData;
       setBlogFormData({
         ...defaultBlogFormData,
         ...parsedData,
         // Preserve these values from state if they exist
         status: parsedData.status || BlogStatus.Draft,
-        content: parsedData.content || "",
+        content: parsedData.content,
       });
     } catch (error) {
       console.error("Error parsing saved blog data:", error);
