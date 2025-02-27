@@ -107,14 +107,16 @@ const TextEditor = () => {
       </div>
       <EditorContent className="w-[830px] -ml-10" editor={editor} />
 
-      <LinkModal isOpen={activeModal.link} onClose={onClose} editor={editor} />
-
       <ComponentPickerModal
         open={activeModal.components}
         onClose={onClose}
         onInsert={(component) => {
           console.log(component);
-          toggleNode(component.id as any, editor);
+          try {
+            toggleNode(component.id as any, editor);
+          } catch (error) {
+            console.log(error);
+          }
           onClose();
         }}
       />

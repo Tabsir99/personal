@@ -31,6 +31,7 @@ interface Tool {
     | "heading"
     | "align"
     | "image"
+    | "link"
     | "textColor";
 }
 export const getTools = (
@@ -94,14 +95,8 @@ export const getTools = (
 
   { type: "divider", key: "divider-3" },
   {
-    icon: <FaLink />,
     key: "link",
-    command: () =>
-      setActiveModal((prev) => ({
-        link: !prev.link,
-        components: false,
-      })),
-    type: "mark",
+    type: "link",
   },
   {
     key: "image",

@@ -16,6 +16,7 @@ import HeadingModal from "../Modals/HeadingModal";
 import TextColorModal from "../Modals/ColorModal";
 import DraftPreview from "./DraftPreview";
 import { ImageInsertButton } from "../Modals/ImageModal";
+import LinkModal from "../Modals/LinkModal";
 
 const Toolbar = ({
   editor,
@@ -101,6 +102,10 @@ const Toolbar = ({
                 }}
               />
             );
+          }
+
+          if (item.type === "link") {
+            return <LinkModal key={item.key} editor={editor} />;
           }
 
           if (item.type === "image") {

@@ -96,15 +96,19 @@ h4 {
 
 /* Text marks styles */
 
-u {
+u,
+a {
   text-decoration: underline 1.3px;
   text-underline-offset: 5px;
   text-decoration-color: inherit;
 }
-
+a{
+  color: #437cd7;
+}
 s {
   text-decoration: line-through 1.3px;
 }
+
 hr {
   border-color: #3b4952;
 }
