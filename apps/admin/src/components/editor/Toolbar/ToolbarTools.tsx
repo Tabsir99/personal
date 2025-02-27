@@ -1,4 +1,6 @@
+import { ActiveModal } from "@/app/dashboard/write-blog/page";
 import { Editor } from "@tiptap/react";
+import { LayoutGrid } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 import {
   FaArrowRotateLeft,
@@ -8,7 +10,6 @@ import {
   FaUnderline,
   FaStrikethrough,
   FaLink,
-  FaImage,
   FaAlignLeft,
   FaAlignCenter,
   FaAlignRight,
@@ -16,10 +17,7 @@ import {
   FaListUl,
   FaListOl,
   FaQuoteLeft,
-  FaCode,
 } from "react-icons/fa6";
-
-import { ActiveModal } from "../Editor";
 
 interface Tool {
   icon?: React.ReactNode;
@@ -32,6 +30,7 @@ interface Tool {
     | "divider"
     | "heading"
     | "align"
+    | "image"
     | "textColor";
 }
 export const getTools = (
@@ -100,23 +99,13 @@ export const getTools = (
     command: () =>
       setActiveModal((prev) => ({
         link: !prev.link,
-        image: false,
-        textColor: false,
-        programmingLanguage: false,
+        components: false,
       })),
     type: "mark",
   },
   {
-    icon: <FaImage />,
     key: "image",
-    command: () =>
-      setActiveModal((prev) => ({
-        link: false,
-        image: !prev.image,
-        textColor: false,
-        programmingLanguage: false,
-      })),
-    type: "node",
+    type: "image",
   },
   { type: "divider", key: "divider-4" },
   {
@@ -165,10 +154,10 @@ export const getTools = (
     type: "node",
   },
   {
-    icon: <FaCode />,
-    key: "code",
+    icon: <LayoutGrid className="w-4 h-4" />,
+    key: "Components",
     command: () => {
-      setActiveModal((prev) => ({ ...prev, programmingLanguage: true }));
+      setActiveModal((prev) => ({ ...prev, components: true }));
     },
     type: "node",
   },

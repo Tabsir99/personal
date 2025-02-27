@@ -1,7 +1,7 @@
 import { PreviewCodeBlock } from "@/components/editor/NodeViews/CodeBlockHighlight";
+import { PreviewImageBlock } from "@/components/editor/NodeViews/NextImage";
 import { highlightCodeblock } from "@/config/highlighter";
 import { JSONContent } from "@tiptap/react";
-import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
 
@@ -92,10 +92,11 @@ export const parseContent = (content: JSONContent | null): React.ReactNode => {
 
     case "image":
       return (
-        <Image
+        <PreviewImageBlock
           src={content.attrs.src}
-          alt={content.attrs.alt}
-          title={content.attrs?.title}
+          alt={content.attrs?.alt || ""}
+          width={content.attrs.width}
+          height={content.attrs.height}
         />
       );
 

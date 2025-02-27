@@ -9,11 +9,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { ActiveModal } from "../Editor";
+import { ActiveModal } from "@/app/dashboard/write-blog/page";
 
 import { getTools } from "./ToolbarTools";
 import HeadingModal from "../Modals/HeadingModal";
 import TextColorModal from "../Modals/ColorModal";
+import DraftPreview from "./DraftPreview";
+import { ImageInsertButton } from "../Modals/ImageModal";
 
 const Toolbar = ({
   editor,
@@ -100,6 +102,10 @@ const Toolbar = ({
               />
             );
           }
+
+          if (item.type === "image") {
+            return <ImageInsertButton editor={editor} key={item.key} />;
+          }
           return (
             <Tooltip key={item.key}>
               <TooltipTrigger asChild>
@@ -130,6 +136,8 @@ const Toolbar = ({
           );
         })}
       </div>
+
+      <DraftPreview editor={editor} />
     </TooltipProvider>
   );
 };

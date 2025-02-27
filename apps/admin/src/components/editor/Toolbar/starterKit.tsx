@@ -13,7 +13,7 @@ import Strike from "@tiptap/extension-strike";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
-import Image from "@tiptap/extension-image";
+// import Image from "@tiptap/extension-image";
 import Text from "@tiptap/extension-text";
 
 import {
@@ -27,16 +27,7 @@ import {
 
 import { TextColor } from "../CustomMarks/customMarks";
 import { HeadingPlugin } from "../CustomPlugins/HeadingPlugin";
-
-const CustomTextAlign = TextAlign.configure({
-  types: ["paragraph", "heading", "listItem"],
-  alignments: ["left", "center", "right", "justify"],
-});
-
-const CustomLink = Link.extend({
-  exitable: true,
-  inclusive: false,
-});
+import { ImageExtension } from "../CustomNodes/Image";
 
 export const starterKitOptions = [
   RootNode,
@@ -76,28 +67,12 @@ export const starterKitOptions = [
   Paragraph,
   Strike,
   Underline.extend({ exitable: true }),
-  CustomTextAlign,
-  CustomLink,
-  Image.extend({
-    addAttributes() {
-      return {
-        ...this.parent?.(),
-        loading: {
-          default: "lazy",
-          parseHTML: (element) => element.getAttribute("loading"),
-          renderHTML: (attributes) =>
-            attributes.loading ? { loading: attributes.loading } : {},
-        },
-        class: {
-          default:
-            "border-2 border-gray-700 rounded-md hover:scale-[1.03] transition-transform duration-200 cursor-pointer",
-          parseHTML: (element) => element.getAttribute("class"),
-          renderHTML: (attributes) =>
-            attributes.loading ? { class: attributes.class } : {},
-        },
-      };
-    },
+  TextAlign.configure({
+    types: ["paragraph", "heading", "listItem"],
+    alignments: ["left", "center", "right", "justify"],
   }),
+  Link.extend({ exitable: true, inclusive: false }),
+  ImageExtension,
   Text,
   LineBreak,
   Cite,

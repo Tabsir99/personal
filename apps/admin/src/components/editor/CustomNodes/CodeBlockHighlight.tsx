@@ -4,22 +4,13 @@ import { CodeBlockNodeview } from "../NodeViews/CodeBlockHighlight";
 import { ShikiPlugin } from "../CustomPlugins/ShikiPlugin";
 
 export const CodeblockHighlight = CodeBlock.extend({
-  addOptions() {
-    return {
-      ...this.parent?.(),
-      exitOnTripleEnter: true,
-      exitOnArrowDown: true,
-      defaultLanguage: null,
-      HTMLAttributes: {},
-    };
-  },
-
   addNodeView() {
-    return ReactNodeViewRenderer(({ node }) => {
+    return ReactNodeViewRenderer(({ node, updateAttributes }) => {
       return (
         <CodeBlockNodeview
           code={node.textContent}
           language={node.attrs.language || "plain"}
+          updateAttributes={updateAttributes}
         />
       );
     });
@@ -33,4 +24,4 @@ export const CodeblockHighlight = CodeBlock.extend({
       }),
     ];
   },
-});
+}).configure({ defaultLanguage: "javascript" });

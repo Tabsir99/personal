@@ -1,0 +1,191 @@
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Search,
+  Code,
+  Table,
+  BarChart,
+  FileText,
+  FileSpreadsheet,
+  Calculator,
+  Settings,
+} from "lucide-react";
+
+// Mock component data
+
+type ComponentId =
+  | "codeBlock"
+  | "dataTable"
+  | "chart"
+  | "markdown"
+  | "csvImport"
+  | "calculator"
+  | "settingsPanel";
+
+interface Component {
+  id: ComponentId;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  category: "content" | "data" | "interactive";
+}
+
+const mockComponents: Component[] = [
+  {
+    id: "codeBlock",
+    name: "Code Block",
+    description: "Insert syntax-highlighted code snippets",
+    icon: <Code />,
+    category: "content",
+  },
+  {
+    id: "dataTable",
+    name: "Data Table",
+    description: "Insert an interactive data table",
+    icon: <Table />,
+    category: "data",
+  },
+  {
+    id: "chart",
+    name: "Chart",
+    description: "Insert various chart types",
+    icon: <BarChart />,
+    category: "data",
+  },
+  {
+    id: "markdown",
+    name: "Markdown",
+    description: "Insert formatted markdown content",
+    icon: <FileText />,
+    category: "content",
+  },
+  {
+    id: "csvImport",
+    name: "CSV Import",
+    description: "Import and display CSV data",
+    icon: <FileSpreadsheet />,
+    category: "data",
+  },
+  {
+    id: "calculator",
+    name: "Calculator",
+    description: "Insert an interactive calculator",
+    icon: <Calculator />,
+    category: "interactive",
+  },
+  {
+    id: "settingsPanel",
+    name: "Settings Panel",
+    description: "Insert configurable settings component",
+    icon: <Settings />,
+    category: "interactive",
+  },
+];
+
+const ComponentPickerModal = ({
+  open,
+  onClose,
+  onInsert,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onInsert: (component: Component) => void;
+}) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
+
+  // Filter components based on search and active tab
+  const filteredComponents = mockComponents.filter((component) => {
+    const matchesSearch =
+      component.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      component.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      activeTab === "all" || component.category === activeTab;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-xl dark">
+        <DialogHeader>
+          <DialogTitle>Insert Component</DialogTitle>
+          <DialogDescription>
+            Choose a component to insert into your document
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex items-center space-x-2 my-2">
+          <Search className="w-4 h-4 text-gray-400" />
+          <Input
+            placeholder="Search components..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-9"
+          />
+        </div>
+
+        <Tabs
+          defaultValue="all"
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="dark"
+        >
+          <TabsList className="grid grid-cols-4 mb-2">
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="data">Data</TabsTrigger>
+            <TabsTrigger value="interactive">Interactive</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activeTab} className="mt-0 dark">
+            <ScrollArea className="h-72">
+              <div className="grid grid-cols-2 gap-3 p-1">
+                {filteredComponents.map((component) => (
+                  <div
+                    key={component.id}
+                    className="flex flex-col p-3 border rounded-lg hover:bg-zinc-800/60 cursor-pointer transition-colors"
+                    onClick={() => onInsert(component)}
+                  >
+                    <div className="flex items-center mb-2 ">
+                      <span className=" w-5 h-5 mr-2  text-primary"> {component.icon} </span>
+                      <h4 className="font-medium text-sm">{component.name}</h4>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {component.description}
+                    </p>
+                  </div>
+                ))}
+
+                {filteredComponents.length === 0 && (
+                  <div className="col-span-2 py-8 text-center text-gray-500">
+                    No components found matching your search
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
+
+        <DialogFooter>
+          <Button variant="outline" className="text-zinc-200" onClick={onClose}>
+            Cancel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default ComponentPickerModal;

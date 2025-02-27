@@ -75,6 +75,7 @@ export const Cite = Node.create({
   },
 });
 
+import { Selection } from "@tiptap/pm/state";
 export const CustomBlockquote = Node.create({
   name: "customBlockquote",
   group: "block",
@@ -96,7 +97,7 @@ export const CustomBlockquote = Node.create({
       toggleBlockquote:
         () =>
         ({ editor }) => {
-          return toggleNode(this.name, editor);
+          return toggleNode("customBlockquote", editor);
         },
     };
   },
@@ -130,49 +131,67 @@ export const CustomBlockquote = Node.create({
 
         return false;
       },
-      Enter: ({ editor }) => {
-        const { selection } = editor.view.state;
-        const { $from, empty } = selection;
-        if (!$from.node(2)) return false;
 
-        if ($from.node(2).type.name !== this.type.name) {
+      Enter: ({ editor }) => {
+        const { state } = editor;
+        const { selection } = state;
+        const { $from, empty } = selection;
+
+        if (!empty || $from.parent.type !== this.type) {
           return false;
         }
-        const tr = editor.view.state.tr;
 
-        const currentParent = $from.parent;
-        const parentNodeType = currentParent.type.name;
+        const isAtEnd = $from.parentOffset === $from.parent.nodeSize - 2;
+        const endsWithDoubleNewline = $from.parent.textContent.endsWith("\n\n");
 
-        if (parentNodeType === "cite") {
-          const pos = $from.after($from.depth - 1);
-          const newTr = tr.replaceWith(
-            pos,
-            pos,
-            editor.schema.nodes.paragraph.createAndFill()!
-          );
-
-          editor.view.dispatch(
-            newTr.setSelection(
-              // editor.state.selection.constructor.near(newTr.doc.resolve(pos))
-              "" as any
-            )
-          );
-          return true;
+        if (!isAtEnd || !endsWithDoubleNewline) {
+          return false;
         }
 
-        if (empty && parentNodeType === "paragraph") {
-          if (currentParent.textContent === "") {
-            tr.delete($from.pos - 1, $from.pos);
-            editor.view.dispatch(tr);
+        return editor
+          .chain()
+          .command(({ tr }) => {
+            tr.delete($from.pos - 2, $from.pos);
+
             return true;
-          } else {
-            tr.split($from.pos);
-            editor.view.dispatch(tr);
-            return true;
-          }
+          })
+          .exitCode()
+          .run();
+      },
+
+      // exit node on arrow down
+      ArrowDown: ({ editor }) => {
+        
+        const { state } = editor;
+        const { selection, doc } = state;
+        const { $from, empty } = selection;
+
+        if (!empty || $from.parent.type !== this.type) {
+          return false;
         }
 
-        return false;
+        const isAtEnd = $from.parentOffset === $from.parent.nodeSize - 2;
+
+        if (!isAtEnd) {
+          return false;
+        }
+
+        const after = $from.after();
+
+        if (after === undefined) {
+          return false;
+        }
+
+        const nodeAfter = doc.nodeAt(after);
+
+        if (nodeAfter) {
+          return editor.commands.command(({ tr }) => {
+            tr.setSelection(Selection.near(doc.resolve(after)));
+            return true;
+          });
+        }
+
+        return editor.commands.exitCode();
       },
     };
   },

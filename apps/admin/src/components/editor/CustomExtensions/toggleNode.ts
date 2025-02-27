@@ -1,6 +1,6 @@
-import type { Editor } from "@tiptap/react";
+import { JSONContent, type Editor } from "@tiptap/react";
 
-export const toggleNode = (node: string, editor: Editor) => {
+export const toggleNode = (node: JSONContent["type"], editor: Editor) => {
   const { selection, tr } = editor.view.state;
   const { $from } = selection;
   const nodeType = editor.schema.nodes[node];
@@ -31,7 +31,11 @@ export const toggleNode = (node: string, editor: Editor) => {
     .content!.replace(/[\+\*]/g, "")
     .split(" ")
     .map((schemaNode) => {
+      if (schemaNode === "text") {
+        return nodeContent || editor.schema.text(" ");
+      }
       const type = editor.schema.nodes[schemaNode];
+
       return schemaNode === "paragraph" || schemaNode === "block"
         ? editor.schema.node("paragraph", null, nodeContent!)
         : type.createAndFill();
@@ -39,11 +43,18 @@ export const toggleNode = (node: string, editor: Editor) => {
 
   const start = $from.before();
   const end = $from.after();
+
   tr.replaceWith(
     start,
     end,
     editor.schema.node(nodeType, null, schemaNodes as any)
   );
+
+  if (!nodeContent) {
+    const nodePos = start;
+    const textPos = nodePos + 1;
+    tr.insertText("", textPos, textPos + 1);
+  }
 
   editor.view.dispatch(tr);
   editor.view.focus();

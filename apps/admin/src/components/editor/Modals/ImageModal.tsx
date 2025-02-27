@@ -1,156 +1,164 @@
 import { Editor } from "@tiptap/react";
 import { useRef, useState } from "react";
-import { FaLink, FaUpload } from "react-icons/fa";
-
+import { ImageIcon, UploadIcon, Link2Icon } from "lucide-react";
 import { uploadImage } from "@/actions/categoryActions";
-import { LocalStorageKeys } from "@/types/types";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-export const ImageModal = ({
-  onClose,
-  isOpen,
-  editor,
-}: {
-  onClose: () => void;
-  isOpen: boolean;
-  editor: Editor;
-}) => {
-  const [src, setSrc] = useState("");
-  const [alt, setAlt] = useState("");
-  const [uploadAlt, setUploadAlt] = useState({
-    show: false,
-    text: "",
-    url: "",
-  });
-  const [showModal, setShowModal] = useState(false);
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
+import { cn, slugify } from "@/lib/utils";
+import useBlogFormData from "@/hooks/useMetadata";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+export const ImageInsertButton = ({ editor }: { editor: Editor }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const uploadRef = useRef<HTMLInputElement | null>(null);
+  const { blogFormData } = useBlogFormData();
 
-  function onImageSubmit(src: string, alt: string) {
-    if (src && alt) {
-      editor.chain().focus().setImage({ src: src, alt: alt }).run();
+  const handleImageUpload = async (file: File) => {
+    try {
+      setIsUploading(true);
+
+      const id = slugify(blogFormData.blogName);
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("blogLink", id);
+
+      const response = await uploadImage(formData);
+
+      if (response.data) {
+        insertImage(response.data);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    } finally {
+      setIsUploading(false);
     }
-  }
-  const handleSubmit = () => {
-    onImageSubmit(src, alt);
-    setSrc("");
-    setAlt("");
-    setShowModal(false);
-    setUploadAlt({
-      show: false,
-      text: "",
-      url: "",
-    });
-    onClose();
   };
 
-  if (!isOpen) return null;
+  const insertImage = (src: string) => {
+    if (src) {
+      editor.chain().focus().setImage({ src, alt: "" }).run();
+      setIsOpen(false);
+      setIsUrlDialogOpen(false);
+      setImageUrl("");
+    }
+  };
+
+  const handleUrlSubmit = () => {
+    insertImage(imageUrl);
+  };
 
   return (
     <>
-      <div className="flex fixed top-32 right-96 border-2 border-gray-700 z-50 flex-col p-3 gap-1 bg-gray-800 w-fit rounded-md">
-        <button
-          className="flex gap-2 px-3 py-2 hover:bg-gray-700 rounded-md"
-          onClick={() => setShowModal(true)}
-        >
-          Insert By URL <FaLink className="w-5 h-5" />
-        </button>
-        <button
-          className="flex gap-2 px-3 py-2 hover:bg-gray-700 rounded-md "
-          onClick={() => {
-            uploadRef.current?.click();
-          }}
-        >
-          Upload from device <FaUpload className="w-5 h-5" />
-        </button>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className={cn(
+                  "p-2 rounded-md text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-95",
+                  isOpen && "bg-zinc-800 text-zinc-100 shadow-inner"
+                )}
+                aria-label="Insert image"
+              >
+                <ImageIcon className="h-4 w-4" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>Insert image</TooltipContent>
+          </Tooltip>
+        </PopoverTrigger>
 
-        <input
-          type="file"
-          className="hidden"
-          ref={uploadRef}
-          accept="image/*"
-          onChange={async (e) => {
-            const imageFile = e.target.files?.[0];
+        <PopoverContent align="end" className="w-56 dark">
+          <div
+            onClick={() => setIsUrlDialogOpen(true)}
+            className="cursor-pointer flex pl-3 py-2 items-center hover:bg-zinc-800 transition rounded-md"
+          >
+            <Link2Icon className="mr-2 h-4 w-4" />
+            <span>Insert from URL</span>
+          </div>
+          <div
+            onClick={() => uploadRef.current?.click()}
+            className="cursor-pointer flex pl-3 py-2 items-center hover:bg-zinc-800 transition rounded-md"
+          >
+            <UploadIcon className="mr-2 h-4 w-4" />
+            <span>Upload from device</span>
+          </div>
+        </PopoverContent>
+      </Popover>
 
-            const { blogName } = JSON.parse(
-              localStorage.getItem(LocalStorageKeys.BlogFormData) || ""
-            );
-            const id = blogName.trim().toLowerCase().replace(/\s/g, "-");
+      <input
+        type="file"
+        className="hidden"
+        ref={uploadRef}
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            handleImageUpload(file);
+          }
+        }}
+      />
 
-            const formData = new FormData();
-            formData.append("file", imageFile!);
-            formData.append("blogLink", id);
-            const response = await uploadImage(formData);
-
-            setUploadAlt((prev) => ({
-              ...prev,
-              show: true,
-              url: response.data!,
-            }));
-          }}
-        />
-
-        {uploadAlt.show && (
-          <div className="mb-4 flex flex-col gap-2">
-            <input
-              type="text"
-              id="alt"
-              className="mt-1 block w-full p-2 outline-none bg-transparent border-b-2 border-green-700 shadow-sm focus:border-green-500 text-gray-200"
-              value={uploadAlt.text}
-              placeholder="Enter Alt text"
-              onChange={(e) =>
-                setUploadAlt((prev) => ({ ...prev, text: e.target.value }))
-              }
+      <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
+        <DialogContent className="sm:max-w-md dark">
+          <DialogHeader>
+            <DialogTitle>Insert Image from URL</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col space-y-4 py-4">
+            <Input
+              id="imageUrl"
+              placeholder="Enter image URL"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="w-full"
             />
-            <button
-              onClick={() => {
-                onImageSubmit(uploadAlt.url, uploadAlt.text);
-                onClose();
-              }}
-              className="px-6 py-2 rounded-md bg-green-600 text-white hover:bg-green-500 focus:outline-none focus:ring focus:ring-green-500 focus:ring-opacity-50"
+          </div>
+          <DialogFooter className="sm:justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsUrlDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleUrlSubmit}
+              disabled={!imageUrl.trim()}
             >
               Insert
-            </button>
-          </div>
-        )}
-      </div>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      {showModal && (
-        <div className="fixed top-0 left-0 h-screen w-screen bg-opacity-45 bg-black flex justify-center items-center z-50">
-          <div className=" bg-gray-800 w-[35%] h-[45%] rounded-lg p-12 shadow-md flex flex-col gap-1 justify-around">
-            <h3 className="text-xl text-gray-300 mb-4">Insert Image</h3>
-            <div className="mb-4">
-              <input
-                type="url"
-                id="src"
-                className="mt-1 block w-full p-2 bg-transparent border-b-2 border-green-700 shadow-sm outline-none focus:border-green-500 text-gray-200"
-                value={src}
-                placeholder="Enter Image URL"
-                onChange={(e) => setSrc(e.target.value)}
-              />
-            </div>
-            <div className="mb-4">
-              <input
-                type="text"
-                id="alt"
-                className="mt-1 block w-full p-2 outline-none bg-transparent border-b-2 border-green-700 shadow-sm focus:border-green-500 text-gray-200"
-                value={alt}
-                placeholder="Enter Alt text"
-                onChange={(e) => setAlt(e.target.value)}
-              />
-            </div>
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-6 py-2 rounded-md bg-gray-600 text-white hover:bg-gray-500 focus:outline-none focus:ring focus:ring-gray-500 focus:ring-opacity-50 ml-2"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="px-6 py-2 rounded-md bg-green-600 text-white hover:bg-green-500 focus:outline-none focus:ring focus:ring-green-500 focus:ring-opacity-50"
-              >
-                Insert
-              </button>
-            </div>
+      {isUploading && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card p-6 rounded-lg shadow-lg flex items-center gap-3">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <p>Uploading image...</p>
           </div>
         </div>
       )}

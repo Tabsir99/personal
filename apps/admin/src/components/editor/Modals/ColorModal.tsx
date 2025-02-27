@@ -8,6 +8,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const TextColorModal = ({
   activeTextColor,
@@ -64,21 +69,31 @@ const TextColorModal = ({
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <button
-          className={cn(
-            "p-2 rounded-md text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-95",
-            isOpen && "bg-zinc-800 text-zinc-100 shadow-inner"
-          )}
-        >
-          <div className="flex flex-col items-center">
-            <span className="text-base font-medium">A</span>
+      <PopoverTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
             <div
-              className="w-4 h-1 rounded-sm mt-0.5"
-              style={{ backgroundColor: activeTextColor }}
-            />
-          </div>
-        </button>
+              className={cn(
+                "p-2 rounded-md h-8 flex flex-col text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-95",
+                isOpen && "bg-zinc-800 text-zinc-100 shadow-inner"
+              )}
+            >
+              <div className="-mt-1.5">
+                <span className="text-base font-medium">A</span>
+                <div
+                  className="w-4 h-0.5 rounded-sm"
+                  style={{ backgroundColor: activeTextColor }}
+                />
+              </div>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent
+            side="bottom"
+            className="bg-zinc-950 text-zinc-200 text-xs border-zinc-800"
+          >
+            Text Color
+          </TooltipContent>
+        </Tooltip>
       </PopoverTrigger>
       <PopoverContent
         className="w-64 p-0 bg-zinc-800 border border-zinc-700 rounded-lg shadow-2xl"
@@ -110,7 +125,12 @@ const TextColorModal = ({
             </TabsList>
 
             {Object.entries(colorPalette).map(([category, colors]) => (
-              <TabsContent key={category} value={category} className="mt-0">
+              <TabsContent
+                key={category}
+                value={category}
+                asChild
+                className="mt-0"
+              >
                 <div className="grid grid-cols-5 gap-2">
                   {colors.map((color) => (
                     <button

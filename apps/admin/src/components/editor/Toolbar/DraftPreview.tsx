@@ -13,6 +13,11 @@ import {
 import { BlogFormData } from "@/types/blogTypes";
 import { LocalStorageKeys } from "@/types/types";
 import { useWriteBlogContext } from "@/context/WriteBlogContext";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const DraftPreview = ({ editor }: { editor: Editor }) => {
   const router = useRouter();
@@ -66,54 +71,81 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
       <div className="border-r border-gray-300 mx-2 h-6" />
 
       <div className="flex items-center gap-[2px]">
-        <button
-          className=" toolbar-btns px-2 py-2 w-8 h-8 relative rounded-md hover:bg-gray-700 transition duration-100 active:scale-95 "
-          onClick={async () => {
-            const { parseContent } = await import("@/lib/parseTiptapJson");
+        <Tooltip key="draft">
+          <TooltipTrigger asChild>
+            <button
+              className=" toolbar-btns px-2 py-2 w-8 h-8 relative rounded-md hover:bg-gray-700 transition duration-100 active:scale-95 "
+              onClick={async () => {
+                const { parseContent } = await import("@/lib/parseTiptapJson");
 
-            const contentJson = editor.getJSON() as JSONContent;
-            const c = parseContent(contentJson);
-            console.log(c)
+                const contentJson = editor.getJSON() as JSONContent;
+                const c = parseContent(contentJson);
+                console.log(contentJson);
 
-            const { renderToString } = await import("react-dom/server");
-            console.log(renderToString(c));
-            return;
-            // await draftBlog(true);
-            // router.push("/dashboard/manage-posts");
-          }}
-          title="Draft"
-        >
-          <FaCloud />
-        </button>
+                const { renderToString } = await import("react-dom/server");
+                console.log(renderToString(c));
+                return;
+                // await draftBlog(true);
+                // router.push("/dashboard/manage-posts");
+              }}
+            >
+              <FaCloud />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent
+            side="bottom"
+            className="bg-zinc-950 text-zinc-200 text-xs border-zinc-800"
+          >
+            Draft Blog
+          </TooltipContent>
+        </Tooltip>
 
-        <button
-          className=" toolbar-btns px-2 py-2 rounded-md w-8 h-8 relative hover:bg-gray-700 transition duration-100 active:scale-95 "
-          onClick={async () => {
-            const data = await draftBlog(false);
-            if (!data) return;
+        <Tooltip key="preview">
+          <TooltipTrigger asChild>
+            <button
+              className=" toolbar-btns px-2 py-2 rounded-md w-8 h-8 relative hover:bg-gray-700 transition duration-100 active:scale-95 "
+              onClick={async () => {
+                const data = await draftBlog(false);
+                if (!data) return;
 
-            setBlogFormData((prev) => ({
-              ...prev,
-              blogId: data.blogId,
-              estReadTime: data.blogMetadata.estReadTime,
-              link: data.link,
-              content: editor.getJSON() as JSONContent,
-            }));
+                setBlogFormData((prev) => ({
+                  ...prev,
+                  blogId: data.blogId,
+                  estReadTime: data.blogMetadata.estReadTime,
+                  link: data.link,
+                  content: editor.getJSON() as JSONContent,
+                }));
 
-            router.push("write-blog/preview-blog");
-          }}
-          title="Preview"
-        >
-          <FaEye />
-        </button>
+                router.push("write-blog/preview-blog");
+              }}
+            >
+              <FaEye />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent
+            side="bottom"
+            className="bg-zinc-950 text-zinc-200 text-xs border-zinc-800"
+          >
+            Preview Blog
+          </TooltipContent>
+        </Tooltip>
 
-        <button
-          className=" toolbar-btns px-2 py-2 rounded-md hover:bg-gray-700 w-8 h-8 relative transition duration-100 active:scale-95 "
-          onClick={() => setShowSidebar(true)}
-          title="Metadata"
-        >
-          <FaTag />
-        </button>
+        <Tooltip key="metadata">
+          <TooltipTrigger asChild>
+            <button
+              className=" toolbar-btns px-2 py-2 rounded-md hover:bg-gray-700 w-8 h-8 relative transition duration-100 active:scale-95 "
+              onClick={() => setShowSidebar(true)}
+            >
+              <FaTag />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent
+            side="bottom"
+            className="bg-zinc-950 text-zinc-200 text-xs border-zinc-800"
+          >
+            Edit Metadata
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       {showSidebar && (

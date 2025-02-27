@@ -1,86 +1,89 @@
 import "@tiptap/core"; // Adjust this path if the package structure changes
 import { useEditor } from "@tiptap/react";
 
-type BoldMark = {
-  type: "bold";
-  attrs: never;
-  text?: string;
-};
-
-type ItalicMark = {
-  type: "italic";
-  attrs: never;
-  text?: string;
-};
-
-type CodeMark = {
-  type: "code";
-  attrs: never;
-  text?: string;
-};
-
-type StrikeMark = {
-  type: "strike";
-  attrs: never;
-  text?: string;
-};
-
-type UnderlineMark = {
-  type: "underline";
-  attrs: never;
-  text?: string;
-};
-
-type LinkMark = {
-  type: "link";
-  attrs: { href: string; target?: string };
-  text?: string;
-};
-
-type TextColorMark = {
-  type: "textColor";
-  attrs: { color: string };
-  text?: string;
-};
-
-type TipTapMarks =
-  | BoldMark
-  | ItalicMark
-  | CodeMark
-  | StrikeMark
-  | UnderlineMark
-  | LinkMark
-  | TextColorMark;
-
-interface HeadingAttrs {
-  level: number;
-}
-
-interface CodeBlockAttrs {
-  language: string;
-}
-
-interface ImageAttrs {
-  src: string;
-  alt: string;
-  title?: string;
-}
-
-interface TextColorAttrs {
-  color: string;
-}
-
-interface ListItemAttrs {
-  checked?: boolean;
-}
-
-interface SectionAttrs {
-  id: string;
-}
-
-type TextAttrs = TextColorAttrs | LinkAttrs;
-
 declare module "@tiptap/core" {
+  type BoldMark = {
+    type: "bold";
+    attrs: never;
+    text?: string;
+  };
+
+  type ItalicMark = {
+    type: "italic";
+    attrs: never;
+    text?: string;
+  };
+
+  type CodeMark = {
+    type: "code";
+    attrs: never;
+    text?: string;
+  };
+
+  type StrikeMark = {
+    type: "strike";
+    attrs: never;
+    text?: string;
+  };
+
+  type UnderlineMark = {
+    type: "underline";
+    attrs: never;
+    text?: string;
+  };
+
+  type LinkMark = {
+    type: "link";
+    attrs: { href: string; target?: string };
+    text?: string;
+  };
+
+  type TextColorMark = {
+    type: "textColor";
+    attrs: { color: string };
+    text?: string;
+  };
+
+  type TipTapMarks =
+    | BoldMark
+    | ItalicMark
+    | CodeMark
+    | StrikeMark
+    | UnderlineMark
+    | LinkMark
+    | TextColorMark;
+
+  interface HeadingAttrs {
+    level: number;
+  }
+
+  interface CodeBlockAttrs {
+    language: string;
+  }
+
+  interface ImageAttrs {
+    src: string;
+    alt?: string;
+    title?: string;
+    caption?: string;
+    width: number;
+    height: number;
+  }
+
+  interface TextColorAttrs {
+    color: string;
+  }
+
+  interface ListItemAttrs {
+    checked?: boolean;
+  }
+
+  interface SectionAttrs {
+    id: string;
+  }
+
+  type TextAttrs = TextColorAttrs | LinkAttrs;
+
   interface BaseNode {
     content?: JSONContent[]; // Default content structure for all nodes
     text?: string; // Default text (optional)
@@ -116,12 +119,17 @@ declare module "@tiptap/core" {
       toggleTextColor: (color: string) => ReturnType;
       toggleBlockquote: () => ReturnType;
     };
-    // textColor: {
-    //   toggleTextColor: (color: string) => ReturnType;
-    // };
-    // customBlockquotes: {
-    //   toggleBlockquote: () => ReturnType;
-    // };
+
+    image: {
+      setImage: (options: {
+        src: string;
+        alt?: string;
+        title?: string;
+        width?: number;
+        height?: number;
+        caption?: string;
+      }) => ReturnType;
+    };
   }
 }
 
