@@ -8,7 +8,7 @@ export const ImageExtension = Node.create({
   group: "block",
   content: "",
   draggable: true,
-  isolating: true,
+  isolating: false,
 
   // Define attributes to store in the document schema
   addAttributes() {

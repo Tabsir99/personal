@@ -5,13 +5,13 @@
 :root {
   --highlight-bg-color: rgb(34, 92, 167);
   --highlight-bg-hover-color: rgb(14, 79, 147);
-  --body-text: 20px;
+  --body-text: 18px;
 
-  --h2-size: 36px;
+  --h2-size: 30px;
   --h2-height: 1.4;
-  --h3-size: 28px;
+  --h3-size: 24px;
   --h3-height: 1.5;
-  --h4-size: 24px;
+  --h4-size: 22px;
   --h4-height: 1.5;
 
   --primary-bg: rgba(15, 17, 21, 0.9);

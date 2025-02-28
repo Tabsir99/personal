@@ -13,7 +13,6 @@ import { BlogFormData } from "@/types/blogTypes";
 import { starterKitOptions } from "@/components/editor/Toolbar/starterKit";
 import CustomSpinner from "@/components/ui/common/LoadingAnimation";
 import Toolbar from "@/components/editor/Toolbar/Toolbar";
-import LinkModal from "@/components/editor/Modals/LinkModal";
 import ComponentPickerModal from "@/components/editor/Modals/ComponentPicker";
 import { toggleNode } from "@/components/editor/CustomExtensions/toggleNode";
 

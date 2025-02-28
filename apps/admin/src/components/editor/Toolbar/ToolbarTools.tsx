@@ -9,7 +9,6 @@ import {
   FaItalic,
   FaUnderline,
   FaStrikethrough,
-  FaLink,
   FaAlignLeft,
   FaAlignCenter,
   FaAlignRight,

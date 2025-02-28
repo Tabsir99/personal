@@ -80,7 +80,7 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
 
                 const contentJson = editor.getJSON() as JSONContent;
                 const c = parseContent(contentJson);
-                console.log(contentJson);
+                console.log(JSON.stringify(contentJson));
 
                 const { renderToString } = await import("react-dom/server");
                 console.log(renderToString(c));

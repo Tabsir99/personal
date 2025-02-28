@@ -4,6 +4,7 @@ export const toggleNode = (node: JSONContent["type"], editor: Editor) => {
   const { selection, tr } = editor.view.state;
   const { $from } = selection;
   const nodeType = editor.schema.nodes[node];
+  console.log("Node type is: ", nodeType);
   const currentNode = $from.parent;
   const text = currentNode.textContent;
   const nodeContent = text ? editor.schema.text(text) : null;
@@ -27,23 +28,26 @@ export const toggleNode = (node: JSONContent["type"], editor: Editor) => {
   }
 
   // Rest of the code for setting the node remains the same
-  const schemaNodes = nodeType.spec
-    .content!.replace(/[\+\*]/g, "")
-    .split(" ")
-    .map((schemaNode) => {
-      if (schemaNode === "text") {
-        return nodeContent || editor.schema.text(" ");
-      }
-      const type = editor.schema.nodes[schemaNode];
+  const schemaNodes = Boolean(nodeType.spec.content)
+    ? nodeType.spec
+        .content!.replace(/[\+\*]/g, "")
+        .split(" ")
+        .map((schemaNode) => {
+          if (schemaNode === "text") {
+            return nodeContent || editor.schema.text(" ");
+          }
+          const type = editor.schema.nodes[schemaNode];
 
-      return schemaNode === "paragraph" || schemaNode === "block"
-        ? editor.schema.node("paragraph", null, nodeContent!)
-        : type.createAndFill();
-    });
+          return schemaNode === "paragraph" || schemaNode === "block"
+            ? editor.schema.node("paragraph", null, nodeContent!)
+            : type.createAndFill();
+        })
+    : null;
 
   const start = $from.before();
   const end = $from.after();
 
+  console.log(schemaNodes, "yh");
   tr.replaceWith(
     start,
     end,

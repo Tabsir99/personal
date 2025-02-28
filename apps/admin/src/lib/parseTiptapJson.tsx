@@ -1,4 +1,5 @@
 import { PreviewCodeBlock } from "@/components/editor/NodeViews/CodeBlockHighlight";
+import { FAQSectionPView } from "@/components/editor/NodeViews/FaqNodeview";
 import { PreviewImageBlock } from "@/components/editor/NodeViews/NextImage";
 import { highlightCodeblock } from "@/config/highlighter";
 import { JSONContent } from "@tiptap/react";
@@ -111,6 +112,9 @@ export const parseContent = (content: JSONContent | null): React.ReactNode => {
 
     case "cite":
       return <cite>{children}</cite>;
+
+    case "faqSection":
+      return <FAQSectionPView items={content.attrs.items} />;
 
     default:
       console.warn(`Unknown node type: ${content}`);

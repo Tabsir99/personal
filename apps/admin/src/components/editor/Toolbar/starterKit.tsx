@@ -28,6 +28,7 @@ import {
 import { TextColor } from "../CustomMarks/customMarks";
 import { HeadingPlugin } from "../CustomPlugins/HeadingPlugin";
 import { ImageExtension } from "../CustomNodes/Image";
+import { FAQSection } from "../CustomNodes/FaqSection";
 
 export const starterKitOptions = [
   RootNode,
@@ -77,4 +78,5 @@ export const starterKitOptions = [
   LineBreak,
   Cite,
   TextColor,
+  FAQSection,
 ];

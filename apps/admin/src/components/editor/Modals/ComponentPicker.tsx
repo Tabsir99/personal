@@ -20,12 +20,14 @@ import {
   FileSpreadsheet,
   Calculator,
   Settings,
+  HelpCircle,
 } from "lucide-react";
 
 // Mock component data
 
 type ComponentId =
   | "codeBlock"
+  | "faqSection"
   | "dataTable"
   | "chart"
   | "markdown"
@@ -47,6 +49,13 @@ const mockComponents: Component[] = [
     name: "Code Block",
     description: "Insert syntax-highlighted code snippets",
     icon: <Code />,
+    category: "content",
+  },
+  {
+    id: "faqSection",
+    name: "FAQ Section",
+    description: "Insert a collapsible FAQ section",
+    icon: <HelpCircle />,
     category: "content",
   },
   {
@@ -159,7 +168,10 @@ const ComponentPickerModal = ({
                     onClick={() => onInsert(component)}
                   >
                     <div className="flex items-center mb-2 ">
-                      <span className=" w-5 h-5 mr-2  text-primary"> {component.icon} </span>
+                      <span className=" w-5 h-5 mr-2  text-primary">
+                        {" "}
+                        {component.icon}{" "}
+                      </span>
                       <h4 className="font-medium text-sm">{component.name}</h4>
                     </div>
                     <p className="text-xs text-gray-500">

@@ -78,8 +78,10 @@ declare module "@tiptap/core" {
     checked?: boolean;
   }
 
-  interface SectionAttrs {
+  interface FaQSectionAttrs {
     id: string;
+    question: string;
+    answer: string;
   }
 
   type TextAttrs = TextColorAttrs | LinkAttrs;
@@ -101,6 +103,7 @@ declare module "@tiptap/core" {
       })
     | (BaseNode & { type: "listItem"; attrs: ListItemAttrs })
     | (BaseNode & { type: "section"; attrs: SectionAttrs })
+    | (BaseNode & { type: "faqSection"; attrs: { items: FaQSectionAttrs[] } })
     | (BaseNode & { type: "paragraph"; attrs: never })
     | (BaseNode & { type: "horizontalRule"; attrs: never })
     | (BaseNode & {
