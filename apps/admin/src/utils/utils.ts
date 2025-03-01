@@ -1,3 +1,4 @@
+import { slugify } from "@/lib/utils";
 import {
   AdminBlogListItem,
   Blog,
@@ -90,9 +91,7 @@ export const buildBlog = (
     type: BlogType.Article,
     status: isDraft ? BlogStatus.Draft : BlogStatus.Active,
     categoryId: blogFormData.categoryId,
-    link: encodeURIComponent(
-      blogFormData.blogName.trim().toLowerCase().replace(/\s/g, "-")
-    ),
+    link: slugify(blogFormData.blogName),
     recommendations: [],
     blogStats: {
       totalComments: 0,

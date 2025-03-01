@@ -9,6 +9,7 @@ import { addCategorydb, deleteCategorydb } from "@/lib/categoryQuery";
 import { updateData } from "@/lib/commonQuery";
 import s3 from "@/config/cloudflareS3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { slugify } from "@/lib/utils";
 
 export async function deleteCategory(categoryId: string) {
   try {
@@ -60,12 +61,12 @@ export const uploadImage = async (
   isThumbnail: boolean = false
 ) => {
   const imageFile = formData.get("file") as File;
-  const blogLink = formData.get("blogLink");
+  const blogId = formData.get("blogId");
   const imageArrayBuffer = await imageFile.arrayBuffer();
 
   const imageBuffer = Buffer.from(new Uint8Array(imageArrayBuffer));
 
-  const fileName = `${blogLink}/${isThumbnail ? "thumbnail" : imageFile.name}`;
+  const fileName = `${blogId}/${isThumbnail ? "thumbnail" : imageFile.name}`;
 
   const putImage = new PutObjectCommand({
     Bucket: "tabsir-s-blog",
@@ -90,7 +91,7 @@ export async function addNewCategory({
   description: string;
 }) {
   const category: BlogCategory = {
-    categoryId: categoryName.trim().toLowerCase().replace(/\s/g, "-"),
+    categoryId: slugify(categoryName),
     categoryName,
     description,
     createdAt: new Date().toISOString(),

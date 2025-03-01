@@ -15,10 +15,7 @@ export default function BlogThumbnailInput() {
   const handleThumbnailUpload = async (image?: File) => {
     const formData = new FormData();
     formData.append("file", image || (thumbnail as any));
-    formData.append(
-      "blogLink",
-      blogFormData.blogName.trim().toLowerCase().replace(/\s/g, "-")
-    );
+    formData.append("blogId", blogFormData.blogId);
     const response = await uploadImage(formData, true);
 
     setBlogFormData((prev) => ({
