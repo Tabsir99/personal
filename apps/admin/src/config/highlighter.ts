@@ -1,6 +1,7 @@
 import { getSingletonHighlighterCore } from "shiki/dist/core.mjs";
 import { createJavaScriptRegexEngine } from "shiki/dist/engine-javascript.mjs";
 import DarkPlus from "shiki/dist/themes/dark-plus.mjs";
+import GithubDark from "shiki/dist/themes/github-dark.mjs";
 import LangJavaScript from "shiki/dist/langs/javascript.mjs";
 import LangTypeScript from "shiki/dist/langs/typescript.mjs";
 import LangPython from "shiki/dist/langs/python.mjs";
@@ -24,7 +25,7 @@ const initializeHighlighter = async () => {
       LangRust,
       LangGo,
     ],
-    themes: [DarkPlus],
+    themes: [DarkPlus, GithubDark],
   });
 };
 
@@ -43,7 +44,7 @@ export const highlightCodeblock = (
 
   const { tokens } = highlighterCore.codeToTokens(code, {
     lang: lang as any,
-    theme: "dark-plus",
+    theme: lang === "bash" ? "github-dark" : "dark-plus",
   });
 
   let result: RealtimeHighlightResult[] | string = realTime ? [] : "";

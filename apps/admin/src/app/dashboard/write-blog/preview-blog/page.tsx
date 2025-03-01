@@ -10,15 +10,23 @@ import {
 } from "@/context/NotificationContext";
 import { useWriteBlogContext } from "@/context/WriteBlogContext";
 import { parseContent } from "@/lib/parseTiptapJson";
+import { LocalStorageKeys } from "@/types/types";
+import {  BlogFormData } from "@/types/blogTypes";
+import { invalidateBlogOverview } from "@/hooks/useInvalidateCache";
 
 export default function PreviewBlog() {
   const { addNotification } = useNotification();
   const [isUploading, setIsUploading] = useState(false);
-  const { resetBlogFormData, blogFormData } = useWriteBlogContext();
+  const { resetBlogFormData, blogFormData, categories } = useWriteBlogContext();
 
   const router = useRouter();
 
   const handleUpload = async () => {
+    const blogFormDataStr = localStorage.getItem(LocalStorageKeys.BlogFormData);
+    if (!blogFormDataStr) throw new Error("BlogFormData is missing");
+
+    const blogFormData = JSON.parse(blogFormDataStr) as BlogFormData;
+
     if (!blogFormData)
       return addNotification({ message: "Blogmetadata is missing" });
 
@@ -34,6 +42,7 @@ export default function PreviewBlog() {
       return addNotification({ message: "There is no blog content" });
     setIsUploading(true);
 
+    console.log(JSON.stringify(blogFormData));
     const res = await uploadBlog(blogFormData);
     setIsUploading(false);
     addNotification({
@@ -44,11 +53,11 @@ export default function PreviewBlog() {
           : NotificationType.ERROR,
     });
     if (res.status === "success") {
-      // invalidateBlogOverview({
-      //   selectedBlog: res.data as AdminBlogListItem,
-      //   categories: categories!,
-      //   type: blogFormData.createdAt ? "update" : "add",
-      // });
+      invalidateBlogOverview({
+        selectedBlog: res.data!,
+        categories: categories!,
+        type: "add",
+      });
       resetBlogFormData();
       router.push("/dashboard/manage-posts");
     }

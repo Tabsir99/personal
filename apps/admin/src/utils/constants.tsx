@@ -6,6 +6,7 @@ import {
   Rust,
   TypeScript,
 } from "@/components/ui/icons/icon";
+import React from "react";
 
 interface Languages {
   name: string;

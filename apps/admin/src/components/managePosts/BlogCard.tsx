@@ -78,8 +78,10 @@ export default function CMSBlogCard({
           <Badge
             variant={
               adminBlogListItem.status === "active"
-                ? "secondary"
-                : "destructive"
+                ? "active"
+                : adminBlogListItem.status === "draft"
+                  ? "secondary"
+                  : "destructive"
             }
             className="w-fit text-[16px] translate-x-8 capitalize"
           >

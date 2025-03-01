@@ -68,6 +68,7 @@ const TextEditor = () => {
 
     extensions: starterKitOptions as AnyExtension[],
     onUpdate: ({ editor }) => {
+      console.log(editor.getJSON())
       debouncedSave(editor.getJSON());
     },
     onContentError: (error) => {

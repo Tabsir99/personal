@@ -46,6 +46,7 @@ export async function saveDraft(
       message: "Draft saved succesfully",
     });
   } catch (error) {
+    console.log(error);
     return formatResponse({
       status: "error",
       data: null,
@@ -56,8 +57,9 @@ export async function saveDraft(
 
 export async function uploadBlog(
   blogFormData: BlogFormData
-): Promise<ApiResponse<Blog>> {
+): Promise<ApiResponse<AdminBlogListItem>> {
   const blog = buildBlog(blogFormData, false, blogFormData.blogId);
+
   const blogDoc = await readSingleDoc<AdminBlogListItem>({
     collectionName: Collections.BLOG_METADATA,
     docId: blog.blogId,
@@ -78,8 +80,6 @@ export async function uploadBlog(
       data: adminBlogListItem,
     });
 
-    // Changes here, needs to be updated in the main blog site
-    // changed { blog: blog } to blog
     const fetchPromise = fetcher({
       url: `${env.BLOGSITE_HOSTNAME}/api/blogs`,
       body: JSON.stringify(blog),

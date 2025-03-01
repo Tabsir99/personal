@@ -82,7 +82,7 @@ export const buildBlog = (
       estReadTime: measureEstReadTime(textContent),
       recommendationTitle: blogFormData.recommendationTitle,
       socialTitle: blogFormData.socialTitle,
-      featuredImageUrl: blogFormData.featuredImageUrl,
+      featuredImageUrl: blogFormData.featuredImageUrl || "",
       updatedAt: new Date().toISOString(),
     },
     blogName: blogFormData.blogName,
@@ -135,7 +135,7 @@ export function buildAdminBlog(
     blogId: blog.blogId,
     createdAt: blog.blogMetadata.createdAt,
     type: blog.type,
-    featuredImageUrl: blog.blogMetadata.featuredImageUrl,
+    featuredImageUrl: blog.blogMetadata.featuredImageUrl || "",
     ...(!shouldUpdate && {
       pageMetrics: {
         totalVisitors: 0,

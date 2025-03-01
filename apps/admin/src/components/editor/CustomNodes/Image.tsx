@@ -14,7 +14,7 @@ export const ImageExtension = Node.create({
   addAttributes() {
     return {
       src: {
-        default: null,
+        default: "null",
       },
       alt: {
         default: null,
