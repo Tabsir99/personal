@@ -1,13 +1,13 @@
 "use client";
 import { usePathname } from "next/navigation";
 import {
-  Home,
   Edit,
   Folder,
   Users,
   Settings,
-  List,
   LogOut,
+  LayoutDashboard,
+  FileText,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -23,7 +23,7 @@ const DashBoardSidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const sidebarItems = [
     {
-      Icon: Home,
+      Icon: LayoutDashboard,
       menuName: "Dashboard",
       menuLink: rootDashBoardUrl,
     },
@@ -38,7 +38,7 @@ const DashBoardSidebar = () => {
       menuLink: `${rootDashBoardUrl}/write-blog`,
     },
     {
-      Icon: List,
+      Icon: FileText,
       menuName: "Manage Posts",
       menuLink: `${rootDashBoardUrl}/manage-posts`,
     },
@@ -56,7 +56,7 @@ const DashBoardSidebar = () => {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-[60] shadow-lg h-screen dark bg-zinc-900/50 border-r border-zinc-800 transition-all duration-300 ease-in-out",
+        "fixed left-0 top-0 z-[60] shadow-lg h-screen dark bg-zinc-900/50 border-r backdrop-blur-md border-zinc-800 transition-all duration-300 ease-in-out",
         isExpanded ? "w-52 shadow-[5px_0px_25px_rgba(0,0,0,0.8)]" : "w-16"
       )}
       onMouseEnter={() => setIsExpanded(true)}

@@ -1,154 +1,78 @@
-"use client"
-
-import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
+"use client";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { 
-  LayoutDashboard, 
-  Globe, 
-  Bell, 
-  Save, 
-  ChevronRight 
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 
-interface SettingsSectionProps {
-  title: string;
-  description?: string;
-  icon: React.ElementType;
-  children: React.ReactNode;
-}
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const SettingsSection: React.FC<SettingsSectionProps> = ({
-  title,
-  description,
-  icon: Icon,
-  children,
-}) => (
-  <Card className="w-full bg-zinc-900 border-neutral-800">
-    <CardHeader className="flex flex-row items-center space-x-4 space-y-0 pb-2">
-      <Icon className="w-6 h-6 text-neutral-200" />
-      <div>
-        <CardTitle className="text-neutral-100">{title}</CardTitle>
-        {description && <CardDescription className="text-neutral-400">{description}</CardDescription>}
-      </div>
-    </CardHeader>
-    <Separator className="mb-4 bg-zinc-800" />
-    <CardContent>{children}</CardContent>
-  </Card>
-);
+import { Save } from "lucide-react";
 
-const SettingsPage: React.FC = () => {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [siteTitle, setSiteTitle] = useState("");
-  const [metaDescription, setMetaDescription] = useState("");
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
+import GeneralSettings from "@/components/settings/GeneralSettings";
+import ContentSettings from "@/components/settings/ContentSettings";
+import DisplaySettings from "@/components/settings/DisplaySettings";
+import NotificationSettings from "@/components/settings/NotificationSettings";
+import { useBlogSettings } from "@/context/SettingsContext";
+import { SocialIntegrations } from "@/components/settings/SocialIntegration";
 
-  const handleSaveChanges = () => {
-    console.info({
-      siteTitle,
-      metaDescription,
-      notificationsEnabled,
-      analyticsEnabled,
-      maintenanceMode,
-    });
-  };
-
+const SettingsPage = () => {
+  const { saveChanges } = useBlogSettings();
   return (
-    <div className="min-h-screen bg-zinc-950 text-neutral-100 p-6 md:p-8 lg:p-12">
-      <div className="container max-w-5xl mx-auto space-y-8">
-        <header className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <LayoutDashboard className="w-10 h-10 text-neutral-200" />
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-neutral-100">
-              Admin Dashboard
-            </h1>
+    <div className="min-h-screen bg-black text-zinc-100">
+      <div className="flex flex-col">
+        <header className="sticky top-0 z-10 bg-zinc-950/80 backdrop-blur-sm border-b border-zinc-800 p-4">
+          <div className="container max-w-6xl mx-auto flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-zinc-100">Settings</h1>
+            <Button
+              onClick={saveChanges}
+              className="bg-blue-600 hover:bg-blue-700 text-white transition-all"
+            >
+              <Save className="mr-2 h-4 w-4" />
+              Save Changes
+            </Button>
           </div>
         </header>
 
-        <div className="space-y-6">
-          <SettingsSection
-            title="General Settings"
-            description="Configure your blog's core information"
-            icon={Globe}
-          >
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label className="text-neutral-300">Site Title</Label>
-                <Input
-                  value={siteTitle}
-                  onChange={(e) => setSiteTitle(e.target.value)}
-                  placeholder="Enter your blog name"
-                  className="w-full bg-zinc-900 border-neutral-800 text-neutral-100 placeholder-neutral-500"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-neutral-300">Meta Description</Label>
-                <Textarea
-                  value={metaDescription}
-                  onChange={(e) => setMetaDescription(e.target.value)}
-                  placeholder="Describe your blog for search engines"
-                  className="min-h-[120px] bg-zinc-900 border-neutral-800 text-neutral-100 placeholder-neutral-500"
-                />
-              </div>
+        <main className="container min-w-full mx-auto p-4 pb-20">
+          <Tabs defaultValue="general" className="w-full">
+            <div className="flex justify-center mb-6">
+              <TabsList className="bg-zinc-900 p-1">
+                {[
+                  { value: "general", label: "General" },
+                  { value: "content", label: "Content" },
+                  { value: "social", label: "Social Integration" },
+                  { value: "appearance", label: "Appearance" },
+                  { value: "notifications", label: "Notifications" },
+                ].map((tab) => (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
             </div>
-          </SettingsSection>
 
-          <SettingsSection
-            title="Site Preferences"
-            description="Customize your blog's behavior"
-            icon={Bell}
-          >
-            <div className="space-y-4">
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="flex items-center justify-between">
-                  <Label className="flex items-center space-x-2 text-neutral-300">
-                    <span>Notifications</span>
-                  </Label>
-                  <Switch
-                    checked={notificationsEnabled}
-                    onCheckedChange={setNotificationsEnabled}
-                    
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label className="flex items-center space-x-2 text-neutral-300">
-                    <span>Analytics</span>
-                  </Label>
-                  <Switch
-                    checked={analyticsEnabled}
-                    onCheckedChange={setAnalyticsEnabled}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label className="flex items-center space-x-2 text-neutral-300">
-                    <span>Maintenance Mode</span>
-                  </Label>
-                  <Switch
-                    checked={maintenanceMode}
-                    onCheckedChange={setMaintenanceMode}
-                  />
-                </div>
-              </div>
-            </div>
-          </SettingsSection>
+            <TabsContent value="general" className="space-y-6 mt-2">
+              <GeneralSettings />
+            </TabsContent>
 
-          <div className="flex justify-end">
-            <Button 
-              onClick={handleSaveChanges} 
-              className="group bg-zinc-800 hover:bg-zinc-700 text-neutral-100"
-            >
-              <Save className="mr-2 h-4 w-4 group-hover:animate-pulse" />
-              Save Changes
-              <ChevronRight className="ml-2 h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </Button>
-          </div>
-        </div>
+            <TabsContent value="content" className="space-y-6 mt-2">
+              <ContentSettings />
+            </TabsContent>
+
+            <TabsContent value="social" className="space-y- mt-2">
+              <SocialIntegrations />
+            </TabsContent>
+
+            <TabsContent value="appearance" className="space-y-6 mt-2">
+              <DisplaySettings />
+            </TabsContent>
+
+            <TabsContent value="notifications" className="space-y-6 mt-2">
+              <NotificationSettings />
+            </TabsContent>
+          </Tabs>
+        </main>
       </div>
     </div>
   );

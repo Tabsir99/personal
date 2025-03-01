@@ -10,6 +10,7 @@ export const createData = async ({
   docId: string;
   data: any;
 }) => {
+  console.log(collectionName, docId, data);
   try {
     const docRef = db.collection(collectionName).doc(docId);
     await docRef.set(data, { merge: true });

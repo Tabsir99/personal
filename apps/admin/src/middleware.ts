@@ -41,6 +41,9 @@ const handleApiAccess = (accessToken?: string | null) => {
 };
 
 export default async function middleware(request: NextRequest) {
+  if (request.nextUrl.pathname.includes("auth")) {
+    return NextResponse.next();
+  }
   // Method validation
   if (!isValidMethod(request.method)) {
     return NextResponse.json({}, { status: HTTP_STATUS.BAD_REQUEST });
@@ -71,5 +74,5 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/api/:path*","/dashboard","/dashboard/:path*"],
+  matcher: ["/", "/api/:path*", "/dashboard", "/dashboard/:path*"],
 };

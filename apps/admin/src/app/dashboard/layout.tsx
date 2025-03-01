@@ -4,6 +4,7 @@ import DashBoardSidebar from "@/components/dashboard/DashboardSidebar";
 
 import { BlogMetadataProvider } from "@/context/WriteBlogContext";
 import { NotificationProvider } from "@/context/NotificationContext";
+import { BlogSettingsProvider } from "@/context/SettingsContext";
 
 export const metadata: Metadata = {
   title: "Dashboard Home",
@@ -21,11 +22,12 @@ export default function DashBoardLayout({
   return (
     <NotificationProvider>
       <BlogMetadataProvider>
-        <DashBoardSidebar />
-
-        <main className=" overflow-y-scroll bg-zinc-950 pl-16 w-screen h-screen">
-          {children}
-        </main>
+        <BlogSettingsProvider>
+          <DashBoardSidebar />
+          <main className=" overflow-y-scroll bg-zinc-950 pl-16 w-screen h-screen">
+            {children}
+          </main>
+        </BlogSettingsProvider>
       </BlogMetadataProvider>
     </NotificationProvider>
   );
