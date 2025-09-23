@@ -2,6 +2,7 @@ import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { toggleNode } from "../CustomExtensions/toggleNode";
 import FAQSectionView from "../NodeViews/FaqNodeview";
+import { exitOnArrowDown } from ".";
 
 export interface FAQSectionOptions {
   HTMLAttributes: Record<string, any>;
@@ -65,6 +66,18 @@ export const FAQSection = Node.create<FAQSectionOptions>({
         renderHTML: (attributes) => {
           return {
             "data-items": JSON.stringify(attributes.items),
+          };
+        },
+      },
+      title: {
+        default: "Frequently Asked Questions",
+        parseHTML(element) {
+          const h = element.getAttribute("data-title");
+          return h;
+        },
+        renderHTML(attributes) {
+          return {
+            "data-title": attributes.title,
           };
         },
       },
@@ -172,6 +185,8 @@ export const FAQSection = Node.create<FAQSectionOptions>({
   addKeyboardShortcuts() {
     return {
       "Mod-Alt-q": () => this.editor.commands.toggleFAQSection(),
+      ArrowDown: ({ editor }) =>
+        exitOnArrowDown({ editor, nodeType: this.name }),
     };
   },
 

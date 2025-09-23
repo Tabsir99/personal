@@ -103,7 +103,10 @@ declare module "@tiptap/core" {
       })
     | (BaseNode & { type: "listItem"; attrs: ListItemAttrs })
     | (BaseNode & { type: "section"; attrs: SectionAttrs })
-    | (BaseNode & { type: "faqSection"; attrs: { items: FaQSectionAttrs[] } })
+    | (BaseNode & {
+        type: "faqSection";
+        attrs: { items: FaQSectionAttrs[]; title: string };
+      })
     | (BaseNode & { type: "paragraph"; attrs: never })
     | (BaseNode & { type: "horizontalRule"; attrs: never })
     | (BaseNode & {

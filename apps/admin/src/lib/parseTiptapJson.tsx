@@ -114,7 +114,12 @@ export const parseContent = (content: JSONContent | null): React.ReactNode => {
       return <cite>{children}</cite>;
 
     case "faqSection":
-      return <FAQSectionPView items={content.attrs.items} />;
+      return (
+        <FAQSectionPView
+          items={content.attrs.items}
+          title={content.attrs.title}
+        />
+      );
 
     default:
       console.warn(`Unknown node type: ${content}`);

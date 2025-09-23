@@ -5,52 +5,43 @@ import BlogThumbnailInput from "./BlogThumbnail";
 
 import CustomSelect from "../ui/common/CustomSelect";
 import FloatingLabelInput from "../ui/common/FloatingLabelInput";
-import { useWriteBlogContext } from "@/context/WriteBlogContext";
 import { BlogType } from "@/types/blogTypes";
 import FloatingLabelTxtArea from "../ui/common/FloatingLabelTxtArea";
-import { LocalStorageKeys } from "@/types/types";
+import { useBlogEditorStore } from "@/stores/BlogEditorStore";
+import { useShallow } from "zustand/shallow";
 
 export default function WriteMetadataComp({
   closeSidebar,
 }: {
   closeSidebar?: () => void;
 }) {
-  const { blogFormData, setBlogFormData, handleOptionChange, categories } =
-    useWriteBlogContext();
+  const setBlogFormData = useBlogEditorStore.getState().setBlogFormData;
+
+  const [blogName, socialTitle, type, description] = useBlogEditorStore(
+    useShallow((state) => {
+      const d = state.blogFormData;
+      return [d.blogName, d.socialTitle, d.type, d.blogDescription];
+    })
+  );
 
   return (
     <>
       <div className="flex gap-4">
         <FloatingLabelInput
           label="Blog Title"
-          onChange={(e) =>
-            setBlogFormData((prev) => ({ ...prev, blogName: e.target.value }))
-          }
-          value={blogFormData.blogName}
+          onChange={(e) => setBlogFormData({ blogName: e.target.value })}
+          value={blogName}
           required={true}
         />
 
         <FloatingLabelInput
           label="Social Meida title"
-          value={blogFormData.socialTitle}
-          onChange={(e) =>
-            setBlogFormData((prev) => ({
-              ...prev,
-              socialTitle: e.target.value,
-            }))
-          }
+          value={socialTitle}
+          onChange={(e) => setBlogFormData({ socialTitle: e.target.value })}
         />
       </div>
 
       <div className="flex gap-4">
-        <CustomSelect
-          options={[
-            "Select a category...",
-            ...(categories?.map((category) => category.categoryId) || []),
-          ]}
-          defaultActiveOption={blogFormData.categoryId}
-          onOptionChange={handleOptionChange}
-        />
         <CustomSelect
           options={[
             "Select blog type...",
@@ -59,12 +50,9 @@ export default function WriteMetadataComp({
             BlogType.NewsArticle,
           ]}
           onOptionChange={(option: BlogType) => {
-            setBlogFormData((prev) => ({
-              ...prev,
-              type: option,
-            }));
+            setBlogFormData({ type: option });
           }}
-          defaultActiveOption={blogFormData.type}
+          defaultActiveOption={type}
         />
       </div>
 
@@ -77,20 +65,14 @@ export default function WriteMetadataComp({
         label="Blog Description"
         placeholder="Enter a breif description about the blog...."
         // className="w-full px-5 py-3 mb-6 bg-zinc-800/70 resize-none text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-        value={blogFormData.blogDescription}
-        onChange={(e) =>
-          setBlogFormData((prev) => ({
-            ...prev,
-            blogDescription: e.target.value,
-          }))
-        }
+        value={description}
+        onChange={(e) => setBlogFormData({ blogDescription: e.target.value })}
       />
 
       <button
         type="button"
         onClick={() => {
           if (closeSidebar) closeSidebar();
-          localStorage.setItem(LocalStorageKeys.BlogFormData, JSON.stringify(blogFormData));
         }}
         className={
           "p-3 bg-[var(--highlight-bg-color)] hover:bg-[var(--highlight-bg-hover-color)] rounded-md text-gray-300 block "

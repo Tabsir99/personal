@@ -1,44 +1,33 @@
 "use server";
-import { db } from "@/config/firebaseAdminBlog";
 import { deleteBlogdb } from "@/lib/blogQuery";
-import { createData, deleteData, readSingleDoc } from "@/lib/commonQuery";
-import { AdminBlogListItem, Blog, BlogFormData } from "@/types/blogTypes";
-import {
-  ApiResponse,
-  buildAdminBlog,
-  buildBlog,
-  env,
-  fetcher,
-  formatResponse,
-} from "@/utils/utils";
-import { Collections } from "@/utils/utils";
+import { createData, readSingleDoc, updateData } from "@/lib/commonQuery";
+import { Blog, BlogFormData, BlogStatus, BlogType } from "@/types/blogTypes";
+import { ApiResponse, buildBlog, formatResponse } from "@/utils/utils";
+import { JSONContent } from "@tiptap/react";
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 
 export async function saveDraft(
   blogFormData: BlogFormData
 ): Promise<ApiResponse<Blog>> {
   const draftExists = await readSingleDoc<Blog>({
-    collectionName: Collections.BLOG_METADATA,
+    collectionName: "BLOGS",
     docId: blogFormData.blogId,
-    fieldsToRead: ["blogId"],
+    fieldsToRead: { blogId: true },
   });
 
-  const draftBlog = buildBlog(blogFormData, true, draftExists?.blogId);
-  const adminBlogListItem = buildAdminBlog(draftBlog, !!draftExists);
+  if (!draftExists) {
+    throw new Error("Draft does not exists");
+  }
+
+  const draftBlog = buildBlog(blogFormData);
 
   try {
-    await Promise.all([
-      createData({
-        collectionName: Collections.BLOG_METADATA,
-        docId: draftBlog.blogId,
-        data: adminBlogListItem,
-      }),
-      createData({
-        collectionName: Collections.DRAFTS,
-        docId: draftBlog.blogId,
-        data: draftBlog,
-      }),
-    ]);
+    await createData<Blog>({
+      collectionName: "BLOGS",
+      docId: draftBlog.blogId,
+      data: draftBlog,
+    });
     revalidatePath("/dashboard", "layout");
     return formatResponse({
       status: "success",
@@ -46,7 +35,7 @@ export async function saveDraft(
       message: "Draft saved succesfully",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return formatResponse({
       status: "error",
       data: null,
@@ -57,13 +46,13 @@ export async function saveDraft(
 
 export async function uploadBlog(
   blogFormData: BlogFormData
-): Promise<ApiResponse<AdminBlogListItem>> {
-  const blog = buildBlog(blogFormData, false, blogFormData.blogId);
+): Promise<ApiResponse<null>> {
+  const blog = buildBlog(blogFormData);
 
-  const blogDoc = await readSingleDoc<AdminBlogListItem>({
-    collectionName: Collections.BLOG_METADATA,
+  const blogDoc = await readSingleDoc<Blog>({
+    collectionName: "BLOGS",
     docId: blog.blogId,
-    fieldsToRead: ["status", "link"],
+    fieldsToRead: { status: true, link: true },
   });
 
   if (!blogDoc)
@@ -71,29 +60,11 @@ export async function uploadBlog(
       "Blog metadata does not exists. System error as it must exist before uploading"
     );
 
-  const adminBlogListItem = buildAdminBlog(blog, true);
-
   try {
-    const uploadBlogPromise = createData({
-      collectionName: Collections.BLOG_METADATA,
-      docId: blog.blogId,
-      data: adminBlogListItem,
-    });
-
-    const fetchPromise = fetcher({
-      url: `${env.BLOGSITE_HOSTNAME}/api/blogs`,
-      body: JSON.stringify(blog),
-    });
-    const deleteDraftPromise = deleteData({
-      collectionName: Collections.DRAFTS,
-      docId: blog.blogId,
-    });
-
-    await Promise.all([uploadBlogPromise, fetchPromise, deleteDraftPromise]);
     revalidatePath("/", "layout");
     return formatResponse({
       status: "success",
-      data: adminBlogListItem,
+      data: null,
       message: "Blog uploaded successfully",
     });
   } catch (error) {
@@ -106,47 +77,23 @@ export async function uploadBlog(
   }
 }
 
-export async function deleteBlog({
-  blogId,
-  categoryId,
-}: {
-  blogId: string;
-  categoryId: string;
-}) {
+export async function deleteBlog(blogId: string) {
   try {
-    const blogStatus = await readSingleDoc<AdminBlogListItem>({
+    const blogStatus = await readSingleDoc<Blog>({
       docId: blogId,
-      collectionName: Collections.BLOG_METADATA,
-      fieldsToRead: ["status"],
+      collectionName: "BLOGS",
+      fieldsToRead: { status: true },
     });
 
     if (!blogStatus) {
       throw new Error("Blog not found, so not deleted");
     }
 
-    const deleteBlogPromise = deleteBlogdb({ blogId, categoryId });
-
-    if (blogStatus.status === "draft") {
-      await Promise.all([
-        deleteBlogPromise,
-        deleteData({ collectionName: Collections.DRAFTS, docId: blogId }),
-      ]);
-
-      revalidatePath("/dashboard", "layout");
-      return formatResponse({
-        status: "success",
-        data: null,
-        message: "Draft deleted successfully",
-      });
-    }
-    const fetchPromise = fetcher({
-      url: `${env.BLOGSITE_HOSTNAME}/api/blogs`,
-      body: JSON.stringify({ blogId }),
-      method: "DELETE",
+    await deleteBlogdb({
+      blogId,
+      isDraft: blogStatus.status === "draft",
     });
 
-    await Promise.all([deleteBlogPromise, fetchPromise]);
-    revalidatePath("/", "layout");
     return formatResponse({
       status: "success",
       data: null,
@@ -166,31 +113,36 @@ export async function toggleBlogStatus(
   blogId: string
 ): Promise<ApiResponse<null>> {
   try {
-    const docRef = db.collection(Collections.BLOG_METADATA).doc(blogId);
-    const blogDoc = await docRef.get();
+    const blogDoc = await readSingleDoc<Blog>({
+      collectionName: "BLOGS",
+      docId: blogId,
+      fieldsToRead: { status: true },
+    });
 
-    if (!blogDoc.exists) {
+    if (!blogDoc) {
       return { message: "Blog does not exists!", data: null, status: "fail" };
     }
 
-    const isActive = blogDoc.data()!.status === "active";
-    const newStatus = isActive ? "inactive" : "active";
+    if (blogDoc.status === "draft") {
+      return {
+        message:
+          "Draft cannot be activated, Please finish writing and publish the blog first",
+        data: null,
+        status: "fail",
+      };
+    }
 
-    const localPromise = docRef.set(
-      {
+    const isActive = blogDoc.status === BlogStatus.Active;
+    const newStatus = isActive ? BlogStatus.Inactive : BlogStatus.Active;
+
+    await updateData<Blog>({
+      collectionName: "BLOGS",
+      docId: blogId,
+      updatedData: {
         status: newStatus,
-        updatedAt: new Date().toISOString(),
+        updatedAt: Date.now(),
       },
-      { merge: true }
-    );
-
-    const fetchPromise = fetcher({
-      url: `${env.BLOGSITE_HOSTNAME}/api/blogs`,
-      body: JSON.stringify({ type: "status", status: newStatus, blogId }),
-      method: "PUT",
     });
-
-    await Promise.all([localPromise, fetchPromise]);
 
     return {
       data: null,
@@ -208,3 +160,85 @@ export async function toggleBlogStatus(
     };
   }
 }
+
+export const startBlogWriting = async (): Promise<
+  ApiResponse<BlogFormData>
+> => {
+  try {
+    const defaultContent: JSONContent = {
+      type: "doc",
+      content: [
+        {
+          type: "section",
+          content: [
+            // @ts-ignore
+            {
+              type: "paragraph",
+              content: [],
+              key: "1",
+            },
+          ],
+        },
+      ],
+    };
+
+    const newBlogId = randomUUID();
+    const newBlog: Blog = {
+      blogName: `Untitled Blog ${new Date().toLocaleDateString()}s`,
+      blogDescription: "",
+      blogTags: [],
+      content: JSON.stringify(defaultContent),
+      featuredImageUrl: "",
+
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      hasDraftChanges: false,
+
+      estReadTime: 0,
+      link: "",
+      type: BlogType.Article,
+      recommendations: [],
+      recommendationTitle: "",
+      socialTitle: "",
+      status: BlogStatus.Draft,
+
+      blogId: newBlogId,
+      blogStats: {
+        totalComments: 0,
+        totalLikes: 0,
+        totalShares: 0,
+        totalViews: 0,
+      },
+    };
+    await createData<Blog>({
+      collectionName: "BLOGS",
+      docId: newBlogId,
+      data: newBlog,
+    });
+
+    return formatResponse<BlogFormData>({
+      status: "success",
+      data: {
+        blogDescription: newBlog.blogDescription,
+        blogId: newBlog.blogId,
+        blogName: newBlog.blogName,
+        blogTags: newBlog.blogTags,
+        recommendationTitle: newBlog.recommendationTitle,
+        content: defaultContent,
+        featuredImageUrl: newBlog.featuredImageUrl,
+        link: newBlog.link,
+        socialTitle: newBlog.socialTitle,
+        status: newBlog.status,
+        type: newBlog.type,
+      } as BlogFormData,
+      message: "Blog writing started successfully",
+    });
+  } catch (error) {
+    console.error("Error while starting blog writing", error);
+    return formatResponse({
+      status: "error",
+      data: null,
+      message: "Error occured while starting blog writing",
+    });
+  }
+};

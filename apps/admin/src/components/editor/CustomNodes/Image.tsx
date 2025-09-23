@@ -1,16 +1,16 @@
 import { Node, ReactNodeViewRenderer } from "@tiptap/react";
 import { ImageBlockNodeview } from "../NodeViews/NextImage";
+import { exitOnArrowDown } from ".";
 
 export const ImageExtension = Node.create({
   name: "image",
 
   // Basic configuration
   group: "block",
-  content: "",
   draggable: true,
   isolating: false,
+  content: "",
 
-  // Define attributes to store in the document schema
   addAttributes() {
     return {
       src: {
@@ -73,6 +73,12 @@ export const ImageExtension = Node.create({
     };
   },
 
+  addKeyboardShortcuts() {
+    return {
+      ArrowDown: ({ editor }) =>
+        exitOnArrowDown({ editor, nodeType: this.name }),
+    };
+  },
   // Your custom component will handle the rendering
   addNodeView() {
     return ReactNodeViewRenderer(ImageBlockNodeview);

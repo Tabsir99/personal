@@ -9,15 +9,15 @@ import GeneralSettings from "@/components/settings/GeneralSettings";
 import ContentSettings from "@/components/settings/ContentSettings";
 import DisplaySettings from "@/components/settings/DisplaySettings";
 import NotificationSettings from "@/components/settings/NotificationSettings";
-import { useBlogSettings } from "@/context/SettingsContext";
 import { SocialIntegrations } from "@/components/settings/SocialIntegration";
+import { useBlogSettingsStore } from "@/stores/SettingStore";
 
 const SettingsPage = () => {
-  const { saveChanges } = useBlogSettings();
+  const saveChanges = useBlogSettingsStore.getState().saveChanges;
   return (
-    <div className="min-h-screen bg-black text-zinc-100">
+    <div className="min-h-screen bg-zinc-900/60 text-zinc-100">
       <div className="flex flex-col">
-        <header className="sticky top-0 z-10 bg-zinc-950/80 backdrop-blur-sm border-b border-zinc-800 p-4">
+        <header className="sticky top-0 z-10  backdrop-blur-sm border-b border-zinc-800 p-4">
           <div className="container max-w-6xl mx-auto flex items-center justify-between">
             <h1 className="text-2xl font-bold text-zinc-100">Settings</h1>
             <Button
@@ -31,7 +31,7 @@ const SettingsPage = () => {
         </header>
 
         <main className="container min-w-full mx-auto p-4 pb-20">
-          <Tabs defaultValue="general" className="w-full">
+          <Tabs defaultValue="notifications" className="w-full">
             <div className="flex justify-center mb-6">
               <TabsList className="bg-zinc-900 p-1">
                 {[

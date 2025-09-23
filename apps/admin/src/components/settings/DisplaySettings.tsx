@@ -11,10 +11,15 @@ import {
 import { Switch } from "../ui/switch";
 import { Palette } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { useBlogSettings } from "@/context/SettingsContext";
+import {
+  useAppearanceSettings,
+  useSettingsActions,
+} from "@/stores/SettingStore";
 
-export default function () {
-  const { updateAppearanceSettings, settings } = useBlogSettings();
+export default function AppearanceSettings() {
+  const appearanceSettings = useAppearanceSettings();
+  const { updateAppearance } = useSettingsActions();
+
   return (
     <SettingsSection
       title="Theme & Display"
@@ -27,28 +32,23 @@ export default function () {
           <div className="flex items-center gap-4">
             <Input
               type="color"
-              value={settings.appearance.themeColor}
-              onChange={(e) =>
-                updateAppearanceSettings({ themeColor: e.target.value })
-              }
+              value={appearanceSettings.themeColor}
+              onChange={(e) => updateAppearance({ themeColor: e.target.value })}
               className="w-16 h-10 bg-zinc-900 border-zinc-700"
             />
             <Input
-              value={settings.appearance.themeColor}
-              onChange={(e) =>
-                updateAppearanceSettings({ themeColor: e.target.value })
-              }
+              value={appearanceSettings.themeColor}
+              onChange={(e) => updateAppearance({ themeColor: e.target.value })}
               className="bg-zinc-900 border-zinc-700 text-zinc-100 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
         </div>
+
         <div className="space-y-2">
           <Label className="text-zinc-300">Primary Font</Label>
           <Select
-            value={settings.appearance.fontPrimary}
-            onValueChange={(value) =>
-              updateAppearanceSettings({ fontPrimary: value })
-            }
+            value={appearanceSettings.fontPrimary}
+            onValueChange={(value) => updateAppearance({ fontPrimary: value })}
           >
             <SelectTrigger className="bg-zinc-900 border-zinc-700 text-zinc-100">
               <SelectValue placeholder="Select font" />
@@ -68,10 +68,8 @@ export default function () {
         <div className="space-y-2">
           <Label className="text-zinc-300">Color Mode</Label>
           <RadioGroup
-            value={settings.appearance.darkMode ? "dark" : "light"}
-            onValueChange={(v) =>
-              updateAppearanceSettings({ darkMode: v === "dark" })
-            }
+            value={appearanceSettings.darkMode ? "dark" : "light"}
+            onValueChange={(v) => updateAppearance({ darkMode: v === "dark" })}
           >
             <div className="flex gap-4 mt-2">
               <div className="flex items-center space-x-2">
@@ -107,6 +105,7 @@ export default function () {
             </div>
           </RadioGroup>
         </div>
+
         <div className="space-y-2">
           <Label className="text-zinc-300">Author Bio Display</Label>
           <div className="flex items-center justify-between mt-2">
@@ -114,9 +113,9 @@ export default function () {
               Show author bio on posts
             </span>
             <Switch
-              checked={settings.appearance.showAuthorBio}
+              checked={appearanceSettings.showAuthorBio}
               onCheckedChange={(value) =>
-                updateAppearanceSettings({ showAuthorBio: value })
+                updateAppearance({ showAuthorBio: value })
               }
             />
           </div>

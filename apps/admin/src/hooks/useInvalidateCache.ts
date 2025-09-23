@@ -1,27 +1,19 @@
-import { AdminBlogListItem, BlogCategory, BlogStatus } from "@/types/blogTypes";
+import { Blog, BlogStatus } from "@/types/blogTypes";
 import { mutate } from "swr";
 
 export const invalidateBlogOverview = ({
   selectedBlog,
-  categories,
   type,
 }: {
-  selectedBlog: AdminBlogListItem;
-  categories: BlogCategory[];
+  selectedBlog: Blog;
   type: "delete" | "add" | "status" | "update";
 }) => {
-  const matchingPatterns = [
-    `/api/local/blogOverview`,
-    ...categories.map(
-      (category) =>
-        `/api/local/blogOverview?categoryId=${category.categoryId}&status=`
-    ),
-  ];
+  const matchingPatterns = [`/api/local/blogOverview`];
 
   matchingPatterns.forEach((pattern) => {
     mutate(
       pattern,
-      (current: AdminBlogListItem[] | undefined) => {
+      (current: Blog[] | undefined) => {
         if (!current) return current;
         switch (type) {
           case "add":

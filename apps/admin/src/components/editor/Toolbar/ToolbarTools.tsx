@@ -1,7 +1,4 @@
-import { ActiveModal } from "@/app/dashboard/write-blog/page";
 import { Editor } from "@tiptap/react";
-import { LayoutGrid } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
 import {
   FaArrowRotateLeft,
   FaArrowRotateRight,
@@ -24,19 +21,17 @@ interface Tool {
   command?: () => void;
   type:
     | "history"
-    | "mark"
-    | "node"
     | "divider"
     | "heading"
-    | "align"
     | "image"
     | "link"
-    | "textColor";
+    | "textColor"
+    | "components"
+    | "mark"
+    | "node"
+    | "align";
 }
-export const getTools = (
-  editor: Editor,
-  setActiveModal: Dispatch<SetStateAction<ActiveModal>>
-): Tool[] => [
+export const getTools = (editor: Editor): Tool[] => [
   {
     icon: <FaArrowRotateLeft />,
     key: "undo",
@@ -50,10 +45,7 @@ export const getTools = (
     type: "history",
   },
   { type: "divider", key: "divider-1" },
-  {
-    type: "heading",
-    key: "heading",
-  },
+  { type: "heading", key: "heading" },
   { type: "divider", key: "divider-2" },
   {
     icon: <FaBold />,
@@ -80,10 +72,7 @@ export const getTools = (
     type: "mark",
   },
 
-  {
-    key: "textColor",
-    type: "textColor",
-  },
+  { key: "textColor", type: "textColor" },
 
   {
     icon: <span className="font-extrabold">hr</span>,
@@ -93,15 +82,11 @@ export const getTools = (
   },
 
   { type: "divider", key: "divider-3" },
-  {
-    key: "link",
-    type: "link",
-  },
-  {
-    key: "image",
-    type: "image",
-  },
+  { key: "link", type: "link" },
+
+  { key: "image", type: "image" },
   { type: "divider", key: "divider-4" },
+
   {
     icon: <FaAlignLeft />,
     key: "left",
@@ -147,12 +132,5 @@ export const getTools = (
     },
     type: "node",
   },
-  {
-    icon: <LayoutGrid className="w-4 h-4" />,
-    key: "Components",
-    command: () => {
-      setActiveModal((prev) => ({ ...prev, components: true }));
-    },
-    type: "node",
-  },
+  { key: "Components", type: "components" },
 ];

@@ -2,27 +2,21 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { MdUploadFile } from "react-icons/md";
 
-import { uploadImage } from "@/actions/categoryActions";
 import ConfirmationModal from "../ui/common/ConfirmationModal";
-import { useWriteBlogContext } from "@/context/WriteBlogContext";
+import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 
 export default function BlogThumbnailInput() {
-  const { blogFormData, setBlogFormData } = useWriteBlogContext();
+  const featuredImageUrl = useBlogEditorStore(
+    (state) => state.blogFormData.featuredImageUrl
+  );
   const uploadRef = useRef<HTMLInputElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   const handleThumbnailUpload = async (image?: File) => {
-    const formData = new FormData();
-    formData.append("file", image || (thumbnail as any));
-    formData.append("blogId", blogFormData.blogId);
-    const response = await uploadImage(formData, true);
-
-    setBlogFormData((prev) => ({
-      ...prev,
-      featuredImageUrl: response.data as any,
-    }));
     setIsOpen(false);
+    image;
+    thumbnail;
   };
   return (
     <>
@@ -42,9 +36,7 @@ export default function BlogThumbnailInput() {
         }
       >
         <MdUploadFile className="h-7 w-12" />{" "}
-        {blogFormData.featuredImageUrl
-          ? "Change Thumbnail"
-          : "Upload Thumbnail"}
+        {featuredImageUrl ? "Change Thumbnail" : "Upload Thumbnail"}
         <input
           ref={uploadRef}
           type="file"
@@ -54,7 +46,7 @@ export default function BlogThumbnailInput() {
 
             if (!imageFile) return;
             setThumbnail(imageFile);
-            if (blogFormData.featuredImageUrl) {
+            if (featuredImageUrl) {
               setIsOpen(true);
             } else {
               await handleThumbnailUpload(imageFile);
@@ -63,9 +55,9 @@ export default function BlogThumbnailInput() {
           className=" hidden"
         />
       </div>
-      {blogFormData.featuredImageUrl && (
+      {featuredImageUrl && (
         <Image
-          src={blogFormData.featuredImageUrl}
+          src={featuredImageUrl}
           alt="whatever"
           className="border-2 border-gray-700 rounded-lg"
           width={600}

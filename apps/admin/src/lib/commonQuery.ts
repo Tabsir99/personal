@@ -1,35 +1,48 @@
 import { firestore } from "firebase-admin";
 import { db } from "../config/firebaseAdminBlog";
+import { Collections, ValidCollections } from "@/utils/utils";
 
-export const createData = async ({
+interface CreateDataParams<T> {
+  collectionName: ValidCollections;
+  docId: string;
+  data: T;
+}
+
+export const createData = async <T>({
   collectionName,
   docId,
   data,
-}: {
-  collectionName: string;
-  docId: string;
-  data: any;
-}) => {
-  console.log(collectionName, docId, data);
+}: CreateDataParams<T>) => {
   try {
-    const docRef = db.collection(collectionName).doc(docId);
-    await docRef.set(data, { merge: true });
+    const docRef = db.collection(Collections[collectionName]).doc(docId);
+    await docRef.set(data as any, { merge: true });
     return "Blog uploaded succesfully";
   } catch (err) {
     throw err;
   }
 };
 
-export const updateData = async (collectionName, docID, updatedData) => {
+interface UpdateDataParams<T> {
+  collectionName: ValidCollections;
+  docId: string;
+  updatedData: Partial<T>;
+}
+
+export const updateData = async <T>({
+  collectionName,
+  docId,
+  updatedData,
+}: UpdateDataParams<T>) => {
   const dataToPut = updatedData;
-  Object.entries(dataToPut).forEach(([key, value]) => {
-    if (Array.isArray(value))
+  Object.entries(dataToPut as any).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
       dataToPut[key] = firestore.FieldValue.arrayUnion(...value);
+    }
   });
 
   try {
-    const docRef = db.collection(collectionName).doc(docID);
-    await docRef.set(updatedData, { merge: true });
+    const docRef = db.collection(Collections[collectionName]).doc(docId);
+    await docRef.set(updatedData as any, { merge: true });
   } catch (err) {}
 };
 
@@ -55,97 +68,66 @@ export const readAllDocs = async <T = any>(
   }
 };
 
-export const readDocsFields = async <T = any>({
-  collection,
-  feildsToRead,
-  feildsToQueryBy = null,
-  feildsValues = null,
-  limit = 999,
-  orderBy = "blogMetadata.updatedAt",
-}: {
-  collection: string;
-  feildsToRead: (keyof T)[];
-  feildsToQueryBy: (keyof T)[] | null;
-  feildsValues: string[] | null;
+interface ReadNDocsParams<T> {
+  collectionName: ValidCollections;
   limit?: number;
-  orderBy?: string;
-}): Promise<T[]> => {
-  const collectionRef = db.collection(collection);
-  feildsToRead;
-  let query = collectionRef
-    .select(...(feildsToRead as string[]))
-    .limit(limit)
-    .orderBy(orderBy, "desc");
-
-  if (
-    feildsToQueryBy &&
-    feildsValues &&
-    feildsToQueryBy.length === feildsValues.length
-  ) {
-    feildsToQueryBy.forEach((feild, index) => {
-      query = query.where(feild as string, "==", feildsValues[index]);
-    });
-  }
-
-  const querySnapshot = await query.get();
-
-  const docs: any[] = [];
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
-
-    docs.push(data);
-  });
-  return docs;
-};
-
-export const readNDocs = async ({
-  collectionName,
-  limitNumber,
-  filter,
-  cursorValue,
-}: {
-  collectionName: string;
-  limitNumber: number;
-  filter: { filterBy: string[]; filterValues: string[] };
+  filters?: Partial<{ [K in keyof T]: T[K] }>;
   cursorValue: string | null;
-}) => {
-  try {
-    const docs: any[] = [];
-    let query = db
-      .collection(collectionName)
-      .orderBy("createdAt", "desc")
-      .limit(limitNumber);
+  fieldsToRead?: Partial<Record<keyof T, boolean>>;
+  orderBy?: {
+    field: keyof T;
+    order: firestore.OrderByDirection;
+  };
+}
 
-    filter.filterBy.forEach((feild, index) => {
-      query = query.where(feild, "==", filter.filterValues[index]);
+export const readNDocs = async <T>({
+  collectionName,
+  limit = 30,
+  filters = {},
+  cursorValue,
+  fieldsToRead,
+  orderBy,
+}: ReadNDocsParams<T>): Promise<T[]> => {
+  try {
+    let query = db.collection(Collections[collectionName]).limit(limit);
+
+    Object.entries(filters).forEach(([field, value]) => {
+      query = query.where(field, "==", value);
     });
+
+    if (fieldsToRead) {
+      query = query.select(
+        ...Object.keys(fieldsToRead).filter((key) => fieldsToRead[key])
+      );
+    }
+
+    if (orderBy) {
+      query = query.orderBy(orderBy.field as string, orderBy.order);
+    }
 
     if (cursorValue) {
       query = query.startAfter(cursorValue);
     }
     const querySnapshot = await query.get();
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      docs.push(data);
-    });
-
-    return docs;
+    return querySnapshot.docs.map((d) => d.data()) as T[];
   } catch (error) {
     console.error(error);
     return [];
   }
 };
 
-export const readSingleDoc = async <T = any>({
+interface ReadSingleDocParams<T> {
+  collectionName: ValidCollections;
+  docId: string;
+  fieldsToRead?: Partial<Record<keyof T, boolean>>;
+}
+
+export const readSingleDoc = async <T>({
   collectionName,
   docId,
   fieldsToRead,
-}: {
-  collectionName: string;
-  docId: string;
-  fieldsToRead?: (keyof T)[];
-}): Promise<T | null> => {
+}: ReadSingleDocParams<T>): Promise<T | null> => {
   try {
     const query = db
       .collection(collectionName)
@@ -153,7 +135,9 @@ export const readSingleDoc = async <T = any>({
       .limit(1);
 
     const finalQuery = fieldsToRead
-      ? query.select(...(fieldsToRead as string[]))
+      ? query.select(
+          ...Object.keys(fieldsToRead).filter((key) => fieldsToRead[key])
+        )
       : query;
 
     const snapshot = await finalQuery.get();
@@ -173,11 +157,11 @@ export const deleteData = async ({
   collectionName,
   docId,
 }: {
-  collectionName: string;
+  collectionName: ValidCollections;
   docId: string;
 }) => {
   try {
-    const docRef = db.collection(collectionName).doc(docId);
+    const docRef = db.collection(Collections[collectionName]).doc(docId);
     await docRef.delete();
   } catch (err) {
     throw err;

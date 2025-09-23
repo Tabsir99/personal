@@ -1,20 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authLimiter } from "./config/redisConfig";
+import { jwtVerify } from "jose";
+import { env } from "./config/env";
 
-// Constants
-const ALLOWED_METHODS = ["POST", "GET", "OPTIONS"] as const;
+const ALLOWED_METHODS = ["POST", "GET"] as const;
 const HTTP_STATUS = {
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
   TOO_MANY_REQUESTS: 429,
 } as const;
 
-// Types
 type AllowedMethod = (typeof ALLOWED_METHODS)[number];
 
-// Helper functions
 const isValidMethod = (method: string): method is AllowedMethod => {
   return ALLOWED_METHODS.includes(method as AllowedMethod);
+};
+
+const isLoggedIn = async (token?: string) => {
+  try {
+    if (!token) return false;
+    await jwtVerify(token, new TextEncoder().encode(env.JWT_SECRET));
+    return true;
+  } catch (error) {
+    return false;
+  }
 };
 
 const handleRateLimit = async (ipAddress: string) => {
@@ -24,53 +33,41 @@ const handleRateLimit = async (ipAddress: string) => {
     : NextResponse.json({}, { status: HTTP_STATUS.TOO_MANY_REQUESTS });
 };
 
-const handleLocalApiAccess = (cookie?: string) => {
-  return cookie === process.env.SECRET_COOKIE_VALUE2
-    ? NextResponse.next()
-    : NextResponse.json(
-        { reason: "Unauthenticated", group: "/api/local" },
-        { status: HTTP_STATUS.UNAUTHORIZED }
-      );
-};
-
-const handleApiAccess = (accessToken?: string | null) => {
-  const isLoggedIn = accessToken === process.env.ACCESS_TOKEN;
-  return isLoggedIn
-    ? NextResponse.next()
-    : NextResponse.json({}, { status: HTTP_STATUS.UNAUTHORIZED });
-};
-
 export default async function middleware(request: NextRequest) {
-  if (request.nextUrl.pathname.includes("auth")) {
-    return NextResponse.next();
-  }
-  // Method validation
-  if (!isValidMethod(request.method)) {
-    return NextResponse.json({}, { status: HTTP_STATUS.BAD_REQUEST });
-  }
-
-  const ipAddress = request.headers.get("xIp") ?? "unknown";
-  const pathname = request.nextUrl.pathname;
-  const cookie = request.cookies.get("Authenticated")?.value;
-
-  // Rate limiting for POST requests to root in production
-  if (
-    pathname === "/" &&
-    request.method === "POST" &&
-    process.env.NODE_ENV !== "development"
-  ) {
-    return handleRateLimit(ipAddress);
-  }
-
-  // API route handling
-  if (pathname !== "/") {
-    if (pathname.includes("local") || pathname.includes("dashboard")) {
-      return handleLocalApiAccess(cookie);
+  try {
+    if (request.nextUrl.pathname.includes("auth")) {
+      return NextResponse.next();
     }
-    return handleApiAccess(request.headers.get("acs_tkn"));
-  }
+    if (!isValidMethod(request.method)) {
+      throw new Error("");
+    }
 
-  return NextResponse.next();
+    const ipAddress = request.headers.get("xIp") ?? "unknown";
+    const pathname = request.nextUrl.pathname;
+    const token = request.cookies.get("token")?.value;
+
+    if (
+      pathname === "/" &&
+      request.method === "POST" &&
+      process.env.NODE_ENV !== "development"
+    ) {
+      return handleRateLimit(ipAddress);
+    }
+
+    const authenticated = await isLoggedIn(token);
+    if (pathname !== "/" && !authenticated) {
+      throw new Error("");
+    }
+
+    if (pathname === "/" && authenticated) {
+      return NextResponse.redirect(`${env.ADMIN_ORIGIN}/dashboard`);
+    }
+
+    return NextResponse.next();
+  } catch (error) {
+    console.error(error);
+    return NextResponse.error();
+  }
 }
 
 export const config = {

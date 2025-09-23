@@ -8,13 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { useBlogSettings } from "@/context/SettingsContext";
 import { Slider } from "../ui/slider";
 import { Switch } from "../ui/switch";
 import { FileText } from "lucide-react";
+import { useContentSettings, useSettingsActions } from "@/stores/SettingStore";
 
 export default function ContentSettings() {
-  const { updateContentSettings, settings } = useBlogSettings();
+  // Use selectors for optimized performance
+  const contentSettings = useContentSettings();
+  const { updateContent } = useSettingsActions();
+
   return (
     <SettingsSection
       title="Content Settings"
@@ -26,22 +29,21 @@ export default function ContentSettings() {
           <Label className="text-zinc-300">Posts Per Page</Label>
           <Input
             type="number"
-            value={settings.content.postsPerPage}
+            value={contentSettings.postsPerPage}
             onChange={(e) =>
-              updateContentSettings({ postsPerPage: parseInt(e.target.value) })
+              updateContent({ postsPerPage: parseInt(e.target.value) })
             }
             min={1}
             max={50}
             className="bg-zinc-900 border-zinc-700 text-zinc-100 focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
+
         <div className="space-y-2">
           <Label className="text-zinc-300">Default Category</Label>
           <Select
-            value={settings.content.defaultCategory}
-            onValueChange={(value) =>
-              updateContentSettings({ defaultCategory: value })
-            }
+            value={contentSettings.defaultCategory}
+            onValueChange={(value) => updateContent({ defaultCategory: value })}
           >
             <SelectTrigger className="bg-zinc-900 border-zinc-700 text-zinc-100">
               <SelectValue placeholder="Select default category" />
@@ -62,36 +64,38 @@ export default function ContentSettings() {
           <Label className="text-zinc-300">Excerpt Length (characters)</Label>
           <div className="pt-2">
             <Slider
-              value={[settings.content.excerptLength]}
+              value={[contentSettings.excerptLength]}
               min={50}
               max={500}
               step={10}
               onValueChange={(value) =>
-                updateContentSettings({ excerptLength: value[0] })
+                updateContent({ excerptLength: value[0] })
               }
               className="py-4"
             />
             <div className="text-zinc-400 text-sm text-right">
-              {settings.content.excerptLength} characters
+              {contentSettings.excerptLength} characters
             </div>
           </div>
         </div>
+
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <Label className="text-zinc-300">Allow Comments</Label>
             <Switch
-              checked={settings.content.allowComments}
+              checked={contentSettings.allowComments}
               onCheckedChange={(value) =>
-                updateContentSettings({ allowComments: value })
+                updateContent({ allowComments: value })
               }
             />
           </div>
+
           <div className="flex items-center justify-between">
             <Label className="text-zinc-300">Comment Moderation</Label>
             <Switch
-              checked={settings.content.commentModeration}
+              checked={contentSettings.commentModeration}
               onCheckedChange={(value) =>
-                updateContentSettings({ commentModeration: value })
+                updateContent({ commentModeration: value })
               }
             />
           </div>

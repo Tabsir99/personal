@@ -1,5 +1,4 @@
 import { JSONContent } from "@tiptap/react";
-import { PageMetrics } from "./dashboardTypes";
 
 // Standardized enum naming using PascalCase consistently
 export enum BlogType {
@@ -14,32 +13,25 @@ export enum BlogStatus {
   Draft = "draft",
 }
 
-// Convert string literal to enum for consistency
-export enum CategoryStatus {
-  Active = "active",
-  Inactive = "inactive",
-}
-
 // Base interface for shared blog properties
 export interface BaseBlogData {
   blogId: string;
   blogName: string;
-  categoryId: string;
   type: BlogType;
   status: BlogStatus;
   link: string;
-}
 
-// Improved metadata interface with proper types
-export interface BlogMetadata {
+  estReadTime: number; // In Minutes
+
   blogDescription: string; // SEO meta description
   blogTags: string[]; // Content categorization tags
-  createdAt: string; // Publication timestamp
-  updatedAt: string; // Last modification timestamp
-  estReadTime: number; // Estimated reading time in minutes
   recommendationTitle: string; // Title used in recommendation sections
-  socialTitle: string; // Title optimized for social media sharing
+  socialTitle: string; // Title for social media sharing
   featuredImageUrl: string; // Image for thumbnails and social sharing
+
+  draftTitle?: string;
+  draftDescription?: string;
+  lastDraftSave?: number;
 }
 
 export interface BlogStats {
@@ -51,47 +43,37 @@ export interface BlogStats {
 
 // Main blog interface extending the base
 export interface Blog extends BaseBlogData {
-  content: string; // Full HTML/Markdown blog content
+  content: string; // Full Tiptap JSONContent but as a string
+  draftContent?: string;
+
   recommendations: string[]; // Array of related blog IDs
-  blogMetadata: BlogMetadata;
   blogStats: BlogStats;
+
+  createdAt: number; // Publication timestamp
+  updatedAt: number; // Last modification timestamp
+
+  hasDraftChanges: boolean;
 }
 
-// Admin-specific category management
-export interface BlogCategory {
-  categoryId: string;
-  categoryName: string;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-  status: CategoryStatus;
-  totalPosts: number; // Calculated field showing posts in category
-}
+export type BlogFields = keyof Blog;
 
 // Interface for blog draft/creation forms
-
 export interface BlogFormData extends BaseBlogData {
-  blogDescription: string;
-  blogTags: string[];
-  recommendationTitle: string;
-  socialTitle: string;
-  featuredImageUrl: string;
-  estReadTime: number | null;
   content: JSONContent | null;
+  draftContent?: JSONContent;
+
+  createdAt?: number; // Publication timestamp
+  updatedAt?: number; // Last modification timestamp
 }
 
-// Admin dashboard blog list item
-export interface AdminBlogListItem extends BaseBlogData {
-  createdAt: string;
-  featuredImageUrl: string;
-  pageMetrics: PageMetrics;
+export interface ValidLinks {
+  categoryLinks: string[];
+  blogLinks: string[];
 }
 
-// // Detailed admin view of a blog
-// export interface AdminBlogDetail extends Blog {
-//   pageMetrics: PageMetrics;
-//   publishHistory: {
-//     publishedAt: string | Date;
-//     version: number;
-//   }[];
-// }
+export interface SiteMapLinks {
+  blogLinks: {
+    link: string;
+    updatedAt: any;
+  }[];
+}

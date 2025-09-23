@@ -1,10 +1,8 @@
 import { type Metadata } from "next";
 
 import DashBoardSidebar from "@/components/dashboard/DashboardSidebar";
-
-import { BlogMetadataProvider } from "@/context/WriteBlogContext";
-import { NotificationProvider } from "@/context/NotificationContext";
-import { BlogSettingsProvider } from "@/context/SettingsContext";
+import { Toaster } from "@/components/ui/sonner";
+import { CreateBlogModal } from "@/context/CreateBlogModal";
 
 export const metadata: Metadata = {
   title: "Dashboard Home",
@@ -20,15 +18,20 @@ export default function DashBoardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <NotificationProvider>
-      <BlogMetadataProvider>
-        <BlogSettingsProvider>
-          <DashBoardSidebar />
-          <main className=" overflow-y-scroll bg-zinc-950 pl-16 w-screen h-screen">
-            {children}
-          </main>
-        </BlogSettingsProvider>
-      </BlogMetadataProvider>
-    </NotificationProvider>
+    <>
+      <DashBoardSidebar />
+      <main className=" overflow-y-scroll bg-zinc-950 pl-16 w-screen h-screen">
+        {children}
+      </main>
+
+      <Toaster
+        richColors
+        position="bottom-right"
+        visibleToasts={3}
+        swipeDirections={["left", "bottom"]}
+        duration={5000}
+      />
+      <CreateBlogModal />
+    </>
   );
 }

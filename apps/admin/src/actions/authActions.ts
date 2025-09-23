@@ -1,18 +1,15 @@
 "use server";
 
 import { cookies } from "next/headers";
-
 import { formatResponse } from "@/utils/utils";
-import { redirect } from "next/navigation";
+import { SignJWT } from "jose";
+import { env } from "@/config/env";
 
 export async function logInAction(formData: FormData) {
   const username = formData.get("username");
   const password = formData.get("password");
 
-  if (
-    username !== process.env.ADMIN_USERNAME ||
-    password !== process.env.ADMIN_PASSWORD
-  ) {
+  if (username !== env.ADMIN_USERNAME || password !== env.ADMIN_PASSWORD) {
     return formatResponse({
       status: "error",
       message: "Incorrect username or password",
@@ -22,10 +19,15 @@ export async function logInAction(formData: FormData) {
 
   const cookieStore = await cookies();
 
-  const cookieValue = process.env.SECRET_COOKIE_VALUE;
+  const jwt = await new SignJWT({ role: "owner", id: env.ADMIN_USERNAME })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("7d")
+    .sign(new TextEncoder().encode(env.JWT_SECRET));
+
   cookieStore.set({
-    name: "Authenticated",
-    value: cookieValue as string,
+    name: "token",
+    value: jwt,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
@@ -36,33 +38,6 @@ export async function logInAction(formData: FormData) {
   return formatResponse({
     status: "success",
     message: "Successfully signed in",
-    data: null,
-  });
-}
-
-export async function secretAction(secret: string) {
-  const cookieStore = await cookies();
-
-  if (secret !== process.env.ADMIN_SECRET_CODE) {
-    cookieStore.delete("Authenticated");
-    redirect("/");
-  }
-
-  const cookieValue = process.env.SECRET_COOKIE_VALUE2;
-
-  cookieStore.set({
-    name: "Authenticated",
-    value: cookieValue as string,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
-
-  return formatResponse({
-    status: "success",
-    message: "Log in Successfull",
     data: null,
   });
 }

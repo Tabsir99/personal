@@ -2,7 +2,6 @@
 import { usePathname } from "next/navigation";
 import {
   Edit,
-  Folder,
   Users,
   Settings,
   LogOut,
@@ -14,7 +13,6 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-// @ts-ignore
 import logo from "../../../public/o-min.png";
 
 const DashBoardSidebar = () => {
@@ -26,11 +24,6 @@ const DashBoardSidebar = () => {
       Icon: LayoutDashboard,
       menuName: "Dashboard",
       menuLink: rootDashBoardUrl,
-    },
-    {
-      Icon: Folder,
-      menuName: "Categories",
-      menuLink: `${rootDashBoardUrl}/categories`,
     },
     {
       Icon: Edit,

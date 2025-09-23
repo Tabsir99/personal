@@ -1,14 +1,10 @@
 import { deleteBlog, toggleBlogStatus } from "@/actions/blogActions";
-import {
-  NotificationType,
-  useNotification,
-} from "@/context/NotificationContext";
-import { useWriteBlogContext } from "@/context/WriteBlogContext";
-import { AdminBlogListItem, Blog, BlogFormData } from "@/types/blogTypes";
+import { Blog, BlogFormData } from "@/types/blogTypes";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useState } from "react";
 import { invalidateBlogOverview } from "./useInvalidateCache";
-import { LocalStorageKeys } from "@/types/types";
+import { toast } from "sonner";
+import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 
 interface UseManageBlogsProps {
   setIsModalOpen: Dispatch<
@@ -18,118 +14,90 @@ interface UseManageBlogsProps {
 export default function useManageBlogs({
   setIsModalOpen,
 }: UseManageBlogsProps) {
-  const { addNotification } = useNotification();
   const router = useRouter();
 
-  const [selectedBlog, setSelectedBlog] = useState<AdminBlogListItem | null>(
-    null
-  );
-
-  const { setBlogFormData, categories } = useWriteBlogContext();
-
-  const handleCategoryChange = (newCategory = "") => {
-    if (!newCategory) {
-      return router.push(`/dashboard/manage-posts`);
-    }
-    router.push(
-      `/dashboard/manage-posts?category=${newCategory.toLowerCase()}`
-    );
-  };
+  const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
+  const setBlogFormData = useBlogEditorStore.getState().setBlogFormData;
 
   const handleBlogDelete = () => {
     setIsModalOpen({ confirm: true, share: false, thumbnail: false });
   };
 
   const confirmDelete = async () => {
-    setSelectedBlog(null);
+    closeModal();
 
-    if (!selectedBlog) return addNotification({ message: "No blog selected" });
-    document.body.style.cursor = "wait";
-    const res = await deleteBlog({
-      blogId: selectedBlog.blogId,
-      categoryId: selectedBlog.categoryId,
-    });
-    document.body.removeAttribute("style");
+    if (!selectedBlog) {
+      toast.error("No blog selected");
+      return;
+    }
+
+    const toastId = toast.loading("Deleting blog...");
+    const res = await deleteBlog(selectedBlog.blogId);
     if (res.status === "success") {
-      addNotification({
-        message: "Blog has been deleted",
-        type: NotificationType.INFO,
-      });
+      toast.success("Blog has been deleted", { id: toastId });
     } else {
-      addNotification({ message: res.message, type: NotificationType.ERROR });
+      toast.error(res.message, { id: toastId });
     }
 
     // Invalidate SWR cache and do Optimistic UI update
     invalidateBlogOverview({
       selectedBlog: selectedBlog!,
-      categories: categories!,
       type: "delete",
     });
-
-    closeModal();
   };
 
   const handleBlogEdit = async () => {
+    if (!selectedBlog) {
+      toast.error("No blog selected");
+      return;
+    }
     setSelectedBlog(null);
-    localStorage.clear();
 
-    document.body.style.cursor = "wait";
-    const res = await fetch(
-      `/api/local/blogs?blogId=${selectedBlog?.blogId}&status=${selectedBlog?.status}`
-    );
+    const toastId = toast.loading("Loading blog...");
+    const res = await fetch(`/api/blogs/${selectedBlog.blogId}`);
     if (!res.ok) {
-      document.body.style.removeProperty("cursor");
-      return addNotification({ message: res.statusText });
+      toast.error(res.statusText, { id: toastId });
+      return;
     }
     const data = (await res.json()) as Blog;
 
-    document.body.style.removeProperty("cursor");
-    if (!data) return addNotification({ message: "No blog found" });
+    if (!data) {
+      toast.error("No blog found", { id: toastId });
+      return;
+    }
     // Turn the metadata to unstructured blog data
-    const metaData = data.blogMetadata;
     const blogFormData: BlogFormData = {
-      blogDescription: metaData.blogDescription,
+      blogDescription: data.blogDescription,
       blogName: data.blogName,
-      blogTags: metaData.blogTags,
-      categoryId: data.categoryId,
-      recommendationTitle: metaData.recommendationTitle,
-      socialTitle: metaData.socialTitle,
-      featuredImageUrl: metaData.featuredImageUrl,
+      blogTags: data.blogTags,
+      recommendationTitle: data.recommendationTitle,
+      socialTitle: data.socialTitle,
+      featuredImageUrl: data.featuredImageUrl,
       type: data.type,
       content: JSON.parse(data.content),
-      estReadTime: metaData.estReadTime,
+      estReadTime: data.estReadTime,
       link: data.link,
       status: data.status,
       blogId: data.blogId,
     };
 
-    localStorage.setItem(
-      LocalStorageKeys.BlogFormData,
-      JSON.stringify(blogFormData)
-    );
     setBlogFormData(blogFormData);
     router.push("./write-blog");
   };
 
   const handleStatus = async () => {
     setSelectedBlog(null);
-    document.body.style.cursor = "wait";
+    const toastId = toast.loading("Updating status...");
     const res = await toggleBlogStatus(selectedBlog?.link as string);
 
     if (res.status !== "success") {
-      addNotification({
-        message: res.message,
-        type: NotificationType.ERROR,
-      });
-      document.body.removeAttribute("style");
+      toast.error(res.message, { id: toastId });
     } else {
-      addNotification({ message: res.message, type: NotificationType.SUCCESS });
-      document.body.removeAttribute("style");
+      toast.success(res.message, { id: toastId });
     }
 
     invalidateBlogOverview({
       selectedBlog: selectedBlog!,
-      categories: categories!,
       type: "status",
     });
   };
@@ -148,7 +116,6 @@ export default function useManageBlogs({
   };
 
   return {
-    handleCategoryChange,
     setSelectedBlog,
     confirmDelete,
     handleBlogEdit,

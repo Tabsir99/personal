@@ -1,13 +1,6 @@
 import { slugify } from "@/lib/utils";
-import {
-  AdminBlogListItem,
-  Blog,
-  BlogFormData,
-  BlogStatus,
-  BlogType,
-} from "@/types/blogTypes";
+import { Blog, BlogFormData, BlogType } from "@/types/blogTypes";
 import { JSONContent } from "@tiptap/react";
-import { randomUUID } from "crypto";
 
 type ResponseStatus = "success" | "error" | "fail";
 
@@ -30,22 +23,18 @@ export const formatResponse = <T>({
 };
 
 export const Collections = {
-  DRAFTS: "draft_blogs",
-  CATEGORY_METADATA: "category-metadata",
-  STATS: {
-    collectionName: "stats",
-    documents: {
-      DASHBOARD: "dashboard",
-    },
-    DAILY_STATS: "daily-stats",
-    MONTHLY_STATS: "monthly-stats",
-  },
+  DASHBOARD_STATS: "stats",
+  DAILY_STATS: "daily-stats",
+  MONTHLY_STATS: "monthly-stats",
+
   VALID_LINKS: "valid-links",
   USERS: "users",
   PAGE_METRICS: "page-metrics",
-  BLOG_METADATA: "blog-metadata",
+  BLOGS: "blogs",
   SESSIONS: "sessions",
 };
+
+export type ValidCollections = keyof typeof Collections;
 
 export const env = {
   BLOGSITE_HOSTNAME: process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME as string,
@@ -66,31 +55,25 @@ export const measureEstReadTime = (blogText = "") => {
   return estReadTime;
 };
 
-export const buildBlog = (
-  blogFormData: BlogFormData,
-  isDraft: boolean,
-  blogId?: string
-): Blog => {
+export const buildBlog = (blogFormData: BlogFormData): Blog => {
   if (!blogFormData.content) throw new Error("There is no blog content");
   const textContent = extractTextFromTipTapJSON(blogFormData.content);
   return {
-    blogId: blogId || randomUUID(),
-    blogMetadata: {
-      blogDescription: blogFormData.blogDescription,
+    blogId: blogFormData.blogId,
+    blogDescription: blogFormData.blogDescription,
 
-      blogTags: blogFormData.blogTags,
-      createdAt: new Date().toISOString(),
-      estReadTime: measureEstReadTime(textContent),
-      recommendationTitle: blogFormData.recommendationTitle,
-      socialTitle: blogFormData.socialTitle,
-      featuredImageUrl: blogFormData.featuredImageUrl || "",
-      updatedAt: new Date().toISOString(),
-    },
+    blogTags: blogFormData.blogTags,
+    recommendationTitle: blogFormData.recommendationTitle,
+    socialTitle: blogFormData.socialTitle,
+    featuredImageUrl: blogFormData.featuredImageUrl || "",
     blogName: blogFormData.blogName,
     content: JSON.stringify(blogFormData.content),
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
     type: BlogType.Article,
-    status: isDraft ? BlogStatus.Draft : BlogStatus.Active,
-    categoryId: blogFormData.categoryId,
+    status: blogFormData.status,
+
+    estReadTime: measureEstReadTime(textContent),
     link: slugify(blogFormData.blogName),
     recommendations: [],
     blogStats: {
@@ -99,6 +82,8 @@ export const buildBlog = (
       totalShares: 0,
       totalViews: 0,
     },
+
+    hasDraftChanges: false,
   };
 };
 
@@ -120,47 +105,6 @@ export async function fetcher({
       acc_tkn: process.env.ACCESS_TOKEN as string,
     },
   });
-}
-
-export function buildAdminBlog(
-  blog: Blog,
-  shouldUpdate: boolean
-): Partial<AdminBlogListItem> {
-  return {
-    blogName: blog.blogName,
-    categoryId: blog.categoryId,
-    link: blog.link,
-    status: blog.status,
-    blogId: blog.blogId,
-    createdAt: blog.blogMetadata.createdAt,
-    type: blog.type,
-    featuredImageUrl: blog.blogMetadata.featuredImageUrl || "",
-    ...(!shouldUpdate && {
-      pageMetrics: {
-        totalVisitors: 0,
-        uniqueVisitoris: 0,
-        timeOnPage: {
-          totalTime: 0,
-          timeRange: {
-            "0-30": 0,
-            "120+": 0,
-            "30-60": 0,
-            "60-120": 0,
-          },
-        },
-        blogMetrics: {
-          totalComments: 0,
-          totalLikes: 0,
-          totalShares: 0,
-          totalDepthScrolled: 0,
-          clickThroughRate: {
-            totalClicks: 0,
-            totalVisibility: 0,
-          },
-        },
-      },
-    }),
-  };
 }
 
 function extractTextFromTipTapJSON(json: JSONContent) {

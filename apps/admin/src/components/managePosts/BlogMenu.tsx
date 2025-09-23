@@ -1,23 +1,17 @@
 import React from "react";
-import { AdminBlogListItem } from "@/types/blogTypes";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  Pencil,
-  Trash2,
-  Power,
-  Share2,
-  Image,
-} from "lucide-react";
+import { Pencil, Trash2, Power, Share2, Image } from "lucide-react";
+import { Blog } from "@/types/blogTypes";
 
 export default function BlogMenu({
   selectedBlog,
   menuActions,
 }: {
-  selectedBlog: AdminBlogListItem | null;
+  selectedBlog: Blog | null;
   menuActions: {
     handleBlogEdit: () => void;
     handleBlogDelete: () => void;
@@ -49,15 +43,17 @@ export default function BlogMenu({
 
       <DropdownMenuSeparator className="bg-zinc-800" />
 
-      <DropdownMenuItem
-        onClick={menuActions.handleStatus}
-        className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-zinc-800 focus:bg-zinc-800"
-      >
-        <Power className="w-4 h-4" />
-        <span>
-          {selectedBlog?.status === "active" ? "Deactivate" : "Activate"} Post
-        </span>
-      </DropdownMenuItem>
+      {selectedBlog?.status !== "draft" && (
+        <DropdownMenuItem
+          onClick={menuActions.handleStatus}
+          className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+        >
+          <Power className="w-4 h-4" />
+          <span>
+            {selectedBlog?.status === "active" ? "Deactivate" : "Activate"} Post
+          </span>
+        </DropdownMenuItem>
+      )}
 
       <DropdownMenuItem
         onClick={menuActions.handleShareBlog}

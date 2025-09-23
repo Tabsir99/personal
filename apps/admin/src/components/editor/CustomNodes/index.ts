@@ -1,17 +1,34 @@
 import { CodeblockHighlight } from "./CodeBlockHighlight";
-import {
-  RootNode,
-  MainSection,
-  LineBreak,
-  Cite,
-  CustomBlockquote,
-} from "../CustomNodes/customNodes";
+import { RootNode, MainSection, LineBreak } from "../CustomNodes/customNodes";
+import type { Editor } from "@tiptap/react";
 
-export {
-  CodeblockHighlight,
-  RootNode,
-  MainSection,
-  LineBreak,
-  Cite,
-  CustomBlockquote,
+// For leaf nodes only
+export const exitOnArrowDown = ({
+  editor,
+  nodeType,
+}: {
+  editor: Editor;
+  nodeType: string;
+}) => {
+  const { state } = editor;
+  const { selection, doc } = state;
+  const { $from } = selection;
+
+  const currentNode = doc.nodeAt($from.pos)?.type.name;
+
+  console.log(currentNode, nodeType);
+  if (currentNode !== nodeType) {
+    return false;
+  }
+
+  const isAtEnd = $from.pos === doc.nodeSize - 4;
+
+  if (!isAtEnd) {
+    return false;
+  }
+
+  editor.commands.insertContentAt($from.pos + 1, { type: "paragraph" });
+  return true;
 };
+
+export { CodeblockHighlight, RootNode, MainSection, LineBreak };

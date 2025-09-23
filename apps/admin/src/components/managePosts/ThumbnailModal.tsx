@@ -1,8 +1,3 @@
-import { uploadImage } from "@/actions/categoryActions";
-import {
-  NotificationType,
-  useNotification,
-} from "@/context/NotificationContext";
 import React, { useEffect, useState } from "react";
 import { FaImages, FaUpload } from "react-icons/fa6";
 import {
@@ -14,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-// import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 export default function ThumbnailModal({
   isOpen,
@@ -30,7 +25,6 @@ export default function ThumbnailModal({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { addNotification } = useNotification();
 
   useEffect(() => {
     if (currentThumbnail) {
@@ -41,39 +35,10 @@ export default function ThumbnailModal({
   const onThumbnailChange = async (newThumbnail: File) => {
     setIsLoading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", newThumbnail);
-      formData.append("blogLink", blogLink);
-      const res = await uploadImage(formData, true);
-
-      if (res.status === "success") {
-        addNotification({
-          message: "Thumbnail has been updated",
-          type: NotificationType.SUCCESS,
-        });
-        // toast({
-        //   title: "Success",
-        //   description: "Thumbnail has been updated successfully",
-        //   variant: "success",
-        // });
-      } else {
-        addNotification({
-          message: "Failed to update thumbnail",
-          type: NotificationType.ERROR,
-        });
-        // toast({
-        //   title: "Error",
-        //   description: "Failed to update thumbnail",
-        //   variant: "destructive",
-        // });
-      }
+      newThumbnail;
+      blogLink;
     } catch (error) {
-      console.error("Error uploading thumbnail:", error);
-      // toast({
-      //   title: "Error",
-      //   description: "An unexpected error occurred",
-      //   variant: "destructive",
-      // });
+      toast.error("Error uploading thumbnail");
     } finally {
       setIsLoading(false);
       onClose();

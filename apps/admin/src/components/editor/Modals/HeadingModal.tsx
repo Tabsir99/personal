@@ -35,7 +35,7 @@ export default function HeadingModal({ editor }: { editor: Editor }) {
       <PopoverTrigger asChild>
         <button
           className={cn(
-            "flex items-center justify-between w-32 px-3 py-2 rounded-md text-zinc-100 hover:bg-zinc-800 transition-all duration-200",
+            "flex items-center justify-between w-36 px-3 py-2 rounded-md text-zinc-100 hover:bg-zinc-800 transition-all duration-200",
             isOpen && "ring-1 ring-zinc-800"
           )}
         >

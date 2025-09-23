@@ -1,7 +1,6 @@
 import { Editor } from "@tiptap/react";
 import { useRef, useState } from "react";
 import { ImageIcon, UploadIcon, Link2Icon } from "lucide-react";
-import { uploadImage } from "@/actions/categoryActions";
 import {
   Tooltip,
   TooltipContent,
@@ -19,8 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
-import { cn, slugify } from "@/lib/utils";
-import useBlogFormData from "@/hooks/useMetadata";
+import { cn } from "@/lib/utils";
 import {
   Popover,
   PopoverContent,
@@ -33,23 +31,14 @@ export const ImageInsertButton = ({ editor }: { editor: Editor }) => {
   const [imageUrl, setImageUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const uploadRef = useRef<HTMLInputElement | null>(null);
-  const { blogFormData } = useBlogFormData();
+  // const { blogFormData } = useBlogFormData();
 
   const handleImageUpload = async (file: File) => {
     try {
       setIsUploading(true);
+      console.log("What the hell", file);
 
-      const id = slugify(blogFormData.blogName);
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("blogLink", id);
-
-      const response = await uploadImage(formData);
-
-      if (response.data) {
-        insertImage(response.data);
-      }
+      insertImage(URL.createObjectURL(file));
     } catch (error) {
       console.error("Error uploading image:", error);
     } finally {

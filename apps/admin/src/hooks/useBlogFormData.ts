@@ -1,7 +1,7 @@
 "use client";
 import { BlogType, BlogFormData, BlogStatus } from "@/types/blogTypes";
-import { LocalStorageKeys } from "@/types/types";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { LocalStorageKeys } from "@/types/settingTypes";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
 
 export interface UseBlogFormData {
   blogFormData: BlogFormData;
@@ -20,39 +20,20 @@ export default function useBlogFormData(): UseBlogFormData {
     blogName: "",
     blogDescription: "",
     blogTags: [],
-    categoryId: "",
     recommendationTitle: "Keep reading...",
     socialTitle: "",
     featuredImageUrl: "",
     type: BlogType.Article,
     link: "",
     content: null,
-    estReadTime: null,
+    estReadTime: 1,
     status: BlogStatus.Draft,
-    blogId: "temp-id",
+    blogId: "",
   }).current;
 
   const [blogFormData, setBlogFormData] =
     useState<BlogFormData>(defaultBlogFormData);
   const [tagInput, setTagInput] = useState("");
-
-  useEffect(() => {
-    const savedData = localStorage.getItem(LocalStorageKeys.BlogFormData);
-    if (!savedData) return;
-
-    try {
-      const parsedData = JSON.parse(savedData) as BlogFormData;
-      setBlogFormData({
-        ...defaultBlogFormData,
-        ...parsedData,
-        // Preserve these values from state if they exist
-        status: parsedData.status || BlogStatus.Draft,
-        content: parsedData.content,
-      });
-    } catch (error) {
-      console.error("Error parsing saved blog data:", error);
-    }
-  }, []);
 
   const addTag = () => {
     const trimmedTag = tagInput.trim();

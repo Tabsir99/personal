@@ -10,10 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { useBlogSettings } from "@/context/SettingsContext";
+import { useGeneralSettings, useSettingsActions } from "@/stores/SettingStore";
 
-export default function GeneralSettings({}) {
-  const { updateGeneralSettings, settings } = useBlogSettings();
+export default function GeneralSettings() {
+  const generalSettings = useGeneralSettings();
+  const { updateGeneral } = useSettingsActions();
 
   return (
     <SettingsSection
@@ -25,21 +26,18 @@ export default function GeneralSettings({}) {
         <div className="space-y-2">
           <Label className="text-zinc-300">Site Title</Label>
           <Input
-            value={settings.general.siteTitle}
-            onChange={(e) =>
-              updateGeneralSettings({ siteTitle: e.target.value })
-            }
+            value={generalSettings.siteTitle}
+            onChange={(e) => updateGeneral({ siteTitle: e.target.value })}
             placeholder="Enter your blog name"
             className="bg-zinc-900 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
+
         <div className="space-y-2">
           <Label className="text-zinc-300">Meta Description</Label>
           <Textarea
-            value={settings.general.metaDescription}
-            onChange={(e) =>
-              updateGeneralSettings({ metaDescription: e.target.value })
-            }
+            value={generalSettings.metaDescription}
+            onChange={(e) => updateGeneral({ metaDescription: e.target.value })}
             placeholder="Describe your blog for search engines"
             className="min-h-[80px] bg-zinc-900 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:border-blue-500 focus:ring-blue-500"
           />
@@ -50,19 +48,18 @@ export default function GeneralSettings({}) {
         <div className="space-y-2">
           <Label className="text-zinc-300">Favicon URL</Label>
           <Input
-            value={settings.general.faviconUrl}
-            onChange={(e) =>
-              updateGeneralSettings({ faviconUrl: e.target.value })
-            }
+            value={generalSettings.faviconUrl}
+            onChange={(e) => updateGeneral({ faviconUrl: e.target.value })}
             placeholder="https://yourblog.com/favicon.ico"
             className="bg-zinc-900 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
+
         <div className="space-y-2">
           <Label className="text-zinc-300">Logo URL</Label>
           <Input
-            value={settings.general.logoUrl}
-            onChange={(e) => updateGeneralSettings({ logoUrl: e.target.value })}
+            value={generalSettings.logoUrl}
+            onChange={(e) => updateGeneral({ logoUrl: e.target.value })}
             placeholder="https://yourblog.com/logo.png"
             className="bg-zinc-900 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:border-blue-500 focus:ring-blue-500"
           />
@@ -73,10 +70,8 @@ export default function GeneralSettings({}) {
         <div className="space-y-2">
           <Label className="text-zinc-300">Default Language</Label>
           <Select
-            value={settings.general.language}
-            onValueChange={(value) =>
-              updateGeneralSettings({ language: value })
-            }
+            value={generalSettings.language}
+            onValueChange={(value) => updateGeneral({ language: value })}
           >
             <SelectTrigger className="bg-zinc-900 border-zinc-700 text-zinc-100">
               <SelectValue placeholder="Select language" />
@@ -90,13 +85,12 @@ export default function GeneralSettings({}) {
             </SelectContent>
           </Select>
         </div>
+
         <div className="space-y-2">
           <Label className="text-zinc-300">Timezone</Label>
           <Select
-            value={settings.general.timezone}
-            onValueChange={(value) =>
-              updateGeneralSettings({ timezone: value })
-            }
+            value={generalSettings.timezone}
+            onValueChange={(value) => updateGeneral({ timezone: value })}
           >
             <SelectTrigger className="bg-zinc-900 border-zinc-700 text-zinc-100">
               <SelectValue placeholder="Select timezone" />

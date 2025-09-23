@@ -13,15 +13,13 @@ import Strike from "@tiptap/extension-strike";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
-// import Image from "@tiptap/extension-image";
 import Text from "@tiptap/extension-text";
+import Blockquote from "@tiptap/extension-blockquote";
 
 import {
   RootNode,
   MainSection,
   LineBreak,
-  Cite,
-  CustomBlockquote,
   CodeblockHighlight,
 } from "../CustomNodes";
 
@@ -33,10 +31,10 @@ import { FAQSection } from "../CustomNodes/FaqSection";
 export const starterKitOptions = [
   RootNode,
   MainSection,
-  CustomBlockquote,
   Bold,
   BulletList,
   Code,
+  Blockquote,
   CodeblockHighlight,
   Dropcursor,
   Heading.extend({
@@ -76,7 +74,6 @@ export const starterKitOptions = [
   ImageExtension,
   Text,
   LineBreak,
-  Cite,
   TextColor,
   FAQSection,
 ];

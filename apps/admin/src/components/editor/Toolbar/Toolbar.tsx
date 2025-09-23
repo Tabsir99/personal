@@ -1,7 +1,7 @@
 "use client";
 
 import { Editor } from "@tiptap/react";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -9,7 +9,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { ActiveModal } from "@/app/dashboard/write-blog/page";
 
 import { getTools } from "./ToolbarTools";
 import HeadingModal from "../Modals/HeadingModal";
@@ -17,37 +16,76 @@ import TextColorModal from "../Modals/ColorModal";
 import DraftPreview from "./DraftPreview";
 import { ImageInsertButton } from "../Modals/ImageModal";
 import LinkModal from "../Modals/LinkModal";
+import ComponentPicker from "../Modals/ComponentPicker";
 
+interface ActiveButton {
+  align: "left" | "right" | "center" | "justify";
+  node: string;
+  mark: {
+    bold: boolean;
+    italic: boolean;
+    underline: boolean;
+    strikethrough: boolean;
+    link: boolean;
+    color: string;
+  };
+}
 const Toolbar = ({
   editor,
-  setActiveModal,
+  // setActiveModal,
 }: {
   editor: Editor;
-  setActiveModal: Dispatch<SetStateAction<ActiveModal>>;
+  // setActiveModal: Dispatch<SetStateAction<ActiveModal>>;
 }) => {
-  const [activeButton, setActiveButton] = useState({
+  console.log("Toolbar re renders");
+  const [activeButton, setActiveButton] = useState<ActiveButton>({
     align: "left",
     node: "",
-    mark: {},
+    mark: {
+      bold: false,
+      color: "#E5E7EB",
+      italic: false,
+      strikethrough: false,
+      underline: false,
+      link: false,
+    },
   });
-  const [activeTextColor, setActiveTextColor] = useState<string>("#E5E7EB");
 
-  const updateActiveButton = () => {
-    setActiveButton({
-      mark: {
+  const throttle = useCallback(
+    (func: (...args: any[]) => void, limit: number) => {
+      let inThrottle: boolean;
+      return function (...args: any[]) {
+        if (!inThrottle) {
+          func.apply(this, args);
+          inThrottle = true;
+          setTimeout(() => (inThrottle = false), limit);
+        }
+      };
+    },
+    []
+  );
+
+  const updateActiveButton = useCallback(
+    throttle(() => {
+      const currentColor = editor.getAttributes("textColor").color || "#E5E7EB";
+
+      const newMarks: ActiveButton["mark"] = {
         bold: editor.isActive("bold"),
         italic: editor.isActive("italic"),
         underline: editor.isActive("underline"),
         strikethrough: editor.isActive("strike"),
-      },
-      align: editor.isActive({ textAlign: "right" })
+        link: editor.isActive("link"),
+        color: currentColor,
+      };
+      const newAlign = editor.isActive({ textAlign: "right" })
         ? "right"
         : editor.isActive({ textAlign: "center" })
           ? "center"
           : editor.isActive({ textAlign: "justify" })
             ? "justify"
-            : "left",
-      node: editor.isActive("bulletList")
+            : "left";
+
+      const newNode = editor.isActive("bulletList")
         ? "ul"
         : editor.isActive("orderedList")
           ? "ol"
@@ -55,24 +93,33 @@ const Toolbar = ({
             ? "quote"
             : editor.isActive("codeBlock")
               ? "code"
-              : "",
-    });
+              : "";
 
-    const currentColor = editor.getAttributes("textColor").color || "#E5E7EB";
-    setActiveTextColor(currentColor);
-  };
+      setActiveButton((prev) => {
+        if (
+          prev.align === newAlign &&
+          prev.node === newNode &&
+          JSON.stringify(prev.mark) === JSON.stringify(newMarks)
+        ) {
+          return prev;
+        }
+        return { align: newAlign, mark: newMarks, node: newNode };
+      });
+    }, 100),
+    []
+  );
+
   useEffect(() => {
     editor.on("selectionUpdate", updateActiveButton);
-
     return () => {
       editor.off("selectionUpdate", updateActiveButton);
     };
   }, [editor, updateActiveButton]);
 
-  const tools = getTools(editor, setActiveModal);
+  const tools = getTools(editor);
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="flex items-center gap-1 p-1 bg-zinc-900 border border-zinc-800 rounded-md">
+      <div className="flex items-center gap-1 p-1 rounded-md">
         {tools.map((item) => {
           const isActive =
             (item.type === "align" && activeButton.align === item.key) ||
@@ -96,20 +143,31 @@ const Toolbar = ({
             return (
               <TextColorModal
                 key={item.key}
-                activeTextColor={activeTextColor}
+                activeTextColor={activeButton.mark.color}
                 handleColorClick={(color) => {
                   editor.chain().focus().toggleTextColor(color).run();
+                  updateActiveButton();
                 }}
               />
             );
           }
 
           if (item.type === "link") {
-            return <LinkModal key={item.key} editor={editor} />;
+            return (
+              <LinkModal
+                key={item.key}
+                editor={editor}
+                isActive={activeButton.mark.link}
+              />
+            );
           }
 
           if (item.type === "image") {
             return <ImageInsertButton editor={editor} key={item.key} />;
+          }
+
+          if (item.type === "components") {
+            return <ComponentPicker editor={editor} key={item.key} />;
           }
           return (
             <Tooltip key={item.key}>
@@ -147,4 +205,6 @@ const Toolbar = ({
   );
 };
 
-export default Toolbar;
+export default memo(Toolbar, () => {
+  return true;
+});

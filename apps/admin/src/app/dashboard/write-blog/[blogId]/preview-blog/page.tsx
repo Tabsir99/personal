@@ -4,20 +4,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { uploadBlog } from "@/actions/blogActions";
-import {
-  NotificationType,
-  useNotification,
-} from "@/context/NotificationContext";
-import { useWriteBlogContext } from "@/context/WriteBlogContext";
 import { parseContent } from "@/lib/parseTiptapJson";
-import { LocalStorageKeys } from "@/types/types";
-import {  BlogFormData } from "@/types/blogTypes";
+import { LocalStorageKeys } from "@/types/settingTypes";
+import { BlogFormData } from "@/types/blogTypes";
 import { invalidateBlogOverview } from "@/hooks/useInvalidateCache";
+import { toast } from "sonner";
+import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 
 export default function PreviewBlog() {
-  const { addNotification } = useNotification();
   const [isUploading, setIsUploading] = useState(false);
-  const { resetBlogFormData, blogFormData, categories } = useWriteBlogContext();
+  const { resetBlogFormData, blogFormData } = useBlogEditorStore.getState();
 
   const router = useRouter();
 
@@ -27,8 +23,7 @@ export default function PreviewBlog() {
 
     const blogFormData = JSON.parse(blogFormDataStr) as BlogFormData;
 
-    if (!blogFormData)
-      return addNotification({ message: "Blogmetadata is missing" });
+    if (!blogFormData) return toast.error("BlogFormData is missing");
 
     // for (const [key, value] of Object.entries(blogFormData)) {
     //   if (key === "createdAt") continue;
@@ -38,29 +33,22 @@ export default function PreviewBlog() {
     //   }
     // }
 
-    if (!blogFormData.content)
-      return addNotification({ message: "There is no blog content" });
+    if (!blogFormData.content) return toast.error("There is no blog content");
     setIsUploading(true);
 
-    console.log(JSON.stringify(blogFormData));
     const res = await uploadBlog(blogFormData);
     setIsUploading(false);
-    addNotification({
-      message: res.message,
-      type:
-        res.status === "success"
-          ? NotificationType.SUCCESS
-          : NotificationType.ERROR,
-    });
+    toast.success(res.message);
+
     if (res.status === "success") {
       invalidateBlogOverview({
         selectedBlog: res.data!,
-        categories: categories!,
         type: "add",
       });
       resetBlogFormData();
       router.push("/dashboard/manage-posts");
     }
+    return;
   };
 
   return (
@@ -68,14 +56,7 @@ export default function PreviewBlog() {
       <header className="w-full">
         <div className="flex items-center text-lg gap-3 px-0 py-10 border-b-2 relative mb-8 border-gray-800 ">
           <Link href="/"> blogs </Link> &gt;
-          <Link href="#">
-            {" "}
-            {blogFormData.blogName
-              ?.trim()
-              .replace(/\s/g, "-")
-              .toLowerCase()
-              .slice(0, 25) + "..."}{" "}
-          </Link>
+          <Link href="#"> {blogFormData.link}</Link>
           <div className="absolute top-8 right-0 flex gap-3 items-center">
             <button
               onClick={handleUpload}

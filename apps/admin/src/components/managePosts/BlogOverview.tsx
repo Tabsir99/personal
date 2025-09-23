@@ -9,10 +9,10 @@ import ManagePostHead from "./ManageBlogHead";
 import useManageBlogs from "@/hooks/useManageBlogs";
 
 import ConfirmationModal from "../ui/common/ConfirmationModal";
-import { AdminBlogListItem, BlogStatus } from "@/types/blogTypes";
+import { Blog } from "@/types/blogTypes";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import BlogShareModal from "./BlogShareModal";
-import SkeletonLoader from "../ui/Skeletons/BlogCardSkeleton";
+import { BlogCardSkeletonGrid } from "../ui/Skeletons/BlogCardSkeleton";
 import ThumbnailModal from "./ThumbnailModal";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
 
@@ -37,12 +37,11 @@ const BlogOverview = () => {
   } = useManageBlogs({ setIsModalOpen });
 
   const [filterBy, setFilterBy] = useState<{
-    categoryId: string;
-    status: BlogStatus | "";
-  }>({ categoryId: "", status: "" });
+    status: Blog["status"] | "";
+  }>({ status: "" });
 
-  const { data, isLoading } = useCustomSWR<AdminBlogListItem[]>(
-    `/api/local/blogOverview${filterBy.categoryId || filterBy.status ? `?categoryId=${filterBy.categoryId}&status=${filterBy.status}` : ""}`
+  const { data, isLoading } = useCustomSWR<Blog[]>(
+    `/api/blogs?=content=false&status=${filterBy.status}`
   );
 
   const filteredPosts = useMemo(() => {
@@ -76,9 +75,6 @@ const BlogOverview = () => {
       />
 
       <ManagePostHead
-        handleCategoryChange={(categoryId) => {
-          setFilterBy((prev) => ({ ...prev, categoryId }));
-        }}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         handleStatusChange={(status) => {
@@ -86,38 +82,40 @@ const BlogOverview = () => {
         }}
       />
 
-      <div className="w-full max-w-7xl mx-auto py-5">
+      <div className="w-full max-w-full mx-auto py-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {isLoading
-            ? [1, 2, 3, 4].map((num) => <SkeletonLoader key={num} />)
-            : filteredPosts?.map((post) => {
-                return (
-                  <div key={post.link} className="relative">
-                    <DropdownMenu
-                      onOpenChange={(open) => {
-                        if (open) {
-                          setSelectedBlog(post);
-                        }
-                      }}
-                    >
-                      <CMSBlogCard adminBlogListItem={post} />
+          {isLoading ? (
+            <BlogCardSkeletonGrid />
+          ) : (
+            filteredPosts?.map((post) => {
+              return (
+                <div key={post.blogId} className="relative">
+                  <DropdownMenu
+                    onOpenChange={(open) => {
+                      if (open) {
+                        setSelectedBlog(post);
+                      }
+                    }}
+                  >
+                    <CMSBlogCard adminBlogListItem={post} />
 
-                      {isModalOpen.confirm || isModalOpen.share || (
-                        <BlogMenu
-                          menuActions={{
-                            handleBlogDelete,
-                            handleBlogEdit,
-                            handleStatus,
-                            handleShareBlog,
-                            handleThumbnail,
-                          }}
-                          selectedBlog={selectedBlog}
-                        />
-                      )}
-                    </DropdownMenu>
-                  </div>
-                );
-              })}
+                    {isModalOpen.confirm || isModalOpen.share || (
+                      <BlogMenu
+                        menuActions={{
+                          handleBlogDelete,
+                          handleBlogEdit,
+                          handleStatus,
+                          handleShareBlog,
+                          handleThumbnail,
+                        }}
+                        selectedBlog={selectedBlog}
+                      />
+                    )}
+                  </DropdownMenu>
+                </div>
+              );
+            })
+          )}
         </div>
 
         {/* Footer */}

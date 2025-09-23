@@ -1,10 +1,13 @@
 import { JSONContent, type Editor } from "@tiptap/react";
 
-export const toggleNode = (node: JSONContent["type"], editor: Editor) => {
+export const toggleNode = (
+  node: JSONContent["type"],
+  editor: Editor,
+  attrs: Record<string, any> | null = null
+) => {
   const { selection, tr } = editor.view.state;
   const { $from } = selection;
   const nodeType = editor.schema.nodes[node];
-  console.log("Node type is: ", nodeType);
   const currentNode = $from.parent;
   const text = currentNode.textContent;
   const nodeContent = text ? editor.schema.text(text) : null;
@@ -47,11 +50,10 @@ export const toggleNode = (node: JSONContent["type"], editor: Editor) => {
   const start = $from.before();
   const end = $from.after();
 
-  console.log(schemaNodes, "yh");
   tr.replaceWith(
     start,
     end,
-    editor.schema.node(nodeType, null, schemaNodes as any)
+    editor.schema.node(nodeType, attrs, schemaNodes as any)
   );
 
   if (!nodeContent) {

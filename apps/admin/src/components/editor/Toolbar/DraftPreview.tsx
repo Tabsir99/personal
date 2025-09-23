@@ -1,32 +1,26 @@
 // DraftPreview.js
 "use client";
-import { Editor, JSONContent } from "@tiptap/react";
+import { Editor } from "@tiptap/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaArrowRight, FaCloud, FaEye, FaTag } from "react-icons/fa6";
 import WriteMetadataComp from "../../write-post/writeMetadata";
 import { saveDraft } from "@/actions/blogActions";
-import {
-  NotificationType,
-  useNotification,
-} from "@/context/NotificationContext";
 import { BlogFormData } from "@/types/blogTypes";
-import { LocalStorageKeys } from "@/types/types";
-import { useWriteBlogContext } from "@/context/WriteBlogContext";
+import { LocalStorageKeys } from "@/types/settingTypes";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 
 const DraftPreview = ({ editor }: { editor: Editor }) => {
   const router = useRouter();
-  const { addNotification } = useNotification();
-  const { resetBlogFormData, setBlogFormData } = useWriteBlogContext();
 
   const [showSidebar, setShowSidebar] = useState(false);
 
-  async function draftBlog(clearLocalStorage: boolean) {
+  async function draftBlog() {
     const blogFormDataStr = localStorage.getItem(LocalStorageKeys.BlogFormData);
     if (!blogFormDataStr) throw new Error("BlogFormData is missing");
 
@@ -34,35 +28,20 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
     try {
       const res = await saveDraft(blogFormData);
       if (res.status === "success") {
-        if (clearLocalStorage) {
-          localStorage.clear();
-          resetBlogFormData();
-          addNotification({
-            message: res.message,
-            type: NotificationType.SUCCESS,
-          });
-        } else {
-          localStorage.setItem(
-            LocalStorageKeys.BlogFormData,
-            JSON.stringify({
-              ...blogFormData,
-              blogId: res.data?.blogId,
-              link: res.data?.link,
-              estReadTime: res.data?.blogMetadata.estReadTime,
-              content: editor.getJSON(),
-            } as BlogFormData)
-          );
-        }
-
-        return res.data;
+        localStorage.setItem(
+          LocalStorageKeys.BlogFormData,
+          JSON.stringify({
+            ...blogFormData,
+            link: res.data?.link,
+            estReadTime: res.data?.estReadTime,
+            content: editor.getJSON(),
+          } as BlogFormData)
+        );
       } else {
         throw new Error(res.message);
       }
     } catch (error) {
-      addNotification({
-        message: (error as Error).message || "An error occurred",
-      });
-      return null;
+      toast.error((error as Error).message || "An error occurred");
     }
   }
 
@@ -75,19 +54,7 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
           <TooltipTrigger asChild>
             <button
               className=" toolbar-btns px-2 py-2 w-8 h-8 relative rounded-md hover:bg-gray-700 transition duration-100 active:scale-95 "
-              onClick={async () => {
-                const { parseContent } = await import("@/lib/parseTiptapJson");
-
-                const contentJson = editor.getJSON() as JSONContent;
-                const c = parseContent(contentJson);
-                console.log(JSON.stringify(contentJson));
-
-                const { renderToString } = await import("react-dom/server");
-                console.log(renderToString(c));
-                return;
-                // await draftBlog(true);
-                // router.push("/dashboard/manage-posts");
-              }}
+              onClick={draftBlog}
             >
               <FaCloud />
             </button>
@@ -104,18 +71,7 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
           <TooltipTrigger asChild>
             <button
               className=" toolbar-btns px-2 py-2 rounded-md w-8 h-8 relative hover:bg-gray-700 transition duration-100 active:scale-95 "
-              onClick={async () => {
-                const data = await draftBlog(false);
-                if (!data) return;
-
-                setBlogFormData((prev) => ({
-                  ...prev,
-                  blogId: data.blogId,
-                  estReadTime: data.blogMetadata.estReadTime,
-                  link: data.link,
-                  content: editor.getJSON() as JSONContent,
-                }));
-
+              onClick={() => {
                 router.push("write-blog/preview-blog");
               }}
             >
@@ -166,10 +122,7 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
         <WriteMetadataComp
           closeSidebar={() => {
             setShowSidebar(false);
-            addNotification({
-              message: "Blog metadata saved",
-              type: NotificationType.INFO,
-            });
+            toast.success("Blog metadata saved");
           }}
         />
       </div>

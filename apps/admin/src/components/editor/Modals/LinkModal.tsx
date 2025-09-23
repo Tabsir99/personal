@@ -18,9 +18,10 @@ import { cn } from "@/lib/utils";
 
 interface LinkModalProps {
   editor: Editor;
+  isActive: boolean;
 }
 
-const LinkModal = ({ editor }: LinkModalProps) => {
+const LinkModal = ({ editor, isActive }: LinkModalProps) => {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [text, setText] = useState("");
@@ -74,8 +75,8 @@ const LinkModal = ({ editor }: LinkModalProps) => {
           <TooltipTrigger asChild>
             <div
               className={cn(
-                "p-2 rounded-md cursor-pointer h-8 flex flex-col text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-95"
-                // isOpen && "bg-zinc-800 text-zinc-100 shadow-inner"
+                "p-2 rounded-md cursor-pointer h-8 flex flex-col text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-95",
+                isActive ?? "bg-zinc-800 text-zinc-100 shadow-inner"
               )}
             >
               <LinkIcon className="w-4 h-4" />

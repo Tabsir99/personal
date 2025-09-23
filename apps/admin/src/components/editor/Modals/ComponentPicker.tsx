@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,6 +6,8 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogClose,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,7 +23,11 @@ import {
   Calculator,
   Settings,
   HelpCircle,
+  LayoutGrid,
 } from "lucide-react";
+import { toggleNode } from "../CustomExtensions/toggleNode";
+import type { Editor } from "@tiptap/react";
+import { cn } from "@/lib/utils";
 
 // Mock component data
 
@@ -102,15 +108,7 @@ const mockComponents: Component[] = [
   },
 ];
 
-const ComponentPickerModal = ({
-  open,
-  onClose,
-  onInsert,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onInsert: (component: Component) => void;
-}) => {
+const ComponentPickerModal = ({ editor }: { editor: Editor }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
@@ -125,8 +123,22 @@ const ComponentPickerModal = ({
     return matchesSearch && matchesCategory;
   });
 
+  const onInsert = (component: Component) => {
+    try {
+      toggleNode(component.id as any, editor);
+    } catch (error) {}
+  };
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          className={cn(
+            "p-2 rounded-md text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-95"
+          )}
+        >
+          <LayoutGrid className="w-4 h-4" />
+        </button>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-xl dark">
         <DialogHeader>
           <DialogTitle>Insert Component</DialogTitle>
@@ -162,22 +174,25 @@ const ComponentPickerModal = ({
             <ScrollArea className="h-72">
               <div className="grid grid-cols-2 gap-3 p-1">
                 {filteredComponents.map((component) => (
-                  <div
-                    key={component.id}
-                    className="flex flex-col p-3 border rounded-lg hover:bg-zinc-800/60 cursor-pointer transition-colors"
-                    onClick={() => onInsert(component)}
-                  >
-                    <div className="flex items-center mb-2 ">
-                      <span className=" w-5 h-5 mr-2  text-primary">
-                        {" "}
-                        {component.icon}{" "}
-                      </span>
-                      <h4 className="font-medium text-sm">{component.name}</h4>
+                  <DialogClose key={component.id} asChild>
+                    <div
+                      className="flex flex-col p-3 border rounded-lg hover:bg-zinc-800/60 cursor-pointer transition-colors"
+                      onClick={() => onInsert(component)}
+                    >
+                      <div className="flex items-center mb-2 ">
+                        <span className=" w-5 h-5 mr-2  text-primary">
+                          {" "}
+                          {component.icon}{" "}
+                        </span>
+                        <h4 className="font-medium text-sm">
+                          {component.name}
+                        </h4>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        {component.description}
+                      </p>
                     </div>
-                    <p className="text-xs text-gray-500">
-                      {component.description}
-                    </p>
-                  </div>
+                  </DialogClose>
                 ))}
 
                 {filteredComponents.length === 0 && (
@@ -190,14 +205,16 @@ const ComponentPickerModal = ({
           </TabsContent>
         </Tabs>
 
-        <DialogFooter>
-          <Button variant="outline" className="text-zinc-200" onClick={onClose}>
-            Cancel
-          </Button>
+        <DialogFooter className=" mt-2">
+          <DialogClose asChild>
+            <Button variant="outline" className="text-zinc-200">
+              Cancel
+            </Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
 
-export default ComponentPickerModal;
+export default memo(ComponentPickerModal, () => true);

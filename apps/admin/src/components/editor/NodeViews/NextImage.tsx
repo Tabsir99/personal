@@ -29,7 +29,9 @@ export const ImageBlockNodeview = ({
   node,
   updateAttributes,
   deleteNode,
+
 }: NodeViewProps) => {
+  
   const { src, alt, width, height, caption } = node.attrs;
   const [isEditing, setIsEditing] = useState(false);
   const [tempSrc, setTempSrc] = useState(src);
@@ -40,7 +42,6 @@ export const ImageBlockNodeview = ({
   const [aspectRatio, setAspectRatio] = useState(tempWidth / tempHeight);
   const [lockAspectRatio, setLockAspectRatio] = useState(true);
 
-  // Reset temp values when node attributes change
   useEffect(() => {
     setTempSrc(src);
     setTempAlt(alt || "");
@@ -87,25 +88,26 @@ export const ImageBlockNodeview = ({
     <NodeViewWrapper className="my-6 relative">
       <div className="relative w-full">
         <Popover open={isEditing} onOpenChange={setIsEditing}>
-          <PopoverTrigger asChild>
-            <div className="cursor-pointer relative">
-              <Image
-                src={src}
-                alt={alt || ""}
-                width={width || 800}
-                height={height || 600}
-                className="rounded-lg shadow-md max-h-full max-w-full mx-auto"
-              />
-              {caption && (
-                <div className="mt-2 text-sm text-gray-500 italic px-2 text-center">
-                  {caption}
-                </div>
-              )}
+          <div className="cursor-pointer relative group">
+            <Image
+              src={src}
+              alt={alt || ""}
+              width={width || 800}
+              height={height || 600}
+              className="rounded-lg shadow-md max-h-full max-w-full mx-auto"
+            />
+            {caption && (
+              <div className="mt-2 text-sm text-gray-500 italic px-2 text-center">
+                {caption}
+              </div>
+            )}
 
-              {/* Optional visual indicator that image is clickable */}
-              <div className="absolute inset-0 bg-zinc-900 bg-opacity-0 hover:bg-opacity-10 transition-opacity rounded-lg"></div>
-            </div>
-          </PopoverTrigger>
+            <PopoverTrigger asChild>
+              <Button className="absolute top-0 right-0 group-hover:opacity-100 opacity-0 transition">
+                Edit Image
+              </Button>
+            </PopoverTrigger>
+          </div>
 
           <PopoverContent
             className="w-80 dark"
