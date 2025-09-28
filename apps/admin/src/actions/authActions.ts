@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { formatResponse } from "@/utils/utils";
+import { formatResponse } from "@/lib/utils";
 import { SignJWT } from "jose";
 import { env } from "@/config/env";
 

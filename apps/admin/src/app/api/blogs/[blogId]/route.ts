@@ -1,18 +1,22 @@
+import { dbToBlogFormData } from "@/lib/blogUtils";
 import { readSingleDoc } from "@/lib/commonQuery";
-import { Blog } from "@/types/blogTypes";
+import { BlogDB } from "@/types/blogTypes";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   _: NextRequest,
-  { params: { blogId } }: { params: { blogId: string } }
+  { params }: { params: Promise<{ blogId: string }> }
 ) {
-  console.log(blogId);
-  if (!blogId) return NextResponse.json({}, { status: 400 });
+  const { blogId } = await params;
 
-  const blog = await readSingleDoc<Blog>({
+  const blog = await readSingleDoc<BlogDB>({
     collectionName: "BLOGS",
     docId: blogId,
   });
 
-  return NextResponse.json(blog);
+  if (!blog) {
+    return NextResponse.json({ error: "Blog not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(dbToBlogFormData(blog));
 }

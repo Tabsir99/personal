@@ -41,5 +41,5 @@
     "**/*.ts",
     "**/*.tsx"
   ],
-  "exclude": ["node_modules", "temp"]
+  "exclude": ["node_modules", "temp", ".next"]
 }

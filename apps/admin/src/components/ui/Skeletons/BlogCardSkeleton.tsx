@@ -74,38 +74,54 @@ const BlogCardSkeleton = () => {
           </div>
         ))}
       </CardFooter>
-
-      {/* CSS for shimmer effect */}
-      <style jsx global>{`
-        .shimmer {
-          background: linear-gradient(
-            90deg,
-            rgba(39, 39, 42, 0.5) 0%,
-            rgba(63, 63, 70, 0.7) 50%,
-            rgba(39, 39, 42, 0.5) 100%
-          );
-          background-size: 200% 100%;
-          animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-          0% {
-            background-position: -200% 0;
-          }
-          100% {
-            background-position: 200% 0;
-          }
-        }
-      `}</style>
     </Card>
   );
 };
 
+const DraftBlogCardSkeleton = () => {
+  return (
+    <Card className="bg-zinc-900 border-zinc-800 text-white">
+      {/* Header - Title, Description and Menu */}
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          {/* Blog Title */}
+          <div className="h-7 bg-zinc-800 rounded-md shimmer w-3/4" />
+          {/* Menu skeleton */}
+          <div className="h-8 w-8 bg-zinc-800 rounded-md shimmer" />
+        </div>
+        {/* Description */}
+        <div className="h-5 bg-zinc-800 rounded-md shimmer w-11/12 mt-2" />
+      </CardHeader>
+
+      {/* Content - Tags */}
+      <CardContent className="py-2">
+        <div className="flex flex-wrap gap-2">
+          <div className="h-5 w-16 bg-zinc-800 rounded-md shimmer" />
+          <div className="h-5 w-20 bg-zinc-800 rounded-md shimmer" />
+          <div className="h-5 w-14 bg-zinc-800 rounded-md shimmer" />
+        </div>
+      </CardContent>
+
+      {/* Footer - Updated time and read time */}
+      <CardFooter className="pt-2 pb-3 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 bg-zinc-800 rounded-sm shimmer" />
+          <div className="h-5 w-32 bg-zinc-800 rounded-md shimmer" />
+        </div>
+        <div className="h-5 w-20 bg-zinc-800 rounded-md shimmer" />
+      </CardFooter>
+    </Card>
+  );
+};
 // For loading multiple cards
-export const BlogCardSkeletonGrid = ({ count = 3 }) => {
+export const BlogCardSkeletonGrid = ({ count = 4 }) => {
   return Array(count)
     .fill(0)
     .map((_, index) => <BlogCardSkeleton key={index} />);
 };
 
-export default BlogCardSkeleton;
+export const DraftBlogCardSkeletonGrid = ({ count = 4 }) => {
+  return Array(count)
+    .fill(0)
+    .map((_, index) => <DraftBlogCardSkeleton key={index} />);
+};

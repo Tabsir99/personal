@@ -1,4 +1,4 @@
-import { Collections } from "@/utils/utils";
+import { Collections } from "@/lib/constants";
 import { firestore } from "firebase-admin";
 
 import { db } from "@/config/firebaseAdminBlog";
@@ -16,10 +16,7 @@ export const deleteBlogdb = async ({
     const docRef = db.collection(Collections.BLOGS).doc(blogId);
     batch.delete(docRef);
 
-    if (isDraft) {
-      const draftDocRef = db.collection(Collections.BLOGS).doc(blogId);
-      batch.delete(draftDocRef);
-    } else {
+    if (!isDraft) {
       const dashboardRef = db
         .collection(Collections.DASHBOARD_STATS)
         .doc("dashboard");

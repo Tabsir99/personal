@@ -15,11 +15,13 @@ export default function ThumbnailModal({
   isOpen,
   onClose,
   currentThumbnail,
+  draftThumbnail,
   blogLink,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  currentThumbnail?: string;
+  currentThumbnail?: string | undefined;
+  draftThumbnail?: string | undefined;
   blogLink: string;
 }) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);

@@ -39,7 +39,7 @@ export default async function RootLayout({
 }) {
   return (
     <html>
-      <body className={" overflow-x-hidden " + LatoFont.className}>
+      <body className={" overflow-x-hidden" + LatoFont.className}>
         {children}
       </body>
     </html>

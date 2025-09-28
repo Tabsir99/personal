@@ -1,18 +1,32 @@
 "use server";
 import { deleteBlogdb } from "@/lib/blogQuery";
 import { createData, readSingleDoc, updateData } from "@/lib/commonQuery";
-import { Blog, BlogFormData, BlogStatus, BlogType } from "@/types/blogTypes";
-import { ApiResponse, buildBlog, formatResponse } from "@/utils/utils";
-import { JSONContent } from "@tiptap/react";
-import { randomUUID } from "crypto";
+import { BlogFormData, BlogStatus, BlogDB } from "@/types/blogTypes";
+import { ApiResponse, formatResponse, measureEstReadTime } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
+import {
+  blogFormDataToDB,
+  createNewBlogFormData,
+  dbToBlogFormData,
+  draftToPublishedBlog,
+} from "@/lib/blogUtils";
 
 export async function saveDraft(
-  blogFormData: BlogFormData
-): Promise<ApiResponse<Blog>> {
-  const draftExists = await readSingleDoc<Blog>({
+  blogFormDataStr: string
+): Promise<ApiResponse<BlogDB>> {
+  const blogFormData = JSON.parse(blogFormDataStr) as BlogFormData;
+  if (!blogFormData.draftContent) {
+    throw new Error("Content is required");
+  }
+
+  blogFormData.updatedAt = Date.now();
+  blogFormData.draftEstReadTime = measureEstReadTime(blogFormData.draftContent);
+
+  const blog = blogFormDataToDB(blogFormData);
+
+  const draftExists = await readSingleDoc<BlogDB>({
     collectionName: "BLOGS",
-    docId: blogFormData.blogId,
+    docId: blog.blogId,
     fieldsToRead: { blogId: true },
   });
 
@@ -20,18 +34,17 @@ export async function saveDraft(
     throw new Error("Draft does not exists");
   }
 
-  const draftBlog = buildBlog(blogFormData);
-
+  console.log("blog", blog);
   try {
-    await createData<Blog>({
+    await createData<BlogDB>({
       collectionName: "BLOGS",
-      docId: draftBlog.blogId,
-      data: draftBlog,
+      docId: blog.blogId,
+      data: blog,
     });
     revalidatePath("/dashboard", "layout");
     return formatResponse({
       status: "success",
-      data: draftBlog,
+      data: blog,
       message: "Draft saved succesfully",
     });
   } catch (error) {
@@ -44,42 +57,50 @@ export async function saveDraft(
   }
 }
 
-export async function uploadBlog(
-  blogFormData: BlogFormData
-): Promise<ApiResponse<null>> {
-  const blog = buildBlog(blogFormData);
-
-  const blogDoc = await readSingleDoc<Blog>({
+export async function publishBlog(blogId: string): Promise<ApiResponse<null>> {
+  // Read the full blog data (not just status and link)
+  const blogDoc = await readSingleDoc<BlogDB>({
     collectionName: "BLOGS",
-    docId: blog.blogId,
-    fieldsToRead: { status: true, link: true },
+    docId: blogId,
   });
 
-  if (!blogDoc)
-    throw new Error(
-      "Blog metadata does not exists. System error as it must exist before uploading"
-    );
+  if (!blogDoc) {
+    throw new Error("Blog does not exist");
+  }
 
   try {
+    // Convert DB format to form data
+    const formData = dbToBlogFormData(blogDoc);
+
+    // Use the utility to promote draft to published
+    const publishedFormData = draftToPublishedBlog(formData);
+
+    await updateData<BlogDB>({
+      collectionName: "BLOGS",
+      docId: blogId,
+      updatedData: blogFormDataToDB(publishedFormData, true),
+      merge: false,
+    });
+
     revalidatePath("/", "layout");
     return formatResponse({
       status: "success",
       data: null,
-      message: "Blog uploaded successfully",
+      message: "Blog published successfully",
     });
   } catch (error) {
     console.error(error);
     return formatResponse({
       status: "error",
       data: null,
-      message: "Error occured while uploading",
+      message: "Error occurred while publishing",
     });
   }
 }
 
 export async function deleteBlog(blogId: string) {
   try {
-    const blogStatus = await readSingleDoc<Blog>({
+    const blogStatus = await readSingleDoc<BlogDB>({
       docId: blogId,
       collectionName: "BLOGS",
       fieldsToRead: { status: true },
@@ -113,7 +134,7 @@ export async function toggleBlogStatus(
   blogId: string
 ): Promise<ApiResponse<null>> {
   try {
-    const blogDoc = await readSingleDoc<Blog>({
+    const blogDoc = await readSingleDoc<BlogDB>({
       collectionName: "BLOGS",
       docId: blogId,
       fieldsToRead: { status: true },
@@ -135,7 +156,7 @@ export async function toggleBlogStatus(
     const isActive = blogDoc.status === BlogStatus.Active;
     const newStatus = isActive ? BlogStatus.Inactive : BlogStatus.Active;
 
-    await updateData<Blog>({
+    await updateData<BlogDB>({
       collectionName: "BLOGS",
       docId: blogId,
       updatedData: {
@@ -161,76 +182,21 @@ export async function toggleBlogStatus(
   }
 }
 
-export const startBlogWriting = async (): Promise<
-  ApiResponse<BlogFormData>
-> => {
+export const startBlogWriting = async (
+  title?: string
+): Promise<ApiResponse<BlogFormData>> => {
   try {
-    const defaultContent: JSONContent = {
-      type: "doc",
-      content: [
-        {
-          type: "section",
-          content: [
-            // @ts-ignore
-            {
-              type: "paragraph",
-              content: [],
-              key: "1",
-            },
-          ],
-        },
-      ],
-    };
+    const newBlogFormData = createNewBlogFormData(title);
 
-    const newBlogId = randomUUID();
-    const newBlog: Blog = {
-      blogName: `Untitled Blog ${new Date().toLocaleDateString()}s`,
-      blogDescription: "",
-      blogTags: [],
-      content: JSON.stringify(defaultContent),
-      featuredImageUrl: "",
-
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      hasDraftChanges: false,
-
-      estReadTime: 0,
-      link: "",
-      type: BlogType.Article,
-      recommendations: [],
-      recommendationTitle: "",
-      socialTitle: "",
-      status: BlogStatus.Draft,
-
-      blogId: newBlogId,
-      blogStats: {
-        totalComments: 0,
-        totalLikes: 0,
-        totalShares: 0,
-        totalViews: 0,
-      },
-    };
-    await createData<Blog>({
+    await createData<BlogDB>({
       collectionName: "BLOGS",
-      docId: newBlogId,
-      data: newBlog,
+      docId: newBlogFormData.blogId,
+      data: blogFormDataToDB(newBlogFormData),
     });
 
     return formatResponse<BlogFormData>({
       status: "success",
-      data: {
-        blogDescription: newBlog.blogDescription,
-        blogId: newBlog.blogId,
-        blogName: newBlog.blogName,
-        blogTags: newBlog.blogTags,
-        recommendationTitle: newBlog.recommendationTitle,
-        content: defaultContent,
-        featuredImageUrl: newBlog.featuredImageUrl,
-        link: newBlog.link,
-        socialTitle: newBlog.socialTitle,
-        status: newBlog.status,
-        type: newBlog.type,
-      } as BlogFormData,
+      data: newBlogFormData,
       message: "Blog writing started successfully",
     });
   } catch (error) {

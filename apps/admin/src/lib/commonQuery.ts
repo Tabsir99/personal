@@ -1,6 +1,6 @@
 import { firestore } from "firebase-admin";
 import { db } from "../config/firebaseAdminBlog";
-import { Collections, ValidCollections } from "@/utils/utils";
+import { Collections, ValidCollections } from "@/lib/constants";
 
 interface CreateDataParams<T> {
   collectionName: ValidCollections;
@@ -26,23 +26,25 @@ interface UpdateDataParams<T> {
   collectionName: ValidCollections;
   docId: string;
   updatedData: Partial<T>;
+  merge?: boolean;
 }
 
 export const updateData = async <T>({
   collectionName,
   docId,
   updatedData,
+  merge = true,
 }: UpdateDataParams<T>) => {
   const dataToPut = updatedData;
   Object.entries(dataToPut as any).forEach(([key, value]) => {
-    if (Array.isArray(value)) {
+    if (Array.isArray(value) && value.length > 0) {
       dataToPut[key] = firestore.FieldValue.arrayUnion(...value);
     }
   });
 
   try {
     const docRef = db.collection(Collections[collectionName]).doc(docId);
-    await docRef.set(updatedData as any, { merge: true });
+    await docRef.set(updatedData as any, { merge });
   } catch (err) {}
 };
 
@@ -130,7 +132,7 @@ export const readSingleDoc = async <T>({
 }: ReadSingleDocParams<T>): Promise<T | null> => {
   try {
     const query = db
-      .collection(collectionName)
+      .collection(Collections[collectionName])
       .where("blogId", "==", docId)
       .limit(1);
 

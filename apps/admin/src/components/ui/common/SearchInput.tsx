@@ -10,7 +10,7 @@ const SearchInput = ({
   placeholder?: string;
 }) => {
   return (
-    <div className="relative w-full max-w-md mx-auto">
+    <div className="relative grow">
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -39,9 +39,6 @@ const SearchInput = ({
           bg-zinc-800/70
           rounded-lg 
           outline-none focus:border-zinc-700 border-2 border-transparent
-          transition-all
-          duration-300
-          ease-in-out
           shadow-md
           placeholder-zinc-500
         "

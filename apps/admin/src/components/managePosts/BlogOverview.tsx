@@ -3,76 +3,74 @@
 import { useMemo, useState } from "react";
 
 import CMSBlogCard from "./BlogCard";
-import BlogMenu from "./BlogMenu";
 import ManagePostHead from "./ManageBlogHead";
-
 import useManageBlogs from "@/hooks/useManageBlogs";
-
-import ConfirmationModal from "../ui/common/ConfirmationModal";
-import { Blog } from "@/types/blogTypes";
+import { BlogDB, BlogStatus, PublishedBlogEditingDB } from "@/types/blogTypes";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import BlogShareModal from "./BlogShareModal";
 import { BlogCardSkeletonGrid } from "../ui/Skeletons/BlogCardSkeleton";
 import ThumbnailModal from "./ThumbnailModal";
-import { DropdownMenu } from "@/components/ui/dropdown-menu";
 
 const BlogOverview = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState({
-    share: false,
-    confirm: false,
-    thumbnail: false,
-  });
 
   const {
     confirmDelete,
-    handleBlogEdit,
     handleStatus,
-    setSelectedBlog,
-    handleBlogDelete,
     closeModal,
     handleShareBlog,
     handleThumbnail,
-    selectedBlog,
-  } = useManageBlogs({ setIsModalOpen });
+    handleSelectPost,
+
+    isModalOpen,
+    selectedPost,
+  } = useManageBlogs();
 
   const [filterBy, setFilterBy] = useState<{
-    status: Blog["status"] | "";
+    status: BlogDB["status"] | "";
   }>({ status: "" });
 
-  const { data, isLoading } = useCustomSWR<Blog[]>(
+  const { data, isLoading } = useCustomSWR<PublishedBlogEditingDB[]>(
     `/api/blogs?=content=false&status=${filterBy.status}`
   );
 
   const filteredPosts = useMemo(() => {
     return (
       data?.filter((blog) => {
-        return blog.blogName.includes(searchTerm);
+        return (
+          blog.title?.includes(searchTerm) ||
+          blog.draftTitle?.includes(searchTerm)
+        );
       }) || []
     );
   }, [data, searchTerm]);
 
   return (
     <>
-      <ConfirmationModal
-        isOpen={isModalOpen.confirm}
-        message="This will permanently delete the blog, Are you sure?"
-        onClose={closeModal}
-        onConfirm={confirmDelete}
-      />
-
-      <ThumbnailModal
-        isOpen={isModalOpen.thumbnail}
-        onClose={closeModal}
-        blogLink={selectedBlog?.link!}
-        currentThumbnail={selectedBlog?.featuredImageUrl!}
-      />
-
-      <BlogShareModal
-        onClose={closeModal}
-        url={`${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${selectedBlog?.link}`}
-        open={isModalOpen.share}
-      />
+      {selectedPost && (
+        <ThumbnailModal
+          isOpen={isModalOpen.thumbnail}
+          onClose={closeModal}
+          blogLink={selectedPost.link}
+          currentThumbnail={
+            selectedPost.status === BlogStatus.Draft
+              ? undefined
+              : selectedPost.featuredImageUrl
+          }
+          draftThumbnail={
+            selectedPost.status === BlogStatus.Draft
+              ? selectedPost.draftFeaturedImageUrl
+              : undefined
+          }
+        />
+      )}
+      {selectedPost && (
+        <BlogShareModal
+          onClose={closeModal}
+          url={`${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${selectedPost.link}`}
+          open={isModalOpen.share}
+        />
+      )}
 
       <ManagePostHead
         searchTerm={searchTerm}
@@ -89,30 +87,15 @@ const BlogOverview = () => {
           ) : (
             filteredPosts?.map((post) => {
               return (
-                <div key={post.blogId} className="relative">
-                  <DropdownMenu
-                    onOpenChange={(open) => {
-                      if (open) {
-                        setSelectedBlog(post);
-                      }
-                    }}
-                  >
-                    <CMSBlogCard adminBlogListItem={post} />
-
-                    {isModalOpen.confirm || isModalOpen.share || (
-                      <BlogMenu
-                        menuActions={{
-                          handleBlogDelete,
-                          handleBlogEdit,
-                          handleStatus,
-                          handleShareBlog,
-                          handleThumbnail,
-                        }}
-                        selectedBlog={selectedBlog}
-                      />
-                    )}
-                  </DropdownMenu>
-                </div>
+                <CMSBlogCard
+                  key={post.blogId}
+                  blog={post}
+                  handleShareBlog={handleShareBlog}
+                  handleThumbnail={handleThumbnail}
+                  handleStatus={handleStatus}
+                  confirmDelete={confirmDelete}
+                  handleSelectPost={handleSelectPost}
+                />
               );
             })
           )}

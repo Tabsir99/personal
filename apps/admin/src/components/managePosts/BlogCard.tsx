@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  Settings,
   ExternalLink,
   Clock,
   Calendar,
@@ -9,7 +8,7 @@ import {
   MessageSquare,
   Share2,
 } from "lucide-react";
-import { env } from "@/utils/utils";
+import { env } from "@/lib/constants";
 import {
   Card,
   CardContent,
@@ -18,16 +17,27 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Blog, BlogStatus } from "@/types/blogTypes";
+import { BlogDB, BlogStatus } from "@/types/blogTypes";
+import BlogMenu from "./BlogMenu";
+import { UseManageBlogs } from "@/hooks/useManageBlogs";
 
 export default function CMSBlogCard({
-  adminBlogListItem,
+  blog,
+  handleShareBlog,
+  handleThumbnail,
+  handleStatus,
+  confirmDelete,
+  handleSelectPost,
 }: {
-  adminBlogListItem: Blog;
+  blog: BlogDB;
+  handleShareBlog: UseManageBlogs["handleShareBlog"];
+  handleThumbnail: UseManageBlogs["handleThumbnail"];
+  handleStatus: UseManageBlogs["handleStatus"];
+  confirmDelete: UseManageBlogs["confirmDelete"];
+  handleSelectPost: UseManageBlogs["handleSelectPost"];
 }) {
   // Get appropriate status color
-  const getStatusClass = (status) => {
+  const getStatusClass = (status: BlogDB["status"]) => {
     switch (status) {
       case BlogStatus.Active:
         return "bg-green-500/10 text-green-400 border-green-500/20";
@@ -40,37 +50,53 @@ export default function CMSBlogCard({
     }
   };
 
-  const statusClass = getStatusClass(adminBlogListItem.status);
+  const statusClass = getStatusClass(blog.status);
+
+  const title = blog.status === BlogStatus.Draft ? blog.draftTitle : blog.title;
+  const description =
+    blog.status === BlogStatus.Draft ? blog.draftDescription : blog.description;
+  const tags = blog.status === BlogStatus.Draft ? blog.draftTags : blog.tags;
+  const stats =
+    blog.status === BlogStatus.Draft
+      ? {
+          totalViews: 0,
+          totalLikes: 0,
+          totalComments: 0,
+          totalShares: 0,
+        }
+      : blog.stats;
+  const estReadTime =
+    blog.status === BlogStatus.Draft ? blog.draftEstReadTime : blog.estReadTime;
 
   return (
-    <Card className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-all text-white">
+    <Card className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-all text-white flex flex-col justify-between">
       <CardHeader className="pb-3 pt-5">
         <div className="flex justify-between items-start gap-4">
           {/* Blog Title */}
           <div className="flex flex-col space-y-2">
             <h2 className="text-xl font-bold text-zinc-100 capitalize">
-              {adminBlogListItem.blogName}
+              {title}
             </h2>
 
             {/* Blog Description - single line with ellipsis */}
-            {adminBlogListItem.blogDescription && (
-              <p className="text-zinc-400 text-sm line-clamp-1">
-                {adminBlogListItem.blogDescription}
-              </p>
-            )}
+            <p className="text-zinc-400 text-sm line-clamp-1">{description}</p>
           </div>
 
           {/* Actions */}
           <div className="flex items-center">
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200"
-              >
-                <Settings className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
+            <BlogMenu
+              blogName={title}
+              blogId={blog.blogId}
+              status={blog.status!}
+              actions={{
+                handleShareBlog,
+                handleThumbnail,
+                handleStatus,
+                confirmDelete,
+                handleSelectPost: () => handleSelectPost(blog),
+              }}
+            />
+
             <Button
               variant="ghost"
               size="icon"
@@ -78,7 +104,7 @@ export default function CMSBlogCard({
               className="text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
             >
               <Link
-                href={`${env.BLOGSITE_HOSTNAME}/blogs/${adminBlogListItem.link}`}
+                href={`${env.BLOGSITE_HOSTNAME}/blogs/${blog.link}`}
                 target="_blank"
                 title="View Blog"
               >
@@ -96,54 +122,50 @@ export default function CMSBlogCard({
             variant="outline"
             className={`${statusClass} text-xs px-2 py-1`}
           >
-            {adminBlogListItem.status}
+            {blog.status}
           </Badge>
 
           {/* Publication Date */}
           <div className="flex items-center gap-2">
             <Calendar className="h-3.5 w-3.5" />
             <time>
-              {new Date(adminBlogListItem.createdAt).toLocaleDateString(
-                "en-US",
-                {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                }
-              )}
+              {new Date(blog.createdAt!).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
             </time>
           </div>
 
           {/* Reading Time */}
           <div className="flex items-center gap-2">
             <Clock className="h-3.5 w-3.5" />
-            <span>{adminBlogListItem.estReadTime} min read</span>
+            <span>{estReadTime} min read</span>
           </div>
         </div>
 
         {/* Tags */}
-        {adminBlogListItem.blogTags &&
-          adminBlogListItem.blogTags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {adminBlogListItem.blogTags.slice(0, 3).map((tag, index) => (
-                <Badge
-                  key={index}
-                  variant="outline"
-                  className="border-zinc-700 text-zinc-300 text-xs"
-                >
-                  {tag}
-                </Badge>
-              ))}
-              {adminBlogListItem.blogTags.length > 3 && (
-                <Badge
-                  variant="outline"
-                  className="border-zinc-700 text-zinc-300 text-xs"
-                >
-                  +{adminBlogListItem.blogTags.length - 3} more
-                </Badge>
-              )}
-            </div>
-          )}
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {tags.slice(0, 3).map((tag, index) => (
+              <Badge
+                key={index}
+                variant="outline"
+                className="border-zinc-700 text-zinc-300 text-xs"
+              >
+                {tag}
+              </Badge>
+            ))}
+            {tags.length > 3 && (
+              <Badge
+                variant="outline"
+                className="border-zinc-700 text-zinc-300 text-xs"
+              >
+                +{tags.length - 3} more
+              </Badge>
+            )}
+          </div>
+        )}
       </CardContent>
 
       {/* Stats Section */}
@@ -151,22 +173,22 @@ export default function CMSBlogCard({
         <MetricItem
           icon={<Eye className="h-4 w-4 text-zinc-500" />}
           label="Views"
-          value={adminBlogListItem.blogStats.totalViews}
+          value={stats.totalViews}
         />
         <MetricItem
           icon={<ThumbsUp className="h-4 w-4 text-zinc-500" />}
           label="Likes"
-          value={adminBlogListItem.blogStats.totalLikes}
+          value={stats.totalLikes}
         />
         <MetricItem
           icon={<MessageSquare className="h-4 w-4 text-zinc-500" />}
           label="Comments"
-          value={adminBlogListItem.blogStats.totalComments}
+          value={stats.totalComments}
         />
         <MetricItem
           icon={<Share2 className="h-4 w-4 text-zinc-500" />}
           label="Shares"
-          value={adminBlogListItem.blogStats.totalShares}
+          value={stats.totalShares}
         />
       </CardFooter>
     </Card>

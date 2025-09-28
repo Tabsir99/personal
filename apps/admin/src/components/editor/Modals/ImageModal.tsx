@@ -31,7 +31,6 @@ export const ImageInsertButton = ({ editor }: { editor: Editor }) => {
   const [imageUrl, setImageUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const uploadRef = useRef<HTMLInputElement | null>(null);
-  // const { blogFormData } = useBlogFormData();
 
   const handleImageUpload = async (file: File) => {
     try {
@@ -75,7 +74,9 @@ export const ImageInsertButton = ({ editor }: { editor: Editor }) => {
                 <ImageIcon className="h-4 w-4" />
               </div>
             </TooltipTrigger>
-            <TooltipContent>Insert image</TooltipContent>
+            <TooltipContent className="bg-zinc-950 text-zinc-200 text-xs border-zinc-800">
+              Insert image
+            </TooltipContent>
           </Tooltip>
         </PopoverTrigger>
 

@@ -139,7 +139,4 @@ declare module "@tiptap/core" {
   }
 }
 
-// import { useEditor } from "@tiptap/react";
-// useEditor()?.commands.customCommands.
-
 export {};

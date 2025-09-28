@@ -15,8 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { startBlogWriting } from "@/actions/blogActions";
-import { toast } from "sonner";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
+import { callWithToast } from "@/lib/utils";
 
 export const CreateBlogModal = () => {
   const [newBlogTitle, setNewBlogTitle] = useState("");
@@ -26,25 +26,22 @@ export const CreateBlogModal = () => {
   const isOpen = useBlogEditorStore((state) => state.isCreateDialogOpen);
 
   const handleCreateBlog = async () => {
-    if (newBlogTitle.trim()) {
-      const res = await startBlogWriting();
-
-      setNewBlogTitle("");
-      closeCreateDialog();
-
-      if (!res.data) {
-        return toast.error("Failed to create blog", {
-          description: res.message,
-        });
+    setNewBlogTitle("");
+    await callWithToast(
+      async () => {
+        const res = await startBlogWriting(newBlogTitle);
+        if (res.status === "success") {
+          setBlogFormData(res.data!);
+          router.push(`/dashboard/write-blog/${res.data?.blogId}`);
+        }
+      },
+      {
+        loading: "Creating blog...",
+        success: "Blog created",
+        err: "Failed to create blog",
       }
-      // Navigate to the editor for the new blog
-
-      setBlogFormData(res.data);
-      router.push(`/dashboard/write-blog/${res.data.blogId}`);
-      return toast.info("Blog created, loading editor...");
-    } else {
-      return toast.error("Please enter blog title");
-    }
+    );
+    closeCreateDialog();
   };
 
   return (
@@ -79,6 +76,7 @@ export const CreateBlogModal = () => {
           <Button
             className="bg-blue-600 hover:bg-blue-700"
             onClick={handleCreateBlog}
+            disabled={newBlogTitle.trim() === ""}
           >
             Create & Edit
           </Button>

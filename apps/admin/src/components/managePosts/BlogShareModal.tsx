@@ -1,7 +1,13 @@
-"use client"
-
+"use client";
 import React, { useState } from "react";
-import { FaTwitter, FaFacebook, FaLinkedin, FaReddit, FaLink } from "react-icons/fa";
+import {
+  FaTwitter,
+  FaFacebook,
+  FaLinkedin,
+  FaReddit,
+  FaLink,
+  FaCheck,
+} from "react-icons/fa";
 import {
   Dialog,
   DialogContent,
@@ -10,12 +16,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-// import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 interface BlogShareModalProps {
   open: boolean;
   onClose: () => void;
   url: string;
+  title?: string;
 }
 
 const ShareButton = ({
@@ -31,14 +38,14 @@ const ShareButton = ({
     <Button
       onClick={handleClick}
       variant="outline"
-      className={`flex items-center justify-center gap-3 h-12 hover:text-white hover:scale-105 transition-all ${className}`}
+      className={`flex items-center justify-center gap-3 h-14 border-2 border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 hover:border-zinc-700 transition-colors duration-200 ${className}`}
     >
       {children}
     </Button>
   );
 };
 
-const BlogShareModal = ({ open, onClose, url }: BlogShareModalProps) => {
+const BlogShareModal = ({ open, onClose, url, title }: BlogShareModalProps) => {
   const [copySuccess, setCopySuccess] = useState(false);
 
   const platforms = [
@@ -48,12 +55,12 @@ const BlogShareModal = ({ open, onClose, url }: BlogShareModalProps) => {
       color: "#1DA1F2",
       link: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
         `${url}?utm_source=twitter`
-      )}`,
+      )}${title ? `&text=${encodeURIComponent(title)}` : ""}`,
     },
     {
       name: "Facebook",
       icon: FaFacebook,
-      color: "#4267B2",
+      color: "#1877F2",
       link: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
         `${url}?utm_source=facebook`
       )}`,
@@ -61,7 +68,7 @@ const BlogShareModal = ({ open, onClose, url }: BlogShareModalProps) => {
     {
       name: "LinkedIn",
       icon: FaLinkedin,
-      color: "#0077b5",
+      color: "#0A66C2",
       link: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
         `${url}?utm_source=linkedin`
       )}`,
@@ -72,7 +79,7 @@ const BlogShareModal = ({ open, onClose, url }: BlogShareModalProps) => {
       color: "#FF4500",
       link: `https://reddit.com/submit?url=${encodeURIComponent(
         `${url}?utm_source=reddit`
-      )}`,
+      )}${title ? `&title=${encodeURIComponent(title)}` : ""}`,
     },
   ];
 
@@ -80,19 +87,11 @@ const BlogShareModal = ({ open, onClose, url }: BlogShareModalProps) => {
     try {
       await navigator.clipboard.writeText(url);
       setCopySuccess(true);
-      // toast({
-      //   title: "Link copied",
-      //   description: "The URL has been copied to your clipboard.",
-      //   duration: 2000,
-      // });
+      toast.success("Link copied to clipboard!");
       setTimeout(() => setCopySuccess(false), 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
-      // toast({
-      //   title: "Copy failed",
-      //   description: "Failed to copy the URL. Please try again.",
-      //   variant: "destructive",
-      // });
+      toast.error("Failed to copy link");
     }
   };
 
@@ -102,40 +101,69 @@ const BlogShareModal = ({ open, onClose, url }: BlogShareModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-zinc-950 text-white border-zinc-800">
-        <DialogHeader>
-          <DialogTitle className="text-xl text-white font-semibold">
+      <DialogContent className="sm:max-w-lg bg-gradient-to-br from-zinc-950 to-zinc-900 text-white border-zinc-800 shadow-2xl">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
             Share this article
           </DialogTitle>
+          <div className="w-12 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
         </DialogHeader>
-        <div className="grid gap-6">
-          <div className="grid grid-cols-2 gap-4">
-            {platforms.map((platform) => (
-              <ShareButton
-                key={platform.name}
-                handleClick={() => handlePlatformClick(platform.link)}
-                className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800"
-              >
-                <platform.icon size={20} color={platform.color} />
-                <span className="text-sm font-medium">{platform.name}</span>
-              </ShareButton>
-            ))}
+
+        <div className="space-y-8 pt-2">
+          {/* Social Platforms */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+              Share on social
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              {platforms.map((platform) => (
+                <ShareButton
+                  key={platform.name}
+                  handleClick={() => handlePlatformClick(platform.link)}
+                >
+                  <platform.icon size={18} style={{ color: platform.color }} />
+                  <span className="text-sm font-medium text-zinc-200">
+                    {platform.name}
+                  </span>
+                </ShareButton>
+              ))}
+            </div>
           </div>
 
-          <div className="flex space-x-2">
-            <Input
-              value={url}
-              readOnly
-              className="bg-zinc-900 border-zinc-800 text-sm"
-            />
-            <Button
-              onClick={copyToClipboard}
-              variant="secondary"
-              className="shrink-0 bg-zinc-800 hover:bg-zinc-700/40 text-zinc-100 hover:text-zinc-200"
-            >
-              <FaLink className="mr-0 h-4 w-4" />
-              {copySuccess ? "Copied!" : "Copy"}
-            </Button>
+          {/* Copy Link Section */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+              Copy link
+            </h3>
+            <div className="flex gap-3">
+              <Input
+                value={url}
+                readOnly
+                className="flex-1 bg-zinc-900/70 border-zinc-700 text-sm text-zinc-300 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600"
+              />
+              <Button
+                onClick={copyToClipboard}
+                variant="secondary"
+                size="lg"
+                className={`shrink-0 px-6 transition-colors duration-200 ${
+                  copySuccess
+                    ? "bg-green-600 hover:bg-green-600 text-white"
+                    : "bg-zinc-800 hover:bg-zinc-700 text-zinc-100 hover:text-white"
+                }`}
+              >
+                {copySuccess ? (
+                  <>
+                    <FaCheck className="w-4 h-4 mr-2" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <FaLink className="w-4 h-4 mr-2" />
+                    Copy
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>

@@ -1,42 +1,47 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { uploadBlog } from "@/actions/blogActions";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { publishBlog } from "@/actions/blogActions";
 import { parseContent } from "@/lib/parseTiptapJson";
-import { LocalStorageKeys } from "@/types/settingTypes";
-import { BlogFormData } from "@/types/blogTypes";
 import { invalidateBlogOverview } from "@/hooks/useInvalidateCache";
 import { toast } from "sonner";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
+import { useShallow } from "zustand/shallow";
+import { slugify } from "@/lib/utils";
 
+const requiredFields = [
+  "draftTitle",
+  "draftDescription",
+  "draftTags",
+  "draftContent",
+  "type",
+  //"draftFeaturedImageUrl",
+];
 export default function PreviewBlog() {
   const [isUploading, setIsUploading] = useState(false);
-  const { resetBlogFormData, blogFormData } = useBlogEditorStore.getState();
-
+  const blogFormData = useBlogEditorStore(
+    useShallow((state) => state.blogFormData)
+  );
+  const resetBlogFormData = useBlogEditorStore.getState().resetBlogFormData;
   const router = useRouter();
 
-  const handleUpload = async () => {
-    const blogFormDataStr = localStorage.getItem(LocalStorageKeys.BlogFormData);
-    if (!blogFormDataStr) throw new Error("BlogFormData is missing");
+  const blogId = useParams().blogId as string;
 
-    const blogFormData = JSON.parse(blogFormDataStr) as BlogFormData;
+  const handlePublish = async () => {
+    if (!blogFormData.blogId) return toast.error("Blog not found");
 
-    if (!blogFormData) return toast.error("BlogFormData is missing");
+    for (const [key, value] of Object.entries(blogFormData)) {
+      if (requiredFields.includes(key) && (!value || value.length === 0)) {
+        toast.error(`${key} is required in metadata`);
+        return;
+      }
+    }
 
-    // for (const [key, value] of Object.entries(blogFormData)) {
-    //   if (key === "createdAt") continue;
-    //   if (!value) {
-    //     addNotification({ message: `${key} is required in metadata` });
-    //     return;
-    //   }
-    // }
-
-    if (!blogFormData.content) return toast.error("There is no blog content");
     setIsUploading(true);
 
-    const res = await uploadBlog(blogFormData);
+    const res = await publishBlog(blogFormData.blogId);
     setIsUploading(false);
     toast.success(res.message);
 
@@ -51,15 +56,22 @@ export default function PreviewBlog() {
     return;
   };
 
+  useEffect(() => {
+    useBlogEditorStore.getState().loadBlogFormData(blogId);
+  }, [blogId]);
+
   return (
     <section className="min-h-screen text-gray-300 flex flex-col justify-start items-start px-12 pb-8 leading-[1.65] rounded-xl max-w-[50rem] mx-auto gap-8 bg-[#0e1117]">
       <header className="w-full">
         <div className="flex items-center text-lg gap-3 px-0 py-10 border-b-2 relative mb-8 border-gray-800 ">
           <Link href="/"> blogs </Link> &gt;
-          <Link href="#"> {blogFormData.link}</Link>
+          <Link href="#">
+            {" "}
+            {blogFormData.link || slugify(blogFormData.draftTitle)}
+          </Link>
           <div className="absolute top-8 right-0 flex gap-3 items-center">
             <button
-              onClick={handleUpload}
+              onClick={handlePublish}
               type="button"
               className="bg-zinc-800/90 flex justify-center items-center w-24 h-10 gap-3 justify-self-end hover:bg-zinc-800/50 text-white font-bold py-2 px-3 text-sm rounded-lg transition duration-300 ease-in-out"
             >
@@ -75,14 +87,14 @@ export default function PreviewBlog() {
         </div>
 
         <h1 className="text-3xl max-sm:text-2xl text-blue-400 capitalize pr-24 w-fit mb-3">
-          {blogFormData.blogName}
+          {blogFormData.title}
         </h1>
         <p className="text-xl">Author: Tabsir</p>
         <time>{new Date().toLocaleDateString()}</time>
       </header>
 
       <article className="article-body text-[20px] max-sm:text-[18px] text-gray-300 w-full flex flex-col gap-[96px] max-sm:gap-[80px]">
-        {parseContent(blogFormData.content)}
+        {parseContent(blogFormData.draftContent)}
       </article>
     </section>
   );

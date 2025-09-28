@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { languages } from "@/utils/constants";
+import { languages } from "@/lib/constants";
 import { Check, ChevronDown, Copy } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { NodeViewWrapper, NodeViewContent } from "@tiptap/react";

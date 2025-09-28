@@ -49,7 +49,7 @@ const DashBoardSidebar = () => {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-[60] shadow-lg h-screen dark bg-zinc-900/50 border-r backdrop-blur-md border-zinc-800 transition-all duration-300 ease-in-out",
+        "fixed left-0 top-0 z-30 shadow-lg h-screen dark bg-zinc-900/50 border-r backdrop-blur-md border-zinc-800 transition-all duration-300 ease-in-out",
         isExpanded ? "w-52 shadow-[5px_0px_25px_rgba(0,0,0,0.8)]" : "w-16"
       )}
       onMouseEnter={() => setIsExpanded(true)}
@@ -100,7 +100,7 @@ const DashBoardSidebar = () => {
               "h-10 justify-start gap-3 px-3 text-zinc-100 transition-all duration-300 ease-in-out overflow-hidden hover:bg-red-900/30 hover:text-red-200",
               isExpanded ? "w-full" : "w-10"
             )}
-            onClick={() => console.log("Logout clicked")}
+            onClick={() => {}}
           >
             <LogOut className="h-5 w-5" />
             <span

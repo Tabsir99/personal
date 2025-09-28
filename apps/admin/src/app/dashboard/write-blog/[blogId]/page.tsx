@@ -7,12 +7,12 @@ import {
   JSONContent,
 } from "@tiptap/react";
 import { useEffect, useState } from "react";
-import { LocalStorageKeys } from "@/types/settingTypes";
-import { BlogFormData } from "@/types/blogTypes";
 import { starterKitOptions } from "@/components/editor/Toolbar/starterKit";
 import CustomSpinner from "@/components/ui/common/LoadingAnimation";
 import Toolbar from "@/components/editor/Toolbar/Toolbar";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
+import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export interface ActiveModal {
   link: boolean;
@@ -20,43 +20,17 @@ export interface ActiveModal {
 }
 const TextEditor = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const setBlogFormData = useBlogEditorStore.getState().setBlogFormData;
-
-  function debounce(func: (content: any) => void, delay: number) {
-    let timeoutId: NodeJS.Timeout;
-    return function (...args: any[]) {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func.apply(this, args), delay);
-    };
-  }
-
-  const debouncedSave = debounce(async (content: JSONContent) => {
-    setBlogFormData({ content });
-    const blogFormDataStr = localStorage.getItem(
-      LocalStorageKeys.BlogFormData
-    )!;
-
-    const blogFormData = JSON.parse(blogFormDataStr) as BlogFormData;
-    localStorage.setItem(
-      LocalStorageKeys.BlogFormData,
-      JSON.stringify({
-        ...blogFormData,
-        content,
-      } as BlogFormData)
-    );
-  }, 2000);
-
+  const saveDraft = useBlogEditorStore.getState().saveDraft;
+  const blogId = useParams().blogId as string;
+  const router = useRouter();
   const editor = useEditor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: false,
     editable: true,
 
     content: "<section> <p></p> </section>",
-
     extensions: starterKitOptions as AnyExtension[],
-    onUpdate: ({ editor }) => {
-      debouncedSave(editor.getJSON());
-    },
+
     onContentError: (error) => {
       console.error(error.error);
     },
@@ -64,20 +38,24 @@ const TextEditor = () => {
 
   useEffect(() => {
     if (!editor) return;
+    useBlogEditorStore
+      .getState()
+      .loadBlogFormData(blogId)
+      .then((blogFormData) => {
+        if (!blogFormData.blogId) {
+          router.push("/dashboard/write-blog");
+          toast.error("Blog not found");
+          return;
+        }
 
-    const blogFormDataStr = localStorage.getItem(LocalStorageKeys.BlogFormData);
-    if (blogFormDataStr) {
-      const blogData = JSON.parse(blogFormDataStr) as BlogFormData;
-      if (blogData.blogId) {
-        setTimeout(() => {
-          setBlogFormData(blogData);
-          editor?.commands.setContent(blogData.content);
-          setIsLoading(false);
-        }, 1000);
+        if (blogFormData.draftContent)
+          editor?.commands.setContent(blogFormData.draftContent);
+        setIsLoading(false);
+      });
 
-        return;
-      }
-    }
+    return () => {
+      saveDraft(editor.getJSON() as JSONContent);
+    };
   }, [editor]);
 
   if (!editor)
@@ -88,8 +66,8 @@ const TextEditor = () => {
     );
 
   return (
-    <section className=" text-[#E5E7EB] h-auto bg-[rgb(16,16,16)] pt-0 pb-3 relative flex justify-center items-center ">
-      <div className=" sticky z-50 top-0 py-4 bg-[rgb(16,16,16)] w-full ">
+    <section className="h-auto pt-16 pb-3 relative flex justify-center items-center overflow-x-hidden">
+      <div className="fixed top-0 pt-4 z-50 backdrop-blur-lg">
         <div className="flex items-center px-4 w-fit mx-auto gap-[2px] rounded-full py-1 bg-zinc-800/40">
           <Toolbar editor={editor} />
         </div>

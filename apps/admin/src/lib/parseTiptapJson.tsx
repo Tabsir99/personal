@@ -7,13 +7,10 @@ import Link from "next/link";
 import { Fragment } from "react";
 
 export const parseContent = (content: JSONContent | null): React.ReactNode => {
-  // Handle empty content
   if (!content) return null;
 
-  // Text nodes are handled specially
   if (content.type === "text") {
     const text = content.text || "";
-    // If there are marks, wrap the text with appropriate components
     if (content.marks?.length) {
       return content.marks.reduce((node, mark) => {
         switch (mark.type) {

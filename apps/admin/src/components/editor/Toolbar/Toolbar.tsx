@@ -8,7 +8,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 
 import { getTools } from "./ToolbarTools";
 import HeadingModal from "../Modals/HeadingModal";
@@ -17,6 +16,8 @@ import DraftPreview from "./DraftPreview";
 import { ImageInsertButton } from "../Modals/ImageModal";
 import LinkModal from "../Modals/LinkModal";
 import ComponentPicker from "../Modals/ComponentPicker";
+import { Button } from "@/components/ui/button";
+import { throttle } from "@/lib/utils";
 
 interface ActiveButton {
   align: "left" | "right" | "center" | "justify";
@@ -30,14 +31,7 @@ interface ActiveButton {
     color: string;
   };
 }
-const Toolbar = ({
-  editor,
-  // setActiveModal,
-}: {
-  editor: Editor;
-  // setActiveModal: Dispatch<SetStateAction<ActiveModal>>;
-}) => {
-  console.log("Toolbar re renders");
+const Toolbar = ({ editor }: { editor: Editor }) => {
   const [activeButton, setActiveButton] = useState<ActiveButton>({
     align: "left",
     node: "",
@@ -50,20 +44,6 @@ const Toolbar = ({
       link: false,
     },
   });
-
-  const throttle = useCallback(
-    (func: (...args: any[]) => void, limit: number) => {
-      let inThrottle: boolean;
-      return function (...args: any[]) {
-        if (!inThrottle) {
-          func.apply(this, args);
-          inThrottle = true;
-          setTimeout(() => (inThrottle = false), limit);
-        }
-      };
-    },
-    []
-  );
 
   const updateActiveButton = useCallback(
     throttle(() => {
@@ -110,6 +90,7 @@ const Toolbar = ({
   );
 
   useEffect(() => {
+    if (!editor) return;
     editor.on("selectionUpdate", updateActiveButton);
     return () => {
       editor.off("selectionUpdate", updateActiveButton);
@@ -172,11 +153,12 @@ const Toolbar = ({
           return (
             <Tooltip key={item.key}>
               <TooltipTrigger asChild>
-                <button
-                  className={cn(
-                    "p-2 rounded-md text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-95",
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={
                     isActive && "bg-zinc-800 text-zinc-100 shadow-inner"
-                  )}
+                  }
                   id={item.key}
                   onClick={() => {
                     if (item.command) {
@@ -187,7 +169,7 @@ const Toolbar = ({
                   }}
                 >
                   {item.icon}
-                </button>
+                </Button>
               </TooltipTrigger>
               <TooltipContent
                 side="bottom"
@@ -205,6 +187,4 @@ const Toolbar = ({
   );
 };
 
-export default memo(Toolbar, () => {
-  return true;
-});
+export default memo(Toolbar, () => true);

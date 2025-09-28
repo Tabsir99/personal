@@ -2,7 +2,8 @@ import { type Metadata } from "next";
 
 import DashBoardSidebar from "@/components/dashboard/DashboardSidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { CreateBlogModal } from "@/context/CreateBlogModal";
+import { CreateBlogModal } from "@/components/ui/common/CreateBlogModal";
+import ConfirmationModal from "@/components/ui/common/ConfirmationModal";
 
 export const metadata: Metadata = {
   title: "Dashboard Home",
@@ -20,7 +21,7 @@ export default function DashBoardLayout({
   return (
     <>
       <DashBoardSidebar />
-      <main className=" overflow-y-scroll bg-zinc-950 pl-16 w-screen h-screen">
+      <main className=" overflow-y-scroll bg-zinc-950/95 pl-24 pr-8 py-6 w-screen h-screen text-zinc-100">
         {children}
       </main>
 
@@ -32,6 +33,7 @@ export default function DashBoardLayout({
         duration={5000}
       />
       <CreateBlogModal />
+      <ConfirmationModal />
     </>
   );
 }

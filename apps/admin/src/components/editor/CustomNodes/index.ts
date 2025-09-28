@@ -16,7 +16,6 @@ export const exitOnArrowDown = ({
 
   const currentNode = doc.nodeAt($from.pos)?.type.name;
 
-  console.log(currentNode, nodeType);
   if (currentNode !== nodeType) {
     return false;
   }

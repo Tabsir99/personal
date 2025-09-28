@@ -1,5 +1,5 @@
 import s3 from "@/config/cloudflareS3";
-import { formatResponse } from "@/utils/utils";
+import { formatResponse } from "@/lib/utils";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 

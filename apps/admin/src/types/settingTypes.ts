@@ -1,8 +1,3 @@
-export enum LocalStorageKeys {
-  BlogFormData = "blogFormData",
-  HighlightedHTML = "highlightedHTML",
-}
-
 export interface GeneralSettings {
   siteTitle: string;
   metaDescription: string;
