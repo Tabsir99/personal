@@ -29,9 +29,7 @@ export const ImageBlockNodeview = ({
   node,
   updateAttributes,
   deleteNode,
-
 }: NodeViewProps) => {
-  
   const { src, alt, width, height, caption } = node.attrs;
   const [isEditing, setIsEditing] = useState(false);
   const [tempSrc, setTempSrc] = useState(src);
@@ -180,7 +178,6 @@ export const ImageBlockNodeview = ({
                   value={tempCaption}
                   onChange={(e) => setTempCaption(e.target.value)}
                   rows={2}
-                  className="resize-none"
                 />
               </div>
 

@@ -1,4 +1,4 @@
-import s3 from "@/config/cloudflareS3";
+import s3, { S3Bucket } from "@/config/cloudflareS3";
 import { formatResponse } from "@/lib/utils";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -10,7 +10,7 @@ interface FileInfo {
 }
 const _getUploadSignedUrl = async (key: string, fileInfo: FileInfo) => {
   const command = new PutObjectCommand({
-    Bucket: "tabsir-s-blog",
+    Bucket: S3Bucket.PUBLIC,
     Key: key,
     ContentType: fileInfo.contentType,
     ContentLength: fileInfo.contentLength,

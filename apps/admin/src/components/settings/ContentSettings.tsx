@@ -1,6 +1,6 @@
 import { SettingsSection } from "./SettingsSection";
 import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { NumericInput } from "../ui/input";
 import {
   Select,
   SelectContent,
@@ -27,15 +27,11 @@ export default function ContentSettings() {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label className="text-zinc-300">Posts Per Page</Label>
-          <Input
-            type="number"
+          <NumericInput
             value={contentSettings.postsPerPage}
-            onChange={(e) =>
-              updateContent({ postsPerPage: parseInt(e.target.value) })
-            }
+            onChange={(value) => updateContent({ postsPerPage: value })}
             min={1}
             max={50}
-            className="bg-zinc-900 border-zinc-700 text-zinc-100 focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
 

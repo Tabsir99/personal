@@ -70,11 +70,7 @@ const FAQSectionView: React.FC<NodeViewProps> = ({ node, editor }) => {
       <div className="relative group">
         <h2>
           {showTitlePopover ? (
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="border-zinc-800 md:text-2xl h-fit p-2"
-            />
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
           ) : (
             title
           )}

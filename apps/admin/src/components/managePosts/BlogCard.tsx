@@ -8,7 +8,6 @@ import {
   MessageSquare,
   Share2,
 } from "lucide-react";
-import { env } from "@/lib/constants";
 import {
   Card,
   CardContent,
@@ -104,7 +103,7 @@ export default function CMSBlogCard({
               className="text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
             >
               <Link
-                href={`${env.BLOGSITE_HOSTNAME}/blogs/${blog.link}`}
+                href={`${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${blog.link}`}
                 target="_blank"
                 title="View Blog"
               >

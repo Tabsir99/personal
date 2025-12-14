@@ -133,9 +133,11 @@ export async function callWithToast(
 ) {
   const id = toast.loading(loading);
   try {
-    await func();
+    const result = await func();
     toast.success(success, { id });
+    return result;
   } catch (error) {
     toast.error(err, { id });
+    return null;
   }
 }

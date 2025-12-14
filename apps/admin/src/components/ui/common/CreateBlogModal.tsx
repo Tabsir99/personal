@@ -59,22 +59,17 @@ export const CreateBlogModal = () => {
           </Label>
           <Input
             id="blogTitle"
-            className="mt-2 bg-zinc-800 border-zinc-700 text-zinc-100"
+            className="mt-2"
             placeholder="Enter a title for your blog..."
             value={newBlogTitle}
             onChange={(e) => setNewBlogTitle(e.target.value)}
           />
         </div>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={closeCreateDialog}
-            className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
-          >
+          <Button variant="outline" onClick={closeCreateDialog}>
             Cancel
           </Button>
           <Button
-            className="bg-blue-600 hover:bg-blue-700"
             onClick={handleCreateBlog}
             disabled={newBlogTitle.trim() === ""}
           >

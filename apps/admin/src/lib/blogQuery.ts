@@ -1,7 +1,7 @@
 import { Collections } from "@/lib/constants";
 import { firestore } from "firebase-admin";
 
-import { db } from "@/config/firebaseAdminBlog";
+import { db } from "@/config/firebaseAdmin";
 
 export const deleteBlogdb = async ({
   blogId,

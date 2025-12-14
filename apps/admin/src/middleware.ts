@@ -1,20 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authLimiter } from "./config/redisConfig";
 import { jwtVerify } from "jose";
-import { env } from "./config/env";
-
-const ALLOWED_METHODS = ["POST", "GET"] as const;
-const HTTP_STATUS = {
-  BAD_REQUEST: 400,
-  UNAUTHORIZED: 401,
-  TOO_MANY_REQUESTS: 429,
-} as const;
-
-type AllowedMethod = (typeof ALLOWED_METHODS)[number];
-
-const isValidMethod = (method: string): method is AllowedMethod => {
-  return ALLOWED_METHODS.includes(method as AllowedMethod);
-};
+import { env } from "./config/env.server";
 
 const isLoggedIn = async (token?: string) => {
   try {
@@ -22,54 +9,56 @@ const isLoggedIn = async (token?: string) => {
     await jwtVerify(token, new TextEncoder().encode(env.JWT_SECRET));
     return true;
   } catch (error) {
+    console.error(error);
     return false;
   }
 };
 
 const handleRateLimit = async (ipAddress: string) => {
   const { success } = await authLimiter.limit(ipAddress);
-  return success
-    ? NextResponse.next()
-    : NextResponse.json({}, { status: HTTP_STATUS.TOO_MANY_REQUESTS });
+  return success ? NextResponse.next() : NextResponse.json({}, { status: 429 });
 };
 
 export default async function middleware(request: NextRequest) {
   try {
-    if (request.nextUrl.pathname.includes("auth")) {
-      return NextResponse.next();
-    }
-    if (!isValidMethod(request.method)) {
-      throw new Error("");
-    }
-
     const ipAddress = request.headers.get("xIp") ?? "unknown";
     const pathname = request.nextUrl.pathname;
     const token = request.cookies.get("token")?.value;
+    const serverToken = request.headers.get("serverToken");
+    const shouldRateLimit =
+      env.RUNTIME !== "local" && pathname === "/" && request.method === "POST";
 
-    if (
-      pathname === "/" &&
-      request.method === "POST" &&
-      process.env.NODE_ENV !== "development"
-    ) {
-      return handleRateLimit(ipAddress);
-    }
+    const serverAuthenticated = serverToken === env.SERVER_TOKEN;
 
-    const authenticated = await isLoggedIn(token);
-    if (pathname !== "/" && !authenticated) {
-      throw new Error("");
-    }
+    console.log(token);
+    // Server auth bypasses everything
+    if (serverAuthenticated) return NextResponse.next();
 
-    if (pathname === "/" && authenticated) {
-      return NextResponse.redirect(`${env.ADMIN_ORIGIN}/dashboard`);
-    }
+    const userAuthenticated = await isLoggedIn(token);
 
+    if (pathname.endsWith("events")) throw new Error("Unauthorized");
+
+    // Do rate limiting for login attempts
+    if (shouldRateLimit) return handleRateLimit(ipAddress);
+
+    // User auth is required for all other routes except login
+    if (pathname !== "/" && !userAuthenticated) throw new Error("Unauthorized");
+
+    // Redirect to dashboard if user is authenticated
+    if (pathname === "/" && userAuthenticated)
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_ADMIN_ORIGIN}/dashboard`
+      );
+
+    // Return next if everything is authenticated
     return NextResponse.next();
   } catch (error) {
     console.error(error);
-    return NextResponse.error();
+    return NextResponse.redirect(
+      process.env.NEXT_PUBLIC_ADMIN_ORIGIN as string
+    );
   }
 }
-
 export const config = {
-  matcher: ["/", "/api/:path*", "/dashboard", "/dashboard/:path*"],
+  matcher: ["/", "/api/:path*", "/dashboard/:path*"],
 };

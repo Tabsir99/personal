@@ -2,18 +2,17 @@
 import { usePathname } from "next/navigation";
 import {
   Edit,
-  Users,
-  Settings,
   LogOut,
   LayoutDashboard,
   FileText,
+  Briefcase,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import logo from "../../../public/o-min.png";
+import Img from "../ui/image";
+import { clientEnv } from "@/config/env.client";
 
 const DashBoardSidebar = () => {
   const rootDashBoardUrl = "/dashboard";
@@ -24,26 +23,25 @@ const DashBoardSidebar = () => {
       Icon: LayoutDashboard,
       menuName: "Dashboard",
       menuLink: rootDashBoardUrl,
+      isActive: pathname === rootDashBoardUrl,
     },
     {
       Icon: Edit,
       menuName: "Write Blog",
       menuLink: `${rootDashBoardUrl}/write-blog`,
+      isActive: pathname.includes("/write-blog"),
     },
     {
       Icon: FileText,
       menuName: "Manage Posts",
       menuLink: `${rootDashBoardUrl}/manage-posts`,
+      isActive: pathname.includes("/manage-posts"),
     },
     {
-      Icon: Users,
-      menuName: "Subscribers",
-      menuLink: `${rootDashBoardUrl}/users`,
-    },
-    {
-      Icon: Settings,
-      menuName: "Settings",
-      menuLink: `${rootDashBoardUrl}/settings`,
+      Icon: Briefcase,
+      menuName: "Portfolio",
+      menuLink: `${rootDashBoardUrl}/portfolio/metadata`,
+      isActive: pathname.includes("/portfolio"),
     },
   ];
   return (
@@ -57,33 +55,32 @@ const DashBoardSidebar = () => {
     >
       <div className="flex flex-col h-full py-2">
         <div className="mb-4 flex justify-center h-16 items-center border-b-2 border-zinc-800">
-          <Image
-            src={logo}
+          <Img
+            src={`${clientEnv.MEDIA_ORIGIN}/logo.png`}
             alt="Logo"
-            width={isExpanded ? 72 : 48}
+            width={isExpanded ? 72 : 56}
             height={48}
             className="transition-all duration-300"
           />
         </div>
         <ul className="flex flex-col gap-1 px-2">
           {sidebarItems.map((item, index) => {
-            const isActive = pathname === item.menuLink;
             return (
               <li key={index}>
                 <Link href={item.menuLink}>
                   <Button
-                    variant={isActive ? "secondary" : "ghost"}
+                    variant={item.isActive ? "secondary" : "ghost"}
                     className={cn(
                       " h-12 justify-start gap-3 text-[16px] text-zinc-100 transition-all duration-300 ease-in-out overflow-hidden",
-                      isActive
+                      item.isActive
                         ? "bg-blue-600/80 hover:bg-blue-600/80 "
                         : "hover:bg-zinc-800/70",
                       isExpanded ? "w-full" : "w-12 "
                     )}
                   >
-                    <item.Icon className=" w-6 h-6" />
+                    <item.Icon className=" w-6 h-6 text-zinc-200" />
                     <span
-                      className={`transition-all duration-300 ${isExpanded ? "" : "opacity-30 translate-x-6 scale-75"}`}
+                      className={`transition-all duration-300 text-zinc-200 ${isExpanded ? "" : "opacity-30 translate-x-6 scale-75"}`}
                     >
                       {item.menuName}
                     </span>

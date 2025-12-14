@@ -6,6 +6,12 @@ interface ConfirmationState {
   headerText: string;
   onConfirm: () => void;
   onCancel: () => void;
+
+  confirmButtonText?: string;
+  cancelButtonText?: string;
+
+  confirmButtonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  cancelButtonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 }
 
 interface UIStore {
@@ -21,6 +27,10 @@ const useUIStore = create<UIStore>((set, get) => ({
     headerText: "",
     onConfirm() {},
     onCancel() {},
+    confirmButtonText: "Confirm",
+    cancelButtonText: "Cancel",
+    confirmButtonVariant: "default",
+    cancelButtonVariant: "outline",
   },
 
   showConfirmation: (config) =>
@@ -37,6 +47,10 @@ const useUIStore = create<UIStore>((set, get) => ({
           get().hideConfirmation();
         },
         headerText: config.headerText || "Are you sure?",
+        confirmButtonText: config.confirmButtonText || "Confirm",
+        cancelButtonText: config.cancelButtonText || "Cancel",
+        confirmButtonVariant: config.confirmButtonVariant || "default",
+        cancelButtonVariant: config.cancelButtonVariant || "outline",
       },
     }),
 

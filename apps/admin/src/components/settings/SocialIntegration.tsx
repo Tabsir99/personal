@@ -163,7 +163,7 @@ export const SocialIntegrations: React.FC = () => {
                                 variant="outline"
                                 onClick={() => handleRefreshToken(platform.id)}
                               >
-                                <RefreshCw className="mr-2 h-3.5 w-3.5" />
+                                <RefreshCw className="h-3.5 w-3.5" />
                                 Refresh
                               </Button>
                             </TooltipTrigger>
@@ -178,7 +178,7 @@ export const SocialIntegrations: React.FC = () => {
                           className="text-destructive hover:text-destructive"
                           onClick={() => handleDisconnect(platform.id)}
                         >
-                          <XCircle className="mr-2 h-3.5 w-3.5" />
+                          <XCircle className="h-3.5 w-3.5" />
                           Disconnect
                         </Button>
                       </>

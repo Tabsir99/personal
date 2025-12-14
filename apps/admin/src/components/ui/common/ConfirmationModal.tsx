@@ -15,7 +15,7 @@ import useUIStore from "@/stores/UIStore";
 import { useShallow } from "zustand/shallow";
 
 const ConfirmationModal = () => {
-  const { isOpen, message, onConfirm, headerText, onCancel } = useUIStore(
+  const { isOpen, message, onConfirm, headerText, onCancel, confirmButtonText, cancelButtonText, confirmButtonVariant, cancelButtonVariant   } = useUIStore(
     useShallow((state) => state.confirmation)
   );
   return (
@@ -59,17 +59,18 @@ const ConfirmationModal = () => {
         {/* Footer */}
         <DialogFooter className="p-6 pt-2 gap-3">
           <Button
-            variant="outline"
+            variant={cancelButtonVariant || "outline"}
             onClick={onCancel}
             className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 px-8"
           >
-            Cancel
+            {cancelButtonText || "Cancel"}
           </Button>
           <Button
+            variant={confirmButtonVariant || "default"}
             onClick={onConfirm}
             className="bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500/50 px-8 font-medium"
           >
-            Confirm
+            {confirmButtonText || "Confirm"}
           </Button>
         </DialogFooter>
       </DialogContent>

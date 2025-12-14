@@ -52,16 +52,9 @@ export const Collections = {
   MONTHLY_STATS: "monthly-stats",
 
   VALID_LINKS: "valid-links",
-  USERS: "users",
   PAGE_METRICS: "page-metrics",
   BLOGS: "blogs",
-  SESSIONS: "sessions",
+  EVENTS: "events",
 };
 
 export type ValidCollections = keyof typeof Collections;
-
-export const env = {
-  BLOGSITE_HOSTNAME: process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME as string,
-  ADMIN_ORIGIN: process.env.ADMIN_ORIGIN as string,
-};
-

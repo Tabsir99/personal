@@ -85,14 +85,14 @@ export const ImageInsertButton = ({ editor }: { editor: Editor }) => {
             onClick={() => setIsUrlDialogOpen(true)}
             className="cursor-pointer flex pl-3 py-2 items-center hover:bg-zinc-800 transition rounded-md"
           >
-            <Link2Icon className="mr-2 h-4 w-4" />
+            <Link2Icon className="h-4 w-4" />
             <span>Insert from URL</span>
           </div>
           <div
             onClick={() => uploadRef.current?.click()}
             className="cursor-pointer flex pl-3 py-2 items-center hover:bg-zinc-800 transition rounded-md"
           >
-            <UploadIcon className="mr-2 h-4 w-4" />
+            <UploadIcon className="h-4 w-4" />
             <span>Upload from device</span>
           </div>
         </PopoverContent>

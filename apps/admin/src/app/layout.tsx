@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   icons: [
     {
       rel: "icon",
-      url: "/o-min.png",
+      url: "https://erzrwwwkwpaoyxnz.public.blob.vercel-storage.com/favicon",
       fetchPriority: "high",
       sizes: "48x48",
       type: "image/png",

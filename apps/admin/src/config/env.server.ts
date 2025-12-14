@@ -1,4 +1,4 @@
-// env.ts
+import "server-only";
 
 function requireEnv(key: string): string {
   const value = process.env[key];
@@ -9,23 +9,19 @@ function requireEnv(key: string): string {
 }
 
 export const env = {
-  // ===== App Config =====
-  ADMIN_ORIGIN: requireEnv("ADMIN_ORIGIN"),
-  NEXT_PUBLIC_BLOGSITE_HOSTNAME: requireEnv("NEXT_PUBLIC_BLOGSITE_HOSTNAME"),
+  RUNTIME: requireEnv("RUNTIME"),
 
   // ===== Auth =====
   ADMIN_USERNAME: requireEnv("ADMIN_USERNAME"),
   ADMIN_PASSWORD: requireEnv("ADMIN_PASSWORD"),
   JWT_SECRET: requireEnv("JWT_SECRET"),
-  SERVER_TO_SERVER_TOKEN: requireEnv("SERVER_TO_SERVER_TOKEN"),
 
   // ===== Firebase =====
-  NEXT_PUBLIC_FIREBASE_CONFIG: requireEnv("NEXT_PUBLIC_FIREBASE_CONFIG"),
   FIREBASE_ADMIN_CONFIG: requireEnv("FIREBASE_ADMIN_CONFIG"),
 
   // ===== Redis =====
-  REDIS_KV_REST_API_URL: requireEnv("REDIS_KV_REST_API_URL"),
-  REDIS_KV_REST_API_TOKEN: requireEnv("REDIS_KV_REST_API_TOKEN"),
+  REDIS_KV_REST_API_URL: requireEnv("KV_REST_API_URL"),
+  REDIS_KV_REST_API_TOKEN: requireEnv("KV_REST_API_TOKEN"),
 
   // ===== Cloudflare R2 =====
   CLOUDFLARE_R2_AK_ID: requireEnv("CLOUDFLARE_R2_AK_ID"),
@@ -35,4 +31,7 @@ export const env = {
   // ===== LinkedIn OAuth =====
   LINKEDIN_CLINET_ID: requireEnv("LINKEDIN_CLINET_ID"),
   LINKEDIN_CLINET_SECRET: requireEnv("LINKEDIN_CLINET_SECRET"),
+
+  // ===== Server to server token =====
+  SERVER_TOKEN: requireEnv("SERVER_TOKEN"),
 } as const;

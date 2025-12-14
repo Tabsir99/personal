@@ -10,6 +10,7 @@ import {
 } from "@/types/blogTypes";
 import { randomUUID } from "crypto";
 import { slugify } from "./utils";
+import { env } from "@/config/env.server";
 
 // Type guards
 export function isDraftBlog(blog: BlogDB): blog is DraftBlogDB {
@@ -170,3 +171,17 @@ export function draftToPublishedBlog(formData: BlogFormData): BlogFormData {
     },
   };
 }
+
+export const sendRevalidateRequest = async (path: string) => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BLOG_ORIGIN}/api/revalidate`, {
+    method: "POST",
+    body: JSON.stringify({ path: `/blogs/${path}` }),
+    headers: {
+      "Content-Type": "application/json",
+      acs_tkn: env.SERVER_TOKEN,
+    },
+  });
+  if (env.RUNTIME === "local") {
+    console.log(res.status, res.statusText);
+  }
+};

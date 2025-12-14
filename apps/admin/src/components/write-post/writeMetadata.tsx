@@ -131,7 +131,6 @@ export default function WriteMetadataComp({
                           onChange={(e) =>
                             setBlogFormData({ draftTitle: e.target.value })
                           }
-                          className="bg-zinc-800/50 border-zinc-700/50 text-zinc-100 placeholder:text-zinc-500 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
                         />
                       </div>
 
@@ -151,7 +150,6 @@ export default function WriteMetadataComp({
                               draftSocialTitle: e.target.value,
                             })
                           }
-                          className="bg-zinc-800/50 border-zinc-700/50 text-zinc-100 placeholder:text-zinc-500 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
                         />
                       </div>
 
@@ -225,7 +223,6 @@ export default function WriteMetadataComp({
                               handleAddTag();
                             }
                           }}
-                          className="bg-zinc-800/50 border-zinc-700/50 text-zinc-100 placeholder:text-zinc-500 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
                         />
                       </div>
                       <div className="pt-8">
@@ -278,7 +275,6 @@ export default function WriteMetadataComp({
                             draftRecommendationTitle: e.target.value,
                           })
                         }
-                        className="bg-zinc-800/50 border-zinc-700/50 text-zinc-100 placeholder:text-zinc-500 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
                       />
                     </div>
                   </div>
@@ -313,7 +309,7 @@ export default function WriteMetadataComp({
                               onClick={() => uploadRef.current?.click()}
                               className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20"
                             >
-                              <Upload className="h-4 w-4 mr-2" />
+                              <Upload className="h-4 w-4" />
                               Change Image
                             </Button>
                           </div>
@@ -370,7 +366,7 @@ export default function WriteMetadataComp({
                       onChange={(e) =>
                         setBlogFormData({ draftDescription: e.target.value })
                       }
-                      className="bg-zinc-800/50 border-zinc-700/50 text-zinc-100 placeholder:text-zinc-500 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 resize-none"
+                      className="resize-none"
                     />
                     <p className="text-xs text-zinc-500">
                       {description?.length || 0}/160 characters (recommended for

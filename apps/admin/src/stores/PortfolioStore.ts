@@ -1,0 +1,328 @@
+import { PageData } from "@/types/portfolioTypes";
+import { toast } from "sonner";
+import { create } from "zustand";
+
+const defaultPageData: PageData = {
+  title: "Tabsir - Full Stack Developer",
+  description: "Portfolio of Tabsir, a full-stack developer",
+  keywords: ["developer", "full-stack", "react"],
+  stats: {
+    yearsExperience: 0,
+    projectsCompleted: 0,
+    jobSuccessRate: 0,
+    responseTime: "",
+    happyClients: 0,
+  },
+  contact: { email: "", social: [] },
+  projects: [],
+  testimonials: [],
+  about: [],
+  profilePicture: "",
+  skills: [],
+  credentials: [],
+  services: [],
+};
+
+type ArrayElement<K extends keyof PageData> =
+  PageData[K] extends Array<infer U> ? U : never;
+
+type EntityHandlers<K extends keyof PageData> = {
+  add: (
+    item: ArrayElement<K> | ((prev: ArrayElement<K>[]) => ArrayElement<K>)
+  ) => void;
+
+  update: (
+    index: number,
+    updates: PageData[K] extends Array<infer U>
+      ? Partial<U> | ((prev: U) => Partial<U>)
+      : never
+  ) => void;
+  delete: (index: number) => void;
+  moveUp: (index: number) => void;
+  moveDown: (index: number) => void;
+  toggle: <F extends keyof ArrayElement<K>>(index: number, field: F) => void;
+};
+
+interface PortfolioStore {
+  initialData: PageData;
+  pageData: PageData;
+
+  loading: boolean;
+  fetching: boolean;
+  saving: boolean;
+  isDirty: boolean;
+
+  _checkForChanges: () => void;
+  resetChanges: () => void;
+  loadPageData: () => Promise<void>;
+  savePageData: () => Promise<void>;
+  updatePageData: (updates: Partial<PageData>) => void;
+
+  projects: EntityHandlers<"projects">;
+  testimonials: EntityHandlers<"testimonials">;
+  credentials: EntityHandlers<"credentials">;
+  services: EntityHandlers<"services">;
+  skills: EntityHandlers<"skills">;
+  about: EntityHandlers<"about">;
+}
+
+export const usePortfolioStore = create<PortfolioStore>((set, get) => {
+  const createEntityHandlers = <K extends keyof PageData>(
+    key: K
+  ): EntityHandlers<K> => {
+    type T = ArrayElement<K>;
+
+    return {
+      add: (item) => {
+        set((state) => {
+          const prevArray = state.pageData[key] as T[];
+          const newItem =
+            typeof item === "function"
+              ? (item as (prev: T[]) => T)(prevArray)
+              : item;
+          return {
+            pageData: {
+              ...state.pageData,
+              [key]: [...prevArray, newItem],
+            },
+          };
+        });
+        get()._checkForChanges();
+      },
+      update: (index: number, updates) => {
+        set((state) => {
+          const prevArray = state.pageData[key] as T[];
+          return {
+            pageData: {
+              ...state.pageData,
+              [key]: prevArray.map((item, i) => {
+                if (i === index) {
+                  const updateData =
+                    typeof updates === "function"
+                      ? (updates as (prev: T) => Partial<T>)(item)
+                      : updates;
+                  return { ...(item as object), ...updateData };
+                }
+                return item;
+              }),
+            },
+          };
+        });
+        get()._checkForChanges();
+      },
+
+      delete: (index) => {
+        set((state) => ({
+          pageData: {
+            ...state.pageData,
+            [key]: (state.pageData[key] as T[]).filter((_, i) => i !== index),
+          },
+        }));
+        get()._checkForChanges();
+      },
+
+      moveUp: (index) => {
+        if (index === 0) return;
+        set((state) => {
+          const prevArray = [...(state.pageData[key] as T[])];
+          const temp = prevArray[index];
+          prevArray[index] = prevArray[index - 1];
+          prevArray[index - 1] = temp;
+          return {
+            pageData: {
+              ...state.pageData,
+              [key]: prevArray,
+            },
+          };
+        });
+        get()._checkForChanges();
+      },
+
+      moveDown: (index) => {
+        set((state) => {
+          const prevArray = [...(state.pageData[key] as T[])];
+          if (index === prevArray.length - 1) return state;
+          const temp = prevArray[index];
+          prevArray[index] = prevArray[index + 1];
+          prevArray[index + 1] = temp;
+          return {
+            pageData: {
+              ...state.pageData,
+              [key]: prevArray,
+            },
+          };
+        });
+        get()._checkForChanges();
+      },
+
+      toggle: (index, field) => {
+        set((state) => {
+          const prevArray = state.pageData[key] as T[];
+          return {
+            pageData: {
+              ...state.pageData,
+              [key]: prevArray.map((item, i) =>
+                i === index
+                  ? { ...(item as object), [field]: !item[field] }
+                  : item
+              ),
+            },
+          };
+        });
+        get()._checkForChanges();
+      },
+    };
+  };
+
+  return {
+    initialData: defaultPageData,
+    pageData: defaultPageData,
+
+    loading: true,
+    fetching: false,
+    saving: false,
+    isDirty: false,
+
+    _checkForChanges: () => {
+      set({
+        isDirty:
+          JSON.stringify(get().pageData) !== JSON.stringify(get().initialData),
+      });
+    },
+
+    resetChanges: () => set({ pageData: get().initialData, isDirty: false }),
+
+    loadPageData: async () => {
+      if (get().fetching) return;
+      set({ fetching: true, loading: true }, false);
+      const pageDataResponse = await fetch("/api/page-data");
+      const pageData = await pageDataResponse.json();
+
+      if (pageData)
+        set({
+          pageData: { ...defaultPageData, ...pageData },
+          initialData: pageData,
+        });
+
+      set({ fetching: false, loading: false }, false);
+    },
+
+    savePageData: async () => {
+      if (get().saving) return;
+      set({ saving: true }, false);
+      const id = toast.loading("Saving page data...");
+      try {
+        const pageData = get().pageData;
+
+        await extractAndUploadBlobs(pageData);
+
+        const res = await fetch("/api/page-data", {
+          method: "POST",
+          body: JSON.stringify(pageData),
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!res.ok) throw new Error("Failed to save page data");
+
+        set({ initialData: pageData }, false);
+        toast.success("Page data saved", { id });
+      } catch (error) {
+        toast.error(error.message, { id });
+      } finally {
+        set({ saving: false }, false);
+        get()._checkForChanges();
+      }
+    },
+
+    updatePageData: (updates) => {
+      set((state) => ({
+        pageData: { ...state.pageData, ...updates },
+      }));
+      get()._checkForChanges();
+    },
+
+    projects: createEntityHandlers("projects"),
+    testimonials: createEntityHandlers("testimonials"),
+    credentials: createEntityHandlers("credentials"),
+    services: createEntityHandlers("services"),
+    skills: createEntityHandlers("skills"),
+    about: createEntityHandlers("about"),
+  };
+});
+
+async function extractAndUploadBlobs(pageData: PageData): Promise<void> {
+  const blobsToUpload: Array<{
+    url: string;
+    path: string;
+    blob?: Blob;
+  }> = [];
+
+  if (pageData.profilePicture.startsWith("blob:")) {
+    blobsToUpload.push({
+      url: pageData.profilePicture,
+      path: "profilePicture",
+    });
+  }
+
+  pageData.projects.forEach((project, i) => {
+    if (project.image.startsWith("blob:")) {
+      blobsToUpload.push({ url: project.image, path: `projects/${i}` });
+    }
+  });
+
+  pageData.credentials.forEach((credential, i) => {
+    if (credential.image.startsWith("blob:")) {
+      blobsToUpload.push({ url: credential.image, path: `credentials/${i}` });
+    }
+  });
+
+  if (blobsToUpload.length === 0) return;
+
+  // Fetch all blobs
+  await Promise.all(
+    blobsToUpload.map(async (item) => {
+      const response = await fetch(item.url);
+      item.blob = await response.blob();
+    })
+  );
+
+  // Get presigned URLs in batch
+  const urlResponse = await fetch("/api/page-data/upload-urls", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(
+      blobsToUpload.map((item) => ({
+        type: item.blob!.type,
+        size: item.blob!.size,
+        path: item.path,
+      }))
+    ),
+  });
+
+  const urls = (await urlResponse.json()) as Array<{
+    presignedUrl: string;
+    key: string;
+    path: string;
+  }>;
+
+  await Promise.all(
+    blobsToUpload.map((item, index) =>
+      fetch(urls[index].presignedUrl, {
+        method: "PUT",
+        body: item.blob!,
+        headers: { "Content-Type": item.blob!.type },
+      })
+    )
+  );
+
+  urls.forEach(({ key, path }) => {
+    if (path === "profilePicture") pageData.profilePicture = key;
+    else if (path.startsWith("projects/")) {
+      const projectIndex = parseInt(path.split("/")[1]);
+      pageData.projects[projectIndex].image = key;
+    } else if (path.startsWith("credentials/")) {
+      const credentialIndex = parseInt(path.split("/")[1]);
+      pageData.credentials[credentialIndex].image = key;
+    }
+  });
+}

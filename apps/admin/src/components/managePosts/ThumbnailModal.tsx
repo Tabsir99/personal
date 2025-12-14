@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import Img from "../ui/image";
 
 export default function ThumbnailModal({
   isOpen,
@@ -96,7 +97,7 @@ export default function ThumbnailModal({
 
             {previewUrl ? (
               <div className="relative h-full w-full">
-                <img
+                <Img
                   src={previewUrl}
                   alt="Thumbnail Preview"
                   className="h-full w-full object-cover transition-opacity"

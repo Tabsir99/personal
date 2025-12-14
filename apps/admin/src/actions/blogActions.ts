@@ -3,12 +3,12 @@ import { deleteBlogdb } from "@/lib/blogQuery";
 import { createData, readSingleDoc, updateData } from "@/lib/commonQuery";
 import { BlogFormData, BlogStatus, BlogDB } from "@/types/blogTypes";
 import { ApiResponse, formatResponse, measureEstReadTime } from "@/lib/utils";
-import { revalidatePath } from "next/cache";
 import {
   blogFormDataToDB,
   createNewBlogFormData,
   dbToBlogFormData,
   draftToPublishedBlog,
+  sendRevalidateRequest,
 } from "@/lib/blogUtils";
 
 export async function saveDraft(
@@ -41,7 +41,6 @@ export async function saveDraft(
       docId: blog.blogId,
       data: blog,
     });
-    revalidatePath("/dashboard", "layout");
     return formatResponse({
       status: "success",
       data: blog,
@@ -82,7 +81,7 @@ export async function publishBlog(blogId: string): Promise<ApiResponse<null>> {
       merge: false,
     });
 
-    revalidatePath("/", "layout");
+    sendRevalidateRequest(blogDoc.link);
     return formatResponse({
       status: "success",
       data: null,
@@ -103,7 +102,7 @@ export async function deleteBlog(blogId: string) {
     const blogStatus = await readSingleDoc<BlogDB>({
       docId: blogId,
       collectionName: "BLOGS",
-      fieldsToRead: { status: true },
+      fieldsToRead: { status: true, link: true },
     });
 
     if (!blogStatus) {
@@ -114,6 +113,7 @@ export async function deleteBlog(blogId: string) {
       blogId,
       isDraft: blogStatus.status === "draft",
     });
+    sendRevalidateRequest(blogStatus.link);
 
     return formatResponse({
       status: "success",
@@ -137,7 +137,7 @@ export async function toggleBlogStatus(
     const blogDoc = await readSingleDoc<BlogDB>({
       collectionName: "BLOGS",
       docId: blogId,
-      fieldsToRead: { status: true },
+      fieldsToRead: { status: true, link: true },
     });
 
     if (!blogDoc) {
@@ -164,6 +164,7 @@ export async function toggleBlogStatus(
         updatedAt: Date.now(),
       },
     });
+    sendRevalidateRequest(blogDoc.link);
 
     return {
       data: null,

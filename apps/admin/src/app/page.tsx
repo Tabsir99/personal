@@ -2,11 +2,11 @@
 import { FormEvent, useState } from "react";
 import { logInAction } from "@/actions/authActions";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const LogIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -15,12 +15,12 @@ const LogIn = () => {
     setIsLoading(true);
     const formData = new FormData(e.currentTarget);
     const response = await logInAction(formData);
-    if (response.status !== "success") {
-      setErrorMessage(response.message);
+    if (response.status === "success") {
       router.push("/dashboard");
       return;
+    } else {
+      toast.error(response.message);
     }
-    setErrorMessage(null);
     setIsLoading(false);
   };
 
@@ -54,7 +54,6 @@ const LogIn = () => {
                 placeholder="Username"
                 onChange={(e) => {
                   setUsername(e.target.value);
-                  if (errorMessage) setErrorMessage(null);
                 }}
                 className="w-full px-4 py-3 rounded-lg bg-black/40 text-purple-200 placeholder-purple-300 border-2 border-purple-800/50 focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-300"
                 required
@@ -71,7 +70,6 @@ const LogIn = () => {
                 placeholder="Password"
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  if (errorMessage) setErrorMessage(null);
                 }}
                 className="w-full px-4 py-3 rounded-lg bg-black/40 text-purple-200 placeholder-purple-300 border-2 border-purple-800/50 focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-300"
                 required
@@ -79,11 +77,7 @@ const LogIn = () => {
                 disabled={isLoading}
               />
             </div>
-            {errorMessage && (
-              <div className="text-red-400 bg-red-900/30 border-2 border-red-700/50 w-full text-center py-2 rounded-lg">
-                {errorMessage}
-              </div>
-            )}
+
             <button
               type="submit"
               disabled={isLoading}

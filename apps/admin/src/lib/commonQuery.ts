@@ -1,5 +1,5 @@
 import { firestore } from "firebase-admin";
-import { db } from "../config/firebaseAdminBlog";
+import { db } from "../config/firebaseAdmin";
 import { Collections, ValidCollections } from "@/lib/constants";
 
 interface CreateDataParams<T> {
@@ -16,8 +16,9 @@ export const createData = async <T>({
   try {
     const docRef = db.collection(Collections[collectionName]).doc(docId);
     await docRef.set(data as any, { merge: true });
-    return "Blog uploaded succesfully";
+    return true;
   } catch (err) {
+    console.error(err);
     throw err;
   }
 };

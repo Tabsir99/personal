@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { formatResponse } from "@/lib/utils";
 import { SignJWT } from "jose";
-import { env } from "@/config/env";
+import { env } from "@/config/env.server";
 
 export async function logInAction(formData: FormData) {
   const username = formData.get("username");
@@ -32,7 +32,7 @@ export async function logInAction(formData: FormData) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: 60 * 60 * 24 * 7 * 1000,
   });
 
   return formatResponse({

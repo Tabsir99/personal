@@ -34,12 +34,11 @@ export default function AppearanceSettings() {
               type="color"
               value={appearanceSettings.themeColor}
               onChange={(e) => updateAppearance({ themeColor: e.target.value })}
-              className="w-16 h-10 bg-zinc-900 border-zinc-700"
+              className="w-16 h-10"
             />
             <Input
               value={appearanceSettings.themeColor}
               onChange={(e) => updateAppearance({ themeColor: e.target.value })}
-              className="bg-zinc-900 border-zinc-700 text-zinc-100 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
         </div>

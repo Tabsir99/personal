@@ -49,7 +49,7 @@ export default function WriteBlog() {
             <div className="relative w-full sm:w-1/2">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500 h-4 w-4" />
               <Input
-                className="pl-10 bg-zinc-900 border-zinc-800 text-zinc-100"
+                className="pl-10"
                 placeholder="Search blogs by title, content or tags..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -103,7 +103,7 @@ const NoBlogs = ({ search }: { search: string }) => {
         className="bg-blue-600 hover:bg-blue-700"
         onClick={openCreateDialog}
       >
-        <Plus className="mr-2 h-4 w-4" />
+        <Plus className="h-4 w-4" />
         Create a New Blog
       </Button>
     </div>

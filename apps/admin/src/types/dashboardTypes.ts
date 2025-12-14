@@ -1,98 +1,114 @@
-export type TrafficSources =
+import type { UAParser } from "ua-parser-js";
+
+export type EventType =
+  | "session_start"
+  | "page_view"
+  | "page_exit"
+  | "portfolio_view";
+
+export type ReferralSource =
   | "organic"
   | "facebook"
   | "reddit"
   | "linkedin"
   | "twitter"
-  | "direct"
-  | "email";
+  | "email"
+  | "direct";
 
-interface ITrafficSources {
-  organic: number;
-  facebook: number;
-  reddit: number;
-  linkedin: number;
-  devto: number;
-  twitter: number;
-}
-export interface DailyStat {
-  date: string;
-  newVisitors: number;
-  totalVisitors: number;
-  totalSessions: number;
-  returningVisitors: number;
-  trafficSources: ITrafficSources;
-}
-
-export interface DashboardData {
-  updatedAt: any;
-  totalPosts: number;
-  totalCategory: number;
-  totalUsers: number;
-  totalComments: number;
-  totalLikes: number;
-  totalBounces: number;
-  totalSessions: number;
-  totalTimeOnSite: number;
-  trafficSources: ITrafficSources;
-}
-
-export interface PageMetrics {
-  uniqueVisitoris: number;
-  totalVisitors: number;
-  timeOnPage: {
-    totalTime: number;
-    timeRange: {
-      "0-30": number;
-      "30-60": number;
-      "60-120": number;
-      "120+": number;
-    };
-  };
-  blogMetrics: BlogMetrics | null;
-}
-
-export interface BlogMetrics {
-  totalLikes: number;
-  totalComments: number;
-  totalShares: number;
-  clickThroughRate: {
-    totalClicks: number;
-    totalVisibility: number;
-  };
-  totalDepthScrolled: number; // how much percent of the page has been scrolled all time,
-  // it should be divided by total visits for the blog page to get avg
-}
-
-export type AggregationType = "daily" | "weekly" | "monthly";
-export interface Aggregation {
-  date: Date;
-  type: AggregationType;
-  trafficSources: Record<TrafficSources, number>;
-  geoLocations: Record<string, number>;
-  totalVisits: number;
-  totalUniqueVisits: number;
-  totalSessions: number;
-}
-
-export interface Session {
-  isReturning: boolean;
+export interface BaseEvent {
   sessionId: string;
-  startTime: Date;
-  endTime: Date | null;
-  referralSource: TrafficSources;
-  exitPage: string | null;
-  pageVisits: Record<
-    string,
-    {
-      entryTime: Date;
-      exitTime: Date | null;
-      depthScrolled: number;
-      recommendationClicks: number;
-      recommendationVisible: number;
-      pageViews: number;
-    }
-  >;
-  ipAdd?: string;
-  country?: string;
+  type: EventType;
+  timestamp: number; // UNIX Milliseconds
+  path: string;
+}
+
+/**
+ * Session start event - fired once per session
+ */
+export interface SessionStartEvent extends BaseEvent {
+  type: "session_start";
+  country: string;
+  device: ReturnType<typeof UAParser>["device"]["type"];
+  ip: string;
+  data: {
+    isReturning: boolean;
+    referralSource: ReferralSource;
+  };
+}
+
+/**
+ * Page view event - fired on every route change
+ */
+export interface PageViewEvent extends BaseEvent {
+  type: "page_view";
+  data: {
+    referrer?: string; // Previous page in SPA
+    loadTime?: number; // Page load time in ms
+  };
+}
+
+/**
+ * Page exit event - fired when leaving a page
+ */
+export interface PageExitEvent extends BaseEvent {
+  type: "page_exit";
+  data: {
+    timeOnPage: number; // Seconds spent on page
+  };
+}
+
+/**
+ * Portfolio view event - fired when clicked on link to portfolio site
+ */
+export interface PortfolioViewEvent extends BaseEvent {
+  type: "portfolio_view";
+}
+
+/**
+ * Union type of all possible events
+ */
+export type AnalyticsEvent =
+  | SessionStartEvent
+  | PageViewEvent
+  | PageExitEvent
+  | PortfolioViewEvent;
+
+export interface DailyStats {
+  date: string; // YYYY-MM-DD
+  sessions: number;
+  pageViews: number;
+  uniqueVisits: number;
+  bounces: number;
+  portfolioClicks: number;
+  totalSessionDuration: number;
+}
+
+export interface PagePerformance {
+  path: string;
+  date: string; // YYYY-MM-DD
+  views: number;
+  avgTimeOnPage: number; // seconds
+  bounces: number; // sessions that bounced from this page
+  bounceRate: number; // percentage
+}
+
+export interface TrafficSource {
+  source: ReferralSource;
+  date: string; // YYYY-MM-DD
+  sessions: number;
+  pageViews: number;
+  bounces: number;
+}
+
+export interface GeoStats {
+  country: string;
+  date: string; // YYYY-MM-DD
+  sessions: number;
+  pageViews: number;
+  uniqueVisits: number;
+  devices: {
+    mobile: number;
+    desktop: number;
+    tablet: number;
+  };
 }

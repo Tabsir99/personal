@@ -136,11 +136,7 @@ const BlogShareModal = ({ open, onClose, url, title }: BlogShareModalProps) => {
               Copy link
             </h3>
             <div className="flex gap-3">
-              <Input
-                value={url}
-                readOnly
-                className="flex-1 bg-zinc-900/70 border-zinc-700 text-sm text-zinc-300 focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600"
-              />
+              <Input value={url} readOnly className="flex-1" />
               <Button
                 onClick={copyToClipboard}
                 variant="secondary"
@@ -153,12 +149,12 @@ const BlogShareModal = ({ open, onClose, url, title }: BlogShareModalProps) => {
               >
                 {copySuccess ? (
                   <>
-                    <FaCheck className="w-4 h-4 mr-2" />
+                    <FaCheck className="w-4 h-4" />
                     Copied!
                   </>
                 ) : (
                   <>
-                    <FaLink className="w-4 h-4 mr-2" />
+                    <FaLink className="w-4 h-4" />
                     Copy
                   </>
                 )}

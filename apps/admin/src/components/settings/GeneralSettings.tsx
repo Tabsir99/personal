@@ -29,7 +29,6 @@ export default function GeneralSettings() {
             value={generalSettings.siteTitle}
             onChange={(e) => updateGeneral({ siteTitle: e.target.value })}
             placeholder="Enter your blog name"
-            className="bg-zinc-900 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
 
@@ -39,7 +38,6 @@ export default function GeneralSettings() {
             value={generalSettings.metaDescription}
             onChange={(e) => updateGeneral({ metaDescription: e.target.value })}
             placeholder="Describe your blog for search engines"
-            className="min-h-[80px] bg-zinc-900 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
       </div>
@@ -51,7 +49,6 @@ export default function GeneralSettings() {
             value={generalSettings.faviconUrl}
             onChange={(e) => updateGeneral({ faviconUrl: e.target.value })}
             placeholder="https://yourblog.com/favicon.ico"
-            className="bg-zinc-900 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
 
@@ -61,7 +58,6 @@ export default function GeneralSettings() {
             value={generalSettings.logoUrl}
             onChange={(e) => updateGeneral({ logoUrl: e.target.value })}
             placeholder="https://yourblog.com/logo.png"
-            className="bg-zinc-900 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
       </div>
