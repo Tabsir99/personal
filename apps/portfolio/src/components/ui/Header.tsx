@@ -2,16 +2,17 @@ import { getPageData } from "@/app/layout";
 import { env } from "@/config/env";
 import Img from "./image";
 import { NavItems } from "./NavItems";
+import { nextImageUrl } from "@/lib/utils";
 
 export const Logo = ({ width = 60 }: { width?: number }) => {
   return (
     <a href="#home" className="pl-3">
       <Img
-        src={env.LOGO_URL}
+        src={nextImageUrl(env.LOGO_URL, 256, 100)}
         width={width}
         fetchPriority="high"
         loading="eager"
-        className=" min-w-[40px] hover:scale-110 transition-transform duration-200 "
+        className=" hover:scale-110 transition-transform duration-200 "
         draggable="false"
         alt=" The Logo where there is a Cat icon beside the word CG"
       />
