@@ -1,13 +1,16 @@
 import "./globals.css";
-
-import Footer from "../components/footer/Footer";
-import NavbarContainer from "@/components/UI/Header";
-import Observer, { AnimationProvider } from "@/components/theObserver";
+import React, { cache } from "react";
+import Footer from "../components/ui/Footer";
+import Navbar from "@/components/ui/Header";
 import { type Metadata } from "next";
 import { Lato, Oswald } from "next/font/google";
+import { PageData } from "./page.type";
+import { env } from "@/config/env";
+import { GlobalCursorGlow } from "@/components/ui/GlowCursor";
+import { ScrollAnimationObserver } from "@/components/ui/ScrollObserver";
 
 const latoFont = Lato({
-  weight: "400",
+  weight: ["400", "900"],
   display: "swap",
   preload: true,
   subsets: ["latin"],
@@ -27,58 +30,72 @@ const osWaldFont = Oswald({
   ],
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://tabsircg.com"),
-  title: "Tabsir's Portfolio",
-  description:
-    "Custom Web Solutions tailored to your needs. Specialized in NEXTJS and Relational Databases. Ready to bring your Web Development vision to life.",
-  icons: {
-    icon: "/o-mins.png",
-  },
-  openGraph: {
-    title: "Tabsir's Portfolio",
-    description:
-      "Custom Web Solutions tailored to your needs. Specialized in NEXTJS and Relational Databases. Ready to bring your Web Development vision to life.",
-    type: "website",
-    url: "/",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Tabsir's Portfolio",
-    description:
-      "Custom Web Solutions tailored to your needs. Specialized in NEXTJS and Relational Databases. Ready to bring your Web Development vision to life.",
-  },
-  keywords: [
-    "Tabsir",
-    "Web Development",
-    "Next.js",
-    "Relational Databases",
-    "Full Stack Developer",
-    "Custom Web Solutions",
-    "Responsive Design",
-    "SEO",
-    "Website Optimization",
-    "Bangladesh Developer",
-    "freelance full stack developer",
-    "Node.js and Express developer",
-    "web application development",
-  ],
-  authors: [{ name: "Tabsir" }],
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: `/`,
-  },
-};
+export const getPageData = cache(async (): Promise<PageData> => {
+  try {
+    const response = await fetch(`${env.ADMIN_ORIGIN}/api/page-data`, {
+      headers: {
+        serverToken: env.SERVER_TOKEN,
+      },
+    });
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+    return {
+      about: [],
+      credentials: [],
+      services: [],
+      stats: {
+        yearsExperience: 0,
+        projectsCompleted: 0,
+        jobSuccessRate: 0,
+        responseTime: "",
+        happyClients: 0,
+      },
+      skills: [],
+      projects: [],
+      testimonials: [],
+      title: "",
+      description: "",
+      keywords: [],
+      profilePicture: "",
+      contact: {
+        email: "",
+        social: [],
+      },
+    };
+  }
+});
 
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
-  userScalable: true,
-  viewportFit: "cover",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const pageData = await getPageData();
+  return {
+    metadataBase: new URL("https://tabsircg.com"),
+    title: pageData.title,
+    description: pageData.description,
+    keywords: pageData.keywords,
+    icons: { icon: env.FAVICON_URL },
+    openGraph: {
+      title: pageData.title,
+      description: pageData.description,
+      type: "website",
+      url: "/",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageData.title,
+      description: pageData.description,
+    },
+    alternates: {
+      canonical: `/`,
+    },
+    authors: [{ name: "Tabsir CG" }],
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default function RootLayout({
   children,
@@ -100,25 +117,22 @@ export default function RootLayout({
         <div
           id="root"
           style={{
-            backgroundColor: "#101010",
             width: "100vw",
             height: "100vh",
             padding: "4.1rem 0 0",
             overflowY: "scroll",
             overflowX: "hidden",
+            scrollBehavior: "smooth",
           }}
           className={latoFont.className + " " + osWaldFont.variable}
         >
-          <script src="/script/onload.js" async></script>
-          <NavbarContainer />
-
-          <AnimationProvider>
-            <main className=" [word-spacing:0.1rem]  ">{children}</main>
-            <Observer />
-          </AnimationProvider>
-
+          <Navbar />
+          <main className=" [word-spacing:0.1rem]">{children}</main>
           <Footer />
         </div>
+        <GlobalCursorGlow />
+        <ScrollAnimationObserver />
+        {/* <BlobCursor /> */}
       </body>
     </html>
   );

@@ -1,10 +1,11 @@
-import HeroSection from "@/components/heroSection/HeroSection";
-import Services from "@/components/featureSection/Services";
-import Skills from "@/components/articles/SkillsSection";
-import Credentials from "@/components/articles/Credentials";
-import About from "@/components/articles/About";
+import React from "react";
+import HeroSection from "@/components/HeroSection/HeroSection";
+import Services from "@/components/Services/Services";
+import Skills from "@/components/About/SkillsSection";
+import Credentials from "@/components/About/Credentials";
+import About from "@/components/About/About";
 import Projects from "@/components/Projects/PortfolioSection";
-import ScriptLoader from "@/components/nullComponents/script";
+import Testimonials from "@/components/Testimonials/Testimonials";
 
 const Home = () => {
   return (
@@ -15,13 +16,13 @@ const Home = () => {
 
       <Projects />
 
+      <Testimonials />
+
       <About />
 
       <Skills />
 
       <Credentials />
-
-      <ScriptLoader />
     </>
   );
 };
