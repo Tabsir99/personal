@@ -11,6 +11,7 @@ import {
 } from "d3";
 import { useEffect, useRef, useState } from "react";
 
+// @ts-expect-error
 import { DailyStat } from "@/types/dashboardTypes";
 
 export const DailyTrendsChart = ({

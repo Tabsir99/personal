@@ -101,10 +101,7 @@ const SocialLinksSection = memo(
 
             <div className="space-y-3">
               {contact.social.map((social, i) => (
-                <div
-                  key={i}
-                  className="group relative p-4 border border-white/10 rounded-lg bg-white hover:border-white/20 hover:shadow-sm transition-all duration-200"
-                >
+                <div key={i}>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div className="space-y-1.5">
                       <Label className="text-xs">Platform</Label>
@@ -153,71 +150,72 @@ const SocialLinksSection = memo(
                 </div>
               ))}
 
-              {isAddingSocial ? (
-                <div className="p-4 border-2 border-dashed border-zinc-700 rounded-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                    <div className="space-y-1.5">
-                      <Label className="text-xs">Platform</Label>
-                      <Input
-                        value={newSocial.name}
-                        onChange={(e) =>
-                          setNewSocial({ ...newSocial, name: e.target.value })
-                        }
-                        className="h-9 text-sm"
-                        placeholder="e.g., LinkedIn"
-                        autoFocus
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs">URL</Label>
-                      <Input
-                        value={newSocial.url}
-                        onChange={(e) =>
-                          setNewSocial({ ...newSocial, url: e.target.value })
-                        }
-                        className="h-9 text-sm"
-                        placeholder="https://..."
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs">Icon Url</Label>
-                      <Input
-                        value={newSocial.icon}
-                        onChange={(e) =>
-                          setNewSocial({ ...newSocial, icon: e.target.value })
-                        }
-                        className="h-9 text-sm"
-                        placeholder="https://example.com/icon.png"
-                      />
-                    </div>
+              <div
+                className={`${isAddingSocial ? "p-4 max-h-[30rem] border-zinc-700" : "p-0 max-h-0 border-transparent"} border-2 mt-8 border-dashed rounded-lg transition-all duration-300 overflow-hidden`}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Platform</Label>
+                    <Input
+                      value={newSocial.name}
+                      onChange={(e) =>
+                        setNewSocial({ ...newSocial, name: e.target.value })
+                      }
+                      className="h-9 text-sm"
+                      placeholder="e.g., LinkedIn"
+                      autoFocus
+                    />
                   </div>
-                  <div className="flex gap-2 justify-end">
-                    <Button
-                      onClick={() => {
-                        setIsAddingSocial(false);
-                        setNewSocial({ name: "", url: "", icon: "" });
-                      }}
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 text-zinc-400"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleAddSocial}
-                      size="sm"
-                      className="h-8 text-zinc-400"
-                    >
-                      <Plus size={14} className="mr-1" />
-                      Add Link
-                    </Button>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">URL</Label>
+                    <Input
+                      value={newSocial.url}
+                      onChange={(e) =>
+                        setNewSocial({ ...newSocial, url: e.target.value })
+                      }
+                      className="h-9 text-sm"
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Icon Url</Label>
+                    <Input
+                      value={newSocial.icon}
+                      onChange={(e) =>
+                        setNewSocial({ ...newSocial, icon: e.target.value })
+                      }
+                      className="h-9 text-sm"
+                      placeholder="https://example.com/icon.png"
+                    />
                   </div>
                 </div>
-              ) : (
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    onClick={() => {
+                      setIsAddingSocial(false);
+                      setNewSocial({ name: "", url: "", icon: "" });
+                    }}
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 text-zinc-400"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleAddSocial}
+                    size="sm"
+                    className="h-8 text-white"
+                  >
+                    <Plus size={14} />
+                    Add Link
+                  </Button>
+                </div>
+              </div>
+              {isAddingSocial || (
                 <Button
                   variant="outline"
                   onClick={() => setIsAddingSocial(true)}
-                  className="w-full border-dashed border-zinc-700 hover:border-zinc-700 hover:bg-zinc-800 transition-colors"
+                  className="w-full border-dashed border-zinc-700 hover:border-zinc-700 hover:bg-zinc-800"
                 >
                   <Plus size={16} />
                   Add Social Link

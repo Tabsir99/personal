@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -29,7 +30,6 @@ import { PageData } from "@/types/portfolioTypes";
 interface ProjectDialogProps {
   children?: React.ReactNode;
   project?: PageData["projects"][number] | undefined;
-
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   projectIndex?: number | null;
@@ -44,6 +44,11 @@ const defaultFormData: PageData["projects"][number] = {
   link2: { text: "GitHub", url: "" },
   skills: [],
   isActive: true,
+  featured: false,
+  metrics: [],
+  year: "",
+  duration: "",
+  clientType: "",
 };
 
 export default function ProjectDialog({
@@ -58,7 +63,10 @@ export default function ProjectDialog({
 
   useEffect(() => {
     if (existingProject && typeof projectIndex === "number") {
-      setFormData(existingProject);
+      setFormData({
+        ...existingProject,
+        metrics: existingProject.metrics || [],
+      });
       setIsUpdating(true);
     } else {
       setFormData(defaultFormData);
@@ -67,6 +75,8 @@ export default function ProjectDialog({
   }, [existingProject, projectIndex]);
 
   const [currentSkill, setCurrentSkill] = useState("");
+  const [metricLabel, setMetricLabel] = useState("");
+  const [metricValue, setMetricValue] = useState("");
 
   const project = usePortfolioStore().projects;
 
@@ -87,12 +97,31 @@ export default function ProjectDialog({
     });
   };
 
+  const handleAddMetric = () => {
+    if (
+      metricLabel.trim() &&
+      metricValue.trim() &&
+      formData.metrics.length < 2
+    ) {
+      setFormData({
+        ...formData,
+        metrics: [
+          ...formData.metrics,
+          { label: metricLabel.trim(), value: metricValue.trim() },
+        ],
+      });
+      setMetricLabel("");
+      setMetricValue("");
+    }
+  };
+
   const handleSubmit = async () => {
     if (isUpdating) project.update(projectIndex!, formData);
     else project.add(formData);
   };
 
   const imageInputRef = useRef<HTMLInputElement>(null);
+
   return (
     <Dialog
       {...(open !== undefined && onOpenChange !== undefined
@@ -100,28 +129,30 @@ export default function ProjectDialog({
         : {})}
     >
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="bg-zinc-900 border-white/10 max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto border-white/10 bg-zinc-900">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Add New Project</DialogTitle>
+          <DialogTitle className="text-2xl">
+            {isUpdating ? "Edit Project" : "Add New Project"}
+          </DialogTitle>
           <DialogDescription className="text-white/50">
-            Fill in the details for your new project
+            Fill in the details for your project
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4 text-white">
           {/* Image Upload */}
           <div>
-            <Label className="text-white/70 mb-2 block">Project Image</Label>
+            <Label className="mb-2 block text-white/70">Project Image</Label>
             <div className="flex items-center gap-4">
               <div
                 onClick={() => imageInputRef.current?.click()}
-                className="w-full min-h-40 cursor-pointer bg-zinc-800/50 border-2 border-dashed border-white/10 rounded-lg flex items-center justify-center overflow-hidden"
+                className="flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-white/10 bg-zinc-800/50"
               >
                 {formData.image ? (
                   <Img
                     src={formData.image}
                     alt="Preview"
-                    className="w-full h-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 ) : (
                   <ImageIcon size={32} className="text-white/30" />
@@ -148,7 +179,7 @@ export default function ProjectDialog({
           <div className="grid grid-cols-2 gap-4">
             {/* Title */}
             <div>
-              <Label className="text-white/70 mb-2 block">Project Title</Label>
+              <Label className="mb-2 block text-white/70">Project Title</Label>
               <Input
                 placeholder="E-commerce Platform"
                 value={formData.title}
@@ -160,7 +191,7 @@ export default function ProjectDialog({
 
             {/* Type */}
             <div>
-              <Label className="text-white/70 mb-2 block">Project Type</Label>
+              <Label className="mb-2 block text-white/70">Project Type</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value: "Personal" | "Demo" | "Freelance") =>
@@ -170,7 +201,7 @@ export default function ProjectDialog({
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                <SelectContent className="border-white/10 bg-zinc-900 text-white">
                   <SelectItem value="Personal">Personal</SelectItem>
                   <SelectItem value="Demo">Demo</SelectItem>
                   <SelectItem value="Freelance">Freelance</SelectItem>
@@ -181,7 +212,7 @@ export default function ProjectDialog({
 
           {/* Description */}
           <div>
-            <Label className="text-white/70 mb-2 block">Description</Label>
+            <Label className="mb-2 block text-white/70">Description</Label>
             <Textarea
               placeholder="A full-featured e-commerce platform with payment integration..."
               value={formData.description}
@@ -193,11 +224,11 @@ export default function ProjectDialog({
 
           {/* Links */}
           <div className="space-y-4">
-            <Label className="text-white/70 block">Links</Label>
+            <Label className="block text-white/70">Links</Label>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-white/50 text-xs mb-2 block">
+                <Label className="mb-2 block text-xs text-white/50">
                   Link 1 Text
                 </Label>
                 <Input
@@ -212,7 +243,7 @@ export default function ProjectDialog({
                 />
               </div>
               <div>
-                <Label className="text-white/50 text-xs mb-2 block">
+                <Label className="mb-2 block text-xs text-white/50">
                   Link 1 URL
                 </Label>
                 <Input
@@ -230,7 +261,7 @@ export default function ProjectDialog({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-white/50 text-xs mb-2 block">
+                <Label className="mb-2 block text-xs text-white/50">
                   Link 2 Text
                 </Label>
                 <Input
@@ -245,7 +276,7 @@ export default function ProjectDialog({
                 />
               </div>
               <div>
-                <Label className="text-white/50 text-xs mb-2 block">
+                <Label className="mb-2 block text-xs text-white/50">
                   Link 2 URL
                 </Label>
                 <Input
@@ -264,10 +295,10 @@ export default function ProjectDialog({
 
           {/* Skills */}
           <div>
-            <Label className="text-white/70 mb-2 block">
+            <Label className="mb-2 block text-white/70">
               Technologies & Skills
             </Label>
-            <div className="flex gap-2 mb-3">
+            <div className="mb-3 flex gap-2">
               <Input
                 placeholder="Add a skill..."
                 value={currentSkill}
@@ -290,17 +321,17 @@ export default function ProjectDialog({
             </div>
 
             {formData.skills.length > 0 && (
-              <div className="flex gap-2 flex-wrap p-4 bg-zinc-800/30 border border-white/10 rounded-lg">
+              <div className="flex flex-wrap gap-2 rounded-lg border border-white/10 bg-zinc-800/30 p-4">
                 {formData.skills.map((skill, i) => (
                   <Badge
                     key={i}
                     variant="secondary"
-                    className="bg-blue-500/20 border-blue-500/30 text-blue-400 pl-3 pr-1 py-1"
+                    className="border-blue-500/30 bg-blue-500/20 py-1 pl-3 pr-1 text-blue-400"
                   >
                     {skill}
                     <button
                       onClick={() => handleRemoveSkill(skill)}
-                      className="ml-2 hover:bg-blue-500/30 rounded-full p-0.5"
+                      className="ml-2 rounded-full p-0.5 hover:bg-blue-500/30"
                     >
                       <X size={12} />
                     </button>
@@ -308,6 +339,158 @@ export default function ProjectDialog({
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Featured Toggle */}
+          <div>
+            <Label className="mb-2 block text-white/70">Featured Project</Label>
+            <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-zinc-800/30 p-4">
+              <Checkbox
+                id="featured"
+                checked={formData.featured || false}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, featured: checked as boolean })
+                }
+              />
+              <Label
+                htmlFor="featured"
+                className="cursor-pointer text-white/70"
+              >
+                Highlight this project with a featured badge
+              </Label>
+            </div>
+          </div>
+
+          {/* Metrics */}
+          <div>
+            <Label className="mb-2 block text-white/70">
+              Project Metrics (Optional)
+            </Label>
+            <p className="mb-3 text-xs text-white/50">
+              Add up to 2 metrics to showcase results (e.g., "10K users", "0.8s
+              load time")
+            </p>
+
+            {formData.metrics.length < 2 && (
+              <div className="mb-3 grid grid-cols-2 gap-4">
+                <Input
+                  placeholder="Metric label (e.g., Users)"
+                  value={metricLabel}
+                  onChange={(e) => setMetricLabel(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddMetric();
+                    }
+                  }}
+                />
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Value (e.g., 10K+)"
+                    value={metricValue}
+                    onChange={(e) => setMetricValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddMetric();
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleAddMetric}
+                    className="bg-blue-500 hover:bg-blue-600"
+                  >
+                    <Plus size={16} />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {formData.metrics.length > 0 && (
+              <div className="flex gap-3 rounded-lg border border-white/10 bg-zinc-800/30 p-4">
+                {formData.metrics.map((metric, i) => (
+                  <div
+                    key={i}
+                    className="group relative flex-1 rounded-lg border border-zinc-700/50 bg-zinc-800/50 p-3"
+                  >
+                    <button
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          metrics: formData.metrics.filter(
+                            (_, idx) => idx !== i
+                          ),
+                        })
+                      }
+                      className="absolute -right-2 -top-2 rounded-full bg-red-500/80 p-1 opacity-0 transition-opacity hover:bg-red-500 group-hover:opacity-100"
+                    >
+                      <X size={12} className="text-white" />
+                    </button>
+                    <div className="text-xs text-zinc-400">{metric.label}</div>
+                    <div className="text-sm font-bold text-white">
+                      {metric.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {formData.metrics.length >= 2 && (
+              <p className="mt-2 text-xs text-yellow-500/70">
+                Maximum 2 metrics reached. Remove one to add another.
+              </p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="mb-2 block text-white/70">Year</Label>
+              <Input
+                placeholder="2024"
+                value={formData.year}
+                onChange={(e) =>
+                  setFormData({ ...formData, year: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <Label className="mb-2 block text-white/70">Duration</Label>
+              <Input
+                placeholder="3 months"
+                value={formData.duration}
+                onChange={(e) =>
+                  setFormData({ ...formData, duration: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="mb-2 block text-white/70">
+                Role (Optional)
+              </Label>
+              <Input
+                placeholder="Full Stack Developer"
+                value={formData.role || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, role: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label className="mb-2 block text-white/70">Client Type</Label>
+            <Input
+              placeholder="Startup, Enterprise, Personal, etc."
+              value={formData.clientType}
+              onChange={(e) =>
+                setFormData({ ...formData, clientType: e.target.value })
+              }
+            />
           </div>
         </div>
 

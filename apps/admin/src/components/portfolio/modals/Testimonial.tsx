@@ -23,11 +23,11 @@ import { Button } from "@/components/ui/button";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { useEffect, useState } from "react";
 import { PageData } from "@/types/portfolioTypes";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface TestimonialDialogProps {
   children?: React.ReactNode;
   testimonial?: PageData["testimonials"][number] | undefined;
-
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   testimonialIndex?: number | null;
@@ -44,6 +44,11 @@ const defaultFormData: PageData["testimonials"][number] = {
   text: "",
   video: "",
   isActive: true,
+  projectDuration: "",
+  projectBudget: "",
+  featured: false,
+  avatar: "",
+  date: "",
 } as const;
 
 export default function TestimonialDialog({
@@ -87,7 +92,9 @@ export default function TestimonialDialog({
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col pb-0 overflow-y-auto bg-zinc-900 border-white/10 text-white">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Add New Testimonial</DialogTitle>
+          <DialogTitle className="text-2xl">
+            {isUpdating ? "Edit Testimonial" : "Add New Testimonial"}
+          </DialogTitle>
           <DialogDescription>
             Fill in the client testimonial information
           </DialogDescription>
@@ -147,9 +154,34 @@ export default function TestimonialDialog({
                 />
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="mb-2 block">Avatar URL</Label>
+                <Input
+                  placeholder="https://..."
+                  value={formData.avatar}
+                  onChange={(e) =>
+                    setFormData({ ...formData, avatar: e.target.value })
+                  }
+                />
+              </div>
+
+              <div>
+                <Label className="mb-2 block">Date</Label>
+                <Input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) =>
+                    setFormData({ ...formData, date: e.target.value })
+                  }
+                />
+              </div>
+            </div>
           </div>
 
-          <div className=" pt-4">
+          {/* Project Details */}
+          <div className="pt-4">
             <h3 className="text-sm font-semibold text-muted-foreground mb-4">
               Project Details
             </h3>
@@ -185,10 +217,50 @@ export default function TestimonialDialog({
                 </Select>
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div>
+                <Label className="mb-2 block">Project Duration</Label>
+                <Input
+                  placeholder="3 months"
+                  value={formData.projectDuration}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      projectDuration: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div>
+                <Label className="mb-2 block">Project Budget</Label>
+                <Input
+                  placeholder="$10,000 - $20,000"
+                  value={formData.projectBudget}
+                  onChange={(e) =>
+                    setFormData({ ...formData, projectBudget: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mt-4">
+              <Checkbox
+                id="featured"
+                checked={formData.featured}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, featured: checked as boolean })
+                }
+              />
+              <Label htmlFor="featured" className="cursor-pointer">
+                Featured testimonial
+              </Label>
+            </div>
           </div>
 
           {/* Rating */}
-          <div className=" pt-4">
+          <div className="pt-4">
             <h3 className="text-sm font-semibold text-muted-foreground mb-4">
               Rating & Review
             </h3>
@@ -229,6 +301,7 @@ export default function TestimonialDialog({
                 onChange={(e) =>
                   setFormData({ ...formData, text: e.target.value })
                 }
+                rows={5}
               />
               <p className="text-xs text-muted-foreground mt-2">
                 Optional: Leave blank if using video testimonial
@@ -237,7 +310,7 @@ export default function TestimonialDialog({
           </div>
 
           {/* Video Testimonial */}
-          <div className=" pt-4">
+          <div className="pt-4">
             <h3 className="text-sm font-semibold text-muted-foreground mb-4">
               Video Testimonial (Optional)
             </h3>

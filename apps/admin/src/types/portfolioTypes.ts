@@ -20,7 +20,17 @@ export interface PageData {
     link1: { text: string; url: string };
     link2: { text: string; url: string };
     skills: string[];
+    featured: boolean;
+    metrics: {
+      label: string;
+      value: string;
+    }[];
     isActive: boolean;
+    // NEW FIELDS
+    year: string;
+    duration: string;
+    role?: string;
+    clientType: string;
   }[];
 
   testimonials: {
@@ -31,10 +41,15 @@ export interface PageData {
     project: string;
     size: "large" | "medium" | "small";
     rating: number;
-
     text?: string;
     video?: string;
     isActive: boolean;
+
+    avatar?: string;
+    date?: string;
+    projectDuration: string;
+    projectBudget: string;
+    featured: boolean;
   }[];
 
   about: string[]; // Array of html strings. One Card is rendered for each string.

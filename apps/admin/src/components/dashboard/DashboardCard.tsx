@@ -1,5 +1,5 @@
 import { FaChartColumn } from "react-icons/fa6";
-
+// @ts-expect-error
 import { DashboardData } from "@/types/dashboardTypes";
 
 const DashboardCard = ({

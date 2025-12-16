@@ -30,7 +30,6 @@ export default async function middleware(request: NextRequest) {
 
     const serverAuthenticated = serverToken === env.SERVER_TOKEN;
 
-    console.log(token);
     // Server auth bypasses everything
     if (serverAuthenticated) return NextResponse.next();
 
