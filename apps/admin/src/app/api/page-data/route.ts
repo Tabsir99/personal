@@ -47,13 +47,13 @@ export async function POST(request: NextRequest) {
       ACL: "private",
     });
 
-    fetch("https://tabsircg.com/api/revalidate", {
+    await fetch("https://tabsircg.com/api/revalidate", {
       headers: {
         Authorization: env.SERVER_TOKEN,
       },
-    })
-      .then(() => console.log("Revalidated tabsircg.com"))
-      .catch((err) => console.error(err));
+    });
+
+    console.log("Revalidated tabsircg.com");
 
     return NextResponse.json("OK", { status: 200 });
   } catch (error) {
