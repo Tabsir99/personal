@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { authLimiter } from "./config/redisConfig";
 import { jwtVerify } from "jose";
 import { env } from "./config/env.server";
 
@@ -14,19 +13,14 @@ const isLoggedIn = async (token?: string) => {
   }
 };
 
-const handleRateLimit = async (ipAddress: string) => {
-  const { success } = await authLimiter.limit(ipAddress);
-  return success ? NextResponse.next() : NextResponse.json({}, { status: 429 });
-};
-
 export default async function middleware(request: NextRequest) {
   try {
-    const ipAddress = request.headers.get("xIp") ?? "unknown";
+    // const ipAddress = request.headers.get("xIp") ?? "unknown";
     const pathname = request.nextUrl.pathname;
     const token = request.cookies.get("token")?.value;
     const serverToken = request.headers.get("serverToken");
-    const shouldRateLimit =
-      env.RUNTIME !== "local" && pathname === "/" && request.method === "POST";
+    // const shouldRateLimit =
+    //   env.RUNTIME !== "local" && pathname === "/" && request.method === "POST";
 
     const serverAuthenticated = serverToken === env.SERVER_TOKEN;
 
@@ -44,10 +38,6 @@ export default async function middleware(request: NextRequest) {
     const userAuthenticated = await isLoggedIn(token);
 
     if (pathname.endsWith("events")) throw new Error("Unauthorized");
-
-    // Do rate limiting for login attempts
-    if (shouldRateLimit) return handleRateLimit(ipAddress);
-
     // User auth is required for all other routes except login
     if (pathname !== "/" && !userAuthenticated) throw new Error("Unauthorized");
 

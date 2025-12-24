@@ -13,7 +13,7 @@ function initFirebase() {
     });
   } else {
     app = initializeApp({
-      credential: cert(JSON.parse(process.env.FIREBASE_ADMIN_CONFIG!)),
+      credential: cert(JSON.parse(env.FIREBASE_ADMIN_CONFIG!)),
     });
   }
 

@@ -19,10 +19,6 @@ export const env = {
   // ===== Firebase =====
   FIREBASE_ADMIN_CONFIG: requireEnv("FIREBASE_ADMIN_CONFIG"),
 
-  // ===== Redis =====
-  REDIS_KV_REST_API_URL: requireEnv("KV_REST_API_URL"),
-  REDIS_KV_REST_API_TOKEN: requireEnv("KV_REST_API_TOKEN"),
-
   // ===== Cloudflare R2 =====
   CLOUDFLARE_R2_AK_ID: requireEnv("CLOUDFLARE_R2_AK_ID"),
   CLOUDFLARE_R2_AK: requireEnv("CLOUDFLARE_R2_AK"),
