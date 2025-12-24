@@ -1,12 +1,9 @@
-import React from "react";
 import {
   ExternalLink,
   Github,
-  TrendingUp,
   Calendar,
   Clock,
   User,
-  Circle,
   Building2,
   Rocket,
   UserCircle,
@@ -19,9 +16,10 @@ import { getPageData } from "@/app/layout";
 import Img from "../ui/image";
 import { PageData } from "@/app/page.type";
 
+type ClientType = PageData["projects"][0]["clientType"];
 // Helper function for client icons
-const getClientIcon = (type: PageData["projects"][0]["clientType"]) => {
-  const iconMap = {
+const getClientIcon = (type: ClientType) => {
+  const iconMap: Record<ClientType, React.ElementType> = {
     Startup: Rocket,
     Enterprise: Building2,
     Personal: UserCircle,

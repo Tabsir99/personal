@@ -281,17 +281,17 @@ em {
   position: relative;
   color: rgb(156, 163, 175);
   background: radial-gradient(
-      circle 80px at var(--mouse-x) var(--mouse-y),
+      circle 100px at var(--mouse-x) var(--mouse-y),
       rgba(96, 165, 250, 0.4),
       transparent 100%
     ),
     radial-gradient(
-      circle 150px at var(--mouse-x) var(--mouse-y),
+      circle 180px at var(--mouse-x) var(--mouse-y),
       rgba(168, 85, 247, 0.3),
       transparent 70%
     ),
     radial-gradient(
-      circle 200px at var(--mouse-x) var(--mouse-y),
+      circle 220px at var(--mouse-x) var(--mouse-y),
       rgb(96, 165, 250),
       rgb(168, 85, 247) 40%,
       rgb(156, 163, 175) 70%

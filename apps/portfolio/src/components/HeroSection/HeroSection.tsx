@@ -29,7 +29,7 @@ const HeroSection = async () => {
         />
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-12 px-4 lg:grid-cols-2 lg:gap-16">
+      <div className="mx-auto grid max-w-[83rem] gap-10 px-4 lg:grid-cols-2 lg:gap-16">
         <HeroContent pageData={pageData} />
         <HeroVisual pageData={pageData} />
       </div>
@@ -38,7 +38,6 @@ const HeroSection = async () => {
 };
 
 export default HeroSection;
-
 const HeroContent = ({ pageData }: { pageData: PageData }) => {
   const avgRating =
     pageData.testimonials.length > 0
@@ -53,27 +52,50 @@ const HeroContent = ({ pageData }: { pageData: PageData }) => {
       {/* Heading with Spotlight Effect */}
       <div className="space-y-4">
         <h1 className="text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-6xl lg:text-7xl">
-          I Ship <HighlightText text="MVPs in 4-6 Weeks," /> Not Months
+          Turning Ideas Into <HighlightText text="Production-Ready MVPs" />
         </h1>
-
         <p className="max-w-xl text-lg leading-relaxed text-zinc-400 md:text-xl">
-          Full-stack developer specializing in{" "}
+          {pageData.stats.yearsExperience}+ years shipping complete SaaS
+          solutions. From database design to deployment, I deliver{" "}
           <span className="font-semibold text-white">
-            production-ready SaaS products
+            battle-tested products in weeks
           </span>
-          . Database to deployment, I ship the complete solution.
+          , not months.
         </p>
       </div>
 
-      {/* Social Proof - Just Upwork Rating */}
-      <div className="flex items-center gap-2">
-        <div className="flex">
-          {[...Array(5)].map((_, i) => (
-            <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-          ))}
+      {/* Social Proof - Rating + Quick Stats */}
+      <div className="flex flex-wrap items-center gap-4 md:gap-6">
+        <div className="flex items-center gap-2">
+          <div className="flex">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className="h-4 w-4 fill-yellow-400 text-yellow-400"
+              />
+            ))}
+          </div>
+          <span className="font-semibold text-white">{avgRating}</span>
+          <span className="text-zinc-500">on Upwork</span>
         </div>
-        <span className="font-semibold text-white">{avgRating}</span>
-        <span className="text-zinc-500">on Upwork</span>
+
+        <div className="h-4 w-px bg-zinc-700" />
+
+        <div className="text-zinc-400">
+          <span className="font-semibold text-white">
+            {pageData.stats.yearsExperience}+
+          </span>{" "}
+          years exp
+        </div>
+
+        <div className="h-4 w-px bg-zinc-700" />
+
+        <div className="text-zinc-400">
+          <span className="font-semibold text-emerald-400">
+            {pageData.stats.responseTime}
+          </span>{" "}
+          response
+        </div>
       </div>
 
       {/* CTAs */}
@@ -84,7 +106,6 @@ const HeroContent = ({ pageData }: { pageData: PageData }) => {
         >
           <span className="relative z-10">View My Work</span>
           <ArrowRight className="relative z-10 h-5 w-5 transition-transform group-hover:translate-x-1" />
-
           {/* Shine effect on hover */}
           <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
         </a>
@@ -100,7 +121,6 @@ const HeroContent = ({ pageData }: { pageData: PageData }) => {
     </div>
   );
 };
-
 const TerminalLine = ({
   icon,
   text,
@@ -288,7 +308,7 @@ import {
 } from "react-icons/hi2";
 
 const StatsGrid = ({ pageData }: { pageData: PageData }) => {
-  const roundDown = (num: number) => Math.floor(num / 5) * 5;
+  const roundDown = (num: number) => (num < 5 ? num : Math.floor(num / 5) * 5);
 
   const stats = [
     {
@@ -298,7 +318,7 @@ const StatsGrid = ({ pageData }: { pageData: PageData }) => {
       bgClass: "bg-emerald-500/10 group-hover:bg-emerald-500/20",
       iconClass: "text-emerald-400",
       value: roundDown(pageData.stats.projectsCompleted),
-      suffix: "+",
+      suffix: pageData.stats.projectsCompleted > 5 ? "+" : "",
     },
     {
       icon: HiRocketLaunch,
@@ -316,7 +336,7 @@ const StatsGrid = ({ pageData }: { pageData: PageData }) => {
       bgClass: "bg-blue-500/10 group-hover:bg-blue-500/20",
       iconClass: "text-blue-400",
       value: roundDown(pageData.stats.happyClients),
-      suffix: "+",
+      suffix: pageData.stats.happyClients > 5 ? "+" : "",
     },
     {
       icon: HiStar,

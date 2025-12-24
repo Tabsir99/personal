@@ -21,7 +21,7 @@ export interface PageData {
     link2: { text: string; url: string };
     skills: string[];
     featured: boolean;
-    metrics?: {
+    metrics: {
       label: string;
       value: string;
     }[];
@@ -30,7 +30,7 @@ export interface PageData {
     year: string;
     duration: string;
     role?: string;
-    clientType: "Startup" | "Enterprise" | "Personal";
+    clientType: "Enterprise" | "Startup" | "Personal";
   }[];
 
   testimonials: {
