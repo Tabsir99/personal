@@ -9,5 +9,6 @@ export async function GET(request: NextRequest) {
   }
 
   revalidatePath("/");
+  console.log("Revalidated");
   return NextResponse.json({ message: "Revalidated" });
 }

@@ -50,17 +50,6 @@ const HeroContent = ({ pageData }: { pageData: PageData }) => {
 
   return (
     <div className="flex flex-col justify-center space-y-8">
-      {/* Badge */}
-      <div className="inline-flex w-fit animate-fade-in items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 backdrop-blur-sm">
-        <div className="relative">
-          <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-          <div className="absolute inset-0 h-2 w-2 animate-ping rounded-full bg-emerald-400" />
-        </div>
-        <span className="text-sm font-medium text-emerald-400">
-          Taking 2 new projects in January
-        </span>
-      </div>
-
       {/* Heading with Spotlight Effect */}
       <div className="space-y-4">
         <h1 className="text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-6xl lg:text-7xl">
