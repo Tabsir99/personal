@@ -48,7 +48,6 @@ export async function POST(request: NextRequest) {
     });
 
     fetch("https://tabsircg.com/api/revalidate", {
-      method: "POST",
       headers: {
         Authorization: env.SERVER_TOKEN,
       },

@@ -19,9 +19,6 @@ export default async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
     const token = request.cookies.get("token")?.value;
     const serverToken = request.headers.get("serverToken");
-    // const shouldRateLimit =
-    //   env.RUNTIME !== "local" && pathname === "/" && request.method === "POST";
-
     const serverAuthenticated = serverToken === env.SERVER_TOKEN;
 
     if (
@@ -36,9 +33,6 @@ export default async function middleware(request: NextRequest) {
     if (serverAuthenticated) return NextResponse.next();
 
     const userAuthenticated = await isLoggedIn(token);
-
-    if (pathname.endsWith("events")) throw new Error("Unauthorized");
-    // User auth is required for all other routes except login
     if (pathname !== "/" && !userAuthenticated) throw new Error("Unauthorized");
 
     // Redirect to dashboard if user is authenticated
