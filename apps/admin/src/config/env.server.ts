@@ -17,7 +17,8 @@ export const env = {
   JWT_SECRET: requireEnv("JWT_SECRET"),
 
   // ===== Firebase =====
-  FIREBASE_ADMIN_CONFIG: requireEnv("FIREBASE_ADMIN_CONFIG"),
+  FIREBASE_PRIVATE_KEY: requireEnv("FIREBASE_PRIVATE_KEY"),
+  FIREBASE_CLIENT_EMAIL: requireEnv("FIREBASE_CLIENT_EMAIL"),
 
   // ===== Cloudflare R2 =====
   CLOUDFLARE_R2_AK_ID: requireEnv("CLOUDFLARE_R2_AK_ID"),
