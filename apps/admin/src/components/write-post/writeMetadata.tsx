@@ -58,13 +58,13 @@ export default function WriteMetadataComp({
     useShallow((state) => {
       const d = state.blogFormData;
       return [
-        d.draftTitle,
-        d.draftSocialTitle,
+        d.title,
+        d.socialTitle,
         d.type,
-        d.draftDescription,
-        d.draftRecommendationTitle,
-        d.draftTags,
-        d.draftFeaturedImageUrl,
+        d.description,
+        d.recommendationTitle,
+        d.tags,
+        d.featuredImageUrl,
       ];
     })
   );
@@ -91,7 +91,7 @@ export default function WriteMetadataComp({
     <Sheet open={showSidebar} onOpenChange={closeSidebar}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-2xl bg-zinc-950/95 border-zinc-800/50 p-0 overflow-hidden"
+        className="w-full sm:max-w-2xl dark border-zinc-800/50 p-0 overflow-hidden"
       >
         <SheetHeader className="px-6 py-6 border-b border-zinc-800/50 bg-zinc-900/50">
           <SheetTitle className="text-xl font-semibold text-zinc-100 text-left">
@@ -129,7 +129,7 @@ export default function WriteMetadataComp({
                           placeholder="Enter your blog title..."
                           value={title}
                           onChange={(e) =>
-                            setBlogFormData({ draftTitle: e.target.value })
+                            setBlogFormData({ title: e.target.value })
                           }
                         />
                       </div>
@@ -147,7 +147,7 @@ export default function WriteMetadataComp({
                           value={socialTitle}
                           onChange={(e) =>
                             setBlogFormData({
-                              draftSocialTitle: e.target.value,
+                              socialTitle: e.target.value,
                             })
                           }
                         />
@@ -272,7 +272,7 @@ export default function WriteMetadataComp({
                         value={recommendationTitle}
                         onChange={(e) =>
                           setBlogFormData({
-                            draftRecommendationTitle: e.target.value,
+                            recommendationTitle: e.target.value,
                           })
                         }
                       />
@@ -364,7 +364,7 @@ export default function WriteMetadataComp({
                       placeholder="Enter a brief description about the blog..."
                       value={description}
                       onChange={(e) =>
-                        setBlogFormData({ draftDescription: e.target.value })
+                        setBlogFormData({ description: e.target.value })
                       }
                       className="resize-none"
                     />

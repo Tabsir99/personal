@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -27,12 +28,14 @@ export const CreateBlogModal = () => {
 
   const handleCreateBlog = async () => {
     setNewBlogTitle("");
+    closeCreateDialog();
+
     await callWithToast(
       async () => {
-        const res = await startBlogWriting(newBlogTitle);
-        if (res.status === "success") {
-          setBlogFormData(res.data!);
-          router.push(`/dashboard/write-blog/${res.data?.blogId}`);
+        const { data, status } = await startBlogWriting(newBlogTitle);
+        if (status === "success") {
+          setBlogFormData(data!);
+          router.push(`/dashboard/write-blog/${data?.blogId}`);
         }
       },
       {
@@ -41,7 +44,6 @@ export const CreateBlogModal = () => {
         err: "Failed to create blog",
       }
     );
-    closeCreateDialog();
   };
 
   return (
@@ -66,15 +68,22 @@ export const CreateBlogModal = () => {
           />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={closeCreateDialog}>
+          <Button
+            variant="outline"
+            onClick={closeCreateDialog}
+            className="text-white"
+          >
             Cancel
           </Button>
-          <Button
-            onClick={handleCreateBlog}
-            disabled={newBlogTitle.trim() === ""}
-          >
-            Create & Edit
-          </Button>
+
+          <DialogClose asChild>
+            <Button
+              onClick={handleCreateBlog}
+              disabled={newBlogTitle.trim() === ""}
+            >
+              Create & Edit
+            </Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>

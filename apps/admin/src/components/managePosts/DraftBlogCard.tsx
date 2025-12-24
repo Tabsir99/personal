@@ -8,10 +8,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Clock } from "lucide-react";
-import { BlogFormData } from "@/types/blogTypes";
+import { BlogFormData, BlogStatus } from "@/types/blogTypes";
 import BlogMenu from "./BlogMenu";
 import Link from "next/link";
-import { UseManageBlogs } from "@/hooks/useManageBlogs";
 import { getTimeSince } from "@/lib/utils";
 
 export default function DraftBlogCard({
@@ -19,12 +18,12 @@ export default function DraftBlogCard({
   confirmDelete,
 }: {
   blog: Partial<BlogFormData>;
-  confirmDelete: UseManageBlogs["confirmDelete"];
+  confirmDelete: (blogId: string) => void;
 }) {
   return (
     <Link draggable={false} href={`write-blog/${blog.blogId}`}>
       <Card className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer">
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 pt-4">
           <div className="flex justify-between items-start">
             <CardTitle className="text-xl font-bold text-zinc-100">
               {blog?.title}
@@ -32,9 +31,9 @@ export default function DraftBlogCard({
 
             <BlogMenu
               blogName={blog.title!}
-              status={blog.status!}
+              status={BlogStatus.Draft}
               blogId={blog.blogId!}
-              actions={{ confirmDelete }}
+              confirmDelete={() => confirmDelete(blog.blogId!)}
             />
           </div>
           <CardDescription className="text-zinc-400 line-clamp-2">
@@ -57,7 +56,7 @@ export default function DraftBlogCard({
             )}
           </div>
         </CardContent>
-        <CardFooter className="pt-2 pb-3 flex justify-between items-center text-sm text-zinc-500">
+        <CardFooter className="pt-2 pb-4 flex justify-between items-center text-sm text-zinc-500">
           <div className="flex items-center">
             <Clock className="mr-1 h-3 w-3" />
             <span>Updated {getTimeSince(blog.updatedAt || 0)}</span>

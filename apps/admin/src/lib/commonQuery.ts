@@ -36,7 +36,7 @@ export const updateData = async <T>({
   updatedData,
   merge = true,
 }: UpdateDataParams<T>) => {
-  const dataToPut = updatedData;
+  const dataToPut = { ...updatedData };
   Object.entries(dataToPut as any).forEach(([key, value]) => {
     if (Array.isArray(value) && value.length > 0) {
       dataToPut[key] = firestore.FieldValue.arrayUnion(...value);
@@ -156,7 +156,7 @@ export const readSingleDoc = async <T>({
   }
 };
 
-export const deleteData = async ({
+export const deleteDoc = async ({
   collectionName,
   docId,
 }: {

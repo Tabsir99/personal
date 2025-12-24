@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { BlogType, BlogFormData, BlogStatus } from "@/types/blogTypes";
+import { BlogType, BlogFormData } from "@/types/blogTypes";
 import { JSONContent } from "@tiptap/react";
-import { saveDraft } from "@/actions/blogActions";
+import { loadBlogForEditing, saveDraft } from "@/actions/blogActions";
 import { callWithToast } from "@/lib/utils";
 
 interface BlogEditorState {
@@ -26,26 +26,28 @@ interface BlogEditorState {
   setSaving: (saving: boolean) => void;
   updateLastSaved: () => void;
 
-  loadBlogFormData: (blogId: string) => Promise<BlogFormData>;
-  saveDraft: (latestContent: JSONContent) => Promise<void>;
+  loadBlogFormData: (blogId: string) => Promise<string>;
+  saveDraft: (latestContent: JSONContent, showToast?: boolean) => Promise<void>;
 }
 
 const defaultBlogFormData: BlogFormData = {
-  draftTitle: "",
-  draftDescription: "",
-  draftTags: [],
-  draftRecommendationTitle: "Keep reading...",
-  draftSocialTitle: "",
-  draftFeaturedImageUrl: "",
-  draftContent: null,
-  draftEstReadTime: 0,
+  title: "",
+  description: "",
+  tags: [],
+  recommendationTitle: "Keep reading...",
+  socialTitle: "",
+  featuredImageUrl: "",
+  content: null,
+  estReadTime: 0,
   hasDraftChanges: true,
 
   type: BlogType.Article,
   link: "",
-  status: BlogStatus.Draft,
   blogId: "",
-} as const;
+  parentBlogId: null,
+  createdAt: 0,
+  updatedAt: 0,
+};
 
 export const useBlogEditorStore = create<BlogEditorState>()(
   devtools(
@@ -70,12 +72,12 @@ export const useBlogEditorStore = create<BlogEditorState>()(
       addTag: (trimmedTag) => {
         const { blogFormData } = get();
 
-        if (trimmedTag && !blogFormData.draftTags.includes(trimmedTag)) {
+        if (trimmedTag && !blogFormData.tags.includes(trimmedTag)) {
           set(
             (state) => ({
               blogFormData: {
                 ...state.blogFormData,
-                draftTags: [...state.blogFormData.draftTags, trimmedTag],
+                tags: [...state.blogFormData.tags, trimmedTag],
               },
               tagInput: "",
             }),
@@ -90,7 +92,7 @@ export const useBlogEditorStore = create<BlogEditorState>()(
           (state) => ({
             blogFormData: {
               ...state.blogFormData,
-              draftTags: state.blogFormData.draftTags!.filter(
+              tags: state.blogFormData.tags.filter(
                 (tag) => tag !== tagToRemove
               ),
             },
@@ -115,36 +117,38 @@ export const useBlogEditorStore = create<BlogEditorState>()(
         set({ lastSaved: Date.now() }, false, "updateLastSaved"),
 
       async loadBlogFormData(blogId) {
-        if (blogId !== get().blogFormData.blogId) {
-          set({ isLoading: true }, false, "loadBlogFormData-start");
-          const blogFormData = (await (
-            await fetch(`/api/blogs/${blogId}`)
-          ).json()) as BlogFormData;
-          if (blogFormData) {
-            set({ blogFormData });
-          }
-          set({ isLoading: false }, false, "loadBlogFormData-success");
-        }
+        if (blogId === get().blogFormData.blogId) return blogId;
 
-        return get().blogFormData;
+        set({ isLoading: true }, false, "loadBlogFormData-start");
+        const { data } = await loadBlogForEditing(blogId);
+
+        if (!data) throw new Error("Blog not found");
+
+        set({ blogFormData: data, isLoading: false }, false);
+        return data.blogId;
       },
 
-      async saveDraft(latestContent) {
+      async saveDraft(latestContent, showToast = true) {
         if (!get().blogFormData.blogId) return;
+        console.log(get().blogFormData);
         set((state) => ({
           ...state,
-          blogFormData: { ...state.blogFormData, draftContent: latestContent },
+          blogFormData: { ...state.blogFormData, content: latestContent },
         }));
 
-        await callWithToast(
-          // Important to stringify the blogFormData as NextJS server actions corrupt the serialization of complex objects
-          () => saveDraft(JSON.stringify(get().blogFormData)),
-          {
-            loading: "Drafting blog...",
-            success: "Blog drafted",
-            err: "Failed to draft blog",
-          }
-        );
+        showToast
+          ? await callWithToast(
+              // Important to stringify the blogFormData as NextJS server actions corrupt the serialization of complex objects
+              () => saveDraft(JSON.stringify(get().blogFormData)),
+              {
+                loading: "Drafting blog...",
+                success: "Blog drafted",
+                err: "Failed to draft blog",
+              }
+            )
+          : await saveDraft(JSON.stringify(get().blogFormData)).catch((err) => {
+              console.error(err);
+            });
       },
     }),
 

@@ -30,6 +30,14 @@ export default async function middleware(request: NextRequest) {
 
     const serverAuthenticated = serverToken === env.SERVER_TOKEN;
 
+    if (
+      env.RUNTIME === "local" &&
+      request.method === "POST" &&
+      pathname.startsWith("/dashboard")
+    ) {
+      await new Promise((res) => setTimeout(res, 500));
+    }
+
     // Server auth bypasses everything
     if (serverAuthenticated) return NextResponse.next();
 

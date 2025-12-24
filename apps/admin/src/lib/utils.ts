@@ -141,3 +141,32 @@ export async function callWithToast(
     return null;
   }
 }
+
+type ActionResult<T> = {
+  data: T;
+  message?: string;
+};
+
+export function wrap<Args extends any[], T>(
+  fn: (...args: Args) => Promise<ActionResult<T>>
+) {
+  return async (...args: Args): Promise<ApiResponse<T>> => {
+    try {
+      const { data, message } = await fn(...args);
+
+      return formatResponse<T>({
+        status: "success",
+        data,
+        message,
+      });
+    } catch (error) {
+      console.error(error);
+
+      return formatResponse<T>({
+        status: "error",
+        data: null,
+        message: error.message,
+      });
+    }
+  };
+}

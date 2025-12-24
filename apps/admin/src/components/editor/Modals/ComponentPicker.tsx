@@ -179,7 +179,7 @@ const ComponentPickerModal = ({ editor }: { editor: Editor }) => {
                       className="flex flex-col p-3 border rounded-lg hover:bg-zinc-800/60 cursor-pointer transition-colors"
                       onClick={() => onInsert(component)}
                     >
-                      <div className="flex items-center mb-2 ">
+                      <div className="flex items-center mb-2 gap-2">
                         <span className=" w-5 h-5 text-primary">
                           {" "}
                           {component.icon}{" "}

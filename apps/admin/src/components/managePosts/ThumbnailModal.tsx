@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FaImages, FaUpload } from "react-icons/fa6";
 import {
   Dialog,
@@ -11,40 +11,31 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import Img from "../ui/image";
+import useUIStore from "@/stores/UIStore";
+import { useShallow } from "zustand/shallow";
 
-export default function ThumbnailModal({
-  isOpen,
-  onClose,
-  currentThumbnail,
-  draftThumbnail,
-  blogLink,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  currentThumbnail?: string | undefined;
-  draftThumbnail?: string | undefined;
-  blogLink: string;
-}) {
+export default function ThumbnailModal() {
+  const { isOpen, data } = useUIStore(
+    useShallow((state) => state.modals.blogThumbnail)
+  );
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    data?.thumbnailUrl ?? null
+  );
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (currentThumbnail) {
-      setPreviewUrl(currentThumbnail);
-    }
-  }, [currentThumbnail]);
+  const closeModal = useUIStore().closeAllModals;
 
-  const onThumbnailChange = async (newThumbnail: File) => {
+  const updateThumbnail = async (newThumbnail: File) => {
     setIsLoading(true);
     try {
-      newThumbnail;
-      blogLink;
+      console.log("Updating thumbnail", newThumbnail);
     } catch (error) {
       toast.error("Error uploading thumbnail");
     } finally {
       setIsLoading(false);
-      onClose();
+      closeModal();
     }
   };
 
@@ -62,17 +53,17 @@ export default function ThumbnailModal({
 
   const handleSubmit = () => {
     if (selectedFile) {
-      onThumbnailChange(selectedFile);
+      updateThumbnail(selectedFile);
     }
   };
 
   const resetSelection = () => {
     setSelectedFile(null);
-    setPreviewUrl(currentThumbnail || null);
+    setPreviewUrl(data?.thumbnailUrl || null);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="sm:max-w-3xl bg-zinc-900 border border-neutral-800 text-neutral-100 shadow-lg">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-white">
@@ -155,7 +146,7 @@ export default function ThumbnailModal({
             )}
           </Button>
           <Button
-            onClick={onClose}
+            onClick={closeModal}
             variant="outline"
             className="w-full sm:w-auto border-neutral-700 text-neutral-300 hover:bg-zinc-800 hover:text-white"
           >

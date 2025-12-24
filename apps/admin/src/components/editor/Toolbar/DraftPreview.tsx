@@ -1,7 +1,6 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { FaCloud, FaEye, FaTag } from "react-icons/fa6";
+import { FaCloud, FaTag, FaEye } from "react-icons/fa6";
 import WriteMetadataComp from "../../write-post/writeMetadata";
 import {
   Tooltip,
@@ -11,17 +10,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { Editor, JSONContent } from "@tiptap/react";
+import PreviewSheet from "./PreviewSheet";
 
 const DraftPreview = ({ editor }: { editor: Editor }) => {
-  const router = useRouter();
   const saveDraft = useBlogEditorStore.getState().saveDraft;
   const [showSidebar, setShowSidebar] = useState(false);
 
-  const blogId = useParams().blogId;
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      <div className="border-r border-gray-300 mx-2 h-6" />
+      <div className="h-6 w-px bg-gradient-to-b from-transparent via-zinc-600 to-transparent mx-1.5" />
 
       <div className="flex items-center gap-[2px]">
         <Tooltip key="draft">
@@ -44,14 +43,8 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
 
         <Tooltip key="preview">
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={async () => {
-                router.push(`./${blogId}/preview`);
-              }}
-            >
-              <FaEye />
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)}>
+              <FaEye className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent
@@ -85,6 +78,8 @@ const DraftPreview = ({ editor }: { editor: Editor }) => {
         closeSidebar={() => setShowSidebar(false)}
         showSidebar={showSidebar}
       />
+
+      <PreviewSheet isOpen={isOpen} setIsOpen={setIsOpen} />
     </>
   );
 };

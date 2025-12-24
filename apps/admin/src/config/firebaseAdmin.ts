@@ -21,7 +21,7 @@ function initFirebase() {
 
   if (env.RUNTIME === "local") {
     db.settings({
-      host: "localhost:8080",
+      host: "localhost:8085",
       ssl: false,
     });
   }

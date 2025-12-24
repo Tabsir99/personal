@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
       { hostname: "localhost" },
       { hostname: "storage.googleapis.com" },
       { hostname: "images.tabsircg.com" },
-
+      { hostname: "media.tabsircg.com" },
     ],
   },
 };

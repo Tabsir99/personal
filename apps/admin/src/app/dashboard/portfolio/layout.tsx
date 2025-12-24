@@ -141,14 +141,17 @@ export default function PortfolioDashboard({
               className="w-full mt-2 relative active:scale-95"
               disabled={saving}
               onClick={() => {
-                useUIStore.getState().showConfirmation({
-                  headerText: "Reset Portfolio",
-                  message: "Are you sure you want to reset the portfolio?",
-                  onConfirm: () => usePortfolioStore.getState().resetChanges(),
-                  confirmButtonText: "Reset",
-                  confirmButtonVariant: "destructive",
-                  cancelButtonText: "Cancel",
-                  cancelButtonVariant: "outline",
+                useUIStore.getState().openModal("confirmation", {
+                  data: {
+                    headerText: "Reset Portfolio",
+                    message: "Are you sure you want to reset the portfolio?",
+                    onConfirm: () =>
+                      usePortfolioStore.getState().resetChanges(),
+                    confirmButtonText: "Reset",
+                    confirmButtonVariant: "destructive",
+                    cancelButtonText: "Cancel",
+                    cancelButtonVariant: "outline",
+                  },
                 });
               }}
             >

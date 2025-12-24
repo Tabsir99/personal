@@ -52,7 +52,9 @@ export async function POST(request: NextRequest) {
       headers: {
         Authorization: env.SERVER_TOKEN,
       },
-    }).catch((err) => console.error(err));
+    })
+      .then(() => console.log("Revalidated tabsircg.com"))
+      .catch((err) => console.error(err));
 
     return NextResponse.json("OK", { status: 200 });
   } catch (error) {

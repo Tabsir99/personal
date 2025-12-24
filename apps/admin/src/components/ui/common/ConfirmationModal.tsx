@@ -15,11 +15,14 @@ import useUIStore from "@/stores/UIStore";
 import { useShallow } from "zustand/shallow";
 
 const ConfirmationModal = () => {
-  const { isOpen, message, onConfirm, headerText, onCancel, confirmButtonText, cancelButtonText, confirmButtonVariant, cancelButtonVariant   } = useUIStore(
-    useShallow((state) => state.confirmation)
+  const { isOpen, data } = useUIStore(
+    useShallow((state) => state.modals.confirmation)
   );
+
+  const closeModal = useUIStore().closeAllModals;
+
   return (
-    <Dialog open={isOpen} onOpenChange={onCancel}>
+    <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="bg-zinc-900 border-zinc-800 text-zinc-50 p-0 gap-0 rounded-xl shadow-2xl">
         {/* Header */}
         <DialogHeader className="p-6 pb-0 space-y-0">
@@ -30,7 +33,7 @@ const ConfirmationModal = () => {
               </div>
               <div>
                 <DialogTitle className="text-xl font-semibold text-zinc-50">
-                  {headerText || "Confirm Action"}
+                  {data?.headerText || "Confirm Action"}
                 </DialogTitle>
               </div>
             </div>
@@ -38,7 +41,7 @@ const ConfirmationModal = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={onCancel}
+                onClick={closeModal}
                 className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 -mr-2 -mt-2"
               >
                 <X className="h-4 w-4" />
@@ -51,27 +54,31 @@ const ConfirmationModal = () => {
         <div className="px-6 py-4">
           <div className="rounded-lg bg-zinc-950/5 border border-zinc-800 p-4">
             <DialogDescription className="text-zinc-300 text-base leading-relaxed m-0">
-              {message}
+              {data?.message}
             </DialogDescription>
           </div>
         </div>
 
         {/* Footer */}
         <DialogFooter className="p-6 pt-2 gap-3">
-          <Button
-            variant={cancelButtonVariant || "outline"}
-            onClick={onCancel}
-            className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 px-8"
-          >
-            {cancelButtonText || "Cancel"}
-          </Button>
-          <Button
-            variant={confirmButtonVariant || "default"}
-            onClick={onConfirm}
-            className="bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500/50 px-8 font-medium"
-          >
-            {confirmButtonText || "Confirm"}
-          </Button>
+          <DialogClose asChild>
+            <Button
+              variant={data?.cancelButtonVariant || "outline"}
+              className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 px-8"
+            >
+              {data?.cancelButtonText || "Cancel"}
+            </Button>
+          </DialogClose>
+
+          <DialogClose asChild>
+            <Button
+              variant={data?.confirmButtonVariant || "default"}
+              onClick={data?.onConfirm}
+              className="bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500/50 px-8 font-medium"
+            >
+              {data?.confirmButtonText || "Confirm"}
+            </Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,36 +1,36 @@
 import { readNDocs } from "@/lib/commonQuery";
-import { PublishedBlogEditingDB } from "@/types/blogTypes";
+import { PublishedBlogDB } from "@/types/blogTypes";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams;
-  const status = query.get("status") as
-    | PublishedBlogEditingDB["status"]
-    | undefined;
 
-  const data = await readNDocs<PublishedBlogEditingDB>({
+  const status = query.get("status") as PublishedBlogDB["status"] | null;
+  const type = query.get("type") as PublishedBlogDB["type"] | null;
+  const cursor = query.get("cursor");
+
+  const filters: Partial<Pick<PublishedBlogDB, "status" | "type">> = {};
+
+  if (status) filters.status = status;
+  if (type) filters.type = type;
+
+  const data = await readNDocs<PublishedBlogDB>({
     collectionName: "BLOGS",
-    cursorValue: query.get("cursor"),
-    filters: status ? { status } : {},
+    cursorValue: cursor,
+    filters,
     fieldsToRead: {
       blogId: true,
-
-      description: true,
-      draftDescription: true,
-
-      draftTitle: true,
       title: true,
-
-      draftTags: true,
+      description: true,
       tags: true,
-
       estReadTime: true,
-      draftEstReadTime: true,
-
       stats: true,
       createdAt: true,
+      updatedAt: true,
       link: true,
       status: true,
+      featuredImageUrl: true,
+      type: true,
     },
     orderBy: {
       field: "createdAt",

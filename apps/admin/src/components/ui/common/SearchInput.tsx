@@ -34,7 +34,7 @@ const SearchInput = ({
           w-full 
           pl-10 
           pr-4 
-          py-3 
+          py-2.5
           text-zinc-200 
           bg-zinc-800/70
           rounded-lg 

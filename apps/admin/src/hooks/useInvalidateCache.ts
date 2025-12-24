@@ -1,11 +1,11 @@
-import { BlogDB, BlogStatus } from "@/types/blogTypes";
+import { PublishedBlogDB, BlogStatus } from "@/types/blogTypes";
 import { mutate } from "swr";
 
 export const invalidateBlogOverview = ({
   selectedBlog,
   type,
 }: {
-  selectedBlog: BlogDB;
+  selectedBlog: PublishedBlogDB;
   type: "delete" | "add" | "status" | "update";
 }) => {
   const matchingPatterns = [`/api/local/blogOverview`];
@@ -13,7 +13,7 @@ export const invalidateBlogOverview = ({
   matchingPatterns.forEach((pattern) => {
     mutate(
       pattern,
-      (current: BlogDB[] | undefined) => {
+      (current: PublishedBlogDB[] | undefined) => {
         if (!current) return current;
         switch (type) {
           case "add":

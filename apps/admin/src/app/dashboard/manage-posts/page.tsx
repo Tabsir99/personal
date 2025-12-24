@@ -3,6 +3,8 @@ import { Plus } from "lucide-react";
 import BlogOverview from "@/components/managePosts/BlogOverview";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { PageHeader } from "@/components/ui/common/PageHeader";
+import BlogShareModal from "@/components/managePosts/BlogShareModal";
+import ThumbnailModal from "@/components/managePosts/ThumbnailModal";
 
 const ManagePosts = () => {
   const openCreateBlogDialog = useBlogEditorStore.getState().openCreateDialog;
@@ -21,6 +23,9 @@ const ManagePosts = () => {
         }}
       />
       <BlogOverview />
+
+      <ThumbnailModal />
+      <BlogShareModal />
     </>
   );
 };

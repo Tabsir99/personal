@@ -16,27 +16,21 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BlogDB, BlogStatus } from "@/types/blogTypes";
+import { BlogDraftDB, BlogStatus, PublishedBlogDB } from "@/types/blogTypes";
 import BlogMenu from "./BlogMenu";
-import { UseManageBlogs } from "@/hooks/useManageBlogs";
+import { clientEnv } from "@/config/env.client";
 
 export default function CMSBlogCard({
   blog,
-  handleShareBlog,
-  handleThumbnail,
-  handleStatus,
+  toggleStatus,
   confirmDelete,
-  handleSelectPost,
 }: {
-  blog: BlogDB;
-  handleShareBlog: UseManageBlogs["handleShareBlog"];
-  handleThumbnail: UseManageBlogs["handleThumbnail"];
-  handleStatus: UseManageBlogs["handleStatus"];
-  confirmDelete: UseManageBlogs["confirmDelete"];
-  handleSelectPost: UseManageBlogs["handleSelectPost"];
+  blog: PublishedBlogDB | BlogDraftDB;
+  toggleStatus: (blogId: string) => void;
+  confirmDelete: (blogId: string) => void;
 }) {
   // Get appropriate status color
-  const getStatusClass = (status: BlogDB["status"]) => {
+  const getStatusClass = (status: BlogStatus) => {
     switch (status) {
       case BlogStatus.Active:
         return "bg-green-500/10 text-green-400 border-green-500/20";
@@ -51,22 +45,6 @@ export default function CMSBlogCard({
 
   const statusClass = getStatusClass(blog.status);
 
-  const title = blog.status === BlogStatus.Draft ? blog.draftTitle : blog.title;
-  const description =
-    blog.status === BlogStatus.Draft ? blog.draftDescription : blog.description;
-  const tags = blog.status === BlogStatus.Draft ? blog.draftTags : blog.tags;
-  const stats =
-    blog.status === BlogStatus.Draft
-      ? {
-          totalViews: 0,
-          totalLikes: 0,
-          totalComments: 0,
-          totalShares: 0,
-        }
-      : blog.stats;
-  const estReadTime =
-    blog.status === BlogStatus.Draft ? blog.draftEstReadTime : blog.estReadTime;
-
   return (
     <Card className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-all text-white flex flex-col justify-between">
       <CardHeader className="pb-3 pt-5">
@@ -74,42 +52,42 @@ export default function CMSBlogCard({
           {/* Blog Title */}
           <div className="flex flex-col space-y-2">
             <h2 className="text-xl font-bold text-zinc-100 capitalize">
-              {title}
+              {blog.title}
             </h2>
 
             {/* Blog Description - single line with ellipsis */}
-            <p className="text-zinc-400 text-sm line-clamp-1">{description}</p>
+            <p className="text-zinc-400 text-sm line-clamp-1">
+              {blog.description || "No description yet..."}
+            </p>
           </div>
 
           {/* Actions */}
           <div className="flex items-center">
             <BlogMenu
-              blogName={title}
+              blogName={blog.title}
               blogId={blog.blogId}
               status={blog.status!}
-              actions={{
-                handleShareBlog,
-                handleThumbnail,
-                handleStatus,
-                confirmDelete,
-                handleSelectPost: () => handleSelectPost(blog),
-              }}
+              thumbnailUrl={blog.featuredImageUrl}
+              toggleStatus={() => toggleStatus(blog.blogId)}
+              confirmDelete={() => confirmDelete(blog.blogId)}
             />
 
-            <Button
-              variant="ghost"
-              size="icon"
-              asChild
-              className="text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-            >
-              <Link
-                href={`${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${blog.link}`}
-                target="_blank"
-                title="View Blog"
+            {blog.status !== BlogStatus.Draft && (
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
               >
-                <ExternalLink className="w-4 h-4" />
-              </Link>
-            </Button>
+                <Link
+                  href={`${clientEnv.BLOG_ORIGIN}/blogs/${blog.link}`}
+                  target="_blank"
+                  title="View Blog"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -139,14 +117,14 @@ export default function CMSBlogCard({
           {/* Reading Time */}
           <div className="flex items-center gap-2">
             <Clock className="h-3.5 w-3.5" />
-            <span>{estReadTime} min read</span>
+            <span>{blog.estReadTime} min read</span>
           </div>
         </div>
 
         {/* Tags */}
-        {tags.length > 0 && (
+        {blog.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-4">
-            {tags.slice(0, 3).map((tag, index) => (
+            {blog.tags.slice(0, 3).map((tag, index) => (
               <Badge
                 key={index}
                 variant="outline"
@@ -155,12 +133,12 @@ export default function CMSBlogCard({
                 {tag}
               </Badge>
             ))}
-            {tags.length > 3 && (
+            {blog.tags.length > 3 && (
               <Badge
                 variant="outline"
                 className="border-zinc-700 text-zinc-300 text-xs"
               >
-                +{tags.length - 3} more
+                +{blog.tags.length - 3} more
               </Badge>
             )}
           </div>
@@ -168,28 +146,30 @@ export default function CMSBlogCard({
       </CardContent>
 
       {/* Stats Section */}
-      <CardFooter className="border-t border-zinc-800 pt-4 pb-4 grid grid-cols-4 gap-4">
-        <MetricItem
-          icon={<Eye className="h-4 w-4 text-zinc-500" />}
-          label="Views"
-          value={stats.totalViews}
-        />
-        <MetricItem
-          icon={<ThumbsUp className="h-4 w-4 text-zinc-500" />}
-          label="Likes"
-          value={stats.totalLikes}
-        />
-        <MetricItem
-          icon={<MessageSquare className="h-4 w-4 text-zinc-500" />}
-          label="Comments"
-          value={stats.totalComments}
-        />
-        <MetricItem
-          icon={<Share2 className="h-4 w-4 text-zinc-500" />}
-          label="Shares"
-          value={stats.totalShares}
-        />
-      </CardFooter>
+      {blog.status !== BlogStatus.Draft && (
+        <CardFooter className="border-t border-zinc-800 pt-4 pb-4 grid grid-cols-4 gap-4">
+          <MetricItem
+            icon={<Eye className="h-4 w-4 text-zinc-500" />}
+            label="Views"
+            value={blog.stats.views}
+          />
+          <MetricItem
+            icon={<ThumbsUp className="h-4 w-4 text-zinc-500" />}
+            label="Likes"
+            value={blog.stats.likes}
+          />
+          <MetricItem
+            icon={<MessageSquare className="h-4 w-4 text-zinc-500" />}
+            label="Comments"
+            value={blog.stats.comments}
+          />
+          <MetricItem
+            icon={<Share2 className="h-4 w-4 text-zinc-500" />}
+            label="Shares"
+            value={blog.stats.shares}
+          />
+        </CardFooter>
+      )}
     </Card>
   );
 }

@@ -1,10 +1,10 @@
 "use client";
-import { Card, CardContent } from "../../../../components/ui/card";
-import { Button } from "../../../../components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { useShallow } from "zustand/shallow";
 import { useEditor, EditorContent } from "@tiptap/react";
-import { starterKitOptions } from "../../../../components/editor/Toolbar/starterKit";
+import { starterKitOptions } from "@/components/editor/Toolbar/starterKit";
 import { Pencil } from "lucide-react";
 import { useRef, useState } from "react";
 import useUIStore from "@/stores/UIStore";
@@ -16,7 +16,7 @@ export default function About() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
-  const showConfirmation = useUIStore.getState().showConfirmation;
+  const openModal = useUIStore.getState().openModal;
 
   const about = usePortfolioStore(useShallow((state) => state.pageData.about));
   const profilePicture = usePortfolioStore(
@@ -123,11 +123,13 @@ export default function About() {
                     },
                     {
                       onClick: () =>
-                        showConfirmation({
-                          headerText: "Delete Section",
-                          message:
-                            "Are you sure you want to delete this section?",
-                          onConfirm: () => handleDelete(index),
+                        openModal("confirmation", {
+                          data: {
+                            headerText: "Delete Section",
+                            message:
+                              "Are you sure you want to delete this section?",
+                            onConfirm: () => handleDelete(index),
+                          },
                         }),
                       variant: "delete",
                     },

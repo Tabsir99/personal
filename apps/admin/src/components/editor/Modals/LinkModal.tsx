@@ -1,13 +1,7 @@
 import { Editor } from "@tiptap/react";
 import { useState } from "react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { X, Link as LinkIcon } from "lucide-react";
 import {
   Tooltip,
@@ -15,6 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 interface LinkModalProps {
   editor: Editor;
@@ -22,14 +17,16 @@ interface LinkModalProps {
 }
 
 const LinkModal = ({ editor, isActive }: LinkModalProps) => {
-  const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(
+    null
+  );
   const [url, setUrl] = useState("");
   const [text, setText] = useState("");
+  const [hasSelection, setHasSelection] = useState(false);
 
   function onInsertLink(url: string, text: string) {
     if (url) {
       if (text) {
-        // If we have both text and URL, set a link with the text
         editor
           .chain()
           .focus()
@@ -38,7 +35,6 @@ const LinkModal = ({ editor, isActive }: LinkModalProps) => {
           .insertContent(text)
           .run();
       } else {
-        // If we only have URL, apply link to the selection
         editor
           .chain()
           .focus()
@@ -57,7 +53,8 @@ const LinkModal = ({ editor, isActive }: LinkModalProps) => {
   const resetAndClose = () => {
     setUrl("");
     setText("");
-    setOpen(false);
+    setPosition(null);
+    setHasSelection(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -69,58 +66,73 @@ const LinkModal = ({ editor, isActive }: LinkModalProps) => {
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div
-              className={cn(
-                "p-2 rounded-md cursor-pointer h-8 flex flex-col text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-95",
-                isActive ?? "bg-zinc-800 text-zinc-100 shadow-inner"
-              )}
+    <>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div
+            className={cn(
+              "p-2 rounded-md cursor-pointer h-8 flex flex-col text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-95",
+              isActive && "bg-zinc-800 text-zinc-100 shadow-inner"
+            )}
+            onClick={() => {
+              const { from, to } = editor.state.selection;
+              const { left, bottom } = editor.view.coordsAtPos(from);
+
+              if (from !== to) setHasSelection(true);
+              setPosition({ x: left, y: bottom + 10 });
+            }}
+          >
+            <LinkIcon className="w-4 h-4" />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent
+          side="bottom"
+          className="bg-zinc-950 text-zinc-200 text-xs border-zinc-800"
+        >
+          Insert Link
+        </TooltipContent>
+      </Tooltip>
+
+      <Dialog
+        open={!!position}
+        onOpenChange={(open) => !open && resetAndClose()}
+        modal={false}
+      >
+        <DialogContent
+          className="w-80 p-4 gap-0 dark text-foreground border-zinc-800/40"
+          style={{
+            top: position?.y,
+            left: position?.x,
+            transform: "none",
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <DialogTitle className="flex items-center space-x-2">
+              <LinkIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium text-sm">Insert Link</span>
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={resetAndClose}
             >
-              <LinkIcon className="w-4 h-4" />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent
-            side="bottom"
-            className="bg-zinc-950 text-zinc-200 text-xs border-zinc-800"
-          >
-            Insert Link
-          </TooltipContent>
-        </Tooltip>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-4 dark" onKeyDown={handleKeyDown}>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <LinkIcon className="h-4 w-4 text-muted-foreground" />
-            <h4 className="font-medium">Insert Link</h4>
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6"
-            onClick={resetAndClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+          <div className="space-y-4">
+            {hasSelection || (
+              <Input
+                id="link-text-input"
+                type="text"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Link text"
+                className="w-full"
+                autoFocus
+              />
+            )}
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="link-text-input">Text</Label>
-            <Input
-              id="link-text-input"
-              type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Link text"
-              className="w-full"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="link-url-input">URL</Label>
             <Input
               id="link-url-input"
               type="url"
@@ -128,25 +140,25 @@ const LinkModal = ({ editor, isActive }: LinkModalProps) => {
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://example.com"
               className="w-full"
+              onKeyDown={handleKeyDown}
             />
+            <div className="flex justify-end space-x-2 pt-2">
+              <Button variant="outline" onClick={resetAndClose} size="sm">
+                Cancel
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={handleInsert}
+                size="sm"
+                disabled={!url}
+              >
+                Insert
+              </Button>
+            </div>
           </div>
-
-          <div className="flex justify-end space-x-2 pt-2">
-            <Button variant="outline" onClick={resetAndClose} size="sm">
-              Cancel
-            </Button>
-            <Button
-              variant="default"
-              onClick={handleInsert}
-              size="sm"
-              disabled={!url}
-            >
-              Save
-            </Button>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

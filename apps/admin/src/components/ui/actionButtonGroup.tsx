@@ -60,7 +60,7 @@ export function ActionButtonGroup({
     moveDown: ArrowDown,
   };
 
-  const showConfirmation = useUIStore.getState().showConfirmation;
+  const openModal = useUIStore.getState().openModal;
 
   return (
     <div className="absolute top-0 right-0 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
@@ -90,14 +90,16 @@ export function ActionButtonGroup({
             className={`${baseClass} ${variantClass}`}
             onClick={() => {
               if (button.variant === "delete") {
-                return showConfirmation({
-                  headerText: `Delete ${entityName}`,
-                  message: `Are you sure you want to delete this ${entityName}?`,
-                  onConfirm: button.onClick,
-                  confirmButtonText: "Delete",
-                  confirmButtonVariant: "destructive",
-                  cancelButtonText: "Cancel",
-                  cancelButtonVariant: "outline",
+                return openModal("confirmation", {
+                  data: {
+                    headerText: `Delete ${entityName}`,
+                    message: `Are you sure you want to delete this ${entityName}?`,
+                    onConfirm: button.onClick,
+                    confirmButtonText: "Delete",
+                    confirmButtonVariant: "destructive",
+                    cancelButtonText: "Cancel",
+                    cancelButtonVariant: "outline",
+                  },
                 });
               }
 

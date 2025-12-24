@@ -13,96 +13,55 @@ export enum BlogStatus {
 }
 
 interface BlogStats {
-  totalViews: number;
-  totalLikes: number;
-  totalComments: number;
-  totalShares: number;
+  views: number;
+  likes: number;
+  comments: number;
+  shares: number;
 }
 
-// Base properties
-interface BaseBlogProperties {
-  blogId: string;
-  type: BlogType;
-  link: string;
-  status: BlogStatus;
-
-  createdAt: number;
-  updatedAt: number;
-}
-
-// Draft blog (DB format) - only has draft fields
-export interface DraftBlogDB extends BaseBlogProperties {
-  status: BlogStatus.Draft;
-  draftTitle: string;
-  draftDescription: string;
-  draftTags: string[];
-  draftSocialTitle: string;
-  draftFeaturedImageUrl: string;
-  draftRecommendationTitle: string;
-  draftContent: string; // JSON string
-  draftEstReadTime: number;
-}
-
-// Published blog (DB format) - only has published fields
-export interface PublishedBlogDB extends BaseBlogProperties {
-  status: BlogStatus.Active | BlogStatus.Inactive;
+interface BlogContent {
   title: string;
   description: string;
   tags: string[];
   socialTitle: string;
   featuredImageUrl: string;
   recommendationTitle: string;
-  content: string; // JSON string
   estReadTime: number;
+}
+
+// Base properties (metadata)
+export interface BaseBlogProperties extends BlogContent {
+  blogId: string;
+  type: BlogType;
+  link: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+// BLOGS_DRAFT collection
+export interface BlogDraftDB extends BaseBlogProperties {
+  parentBlogId: string | null;
+  status: BlogStatus.Draft;
+  content: string; // JSON string
+}
+
+// BLOGS collection
+export interface PublishedBlogDB extends BaseBlogProperties {
+  status: BlogStatus.Active | BlogStatus.Inactive;
+  content: string; // JSON string
   recommendations: string[];
   stats: BlogStats;
-  publishedAt?: number;
+  publishedAt: number;
 }
 
-// Published blog being edited (DB format) - has both published and draft fields
-export interface PublishedBlogEditingDB extends PublishedBlogDB {
-  draftTitle: string;
-  draftDescription: string;
-  draftTags: string[];
-  draftSocialTitle: string;
-  draftFeaturedImageUrl: string;
-  draftRecommendationTitle: string;
-  draftContent: string; // JSON string
-  draftEstReadTime: number;
-}
-
-// Union type for what we get from DB
-export type BlogDB = DraftBlogDB | PublishedBlogDB | PublishedBlogEditingDB;
-
-// Client-side format - ALWAYS has draft fields (what user edits)
-export interface BlogFormData
-  extends Omit<BaseBlogProperties, "createdAt" | "updatedAt"> {
-  // Draft fields (always present for editing)
-  draftTitle: string;
-  draftDescription: string;
-  draftTags: string[];
-  draftSocialTitle: string;
-  draftFeaturedImageUrl: string;
-  draftRecommendationTitle: string;
-  draftContent: JSONContent | null;
-  draftEstReadTime: number;
-
-  // Published fields (only if it was published before)
-  title?: string;
-  description?: string;
-  tags?: string[];
-  socialTitle?: string;
-  featuredImageUrl?: string;
-  recommendationTitle?: string;
-  content?: JSONContent;
-  estReadTime?: number;
-  recommendations?: string[];
-  stats?: BlogStats;
-  createdAt?: number;
-  updatedAt?: number;
-  publishedAt?: number;
-
-  // UI state
+// Client form data
+export interface BlogFormData extends BaseBlogProperties {
+  parentBlogId: string | null;
+  content: JSONContent | null;
+  publishedVersion?: BlogContent & {
+    content: JSONContent;
+    publishedAt: number;
+  };
   hasDraftChanges: boolean;
 }
 

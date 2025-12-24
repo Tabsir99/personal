@@ -24,6 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
 
 export const ImageInsertButton = ({ editor }: { editor: Editor }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -80,20 +81,44 @@ export const ImageInsertButton = ({ editor }: { editor: Editor }) => {
           </Tooltip>
         </PopoverTrigger>
 
-        <PopoverContent align="end" className="w-56 dark">
-          <div
-            onClick={() => setIsUrlDialogOpen(true)}
-            className="cursor-pointer flex pl-3 py-2 items-center hover:bg-zinc-800 transition rounded-md"
-          >
-            <Link2Icon className="h-4 w-4" />
-            <span>Insert from URL</span>
-          </div>
-          <div
-            onClick={() => uploadRef.current?.click()}
-            className="cursor-pointer flex pl-3 py-2 items-center hover:bg-zinc-800 transition rounded-md"
-          >
-            <UploadIcon className="h-4 w-4" />
-            <span>Upload from device</span>
+        <PopoverContent
+          align="start"
+          className="w-64 p-2 dark"
+        >
+          <div className="space-y-1">
+            <button
+              onClick={() => {
+                setIsUrlDialogOpen(true);
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/40 transition-colors rounded-md group"
+            >
+              <div className="p-1.5 rounded-md bg-zinc-800 group-hover:bg-zinc-700 transition-colors">
+                <Link2Icon className="h-3.5 w-3.5" />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="font-medium">Insert from URL</span>
+                <span className="text-xs text-zinc-500">Paste image link</span>
+              </div>
+            </button>
+
+            <div className="h-px bg-zinc-800 my-1" />
+
+            <button
+              onClick={() => {
+                uploadRef.current?.click();
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/40 transition-colors rounded-md group"
+            >
+              <div className="p-1.5 rounded-md bg-zinc-800 group-hover:bg-zinc-700 transition-colors">
+                <UploadIcon className="h-3.5 w-3.5" />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="font-medium">Upload from device</span>
+                <span className="text-xs text-zinc-500">JPG, PNG, GIF</span>
+              </div>
+            </button>
           </div>
         </PopoverContent>
       </Popover>
@@ -114,22 +139,55 @@ export const ImageInsertButton = ({ editor }: { editor: Editor }) => {
       <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
         <DialogContent className="sm:max-w-md dark">
           <DialogHeader>
-            <DialogTitle>Insert Image from URL</DialogTitle>
+            <DialogTitle className="text-zinc-100">
+              Insert Image from URL
+            </DialogTitle>
+            <p className="text-sm text-zinc-400 mt-1">
+              Enter the URL of the image you want to insert
+            </p>
           </DialogHeader>
-          <div className="flex flex-col space-y-4 py-4">
-            <Input
-              id="imageUrl"
-              placeholder="Enter image URL"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="w-full"
-            />
+
+          <div className="py-4">
+            <div className="space-y-2">
+              <Label htmlFor="imageUrl" className="text-xs text-zinc-400">
+                Image URL
+              </Label>
+              <Input
+                id="imageUrl"
+                placeholder="https://example.com/image.jpg"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && imageUrl.trim()) {
+                    handleUrlSubmit();
+                  }
+                }}
+              />
+            </div>
+
+            {/* Optional: Preview if URL is valid */}
+            {imageUrl && (
+              <div className="mt-3 p-2 rounded-md">
+                <p className="text-xs text-zinc-500 mb-2">Preview</p>
+                <img
+                  src={imageUrl}
+                  alt="Preview"
+                  className="max-h-32 rounded object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
+            )}
           </div>
-          <DialogFooter className="sm:justify-end">
+
+          <DialogFooter className="gap-2">
             <Button
               type="button"
-              variant="secondary"
+              variant="ghost"
               onClick={() => setIsUrlDialogOpen(false)}
+              className="hover:bg-zinc-800"
             >
               Cancel
             </Button>
@@ -137,18 +195,19 @@ export const ImageInsertButton = ({ editor }: { editor: Editor }) => {
               type="button"
               onClick={handleUrlSubmit}
               disabled={!imageUrl.trim()}
+              className="bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
             >
-              Insert
+              Insert Image
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {isUploading && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card p-6 rounded-lg shadow-lg flex items-center gap-3">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <p>Uploading image...</p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in-0">
+          <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-lg shadow-2xl flex items-center gap-3 animate-in zoom-in-95">
+            <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
+            <p className="text-zinc-200 font-medium">Uploading image...</p>
           </div>
         </div>
       )}

@@ -1,187 +1,168 @@
 import "server-only";
 import {
-  BlogDB,
   BlogFormData,
   BlogStatus,
   BlogType,
-  DraftBlogDB,
+  BlogDraftDB,
   PublishedBlogDB,
-  PublishedBlogEditingDB,
 } from "@/types/blogTypes";
 import { randomUUID } from "crypto";
 import { slugify } from "./utils";
 import { env } from "@/config/env.server";
 
-// Type guards
-export function isDraftBlog(blog: BlogDB): blog is DraftBlogDB {
-  return blog.status === BlogStatus.Draft && !("title" in blog);
-}
+// ============================================================================
+// DRAFT CONVERSIONS (BLOG_DRAFTS collection)
+// ============================================================================
 
-export function isPublishedBlog(blog: BlogDB): blog is PublishedBlogDB {
-  return blog.status !== BlogStatus.Draft && !("draftTitle" in blog);
-}
-
-export function isPublishedBlogEditing(
-  blog: BlogDB
-): blog is PublishedBlogEditingDB {
-  return blog.status !== BlogStatus.Draft && "draftTitle" in blog;
-}
-
-// Conversion functions
-export function dbToBlogFormData(dbBlog: BlogDB): BlogFormData {
-  if (isDraftBlog(dbBlog)) {
-    // Pure draft blog
-    return {
-      ...dbBlog,
-      draftContent: dbBlog.draftContent
-        ? JSON.parse(dbBlog.draftContent)
-        : null,
-      hasDraftChanges: true,
-    };
-  }
-
-  if (isPublishedBlogEditing(dbBlog)) {
-    // Published blog with draft fields (being edited)
-    return {
-      ...dbBlog,
-      draftContent: JSON.parse(dbBlog.draftContent),
-      content: JSON.parse(dbBlog.content),
-      hasDraftChanges: true,
-    };
-  }
-
-  // Published blog without draft fields - populate drafts from published
-  const publishedBlog = dbBlog as PublishedBlogDB;
+export function draftDBToFormData(dbDraft: BlogDraftDB): BlogFormData {
   return {
-    ...publishedBlog,
-    // Populate draft fields from published fields
-    draftTitle: publishedBlog.title,
-    draftDescription: publishedBlog.description,
-    draftTags: publishedBlog.tags,
-    draftSocialTitle: publishedBlog.socialTitle,
-    draftFeaturedImageUrl: publishedBlog.featuredImageUrl,
-    draftRecommendationTitle: publishedBlog.recommendationTitle,
-    draftContent: JSON.parse(publishedBlog.content),
-    draftEstReadTime: publishedBlog.estReadTime,
-
-    content: JSON.parse(publishedBlog.content),
-    hasDraftChanges: false,
+    blogId: dbDraft.blogId,
+    parentBlogId: dbDraft.parentBlogId,
+    type: dbDraft.type,
+    link: dbDraft.link,
+    title: dbDraft.title,
+    description: dbDraft.description,
+    tags: dbDraft.tags,
+    socialTitle: dbDraft.socialTitle,
+    featuredImageUrl: dbDraft.featuredImageUrl,
+    recommendationTitle: dbDraft.recommendationTitle,
+    content: JSON.parse(dbDraft.content),
+    estReadTime: dbDraft.estReadTime,
+    createdAt: dbDraft.createdAt,
+    updatedAt: dbDraft.updatedAt,
+    hasDraftChanges: true,
+    // publishedVersion will be added separately if parentBlogId exists
   };
 }
 
-export function blogFormDataToDB(
-  formData: BlogFormData,
-  doCleanPublish: boolean = false
-): BlogDB {
-  if (formData.status === BlogStatus.Draft) {
-    // Draft blog - only save draft fields
-    return {
-      blogId: formData.blogId,
-      type: formData.type,
-      link: formData.link,
-      status: BlogStatus.Draft,
-      draftTitle: formData.draftTitle,
-      draftDescription: formData.draftDescription,
-      draftTags: formData.draftTags,
-      draftSocialTitle: formData.draftSocialTitle,
-      draftFeaturedImageUrl: formData.draftFeaturedImageUrl,
-      draftRecommendationTitle: formData.draftRecommendationTitle,
-      draftContent: JSON.stringify(formData.draftContent),
-      draftEstReadTime: formData.draftEstReadTime,
-
-      createdAt: formData.createdAt!,
-      updatedAt: formData.updatedAt!,
-    } as DraftBlogDB;
-  }
-
-  if (doCleanPublish) {
-    // Clean published blog - no draft fields
-    return {
-      blogId: formData.blogId,
-      type: formData.type,
-      link: formData.link,
-      status: formData.status,
-      title: formData.title!,
-      description: formData.description!,
-      tags: formData.tags!,
-      content: JSON.stringify(formData.content!),
-      estReadTime: formData.estReadTime!,
-      recommendations: formData.recommendations!,
-      stats: formData.stats!,
-      createdAt: formData.createdAt!,
-      updatedAt: formData.updatedAt!,
-      socialTitle: formData.socialTitle!,
-      featuredImageUrl: formData.featuredImageUrl!,
-      recommendationTitle: formData.recommendationTitle!,
-      publishedAt: formData.publishedAt!,
-    } as PublishedBlogDB;
-  }
-  // Published blog being edited - save both published and draft fields
+export function formDataToDraftDB(formData: BlogFormData): BlogDraftDB {
   return {
-    ...formData,
-    content: JSON.stringify(formData.content!),
-    draftContent: JSON.stringify(formData.draftContent),
-  } as PublishedBlogEditingDB;
+    blogId: formData.blogId,
+    parentBlogId: formData.parentBlogId,
+    type: formData.type,
+    link: formData.link,
+    status: BlogStatus.Draft,
+    title: formData.title,
+    description: formData.description,
+    tags: formData.tags,
+    socialTitle: formData.socialTitle,
+    featuredImageUrl: formData.featuredImageUrl,
+    recommendationTitle: formData.recommendationTitle,
+    content: JSON.stringify(formData.content),
+    estReadTime: formData.estReadTime,
+    createdAt: formData.createdAt || Date.now(),
+    updatedAt: Date.now(),
+  };
 }
+
+// ============================================================================
+// PUBLISHED CONVERSIONS (BLOGS collection)
+// ============================================================================
+
+export function publishedDBToFormData(
+  dbPublished: PublishedBlogDB
+): BlogFormData {
+  // When loading published blog for editing, populate draft fields from published
+  return {
+    blogId: randomUUID(), // New draft ID
+    parentBlogId: dbPublished.blogId, // Link to published blog
+    type: dbPublished.type,
+    link: dbPublished.link,
+    // Populate draft fields from published (user will edit these)
+    title: dbPublished.title,
+    description: dbPublished.description,
+    tags: dbPublished.tags,
+    socialTitle: dbPublished.socialTitle,
+    featuredImageUrl: dbPublished.featuredImageUrl,
+    recommendationTitle: dbPublished.recommendationTitle,
+    content: JSON.parse(dbPublished.content),
+    estReadTime: dbPublished.estReadTime,
+    // Store published version for comparison
+    publishedVersion: {
+      title: dbPublished.title,
+      description: dbPublished.description,
+      tags: dbPublished.tags,
+      socialTitle: dbPublished.socialTitle,
+      featuredImageUrl: dbPublished.featuredImageUrl,
+      recommendationTitle: dbPublished.recommendationTitle,
+      content: JSON.parse(dbPublished.content),
+      estReadTime: dbPublished.estReadTime,
+      publishedAt: dbPublished.publishedAt,
+    },
+    createdAt: Date.now(), // Draft creation time
+    updatedAt: Date.now(),
+    hasDraftChanges: false, // No changes yet
+  };
+}
+
+export function formDataToPublishedDB(formData: BlogFormData): PublishedBlogDB {
+  // Promote draft fields to published
+  return {
+    blogId: formData.parentBlogId || formData.blogId, // Use parent ID if editing, else draft ID
+    type: formData.type,
+    link: formData.link || slugify(formData.title),
+    status: BlogStatus.Active,
+    title: formData.title,
+    description: formData.description,
+    tags: formData.tags,
+    socialTitle: formData.socialTitle,
+    featuredImageUrl: formData.featuredImageUrl,
+    recommendationTitle: formData.recommendationTitle,
+    content: JSON.stringify(formData.content),
+    estReadTime: formData.estReadTime,
+    stats: { views: 0, likes: 0, comments: 0, shares: 0 },
+    createdAt: formData.publishedVersion ? formData.createdAt! : Date.now(),
+    updatedAt: Date.now(),
+    publishedAt: formData.publishedVersion?.publishedAt || Date.now(),
+    recommendations: [],
+  };
+}
+
+// ============================================================================
+// FACTORY FUNCTIONS
+// ============================================================================
 
 export function createNewBlogFormData(title?: string): BlogFormData {
   return {
     blogId: randomUUID(),
+    parentBlogId: null, // New draft (not editing published)
     type: BlogType.Article,
     link: "",
-    status: BlogStatus.Draft,
-
-    draftTitle: title || `Untitled Blog ${new Date().toLocaleDateString()}`,
-    draftDescription: "",
-    draftTags: [],
-    draftSocialTitle: "",
-    draftFeaturedImageUrl: "",
-    draftRecommendationTitle: "Keep reading...",
-    draftContent: null,
-    draftEstReadTime: 0,
-
-    hasDraftChanges: true,
+    title: title || `Untitled Blog ${new Date().toLocaleDateString()}`,
+    description: "",
+    tags: [],
+    socialTitle: "",
+    featuredImageUrl: "",
+    recommendationTitle: "Keep reading...",
+    content: null,
+    estReadTime: 0,
     createdAt: Date.now(),
     updatedAt: Date.now(),
+    hasDraftChanges: true,
   };
 }
 
-// Publish draft (promote draft fields to published fields)
-export function draftToPublishedBlog(formData: BlogFormData): BlogFormData {
-  return {
-    ...formData,
-    status: BlogStatus.Active,
-    title: formData.draftTitle,
-    description: formData.draftDescription,
-    tags: formData.draftTags,
-    socialTitle: formData.draftSocialTitle,
-    featuredImageUrl: formData.draftFeaturedImageUrl,
-    recommendationTitle: formData.draftRecommendationTitle,
-    content: formData.draftContent!,
-    estReadTime: formData.draftEstReadTime,
-    updatedAt: Date.now(),
-    publishedAt: formData.publishedAt || Date.now(),
-    link: formData.link || slugify(formData.draftTitle),
-    recommendations: [],
-    stats: {
-      totalViews: 0,
-      totalLikes: 0,
-      totalComments: 0,
-      totalShares: 0,
-    },
-  };
-}
+// ============================================================================
+// UTILITIES
+// ============================================================================
 
-export const sendRevalidateRequest = async (path: string) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BLOG_ORIGIN}/api/revalidate`, {
-    method: "POST",
-    body: JSON.stringify({ path: `/blogs/${path}` }),
-    headers: {
-      "Content-Type": "application/json",
-      acs_tkn: env.SERVER_TOKEN,
-    },
-  });
-  if (env.RUNTIME === "local") {
-    console.log(res.status, res.statusText);
+export async function sendRevalidateRequest(path: string) {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BLOG_ORIGIN}/api/revalidate`,
+      {
+        method: "POST",
+        body: JSON.stringify({ path: `/blogs/${path}` }),
+        headers: {
+          "Content-Type": "application/json",
+          acs_tkn: env.SERVER_TOKEN,
+        },
+      }
+    );
+    if (env.RUNTIME === "local") {
+      console.log(res.status, res.statusText);
+    }
+  } catch (error) {
+    console.error(error);
   }
-};
+}

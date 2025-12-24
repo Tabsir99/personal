@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Search, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,27 +15,39 @@ import { callWithToast } from "@/lib/utils";
 export default function WriteBlog() {
   const [search, setSearch] = useState("");
 
-  const { data = [], isLoading } = useCustomSWR<BlogFormData[]>(
-    `/api/blogs?status=draft`
-  );
+  const {
+    data = [],
+    isLoading,
+    mutate,
+  } = useCustomSWR<BlogFormData[]>(`/api/blogs?status=draft`);
 
-  const filteredBlogs = data.filter(
-    (blog) =>
-      blog.title?.toLowerCase().includes(search.toLowerCase()) ||
-      blog.description?.toLowerCase().includes(search.toLowerCase()) ||
-      blog.tags?.some((tag) => tag.toLowerCase().includes(search.toLowerCase()))
+  const filteredBlogs = useMemo(
+    () =>
+      data.filter((blog) => {
+        const searchTerm = search.toLowerCase();
+        const title = blog.title?.toLowerCase() || "";
+        const description = blog.description?.toLowerCase() || "";
+        const tags = blog.tags?.map((tag) => tag.toLowerCase()) || [];
+
+        return (
+          title.includes(searchTerm) ||
+          description.includes(searchTerm) ||
+          tags.some((tag) => tag.includes(searchTerm))
+        );
+      }),
+    [data, search]
   );
 
   const isEmpty = filteredBlogs.length < 1;
 
   const confirmDelete = async (id: string) => {
     await callWithToast(() => deleteBlog(id), {
-      loading: "Deleting blog...",
-      success: "Blog has been deleted",
-      err: "Failed to delete blog",
+      loading: "Deleting draft...",
+      success: "Draft has been deleted",
+      err: "Failed to delete draft",
     });
 
-    // Invalidate SWR cache and do Optimistic UI update
+    mutate((prev) => prev?.filter((p) => p.blogId !== id), false);
   };
 
   return (

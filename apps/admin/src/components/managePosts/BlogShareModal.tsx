@@ -17,13 +17,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-
-interface BlogShareModalProps {
-  open: boolean;
-  onClose: () => void;
-  url: string;
-  title?: string;
-}
+import useUIStore from "@/stores/UIStore";
+import { useShallow } from "zustand/shallow";
 
 const ShareButton = ({
   children,
@@ -45,8 +40,16 @@ const ShareButton = ({
   );
 };
 
-const BlogShareModal = ({ open, onClose, url, title }: BlogShareModalProps) => {
+const BlogShareModal = () => {
+  const { isOpen, data } = useUIStore(
+    useShallow((state) => state.modals.blogShare)
+  );
+  const closeModal = useUIStore().closeAllModals;
+
   const [copySuccess, setCopySuccess] = useState(false);
+
+  const url = data?.url;
+  const title = data?.title;
 
   const platforms = [
     {
@@ -85,6 +88,7 @@ const BlogShareModal = ({ open, onClose, url, title }: BlogShareModalProps) => {
 
   const copyToClipboard = async () => {
     try {
+      if (!url) return;
       await navigator.clipboard.writeText(url);
       setCopySuccess(true);
       toast.success("Link copied to clipboard!");
@@ -100,7 +104,7 @@ const BlogShareModal = ({ open, onClose, url, title }: BlogShareModalProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="sm:max-w-lg bg-gradient-to-br from-zinc-950 to-zinc-900 text-white border-zinc-800 shadow-2xl">
         <DialogHeader className="space-y-3">
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">

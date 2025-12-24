@@ -1,4 +1,3 @@
-import React from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,30 +6,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Pencil, Trash2, Power, Share2, Image } from "lucide-react";
-import { BlogDB } from "@/types/blogTypes";
 import useUIStore from "@/stores/UIStore";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
-import { UseManageBlogs } from "@/hooks/useManageBlogs";
+import { BlogStatus } from "@/types/blogTypes";
 
 export default function BlogMenu({
   status,
   blogName,
   blogId,
-  actions: {
-    handleThumbnail,
-    handleShareBlog,
-    handleStatus,
-    confirmDelete,
-    handleSelectPost,
-  },
+  thumbnailUrl,
+  toggleStatus,
+  confirmDelete,
 }: {
-  status: BlogDB["status"];
+  status: BlogStatus;
   blogName: string;
   blogId: string;
-  actions: Partial<UseManageBlogs> & { handleSelectPost?: () => void };
+  thumbnailUrl?: string;
+  toggleStatus?: () => void;
+  confirmDelete: () => void;
 }) {
-  const showConfirmation = useUIStore.getState().showConfirmation;
+  const openModal = useUIStore.getState().openModal;
 
   const router = useRouter();
   const handleBlogEdit = () => router.push(`write-blog/${blogId}`);
@@ -44,7 +40,6 @@ export default function BlogMenu({
           variant="ghost"
           size="icon"
           className="h-8 w-8 text-zinc-400 hover:text-zinc-100"
-          onClick={handleSelectPost}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -67,6 +62,7 @@ export default function BlogMenu({
       <DropdownMenuContent
         align="end"
         className="w-48 bg-zinc-900 border-neutral-800"
+        onClick={(e) => e.stopPropagation()}
       >
         <DropdownMenuItem
           onClick={handleBlogEdit}
@@ -78,7 +74,9 @@ export default function BlogMenu({
 
         {isDraft || (
           <DropdownMenuItem
-            onClick={handleThumbnail}
+            onClick={() =>
+              openModal("blogThumbnail", { data: { blogId, thumbnailUrl } })
+            }
             className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-zinc-800 focus:bg-zinc-800"
           >
             <Image className="w-4 h-4" />
@@ -88,10 +86,17 @@ export default function BlogMenu({
 
         {isDraft || <DropdownMenuSeparator className="bg-zinc-800" />}
 
-        {handleStatus &&
+        {toggleStatus &&
           (isDraft || (
             <DropdownMenuItem
-              onClick={() => handleStatus(blogId)}
+              onClick={() =>
+                openModal("confirmation", {
+                  data: {
+                    message: `Are you sure you want to ${status === "active" ? "deactivate" : "activate"} this post?`,
+                    onConfirm: toggleStatus,
+                  },
+                })
+              }
               className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-zinc-800 focus:bg-zinc-800"
             >
               <Power className="w-4 h-4" />
@@ -103,7 +108,14 @@ export default function BlogMenu({
 
         {isDraft || (
           <DropdownMenuItem
-            onClick={handleShareBlog}
+            onClick={() =>
+              openModal("blogShare", {
+                data: {
+                  url: `${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${blogId}`,
+                  title: blogName,
+                },
+              })
+            }
             className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-zinc-800 focus:bg-zinc-800"
           >
             <Share2 className="w-4 h-4" />
@@ -115,9 +127,11 @@ export default function BlogMenu({
 
         <DropdownMenuItem
           onClick={() => {
-            showConfirmation({
-              message: `Deleting "${blogName}" is irrecoverable.`,
-              onConfirm: () => confirmDelete?.(blogId),
+            openModal("confirmation", {
+              data: {
+                message: `Deleting "${blogName}" is irrecoverable.`,
+                onConfirm: confirmDelete,
+              },
             });
           }}
           className="flex items-center space-x-2 text-red-400 hover:text-red-300 focus:text-red-300 hover:bg-zinc-800 focus:bg-zinc-800"

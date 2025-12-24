@@ -36,12 +36,8 @@ body {
   outline: none;
 }
 .ProseMirror {
-  padding: 3rem;
   margin: 0 auto;
   min-height: 130vh;
-  border-radius: 1%;
-  background-color: rgba(24, 23, 23, 0.5);
-  border: 2px solid rgba(32, 33, 34, 0.5);
 }
 .ProseMirror:focus {
   border-color: #30373c77;
@@ -51,7 +47,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 100px;
-  font-size: 20px;
+  font-size: 18px;
   word-spacing: 0.1em;
   line-height: 1.65;
 }
@@ -229,11 +225,11 @@ p + h4 {
     --radius: 0.5rem;
   }
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 0 0% 8%;
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 240 10% 10%;
     --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
     --primary-foreground: 240 5.9% 10%;
@@ -292,10 +288,6 @@ p + h4 {
     background-position: 200% 0;
   }
 }
-
-
-
-
 
 /* Animations for Cursor Effects */
 

@@ -1,36 +1,22 @@
 "use client";
 
 import { useMemo, useState } from "react";
-
 import CMSBlogCard from "./BlogCard";
 import ManagePostHead from "./ManageBlogHead";
-import useManageBlogs from "@/hooks/useManageBlogs";
-import { BlogDB, BlogStatus, PublishedBlogEditingDB } from "@/types/blogTypes";
+import { PublishedBlogDB, BlogStatus } from "@/types/blogTypes";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
-import BlogShareModal from "./BlogShareModal";
 import { BlogCardSkeletonGrid } from "../ui/Skeletons/BlogCardSkeleton";
-import ThumbnailModal from "./ThumbnailModal";
+import { callWithToast } from "@/lib/utils";
+import { deleteBlog, toggleBlogStatus } from "@/actions/blogActions";
 
 const BlogOverview = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const {
-    confirmDelete,
-    handleStatus,
-    closeModal,
-    handleShareBlog,
-    handleThumbnail,
-    handleSelectPost,
-
-    isModalOpen,
-    selectedPost,
-  } = useManageBlogs();
-
   const [filterBy, setFilterBy] = useState<{
-    status: BlogDB["status"] | "";
+    status: BlogStatus | "";
   }>({ status: "" });
 
-  const { data, isLoading } = useCustomSWR<PublishedBlogEditingDB[]>(
+  const { data, isLoading } = useCustomSWR<PublishedBlogDB[]>(
     `/api/blogs?=content=false&status=${filterBy.status}`
   );
 
@@ -39,39 +25,30 @@ const BlogOverview = () => {
       data?.filter((blog) => {
         return (
           blog.title?.includes(searchTerm) ||
-          blog.draftTitle?.includes(searchTerm)
+          blog.description?.includes(searchTerm)
         );
       }) || []
     );
   }, [data, searchTerm]);
 
+  const toggleStatus = async (blogId: string) => {
+    await callWithToast(async () => toggleBlogStatus(blogId), {
+      loading: "Toggling status...",
+      success: "Status toggled successfully",
+      err: "Failed to toggle status",
+    });
+  };
+
+  const confirmDelete = async (blogId: string) => {
+    await callWithToast(async () => deleteBlog(blogId), {
+      loading: "Deleting blog...",
+      success: "Blog deleted successfully",
+      err: "Failed to delete blog",
+    });
+  };
+
   return (
     <>
-      {selectedPost && (
-        <ThumbnailModal
-          isOpen={isModalOpen.thumbnail}
-          onClose={closeModal}
-          blogLink={selectedPost.link}
-          currentThumbnail={
-            selectedPost.status === BlogStatus.Draft
-              ? undefined
-              : selectedPost.featuredImageUrl
-          }
-          draftThumbnail={
-            selectedPost.status === BlogStatus.Draft
-              ? selectedPost.draftFeaturedImageUrl
-              : undefined
-          }
-        />
-      )}
-      {selectedPost && (
-        <BlogShareModal
-          onClose={closeModal}
-          url={`${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${selectedPost.link}`}
-          open={isModalOpen.share}
-        />
-      )}
-
       <ManagePostHead
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -90,11 +67,8 @@ const BlogOverview = () => {
                 <CMSBlogCard
                   key={post.blogId}
                   blog={post}
-                  handleShareBlog={handleShareBlog}
-                  handleThumbnail={handleThumbnail}
-                  handleStatus={handleStatus}
+                  toggleStatus={toggleStatus}
                   confirmDelete={confirmDelete}
-                  handleSelectPost={handleSelectPost}
                 />
               );
             })
