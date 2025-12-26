@@ -34,26 +34,26 @@ const Services = async () => {
                 style={{
                   animationDelay: `${index * 400}ms`,
                 }}
-                className="group opacity-0 relative overflow-hidden border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm w-full transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.05] rounded-2xl"
+                className="group opacity-0 relative overflow-hidden border border-white/[0.08] bg-white/[0.03] backdrop-blur-md w-full transition-all duration-500 hover:border-white/[0.12] hover:bg-gradient-to-br hover:from-white/[0.08] hover:to-transparent rounded-2xl"
               >
                 <div
                   className="absolute inset-0 shimmer pointer-events-none"
                   style={{ animationDelay: `${index * 1}s` }}
                 />
                 <CardContent className="p-8">
-                  <div className="flex items-center gap-3 mb-4">
+                  <div className="flex flex-col items-start gap-4 mb-5">
                     <Img
                       src={service.icon}
                       alt={service.title}
-                      width={44}
-                      height={44}
+                      width={56}
+                      height={56}
                     />
                     <h3 className="text-xl font-semibold text-white/95 tracking-tight">
                       {service.title}
                     </h3>
                   </div>
 
-                  <p className="text-[15px] text-white/60 leading-relaxed">
+                  <p className="text-[15px] text-white/60 leading-loose">
                     {service.content}
                   </p>
                 </CardContent>

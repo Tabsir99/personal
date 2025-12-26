@@ -39,8 +39,8 @@ export default async function PortfolioSection() {
       id="portfolio"
       data-navlink="#portfolio"
       className="relative scroll-mt-16 bg-zinc-950/40"
-      headerText="Real Projects, Real Results"
-      headerDescription="MVPs and products I've shipped for startups and clients"
+      headerText="Things I've Built"
+      headerDescription="Client products and full-featured side projects—all live"
     >
       <div className="px-10 max-sm:px-4">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-10">

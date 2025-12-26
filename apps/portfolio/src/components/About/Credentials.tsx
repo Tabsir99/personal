@@ -147,17 +147,14 @@ const CertificateModal = ({
 const Credentials = async () => {
   const pageData = await getPageData();
   return (
-    <Section className="bg-zinc-950/40" id="credentials">
+    <Section
+      className="bg-zinc-950/40"
+      id="credentials"
+      data-navlink="#credentials"
+      headerText="Certifications"
+      headerDescription="Professional certifications and completed coursework"
+    >
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16 max-sm:mb-12">
-          <h2 className="text-4xl max-sm:text-3xl font-bold text-white/95 mb-3">
-            Certifications
-          </h2>
-          <p className="text-white/60 text-lg max-w-2xl mx-auto">
-            Professional certifications and completed coursework
-          </p>
-        </div>
-
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pageData.credentials.map((cert, index) => (
             <CertificateCard key={index} {...cert} index={index} />

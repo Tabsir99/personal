@@ -1,4 +1,3 @@
-import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Section from "../ui/section";
 import { getPageData } from "@/app/layout";
@@ -12,17 +11,10 @@ export default async function About() {
       className="bg-zinc-950/40 scroll-mt-16"
       id="about"
       data-navlink="#about"
+      headerText="About Me"
+      headerDescription="Developer, problem-solver, and lifelong learner"
     >
       <div className="max-w-6xl mx-auto">
-        <div className="mb-16 text-center">
-          <h2 className="text-4xl max-sm:text-3xl font-bold text-white/95 mb-3">
-            About Me
-          </h2>
-          <p className="text-white/50 text-lg">
-            Full-stack developer passionate about backend systems
-          </p>
-        </div>
-
         <div className="grid lg:grid-cols-[1fr_400px] gap-12 items-start">
           <div className="space-y-8">
             {pageData.about.map((card, index) => (
@@ -62,21 +54,6 @@ export default async function About() {
                     <p className="text-white/70">Full Stack Developer</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-white/[0.08] bg-zinc-900/40 backdrop-blur-sm">
-              <CardContent className="p-6 text-center">
-                <p className="text-white/80 mb-4 leading-relaxed">
-                  Passionate about Tech, Data, or AI? Working on something
-                  exciting?
-                </p>
-                <a
-                  href="#contact"
-                  className="inline-block px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 rounded-lg text-emerald-400 font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/20"
-                >
-                  Let's Connect
-                </a>
               </CardContent>
             </Card>
           </div>
