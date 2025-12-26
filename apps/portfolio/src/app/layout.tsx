@@ -8,6 +8,7 @@ import { PageData } from "./page.type";
 import { env } from "@/config/env";
 import { GlobalCursorGlow } from "@/components/ui/GlowCursor";
 import { ScrollAnimationObserver } from "@/components/ui/ScrollObserver";
+import JsonLd from "@/components/JsonLd";
 
 const latoFont = Lato({
   weight: ["400", "900"],
@@ -98,7 +99,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -114,6 +115,9 @@ export default function RootLayout({
         overflow: "hidden",
       }}
     >
+      <head>
+        <JsonLd />
+      </head>
       <body style={{ margin: 0, padding: 0, backgroundColor: "#101010" }}>
         <div
           id="root"
