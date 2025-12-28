@@ -129,6 +129,15 @@
   list-style-type: none;
 }
 
+h2 {
+  font-size: 36px;
+}
+
+#about p {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
 .text-service {
   background: linear-gradient(
     92.66deg,

@@ -25,7 +25,7 @@ export default async function About() {
                 style={{ animationDelay: `${300 + index * 400}ms` }}
               >
                 <CardContent
-                  className="p-8 max-sm:p-6"
+                  className="px-8 py-3"
                   dangerouslySetInnerHTML={{ __html: card }}
                 />
               </Card>
@@ -61,93 +61,4 @@ export default async function About() {
       </div>
     </Section>
   );
-}
-
-{
-  // const interests = [
-  //   "Dashboards & Visualizations",
-  //   "Microservices Architecture",
-  //   "E-commerce Platforms",
-  //   "Social Media Systems",
-  // ];
-  /* <h3 className="text-2xl font-semibold text-white/95 mb-4">
-                    Who I Am
-                  </h3>
-                  <div className="space-y-4 text-white/70 leading-relaxed">
-                    <p>
-                      I'm{" "}
-                      <span className="text-white/90 font-medium">Tabsir</span>,
-                      a full-stack developer based in Bangladesh, passionate
-                      about building dynamic web frontends and robust backend
-                      systems.
-                    </p>
-                    <p>
-                      You can call me{" "}
-                      <span className="text-white/90 font-medium">CG</span>
-                      —whether it stands for
-                      <span className="text-white/90 font-medium">
-                        {" "}
-                        CatGuy
-                      </span>{" "}
-                      or
-                      <span className="text-white/90 font-medium">
-                        {" "}
-                        Computer Guy
-                      </span>
-                      , both fit me well!
-                    </p>
-                  </div>
-
-<Card className="border-white/[0.08] bg-white/[0.02] backdrop-blur-sm">
-<CardContent className="p-8 max-sm:p-6">
-  <h3 className="text-2xl font-semibold text-white/95 mb-4">
-    What Drives Me
-  </h3>
-  <div className="space-y-4 text-white/70 leading-relaxed">
-    <p>
-      While I work across the full stack, my passion lies in
-      backend development—especially working with
-      <span className="text-white/90 font-medium">
-        {" "}
-        APIs, data
-      </span>
-      , and
-      <span className="text-white/90 font-medium">
-        {" "}
-        algorithms
-      </span>
-      .
-    </p>
-    <p>
-      There's something satisfying about seeing how APIs interact
-      with databases, how they manipulate data, and how everything
-      comes together.
-    </p>
-
-    <div className="pt-4">
-      <p className="text-white/60 text-sm mb-3">
-        I enjoy building:
-      </p>
-      <ul>
-        {interests.map((interest) => (
-          <li key={interest}>{interest}</li>
-        ))}
-      </ul>
-    </div>
-  </div>
-</CardContent>
-</Card>
-
-<Card className="border-white/[0.08] bg-white/[0.02] backdrop-blur-sm">
-<CardContent className="p-8 max-sm:p-6">
-  <h3 className="text-2xl font-semibold text-white/95 mb-4">
-    Beyond Code
-  </h3>
-  <p className="text-white/70 leading-relaxed">
-    When I'm not coding, I'm probably reading a book, learning
-    about AI, or refining my skills. I also enjoy spending time
-    with my cat and occasionally catching up with friends.
-  </p>
-</CardContent>
-</Card> */
 }
