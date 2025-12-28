@@ -55,6 +55,9 @@ export async function POST(request: NextRequest) {
 
     console.log("Revalidated tabsircg.com");
 
+    await fetch("https://tabsircg.com");
+    console.log("Created static cache for tabsircg.com");
+
     return NextResponse.json("OK", { status: 200 });
   } catch (error) {
     console.error(error);
