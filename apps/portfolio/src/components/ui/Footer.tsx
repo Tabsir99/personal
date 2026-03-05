@@ -3,6 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import { Logo } from "./Header";
 import { getPageData } from "@/app/layout";
 import Img from "./image";
+import Link from "next/link";
 
 const quickLinks = [
   { label: "Home", href: "#home" },
@@ -125,13 +126,13 @@ const Footer = async () => {
 
         <div className="flex items-center gap-4">
           {legalLinks.map((link) => (
-            <a
+            <Link
               key={link.label}
               href={link.href}
-              className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors hover:underline"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
       </div>
