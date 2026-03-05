@@ -1,4 +1,4 @@
-import { Mail, Heart, ArrowUpRight, Code2 } from "lucide-react";
+import { Mail, Heart, ArrowUpRight, Code2, MapPin } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Logo } from "./Header";
 import { getPageData } from "@/app/layout";
@@ -12,6 +12,12 @@ const quickLinks = [
   { label: "Testimonials", href: "#testimonials" },
   { label: "Services", href: "#services" },
   { label: "Blogs", href: "/blogs" },
+];
+
+const legalLinks = [
+  { label: "Terms of Service", href: "/terms" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Refund Policy", href: "/refund-policy" },
 ];
 
 const Footer = async () => {
@@ -55,6 +61,19 @@ const Footer = async () => {
               </div>
             </div>
           </a>
+
+          <div className="flex items-start gap-4 max-w-96 p-6 rounded-xl border border-zinc-800 bg-zinc-900/30">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-zinc-800 border border-zinc-700">
+              <MapPin className="h-5 w-5 text-zinc-400" />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-sm font-semibold text-zinc-300">
+                TabsirCG Web & AI Solutions LLC
+              </p>
+              <p className="text-sm text-zinc-500">30 N Gould St Ste R</p>
+              <p className="text-sm text-zinc-500">Sheridan, WY 82801</p>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-8">
@@ -67,7 +86,7 @@ const Footer = async () => {
                 <SocialMediaLink
                   key={social.name}
                   href={social.url}
-                  icon={social.icon as string}
+                  icon={social.icon}
                   label={social.name}
                   index={index}
                 />
@@ -99,27 +118,21 @@ const Footer = async () => {
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-sm">
         <div className="flex items-center gap-3 text-zinc-500">
           <Logo width={24} />
-          <span className="font-medium">© 2024 Tabsir</span>
-          <span className="h-1 w-1 rounded-full bg-zinc-700" />
-          <span className="flex items-center gap-1.5 text-xs text-zinc-400">
-            <Code2 className="h-3 w-3" />
-            Next.js • TypeScript • Tailwind
+          <span className="font-medium">
+            © {new Date().getFullYear()} TabsirCG Web & AI Solutions LLC
           </span>
         </div>
 
-        <div className="flex items-center gap-2 text-zinc-500">
-          <span>Crafted with</span>
-          <Heart className="h-4 w-4 fill-red-500 text-red-500" />
-          <span>• Inspired by</span>
-          <a
-            href="https://www.freecodecamp.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 font-semibold text-zinc-200 hover:text-blue-400 transition-colors group"
-          >
-            freeCodeCamp
-            <ArrowUpRight className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </a>
+        <div className="flex items-center gap-4">
+          {legalLinks.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              {link.label}
+            </a>
+          ))}
         </div>
       </div>
     </footer>
