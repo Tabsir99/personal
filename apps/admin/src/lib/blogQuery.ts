@@ -1,6 +1,5 @@
 import { Collections } from "@/lib/constants";
 import { firestore } from "firebase-admin";
-
 import { db } from "@/config/firebaseAdmin";
 
 export const deleteBlogdb = async ({
@@ -27,7 +26,7 @@ export const deleteBlogdb = async ({
           updatedAt: Date.now(),
           totalPosts: firestore.FieldValue.increment(-1),
         },
-        { merge: true }
+        { merge: true },
       );
     }
 
