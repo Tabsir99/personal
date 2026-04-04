@@ -1,4 +1,4 @@
-import "server-only";
+// import "server-only";
 
 function requireEnv(key: string): string {
   const value = process.env[key];
