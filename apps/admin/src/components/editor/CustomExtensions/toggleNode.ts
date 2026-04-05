@@ -1,13 +1,13 @@
-import { JSONContent, type Editor } from "@tiptap/react";
+import { JSONContent, type Editor } from "@tiptap/core";
 
 export const toggleNode = (
   node: JSONContent["type"],
   editor: Editor,
-  attrs: Record<string, any> | null = null
+  attrs: Record<string, any> | null = null,
 ) => {
   const { selection, tr } = editor.view.state;
   const { $from } = selection;
-  const nodeType = editor.schema.nodes[node];
+  const nodeType = editor.schema.nodes[node!];
   const currentNode = $from.parent;
   const text = currentNode.textContent;
   const nodeContent = text ? editor.schema.text(text) : null;
@@ -20,7 +20,7 @@ export const toggleNode = (
     // Create a new paragraph with the existing content
     const newParagraph = editor.schema.nodes.paragraph.create(
       null,
-      nodeContent ? [nodeContent] : undefined
+      nodeContent ? [nodeContent] : undefined,
     );
 
     tr.replaceWith(start, end, newParagraph);
@@ -53,7 +53,7 @@ export const toggleNode = (
   tr.replaceWith(
     start,
     end,
-    editor.schema.node(nodeType, attrs, schemaNodes as any)
+    editor.schema.node(nodeType, attrs, schemaNodes as any),
   );
 
   if (!nodeContent) {

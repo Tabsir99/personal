@@ -1,13 +1,13 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AreaChart, Area, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, ResponsiveContainer, Tooltip } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface MetricCardProps {
   title: string;
   value: string;
   trend: number;
-  data: number[];
+  data: { value: number; date: string }[];
   isLoading: boolean;
   isError: boolean;
   trendHigherIsBad?: boolean;
@@ -41,7 +41,7 @@ export function MetricCard({ title, value, trend, data, isLoading, isError, tren
     );
   }
 
-  const chartData = data.map((v, i) => ({ value: v, index: i }));
+  const chartData = data;
   const isPositive = trend > 0;
   const isNegative = trend < 0;
   
@@ -71,6 +71,19 @@ export function MetricCard({ title, value, trend, data, isLoading, isError, tren
         <div className="h-[60px] w-full mt-2">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
+              <Tooltip
+                content={({ active, payload }: any) => {
+                  if (!active || !payload || !payload.length) return null;
+                  const item = payload[0].payload;
+                  return (
+                    <div className="rounded-md border bg-background px-2 py-1 shadow-md text-xs">
+                      <div className="font-medium">{item.date}</div>
+                      <div className="text-muted-foreground">{item.value.toFixed(1)}</div>
+                    </div>
+                  );
+                }}
+                cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }}
+              />
               <Area 
                 type="monotone" 
                 dataKey="value" 

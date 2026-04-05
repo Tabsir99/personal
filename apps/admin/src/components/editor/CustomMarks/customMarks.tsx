@@ -1,4 +1,13 @@
 import { Mark, mergeAttributes } from "@tiptap/react";
+import "@tiptap/core";
+
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    textColor: {
+      toggleTextColor: (color: string) => ReturnType;
+    };
+  }
+}
 
 export const TextColor = Mark.create({
   name: "textColor",
@@ -48,11 +57,4 @@ export const TextColor = Mark.create({
         },
     };
   },
-  // addKeyboardShortcuts() {
-  //   return {
-  //     "Mod-l": () => {
-  //       this.editor.chain().focus().setMark(this.type, { color: "#fff" }).run();
-  //     },
-  //   };
-  // },
 });

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NodeViewWrapper, NodeViewProps, FaQSectionAttrs } from "@tiptap/react";
+import { NodeViewWrapper, NodeViewProps } from "@tiptap/react";
 import {
   Dialog,
   DialogContent,
@@ -149,7 +149,7 @@ const FAQSectionView: React.FC<NodeViewProps> = ({ node, editor }) => {
                 value={currentItem?.question || ""}
                 onChange={(e) =>
                   setCurrentItem((prev) =>
-                    prev ? { ...prev, question: e.target.value } : null
+                    prev ? { ...prev, question: e.target.value } : null,
                   )
                 }
                 placeholder="Enter your question"
@@ -162,7 +162,7 @@ const FAQSectionView: React.FC<NodeViewProps> = ({ node, editor }) => {
                 value={currentItem?.answer || ""}
                 onChange={(e) =>
                   setCurrentItem((prev) =>
-                    prev ? { ...prev, answer: e.target.value } : null
+                    prev ? { ...prev, answer: e.target.value } : null,
                   )
                 }
                 placeholder="Enter your answer"

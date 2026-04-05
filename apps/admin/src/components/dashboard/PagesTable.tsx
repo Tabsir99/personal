@@ -4,40 +4,14 @@ import { usePagePerformance } from "@/lib/hooks/useDashboardData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DateRangeSelector } from "./DateRangeSelector";
 
-export function PagesTable({ days }: { days: number }) {
+export function PagesTable() {
+  const [days, setDays] = useState(7);
   const { data, error, isLoading } = usePagePerformance(days);
   const [sortKey, setSortKey] = useState<string>("views");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [showAll, setShowAll] = useState(false);
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Pages</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">Failed to load</CardContent>
-      </Card>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Pages</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
@@ -72,12 +46,23 @@ export function PagesTable({ days }: { days: number }) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle>Top Pages</CardTitle>
+        <DateRangeSelector value={days} onChange={setDays} />
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
-          <Table>
+        {error ? (
+          <div className="h-[280px] flex items-center justify-center text-sm text-muted-foreground">Failed to load</div>
+        ) : isLoading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </div>
+        ) : (
+        <>
+          <div className="rounded-md border">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="cursor-pointer" onClick={() => handleSort("path")}>
@@ -124,6 +109,8 @@ export function PagesTable({ days }: { days: number }) {
               {showAll ? "Show less" : "Show all"}
             </button>
           </div>
+        )}
+        </>
         )}
       </CardContent>
     </Card>

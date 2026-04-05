@@ -20,7 +20,7 @@ export default function About() {
 
   const about = usePortfolioStore(useShallow((state) => state.pageData.about));
   const profilePicture = usePortfolioStore(
-    useShallow((state) => state.pageData.profilePicture)
+    useShallow((state) => state.pageData.profilePicture),
   );
 
   const updatePageData = usePortfolioStore.getState().updatePageData;

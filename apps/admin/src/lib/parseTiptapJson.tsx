@@ -27,14 +27,14 @@ export const parseContent = (content: JSONContent | null): React.ReactNode => {
           case "link":
             return (
               <Link
-                href={mark.attrs.href}
-                target={mark.attrs.target || "_blank"}
+                href={mark.attrs?.href}
+                target={mark.attrs?.target || "_blank"}
               >
                 {node}
               </Link>
             );
           case "textColor":
-            return <span style={{ color: mark.attrs.color }}>{node}</span>;
+            return <span style={{ color: mark.attrs?.color }}>{node}</span>;
           default:
             return node;
         }
@@ -77,13 +77,13 @@ export const parseContent = (content: JSONContent | null): React.ReactNode => {
         content.content?.map((child) => child.text || "").join("\n") || "";
       const highlightCode = highlightCodeblock(
         codeContent,
-        content.attrs.language,
-        false
+        content.attrs?.language,
+        false,
       ) as string;
       return (
         <PreviewCodeBlock
           codeHtml={highlightCode}
-          language={content.attrs.language}
+          language={content.attrs?.language}
           code={codeContent}
         />
       );
@@ -91,10 +91,10 @@ export const parseContent = (content: JSONContent | null): React.ReactNode => {
     case "image":
       return (
         <PreviewImageBlock
-          src={content.attrs.src}
+          src={content.attrs?.src}
           alt={content.attrs?.alt || ""}
-          width={content.attrs.width}
-          height={content.attrs.height}
+          width={content.attrs?.width}
+          height={content.attrs?.height}
         />
       );
 
@@ -113,8 +113,8 @@ export const parseContent = (content: JSONContent | null): React.ReactNode => {
     case "faqSection":
       return (
         <FAQSectionPView
-          items={content.attrs.items}
-          title={content.attrs.title}
+          items={content.attrs?.items}
+          title={content.attrs?.title}
         />
       );
 

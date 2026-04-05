@@ -1,6 +1,6 @@
 import { CodeblockHighlight } from "./CodeBlockHighlight";
 import { RootNode, MainSection, LineBreak } from "../CustomNodes/customNodes";
-import type { Editor } from "@tiptap/react";
+import type { Editor } from "@tiptap/core";
 
 // For leaf nodes only
 export const exitOnArrowDown = ({

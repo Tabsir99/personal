@@ -1,5 +1,4 @@
-import "@tiptap/core"; // Adjust this path if the package structure changes
-import { useEditor } from "@tiptap/react";
+import "@tiptap/core";
 
 declare module "@tiptap/core" {
   type BoldMark = {
@@ -121,9 +120,8 @@ declare module "@tiptap/core" {
     | (BaseNode & { type: "cite"; attrs: never });
 
   interface Commands<ReturnType> {
-    customCommands: {
+    textColor: {
       toggleTextColor: (color: string) => ReturnType;
-      toggleBlockquote: () => ReturnType;
     };
 
     image: {

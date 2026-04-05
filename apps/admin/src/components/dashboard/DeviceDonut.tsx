@@ -1,37 +1,14 @@
 "use client";
+import { useState } from "react";
 import { useGeoStats } from "@/lib/hooks/useDashboardData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DateRangeSelector } from "./DateRangeSelector";
 
-export function DeviceDonut({ days }: { days: number }) {
+export function DeviceDonut() {
+  const [days, setDays] = useState(7);
   const { data, error, isLoading } = useGeoStats(days);
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Devices</CardTitle>
-        </CardHeader>
-        <CardContent className="h-[280px] flex items-center justify-center text-sm text-muted-foreground">
-          Failed to load
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Devices</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-[280px] w-full rounded-xl" />
-        </CardContent>
-      </Card>
-    );
-  }
 
   let mobile = 0;
   let desktop = 0;
@@ -58,11 +35,16 @@ export function DeviceDonut({ days }: { days: number }) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle>Devices</CardTitle>
+        <DateRangeSelector value={days} onChange={setDays} />
       </CardHeader>
       <CardContent className="h-[280px] relative">
-        {total > 0 ? (
+        {error ? (
+          <div className="h-full flex items-center justify-center text-sm text-muted-foreground">Failed to load</div>
+        ) : isLoading ? (
+          <Skeleton className="h-full w-full rounded-xl" />
+        ) : total > 0 ? (
           <>
             <div className="absolute inset-0 flex items-center justify-center pt-8">
               <div className="text-center">

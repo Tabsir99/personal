@@ -15,6 +15,7 @@ import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
 import Text from "@tiptap/extension-text";
 import Blockquote from "@tiptap/extension-blockquote";
+import { Extensions } from "@tiptap/core";
 
 import {
   RootNode,
@@ -76,4 +77,4 @@ export const starterKitOptions = [
   LineBreak,
   TextColor,
   FAQSection,
-];
+] as Extensions;

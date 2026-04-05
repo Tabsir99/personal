@@ -68,7 +68,7 @@ export const ImageInsertButton = ({ editor }: { editor: Editor }) => {
               <div
                 className={cn(
                   "p-2 rounded-md text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-95",
-                  isOpen && "bg-zinc-800 text-zinc-100 shadow-inner"
+                  isOpen && "bg-zinc-800 text-zinc-100 shadow-inner",
                 )}
                 aria-label="Insert image"
               >
@@ -81,10 +81,7 @@ export const ImageInsertButton = ({ editor }: { editor: Editor }) => {
           </Tooltip>
         </PopoverTrigger>
 
-        <PopoverContent
-          align="start"
-          className="w-64 p-2 dark"
-        >
+        <PopoverContent align="start" className="w-64 p-2 dark">
           <div className="space-y-1">
             <button
               onClick={() => {

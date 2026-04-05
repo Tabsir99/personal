@@ -107,14 +107,14 @@ export const CodeBlockNodeview = memo(
   ({ language, code, updateAttributes }: CodeBlockProps) => {
     const languageObj = useMemo(
       () => languages.find((lang) => lang.value === language) || languages[0],
-      [language]
+      [language],
     );
 
     const handleLanguageChange = useCallback(
       (value: string) => {
         updateAttributes({ language: value });
       },
-      [updateAttributes]
+      [updateAttributes],
     );
 
     return (
@@ -126,11 +126,11 @@ export const CodeBlockNodeview = memo(
           onLanguageChange={handleLanguageChange}
           languages={languages}
         >
-          <NodeViewContent as="code" />
+          <NodeViewContent as="div" />
         </CodeBlockBase>
       </NodeViewWrapper>
     );
-  }
+  },
 );
 
 export const PreviewCodeBlock = ({
