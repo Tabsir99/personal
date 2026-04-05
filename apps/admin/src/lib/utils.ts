@@ -1,6 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { JSONContent } from "@tiptap/react";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -37,9 +36,8 @@ export const formatResponse = <T>({
   };
 };
 
-export const measureEstReadTime = (json: JSONContent) => {
-  const blogText = extractTextFromTipTapJSON(json);
-  const textsLength = blogText
+export const measureEstReadTime = () => {
+  const textsLength = "blogText"
     .trim()
     .split(/\s+/)
     .filter((word) => {
@@ -51,34 +49,6 @@ export const measureEstReadTime = (json: JSONContent) => {
 
   return estReadTime;
 };
-
-function extractTextFromTipTapJSON(json: JSONContent) {
-  let text = "";
-
-  if (!json || !json.content) {
-    return text;
-  }
-
-  json.content.forEach((node) => {
-    if (node.text) {
-      text += node.text;
-    }
-
-    if (node.type === "text" && node.marks) {
-      node.marks.forEach((mark) => {
-        if (mark.text) {
-          text += mark.text;
-        }
-      });
-    }
-
-    if (node.content) {
-      text += extractTextFromTipTapJSON(node);
-    }
-  });
-
-  return text;
-}
 
 export const getTimeSince = (timestamp: number) => {
   const date = new Date(timestamp);
@@ -129,7 +99,7 @@ export async function callWithToast(
     loading?: string;
     success?: string;
     err?: string;
-  }
+  },
 ) {
   const id = toast.loading(loading);
   try {
@@ -148,7 +118,7 @@ type ActionResult<T> = {
 };
 
 export function wrap<Args extends any[], T>(
-  fn: (...args: Args) => Promise<ActionResult<T>>
+  fn: (...args: Args) => Promise<ActionResult<T>>,
 ) {
   return async (...args: Args): Promise<ApiResponse<T>> => {
     try {

@@ -28,8 +28,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface TestimonialDialogProps {
   children?: React.ReactNode;
   testimonial?: PageData["testimonials"][number] | undefined;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   testimonialIndex?: number | null;
 }
 
@@ -59,7 +59,7 @@ export default function TestimonialDialog({
   testimonialIndex,
 }: TestimonialDialogProps) {
   const [formData, setFormData] = useState(
-    existingTestimonial || defaultFormData
+    existingTestimonial || defaultFormData,
   );
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -88,7 +88,7 @@ export default function TestimonialDialog({
   };
 
   return (
-    <Dialog {...(open && onOpenChange ? { open, onOpenChange } : {})}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col pb-0 overflow-y-auto bg-zinc-900 border-white/10 text-white">
         <DialogHeader>

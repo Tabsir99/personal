@@ -30,8 +30,8 @@ import { PageData } from "@/types/portfolioTypes";
 interface ProjectDialogProps {
   children?: React.ReactNode;
   project?: PageData["projects"][number] | undefined;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   projectIndex?: number | null;
 }
 
@@ -123,11 +123,7 @@ export default function ProjectDialog({
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <Dialog
-      {...(open !== undefined && onOpenChange !== undefined
-        ? { open, onOpenChange }
-        : {})}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto border-white/10 bg-zinc-900">
         <DialogHeader>
@@ -419,7 +415,7 @@ export default function ProjectDialog({
                         setFormData({
                           ...formData,
                           metrics: formData.metrics.filter(
-                            (_, idx) => idx !== i
+                            (_, idx) => idx !== i,
                           ),
                         })
                       }
