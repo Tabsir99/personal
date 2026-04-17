@@ -1,5 +1,5 @@
 import s3, { S3Bucket } from "@/config/cloudflareS3";
-import { formatResponse } from "@/lib/utils";
+import { formatResponse } from "@/lib/appUtils";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -28,12 +28,12 @@ const _getUploadSignedUrl = async (key: string, fileInfo: FileInfo) => {
 export const getImageUploadSignedUrl = async (
   fileInfo: FileInfo,
   blogId: string,
-  isThumbnail: boolean
+  isThumbnail: boolean,
 ) => {
   const key = isThumbnail
     ? `/${blogId}/thumbnail.${fileInfo.contentType.split("/")[1]}`
     : `/${blogId}/${fileInfo.fileName}`;
-    
+
   const signedUrl = await _getUploadSignedUrl(key, fileInfo);
 
   return formatResponse({ status: "success", data: signedUrl });

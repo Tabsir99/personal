@@ -1,6 +1,9 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Lato } from "next/font/google";
+import { Lato, Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const LatoFont = Lato({
   subsets: ["latin"],
@@ -38,7 +41,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html>
+    <html className={cn("font-sans", geist.variable)}>
       <body className={" overflow-x-hidden" + LatoFont.className}>
         {children}
       </body>

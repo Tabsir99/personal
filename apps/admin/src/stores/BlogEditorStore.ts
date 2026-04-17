@@ -3,7 +3,7 @@ import { devtools } from "zustand/middleware";
 import { BlogType, BlogFormData } from "@/types/blogTypes";
 import { JSONContent } from "@tiptap/react";
 import { loadBlogForEditing, saveDraft } from "@/actions/blogActions";
-import { callWithToast } from "@/lib/utils";
+import { callWithToast } from "@/lib/appUtils";
 
 interface BlogEditorState {
   // Blog form data
@@ -66,7 +66,7 @@ export const useBlogEditorStore = create<BlogEditorState>()(
             blogFormData: { ...state.blogFormData, ...data },
           }),
           false,
-          "setBlogFormData"
+          "setBlogFormData",
         ),
 
       addTag: (trimmedTag) => {
@@ -82,7 +82,7 @@ export const useBlogEditorStore = create<BlogEditorState>()(
               tagInput: "",
             }),
             false,
-            "addTag"
+            "addTag",
           );
         }
       },
@@ -93,12 +93,12 @@ export const useBlogEditorStore = create<BlogEditorState>()(
             blogFormData: {
               ...state.blogFormData,
               tags: state.blogFormData.tags.filter(
-                (tag) => tag !== tagToRemove
+                (tag) => tag !== tagToRemove,
               ),
             },
           }),
           false,
-          "removeTag"
+          "removeTag",
         ),
 
       resetBlogFormData: () => {
@@ -144,7 +144,7 @@ export const useBlogEditorStore = create<BlogEditorState>()(
                 loading: "Drafting blog...",
                 success: "Blog drafted",
                 err: "Failed to draft blog",
-              }
+              },
             )
           : await saveDraft(JSON.stringify(get().blogFormData)).catch((err) => {
               console.error(err);
@@ -152,6 +152,6 @@ export const useBlogEditorStore = create<BlogEditorState>()(
       },
     }),
 
-    { name: "blog-editor-store" }
-  )
+    { name: "blog-editor-store" },
+  ),
 );

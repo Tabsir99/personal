@@ -7,7 +7,7 @@ import {
   PublishedBlogDB,
 } from "@/types/blogTypes";
 import { randomUUID } from "crypto";
-import { slugify } from "./utils";
+import { slugify } from "./appUtils";
 import { env } from "@/config/env.server";
 
 // ============================================================================
@@ -60,7 +60,7 @@ export function formDataToDraftDB(formData: BlogFormData): BlogDraftDB {
 // ============================================================================
 
 export function publishedDBToFormData(
-  dbPublished: PublishedBlogDB
+  dbPublished: PublishedBlogDB,
 ): BlogFormData {
   // When loading published blog for editing, populate draft fields from published
   return {
@@ -157,7 +157,7 @@ export async function sendRevalidateRequest(path: string) {
           "Content-Type": "application/json",
           acs_tkn: env.SERVER_TOKEN,
         },
-      }
+      },
     );
     if (env.RUNTIME === "local") {
       console.log(res.status, res.statusText);

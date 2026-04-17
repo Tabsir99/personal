@@ -10,7 +10,7 @@ import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { PageHeader } from "@/components/ui/common/PageHeader";
 import { deleteBlog } from "@/actions/blogActions";
 import { DraftBlogCardSkeletonGrid } from "@/components/ui/Skeletons/BlogCardSkeleton";
-import { callWithToast } from "@/lib/utils";
+import { callWithToast } from "@/lib/appUtils";
 
 export default function WriteBlog() {
   const [search, setSearch] = useState("");
@@ -35,7 +35,7 @@ export default function WriteBlog() {
           tags.some((tag) => tag.includes(searchTerm))
         );
       }),
-    [data, search]
+    [data, search],
   );
 
   const isEmpty = filteredBlogs.length < 1;

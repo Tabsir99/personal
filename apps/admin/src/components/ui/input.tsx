@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/appUtils";
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {
@@ -8,13 +8,13 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
         type={type}
         className={cn(
           "flex h-9 w-full text-zinc-100 rounded-md border border-white/10 bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-white/40 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-          className
+          className,
         )}
         ref={ref}
         {...props}
       />
     );
-  }
+  },
 );
 
 Input.displayName = "Input";
@@ -23,11 +23,10 @@ export { Input };
 
 import { forwardRef } from "react";
 
-interface NumericInputProps
-  extends Omit<
-    React.InputHTMLAttributes<HTMLInputElement>,
-    "type" | "onChange"
-  > {
+interface NumericInputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "type" | "onChange"
+> {
   value: number;
   onChange: (value: number) => void;
   min?: number;
@@ -48,7 +47,7 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
       className,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [displayValue, setDisplayValue] = React.useState(value.toString());
     const [error, setError] = React.useState<string | null>(null);
@@ -133,7 +132,7 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
           <div
             className={cn(
               "grid transition-all duration-200 ease-in-out",
-              error ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+              error ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
             )}
           >
             <div className="overflow-hidden">
@@ -143,7 +142,7 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
         }
       </div>
     );
-  }
+  },
 );
 
 NumericInput.displayName = "NumericInput";

@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { startBlogWriting } from "@/actions/blogActions";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
-import { callWithToast } from "@/lib/utils";
+import { callWithToast } from "@/lib/appUtils";
 
 export const CreateBlogModal = () => {
   const [newBlogTitle, setNewBlogTitle] = useState("");
@@ -42,7 +42,7 @@ export const CreateBlogModal = () => {
         loading: "Creating blog...",
         success: "Blog created",
         err: "Failed to create blog",
-      }
+      },
     );
   };
 

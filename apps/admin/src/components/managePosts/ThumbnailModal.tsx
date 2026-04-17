@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/appUtils";
 import { toast } from "sonner";
 import Img from "../ui/image";
 import useUIStore from "@/stores/UIStore";
@@ -16,12 +16,12 @@ import { useShallow } from "zustand/shallow";
 
 export default function ThumbnailModal() {
   const { isOpen, data } = useUIStore(
-    useShallow((state) => state.modals.blogThumbnail)
+    useShallow((state) => state.modals.blogThumbnail),
   );
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
-    data?.thumbnailUrl ?? null
+    data?.thumbnailUrl ?? null,
   );
   const [isLoading, setIsLoading] = useState(false);
 
@@ -75,7 +75,7 @@ export default function ThumbnailModal() {
           <div
             className={cn(
               "group relative cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-neutral-700 transition-all hover:border-neutral-500",
-              previewUrl ? "h-96" : "h-64"
+              previewUrl ? "h-96" : "h-64",
             )}
           >
             <input

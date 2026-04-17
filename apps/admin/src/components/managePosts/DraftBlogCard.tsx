@@ -11,7 +11,7 @@ import { Clock } from "lucide-react";
 import { BlogFormData, BlogStatus } from "@/types/blogTypes";
 import BlogMenu from "./BlogMenu";
 import Link from "next/link";
-import { getTimeSince } from "@/lib/utils";
+import { getTimeSince } from "@/lib/appUtils";
 
 export default function DraftBlogCard({
   blog,

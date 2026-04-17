@@ -12,7 +12,7 @@ import {
   PublishedBlogDB,
   BlogStatus,
 } from "@/types/blogTypes";
-import { measureEstReadTime, wrap } from "@/lib/utils";
+import { measureEstReadTime, wrap } from "@/lib/appUtils";
 import {
   createNewBlogFormData,
   draftDBToFormData,
@@ -87,7 +87,7 @@ export const saveDraft = wrap(async (blogFormDataString: string) => {
 
   if (!existingDraft) {
     throw new Error(
-      `Draft ${blogFormData.blogId} does not exist. Cannot save.`
+      `Draft ${blogFormData.blogId} does not exist. Cannot save.`,
     );
   }
 

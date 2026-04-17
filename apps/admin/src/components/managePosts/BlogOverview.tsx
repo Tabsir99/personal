@@ -6,7 +6,7 @@ import ManagePostHead from "./ManageBlogHead";
 import { PublishedBlogDB, BlogStatus } from "@/types/blogTypes";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import { BlogCardSkeletonGrid } from "../ui/Skeletons/BlogCardSkeleton";
-import { callWithToast } from "@/lib/utils";
+import { callWithToast } from "@/lib/appUtils";
 import { deleteBlog, toggleBlogStatus } from "@/actions/blogActions";
 
 const BlogOverview = () => {
@@ -17,7 +17,7 @@ const BlogOverview = () => {
   }>({ status: "" });
 
   const { data, isLoading } = useCustomSWR<PublishedBlogDB[]>(
-    `/api/blogs?=content=false&status=${filterBy.status}`
+    `/api/blogs?=content=false&status=${filterBy.status}`,
   );
 
   const filteredPosts = useMemo(() => {
