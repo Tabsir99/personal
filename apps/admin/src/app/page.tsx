@@ -29,7 +29,7 @@ const LogIn = () => {
   };
 
   return (
-    <div className="min-h-screen dark bg-background [background-image:radial-gradient(hsl(var(--border))_1px,transparent_1px)] [background-size:28px_28px] flex items-center justify-center p-4">
+    <div className="min-h-screen dark bg-background bg-[radial-gradient(hsl(var(--border))_1px,transparent_1px)] bg-size-[28px_28px] flex items-center justify-center p-4">
       {/* Ambient glow */}
       <div className="fixed top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/5 blur-[80px] pointer-events-none" />
 

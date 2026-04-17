@@ -64,7 +64,7 @@ export default function Services() {
           return (
             <Card
               key={index}
-              className="min-h-52 group relative overflow-hidden border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm w-full transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.05] rounded-2xl"
+              className="min-h-52 group relative overflow-hidden border border-white/8 bg-white/3 backdrop-blur-sm w-full transition-all duration-500 hover:border-white/12 hover:bg-white/5 rounded-2xl"
             >
               {!isEditing ? (
                 <ActionButtonGroup
@@ -182,7 +182,7 @@ export default function Services() {
                 </div>
               </CardContent>
 
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </Card>
           );
         })}

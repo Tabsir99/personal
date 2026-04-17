@@ -40,7 +40,7 @@ export default function ManagePostHead({
                 <SelectItem
                   key={option}
                   value={option}
-                  className="h-11 px-4 py-6 flex items-center justify-between cursor-pointer hover:bg-zinc-700 focus:bg-zinc-700 focus:text-white data-[highlighted]:bg-zinc-700 data-[highlighted]:text-white transition-colors duration-150"
+                  className="h-11 px-4 py-6 flex items-center justify-between cursor-pointer hover:bg-zinc-700 focus:bg-zinc-700 focus:text-white data-highlighted:bg-zinc-700 data-highlighted:text-white transition-colors duration-150"
                 >
                   <span>{option === "all" ? "All Status" : option}</span>
                 </SelectItem>

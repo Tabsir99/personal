@@ -65,7 +65,7 @@ export default function Skills() {
         {skillCategories.map((categoryItem, categoryIndex) => (
           <Card
             key={categoryItem.title}
-            className="group relative border-white/[0.08] bg-white/[0.02] backdrop-blur-sm hover:bg-white/[0.04] transition-all duration-300 hover:border-white/[0.12] rounded-2xl"
+            className="group relative border-white/8 bg-white/2 backdrop-blur-sm hover:bg-white/4 transition-all duration-300 hover:border-white/12 rounded-2xl"
           >
             <ActionButtonGroup
               buttons={[
@@ -138,7 +138,7 @@ export default function Skills() {
                       <div className="h-1.5 rounded-full flex items-center justify-between gap-4">
                         <div className="flex-1  rounded-full overflow-hidden h-full">
                           <div
-                            className="h-full bg-gradient-to-r from-transparent to-purple-500 rounded-full transition-all duration-1000"
+                            className="h-full bg-linear-to-r from-transparent to-purple-500 rounded-full transition-all duration-1000"
                             style={{ width: `${skillItem.level}%` }}
                           />
                         </div>

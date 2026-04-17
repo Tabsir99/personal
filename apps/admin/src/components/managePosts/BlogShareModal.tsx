@@ -105,12 +105,12 @@ const BlogShareModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="sm:max-w-lg bg-gradient-to-br from-zinc-950 to-zinc-900 text-white border-zinc-800 shadow-2xl">
+      <DialogContent className="sm:max-w-lg bg-linear-to-br from-zinc-950 to-zinc-900 text-white border-zinc-800 shadow-2xl">
         <DialogHeader className="space-y-3">
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
+          <DialogTitle className="text-2xl font-bold bg-linear-to-r from-white to-zinc-300 bg-clip-text text-transparent">
             Share this article
           </DialogTitle>
-          <div className="w-12 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
+          <div className="w-12 h-0.5 bg-linear-to-r from-blue-500 to-purple-500 rounded-full" />
         </DialogHeader>
 
         <div className="space-y-8 pt-2">

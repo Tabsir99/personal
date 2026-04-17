@@ -31,7 +31,7 @@ export default function Credentials() {
         {credentials.map((credentialItem, index) => (
           <Card
             key={index}
-            className="group relative border-white/[0.08] bg-white/[0.02] backdrop-blur-sm hover:bg-white/[0.04] hover:border-white/[0.12] transition-all duration-300 rounded-xl"
+            className="group relative border-white/8 bg-white/2 backdrop-blur-sm hover:bg-white/4 hover:border-white/12 transition-all duration-300 rounded-xl"
           >
             <ActionButtonGroup
               buttons={[
@@ -74,11 +74,11 @@ export default function Credentials() {
                 </div>
               </div>
 
-              <p className="text-white/70 text-sm mb-4 flex-grow leading-relaxed">
+              <p className="text-white/70 text-sm mb-4 grow leading-relaxed">
                 {credentialItem.description}
               </p>
 
-              <div className="flex items-center justify-between pt-4 border-t border-white/[0.08]">
+              <div className="flex items-center justify-between pt-4 border-t border-white/8">
                 <div className="flex items-center gap-2 text-xs text-white/50">
                   <Calendar className="w-3.5 h-3.5" />
                   <span>{credentialItem.date}</span>
@@ -86,7 +86,7 @@ export default function Credentials() {
                 <div className="flex gap-2">
                   <a
                     href={`#cert-${index}`}
-                    className="text-xs px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-white/80 border border-white/[0.08] hover:border-white/[0.15] transition-all duration-300 active:scale-95"
+                    className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 border border-white/8 hover:border-white/15 transition-all duration-300 active:scale-95"
                   >
                     View
                   </a>

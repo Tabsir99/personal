@@ -32,9 +32,9 @@ export default function Projects() {
         {projects.map((projectItem, index) => (
           <Card
             key={index}
-            className="group pt-0 relative overflow-hidden border-white/[0.08] bg-white/[0.02] backdrop-blur-sm hover:border-white/[0.15] transition-all duration-500"
+            className="group pt-0 relative overflow-hidden border-white/8 bg-white/2 backdrop-blur-sm hover:border-white/15 transition-all duration-500"
           >
-            <div className="relative aspect-video overflow-hidden bg-white/[0.02]">
+            <div className="relative aspect-video overflow-hidden bg-white/2">
               <Img
                 src={projectItem.image}
                 alt={projectItem.title}
@@ -43,7 +43,7 @@ export default function Projects() {
                 loading="lazy"
               />
 
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               <Badge
                 variant="secondary"
@@ -67,7 +67,7 @@ export default function Projects() {
                   <Badge
                     key={skill}
                     variant="outline"
-                    className="bg-white/[0.04] border-white/[0.08] text-white/70 text-xs font-normal hover:bg-white/[0.08] transition-colors"
+                    className="bg-white/4 border-white/8 text-white/70 text-xs font-normal hover:bg-white/8 transition-colors"
                   >
                     {skill}
                   </Badge>
@@ -75,7 +75,7 @@ export default function Projects() {
                 {projectItem.skills.length > 4 && (
                   <Badge
                     variant="outline"
-                    className="bg-white/[0.04] border-white/[0.08] text-white/70 text-xs font-normal"
+                    className="bg-white/4 border-white/8 text-white/70 text-xs font-normal"
                   >
                     +{projectItem.skills.length - 4}
                   </Badge>
@@ -94,7 +94,7 @@ export default function Projects() {
                       {projectItem.link1.text}
                     </a>
                   }
-                  className="flex-1 bg-white/[0.08] hover:bg-white/[0.12] text-white border border-white/[0.08] rounded-xl"
+                  className="flex-1 bg-white/8 hover:bg-white/12 text-white border border-white/8 rounded-xl"
                 />
 
                 <Button
@@ -109,12 +109,12 @@ export default function Projects() {
                     </a>
                   }
                   variant="outline"
-                  className="flex-1 bg-transparent hover:bg-white/[0.08] text-white/80 border-white/[0.08] rounded-xl"
+                  className="flex-1 bg-transparent hover:bg-white/8 text-white/80 border-white/8 rounded-xl"
                 />
               </div>
             </CardContent>
 
-            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
             <ActionButtonGroup
               buttons={[

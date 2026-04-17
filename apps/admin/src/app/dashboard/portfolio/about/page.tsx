@@ -109,7 +109,7 @@ export default function About() {
           {about.map((card, index) => (
             <Card
               key={index}
-              className="border-white/[0.08] bg-white/[0.02] backdrop-blur-sm relative group"
+              className="border-white/8 bg-white/2 backdrop-blur-sm relative group"
             >
               {/* Action Buttons - Only show in view mode */}
               {editingIndex !== index && (
@@ -233,7 +233,7 @@ export default function About() {
                   draggable="false"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <h4 className="text-2xl font-bold text-white">Tabsir</h4>
                   <p className="text-white/80">Full Stack Developer</p>

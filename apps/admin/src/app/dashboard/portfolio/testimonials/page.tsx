@@ -33,7 +33,7 @@ export default function Testimonials() {
         {testimonials.map((testimonialItem, index) => (
           <Card
             key={testimonialItem.name}
-            className={`group relative overflow-hidden border-white/[0.08] bg-white/[0.02] backdrop-blur-sm transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.04] rounded-xl ${
+            className={`group relative overflow-hidden border-white/8 bg-white/2 backdrop-blur-sm transition-all duration-300 hover:border-white/12 hover:bg-white/4 rounded-xl ${
               testimonialItem.size === "large"
                 ? "md:col-span-2 lg:col-span-2"
                 : testimonialItem.size === "medium"
@@ -70,7 +70,7 @@ export default function Testimonials() {
               entityName="Testimonial"
             />
 
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
             <div className="relative p-6">
               <div className="mb-4 flex gap-1">
@@ -100,7 +100,7 @@ export default function Testimonials() {
                   </p>
                 </div>
 
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-400 transition-all duration-300 group-hover:bg-emerald-500/20 group-hover:border-emerald-500/30">
                     Upwork
                   </div>

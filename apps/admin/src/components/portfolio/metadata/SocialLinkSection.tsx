@@ -151,7 +151,7 @@ const SocialLinksSection = memo(
               ))}
 
               <div
-                className={`${isAddingSocial ? "p-4 max-h-[30rem] border-zinc-700" : "p-0 max-h-0 border-transparent"} border-2 mt-8 border-dashed rounded-lg transition-all duration-300 overflow-hidden`}
+                className={`${isAddingSocial ? "p-4 max-h-120 border-zinc-700" : "p-0 max-h-0 border-transparent"} border-2 mt-8 border-dashed rounded-lg transition-all duration-300 overflow-hidden`}
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                   <div className="space-y-1.5">

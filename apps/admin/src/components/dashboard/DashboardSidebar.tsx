@@ -49,7 +49,7 @@ const DashBoardSidebar = () => {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-30 h-screen bg-gradient-to-b from-zinc-950/30 via-zinc-900/40 to-zinc-950/30 backdrop-blur-xl border-r border-zinc-800/50 transition-all duration-300 ease-in-out",
+        "fixed left-0 top-0 z-30 h-screen bg-linear-to-b from-zinc-950/30 via-zinc-900/40 to-zinc-950/30 backdrop-blur-xl border-r border-zinc-800/50 transition-all duration-300 ease-in-out",
         isExpanded ? "w-56 shadow-[8px_0px_40px_rgba(0,0,0,0.6)]" : "w-[72px]",
       )}
       onMouseEnter={() => setIsExpanded(true)}
@@ -79,22 +79,22 @@ const DashBoardSidebar = () => {
                       className={cn(
                         "relative h-12 w-full justify-start gap-4 text-base font-medium transition-all duration-300 ease-out overflow-hidden group",
                         item.isActive
-                          ? "bg-gradient-to-r from-blue-500/20 to-blue-600/10 text-blue-300 shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] backdrop-blur-sm border border-blue-500/20"
+                          ? "bg-linear-to-r from-blue-500/20 to-blue-600/10 text-blue-300 shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] backdrop-blur-sm border border-blue-500/20"
                           : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/40",
                         isExpanded ? "px-4" : "px-3 justify-center",
                       )}
                     >
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                       </div>
 
                       {item.isActive && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-blue-400 to-blue-600 rounded-r-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-linear-to-b from-blue-400 to-blue-600 rounded-r-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
                       )}
 
                       <item.Icon
                         className={cn(
-                          "w-5 h-5 transition-all duration-300 flex-shrink-0",
+                          "w-5 h-5 transition-all duration-300 shrink-0",
                           item.isActive
                             ? "text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]"
                             : "text-zinc-500 group-hover:text-zinc-300",
@@ -131,10 +131,10 @@ const DashBoardSidebar = () => {
           >
             {/* Glass shine effect */}
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-red-500/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
             </div>
 
-            <LogOut className="w-5 h-5 flex-shrink-0 transition-transform group-hover:translate-x-0.5" />
+            <LogOut className="w-5 h-5 shrink-0 transition-transform group-hover:translate-x-0.5" />
             <span
               className={cn(
                 "transition-all duration-300 whitespace-nowrap",
