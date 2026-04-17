@@ -1,9 +1,10 @@
 import { type Metadata } from "next";
 
 import DashBoardSidebar from "@/components/dashboard/DashboardSidebar";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "sonner";
 import { CreateBlogModal } from "@/components/ui/common/CreateBlogModal";
 import ConfirmationModal from "@/components/ui/common/ConfirmationModal";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
   title: "Dashboard Home",
@@ -19,7 +20,7 @@ export default function DashBoardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <TooltipProvider>
       <DashBoardSidebar />
       <main className=" overflow-y-scroll dark bg-background pl-24 pr-8 py-6 w-screen h-screen text-zinc-100">
         {children}
@@ -34,6 +35,6 @@ export default function DashBoardLayout({
       />
       <CreateBlogModal />
       <ConfirmationModal />
-    </>
+    </TooltipProvider>
   );
 }

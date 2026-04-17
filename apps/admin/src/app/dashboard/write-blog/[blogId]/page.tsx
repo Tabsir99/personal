@@ -4,7 +4,7 @@ import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { CheckCircle2, Cloud } from "lucide-react";
-import { cn } from "@/lib/appUtils";
+import { cn } from "@/lib/utils";
 
 const TextEditor = () => {
   const [isLoading, setIsLoading] = useState(true);

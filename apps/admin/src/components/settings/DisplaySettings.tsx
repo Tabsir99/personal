@@ -1,16 +1,16 @@
 import { SettingsSection } from "./SettingsSection";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { Switch } from "../ui/switch";
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Palette } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   useAppearanceSettings,
   useSettingsActions,
@@ -47,7 +47,7 @@ export default function AppearanceSettings() {
           <Label className="text-zinc-300">Primary Font</Label>
           <Select
             value={appearanceSettings.fontPrimary}
-            onValueChange={(value) => updateAppearance({ fontPrimary: value })}
+            onValueChange={(value) => updateAppearance({ fontPrimary: value! })}
           >
             <SelectTrigger className="bg-zinc-900 border-zinc-700 text-zinc-100">
               <SelectValue placeholder="Select font" />

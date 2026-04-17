@@ -3,8 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { useShallow } from "zustand/shallow";
-import { useEditor, EditorContent } from "@tiptap/react";
-import { starterKitOptions } from "@/components/editor/Toolbar/starterKit";
 import { Pencil } from "lucide-react";
 import { useRef, useState } from "react";
 import useUIStore from "@/stores/UIStore";

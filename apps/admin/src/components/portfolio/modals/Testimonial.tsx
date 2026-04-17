@@ -89,7 +89,9 @@ export default function TestimonialDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
+      {children && (
+        <DialogTrigger render={children as React.ReactElement} />
+      )}
       <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col pb-0 overflow-y-auto bg-zinc-900 border-white/10 text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl">
@@ -347,24 +349,24 @@ export default function TestimonialDialog({
         </div>
 
         <DialogFooter className="gap-2 sticky bottom-0 py-4 bg-zinc-900">
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
+          <DialogClose render={<Button variant="outline">Cancel</Button>} />
 
-          <DialogClose asChild>
-            <Button
-              onClick={handleSubmit}
-              disabled={
-                !formData.name ||
-                !formData.company ||
-                !formData.role ||
-                !formData.project ||
-                (!formData.text && !formData.video)
-              }
-            >
-              {isUpdating ? "Update Testimonial" : "Add Testimonial"}
-            </Button>
-          </DialogClose>
+          <DialogClose
+            render={
+              <Button
+                onClick={handleSubmit}
+                disabled={
+                  !formData.name ||
+                  !formData.company ||
+                  !formData.role ||
+                  !formData.project ||
+                  (!formData.text && !formData.video)
+                }
+              >
+                {isUpdating ? "Update Testimonial" : "Add Testimonial"}
+              </Button>
+            }
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>

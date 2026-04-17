@@ -33,7 +33,6 @@ export default function ManagePostHead({
           </SelectTrigger>
           <SelectContent
             className="bg-zinc-800 border-neutral-700 text-white rounded-md shadow-xl backdrop-blur-md"
-            position="popper"
             sideOffset={4}
           >
             <SelectGroup className="capitalize">

@@ -16,7 +16,7 @@ import { useShallow } from "zustand/shallow";
 
 const ConfirmationModal = () => {
   const { isOpen, data } = useUIStore(
-    useShallow((state) => state.modals.confirmation)
+    useShallow((state) => state.modals.confirmation),
   );
 
   const closeModal = useUIStore().closeAllModals;
@@ -37,16 +37,18 @@ const ConfirmationModal = () => {
                 </DialogTitle>
               </div>
             </div>
-            <DialogClose asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={closeModal}
-                className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 -mr-2 -mt-2"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </DialogClose>
+            <DialogClose
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={closeModal}
+                  className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 -mr-2 -mt-2"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              }
+            />
           </div>
         </DialogHeader>
 
@@ -61,24 +63,28 @@ const ConfirmationModal = () => {
 
         {/* Footer */}
         <DialogFooter className="p-6 pt-2 gap-3">
-          <DialogClose asChild>
-            <Button
-              variant={data?.cancelButtonVariant || "outline"}
-              className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 px-8"
-            >
-              {data?.cancelButtonText || "Cancel"}
-            </Button>
-          </DialogClose>
+          <DialogClose
+            render={
+              <Button
+                variant={data?.cancelButtonVariant || "outline"}
+                className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 px-8"
+              >
+                {data?.cancelButtonText || "Cancel"}
+              </Button>
+            }
+          />
 
-          <DialogClose asChild>
-            <Button
-              variant={data?.confirmButtonVariant || "default"}
-              onClick={data?.onConfirm}
-              className="bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500/50 px-8 font-medium"
-            >
-              {data?.confirmButtonText || "Confirm"}
-            </Button>
-          </DialogClose>
+          <DialogClose
+            render={
+              <Button
+                variant={data?.confirmButtonVariant || "default"}
+                onClick={data?.onConfirm}
+                className="bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500/50 px-8 font-medium"
+              >
+                {data?.confirmButtonText || "Confirm"}
+              </Button>
+            }
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -9,7 +9,8 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Input, NumericInput } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
+import { NumericInput } from "@/components/ui/NumericInput";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
@@ -21,7 +22,7 @@ export default function PortfolioMetadata() {
       title: state.pageData.title,
       description: state.pageData.description,
       stats: state.pageData.stats,
-    }))
+    })),
   );
 
   const updatePageData = usePortfolioStore.getState().updatePageData;

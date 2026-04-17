@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/appUtils";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import Img from "../ui/image";
 import useUIStore from "@/stores/UIStore";

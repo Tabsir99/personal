@@ -15,9 +15,8 @@ import { Card, CardContent } from "../ui/card";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
-} from "../ui/tooltip";
+} from "@/components/ui/tooltip";
 
 interface SocialPlatform {
   id: "twitter" | "linkedin" | "facebook" | "medium";
@@ -72,7 +71,7 @@ export const SocialIntegrations: React.FC = () => {
 
   const handleConnect = async (_platformId: SocialPlatform["id"]) => {
     // For demo purposes, toggle connection status
-    window.location.href = "http://localhost:3000/api/auth/signin/linkedin"
+    window.location.href = "http://localhost:3000/api/auth/signin/linkedin";
   };
 
   const handleDisconnect = (platformId: string) => {
@@ -88,8 +87,8 @@ export const SocialIntegrations: React.FC = () => {
                 lastSync: null,
                 username: null,
               }
-            : platform
-        )
+            : platform,
+        ),
       );
     }
   };
@@ -103,8 +102,8 @@ export const SocialIntegrations: React.FC = () => {
       platforms.map((platform) =>
         platform.id === platformId
           ? { ...platform, lastSync: "Just now" }
-          : platform
-      )
+          : platform,
+      ),
     );
   };
 
@@ -155,9 +154,9 @@ export const SocialIntegrations: React.FC = () => {
                   <div className="flex gap-2">
                     {platform.connected ? (
                       <>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -166,12 +165,12 @@ export const SocialIntegrations: React.FC = () => {
                                 <RefreshCw className="h-3.5 w-3.5" />
                                 Refresh
                               </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Refresh connection token</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                            }
+                          />
+                          <TooltipContent>
+                            <p>Refresh connection token</p>
+                          </TooltipContent>
+                        </Tooltip>
                         <Button
                           size="sm"
                           variant="outline"

@@ -76,17 +76,17 @@ export default function CMSBlogCard({
               <Button
                 variant="ghost"
                 size="icon"
-                asChild
+                render={
+                  <Link
+                    href={`${clientEnv.BLOG_ORIGIN}/blogs/${blog.link}`}
+                    target="_blank"
+                    title="View Blog"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </Link>
+                }
                 className="text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-              >
-                <Link
-                  href={`${clientEnv.BLOG_ORIGIN}/blogs/${blog.link}`}
-                  target="_blank"
-                  title="View Blog"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </Link>
-              </Button>
+              />
             )}
           </div>
         </div>

@@ -75,15 +75,17 @@ export const CreateBlogModal = () => {
           >
             Cancel
           </Button>
-
-          <DialogClose asChild>
-            <Button
-              onClick={handleCreateBlog}
-              disabled={newBlogTitle.trim() === ""}
-            >
-              Create & Edit
-            </Button>
-          </DialogClose>
+          <DialogClose
+            render={
+              <Button
+                onClick={handleCreateBlog}
+                disabled={newBlogTitle.trim() === ""}
+              >
+                Create & Edit
+              </Button>
+            }
+          />
+          /
         </DialogFooter>
       </DialogContent>
     </Dialog>

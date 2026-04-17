@@ -1,15 +1,15 @@
 import { SettingsSection } from "./SettingsSection";
-import { Label } from "../ui/label";
-import { NumericInput } from "../ui/input";
+import { Label } from "@/components/ui/label";
+import { NumericInput } from "@/components/ui/NumericInput";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { Slider } from "../ui/slider";
-import { Switch } from "../ui/switch";
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { FileText } from "lucide-react";
 import { useContentSettings, useSettingsActions } from "@/stores/SettingStore";
 
@@ -39,7 +39,9 @@ export default function ContentSettings() {
           <Label className="text-zinc-300">Default Category</Label>
           <Select
             value={contentSettings.defaultCategory}
-            onValueChange={(value) => updateContent({ defaultCategory: value })}
+            onValueChange={(value) =>
+              updateContent({ defaultCategory: value! })
+            }
           >
             <SelectTrigger className="bg-zinc-900 border-zinc-700 text-zinc-100">
               <SelectValue placeholder="Select default category" />

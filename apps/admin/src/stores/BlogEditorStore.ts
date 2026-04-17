@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { BlogType, BlogFormData } from "@/types/blogTypes";
-import { JSONContent } from "@tiptap/react";
 import { loadBlogForEditing, saveDraft } from "@/actions/blogActions";
 import { callWithToast } from "@/lib/appUtils";
+import type { JSONContent } from "@tiptap/react";
 
 interface BlogEditorState {
   // Blog form data

@@ -39,7 +39,7 @@ export default function SkillCategoryDialog({
 
   return (
     <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger render={children as React.ReactElement} />
       <DialogContent className="max-w-md bg-zinc-900 border-white/10 text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl">Add Skill Category</DialogTitle>
@@ -77,18 +77,18 @@ export default function SkillCategoryDialog({
         </div>
 
         <DialogFooter className="gap-2">
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
+          <DialogClose render={<Button variant="outline">Cancel</Button>} />
 
-          <DialogClose asChild>
-            <Button
-              onClick={handleSubmit}
-              disabled={!formData.title || !formData.icon}
-            >
-              Add Category
-            </Button>
-          </DialogClose>
+          <DialogClose
+            render={
+              <Button
+                onClick={handleSubmit}
+                disabled={!formData.title || !formData.icon}
+              >
+                Add Category
+              </Button>
+            }
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>

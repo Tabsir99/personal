@@ -4,19 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-html,
-body {
-  font-size: 18px;
-  overflow-x: hidden;
-  overflow-y: hidden;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
@@ -138,5 +125,14 @@ body {
   }
   html {
     @apply font-sans;
+  }
+
+  html,
+  body {
+    font-size: 18px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    margin: 0;
+    padding: 0;
   }
 }

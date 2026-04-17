@@ -1,5 +1,9 @@
 import { create } from "zustand";
-import { ButtonVariant } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+
+type ButtonVariant = NonNullable<
+  NonNullable<Parameters<typeof buttonVariants>[0]>["variant"]
+>;
 
 interface ConfirmationConfig {
   message: string;
@@ -33,7 +37,7 @@ interface UIStore {
 
   openModal: <K extends keyof ModalStates>(
     modalName: K,
-    data: ModalData<ModalStates[K]>
+    data: ModalData<ModalStates[K]>,
   ) => void;
 
   closeModal: (modalName: keyof ModalStates) => void;
@@ -85,7 +89,7 @@ const useUIStore = create<UIStore>((set) => ({
         Object.entries(state.modals).map(([key, value]) => [
           key,
           { ...value, isOpen: false },
-        ])
+        ]),
       ) as ModalStates,
     })),
 }));

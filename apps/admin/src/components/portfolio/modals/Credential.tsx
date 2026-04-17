@@ -45,7 +45,7 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger render={children as React.ReactElement} />
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-zinc-900 border-white/10 text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl">Add New Credential</DialogTitle>
@@ -166,23 +166,23 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
         </div>
 
         <DialogFooter className="gap-2">
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
+          <DialogClose render={<Button variant="outline">Cancel</Button>} />
 
-          <DialogClose asChild>
-            <Button
-              onClick={handleSubmit}
-              disabled={
-                !formData.title ||
-                !formData.issuer ||
-                !formData.date ||
-                !formData.description
-              }
-            >
-              Add Credential
-            </Button>
-          </DialogClose>
+          <DialogClose
+            render={
+              <Button
+                onClick={handleSubmit}
+                disabled={
+                  !formData.title ||
+                  !formData.issuer ||
+                  !formData.date ||
+                  !formData.description
+                }
+              >
+                Add Credential
+              </Button>
+            }
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>

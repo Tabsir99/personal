@@ -67,7 +67,7 @@ export default function GeneralSettings() {
           <Label className="text-zinc-300">Default Language</Label>
           <Select
             value={generalSettings.language}
-            onValueChange={(value) => updateGeneral({ language: value })}
+            onValueChange={(value) => updateGeneral({ language: value! })}
           >
             <SelectTrigger className="bg-zinc-900 border-zinc-700 text-zinc-100">
               <SelectValue placeholder="Select language" />
@@ -86,7 +86,7 @@ export default function GeneralSettings() {
           <Label className="text-zinc-300">Timezone</Label>
           <Select
             value={generalSettings.timezone}
-            onValueChange={(value) => updateGeneral({ timezone: value })}
+            onValueChange={(value) => updateGeneral({ timezone: value! })}
           >
             <SelectTrigger className="bg-zinc-900 border-zinc-700 text-zinc-100">
               <SelectValue placeholder="Select timezone" />

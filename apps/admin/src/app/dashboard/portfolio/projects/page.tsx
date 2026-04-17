@@ -13,7 +13,7 @@ import { useState } from "react";
 
 export default function Projects() {
   const projects = usePortfolioStore(
-    useShallow((state) => state.pageData.projects)
+    useShallow((state) => state.pageData.projects),
   );
 
   const project = usePortfolioStore().projects;
@@ -84,33 +84,33 @@ export default function Projects() {
 
               <div className="flex gap-3">
                 <Button
-                  asChild
+                  render={
+                    <a
+                      href={projectItem.link1.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      {projectItem.link1.text}
+                    </a>
+                  }
                   className="flex-1 bg-white/[0.08] hover:bg-white/[0.12] text-white border border-white/[0.08] rounded-xl"
-                >
-                  <a
-                    href={projectItem.link1.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    {projectItem.link1.text}
-                  </a>
-                </Button>
+                />
 
                 <Button
-                  asChild
+                  render={
+                    <a
+                      href={projectItem.link2.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Github className="w-4 h-4" />
+                      {projectItem.link2.text}
+                    </a>
+                  }
                   variant="outline"
                   className="flex-1 bg-transparent hover:bg-white/[0.08] text-white/80 border-white/[0.08] rounded-xl"
-                >
-                  <a
-                    href={projectItem.link2.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Github className="w-4 h-4" />
-                    {projectItem.link2.text}
-                  </a>
-                </Button>
+                />
               </div>
             </CardContent>
 

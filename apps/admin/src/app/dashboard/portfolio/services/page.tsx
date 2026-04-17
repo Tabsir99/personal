@@ -23,7 +23,7 @@ import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
 
 export default function Services() {
   const services = usePortfolioStore(
-    useShallow((state) => state.pageData.services)
+    useShallow((state) => state.pageData.services),
   );
   const service = usePortfolioStore().services;
 
@@ -217,13 +217,15 @@ const AddServiceModal = () => {
 
   return (
     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-      <DialogTrigger asChild>
-        <AddCard
-          title="Add Service"
-          description="Add a new service to your portfolio"
-          className="min-h-52"
-        />
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          <AddCard
+            title="Add Service"
+            description="Add a new service to your portfolio"
+            className="min-h-52"
+          />
+        }
+      />
       <DialogContent className="sm:max-w-[550px] bg-zinc-900/95 backdrop-blur-xl border border-white/10 shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-white">

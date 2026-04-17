@@ -124,7 +124,7 @@ export default function ProjectDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      {children && <DialogTrigger render={children as React.ReactElement} />}
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto border-white/10 bg-zinc-900">
         <DialogHeader>
           <DialogTitle className="text-2xl">
@@ -491,21 +491,25 @@ export default function ProjectDialog({
         </div>
 
         <DialogFooter className="gap-2">
-          <DialogClose asChild>
-            <Button variant="outline" className="border-white/10 text-white">
-              Cancel
-            </Button>
-          </DialogClose>
+          <DialogClose
+            render={
+              <Button variant="outline" className="border-white/10 text-white">
+                Cancel
+              </Button>
+            }
+          />
 
-          <DialogClose asChild>
-            <Button
-              onClick={handleSubmit}
-              className="bg-blue-500 hover:bg-blue-600"
-              disabled={!formData.title || !formData.description}
-            >
-              {isUpdating ? "Update Project" : "Add Project"}
-            </Button>
-          </DialogClose>
+          <DialogClose
+            render={
+              <Button
+                onClick={handleSubmit}
+                className="bg-blue-500 hover:bg-blue-600"
+                disabled={!formData.title || !formData.description}
+              >
+                {isUpdating ? "Update Project" : "Add Project"}
+              </Button>
+            }
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>
