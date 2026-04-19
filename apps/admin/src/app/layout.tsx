@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Lato, Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const LatoFont = Lato({
   subsets: ["latin"],
@@ -42,7 +42,7 @@ export default async function RootLayout({
 }) {
   return (
     <html className={cn("font-sans", geist.variable)}>
-      <body className={" overflow-x-hidden" + LatoFont.className}>
+      <body className={" overflow-x-hidden dark " + LatoFont.className}>
         {children}
       </body>
     </html>

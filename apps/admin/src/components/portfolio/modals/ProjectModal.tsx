@@ -125,7 +125,7 @@ export default function ProjectDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {children && <DialogTrigger render={children as React.ReactElement} />}
-      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto border-white/10 bg-zinc-900">
+      <DialogContent className="max-h-[90vh] sm:max-w-3xl overflow-y-auto border-white/10 bg-zinc-900">
         <DialogHeader>
           <DialogTitle className="text-2xl">
             {isUpdating ? "Edit Project" : "Add New Project"}
@@ -197,7 +197,7 @@ export default function ProjectDialog({
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="border-white/10 bg-zinc-900 text-white">
+                <SelectContent>
                   <SelectItem value="Personal">Personal</SelectItem>
                   <SelectItem value="Demo">Demo</SelectItem>
                   <SelectItem value="Freelance">Freelance</SelectItem>
@@ -506,7 +506,13 @@ export default function ProjectDialog({
                 className="bg-blue-500 hover:bg-blue-600"
                 disabled={!formData.title || !formData.description}
               >
-                {isUpdating ? "Update Project" : "Add Project"}
+                {isUpdating ? (
+                  "Update Project"
+                ) : (
+                  <>
+                    <Plus /> Add Project
+                  </>
+                )}
               </Button>
             }
           />

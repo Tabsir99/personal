@@ -28,7 +28,7 @@ export default function ManagePostHead({
     <div className="flex gap-4 relative z-20 max-w-4xl">
       <div className="flex gap-4 grow">
         <Select onValueChange={handleStatusChange} defaultValue="all">
-          <SelectTrigger className="h-12 px-4 bg-zinc-800/70 border-neutral-700 rounded-md text-white capitalize hover:bg-zinc-700/70 focus:ring-neutral-600 focus:border-neutral-600 transition-all duration-200">
+          <SelectTrigger className="capitalize min-h-full">
             <SelectValue className="text-neutral-300" />
           </SelectTrigger>
           <SelectContent

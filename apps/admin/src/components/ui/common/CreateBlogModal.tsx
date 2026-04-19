@@ -48,31 +48,27 @@ export const CreateBlogModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeCreateDialog}>
-      <DialogContent className="bg-zinc-900 border-zinc-800">
-        <DialogHeader>
+      <DialogContent>
+        <DialogHeader className="p-2.5">
           <DialogTitle className="text-xl">Create a New Blog</DialogTitle>
           <DialogDescription className="text-zinc-400">
             Start writing a new blog post. Give it a title to begin.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
+        <div className="p-2.5">
           <Label htmlFor="blogTitle" className="text-zinc-300">
             Blog Title
           </Label>
           <Input
             id="blogTitle"
-            className="mt-2"
+            className="mt-3"
             placeholder="Enter a title for your blog..."
             value={newBlogTitle}
             onChange={(e) => setNewBlogTitle(e.target.value)}
           />
         </div>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={closeCreateDialog}
-            className="text-white"
-          >
+          <Button variant="outline" onClick={closeCreateDialog}>
             Cancel
           </Button>
           <DialogClose
@@ -85,7 +81,6 @@ export const CreateBlogModal = () => {
               </Button>
             }
           />
-          /
         </DialogFooter>
       </DialogContent>
     </Dialog>

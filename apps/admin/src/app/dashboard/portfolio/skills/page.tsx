@@ -21,7 +21,7 @@ export default function Skills() {
   });
 
   const skillCategories = usePortfolioStore(
-    useShallow((state) => state.pageData.skills)
+    useShallow((state) => state.pageData.skills),
   );
 
   const skill = usePortfolioStore().skills;
@@ -270,28 +270,4 @@ export default function Skills() {
       </div>
     </div>
   );
-}
-
-{
-  /* <Button
-size="icon"
-variant="ghost"
-className=" h-7 w-7 opacity-0 group-hover/skill:opacity-100 bg-white/5 backdrop-blur-sm hover:bg-red-500/90 text-white/60 hover:text-white border border-white/10 hover:border-red-400/50 transition-all duration-300 rounded-lg"
-onClick={() =>
-  showConfirmation({
-    headerText: "Delete Skill",
-    message:
-      "Are you sure you want to delete this skill?",
-    onConfirm: () =>
-      skill.update(categoryIndex, {
-        ...skillCategories[categoryIndex],
-        skills: skillCategories[
-          categoryIndex
-        ].skills.filter((_, i) => i !== skillIndex),
-      }),
-  })
-}
->
-<Trash2 className="h-3.5 w-3.5" />
-</Button> */
 }

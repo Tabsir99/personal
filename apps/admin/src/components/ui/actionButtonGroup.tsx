@@ -48,7 +48,7 @@ export function ActionButtonGroup({
     moveUp: moveBtnClass,
     moveDown: moveBtnClass,
     toggle:
-      "bg-white/5 hover:bg-emerald-400 border-emerald-400/50 hover:border-emerald-300/50 hover:shadow-emerald-500/40",
+      "bg-white/5 hover:bg-emerald-400 hover:border-emerald-300/50 hover:shadow-emerald-500/40",
   };
 
   const defaultIcons = {
@@ -86,7 +86,6 @@ export function ActionButtonGroup({
           <Button
             key={idx}
             size="icon"
-            variant="ghost"
             className={`${baseClass} ${variantClass}`}
             onClick={() => {
               if (button.variant === "delete") {

@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Image as ImageIcon, Calendar } from "lucide-react";
+import { Image as ImageIcon, Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import Img from "@/components/ui/image";
@@ -179,7 +179,7 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
                   !formData.description
                 }
               >
-                Add Credential
+                <Plus /> Add Credential
               </Button>
             }
           />

@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Star, Upload, Video } from "lucide-react";
+import { Plus, Star, Upload, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { useEffect, useState } from "react";
@@ -89,9 +89,7 @@ export default function TestimonialDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {children && (
-        <DialogTrigger render={children as React.ReactElement} />
-      )}
+      {children && <DialogTrigger render={children as React.ReactElement} />}
       <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col pb-0 overflow-y-auto bg-zinc-900 border-white/10 text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl">
@@ -363,7 +361,13 @@ export default function TestimonialDialog({
                   (!formData.text && !formData.video)
                 }
               >
-                {isUpdating ? "Update Testimonial" : "Add Testimonial"}
+                {isUpdating ? (
+                  "Update Testimonial"
+                ) : (
+                  <>
+                    <Plus /> Add Testimonial
+                  </>
+                )}
               </Button>
             }
           />

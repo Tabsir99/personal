@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, X } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogClose,
@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import useUIStore from "@/stores/UIStore";
 import { useShallow } from "zustand/shallow";
+import { cn } from "@/lib/utils";
 
 const ConfirmationModal = () => {
   const { isOpen, data } = useUIStore(
@@ -23,32 +24,18 @@ const ConfirmationModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="bg-zinc-900 border-zinc-800 text-zinc-50 p-0 gap-0 rounded-xl shadow-2xl">
+      <DialogContent>
         {/* Header */}
         <DialogHeader className="p-6 pb-0 space-y-0">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 border border-red-500/20">
-                <AlertTriangle className="h-6 w-6 text-red-500" />
-              </div>
-              <div>
-                <DialogTitle className="text-xl font-semibold text-zinc-50">
-                  {data?.headerText || "Confirm Action"}
-                </DialogTitle>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 border border-red-500/20">
+              <AlertTriangle className="h-6 w-6 text-red-500" />
             </div>
-            <DialogClose
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={closeModal}
-                  className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 -mr-2 -mt-2"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              }
-            />
+            <div>
+              <DialogTitle className="text-xl font-semibold text-zinc-50">
+                {data?.headerText || "Confirm Action"}
+              </DialogTitle>
+            </div>
           </div>
         </DialogHeader>
 
@@ -62,12 +49,12 @@ const ConfirmationModal = () => {
         </div>
 
         {/* Footer */}
-        <DialogFooter className="p-6 pt-2 gap-3">
+        <DialogFooter>
           <DialogClose
             render={
               <Button
                 variant={data?.cancelButtonVariant || "outline"}
-                className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 px-8"
+                className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 w-24"
               >
                 {data?.cancelButtonText || "Cancel"}
               </Button>
@@ -77,9 +64,9 @@ const ConfirmationModal = () => {
           <DialogClose
             render={
               <Button
-                variant={data?.confirmButtonVariant || "default"}
+                variant={data?.confirmButtonVariant || "destructive"}
                 onClick={data?.onConfirm}
-                className="bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500/50 px-8 font-medium"
+                className={cn("w-24")}
               >
                 {data?.confirmButtonText || "Confirm"}
               </Button>

@@ -44,7 +44,7 @@ export default function PortfolioMetadata() {
       </div>
 
       <div className="space-y-6">
-        <Card className="bg-zinc-900 text-zinc-100 border-zinc-800">
+        <Card>
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-2xl">Basic Information</CardTitle>
             <CardDescription>

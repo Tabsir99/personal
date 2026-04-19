@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { PageData } from "@/types/portfolioTypes";
+import { Plus } from "lucide-react";
 
 interface SkillCategoryDialogProps {
   children: React.ReactNode;
@@ -85,7 +86,7 @@ export default function SkillCategoryDialog({
                 onClick={handleSubmit}
                 disabled={!formData.title || !formData.icon}
               >
-                Add Category
+                <Plus /> Add Category
               </Button>
             }
           />
