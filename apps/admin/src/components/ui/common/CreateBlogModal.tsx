@@ -51,14 +51,12 @@ export const CreateBlogModal = () => {
       <DialogContent>
         <DialogHeader className="p-2.5">
           <DialogTitle className="text-xl">Create a New Blog</DialogTitle>
-          <DialogDescription className="text-zinc-400">
+          <DialogDescription className="text-muted-foreground">
             Start writing a new blog post. Give it a title to begin.
           </DialogDescription>
         </DialogHeader>
         <div className="p-2.5">
-          <Label htmlFor="blogTitle" className="text-zinc-300">
-            Blog Title
-          </Label>
+          <Label htmlFor="blogTitle">Blog Title</Label>
           <Input
             id="blogTitle"
             className="mt-3"

@@ -65,7 +65,7 @@ export default function Skills() {
         {skillCategories.map((categoryItem, categoryIndex) => (
           <Card
             key={categoryItem.title}
-            className="group relative border-white/8 bg-white/2 backdrop-blur-sm hover:bg-white/4 transition-all duration-300 hover:border-white/12 rounded-2xl"
+            className="group relative rounded-2xl border-border/50 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-border hover:bg-card"
           >
             <ActionButtonGroup
               buttons={[
@@ -97,7 +97,7 @@ export default function Skills() {
             />
             <CardContent className="p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-xl bg-white/5 ring-1 ring-white/10 transition-all duration-300 group-hover:bg-white/10 group-hover:ring-white/20">
+                <div className="rounded-xl bg-muted/60 p-2 ring-1 ring-border/60 transition-all duration-300 group-hover:bg-muted group-hover:ring-border">
                   <Img
                     width={28}
                     height={28}
@@ -107,7 +107,7 @@ export default function Skills() {
                     loading="lazy"
                   />
                 </div>
-                <h3 className="text-xl font-semibold text-white/95">
+                <h3 className="text-xl font-semibold text-foreground">
                   {categoryItem.title}
                 </h3>
               </div>
@@ -129,7 +129,7 @@ export default function Skills() {
                             fetchPriority="low"
                             loading="lazy"
                           />
-                          <span className="text-white/80 text-sm font-medium">
+                          <span className="text-sm font-medium text-foreground/90">
                             {skillItem.name}
                           </span>
                         </div>
@@ -138,11 +138,11 @@ export default function Skills() {
                       <div className="h-1.5 rounded-full flex items-center justify-between gap-4">
                         <div className="flex-1  rounded-full overflow-hidden h-full">
                           <div
-                            className="h-full bg-linear-to-r from-transparent to-purple-500 rounded-full transition-all duration-1000"
+                            className="h-full rounded-full bg-linear-to-r from-transparent to-primary transition-all duration-1000"
                             style={{ width: `${skillItem.level}%` }}
                           />
                         </div>
-                        <span className="text-white/50 text-xs min-w-[35px] text-right">
+                        <span className="min-w-[35px] text-right text-xs text-muted-foreground">
                           {skillItem.level}%
                         </span>
 
@@ -157,7 +157,7 @@ export default function Skills() {
                               ].skills.filter((_, i) => i !== skillIndex),
                             })
                           }
-                          className="h-7 w-7 opacity-0 group-hover/skill:opacity-100 bg-white/5 backdrop-blur-sm hover:bg-red-500/90 text-white/60 hover:text-white border border-white/10 hover:border-red-400/50 transition-all duration-300 rounded-lg"
+                          className="h-7 w-7 rounded-lg border border-border/50 bg-muted/50 text-muted-foreground opacity-0 backdrop-blur-sm transition-all duration-300 hover:border-destructive/40 hover:bg-destructive/90 hover:text-destructive-foreground group-hover/skill:opacity-100"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -177,7 +177,7 @@ export default function Skills() {
               >
                 <div className="overflow-hidden min-h-0">
                   <div className="mt-8">
-                    <div className="p-4 rounded-lg bg-white/5 border border-white/10 space-y-3">
+                    <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-4">
                       <div className="grid grid-cols-2 gap-2">
                         <Input
                           placeholder="Skill name"
@@ -197,10 +197,10 @@ export default function Skills() {
 
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs text-white/60">
+                          <span className="text-xs text-muted-foreground">
                             Proficiency Level
                           </span>
-                          <span className="text-xs font-medium text-white/80">
+                          <span className="text-xs font-medium text-foreground/90">
                             {newSkill.level}%
                           </span>
                         </div>
@@ -252,7 +252,7 @@ export default function Skills() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="w-full border-dashed text-white/80"
+                      className="w-full border-dashed text-foreground/80"
                       onClick={() => setAddingSkillTo(categoryIndex)}
                     >
                       <Plus size={14} />

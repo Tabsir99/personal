@@ -28,7 +28,7 @@ export default function AppearanceSettings() {
     >
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label className="text-zinc-300">Theme Color</Label>
+          <Label className="text-foreground/80">Theme Color</Label>
           <div className="flex items-center gap-4">
             <Input
               type="color"
@@ -44,15 +44,15 @@ export default function AppearanceSettings() {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-zinc-300">Primary Font</Label>
+          <Label className="text-foreground/80">Primary Font</Label>
           <Select
             value={appearanceSettings.fontPrimary}
             onValueChange={(value) => updateAppearance({ fontPrimary: value! })}
           >
-            <SelectTrigger className="bg-zinc-900 border-zinc-700 text-zinc-100">
+            <SelectTrigger>
               <SelectValue placeholder="Select font" />
             </SelectTrigger>
-            <SelectContent className="bg-zinc-800 border-zinc-700">
+            <SelectContent>
               <SelectItem value="Inter">Inter</SelectItem>
               <SelectItem value="Roboto">Roboto</SelectItem>
               <SelectItem value="Lato">Lato</SelectItem>
@@ -65,39 +65,27 @@ export default function AppearanceSettings() {
 
       <div className="grid md:grid-cols-2 gap-6 mt-6">
         <div className="space-y-2">
-          <Label className="text-zinc-300">Color Mode</Label>
+          <Label className="text-foreground/80">Color Mode</Label>
           <RadioGroup
             value={appearanceSettings.darkMode ? "dark" : "light"}
             onValueChange={(v) => updateAppearance({ darkMode: v === "dark" })}
           >
             <div className="flex gap-4 mt-2">
               <div className="flex items-center space-x-2">
-                <RadioGroupItem
-                  value="light"
-                  id="light"
-                  className="border-zinc-600"
-                />
-                <Label htmlFor="light" className="text-zinc-300">
+                <RadioGroupItem value="light" id="light" />
+                <Label htmlFor="light" className="text-foreground/80">
                   Light
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem
-                  value="dark"
-                  id="dark"
-                  className="border-zinc-600"
-                />
-                <Label htmlFor="dark" className="text-zinc-300">
+                <RadioGroupItem value="dark" id="dark" />
+                <Label htmlFor="dark" className="text-foreground/80">
                   Dark
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem
-                  value="auto"
-                  id="auto"
-                  className="border-zinc-600"
-                />
-                <Label htmlFor="auto" className="text-zinc-300">
+                <RadioGroupItem value="auto" id="auto" />
+                <Label htmlFor="auto" className="text-foreground/80">
                   Auto (System)
                 </Label>
               </div>
@@ -106,9 +94,9 @@ export default function AppearanceSettings() {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-zinc-300">Author Bio Display</Label>
+          <Label className="text-foreground/80">Author Bio Display</Label>
           <div className="flex items-center justify-between mt-2">
-            <span className="text-zinc-400 text-sm">
+            <span className="text-sm text-muted-foreground">
               Show author bio on posts
             </span>
             <Switch

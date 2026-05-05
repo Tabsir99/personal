@@ -42,7 +42,7 @@ const KeywordsSection = memo(
     };
 
     return (
-      <Card className="bg-zinc-900 text-zinc-100 border-zinc-800">
+      <Card>
         <CardHeader className="space-y-1 pb-4">
           <CardTitle className="text-2xl">Keywords</CardTitle>
           <CardDescription>
@@ -50,17 +50,17 @@ const KeywordsSection = memo(
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex gap-2 flex-wrap min-h-[40px] p-3 border border-white/10 rounded-lg">
+          <div className="flex min-h-[40px] flex-wrap gap-2 rounded-lg border border-border p-3">
             {keywords.map((keyword, i) => (
               <Badge
                 key={i}
                 variant="secondary"
-                className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20 px-3 py-1 transition-colors group"
+                className="group border-primary/20 bg-primary/10 px-3 py-1 text-primary transition-colors hover:bg-primary/20"
               >
                 {keyword}
                 <button
                   onClick={() => handleRemoveKeyword(i)}
-                  className="ml-2 hover:text-blue-900 transition-colors"
+                  className="ml-2 transition-colors hover:text-primary/70"
                   aria-label={`Remove ${keyword}`}
                 >
                   <X
@@ -108,7 +108,7 @@ const KeywordsSection = memo(
                 variant="outline"
                 size="sm"
                 onClick={() => setIsAddingKeyword(true)}
-                className="h-7 border-dashed border-zinc-700 hover:border-zinc-700 hover:bg-zinc-800 transition-colors"
+                className="h-7 border-dashed border-border transition-colors hover:bg-accent"
               >
                 <Plus size={14} className="mr-1" />
                 Add Keyword

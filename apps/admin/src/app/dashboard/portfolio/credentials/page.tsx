@@ -21,7 +21,7 @@ export default function Credentials() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-bold mb-2">Credentials</h2>
-          <p className="text-white/50">
+          <p className="text-muted-foreground">
             Manage certifications and achievements
           </p>
         </div>
@@ -31,7 +31,7 @@ export default function Credentials() {
         {credentials.map((credentialItem, index) => (
           <Card
             key={index}
-            className="group relative border-white/8 bg-white/2 backdrop-blur-sm hover:bg-white/4 hover:border-white/12 transition-all duration-300 rounded-xl"
+            className="group relative rounded-xl border-border/50 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-border hover:bg-card"
           >
             <ActionButtonGroup
               buttons={[
@@ -60,33 +60,33 @@ export default function Credentials() {
 
             <CardContent className="p-6 h-full flex flex-col">
               <div className="flex items-start gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20 transition-all duration-300 group-hover:bg-blue-500/20 group-hover:border-blue-500/30">
-                  <Award className="w-5 h-5 text-blue-400" />
+                <div className="rounded-lg border border-primary/20 bg-primary/10 p-2 transition-all duration-300 group-hover:border-primary/30 group-hover:bg-primary/20">
+                  <Award className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-white/95 mb-1 group-hover:text-blue-400 transition-colors duration-300">
+                  <h3 className="mb-1 text-lg font-semibold text-foreground transition-colors duration-300 group-hover:text-primary">
                     {credentialItem.title}
                   </h3>
-                  <div className="flex items-center gap-2 text-sm text-white/60">
-                    <CheckCircle2 className="w-4 h-4 text-green-400" />
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
                     <span>{credentialItem.issuer}</span>
                   </div>
                 </div>
               </div>
 
-              <p className="text-white/70 text-sm mb-4 grow leading-relaxed">
+              <p className="mb-4 grow text-sm leading-relaxed text-foreground/80">
                 {credentialItem.description}
               </p>
 
-              <div className="flex items-center justify-between pt-4 border-t border-white/8">
-                <div className="flex items-center gap-2 text-xs text-white/50">
-                  <Calendar className="w-3.5 h-3.5" />
+              <div className="flex items-center justify-between border-t border-border/60 pt-4">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5" />
                   <span>{credentialItem.date}</span>
                 </div>
                 <div className="flex gap-2">
                   <a
                     href={`#cert-${index}`}
-                    className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 border border-white/8 hover:border-white/15 transition-all duration-300 active:scale-95"
+                    className="rounded-lg border border-border/60 bg-muted/60 px-3 py-1.5 text-xs text-foreground/80 transition-all duration-300 hover:bg-accent active:scale-95"
                   >
                     View
                   </a>
@@ -95,7 +95,7 @@ export default function Credentials() {
                     href={credentialItem.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/30 transition-all duration-300 flex items-center gap-1 active:scale-95"
+                    className="flex items-center gap-1 rounded-lg border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs text-primary transition-all duration-300 hover:border-primary/30 hover:bg-primary/20 active:scale-95"
                   >
                     Verify
                     <ExternalLink className="w-3 h-3" />

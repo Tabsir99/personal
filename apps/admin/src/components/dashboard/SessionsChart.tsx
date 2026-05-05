@@ -51,6 +51,10 @@ export function SessionsChart() {
           </div>
         ) : isLoading ? (
           <Skeleton className="h-[320px] w-full rounded-xl" />
+        ) : chartData.length === 0 ? (
+          <div className="h-full flex items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 text-sm text-muted-foreground">
+            No graph data available for this range
+          </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart

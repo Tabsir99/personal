@@ -54,7 +54,7 @@ export default function Services() {
     <div>
       <div className="mb-8">
         <h2 className="text-3xl font-bold mb-2">Services</h2>
-        <p className="text-white/50">Manage your portfolio services</p>
+        <p className="text-muted-foreground">Manage your portfolio services</p>
       </div>
 
       <div className="grid grid-cols-3 gap-6 items-start">
@@ -64,7 +64,7 @@ export default function Services() {
           return (
             <Card
               key={index}
-              className="min-h-52 group relative overflow-hidden border border-white/8 bg-white/3 backdrop-blur-sm w-full transition-all duration-500 hover:border-white/12 hover:bg-white/5 rounded-2xl"
+              className="group relative min-h-52 w-full overflow-hidden rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm transition-all duration-500 hover:border-border hover:bg-card"
             >
               {!isEditing ? (
                 <ActionButtonGroup
@@ -109,7 +109,7 @@ export default function Services() {
                 >
                   <div className="overflow-hidden min-h-0">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 rounded-xl bg-white/5 ring-1 ring-white/10 transition-all duration-300 group-hover:bg-white/10 group-hover:ring-white/20">
+                      <div className="rounded-xl bg-muted/60 p-2 ring-1 ring-border/60 transition-all duration-300 group-hover:bg-muted group-hover:ring-border">
                         <Img
                           src={item.icon}
                           alt={item.title}
@@ -117,11 +117,11 @@ export default function Services() {
                           height={36}
                         />
                       </div>
-                      <h3 className="text-xl font-semibold text-white/95 tracking-tight">
+                      <h3 className="text-xl font-semibold tracking-tight text-foreground">
                         {item.title}
                       </h3>
                     </div>
-                    <p className="text-[15px] text-white/60 leading-relaxed">
+                    <p className="text-[15px] leading-relaxed text-muted-foreground">
                       {item.content}
                     </p>
                   </div>
@@ -135,7 +135,7 @@ export default function Services() {
                   <div className="overflow-hidden min-h-0">
                     <div className="space-y-4">
                       <div>
-                        <label className="text-sm font-medium text-white/80 mb-2 block">
+                        <label className="mb-2 block text-sm font-medium text-foreground/90">
                           Icon URL
                         </label>
                         <Input
@@ -147,7 +147,7 @@ export default function Services() {
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-white/80 mb-2 block">
+                        <label className="mb-2 block text-sm font-medium text-foreground/90">
                           Title
                         </label>
                         <Input
@@ -162,7 +162,7 @@ export default function Services() {
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-white/80 mb-2 block">
+                        <label className="mb-2 block text-sm font-medium text-foreground/90">
                           Description
                         </label>
                         <Textarea
@@ -182,7 +182,7 @@ export default function Services() {
                 </div>
               </CardContent>
 
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-border to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
             </Card>
           );
         })}
@@ -226,18 +226,18 @@ const AddServiceModal = () => {
           />
         }
       />
-      <DialogContent className="sm:max-w-[550px] bg-zinc-900/95 backdrop-blur-xl border border-white/10 shadow-2xl">
+      <DialogContent className="sm:max-w-[550px] border border-border shadow-2xl backdrop-blur-xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-white">
+          <DialogTitle className="text-2xl font-bold">
             Add New Service
           </DialogTitle>
-          <DialogDescription className="text-white/60">
+          <DialogDescription className="text-muted-foreground">
             Create a new service to showcase on your portfolio
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-5 py-6">
           <div className="space-y-2">
-            <Label htmlFor="icon" className="text-sm font-medium text-white/90">
+            <Label htmlFor="icon" className="text-sm font-medium text-foreground/90">
               Icon URL
             </Label>
             <Input
@@ -248,14 +248,14 @@ const AddServiceModal = () => {
               }
               placeholder="https://example.com/icon.png"
             />
-            <p className="text-xs text-white/50">
+            <p className="text-xs text-muted-foreground">
               Paste a public URL to your service icon
             </p>
           </div>
           <div className="space-y-2">
             <Label
               htmlFor="title"
-              className="text-sm font-medium text-white/90"
+              className="text-sm font-medium text-foreground/90"
             >
               Service Title
             </Label>
@@ -271,7 +271,7 @@ const AddServiceModal = () => {
           <div className="space-y-2">
             <Label
               htmlFor="description"
-              className="text-sm font-medium text-white/90"
+              className="text-sm font-medium text-foreground/90"
             >
               Description
             </Label>

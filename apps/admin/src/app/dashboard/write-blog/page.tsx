@@ -59,7 +59,7 @@ export default function WriteBlog() {
         {isEmpty || (
           <div className="flex flex-col gap-4 items-start justify-between">
             <div className="relative w-full sm:w-1/2">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 className="pl-10"
                 placeholder="Search blogs by title, content or tags..."
@@ -91,7 +91,7 @@ export default function WriteBlog() {
         </div>
       </div>
       {/* Footer */}
-      <div className="px-6 py-3 border-t border-zinc-800 text-zinc-500 text-sm">
+      <div className="border-t border-border px-6 py-3 text-sm text-muted-foreground">
         <div className="flex justify-between items-center">
           {data.length} draft{data.length !== 1 ? "s" : ""}
         </div>
@@ -104,17 +104,14 @@ const NoBlogs = ({ search }: { search: string }) => {
   const openCreateDialog = useBlogEditorStore().openCreateDialog;
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center mt-12">
-      <Sparkles className="h-12 w-12 text-zinc-600 mb-4" />
-      <h3 className="text-xl font-medium text-zinc-300">No drafts found</h3>
-      <p className="text-zinc-500 mt-2 mb-6">
+      <Sparkles className="mb-4 h-12 w-12 text-muted-foreground" />
+      <h3 className="text-xl font-medium text-foreground">No drafts found</h3>
+      <p className="mb-6 mt-2 text-muted-foreground">
         {search
           ? "Try a different search term"
           : "Create your first blog post to get started"}
       </p>
-      <Button
-        className="bg-blue-600 hover:bg-blue-700"
-        onClick={openCreateDialog}
-      >
+      <Button onClick={openCreateDialog}>
         <Plus className="h-4 w-4" />
         Create a New Blog
       </Button>

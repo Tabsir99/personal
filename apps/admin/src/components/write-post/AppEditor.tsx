@@ -109,7 +109,7 @@ const TextEditor = () => {
         <div className="relative w-20 h-6">
           <div
             className={cn(
-              "absolute inset-0 flex items-center gap-1.5 text-xs font-medium text-blue-400 transition-opacity duration-300",
+              "absolute inset-0 flex items-center gap-1.5 text-xs font-medium text-primary transition-opacity duration-300",
               saveStatus === "saving" ? "opacity-100" : "opacity-0",
             )}
           >
@@ -118,7 +118,7 @@ const TextEditor = () => {
           </div>
           <div
             className={cn(
-              "absolute inset-0 flex items-center gap-1.5 text-xs font-medium text-emerald-400 transition-opacity duration-300",
+              "absolute inset-0 flex items-center gap-1.5 text-xs font-medium text-primary transition-opacity duration-300",
               saveStatus === "saved" ? "opacity-100" : "opacity-0",
             )}
           >

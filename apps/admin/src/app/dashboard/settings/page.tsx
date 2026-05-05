@@ -28,7 +28,7 @@ const SettingsPage = () => {
       />
       <Tabs defaultValue="notifications" className="w-full">
         <div className="flex justify-center mb-6">
-          <TabsList className="bg-zinc-900 p-1">
+          <TabsList className="p-1">
             {[
               { value: "general", label: "General" },
               { value: "content", label: "Content" },
@@ -39,7 +39,7 @@ const SettingsPage = () => {
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 {tab.label}
               </TabsTrigger>

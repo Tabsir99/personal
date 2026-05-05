@@ -20,21 +20,21 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   icon: Icon,
   children,
 }) => (
-  <Card className="w-full bg-zinc-950 border border-zinc-800 shadow-md">
+  <Card className="w-full border border-border bg-card shadow-md">
     <CardHeader className="flex flex-row items-center gap-4 pb-2">
-      <div className="bg-zinc-800 p-2 rounded-md">
-        <Icon className="w-5 h-5 text-zinc-100" />
+      <div className="rounded-md bg-muted p-2">
+        <Icon className="h-5 w-5 text-foreground" />
       </div>
       <div>
-        <CardTitle className="text-zinc-100 text-lg">{title}</CardTitle>
+        <CardTitle className="text-lg text-foreground">{title}</CardTitle>
         {description && (
-          <CardDescription className="text-zinc-400 text-sm">
+          <CardDescription className="text-sm text-muted-foreground">
             {description}
           </CardDescription>
         )}
       </div>
     </CardHeader>
-    <Separator className="mb-4 bg-zinc-800" />
+    <Separator className="mb-4 bg-border" />
     <CardContent className="pt-2">{children}</CardContent>
   </Card>
 );

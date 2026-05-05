@@ -55,25 +55,25 @@ export default function PortfolioDashboard({
 
   if (loading) {
     return (
-      <div className="text-white absolute w-[calc(100%-6rem)] top-0">
+      <div className="absolute top-0 w-[calc(100%-6rem)] text-foreground">
         <div className="flex">
           {/* Sidebar Skeleton */}
-          <aside className="w-60 min-h-screen border-r border-white/10 pr-8 py-6">
-            <div className="mb-4 pb-4 px-4 border-b border-white/10">
-              <div className="h-8 bg-white/10 rounded animate-pulse" />
+          <aside className="w-60 min-h-screen border-r border-border pr-8 py-6">
+            <div className="mb-4 border-b border-border pb-4 px-4">
+              <div className="h-8 rounded bg-muted/60 animate-pulse" />
             </div>
 
-            <nav className="space-y-2">
+            <nav className="flex flex-col gap-2">
               {sections.map((section) => (
                 <div
                   key={section.id}
-                  className="w-full h-12 px-4 py-3 bg-white/5 border border-transparent rounded-lg animate-pulse"
+                  className="h-12 w-full rounded-lg border border-transparent bg-muted/30 px-4 py-3 animate-pulse"
                 />
               ))}
             </nav>
 
             <div className="mt-auto pt-8">
-              <div className="w-full h-10 bg-white/5 rounded-md animate-pulse" />
+              <div className="h-10 w-full rounded-md bg-muted/30 animate-pulse" />
             </div>
           </aside>
 
@@ -81,8 +81,8 @@ export default function PortfolioDashboard({
           <main className="flex-1 overflow-y-auto max-h-screen p-10">
             <div className="flex items-center justify-center h-full">
               <div className="flex flex-col items-center gap-4">
-                <Loader2 size={48} className="animate-spin text-blue-400" />
-                <p className="text-white/60 text-lg">
+                <Loader2 size={48} className="animate-spin text-primary" />
+                <p className="text-muted-foreground text-lg">
                   Loading portfolio data...
                 </p>
               </div>
@@ -94,12 +94,12 @@ export default function PortfolioDashboard({
   }
 
   return (
-    <div className="text-white absolute w-[calc(100%-6rem)] top-0">
+    <div className="absolute top-0 w-[calc(100%-6rem)] text-foreground">
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-52 min-h-screen border-r border-white/10 pr-8 py-6">
-          <div className="mb-4 pb-4 px-4 border-b border-white/10">
-            <h1 className="text-2xl font-bold text-white">Portfolio</h1>
+        <aside className="w-52 min-h-screen border-r border-border pr-8 py-6">
+          <div className="mb-4 border-b border-border pb-4 px-4">
+            <h1 className="text-2xl font-bold">Portfolio</h1>
           </div>
 
           <nav className="flex flex-col gap-2">
@@ -111,8 +111,8 @@ export default function PortfolioDashboard({
                   href={`/dashboard/portfolio/${section.id}`}
                   className={`w-full flex items-center gap-3 p-2 border rounded-lg transition-all duration-200 active:scale-95 ${
                     activeSection === section.id
-                      ? "bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30"
-                      : "text-white/60 hover:text-white hover:bg-white/5 border-transparent"
+                      ? "bg-primary/10 text-primary border-primary/30 hover:bg-primary/15"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent border-transparent"
                   }`}
                 >
                   <Icon size={18} />
@@ -128,10 +128,10 @@ export default function PortfolioDashboard({
             className="w-full mt-8 relative active:scale-95"
             onClick={savePageData}
           >
-            <Save size={16} className={isDirty ? "text-orange-500" : ""} />
+            <Save size={16} className={isDirty ? "text-primary" : ""} />
             Save Changes
             {isDirty && (
-              <span className="absolute top-1/2 -translate-y-1/2 right-3 h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
+              <span className="absolute top-1/2 right-3 h-2 w-2 -translate-y-1/2 rounded-full bg-primary animate-pulse" />
             )}
           </Button>
 

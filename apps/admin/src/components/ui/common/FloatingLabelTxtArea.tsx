@@ -16,15 +16,14 @@ const FloatingLabelTxtArea = ({
     <div className="floating-label-input relative w-full">
       <textarea
         placeholder=" "
-        className="inputField w-full px-8 block py-2 text-lg bg-zinc-900 text-white rounded outline-none
-         border-2 border-transparent focus:border-blue-500/0"
+        className="inputField block w-full rounded border-2 border-transparent bg-background px-8 py-2 text-lg text-foreground outline-none focus:border-ring"
         value={value}
         ref={ref}
         {...props}
       />
       <label
         className={`px-3 absolute left-3 transition-all 
-        pointer-events-none text-gray-500 
+        pointer-events-none text-muted-foreground 
           top-1/2 -translate-y-1/2  `}
       >
         {label}
@@ -34,7 +33,7 @@ const FloatingLabelTxtArea = ({
         <span
           className="
             absolute right-3 top-1/2 -translate-y-1/2 leading-[0.4] max-h-0 opacity-50
-            text-gray-300 font-bold
+            text-muted-foreground font-bold
             transition-opacity text-[35px]
           "
           title="Required field"

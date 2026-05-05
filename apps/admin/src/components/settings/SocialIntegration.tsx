@@ -128,16 +128,13 @@ export const SocialIntegrations: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <h3 className="font-medium">{platform.name}</h3>
                         {platform.connected ? (
-                          <Badge
-                            variant="outline"
-                            className="text-xs text-green-500"
-                          >
+                          <Badge variant="outline" className="text-xs text-primary">
                             Connected
                           </Badge>
                         ) : (
                           <Badge
                             variant="outline"
-                            className="text-xs text-muted-foreground text-red-500"
+                            className="text-xs text-muted-foreground"
                           >
                             Not Connected
                           </Badge>
@@ -208,8 +205,8 @@ export const SocialIntegrations: React.FC = () => {
           <div className="grid gap-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label className="text-zinc-300">Auto-share new posts</Label>
-                <p className="text-sm text-zinc-500">
+                <Label className="text-foreground/80">Auto-share new posts</Label>
+                <p className="text-sm text-muted-foreground">
                   Automatically share new blog posts when published
                 </p>
               </div>
@@ -220,13 +217,13 @@ export const SocialIntegrations: React.FC = () => {
                 }
               />
             </div>
-            <Separator className="my-2 bg-zinc-800" />
+            <Separator className="my-2 bg-border" />
             <div className="flex items-center justify-between">
               <div>
-                <Label className="text-zinc-300">
+                <Label className="text-foreground/80">
                   Auto-share content updates
                 </Label>
-                <p className="text-sm text-zinc-500">
+                <p className="text-sm text-muted-foreground">
                   Share when existing posts are significantly updated
                 </p>
               </div>

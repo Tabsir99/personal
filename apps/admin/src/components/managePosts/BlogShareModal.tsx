@@ -33,7 +33,7 @@ const ShareButton = ({
     <Button
       onClick={handleClick}
       variant="outline"
-      className={`flex items-center justify-center gap-3 h-14 border-2 border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 hover:border-zinc-700 transition-colors duration-200 ${className}`}
+      className={`h-14 border-2 border-border bg-muted/30 transition-colors duration-200 hover:bg-accent ${className}`}
     >
       {children}
     </Button>
@@ -105,18 +105,18 @@ const BlogShareModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="sm:max-w-lg bg-linear-to-br from-zinc-950 to-zinc-900 text-white border-zinc-800 shadow-2xl">
+      <DialogContent className="sm:max-w-lg shadow-2xl">
         <DialogHeader className="space-y-3">
-          <DialogTitle className="text-2xl font-bold bg-linear-to-r from-white to-zinc-300 bg-clip-text text-transparent">
+          <DialogTitle className="text-2xl font-bold">
             Share this article
           </DialogTitle>
-          <div className="w-12 h-0.5 bg-linear-to-r from-blue-500 to-purple-500 rounded-full" />
+          <div className="h-0.5 w-12 rounded-full bg-primary" />
         </DialogHeader>
 
         <div className="space-y-8 pt-2">
           {/* Social Platforms */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+            <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
               Share on social
             </h3>
             <div className="grid grid-cols-2 gap-3">
@@ -126,7 +126,7 @@ const BlogShareModal = () => {
                   handleClick={() => handlePlatformClick(platform.link)}
                 >
                   <platform.icon size={18} style={{ color: platform.color }} />
-                  <span className="text-sm font-medium text-zinc-200">
+                  <span className="text-sm font-medium text-foreground">
                     {platform.name}
                   </span>
                 </ShareButton>
@@ -136,7 +136,7 @@ const BlogShareModal = () => {
 
           {/* Copy Link Section */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+            <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
               Copy link
             </h3>
             <div className="flex gap-3">
@@ -147,8 +147,8 @@ const BlogShareModal = () => {
                 size="lg"
                 className={`shrink-0 px-6 transition-colors duration-200 ${
                   copySuccess
-                    ? "bg-green-600 hover:bg-green-600 text-white"
-                    : "bg-zinc-800 hover:bg-zinc-700 text-zinc-100 hover:text-white"
+                    ? "bg-primary text-primary-foreground hover:bg-primary"
+                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                 }`}
               >
                 {copySuccess ? (

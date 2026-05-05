@@ -22,10 +22,10 @@ export default function DraftBlogCard({
 }) {
   return (
     <Link draggable={false} href={`write-blog/${blog.blogId}`}>
-      <Card className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer">
+      <Card className="cursor-pointer transition-all hover:border-border/80">
         <CardHeader className="pb-2 pt-4">
           <div className="flex justify-between items-start">
-            <CardTitle className="text-xl font-bold text-zinc-100">
+            <CardTitle className="text-xl font-bold">
               {blog?.title}
             </CardTitle>
 
@@ -36,7 +36,7 @@ export default function DraftBlogCard({
               confirmDelete={() => confirmDelete(blog.blogId!)}
             />
           </div>
-          <CardDescription className="text-zinc-400 line-clamp-2">
+          <CardDescription className="line-clamp-2">
             {blog.description || "No description yet..."}
           </CardDescription>
         </CardHeader>
@@ -46,17 +46,17 @@ export default function DraftBlogCard({
               <Badge
                 key={tag}
                 variant="outline"
-                className="border-zinc-700 text-zinc-300 text-xs"
+                className="text-xs"
               >
                 {tag}
               </Badge>
             ))}
             {blog.tags?.length === 0 && (
-              <span className="text-zinc-500 text-sm italic">No tags yet</span>
+              <span className="text-sm italic text-muted-foreground">No tags yet</span>
             )}
           </div>
         </CardContent>
-        <CardFooter className="pt-2 pb-4 flex justify-between items-center text-sm text-zinc-500">
+        <CardFooter className="flex items-center justify-between pb-4 pt-2 text-sm text-muted-foreground">
           <div className="flex items-center">
             <Clock className="mr-1 h-3 w-3" />
             <span>Updated {getTimeSince(blog.updatedAt || 0)}</span>

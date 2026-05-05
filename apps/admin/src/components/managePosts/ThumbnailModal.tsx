@@ -64,9 +64,9 @@ export default function ThumbnailModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="sm:max-w-3xl bg-zinc-900 border border-neutral-800 text-neutral-100 shadow-lg">
+      <DialogContent className="sm:max-w-3xl shadow-lg">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-white">
+          <DialogTitle className="text-xl font-semibold">
             Update Thumbnail
           </DialogTitle>
         </DialogHeader>
@@ -74,7 +74,7 @@ export default function ThumbnailModal() {
         <div className="my-6">
           <div
             className={cn(
-              "group relative cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-neutral-700 transition-all hover:border-neutral-500",
+              "group relative cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-border transition-all hover:border-border/80",
               previewUrl ? "h-96" : "h-64",
             )}
           >
@@ -93,20 +93,20 @@ export default function ThumbnailModal() {
                   alt="Thumbnail Preview"
                   className="h-full w-full object-cover transition-opacity"
                 />
-                <div className="absolute inset-0 bg-black/60 opacity-0 flex flex-col items-center justify-center group-hover:opacity-100 transition-opacity">
-                  <FaUpload size={32} className="text-white mb-2" />
-                  <p className="text-white font-medium">
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/60 opacity-0 transition-opacity group-hover:opacity-100">
+                  <FaUpload size={32} className="mb-2 text-background" />
+                  <p className="font-medium text-background">
                     Click to replace image
                   </p>
                 </div>
               </div>
             ) : (
               <div className="flex h-full flex-col items-center justify-center p-6">
-                <FaImages size={48} className="text-neutral-400 mb-3" />
-                <p className="text-neutral-300 text-center font-medium mb-2">
+                <FaImages size={48} className="mb-3 text-muted-foreground" />
+                <p className="mb-2 text-center font-medium text-foreground">
                   Drag and drop or click to upload
                 </p>
-                <p className="text-neutral-500 text-sm text-center">
+                <p className="text-center text-sm text-muted-foreground">
                   Recommended: 1200 × 630px or larger (16:9 ratio)
                 </p>
               </div>
@@ -114,7 +114,7 @@ export default function ThumbnailModal() {
           </div>
 
           {selectedFile && (
-            <p className="mt-2 text-sm text-neutral-400">
+            <p className="mt-2 text-sm text-muted-foreground">
               Selected: {selectedFile.name} (
               {Math.round(selectedFile.size / 1024)} KB)
             </p>
@@ -126,7 +126,7 @@ export default function ThumbnailModal() {
             <Button
               variant="outline"
               onClick={resetSelection}
-              className="w-full sm:w-auto border-neutral-700 text-neutral-300 hover:bg-zinc-800 hover:text-white"
+              className="w-full sm:w-auto"
             >
               Reset
             </Button>
@@ -134,7 +134,7 @@ export default function ThumbnailModal() {
           <Button
             onClick={handleSubmit}
             disabled={!selectedFile || isLoading}
-            className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700 disabled:bg-zinc-700 disabled:text-neutral-400"
+            className="w-full sm:w-auto disabled:bg-muted disabled:text-muted-foreground"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">
@@ -148,7 +148,7 @@ export default function ThumbnailModal() {
           <Button
             onClick={closeModal}
             variant="outline"
-            className="w-full sm:w-auto border-neutral-700 text-neutral-300 hover:bg-zinc-800 hover:text-white"
+            className="w-full sm:w-auto"
           >
             Cancel
           </Button>

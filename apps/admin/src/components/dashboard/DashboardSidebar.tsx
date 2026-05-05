@@ -49,15 +49,15 @@ const DashBoardSidebar = () => {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-30 h-screen bg-linear-to-b from-zinc-950/30 via-zinc-900/40 to-zinc-950/30 backdrop-blur-xl border-r border-zinc-800/50 transition-all duration-300 ease-in-out",
-        isExpanded ? "w-56 shadow-[8px_0px_40px_rgba(0,0,0,0.6)]" : "w-[72px]",
+        "fixed left-0 top-0 z-30 h-screen border-r border-sidebar-border bg-sidebar/80 backdrop-blur-xl transition-all duration-300 ease-in-out",
+        isExpanded ? "w-56 shadow-2xl" : "w-[72px]",
       )}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
       <div className="flex flex-col h-full py-4 gap-2">
         {/* Logo Section */}
-        <div className="flex justify-center h-16 items-center px-4 border-b border-zinc-800/50 pb-4">
+        <div className="flex justify-center h-16 items-center px-4 border-b border-sidebar-border pb-4">
           <Img
             src={`${clientEnv.MEDIA_ORIGIN}/logo.png`}
             alt="Logo"
@@ -79,25 +79,25 @@ const DashBoardSidebar = () => {
                       className={cn(
                         "relative h-12 w-full justify-start gap-4 text-base font-medium transition-all duration-300 ease-out overflow-hidden group",
                         item.isActive
-                          ? "bg-linear-to-r from-blue-500/20 to-blue-600/10 text-blue-300 shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] backdrop-blur-sm border border-blue-500/20"
-                          : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/40",
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground backdrop-blur-sm border border-sidebar-border"
+                          : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50",
                         isExpanded ? "px-4" : "px-3 justify-center",
                       )}
                     >
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-foreground/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                       </div>
 
                       {item.isActive && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-linear-to-b from-blue-400 to-blue-600 rounded-r-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-sidebar-primary shadow-[0_0_8px_hsl(var(--sidebar-primary)/0.35)]" />
                       )}
 
                       <item.Icon
                         className={cn(
                           "w-5 h-5 transition-all duration-300 shrink-0",
                           item.isActive
-                            ? "text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]"
-                            : "text-zinc-500 group-hover:text-zinc-300",
+                            ? "text-sidebar-primary drop-shadow-[0_0_8px_hsl(var(--sidebar-primary)/0.4)]"
+                            : "text-muted-foreground/70 group-hover:text-foreground/80",
                         )}
                       />
 
@@ -120,18 +120,18 @@ const DashBoardSidebar = () => {
         </nav>
 
         {/* Logout Button */}
-        <div className="px-3 pt-4 border-t border-zinc-800/50">
+        <div className="px-3 pt-4 border-t border-sidebar-border">
           <Button
             variant="ghost"
             className={cn(
-              "relative h-12 w-full justify-start gap-4 text-base font-medium text-zinc-400 hover:text-red-300 hover:bg-red-950/30 transition-all duration-300 ease-out overflow-hidden group border border-transparent hover:border-red-900/30",
+              "relative h-12 w-full justify-start gap-4 text-base font-medium text-muted-foreground transition-all duration-300 ease-out overflow-hidden group border border-transparent hover:border-destructive/20 hover:text-destructive hover:bg-destructive/10",
               isExpanded ? "px-4" : "px-3 justify-center",
             )}
             onClick={() => {}}
           >
             {/* Glass shine effect */}
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-              <div className="absolute inset-0 bg-linear-to-r from-transparent via-red-500/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-destructive/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
             </div>
 
             <LogOut className="w-5 h-5 shrink-0 transition-transform group-hover:translate-x-0.5" />

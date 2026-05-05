@@ -25,7 +25,7 @@ export default function Projects() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-bold mb-2">Projects</h2>
-          <p className="text-white/50">Manage your portfolio projects</p>
+          <p className="text-muted-foreground">Manage your portfolio projects</p>
         </div>
       </div>
 
@@ -33,9 +33,9 @@ export default function Projects() {
         {projects.map((projectItem, index) => (
           <Card
             key={index}
-            className="group pt-0 relative overflow-hidden border-white/8 bg-white/2 backdrop-blur-sm hover:border-white/15 transition-all duration-500"
+            className="group relative overflow-hidden border-border/50 bg-card/60 pt-0 backdrop-blur-sm transition-all duration-500 hover:border-border"
           >
-            <div className="relative aspect-video overflow-hidden bg-white/2">
+            <div className="relative aspect-video overflow-hidden bg-muted/30">
               <Img
                 src={projectItem.image}
                 alt={projectItem.title}
@@ -44,22 +44,22 @@ export default function Projects() {
                 loading="lazy"
               />
 
-              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-linear-to-t from-foreground/80 via-foreground/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
               <Badge
                 variant="secondary"
-                className="absolute top-4 left-4 bg-white/10 backdrop-blur-md border-white/20 text-white"
+                className="absolute left-4 top-4 border-border/60 bg-background/70 text-foreground backdrop-blur-md"
               >
                 {projectItem.type}
               </Badge>
             </div>
 
             <CardContent className="p-6">
-              <h3 className="text-2xl font-semibold text-white/95 mb-2 group-hover:text-white transition-colors">
+              <h3 className="mb-2 text-2xl font-semibold text-foreground transition-colors group-hover:text-foreground">
                 {projectItem.title}
               </h3>
 
-              <p className="text-white/60 text-[15px] leading-relaxed mb-4 line-clamp-2">
+              <p className="mb-4 line-clamp-2 text-[15px] leading-relaxed text-muted-foreground">
                 {projectItem.description}
               </p>
 
@@ -68,7 +68,7 @@ export default function Projects() {
                   <Badge
                     key={skill}
                     variant="outline"
-                    className="bg-white/4 border-white/8 text-white/70 text-xs font-normal hover:bg-white/8 transition-colors"
+                    className="border-border/60 bg-muted/60 text-xs font-normal text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                   >
                     {skill}
                   </Badge>
@@ -76,7 +76,7 @@ export default function Projects() {
                 {projectItem.skills.length > 4 && (
                   <Badge
                     variant="outline"
-                    className="bg-white/4 border-white/8 text-white/70 text-xs font-normal"
+                    className="border-border/60 bg-muted/60 text-xs font-normal text-muted-foreground"
                   >
                     +{projectItem.skills.length - 4}
                   </Badge>
@@ -95,7 +95,7 @@ export default function Projects() {
                       {projectItem.link1.text}
                     </a>
                   }
-                  className="flex-1 bg-white/8 hover:bg-white/12 text-white border border-white/8 rounded-xl"
+                  className="flex-1 rounded-xl border border-border/60 bg-secondary text-secondary-foreground hover:bg-secondary/80"
                 />
 
                 <Button
@@ -110,12 +110,12 @@ export default function Projects() {
                     </a>
                   }
                   variant="outline"
-                  className="flex-1 bg-transparent hover:bg-white/8 text-white/80 border-white/8 rounded-xl"
+                  className="flex-1 rounded-xl border-border/60 bg-transparent text-foreground/80 hover:bg-accent"
                 />
               </div>
             </CardContent>
 
-            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-border to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
             <ActionButtonGroup
               buttons={[

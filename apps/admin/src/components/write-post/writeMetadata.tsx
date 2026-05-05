@@ -91,13 +91,13 @@ export default function WriteMetadataComp({
     <Sheet open={showSidebar} onOpenChange={closeSidebar}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-2xl border-zinc-800/50 p-0 overflow-hidden"
+        className="w-full sm:max-w-2xl border-border p-0 overflow-hidden"
       >
-        <SheetHeader className="px-6 py-6 border-b border-zinc-800/50 bg-zinc-900/50">
-          <SheetTitle className="text-xl font-semibold text-zinc-100 text-left">
+        <SheetHeader className="px-6 py-6 border-b border-border bg-card/40">
+          <SheetTitle className="text-xl font-semibold text-left">
             Blog Metadata
           </SheetTitle>
-          <SheetDescription className="text-sm text-zinc-400 text-left mt-1">
+          <SheetDescription className="mt-1 text-sm text-muted-foreground text-left">
             Configure your blog's SEO and display settings
           </SheetDescription>
         </SheetHeader>
@@ -106,11 +106,11 @@ export default function WriteMetadataComp({
           <div className="p-6">
             <div className="space-y-6">
               {/* Basic Information Section */}
-              <Card className="bg-zinc-900/50 border-zinc-800/50">
+              <Card className="bg-card/70 border-border">
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-2 mb-4">
-                    <FileText className="h-4 w-4 text-zinc-400" />
-                    <h3 className="text-lg font-medium text-zinc-100">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <h3 className="text-lg font-medium">
                       Basic Information
                     </h3>
                   </div>
@@ -120,7 +120,7 @@ export default function WriteMetadataComp({
                       <div className="space-y-2">
                         <Label
                           htmlFor="blogTitle"
-                          className="text-zinc-300 text-sm font-medium"
+                          className="text-sm font-medium text-foreground/80"
                         >
                           Blog Title *
                         </Label>
@@ -137,7 +137,7 @@ export default function WriteMetadataComp({
                       <div className="space-y-2">
                         <Label
                           htmlFor="socialTitle"
-                          className="text-zinc-300 text-sm font-medium"
+                          className="text-sm font-medium text-foreground/80"
                         >
                           Social Media Title
                         </Label>
@@ -154,7 +154,7 @@ export default function WriteMetadataComp({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-zinc-300 text-sm font-medium">
+                        <Label className="text-sm font-medium text-foreground/80">
                           Blog Type
                         </Label>
                         <Select
@@ -163,26 +163,17 @@ export default function WriteMetadataComp({
                             setBlogFormData({ type: value })
                           }
                         >
-                          <SelectTrigger className="bg-zinc-800/50 border-zinc-700/50 text-zinc-100">
+                          <SelectTrigger className="bg-muted/40 border-border">
                             <SelectValue placeholder="Select blog type..." />
                           </SelectTrigger>
-                          <SelectContent className="bg-zinc-900 border-zinc-700">
-                            <SelectItem
-                              value={BlogType.Article}
-                              className="text-zinc-100"
-                            >
+                          <SelectContent>
+                            <SelectItem value={BlogType.Article}>
                               Article
                             </SelectItem>
-                            <SelectItem
-                              value={BlogType.BlogPosting}
-                              className="text-zinc-100"
-                            >
+                            <SelectItem value={BlogType.BlogPosting}>
                               Blog Posting
                             </SelectItem>
-                            <SelectItem
-                              value={BlogType.NewsArticle}
-                              className="text-zinc-100"
-                            >
+                            <SelectItem value={BlogType.NewsArticle}>
                               News Article
                             </SelectItem>
                           </SelectContent>
@@ -194,11 +185,11 @@ export default function WriteMetadataComp({
               </Card>
 
               {/* Tags Section */}
-              <Card className="bg-zinc-900/50 border-zinc-800/50">
+              <Card className="bg-card/70 border-border">
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-2 mb-4">
-                    <Hash className="h-4 w-4 text-zinc-400" />
-                    <h3 className="text-lg font-medium text-zinc-100">
+                    <Hash className="h-4 w-4 text-muted-foreground" />
+                    <h3 className="text-lg font-medium">
                       Tags & Categories
                     </h3>
                   </div>
@@ -208,7 +199,7 @@ export default function WriteMetadataComp({
                       <div className="flex-1 space-y-2">
                         <Label
                           htmlFor="tagInput"
-                          className="text-zinc-300 text-sm font-medium"
+                          className="text-sm font-medium text-foreground/80"
                         >
                           Add Tags
                         </Label>
@@ -229,7 +220,7 @@ export default function WriteMetadataComp({
                         <Button
                           onClick={handleAddTag}
                           size="sm"
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
                         >
                           <Plus className="h-4 w-4" />
                         </Button>
@@ -242,7 +233,7 @@ export default function WriteMetadataComp({
                           <Badge
                             key={tag}
                             variant="secondary"
-                            className="bg-zinc-800/70 text-zinc-200 hover:bg-zinc-700/70 pr-1"
+                            className="bg-muted text-foreground hover:bg-accent pr-1"
                           >
                             <Tag className="h-3 w-3 mr-1" />
                             {tag}
@@ -250,7 +241,7 @@ export default function WriteMetadataComp({
                               variant="ghost"
                               size="sm"
                               onClick={() => removeTag(tag)}
-                              className="ml-2 h-4 w-4 p-0 hover:bg-red-500/20 text-zinc-400 hover:text-red-400"
+                              className="ml-2 h-4 w-4 p-0 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
                             >
                               <X className="h-3 w-3" />
                             </Button>
@@ -262,7 +253,7 @@ export default function WriteMetadataComp({
                     <div className="space-y-2">
                       <Label
                         htmlFor="recTitle"
-                        className="text-zinc-300 text-sm font-medium"
+                        className="text-sm font-medium text-foreground/80"
                       >
                         Recommendation Title
                       </Label>
@@ -282,11 +273,11 @@ export default function WriteMetadataComp({
               </Card>
 
               {/* Featured Image Section */}
-              <Card className="bg-zinc-900/50 border-zinc-800/50">
+              <Card className="bg-card/70 border-border">
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-2 mb-4">
-                    <ImageIcon className="h-4 w-4 text-zinc-400" />
-                    <h3 className="text-lg font-medium text-zinc-100">
+                    <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                    <h3 className="text-lg font-medium">
                       Featured Image
                     </h3>
                   </div>
@@ -294,7 +285,7 @@ export default function WriteMetadataComp({
                   <div className="space-y-4">
                     {featuredImageUrl ? (
                       <div className="space-y-3">
-                        <div className="relative rounded-lg border border-zinc-700/50 overflow-hidden">
+                        <div className="relative rounded-lg border border-border overflow-hidden">
                           <Image
                             src={featuredImageUrl}
                             alt="Featured image"
@@ -302,12 +293,12 @@ export default function WriteMetadataComp({
                             height={200}
                             className="w-full h-48 object-cover"
                           />
-                          <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                          <div className="absolute inset-0 bg-foreground/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                             <Button
                               variant="secondary"
                               size="sm"
                               onClick={() => uploadRef.current?.click()}
-                              className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20"
+                              className="bg-background/20 backdrop-blur-sm text-background hover:bg-background/30"
                             >
                               <Upload className="h-4 w-4" />
                               Change Image
@@ -318,13 +309,13 @@ export default function WriteMetadataComp({
                     ) : (
                       <div
                         onClick={() => uploadRef.current?.click()}
-                        className="border-2 border-dashed border-zinc-700/50 rounded-lg p-8 text-center cursor-pointer hover:border-zinc-600/50 hover:bg-zinc-800/20 transition-all"
+                        className="cursor-pointer rounded-lg border-2 border-dashed border-border p-8 text-center transition-all hover:bg-accent/30"
                       >
-                        <Upload className="h-8 w-8 text-zinc-400 mx-auto mb-3" />
-                        <p className="text-zinc-300 font-medium mb-1">
+                        <Upload className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+                        <p className="mb-1 font-medium text-foreground">
                           Upload Featured Image
                         </p>
-                        <p className="text-zinc-500 text-sm">
+                        <p className="text-sm text-muted-foreground">
                           Click to select an image file
                         </p>
                       </div>
@@ -342,11 +333,11 @@ export default function WriteMetadataComp({
               </Card>
 
               {/* Description Section */}
-              <Card className="bg-zinc-900/50 border-zinc-800/50">
+              <Card className="bg-card/70 border-border">
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-2 mb-4">
-                    <Globe className="h-4 w-4 text-zinc-400" />
-                    <h3 className="text-lg font-medium text-zinc-100">
+                    <Globe className="h-4 w-4 text-muted-foreground" />
+                    <h3 className="text-lg font-medium">
                       SEO & Description
                     </h3>
                   </div>
@@ -354,7 +345,7 @@ export default function WriteMetadataComp({
                   <div className="space-y-2">
                     <Label
                       htmlFor="description"
-                      className="text-zinc-300 text-sm font-medium"
+                      className="text-sm font-medium text-foreground/80"
                     >
                       Blog Description
                     </Label>
@@ -368,7 +359,7 @@ export default function WriteMetadataComp({
                       }
                       className="resize-none"
                     />
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs text-muted-foreground">
                       {description?.length || 0}/160 characters (recommended for
                       SEO)
                     </p>
@@ -376,13 +367,13 @@ export default function WriteMetadataComp({
                 </CardContent>
               </Card>
 
-              <Separator className="bg-zinc-800/50" />
+              <Separator className="bg-border" />
 
               {/* Save Button */}
               <div className="flex justify-end">
                 <Button
                   onClick={closeSidebar}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-6"
                 >
                   Save Metadata
                 </Button>

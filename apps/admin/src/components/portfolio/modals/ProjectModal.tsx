@@ -125,24 +125,24 @@ export default function ProjectDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {children && <DialogTrigger render={children as React.ReactElement} />}
-      <DialogContent className="max-h-[90vh] sm:max-w-3xl overflow-y-auto border-white/10 bg-zinc-900">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="text-2xl">
             {isUpdating ? "Edit Project" : "Add New Project"}
           </DialogTitle>
-          <DialogDescription className="text-white/50">
+          <DialogDescription className="text-muted-foreground">
             Fill in the details for your project
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4 text-white">
+        <div className="space-y-6 py-4">
           {/* Image Upload */}
           <div>
-            <Label className="mb-2 block text-white/70">Project Image</Label>
+            <Label className="mb-2 block text-foreground/80">Project Image</Label>
             <div className="flex items-center gap-4">
               <div
                 onClick={() => imageInputRef.current?.click()}
-                className="flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-white/10 bg-zinc-800/50"
+                className="flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-muted/40"
               >
                 {formData.image ? (
                   <Img
@@ -151,7 +151,7 @@ export default function ProjectDialog({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <ImageIcon size={32} className="text-white/30" />
+                  <ImageIcon size={32} className="text-muted-foreground" />
                 )}
               </div>
 
@@ -175,7 +175,7 @@ export default function ProjectDialog({
           <div className="grid grid-cols-2 gap-4">
             {/* Title */}
             <div>
-              <Label className="mb-2 block text-white/70">Project Title</Label>
+              <Label className="mb-2 block text-foreground/80">Project Title</Label>
               <Input
                 placeholder="E-commerce Platform"
                 value={formData.title}
@@ -187,7 +187,7 @@ export default function ProjectDialog({
 
             {/* Type */}
             <div>
-              <Label className="mb-2 block text-white/70">Project Type</Label>
+              <Label className="mb-2 block text-foreground/80">Project Type</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value: "Personal" | "Demo" | "Freelance") =>
@@ -208,7 +208,7 @@ export default function ProjectDialog({
 
           {/* Description */}
           <div>
-            <Label className="mb-2 block text-white/70">Description</Label>
+            <Label className="mb-2 block text-foreground/80">Description</Label>
             <Textarea
               placeholder="A full-featured e-commerce platform with payment integration..."
               value={formData.description}
@@ -220,11 +220,11 @@ export default function ProjectDialog({
 
           {/* Links */}
           <div className="space-y-4">
-            <Label className="block text-white/70">Links</Label>
+            <Label className="block text-foreground/80">Links</Label>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="mb-2 block text-xs text-white/50">
+                <Label className="mb-2 block text-xs text-muted-foreground">
                   Link 1 Text
                 </Label>
                 <Input
@@ -239,7 +239,7 @@ export default function ProjectDialog({
                 />
               </div>
               <div>
-                <Label className="mb-2 block text-xs text-white/50">
+                <Label className="mb-2 block text-xs text-muted-foreground">
                   Link 1 URL
                 </Label>
                 <Input
@@ -257,7 +257,7 @@ export default function ProjectDialog({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="mb-2 block text-xs text-white/50">
+                <Label className="mb-2 block text-xs text-muted-foreground">
                   Link 2 Text
                 </Label>
                 <Input
@@ -272,7 +272,7 @@ export default function ProjectDialog({
                 />
               </div>
               <div>
-                <Label className="mb-2 block text-xs text-white/50">
+                <Label className="mb-2 block text-xs text-muted-foreground">
                   Link 2 URL
                 </Label>
                 <Input
@@ -291,7 +291,7 @@ export default function ProjectDialog({
 
           {/* Skills */}
           <div>
-            <Label className="mb-2 block text-white/70">
+            <Label className="mb-2 block text-foreground/80">
               Technologies & Skills
             </Label>
             <div className="mb-3 flex gap-2">
@@ -310,24 +310,24 @@ export default function ProjectDialog({
               <Button
                 type="button"
                 onClick={handleAddSkill}
-                className="bg-blue-500 hover:bg-blue-600"
+                className="bg-primary hover:bg-primary/90"
               >
                 <Plus size={16} />
               </Button>
             </div>
 
             {formData.skills.length > 0 && (
-              <div className="flex flex-wrap gap-2 rounded-lg border border-white/10 bg-zinc-800/30 p-4">
+              <div className="flex flex-wrap gap-2 rounded-lg border border-border bg-muted/30 p-4">
                 {formData.skills.map((skill, i) => (
                   <Badge
                     key={i}
                     variant="secondary"
-                    className="border-blue-500/30 bg-blue-500/20 py-1 pl-3 pr-1 text-blue-400"
+                    className="border-primary/30 bg-primary/20 py-1 pl-3 pr-1 text-primary"
                   >
                     {skill}
                     <button
                       onClick={() => handleRemoveSkill(skill)}
-                      className="ml-2 rounded-full p-0.5 hover:bg-blue-500/30"
+                      className="ml-2 rounded-full p-0.5 hover:bg-primary/30"
                     >
                       <X size={12} />
                     </button>
@@ -339,8 +339,8 @@ export default function ProjectDialog({
 
           {/* Featured Toggle */}
           <div>
-            <Label className="mb-2 block text-white/70">Featured Project</Label>
-            <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-zinc-800/30 p-4">
+            <Label className="mb-2 block text-foreground/80">Featured Project</Label>
+            <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-4">
               <Checkbox
                 id="featured"
                 checked={formData.featured || false}
@@ -350,7 +350,7 @@ export default function ProjectDialog({
               />
               <Label
                 htmlFor="featured"
-                className="cursor-pointer text-white/70"
+                className="cursor-pointer text-foreground/80"
               >
                 Highlight this project with a featured badge
               </Label>
@@ -359,10 +359,10 @@ export default function ProjectDialog({
 
           {/* Metrics */}
           <div>
-            <Label className="mb-2 block text-white/70">
+            <Label className="mb-2 block text-foreground/80">
               Project Metrics (Optional)
             </Label>
-            <p className="mb-3 text-xs text-white/50">
+            <p className="mb-3 text-xs text-muted-foreground">
               Add up to 2 metrics to showcase results (e.g., "10K users", "0.8s
               load time")
             </p>
@@ -395,7 +395,7 @@ export default function ProjectDialog({
                   <Button
                     type="button"
                     onClick={handleAddMetric}
-                    className="bg-blue-500 hover:bg-blue-600"
+                    className="bg-primary hover:bg-primary/90"
                   >
                     <Plus size={16} />
                   </Button>
@@ -404,11 +404,11 @@ export default function ProjectDialog({
             )}
 
             {formData.metrics.length > 0 && (
-              <div className="flex gap-3 rounded-lg border border-white/10 bg-zinc-800/30 p-4">
+              <div className="flex gap-3 rounded-lg border border-border bg-muted/30 p-4">
                 {formData.metrics.map((metric, i) => (
                   <div
                     key={i}
-                    className="group relative flex-1 rounded-lg border border-zinc-700/50 bg-zinc-800/50 p-3"
+                    className="group relative flex-1 rounded-lg border border-border/70 bg-muted/60 p-3"
                   >
                     <button
                       onClick={() =>
@@ -419,12 +419,12 @@ export default function ProjectDialog({
                           ),
                         })
                       }
-                      className="absolute -right-2 -top-2 rounded-full bg-red-500/80 p-1 opacity-0 transition-opacity hover:bg-red-500 group-hover:opacity-100"
+                      className="absolute -right-2 -top-2 rounded-full bg-destructive/80 p-1 opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100"
                     >
-                      <X size={12} className="text-white" />
+                      <X size={12} className="text-destructive-foreground" />
                     </button>
-                    <div className="text-xs text-zinc-400">{metric.label}</div>
-                    <div className="text-sm font-bold text-white">
+                    <div className="text-xs text-muted-foreground">{metric.label}</div>
+                    <div className="text-sm font-bold text-foreground">
                       {metric.value}
                     </div>
                   </div>
@@ -433,7 +433,7 @@ export default function ProjectDialog({
             )}
 
             {formData.metrics.length >= 2 && (
-              <p className="mt-2 text-xs text-yellow-500/70">
+              <p className="mt-2 text-xs text-destructive/80">
                 Maximum 2 metrics reached. Remove one to add another.
               </p>
             )}
@@ -441,7 +441,7 @@ export default function ProjectDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="mb-2 block text-white/70">Year</Label>
+              <Label className="mb-2 block text-foreground/80">Year</Label>
               <Input
                 placeholder="2024"
                 value={formData.year}
@@ -452,7 +452,7 @@ export default function ProjectDialog({
             </div>
 
             <div>
-              <Label className="mb-2 block text-white/70">Duration</Label>
+              <Label className="mb-2 block text-foreground/80">Duration</Label>
               <Input
                 placeholder="3 months"
                 value={formData.duration}
@@ -465,7 +465,7 @@ export default function ProjectDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="mb-2 block text-white/70">
+              <Label className="mb-2 block text-foreground/80">
                 Role (Optional)
               </Label>
               <Input
@@ -479,7 +479,7 @@ export default function ProjectDialog({
           </div>
 
           <div>
-            <Label className="mb-2 block text-white/70">Client Type</Label>
+            <Label className="mb-2 block text-foreground/80">Client Type</Label>
             <Input
               placeholder="Startup, Enterprise, Personal, etc."
               value={formData.clientType}
@@ -493,7 +493,7 @@ export default function ProjectDialog({
         <DialogFooter className="gap-2">
           <DialogClose
             render={
-              <Button variant="outline" className="border-white/10 text-white">
+              <Button variant="outline">
                 Cancel
               </Button>
             }
@@ -503,7 +503,7 @@ export default function ProjectDialog({
             render={
               <Button
                 onClick={handleSubmit}
-                className="bg-blue-500 hover:bg-blue-600"
+                className="bg-primary hover:bg-primary/90"
                 disabled={!formData.title || !formData.description}
               >
                 {isUpdating ? (

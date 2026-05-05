@@ -90,7 +90,7 @@ export default function TestimonialDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {children && <DialogTrigger render={children as React.ReactElement} />}
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col pb-0 overflow-y-auto bg-zinc-900 border-white/10 text-white">
+      <DialogContent className="flex max-h-[90vh] max-w-3xl flex-col overflow-y-auto pb-0">
         <DialogHeader>
           <DialogTitle className="text-2xl">
             {isUpdating ? "Edit Testimonial" : "Add New Testimonial"}
@@ -206,10 +206,10 @@ export default function TestimonialDialog({
                     setFormData({ ...formData, size: value })
                   }
                 >
-                  <SelectTrigger className="bg-zinc-800/50 border-white/10">
+                  <SelectTrigger className="bg-muted/40 border-border">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                  <SelectContent>
                     <SelectItem value="small">Small</SelectItem>
                     <SelectItem value="medium">Medium</SelectItem>
                     <SelectItem value="large">Large</SelectItem>
@@ -281,8 +281,8 @@ export default function TestimonialDialog({
                       size={32}
                       className={`${
                         star <= (hoverRating || formData.rating)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300"
+                          ? "fill-primary text-primary"
+                          : "text-muted-foreground"
                       }`}
                     />
                   </button>
@@ -346,7 +346,7 @@ export default function TestimonialDialog({
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sticky bottom-0 py-4 bg-zinc-900">
+        <DialogFooter className="sticky bottom-0 gap-2 bg-background py-4">
           <DialogClose render={<Button variant="outline">Cancel</Button>} />
 
           <DialogClose

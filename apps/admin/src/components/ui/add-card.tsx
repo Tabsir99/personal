@@ -21,24 +21,24 @@ export function AddCard({
   return (
     <Card
       onClick={onClick}
-      className={`flex items-center justify-center group relative overflow-hidden border-2 border-dashed border-white/15 bg-white/2 backdrop-blur-sm w-full transition-all duration-500 hover:border-white/30 hover:bg-white/4 rounded-2xl cursor-pointer active:scale-[0.95]
+      className={`group relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border bg-card/60 backdrop-blur-sm transition-all duration-500 hover:border-border/80 hover:bg-card active:scale-[0.95]
         ${className}`}
     >
       <CardContent
         className={`p-8 flex flex-col items-center justify-center h-full space-y-4`}
       >
-        <div className="bg-white/5 rounded-md p-2">
+        <div className="rounded-md bg-muted p-2">
           {icon || (
-            <Plus className="h-7 w-7 text-white/60 group-hover:text-white/90 transition-all duration-300" />
+            <Plus className="h-7 w-7 text-muted-foreground transition-all duration-300 group-hover:text-foreground" />
           )}
         </div>
 
         <div className="text-center space-y-2">
-          <h3 className="text-lg font-semibold text-white/70 group-hover:text-white/95 transition-colors duration-300">
+          <h3 className="text-lg font-semibold text-foreground/80 transition-colors duration-300 group-hover:text-foreground">
             {title}
           </h3>
           {description && (
-            <p className="text-sm text-white/50 group-hover:text-white/70 transition-colors duration-300">
+            <p className="text-sm text-muted-foreground transition-colors duration-300 group-hover:text-foreground/80">
               {description}
             </p>
           )}

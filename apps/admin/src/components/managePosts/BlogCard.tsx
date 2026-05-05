@@ -33,30 +33,30 @@ export default function CMSBlogCard({
   const getStatusClass = (status: BlogStatus) => {
     switch (status) {
       case BlogStatus.Active:
-        return "bg-green-500/10 text-green-400 border-green-500/20";
+        return "border-primary/20 bg-primary/10 text-primary";
       case BlogStatus.Draft:
-        return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
+        return "border-accent bg-accent text-accent-foreground";
       case BlogStatus.Inactive:
-        return "bg-red-500/10 text-red-400 border-red-500/20";
+        return "border-destructive/20 bg-destructive/10 text-destructive";
       default:
-        return "bg-zinc-500/10 text-zinc-400 border-zinc-500/20";
+        return "border-border bg-muted text-muted-foreground";
     }
   };
 
   const statusClass = getStatusClass(blog.status);
 
   return (
-    <Card className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-all text-white flex flex-col justify-between">
+    <Card className="flex flex-col justify-between transition-all hover:border-border/80">
       <CardHeader className="pb-3 pt-5">
         <div className="flex justify-between items-start gap-4">
           {/* Blog Title */}
           <div className="flex flex-col space-y-2">
-            <h2 className="text-xl font-bold text-zinc-100 capitalize">
+            <h2 className="text-xl font-bold capitalize">
               {blog.title}
             </h2>
 
             {/* Blog Description - single line with ellipsis */}
-            <p className="text-zinc-400 text-sm line-clamp-1">
+            <p className="text-sm text-muted-foreground line-clamp-1">
               {blog.description || "No description yet..."}
             </p>
           </div>
@@ -85,7 +85,7 @@ export default function CMSBlogCard({
                     <ExternalLink className="w-4 h-4" />
                   </Link>
                 }
-                className="text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                className="text-muted-foreground hover:text-foreground hover:bg-accent"
               />
             )}
           </div>
@@ -93,7 +93,7 @@ export default function CMSBlogCard({
       </CardHeader>
 
       <CardContent className="pb-4 pt-2">
-        <div className="flex flex-wrap items-center gap-6 text-sm text-zinc-400">
+        <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
           {/* Status Badge */}
           <Badge
             variant="outline"
@@ -128,7 +128,7 @@ export default function CMSBlogCard({
               <Badge
                 key={index}
                 variant="outline"
-                className="border-zinc-700 text-zinc-300 text-xs"
+                className="text-xs"
               >
                 {tag}
               </Badge>
@@ -136,7 +136,7 @@ export default function CMSBlogCard({
             {blog.tags.length > 3 && (
               <Badge
                 variant="outline"
-                className="border-zinc-700 text-zinc-300 text-xs"
+                className="text-xs"
               >
                 +{blog.tags.length - 3} more
               </Badge>
@@ -147,24 +147,24 @@ export default function CMSBlogCard({
 
       {/* Stats Section */}
       {blog.status !== BlogStatus.Draft && (
-        <CardFooter className="border-t border-zinc-800 pt-4 pb-4 grid grid-cols-4 gap-4">
+        <CardFooter className="grid grid-cols-4 gap-4 border-t border-border pb-4 pt-4">
           <MetricItem
-            icon={<Eye className="h-4 w-4 text-zinc-500" />}
+            icon={<Eye className="h-4 w-4 text-muted-foreground" />}
             label="Views"
             value={blog.stats.views}
           />
           <MetricItem
-            icon={<ThumbsUp className="h-4 w-4 text-zinc-500" />}
+            icon={<ThumbsUp className="h-4 w-4 text-muted-foreground" />}
             label="Likes"
             value={blog.stats.likes}
           />
           <MetricItem
-            icon={<MessageSquare className="h-4 w-4 text-zinc-500" />}
+            icon={<MessageSquare className="h-4 w-4 text-muted-foreground" />}
             label="Comments"
             value={blog.stats.comments}
           />
           <MetricItem
-            icon={<Share2 className="h-4 w-4 text-zinc-500" />}
+            icon={<Share2 className="h-4 w-4 text-muted-foreground" />}
             label="Shares"
             value={blog.stats.shares}
           />
@@ -187,10 +187,10 @@ const MetricItem = ({
   <div className="flex items-center gap-2">
     {icon}
     <div className="flex flex-col">
-      <span className="text-base font-semibold text-zinc-200">
+      <span className="text-base font-semibold text-foreground">
         {value ?? 0}
       </span>
-      <span className="text-xs text-zinc-400">{label}</span>
+      <span className="text-xs text-muted-foreground">{label}</span>
     </div>
   </div>
 );

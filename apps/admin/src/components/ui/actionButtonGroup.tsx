@@ -38,17 +38,18 @@ export function ActionButtonGroup({
   entityName,
 }: ActionButtonGroupProps) {
   const moveBtnClass =
-    "bg-white/5 hover:bg-green-500/90 hover:border-green-400/50 hover:shadow-green-500/30";
+    "hover:bg-primary/10 hover:border-primary/30 hover:text-primary";
   const variantStyles = {
-    edit: "bg-white/5 hover:bg-blue-500/90 hover:border-blue-400/50 hover:shadow-blue-500/30",
-    delete: "bg-white/5 hover:bg-red-500/90 hover:border-red-400/50",
-    save: "bg-emerald-500/90 hover:bg-emerald-400 border-emerald-400/50 hover:border-emerald-300/50 hover:shadow-emerald-500/40",
+    edit: "hover:bg-accent hover:text-accent-foreground",
+    delete:
+      "hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30",
+    save: "hover:bg-primary/10 hover:text-primary hover:border-primary/30",
     cancel:
-      "bg-white/10 hover:bg-white/20 border-white/20 hover:border-white/30",
+      "hover:bg-muted hover:text-foreground hover:border-border",
     moveUp: moveBtnClass,
     moveDown: moveBtnClass,
     toggle:
-      "bg-white/5 hover:bg-emerald-400 hover:border-emerald-300/50 hover:shadow-emerald-500/40",
+      "hover:bg-primary/10 hover:text-primary hover:border-primary/30",
   };
 
   const defaultIcons = {
@@ -76,7 +77,7 @@ export function ActionButtonGroup({
             ? defaultIcons[button.variant]
             : undefined);
 
-        const baseClass = `h-9 w-9 rounded-none ${idx === buttons.length - 1 ? "rounded-tr-xl" : ""} ${idx === 0 ? "rounded-bl-xl" : ""} ${idx === buttons.length - 1 ? "rounded-br-none" : ""} backdrop-blur-sm text-white/60 hover:text-white shadow-lg border-white/10 transition-all duration-300`;
+        const baseClass = `h-9 w-9 rounded-none ${idx === buttons.length - 1 ? "rounded-tr-xl" : ""} ${idx === 0 ? "rounded-bl-xl" : ""} ${idx === buttons.length - 1 ? "rounded-br-none" : ""} border border-border/60 bg-background/60 text-muted-foreground backdrop-blur-sm shadow-lg transition-all duration-300 hover:border-border hover:text-foreground`;
         const variantClass =
           button.variant && button.variant !== "custom"
             ? variantStyles[button.variant]

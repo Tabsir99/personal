@@ -16,7 +16,7 @@ interface MetricCardProps {
 export function MetricCard({ title, value, trend, data, isLoading, isError, trendHigherIsBad = false }: MetricCardProps) {
   if (isError) {
     return (
-      <Card className="bg-zinc-900/50 border-zinc-800/50">
+      <Card className="bg-card">
         <CardHeader className="p-4 pb-0">
           <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         </CardHeader>
@@ -29,7 +29,7 @@ export function MetricCard({ title, value, trend, data, isLoading, isError, tren
 
   if (isLoading) {
     return (
-      <Card className="bg-zinc-900/50 border-zinc-800/50">
+      <Card className="bg-card">
         <CardHeader className="p-4 pb-0">
           <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         </CardHeader>
@@ -49,15 +49,15 @@ export function MetricCard({ title, value, trend, data, isLoading, isError, tren
   let AreaFillColor = "hsl(var(--muted-foreground))";
   
   if ((isPositive && !trendHigherIsBad) || (isNegative && trendHigherIsBad)) {
-    trendColor = "text-emerald-500";
-    AreaFillColor = "#10b981"; // emerald-500
+    trendColor = "text-primary";
+    AreaFillColor = "hsl(var(--primary))";
   } else if ((isNegative && !trendHigherIsBad) || (isPositive && trendHigherIsBad)) {
-    trendColor = "text-red-500";
-    AreaFillColor = "#ef4444"; // red-500
+    trendColor = "text-destructive";
+    AreaFillColor = "hsl(var(--destructive))";
   }
 
   return (
-    <Card className="flex flex-col bg-zinc-900/50 border-zinc-800/50">
+    <Card className="flex flex-col bg-card">
       <CardHeader className="p-4 pb-0">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
       </CardHeader>
@@ -68,34 +68,40 @@ export function MetricCard({ title, value, trend, data, isLoading, isError, tren
             {trend > 0 ? "+" : ""}{trend.toFixed(1)}% vs previous
           </div>
         </div>
-        <div className="h-[60px] w-full mt-2">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData}>
-              <Tooltip
-                content={({ active, payload }: any) => {
-                  if (!active || !payload || !payload.length) return null;
-                  const item = payload[0].payload;
-                  return (
-                    <div className="rounded-md border bg-background px-2 py-1 shadow-md text-xs">
-                      <div className="font-medium">{item.date}</div>
-                      <div className="text-muted-foreground">{item.value.toFixed(1)}</div>
-                    </div>
-                  );
-                }}
-                cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="value" 
-                stroke={AreaFillColor} 
-                fill={AreaFillColor} 
-                fillOpacity={0.2} 
-                strokeWidth={2} 
-                isAnimationActive={false} 
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        {chartData.length > 0 ? (
+          <div className="mt-2 h-[60px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData}>
+                <Tooltip
+                  content={({ active, payload }: any) => {
+                    if (!active || !payload || !payload.length) return null;
+                    const item = payload[0].payload;
+                    return (
+                      <div className="rounded-md border bg-background px-2 py-1 text-xs shadow-md">
+                        <div className="font-medium">{item.date}</div>
+                        <div className="text-muted-foreground">{item.value.toFixed(1)}</div>
+                      </div>
+                    );
+                  }}
+                  cursor={{ fill: "hsl(var(--muted))", opacity: 0.2 }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke={AreaFillColor}
+                  fill={AreaFillColor}
+                  fillOpacity={0.2}
+                  strokeWidth={2}
+                  isAnimationActive={false}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="mt-3 rounded-md border border-dashed border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+            No chart data
+          </div>
+        )}
       </CardContent>
     </Card>
   );

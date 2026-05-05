@@ -41,7 +41,7 @@ export default function SkillCategoryDialog({
   return (
     <Dialog>
       <DialogTrigger render={children as React.ReactElement} />
-      <DialogContent className="max-w-md bg-zinc-900 border-white/10 text-white">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl">Add Skill Category</DialogTitle>
           <DialogDescription>

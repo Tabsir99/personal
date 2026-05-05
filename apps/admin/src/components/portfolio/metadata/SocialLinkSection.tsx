@@ -72,7 +72,7 @@ const SocialLinksSection = memo(
     };
 
     return (
-      <Card className="bg-zinc-900 text-zinc-100 border-zinc-800">
+      <Card>
         <CardHeader className="space-y-1 pb-4">
           <CardTitle className="text-2xl">Contact Information</CardTitle>
           <CardDescription>How people can reach you</CardDescription>
@@ -140,7 +140,7 @@ const SocialLinksSection = memo(
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRemoveSocial(i)}
-                          className="h-9 px-3 text-zinc-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="h-9 px-3 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
                         >
                           <Trash2 size={16} />
                         </Button>
@@ -151,7 +151,7 @@ const SocialLinksSection = memo(
               ))}
 
               <div
-                className={`${isAddingSocial ? "p-4 max-h-120 border-zinc-700" : "p-0 max-h-0 border-transparent"} border-2 mt-8 border-dashed rounded-lg transition-all duration-300 overflow-hidden`}
+                className={`${isAddingSocial ? "max-h-120 border-border p-4" : "max-h-0 border-transparent p-0"} mt-8 overflow-hidden rounded-lg border-2 border-dashed transition-all duration-300`}
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                   <div className="space-y-1.5">
@@ -197,14 +197,14 @@ const SocialLinksSection = memo(
                     }}
                     size="sm"
                     variant="ghost"
-                    className="h-8 text-zinc-400"
+                    className="h-8 text-muted-foreground"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleAddSocial}
                     size="sm"
-                    className="h-8 text-white"
+                    className="h-8"
                   >
                     <Plus size={14} />
                     Add Link
@@ -215,7 +215,7 @@ const SocialLinksSection = memo(
                 <Button
                   variant="outline"
                   onClick={() => setIsAddingSocial(true)}
-                  className="w-full border-dashed border-zinc-700 hover:border-zinc-700 hover:bg-zinc-800"
+                  className="w-full border-dashed border-border hover:bg-accent"
                 >
                   <Plus size={16} />
                   Add Social Link

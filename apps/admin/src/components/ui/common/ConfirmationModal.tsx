@@ -26,13 +26,13 @@ const ConfirmationModal = () => {
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent>
         {/* Header */}
-        <DialogHeader className="p-6 pb-0 space-y-0">
+        <DialogHeader className="p-6 pb-0">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 border border-red-500/20">
-              <AlertTriangle className="h-6 w-6 text-red-500" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-destructive/20 bg-destructive/10">
+              <AlertTriangle className="h-6 w-6 text-destructive" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-semibold text-zinc-50">
+              <DialogTitle className="text-xl font-semibold">
                 {data?.headerText || "Confirm Action"}
               </DialogTitle>
             </div>
@@ -41,8 +41,8 @@ const ConfirmationModal = () => {
 
         {/* Content */}
         <div className="px-6 py-4">
-          <div className="rounded-lg bg-zinc-950/5 border border-zinc-800 p-4">
-            <DialogDescription className="text-zinc-300 text-base leading-relaxed m-0">
+          <div className="rounded-lg border border-border bg-muted/30 p-4">
+            <DialogDescription className="m-0 text-base leading-relaxed text-foreground">
               {data?.message}
             </DialogDescription>
           </div>
@@ -54,7 +54,7 @@ const ConfirmationModal = () => {
             render={
               <Button
                 variant={data?.cancelButtonVariant || "outline"}
-                className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 w-24"
+                className="w-24"
               >
                 {data?.cancelButtonText || "Cancel"}
               </Button>

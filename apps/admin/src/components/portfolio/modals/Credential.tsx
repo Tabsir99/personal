@@ -46,7 +46,7 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
   return (
     <Dialog>
       <DialogTrigger render={children as React.ReactElement} />
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-zinc-900 border-white/10 text-white">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">Add New Credential</DialogTitle>
           <DialogDescription>
@@ -61,7 +61,7 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
             <div className="flex items-center gap-4">
               <div
                 onClick={() => imageInputRef.current?.click()}
-                className="w-full min-h-40 cursor-pointer bg-zinc-800/50 border-2 border-dashed border-white/10 rounded-lg flex items-center justify-center overflow-hidden"
+                className="flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-muted/30"
               >
                 {formData.image ? (
                   <Img

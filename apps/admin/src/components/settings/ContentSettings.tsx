@@ -26,7 +26,7 @@ export default function ContentSettings() {
     >
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label className="text-zinc-300">Posts Per Page</Label>
+          <Label className="text-foreground/80">Posts Per Page</Label>
           <NumericInput
             value={contentSettings.postsPerPage}
             onChange={(value) => updateContent({ postsPerPage: value })}
@@ -36,17 +36,17 @@ export default function ContentSettings() {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-zinc-300">Default Category</Label>
+          <Label className="text-foreground/80">Default Category</Label>
           <Select
             value={contentSettings.defaultCategory}
             onValueChange={(value) =>
               updateContent({ defaultCategory: value! })
             }
           >
-            <SelectTrigger className="bg-zinc-900 border-zinc-700 text-zinc-100">
+            <SelectTrigger>
               <SelectValue placeholder="Select default category" />
             </SelectTrigger>
-            <SelectContent className="bg-zinc-800 border-zinc-700">
+            <SelectContent>
               <SelectItem value="uncategorized">Uncategorized</SelectItem>
               <SelectItem value="technology">Technology</SelectItem>
               <SelectItem value="news">News</SelectItem>
@@ -59,7 +59,7 @@ export default function ContentSettings() {
 
       <div className="grid md:grid-cols-2 gap-6 mt-6">
         <div className="space-y-2">
-          <Label className="text-zinc-300">Excerpt Length (characters)</Label>
+          <Label className="text-foreground/80">Excerpt Length (characters)</Label>
           <div className="pt-2">
             <Slider
               value={[contentSettings.excerptLength]}
@@ -71,7 +71,7 @@ export default function ContentSettings() {
               }
               className="py-4"
             />
-            <div className="text-zinc-400 text-sm text-right">
+            <div className="text-sm text-right text-muted-foreground">
               {contentSettings.excerptLength} characters
             </div>
           </div>
@@ -79,7 +79,7 @@ export default function ContentSettings() {
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label className="text-zinc-300">Allow Comments</Label>
+            <Label className="text-foreground/80">Allow Comments</Label>
             <Switch
               checked={contentSettings.allowComments}
               onCheckedChange={(value) =>
@@ -89,7 +89,7 @@ export default function ContentSettings() {
           </div>
 
           <div className="flex items-center justify-between">
-            <Label className="text-zinc-300">Comment Moderation</Label>
+            <Label className="text-foreground/80">Comment Moderation</Label>
             <Switch
               checked={contentSettings.commentModeration}
               onCheckedChange={(value) =>

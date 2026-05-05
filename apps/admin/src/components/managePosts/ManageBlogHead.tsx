@@ -29,18 +29,15 @@ export default function ManagePostHead({
       <div className="flex gap-4 grow">
         <Select onValueChange={handleStatusChange} defaultValue="all">
           <SelectTrigger className="capitalize min-h-full">
-            <SelectValue className="text-neutral-300" />
+            <SelectValue />
           </SelectTrigger>
-          <SelectContent
-            className="bg-zinc-800 border-neutral-700 text-white rounded-md shadow-xl backdrop-blur-md"
-            sideOffset={4}
-          >
+          <SelectContent className="rounded-md shadow-xl backdrop-blur-md" sideOffset={4}>
             <SelectGroup className="capitalize">
               {options.map((option) => (
                 <SelectItem
                   key={option}
                   value={option}
-                  className="h-11 px-4 py-6 flex items-center justify-between cursor-pointer hover:bg-zinc-700 focus:bg-zinc-700 focus:text-white data-highlighted:bg-zinc-700 data-highlighted:text-white transition-colors duration-150"
+                  className="h-11 cursor-pointer px-4 py-6 transition-colors duration-150"
                 >
                   <span>{option === "all" ? "All Status" : option}</span>
                 </SelectItem>

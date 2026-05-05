@@ -37,7 +37,7 @@ export default function PortfolioMetadata() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-bold mb-2">Site Metadata</h2>
-          <p className="text-white/50">
+          <p className="text-muted-foreground">
             Manage your portfolio's SEO and social media presence
           </p>
         </div>

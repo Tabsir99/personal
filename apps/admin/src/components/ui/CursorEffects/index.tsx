@@ -36,7 +36,7 @@ interface Particle {
         {particles.map((particle) => (
           <div
             key={particle.id}
-            className="absolute h-2 w-2 rounded-full bg-blue-400/60"
+            className="absolute h-2 w-2 rounded-full bg-primary/60"
             style={{
               left: particle.x,
               top: particle.y,
@@ -172,7 +172,7 @@ interface Particle {
     return (
       <div
         ref={blobRef}
-        className="pointer-events-none fixed left-0 top-0 z-50 h-14 w-14 rounded-full bg-blue-400/30 blur-xl"
+        className="pointer-events-none fixed left-0 top-0 z-50 h-14 w-14 rounded-full bg-primary/30 blur-xl"
       />
     );
   };

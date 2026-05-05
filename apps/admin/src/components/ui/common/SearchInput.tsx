@@ -14,7 +14,7 @@ const SearchInput = ({
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 text-zinc-500"
+          className="h-5 w-5 text-muted-foreground"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -35,12 +35,12 @@ const SearchInput = ({
           pl-10 
           pr-4 
           py-2.5
-          text-zinc-200 
-          bg-zinc-800/70
+          text-foreground
+          bg-muted/40
           rounded-lg 
-          outline-none focus:border-zinc-700 border-2 border-transparent
+          outline-none focus:border-ring border-2 border-transparent
           shadow-md
-          placeholder-zinc-500
+          placeholder:text-muted-foreground
         "
         value={searchTerm}
         onChange={handleChange}

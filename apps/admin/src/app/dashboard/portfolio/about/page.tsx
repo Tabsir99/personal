@@ -98,7 +98,7 @@ export default function About() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-3xl font-bold mb-2">About Sections</h2>
-          <p className="text-white/50">Manage your about page content cards</p>
+          <p className="text-muted-foreground">Manage your about page content cards</p>
         </div>
       </div>
 
@@ -107,7 +107,7 @@ export default function About() {
           {about.map((card, index) => (
             <Card
               key={index}
-              className="border-white/8 bg-white/2 backdrop-blur-sm relative group"
+              className="relative group border-border/50 bg-card/60 backdrop-blur-sm"
             >
               {/* Action Buttons - Only show in view mode */}
               {editingIndex !== index && (
@@ -153,7 +153,7 @@ export default function About() {
                 >
                   <div className="overflow-hidden min-h-0">
                     <div
-                      className="p-2 text-zinc-200"
+                      className="p-2 text-foreground"
                       dangerouslySetInnerHTML={{ __html: card }}
                     />
                   </div>
@@ -184,7 +184,7 @@ export default function About() {
                     </div>
                     <OpenNotionView
                       editor={editingIndex === index ? editor : null}
-                      className="no-scrollbar max-w-full h-64 overflow-y-auto p-4 focus:outline-none text-zinc-200"
+                      className="no-scrollbar h-64 max-w-full overflow-y-auto p-4 text-foreground focus:outline-none"
                     />
                   </div>
                 </div>
@@ -202,13 +202,13 @@ export default function About() {
 
         {/* Sidebar */}
         <div className="space-y-6 lg:sticky lg:top-8">
-          <Card className="border-gray-200 shadow-sm overflow-hidden group">
+          <Card className="group overflow-hidden border-border shadow-sm">
             <CardContent className="p-0">
               <div className="aspect-square relative">
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/40 cursor-pointer z-10 flex items-center justify-center">
+                <div className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-foreground/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   <Button
                     size="sm"
-                    className="gap-2 bg-white/90 text-black hover:bg-white"
+                    className="gap-2 bg-background/90 text-foreground hover:bg-background"
                     onClick={() => imageInputRef.current?.click()}
                   >
                     <Pencil size={16} />
@@ -230,18 +230,18 @@ export default function About() {
                   draggable="false"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-foreground/60 via-transparent to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h4 className="text-2xl font-bold text-white">Tabsir</h4>
-                  <p className="text-white/80">Full Stack Developer</p>
+                  <h4 className="text-2xl font-bold text-background">Tabsir</h4>
+                  <p className="text-background/80">Full Stack Developer</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-zinc-700 bg-zinc-800/30 shadow-sm">
+          <Card className="border-border bg-muted/40 shadow-sm">
             <CardContent className="p-6 text-center">
-              <p className="text-gray-200 mb-4 leading-relaxed">
+              <p className="mb-4 leading-relaxed text-foreground">
                 Passionate about Tech, Data, or AI? Working on something
                 exciting?
               </p>

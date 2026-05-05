@@ -40,7 +40,7 @@ export default function BlogMenu({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-zinc-400 hover:text-zinc-100"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -63,12 +63,12 @@ export default function BlogMenu({
 
       <DropdownMenuContent
         align="end"
-        className="w-48 bg-zinc-900 border-neutral-800"
+        className="w-48"
         onClick={(e) => e.stopPropagation()}
       >
         <DropdownMenuItem
           onClick={handleBlogEdit}
-          className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+          className="flex items-center space-x-2"
         >
           <Pencil className="w-4 h-4" />
           <span>Edit Post</span>
@@ -79,14 +79,14 @@ export default function BlogMenu({
             onClick={() =>
               openModal("blogThumbnail", { data: { blogId, thumbnailUrl } })
             }
-            className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+            className="flex items-center space-x-2"
           >
             <Image className="w-4 h-4" />
             <span>Change Thumbnail</span>
           </DropdownMenuItem>
         )}
 
-        {isDraft || <DropdownMenuSeparator className="bg-zinc-800" />}
+        {isDraft || <DropdownMenuSeparator />}
 
         {toggleStatus &&
           (isDraft || (
@@ -99,7 +99,7 @@ export default function BlogMenu({
                   },
                 })
               }
-              className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+              className="flex items-center space-x-2"
             >
               <Power className="w-4 h-4" />
               <span>
@@ -118,14 +118,14 @@ export default function BlogMenu({
                 },
               })
             }
-            className="flex items-center space-x-2 text-neutral-200 hover:text-white focus:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+            className="flex items-center space-x-2"
           >
             <Share2 className="w-4 h-4" />
             <span>Share Post</span>
           </DropdownMenuItem>
         )}
 
-        {isDraft || <DropdownMenuSeparator className="bg-zinc-800" />}
+        {isDraft || <DropdownMenuSeparator />}
 
         <DropdownMenuItem
           onClick={() => {
@@ -136,7 +136,7 @@ export default function BlogMenu({
               },
             });
           }}
-          className="flex items-center space-x-2 text-red-400 hover:text-red-300 focus:text-red-300 hover:bg-zinc-800 focus:bg-zinc-800"
+          className="flex items-center space-x-2 text-destructive focus:text-destructive"
         >
           <Trash2 className="w-4 h-4" />
           <span>Delete Post</span>

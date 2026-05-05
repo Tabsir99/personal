@@ -2,7 +2,7 @@ const LoadingButton = ({ isLoading, children, className, ...props }) => {
   return (
     <button
       className={`
-          relative text-white
+          relative text-foreground
            overflow-hidden transition-all duration-300 ease-in-out
            focus:outline-none 
           disabled:opacity-70 disabled:cursor-not-allowed
@@ -23,7 +23,7 @@ const LoadingButton = ({ isLoading, children, className, ...props }) => {
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className={`w-2 h-2 bg-white rounded-full animate-bounce`}
+                className={`w-2 h-2 bg-foreground rounded-full animate-bounce`}
                 style={{ animationDelay: `${i * 0.2}s` }}
               ></div>
             ))}

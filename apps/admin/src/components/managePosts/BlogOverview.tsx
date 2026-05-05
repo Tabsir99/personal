@@ -57,7 +57,7 @@ const BlogOverview = () => {
         }}
       />
 
-      <div className="w-full max-w-full mx-auto py-5">
+      <div className="mx-auto w-full max-w-full py-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {isLoading ? (
             <BlogCardSkeletonGrid />
@@ -76,8 +76,8 @@ const BlogOverview = () => {
         </div>
 
         {/* Footer */}
-        <div className="mt-10 bg-zinc-850 rounded-lg p-4 inline-block">
-          <p className="text-gray-300 font-medium">
+        <div className="mt-10 inline-block rounded-lg bg-muted p-4">
+          <p className="font-medium text-muted-foreground">
             Total Posts: {data?.length || 0} <br />
             Showing: {filteredPosts.length > 0 ? "1" : "0"} -{" "}
             {filteredPosts.length}
