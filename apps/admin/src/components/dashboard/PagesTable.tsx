@@ -1,8 +1,15 @@
 "use client";
 import { useState } from "react";
-import { usePagePerformance } from "@/lib/hooks/useDashboardData";
+import { usePagePerformance } from "@/hooks/useDashboardData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DateRangeSelector } from "./DateRangeSelector";
 
@@ -52,7 +59,9 @@ export function PagesTable() {
       </CardHeader>
       <CardContent>
         {error ? (
-          <div className="h-[280px] flex items-center justify-center text-sm text-muted-foreground">Failed to load</div>
+          <div className="h-[280px] flex items-center justify-center text-sm text-muted-foreground">
+            Failed to load
+          </div>
         ) : isLoading ? (
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -60,57 +69,87 @@ export function PagesTable() {
             ))}
           </div>
         ) : (
-        <>
-          <div className="rounded-md border">
-            <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("path")}>
-                  Path {sortKey === "path" && (sortOrder === "asc" ? "↑" : "↓")}
-                </TableHead>
-                <TableHead className="cursor-pointer text-right" onClick={() => handleSort("views")}>
-                  Views {sortKey === "views" && (sortOrder === "asc" ? "↑" : "↓")}
-                </TableHead>
-                <TableHead className="cursor-pointer text-right" onClick={() => handleSort("avgTimeOnPage")}>
-                  Avg Time {sortKey === "avgTimeOnPage" && (sortOrder === "asc" ? "↑" : "↓")}
-                </TableHead>
-                <TableHead className="cursor-pointer text-right" onClick={() => handleSort("bounceRate")}>
-                  Bounce Rate {sortKey === "bounceRate" && (sortOrder === "asc" ? "↑" : "↓")}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {displayData.map((page, i) => (
-                <TableRow key={i} className="hover:bg-muted/50 cursor-default">
-                  <TableCell title={page.path} className="font-medium max-w-[200px]">
-                    {truncate(page.path, 30)}
-                  </TableCell>
-                  <TableCell className="text-right">{new Intl.NumberFormat().format(page.views)}</TableCell>
-                  <TableCell className="text-right">{formatDuration(page.avgTimeOnPage)}</TableCell>
-                  <TableCell className="text-right">{page.bounceRate.toFixed(1)}%</TableCell>
-                </TableRow>
-              ))}
-              {displayData.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        {sortedData.length > 5 && (
-          <div className="mt-4 text-center">
-            <button
-              className="text-sm font-medium text-primary hover:underline cursor-pointer"
-              onClick={() => setShowAll(!showAll)}
-            >
-              {showAll ? "Show less" : "Show all"}
-            </button>
-          </div>
-        )}
-        </>
+          <>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead
+                      className="cursor-pointer"
+                      onClick={() => handleSort("path")}
+                    >
+                      Path{" "}
+                      {sortKey === "path" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
+                    <TableHead
+                      className="cursor-pointer text-right"
+                      onClick={() => handleSort("views")}
+                    >
+                      Views{" "}
+                      {sortKey === "views" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
+                    <TableHead
+                      className="cursor-pointer text-right"
+                      onClick={() => handleSort("avgTimeOnPage")}
+                    >
+                      Avg Time{" "}
+                      {sortKey === "avgTimeOnPage" &&
+                        (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
+                    <TableHead
+                      className="cursor-pointer text-right"
+                      onClick={() => handleSort("bounceRate")}
+                    >
+                      Bounce Rate{" "}
+                      {sortKey === "bounceRate" &&
+                        (sortOrder === "asc" ? "↑" : "↓")}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {displayData.map((page, i) => (
+                    <TableRow
+                      key={i}
+                      className="hover:bg-muted/50 cursor-default"
+                    >
+                      <TableCell
+                        title={page.path}
+                        className="font-medium max-w-[200px]"
+                      >
+                        {truncate(page.path, 30)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {new Intl.NumberFormat().format(page.views)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatDuration(page.avgTimeOnPage)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {page.bounceRate.toFixed(1)}%
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {displayData.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-24 text-center">
+                        No results.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            {sortedData.length > 5 && (
+              <div className="mt-4 text-center">
+                <button
+                  className="text-sm font-medium text-primary hover:underline cursor-pointer"
+                  onClick={() => setShowAll(!showAll)}
+                >
+                  {showAll ? "Show less" : "Show all"}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </CardContent>
     </Card>

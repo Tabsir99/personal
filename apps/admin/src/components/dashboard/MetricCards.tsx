@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useDailyStats } from "@/lib/hooks/useDashboardData";
+import { useDailyStats } from "@/hooks/useDashboardData";
 import { MetricCard } from "./MetricCard";
 import { DateRangeSelector } from "./DateRangeSelector";
 
@@ -89,7 +89,7 @@ export function MetricCards() {
         <h2 className="text-lg font-semibold tracking-tight">Key Metrics</h2>
         <DateRangeSelector value={days} onChange={setDays} />
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
         <MetricCard
           title="Sessions"
           value={formatNumber(currentSessions)}

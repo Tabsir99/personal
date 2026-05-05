@@ -1,4 +1,4 @@
-import type { JSONContent } from "@tiptap/react";
+import { DocContent } from "@open-notion/editor";
 
 export enum BlogType {
   Article = "Article",
@@ -57,9 +57,9 @@ export interface PublishedBlogDB extends BaseBlogProperties {
 // Client form data
 export interface BlogFormData extends BaseBlogProperties {
   parentBlogId: string | null;
-  content: JSONContent | null;
+  content: DocContent | null;
   publishedVersion?: BlogContent & {
-    content: JSONContent;
+    content: DocContent;
     publishedAt: number;
   };
   hasDraftChanges: boolean;

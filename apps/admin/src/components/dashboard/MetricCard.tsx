@@ -16,7 +16,7 @@ interface MetricCardProps {
 export function MetricCard({ title, value, trend, data, isLoading, isError, trendHigherIsBad = false }: MetricCardProps) {
   if (isError) {
     return (
-      <Card>
+      <Card className="bg-zinc-900/50 border-zinc-800/50">
         <CardHeader className="p-4 pb-0">
           <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         </CardHeader>
@@ -29,7 +29,7 @@ export function MetricCard({ title, value, trend, data, isLoading, isError, tren
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="bg-zinc-900/50 border-zinc-800/50">
         <CardHeader className="p-4 pb-0">
           <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         </CardHeader>
@@ -57,7 +57,7 @@ export function MetricCard({ title, value, trend, data, isLoading, isError, tren
   }
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col bg-zinc-900/50 border-zinc-800/50">
       <CardHeader className="p-4 pb-0">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
       </CardHeader>

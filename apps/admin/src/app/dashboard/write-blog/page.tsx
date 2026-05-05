@@ -10,7 +10,7 @@ import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { PageHeader } from "@/components/ui/common/PageHeader";
 import { deleteBlog } from "@/actions/blogActions";
 import { DraftBlogCardSkeletonGrid } from "@/components/ui/Skeletons/BlogCardSkeleton";
-import { callWithToast } from "@/lib/appUtils";
+import { callWithToast } from "@/lib/utils";
 
 export default function WriteBlog() {
   const [search, setSearch] = useState("");

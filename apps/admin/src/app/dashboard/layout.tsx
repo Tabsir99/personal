@@ -22,7 +22,7 @@ export default function DashBoardLayout({
   return (
     <TooltipProvider>
       <DashBoardSidebar />
-      <main className=" overflow-y-scroll dark bg-background pl-24 pr-8 py-6 w-screen h-screen text-zinc-100">
+      <main className=" overflow-y-scroll bg-background pl-24 pr-8 py-6 w-screen h-screen text-zinc-100">
         {children}
       </main>
 
@@ -32,6 +32,7 @@ export default function DashBoardLayout({
         visibleToasts={3}
         swipeDirections={["left", "bottom"]}
         duration={5000}
+        theme="dark"
       />
       <CreateBlogModal />
       <ConfirmationModal />

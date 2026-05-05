@@ -2,8 +2,8 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { BlogType, BlogFormData } from "@/types/blogTypes";
 import { loadBlogForEditing, saveDraft } from "@/actions/blogActions";
-import { callWithToast } from "@/lib/appUtils";
-import type { JSONContent } from "@tiptap/react";
+import { callWithToast } from "@/lib/utils";
+import type { DocContent } from "@open-notion/editor";
 
 interface BlogEditorState {
   // Blog form data
@@ -27,7 +27,7 @@ interface BlogEditorState {
   updateLastSaved: () => void;
 
   loadBlogFormData: (blogId: string) => Promise<string>;
-  saveDraft: (latestContent: JSONContent, showToast?: boolean) => Promise<void>;
+  saveDraft: (latestContent: DocContent, showToast?: boolean) => Promise<void>;
 }
 
 const defaultBlogFormData: BlogFormData = {
@@ -57,7 +57,7 @@ export const useBlogEditorStore = create<BlogEditorState>()(
       isCreateDialogOpen: false,
       isSaving: false,
       lastSaved: undefined,
-      isLoading: false,
+      isLoading: true,
 
       // Actions
       setBlogFormData: (data) =>

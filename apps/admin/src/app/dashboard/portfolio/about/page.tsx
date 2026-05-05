@@ -9,6 +9,7 @@ import useUIStore from "@/stores/UIStore";
 import Img from "@/components/ui/image";
 import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
+import { OpenNotionView, useOpenNotion } from "@open-notion/editor";
 
 export default function About() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -23,10 +24,7 @@ export default function About() {
 
   const updatePageData = usePortfolioStore.getState().updatePageData;
 
-  const editor = useEditor({
-    extensions: starterKitOptions,
-    content: "",
-  });
+  const editor = useOpenNotion();
 
   const handleEdit = (index: number, content: string) => {
     setEditingIndex(index);
@@ -38,10 +36,10 @@ export default function About() {
     editor?.commands.setContent("");
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editingIndex !== null && editor) {
       const newCards = [...about];
-      newCards[editingIndex] = editor.getHTML();
+      newCards[editingIndex] = await editor.getHTML();
       updatePageData({ about: newCards });
       closeEditor();
     }
@@ -184,10 +182,9 @@ export default function About() {
                         )}
                       </div>
                     </div>
-                    <EditorContent
+                    <OpenNotionView
                       editor={editingIndex === index ? editor : null}
-                      style={{ scrollbarWidth: "none" }}
-                      className="prose prose-sm max-w-full h-64 overflow-y-auto p-4 focus:outline-none text-zinc-200"
+                      className="no-scrollbar max-w-full h-64 overflow-y-auto p-4 focus:outline-none text-zinc-200"
                     />
                   </div>
                 </div>

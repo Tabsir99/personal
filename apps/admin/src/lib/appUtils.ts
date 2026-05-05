@@ -1,3 +1,5 @@
+import { DocContent, docToText } from "@open-notion/editor";
+
 export function slugify(text: string): string {
   return text
     .toString()
@@ -29,8 +31,8 @@ export const formatResponse = <T>({
   };
 };
 
-export const measureEstReadTime = () => {
-  const textsLength = "blogText"
+export const measureEstReadTime = async (blogContent: DocContent) => {
+  const textsLength = (await docToText(blogContent))
     .trim()
     .split(/\s+/)
     .filter((word) => {
@@ -61,49 +63,6 @@ export const getTimeSince = (timestamp: number) => {
 
   return "just now";
 };
-
-export function debounce(func: (content: any) => void, delay: number) {
-  let timeoutId: NodeJS.Timeout;
-  return function (...args: any[]) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(this, args), delay);
-  };
-}
-
-export function throttle(func: (...args: any[]) => void, limit: number) {
-  let inThrottle: boolean;
-  return function (...args: any[]) {
-    if (!inThrottle) {
-      func.apply(this, args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
-  };
-}
-
-import { toast } from "sonner";
-export async function callWithToast(
-  func: () => Promise<any>,
-  {
-    loading = "Loading...",
-    success = "Success",
-    err = "Error",
-  }: {
-    loading?: string;
-    success?: string;
-    err?: string;
-  },
-) {
-  const id = toast.loading(loading);
-  try {
-    const result = await func();
-    toast.success(success, { id });
-    return result;
-  } catch (error) {
-    toast.error(err, { id });
-    return null;
-  }
-}
 
 type ActionResult<T> = {
   data: T;

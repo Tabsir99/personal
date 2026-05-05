@@ -97,7 +97,7 @@ export const saveDraft = wrap(async (blogFormDataString: string) => {
   }
 
   blogFormData.updatedAt = Date.now();
-  blogFormData.estReadTime = measureEstReadTime(blogFormData.content);
+  blogFormData.estReadTime = await measureEstReadTime(blogFormData.content);
 
   const draftDB = formDataToDraftDB(blogFormData);
 

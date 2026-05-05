@@ -118,7 +118,7 @@ export const SocialIntegrations: React.FC = () => {
           <div className="grid gap-6">
             {platforms.map((platform) => (
               // Update the platform card styling
-              <Card key={platform.id} className="border border-border dark">
+              <Card key={platform.id} className="border border-border">
                 <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between p-5">
                   <div className="flex items-center gap-3 mb-4 sm:mb-0">
                     <div className="text-muted-foreground text-lg">

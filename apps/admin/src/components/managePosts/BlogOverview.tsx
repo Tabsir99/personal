@@ -6,7 +6,7 @@ import ManagePostHead from "./ManageBlogHead";
 import { PublishedBlogDB, BlogStatus } from "@/types/blogTypes";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import { BlogCardSkeletonGrid } from "../ui/Skeletons/BlogCardSkeleton";
-import { callWithToast } from "@/lib/appUtils";
+import { callWithToast } from "@/lib/utils";
 import { deleteBlog, toggleBlogStatus } from "@/actions/blogActions";
 
 const BlogOverview = () => {

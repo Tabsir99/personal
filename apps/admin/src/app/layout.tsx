@@ -42,7 +42,7 @@ export default async function RootLayout({
 }) {
   return (
     <html className={cn("font-sans", geist.variable)}>
-      <body className={" overflow-x-hidden dark " + LatoFont.className}>
+      <body className={"overflow-x-hidden" + LatoFont.className}>
         {children}
       </body>
     </html>

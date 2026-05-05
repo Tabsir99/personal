@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { startBlogWriting } from "@/actions/blogActions";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
-import { callWithToast } from "@/lib/appUtils";
+import { callWithToast } from "@/lib/utils";
 
 export const CreateBlogModal = () => {
   const [newBlogTitle, setNewBlogTitle] = useState("");

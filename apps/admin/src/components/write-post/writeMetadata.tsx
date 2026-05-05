@@ -91,7 +91,7 @@ export default function WriteMetadataComp({
     <Sheet open={showSidebar} onOpenChange={closeSidebar}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-2xl dark border-zinc-800/50 p-0 overflow-hidden"
+        className="w-full sm:max-w-2xl border-zinc-800/50 p-0 overflow-hidden"
       >
         <SheetHeader className="px-6 py-6 border-b border-zinc-800/50 bg-zinc-900/50">
           <SheetTitle className="text-xl font-semibold text-zinc-100 text-left">

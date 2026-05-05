@@ -1,8 +1,16 @@
 "use client";
 import { useState } from "react";
-import { useGeoStats } from "@/lib/hooks/useDashboardData";
+import { useGeoStats } from "@/hooks/useDashboardData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DateRangeSelector } from "./DateRangeSelector";
 
@@ -21,29 +29,65 @@ export function CountriesBar() {
       </CardHeader>
       <CardContent>
         {error ? (
-          <div className="h-[280px] flex items-center justify-center text-sm text-muted-foreground">Failed to load</div>
+          <div className="h-[280px] flex items-center justify-center text-sm text-muted-foreground">
+            Failed to load
+          </div>
         ) : isLoading ? (
           <Skeleton className="h-[280px] w-full rounded-xl" />
         ) : chartData.length > 0 ? (
           <div style={{ height: `${height}px` }} className="w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 30, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} className="stroke-muted" />
-                <XAxis type="number" fontSize={12} className="fill-muted-foreground" tickLine={false} axisLine={false} />
-                <YAxis dataKey="country" type="category" width={80} tick={{ dx: -10 }} fontSize={12} className="fill-muted-foreground" tickLine={false} axisLine={false} />
+              <BarChart
+                data={chartData}
+                layout="vertical"
+                margin={{ top: 0, right: 30, left: -20, bottom: 0 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  horizontal={false}
+                  className="stroke-muted"
+                />
+                <XAxis
+                  type="number"
+                  fontSize={12}
+                  className="fill-muted-foreground"
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  dataKey="country"
+                  type="category"
+                  width={80}
+                  tick={{ dx: -10 }}
+                  fontSize={12}
+                  className="fill-muted-foreground"
+                  tickLine={false}
+                  axisLine={false}
+                />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (!active || !payload || !payload.length) return null;
                     return (
                       <div className="rounded-lg border bg-background p-2 shadow-md text-sm">
-                        <span className="font-medium mr-2">{payload[0].payload.country}:</span>
+                        <span className="font-medium mr-2">
+                          {payload[0].payload.country}:
+                        </span>
                         <span>{payload[0].value} sessions</span>
                       </div>
                     );
                   }}
-                  cursor={{ fill: 'hsl(var(--muted))', opacity: 0.4 }}
+                  cursor={{ fill: "hsl(var(--muted))", opacity: 0.4 }}
                 />
-                <Bar dataKey="sessions" fill="hsl(var(--chart-2))" radius={[0, 4, 4, 0]} label={{ position: 'right', fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
+                <Bar
+                  dataKey="sessions"
+                  fill="hsl(var(--chart-2))"
+                  radius={[0, 4, 4, 0]}
+                  label={{
+                    position: "right",
+                    fill: "hsl(var(--muted-foreground))",
+                    fontSize: 12,
+                  }}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>

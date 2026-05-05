@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useDailyStats } from "@/lib/hooks/useDashboardData";
+import { useDailyStats } from "@/hooks/useDashboardData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AreaChart,

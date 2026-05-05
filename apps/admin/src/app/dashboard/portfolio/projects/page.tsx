@@ -1,7 +1,8 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Github, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import Github from "@devicon/react/github/original";
 import { Badge } from "@/components/ui/badge";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { useShallow } from "zustand/shallow";
