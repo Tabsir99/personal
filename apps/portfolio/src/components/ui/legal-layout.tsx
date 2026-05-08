@@ -13,7 +13,7 @@ interface Section {
     return (
       <>
         <div className="space-y-2 mb-16 scroll-mt-40">
-          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-br from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold tracking-tight bg-linear-to-br from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent">
             {title}
           </h1>
           <p className="text-sm text-zinc-600">Last updated: {lastUpdated}</p>

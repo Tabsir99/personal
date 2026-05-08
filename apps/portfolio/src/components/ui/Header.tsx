@@ -32,7 +32,7 @@ const Navbar = async () => {
         <a
           href={`mailto:${pageData.contact.email}`}
           id="hire-now"
-          className="relative h-10 w-30 text-sm bg-gradient-to-r  from-purple-800 to-purple-600 hover:from-purple-600 hover:to-purple-800 rounded-lg flex justify-center items-center text-white font-bold tracking-wider bg-purple-600 cursor-pointer overflow-hidden"
+          className="relative h-10 w-30 text-sm bg-linear-to-r  from-purple-800 to-purple-600 hover:from-purple-600 hover:to-purple-800 rounded-lg flex justify-center items-center text-white font-bold tracking-wider bg-purple-600 cursor-pointer overflow-hidden"
         >
           HIRE NOW
         </a>

@@ -72,7 +72,7 @@ export const NavItems = ({ activeSection = "home" }: NavItemsProps) => {
   return (
     <div className="relative">
       <button
-        className="p-2 text-zinc-400 hover:text-white transition-colors sm:hidden relative z-[60]"
+        className="p-2 text-zinc-400 hover:text-white transition-colors sm:hidden relative z-60"
         onClick={() => setOpen(!open)}
         aria-label="Toggle menu"
       >
@@ -139,7 +139,7 @@ export const NavItems = ({ activeSection = "home" }: NavItemsProps) => {
               />
               <span className="text-lg sm:text-base">{item.text}</span>
               {isActive && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full transition-all duration-300" />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-linear-to-r from-blue-400 to-purple-500 rounded-full transition-all duration-300" />
               )}
             </a>
           );

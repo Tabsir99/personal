@@ -21,7 +21,7 @@ export default async function Skills() {
             <Card
               key={index}
               data-fadein
-              className="border-white/[0.08] bg-white/[0.02] backdrop-blur-sm hover:bg-white/[0.04] transition-colors opacity-0"
+              className="border-white/8 bg-white/2 backdrop-blur-sm hover:bg-white/4 transition-colors opacity-0"
               style={{ animationDelay: `${index * 400}ms` }}
             >
               <CardContent className="p-6">
@@ -65,7 +65,7 @@ export default async function Skills() {
                         <div className="h-1.5 rounded-full overflow-hidden">
                           <div
                             data-progress={skill.level}
-                            className={`h-full bg-gradient-to-r from-transparent to-purple-500 rounded-full duration-[2200ms] w-0`}
+                            className={`h-full bg-linear-to-r from-transparent to-purple-500 rounded-full duration-2200 w-0`}
                           />
                         </div>
                       </div>

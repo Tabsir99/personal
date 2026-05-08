@@ -34,7 +34,7 @@ const Services = async () => {
                 style={{
                   animationDelay: `${index * 400}ms`,
                 }}
-                className="group opacity-0 relative overflow-hidden border border-white/[0.08] bg-white/[0.03] backdrop-blur-md w-full transition-all duration-500 hover:border-white/[0.12] hover:bg-gradient-to-br hover:from-white/[0.08] hover:to-transparent rounded-2xl"
+                className="group opacity-0 relative overflow-hidden border border-white/8 bg-white/3 backdrop-blur-md w-full transition-all duration-500 hover:border-white/12 hover:bg-linear-to-br hover:from-white/8 hover:to-transparent rounded-2xl"
               >
                 <div
                   className="absolute inset-0 shimmer pointer-events-none"
@@ -58,7 +58,7 @@ const Services = async () => {
                   </p>
                 </CardContent>
 
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </Card>
             );
           })}

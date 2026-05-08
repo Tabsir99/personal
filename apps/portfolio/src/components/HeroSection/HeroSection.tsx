@@ -24,12 +24,12 @@ const HeroSection = async () => {
     >
       <div className="absolute inset-0 -z-20">
         <div
-          className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem]"
+          className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-size-[4rem_4rem]"
           style={{ animation: "gridFloat 15s ease-in-out infinite" }}
         />
       </div>
 
-      <div className="mx-auto grid max-w-[83rem] gap-10 px-4 lg:grid-cols-2 lg:gap-16">
+      <div className="mx-auto grid max-w-332 gap-10 px-4 lg:grid-cols-2 lg:gap-16">
         <HeroContent pageData={pageData} />
         <HeroVisual pageData={pageData} />
       </div>
@@ -102,12 +102,12 @@ const HeroContent = ({ pageData }: { pageData: PageData }) => {
       <div className="flex flex-wrap items-center gap-4">
         <a
           href="#portfolio"
-          className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/40"
+          className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-linear-to-r from-blue-600 to-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/40"
         >
           <span className="relative z-10">View My Work</span>
           <ArrowRight className="relative z-10 h-5 w-5 transition-transform group-hover:translate-x-1" />
           {/* Shine effect on hover */}
-          <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+          <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
         </a>
 
         <a
@@ -207,7 +207,7 @@ const TerminalCard = () => {
   const baseDelay = 1500;
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-zinc-700/50 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-800 shadow-2xl shadow-black/60">
+    <div className="group relative overflow-hidden rounded-2xl border border-zinc-700/50 bg-linear-to-br from-zinc-900 via-zinc-900 to-zinc-800 shadow-2xl shadow-black/60">
       <div className="relative border-b border-zinc-700/50 bg-zinc-800/80 px-4 py-3 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -224,7 +224,7 @@ const TerminalCard = () => {
 
       <div className="relative bg-black/40 p-6">
         <div
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(255,255,255,0.02)_50%)] bg-[length:100%_4px]"
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(255,255,255,0.02)_50%)] bg-size-[100%_4px]"
           style={{ animation: "scanline 8s linear infinite" }}
         />
 

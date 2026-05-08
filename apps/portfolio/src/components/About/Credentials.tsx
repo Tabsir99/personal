@@ -20,7 +20,7 @@ const CertificateCard = ({
       <Card
         data-fadein
         style={{ animationDelay: `${index * 400}ms` }}
-        className="group border-white/[0.08] bg-white/[0.02] backdrop-blur-sm hover:bg-white/[0.04] hover:border-white/[0.15] transition-all duration-300 opacity-0"
+        className="group border-white/8 bg-white/2 backdrop-blur-sm hover:bg-white/4 hover:border-white/15 transition-all duration-300 opacity-0"
       >
         <CardContent className="p-6 h-full flex flex-col">
           <div className="flex items-start gap-3 mb-4">
@@ -38,11 +38,11 @@ const CertificateCard = ({
             </div>
           </div>
 
-          <p className="text-white/70 text-sm mb-4 flex-grow leading-relaxed">
+          <p className="text-white/70 text-sm mb-4 grow leading-relaxed">
             {description}
           </p>
 
-          <div className="flex items-center justify-between pt-4 border-t border-white/[0.08]">
+          <div className="flex items-center justify-between pt-4 border-t border-white/8">
             <div className="flex items-center gap-2 text-xs text-white/50">
               <Calendar className="w-3.5 h-3.5" />
               <span>{date}</span>
@@ -50,7 +50,7 @@ const CertificateCard = ({
             <div className="flex gap-2">
               <a
                 href={`#cert-${index}`}
-                className="text-xs px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-white/80 border border-white/[0.08] transition-colors"
+                className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 border border-white/8 transition-colors"
               >
                 View
               </a>
@@ -96,7 +96,7 @@ const CertificateModal = ({
                transition-[opacity,scale] duration-200"
     >
       <div className="relative bg-[#1a1a24] rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
-        <div className="flex items-center justify-between p-6 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between p-6 border-b border-white/8">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
               <Award className="w-5 h-5 text-blue-400" />
@@ -105,7 +105,7 @@ const CertificateModal = ({
           </div>
           <a
             href="#"
-            className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors text-white/60 hover:text-white/90"
+            className="p-2 rounded-lg hover:bg-white/5 transition-colors text-white/60 hover:text-white/90"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -122,10 +122,10 @@ const CertificateModal = ({
           />
         </div>
 
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-white/[0.08]">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-white/8">
           <a
             href="#"
-            className="px-4 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-white/80 border border-white/[0.08] transition-colors text-sm"
+            className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 border border-white/8 transition-colors text-sm"
           >
             Close
           </a>

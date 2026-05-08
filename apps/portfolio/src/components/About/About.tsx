@@ -20,7 +20,7 @@ export default async function About() {
             {pageData.about.map((card, index) => (
               <Card
                 key={index}
-                className="border-white/[0.08] bg-white/[0.02] backdrop-blur-sm text-zinc-100 opacity-0"
+                className="border-white/8 bg-white/2 backdrop-blur-sm text-zinc-100 opacity-0"
                 data-fadein
                 style={{ animationDelay: `${300 + index * 400}ms` }}
               >
@@ -33,7 +33,7 @@ export default async function About() {
           </div>
 
           <div className="space-y-6 lg:sticky lg:top-8">
-            <Card className="border-white/[0.08] bg-white/2 backdrop-blur-sm overflow-hidden relative group">
+            <Card className="border-white/8 bg-white/2 backdrop-blur-sm overflow-hidden relative group">
               <CardContent className="p-0">
                 <div className="aspect-square relative">
                   <Img
@@ -45,7 +45,7 @@ export default async function About() {
                     fetchPriority="low"
                   />
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
                   <div className="absolute bottom-0 left-0 right-0 p-6">
                     <h4 className="text-2xl font-bold text-white mb-1">

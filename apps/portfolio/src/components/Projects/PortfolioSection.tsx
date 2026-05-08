@@ -58,7 +58,7 @@ export default async function PortfolioSection() {
                 }}
               >
                 {project.featured && (
-                  <div className="absolute -right-12 top-6 z-10 rotate-45 bg-gradient-to-r from-blue-600 to-purple-600 px-12 py-1 text-xs font-semibold text-white shadow-lg">
+                  <div className="absolute -right-12 top-6 z-10 rotate-45 bg-linear-to-r from-blue-600 to-purple-600 px-12 py-1 text-xs font-semibold text-white shadow-lg">
                     Featured
                   </div>
                 )}
@@ -72,7 +72,7 @@ export default async function PortfolioSection() {
                     loading="lazy"
                   />
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-60 transition-opacity duration-500 group-hover/image:opacity-80" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent opacity-60 transition-opacity duration-500 group-hover/image:opacity-80" />
                 </div>
 
                 <CardContent className="p-6">
@@ -102,7 +102,7 @@ export default async function PortfolioSection() {
                     </div>
                   </div>
 
-                  <p className="mb-3 line-clamp-2 text-[15px] leading-[1.5] text-zinc-300">
+                  <p className="mb-3 line-clamp-2 text-[15px] leading-normal text-zinc-300">
                     {project.description}
                   </p>
 
@@ -157,7 +157,7 @@ export default async function PortfolioSection() {
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <Button
                       asChild
-                      className="flex-[1.2] rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/20 transition-all hover:shadow-xl hover:shadow-blue-500/30 sm:flex-[1.5]"
+                      className="flex-[1.2] rounded-xl bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/20 transition-all hover:shadow-xl hover:shadow-blue-500/30 sm:flex-[1.5]"
                     >
                       <a
                         href={project.link1.url}
@@ -186,7 +186,7 @@ export default async function PortfolioSection() {
                   </div>
                 </CardContent>
 
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-white/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
               </Card>
             );
           })}

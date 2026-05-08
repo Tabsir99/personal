@@ -31,7 +31,7 @@ const Footer = async () => {
       <div className="grid gap-16 lg:grid-cols-2">
         <div className="space-y-8">
           <div className="space-y-4">
-            <h3 className="text-4xl font-bold tracking-tight bg-gradient-to-br from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent">
+            <h3 className="text-4xl font-bold tracking-tight bg-linear-to-br from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent">
               Let's build something amazing
             </h3>
             <p className="text-zinc-400 text-lg leading-relaxed max-w-xl">
@@ -47,7 +47,7 @@ const Footer = async () => {
             draggable="false"
             className="block max-w-96 group flex-1 relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm p-6 hover:border-zinc-700 hover:bg-zinc-900/80 transition-all duration-300"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500/10 border border-blue-500/20">
                 <Mail className="h-6 w-6 text-blue-400" />
@@ -165,7 +165,7 @@ const SocialMediaLink = ({
         animationDelay: `${index * 400}ms`,
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute inset-0 bg-linear-to-br from-blue-500/0 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
 
       <div className="relative flex items-center gap-3">
         <Img

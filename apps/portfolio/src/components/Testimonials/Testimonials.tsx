@@ -50,7 +50,7 @@ const TestimonialCard = ({
       <Card
         className={`relative h-full overflow-hidden transition-all duration-300 ${
           testimonial.featured
-            ? "border-2 border-emerald-500/60 bg-gradient-to-br from-emerald-950/50 via-zinc-900 to-zinc-950 shadow-2xl shadow-emerald-500/25"
+            ? "border-2 border-emerald-500/60 bg-linear-to-br from-emerald-950/50 via-zinc-900 to-zinc-950 shadow-2xl shadow-emerald-500/25"
             : "border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm hover:border-zinc-700 hover:shadow-xl hover:shadow-emerald-500/5"
         }`}
       >
@@ -58,10 +58,10 @@ const TestimonialCard = ({
         {testimonial.featured && (
           <>
             {/* Animated border glow */}
-            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-emerald-500/0 via-emerald-500/30 to-emerald-500/0 blur-xl opacity-50 animate-pulse" />
+            <div className="absolute inset-0 rounded-lg bg-linear-to-r from-emerald-500/0 via-emerald-500/30 to-emerald-500/0 blur-xl opacity-50 animate-pulse" />
 
             {/* Top accent line */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-emerald-400 to-transparent" />
           </>
         )}
 
@@ -73,7 +73,7 @@ const TestimonialCard = ({
               <div className="absolute inset-0 rounded-full bg-emerald-400/30 blur-md" />
 
               {/* Badge content */}
-              <div className="relative flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-emerald-500/50">
+              <div className="relative flex items-center gap-1.5 rounded-full bg-linear-to-r from-emerald-500 to-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-emerald-500/50">
                 <Star className="h-3.5 w-3.5 fill-white animate-pulse" />
                 FEATURED
               </div>
@@ -85,8 +85,8 @@ const TestimonialCard = ({
         <div
           className={`absolute inset-0 transition-opacity duration-500 ${
             testimonial.featured
-              ? "bg-gradient-to-br from-emerald-400/10 via-transparent to-blue-400/10 opacity-0 group-hover:opacity-100"
-              : "bg-gradient-to-br from-emerald-500/0 via-transparent to-blue-500/0 opacity-0 group-hover:opacity-10"
+              ? "bg-linear-to-br from-emerald-400/10 via-transparent to-blue-400/10 opacity-0 group-hover:opacity-100"
+              : "bg-linear-to-br from-emerald-500/0 via-transparent to-blue-500/0 opacity-0 group-hover:opacity-10"
           }`}
         />
 
@@ -94,11 +94,11 @@ const TestimonialCard = ({
           {/* Video embed */}
           {videoUrl ? (
             <div
-              className={`relative mb-6 overflow-hidden rounded-lg flex-shrink-0 ${
+              className={`relative mb-6 overflow-hidden rounded-lg shrink-0 ${
                 testimonial.featured ? "ring-2 ring-emerald-500/30" : ""
               }`}
             >
-              <div className="aspect-video bg-gradient-to-br from-zinc-800 to-zinc-900">
+              <div className="aspect-video bg-linear-to-br from-zinc-800 to-zinc-900">
                 <iframe
                   src={videoUrl}
                   className="w-full h-full"
@@ -154,7 +154,7 @@ const TestimonialCard = ({
           {/* Author info */}
           <div className="mb-4 flex items-start gap-3">
             {testimonial.avatar && (
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <div
                   className={`h-12 w-12 overflow-hidden rounded-full ${
                     testimonial.featured
@@ -183,7 +183,7 @@ const TestimonialCard = ({
               </p>
               <p className="text-xs text-zinc-500">{testimonial.location}</p>
             </div>
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <div
                 className={`rounded-full px-3 py-1 text-xs font-medium ${
                   testimonial.featured
@@ -261,8 +261,8 @@ const TestimonialCard = ({
         <div
           className={`absolute bottom-0 left-0 right-0 h-px transition-opacity ${
             testimonial.featured
-              ? "bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-60 group-hover:opacity-100"
-              : "bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100"
+              ? "bg-linear-to-r from-transparent via-emerald-400 to-transparent opacity-60 group-hover:opacity-100"
+              : "bg-linear-to-r from-transparent via-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100"
           }`}
         />
       </Card>
@@ -276,8 +276,8 @@ const InfiniteMarquee = ({
 }) => {
   return (
     <div className="relative mb-12 overflow-hidden">
-      <div className="absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-zinc-950 to-transparent" />
-      <div className="absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-zinc-950 to-transparent" />
+      <div className="absolute left-0 top-0 z-10 h-full w-20 bg-linear-to-r from-zinc-950 to-transparent" />
+      <div className="absolute right-0 top-0 z-10 h-full w-20 bg-linear-to-l from-zinc-950 to-transparent" />
 
       <div className="flex marquee-container gap-4">
         <div className="flex animate-marquee gap-4">
@@ -307,7 +307,7 @@ const MarqueeTestimonialCard = ({
   testimonial: PageData["testimonials"][number];
 }) => {
   return (
-    <div className="flex w-80 max-sm:w-60 flex-shrink-0 items-start gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 backdrop-blur-sm">
+    <div className="flex w-80 max-sm:w-60 shrink-0 items-start gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 backdrop-blur-sm">
       {testimonial.avatar && (
         <img
           src={testimonial.avatar}
@@ -395,7 +395,7 @@ export default async function Testimonials() {
           }
           target="_blank"
           rel="noopener noreferrer"
-          className="group inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-4 font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-500/40"
+          className="group inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-emerald-500 to-emerald-600 px-8 py-4 font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-500/40"
         >
           View All Reviews on Upwork
           <ExternalLink className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
