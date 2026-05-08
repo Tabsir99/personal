@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { BlogType, BlogFormData } from "@/types/blogTypes";
+import { BlogFormData, SchemaType } from "@/schemas/blogSchemas";
 import { saveDraft } from "@/actions/blogActions";
 import { callWithToast } from "@/lib/utils";
 import type { DocContent } from "@open-notion/editor";
@@ -35,17 +35,19 @@ const defaultBlogFormData: BlogFormData = {
   socialTitle: "",
   socialDescription: "",
   coverImageUrl: "",
-  content: null,
+  content: { type: "doc", content: [] },
   readTime: 0,
   hasDraftChanges: true,
   dek: "",
   seoTitle: "",
-  type: BlogType.Article,
+  kind: "essay",
+  schemaType: SchemaType.Article,
   slug: "",
   blogId: "",
   parentBlogId: null,
   createdAt: 0,
   updatedAt: 0,
+  featured: false,
 };
 
 export const useBlogEditorStore = create<BlogEditorState>()(

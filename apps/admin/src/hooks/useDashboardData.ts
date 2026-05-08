@@ -1,19 +1,17 @@
 import useSWR from "swr";
 
-const fetcher = (url: string) => fetch(url).then(r => r.json());
-
 export function useDailyStats(days: number) {
-  return useSWR(`/api/dashboard/stats?days=${days}`, fetcher);
+  return useSWR(`/api/dashboard/stats?days=${days}`);
 }
 
 export function usePagePerformance(days: number) {
-  return useSWR(`/api/dashboard/pages?days=${days}`, fetcher);
+  return useSWR(`/api/dashboard/pages?days=${days}`);
 }
 
 export function useGeoStats(days: number) {
-  return useSWR(`/api/dashboard/geo?days=${days}`, fetcher);
+  return useSWR(`/api/dashboard/geo?days=${days}`);
 }
 
 export function useTrafficSources(days: number) {
-  return useSWR(`/api/dashboard/sources?days=${days}`, fetcher);
+  return useSWR(`/api/dashboard/sources?days=${days}`);
 }

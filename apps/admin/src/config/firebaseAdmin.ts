@@ -34,3 +34,31 @@ function initFirebase() {
 }
 
 export const db = initFirebase();
+
+export const Collections = {
+  /** Aggregated dashboard stats. Docs: `overall`. */
+  DASHBOARD_STATS: "stats",
+
+  /** Stats bucketed per day (doc IDs like `2026-05-08`). Dynamic docs. */
+  DAILY_STATS: "daily-stats",
+
+  /** Stats bucketed per month (doc IDs like `2026-05`). Dynamic docs. */
+  MONTHLY_STATS: "monthly-stats",
+
+  /** Per-page traffic and engagement metrics (doc IDs are page slugs). Dynamic docs. */
+  PAGE_METRICS: "page-metrics",
+
+  /** Blog posts (doc IDs are uuid). Dynamic docs. */
+  BLOGS: "blogs",
+
+  /** Event log (page views, clicks, etc.). Dynamic docs. */
+  EVENTS: "events",
+
+  /** Denormalized list of published blog slugs for sitemap/link validation. Docs: `blogs`. */
+  VALID_LINKS: "valid-links",
+
+  /** App-level config edited from the CMS. Docs: `blog`, `site`. */
+  CONFIG: "config",
+} as const;
+
+export type ValidCollections = keyof typeof Collections;

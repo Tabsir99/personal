@@ -9,7 +9,7 @@ import { Pencil, Trash2, Power, Share2, Image } from "lucide-react";
 import useUIStore from "@/stores/UIStore";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
-import { BlogStatus } from "@/types/blogTypes";
+import { BlogStatus } from "@/schemas/blogSchemas";
 
 export default function BlogMenu({
   status,

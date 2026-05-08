@@ -1,6 +1,6 @@
 import { env } from "@/config/env.server";
 import { NextRequest, NextResponse } from "next/server";
-import { PageData } from "@/types/portfolioTypes";
+import { PageData, pageDataSchema } from "@/schemas/portfolioSchemas";
 import {
   readObject,
   S3Bucket,
@@ -29,7 +29,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const pageData = (await request.json()) as PageData;
+    const body = await request.json();
+    const parsed = pageDataSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid page data", issues: parsed.error.issues },
+        { status: 400 },
+      );
+    }
+    const pageData = parsed.data;
 
     // Fetch the old page data
     const oldPageData = await fetchPageData();

@@ -4,14 +4,19 @@ import s3, { S3Bucket } from "@/config/cloudflareS3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
+import { uploadFileInfoArraySchema } from "@/schemas/portfolioSchemas";
 
 export async function POST(request: NextRequest) {
   try {
-    const files = (await request.json()) as {
-      size: number;
-      type: string;
-      path: string;
-    }[];
+    const body = await request.json();
+    const parsed = uploadFileInfoArraySchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid file list", issues: parsed.error.issues },
+        { status: 400 },
+      );
+    }
+    const files = parsed.data;
 
     const urlPromises = files.map(async ({ size, type, path }) => {
       const key = `portfolio/${randomUUID()}`;

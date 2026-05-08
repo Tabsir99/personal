@@ -1,4 +1,5 @@
 "use server";
+import { z } from "zod";
 import {
   createData,
   readSingleDoc,
@@ -6,12 +7,6 @@ import {
   deleteDoc,
   readNDocs,
 } from "@/lib/commonQuery";
-import {
-  BlogFormData,
-  BlogDraftDB,
-  PublishedBlogDB,
-  BlogStatus,
-} from "@/types/blogTypes";
 import { measureEstReadTime, wrap } from "@/lib/appUtils";
 import {
   createNewBlogFormData,
@@ -21,13 +16,23 @@ import {
   publishedDBToFormData,
   sendRevalidateRequest,
 } from "@/lib/blogUtils";
+import {
+  BlogDraftDB,
+  BlogStatus,
+  PublishedBlogDB,
+  blogFormDataSchema,
+} from "@/schemas/blogSchemas";
+
+const blogIdSchema = z.string().min(1);
+const optionalTitleSchema = z.string().optional();
 
 // ============================================================================
 // DRAFT ACTIONS (BLOG_DRAFTS collection)
 // ============================================================================
 
 export const startBlogWriting = wrap(async (title?: string) => {
-  const newBlogFormData = createNewBlogFormData(title);
+  const parsedTitle = optionalTitleSchema.parse(title);
+  const newBlogFormData = createNewBlogFormData(parsedTitle);
 
   await createData<BlogDraftDB>({
     collectionName: "BLOGS",
@@ -39,22 +44,23 @@ export const startBlogWriting = wrap(async (title?: string) => {
 });
 
 export const loadBlogForEditing = wrap(async (blogId: string) => {
+  const parsedBlogId = blogIdSchema.parse(blogId);
   const blog = await readSingleDoc<PublishedBlogDB | BlogDraftDB>({
     collectionName: "BLOGS",
-    docId: blogId,
+    docId: parsedBlogId,
   });
 
   if (!blog) throw new Error("Blog not found");
 
   // If it's already a draft, just convert and return
-  if (blog.status === BlogStatus.Draft)
+  if (blog.status === BlogStatus.draft)
     return { data: draftDBToFormData(blog) };
 
   // If published, check for existing draft first
   const existingDraft = (
     await readNDocs<BlogDraftDB>({
       collectionName: "BLOGS",
-      filters: { parentBlogId: blogId },
+      filters: { parentBlogId: parsedBlogId },
       cursorValue: null,
       limit: 1,
     })
@@ -75,9 +81,7 @@ export const loadBlogForEditing = wrap(async (blogId: string) => {
 });
 
 export const saveDraft = wrap(async (blogFormDataString: string) => {
-  const blogFormData = JSON.parse(blogFormDataString) as BlogFormData;
-
-  if (!blogFormData.content) throw new Error("Content is required");
+  const blogFormData = blogFormDataSchema.parse(JSON.parse(blogFormDataString));
 
   // VALIDATION: Check if draft exists
   const existingDraft = await readSingleDoc<BlogDraftDB>({
@@ -112,9 +116,10 @@ export const saveDraft = wrap(async (blogFormDataString: string) => {
 });
 
 export const discardDraftChanges = wrap(async (draftId: string) => {
+  const parsedDraftId = blogIdSchema.parse(draftId);
   const draft = await readSingleDoc<BlogDraftDB>({
     collectionName: "BLOGS",
-    docId: draftId,
+    docId: parsedDraftId,
   });
 
   if (!draft || !draft.parentBlogId)
@@ -122,7 +127,7 @@ export const discardDraftChanges = wrap(async (draftId: string) => {
 
   await deleteDoc({
     collectionName: "BLOGS",
-    docId: draftId,
+    docId: parsedDraftId,
   });
   return { data: null };
 });
@@ -161,6 +166,7 @@ export const publishBlog = wrap(async (draftId: string) => {
         readTime: publishedBlog.readTime,
         metaDescription: publishedBlog.metaDescription,
         publishedAt: publishedBlog.publishedAt,
+        featured: publishedBlog.featured,
       };
     }
   }
@@ -201,8 +207,8 @@ export const toggleBlogStatus = wrap(async (blogId: string) => {
 
   if (!blogDoc) throw new Error("Blog does not exist");
 
-  const isActive = blogDoc.status === BlogStatus.Published;
-  const newStatus = isActive ? BlogStatus.Unpublished : BlogStatus.Published;
+  const isActive = blogDoc.status === BlogStatus.published;
+  const newStatus = isActive ? BlogStatus.unpublished : BlogStatus.published;
 
   await updateData<PublishedBlogDB>({
     collectionName: "BLOGS",

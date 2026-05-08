@@ -4,7 +4,7 @@ import { Search, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DraftBlogCard from "@/components/managePosts/DraftBlogCard";
-import { BlogFormData } from "@/types/blogTypes";
+import { BlogFormData } from "@/schemas/blogSchemas";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { PageHeader } from "@/components/ui/common/PageHeader";

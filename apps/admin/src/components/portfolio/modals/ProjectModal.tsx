@@ -25,7 +25,7 @@ import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Img from "@/components/ui/image";
-import { PageData } from "@/types/portfolioTypes";
+import { PageData } from "@/schemas/portfolioSchemas";
 
 interface ProjectDialogProps {
   children?: React.ReactNode;
@@ -48,6 +48,7 @@ const defaultFormData: PageData["projects"][number] = {
   metrics: [],
   year: "",
   duration: "",
+  role: "",
   clientType: "",
 };
 
@@ -138,7 +139,9 @@ export default function ProjectDialog({
         <div className="space-y-6 py-4">
           {/* Image Upload */}
           <div>
-            <Label className="mb-2 block text-foreground/80">Project Image</Label>
+            <Label className="mb-2 block text-foreground/80">
+              Project Image
+            </Label>
             <div className="flex items-center gap-4">
               <div
                 onClick={() => imageInputRef.current?.click()}
@@ -175,7 +178,9 @@ export default function ProjectDialog({
           <div className="grid grid-cols-2 gap-4">
             {/* Title */}
             <div>
-              <Label className="mb-2 block text-foreground/80">Project Title</Label>
+              <Label className="mb-2 block text-foreground/80">
+                Project Title
+              </Label>
               <Input
                 placeholder="E-commerce Platform"
                 value={formData.title}
@@ -187,14 +192,16 @@ export default function ProjectDialog({
 
             {/* Type */}
             <div>
-              <Label className="mb-2 block text-foreground/80">Project Type</Label>
+              <Label className="mb-2 block text-foreground/80">
+                Project Type
+              </Label>
               <Select
                 value={formData.type}
                 onValueChange={(value: "Personal" | "Demo" | "Freelance") =>
                   setFormData({ ...formData, type: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="capitalize">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -339,7 +346,9 @@ export default function ProjectDialog({
 
           {/* Featured Toggle */}
           <div>
-            <Label className="mb-2 block text-foreground/80">Featured Project</Label>
+            <Label className="mb-2 block text-foreground/80">
+              Featured Project
+            </Label>
             <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-4">
               <Checkbox
                 id="featured"
@@ -423,7 +432,9 @@ export default function ProjectDialog({
                     >
                       <X size={12} className="text-destructive-foreground" />
                     </button>
-                    <div className="text-xs text-muted-foreground">{metric.label}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {metric.label}
+                    </div>
                     <div className="text-sm font-bold text-foreground">
                       {metric.value}
                     </div>
@@ -491,13 +502,7 @@ export default function ProjectDialog({
         </div>
 
         <DialogFooter className="gap-2">
-          <DialogClose
-            render={
-              <Button variant="outline">
-                Cancel
-              </Button>
-            }
-          />
+          <DialogClose render={<Button variant="outline">Cancel</Button>} />
 
           <DialogClose
             render={

@@ -2,34 +2,55 @@
 
 import { useMemo, useState } from "react";
 import CMSBlogCard from "./BlogCard";
-import ManagePostHead from "./ManageBlogHead";
-import { PublishedBlogDB, BlogStatus } from "@/types/blogTypes";
+import ManagePostHead, { BlogFilters } from "./ManageBlogHead";
+import { PublishedBlogDB } from "@/schemas/blogSchemas";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import { BlogCardSkeletonGrid } from "../ui/Skeletons/BlogCardSkeleton";
 import { callWithToast } from "@/lib/utils";
 import { deleteBlog, toggleBlogStatus } from "@/actions/blogActions";
 
+const DEFAULT_FILTERS: BlogFilters = {
+  status: "all",
+  kind: "all",
+  schemaType: "all",
+};
+
+function buildBlogsQueryString(filters: BlogFilters) {
+  const params = new URLSearchParams();
+  if (filters.status !== "all") params.set("status", filters.status);
+  if (filters.kind !== "all") params.set("kind", filters.kind);
+  if (filters.schemaType !== "all")
+    params.set("schemaType", filters.schemaType);
+  const qs = params.toString();
+  return qs ? `?${qs}` : "";
+}
+
 const BlogOverview = () => {
   const [searchTerm, setSearchTerm] = useState("");
-
-  const [filterBy, setFilterBy] = useState<{
-    status: BlogStatus | "";
-  }>({ status: "" });
+  const [filters, setFilters] = useState<BlogFilters>(DEFAULT_FILTERS);
 
   const { data, isLoading } = useCustomSWR<PublishedBlogDB[]>(
-    `/api/blogs?=content=false&status=${filterBy.status}`,
+    `/api/blogs${buildBlogsQueryString(filters)}`,
   );
 
   const filteredPosts = useMemo(() => {
-    return (
-      data?.filter((blog) => {
-        return (
-          blog.title?.includes(searchTerm) ||
-          blog.metaDescription?.includes(searchTerm)
-        );
-      }) || []
+    const term = searchTerm.toLowerCase();
+    if (!term) return data ?? [];
+    return (data ?? []).filter(
+      (blog) =>
+        blog.title?.toLowerCase().includes(term) ||
+        blog.metaDescription?.toLowerCase().includes(term),
     );
   }, [data, searchTerm]);
+
+  const handleFilterChange = <K extends keyof BlogFilters>(
+    key: K,
+    value: BlogFilters[K],
+  ) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleClearFilters = () => setFilters(DEFAULT_FILTERS);
 
   const toggleStatus = async (blogId: string) => {
     await callWithToast(async () => toggleBlogStatus(blogId), {
@@ -52,9 +73,9 @@ const BlogOverview = () => {
       <ManagePostHead
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        handleStatusChange={(status) => {
-          setFilterBy((prev) => ({ ...prev, status }));
-        }}
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onClearFilters={handleClearFilters}
       />
 
       <div className="mx-auto w-full max-w-full py-5">

@@ -1,6 +1,5 @@
 import { firestore } from "firebase-admin";
-import { db } from "../config/firebaseAdmin";
-import { Collections, ValidCollections } from "@/lib/constants";
+import { db, Collections, ValidCollections } from "../config/firebaseAdmin";
 
 interface CreateDataParams<T> {
   collectionName: ValidCollections;
@@ -46,7 +45,9 @@ export const updateData = async <T>({
   try {
     const docRef = db.collection(Collections[collectionName]).doc(docId);
     await docRef.set(updatedData as any, { merge });
-  } catch (err) {}
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 export const readAllDocs = async <T = any>(
@@ -71,10 +72,15 @@ export const readAllDocs = async <T = any>(
   }
 };
 
+type ArrayContains<T> = {
+  [K in keyof T]?: T[K] extends Array<infer U> ? U : never;
+};
+
 interface ReadNDocsParams<T> {
   collectionName: ValidCollections;
   limit?: number;
   filters?: Partial<{ [K in keyof T]: T[K] }>;
+  arrayContainsFilters?: ArrayContains<T>;
   cursorValue: string | null;
   fieldsToRead?: Partial<Record<keyof T, boolean>>;
   orderBy?: {
@@ -87,6 +93,7 @@ export const readNDocs = async <T>({
   collectionName,
   limit = 30,
   filters = {},
+  arrayContainsFilters,
   cursorValue,
   fieldsToRead,
   orderBy,
@@ -97,6 +104,14 @@ export const readNDocs = async <T>({
     Object.entries(filters).forEach(([field, value]) => {
       query = query.where(field, "==", value);
     });
+
+    if (arrayContainsFilters) {
+      Object.entries(arrayContainsFilters).forEach(([field, value]) => {
+        if (value !== undefined) {
+          query = query.where(field, "array-contains", value);
+        }
+      });
+    }
 
     if (fieldsToRead) {
       query = query.select(

@@ -10,11 +10,11 @@ const SearchInput = ({
   placeholder?: string;
 }) => {
   return (
-    <div className="relative grow">
+    <div className="relative w-full sm:w-72">
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 text-muted-foreground"
+          className="h-4 w-4 text-muted-foreground"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -30,18 +30,7 @@ const SearchInput = ({
       <input
         type="search"
         placeholder={placeholder}
-        className="
-          w-full 
-          pl-10 
-          pr-4 
-          py-2.5
-          text-foreground
-          bg-muted/40
-          rounded-lg 
-          outline-none focus:border-ring border-2 border-transparent
-          shadow-md
-          placeholder:text-muted-foreground
-        "
+        className="w-full h-9 pl-9 pr-3 text-sm text-foreground bg-muted/40 rounded-lg outline-none border border-input focus:border-ring placeholder:text-muted-foreground"
         value={searchTerm}
         onChange={handleChange}
       />

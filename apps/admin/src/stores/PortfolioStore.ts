@@ -1,4 +1,4 @@
-import { PageData } from "@/types/portfolioTypes";
+import { PageData } from "@/schemas/portfolioSchemas";
 import { toast } from "sonner";
 import { create } from "zustand";
 

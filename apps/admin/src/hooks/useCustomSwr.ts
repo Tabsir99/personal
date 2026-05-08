@@ -3,7 +3,7 @@ import useSWR, { SWRConfiguration, Fetcher } from "swr";
 const defaultConfig: SWRConfiguration = {
   revalidateOnFocus: false,
   revalidateOnReconnect: false,
-  dedupingInterval: 2000, // Prevent multiple requests for the same data within 2 seconds
+  dedupingInterval: 2000,
   revalidateIfStale: false,
   keepPreviousData: true,
   shouldRetryOnError: false,
@@ -19,10 +19,9 @@ const fetcher: Fetcher<any> = async (url: string) => {
   return response.json();
 };
 
-// Custom SWR Hook
 export function useCustomSWR<T = any>(
   key: string | null,
-  config: SWRConfiguration = {}
+  config: SWRConfiguration = {},
 ) {
   const mergedConfig = { ...defaultConfig, ...config };
 

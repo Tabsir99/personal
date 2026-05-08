@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Clock } from "lucide-react";
-import { BlogFormData, BlogStatus } from "@/types/blogTypes";
+import { BlogFormData, BlogStatus } from "@/schemas/blogSchemas";
 import BlogMenu from "./BlogMenu";
 import Link from "next/link";
 import { getTimeSince } from "@/lib/appUtils";
@@ -29,7 +29,7 @@ export default function DraftBlogCard({
 
             <BlogMenu
               blogName={blog.title!}
-              status={BlogStatus.Draft}
+              status={BlogStatus.draft}
               blogId={blog.blogId!}
               confirmDelete={() => confirmDelete(blog.blogId!)}
             />

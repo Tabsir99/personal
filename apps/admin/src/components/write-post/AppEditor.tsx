@@ -5,7 +5,7 @@ import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { useOpenNotion, OpenNotionView } from "@open-notion/editor";
 import { DocContent } from "@open-notion/editor";
 import WriteMetadataComp from "./writeMetadata";
-import { BlogFormData } from "@/types/blogTypes";
+import { BlogFormData } from "@/schemas/blogSchemas";
 import EditorHeader from "./EditorHeader";
 import Preview from "./Preview";
 import { PublishBlog } from "./PublishBlog";
@@ -22,11 +22,7 @@ const TextEditor = ({ blogFormData }: { blogFormData: BlogFormData }) => {
   const lastDocStateRef = useRef<any>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const onChange = async (json: DocContent) => {
-    if (!lastDocStateRef.current || !editor) return;
-    if (editor.state.doc.eq(lastDocStateRef.current)) return;
-
-    lastDocStateRef.current = editor.state.doc;
+  const triggerSave = async (json: DocContent) => {
     setSaveStatus("saving");
     await saveDraft(json, false);
     setSaveStatus("saved");
@@ -36,6 +32,20 @@ const TextEditor = ({ blogFormData }: { blogFormData: BlogFormData }) => {
       setSaveStatus("idle");
       saveTimerRef.current = null;
     }, 2000);
+  };
+
+  const onChange = async (json: DocContent) => {
+    if (!lastDocStateRef.current || !editor) return;
+    if (editor.state.doc.eq(lastDocStateRef.current)) return;
+
+    lastDocStateRef.current = editor.state.doc;
+    await triggerSave(json);
+  };
+
+  const closeSettings = async () => {
+    setShowSettings(false);
+    if (!editor) return;
+    await triggerSave(editor.getJSON());
   };
 
   const editor = useOpenNotion({
@@ -81,7 +91,7 @@ const TextEditor = ({ blogFormData }: { blogFormData: BlogFormData }) => {
       />
       <WriteMetadataComp
         showSidebar={showSettings}
-        closeSidebar={() => setShowSettings(false)}
+        closeSidebar={closeSettings}
       />
       <PublishBlog
         blogId={blogFormData.blogId}

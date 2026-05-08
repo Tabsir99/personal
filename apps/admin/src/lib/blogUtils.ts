@@ -2,10 +2,10 @@ import "server-only";
 import {
   BlogFormData,
   BlogStatus,
-  BlogType,
+  SchemaType,
   BlogDraftDB,
   PublishedBlogDB,
-} from "@/types/blogTypes";
+} from "@/schemas/blogSchemas";
 import { randomUUID } from "crypto";
 import { slugify } from "./appUtils";
 import { env } from "@/config/env.server";
@@ -18,7 +18,8 @@ export function draftDBToFormData(dbDraft: BlogDraftDB): BlogFormData {
   return {
     blogId: dbDraft.blogId,
     parentBlogId: dbDraft.parentBlogId,
-    type: dbDraft.type,
+    kind: dbDraft.kind,
+    schemaType: dbDraft.schemaType,
     slug: dbDraft.slug,
     title: dbDraft.title,
     metaDescription: dbDraft.metaDescription,
@@ -33,6 +34,7 @@ export function draftDBToFormData(dbDraft: BlogDraftDB): BlogFormData {
     updatedAt: dbDraft.updatedAt,
     hasDraftChanges: true,
     socialDescription: dbDraft.socialDescription,
+    featured: dbDraft.featured || false,
     // publishedVersion will be added separately if parentBlogId exists
   };
 }
@@ -41,9 +43,10 @@ export function formDataToDraftDB(formData: BlogFormData): BlogDraftDB {
   return {
     blogId: formData.blogId,
     parentBlogId: formData.parentBlogId,
-    type: formData.type,
+    kind: formData.kind,
+    schemaType: formData.schemaType,
     slug: formData.slug,
-    status: BlogStatus.Draft,
+    status: BlogStatus.draft,
     title: formData.title,
     dek: formData.dek,
     seoTitle: formData.seoTitle,
@@ -56,6 +59,7 @@ export function formDataToDraftDB(formData: BlogFormData): BlogDraftDB {
     createdAt: formData.createdAt || Date.now(),
     updatedAt: Date.now(),
     socialDescription: formData.socialDescription,
+    featured: formData.featured || false,
   };
 }
 
@@ -70,8 +74,10 @@ export function publishedDBToFormData(
   return {
     blogId: randomUUID(), // New draft ID
     parentBlogId: dbPublished.blogId, // Link to published blog
-    type: dbPublished.type,
+    kind: dbPublished.kind,
+    schemaType: dbPublished.schemaType,
     slug: dbPublished.slug,
+    featured: dbPublished.featured,
     // Populate draft fields from published (user will edit these)
     title: dbPublished.title,
     dek: dbPublished.dek,
@@ -96,6 +102,7 @@ export function publishedDBToFormData(
       metaDescription: dbPublished.metaDescription,
       publishedAt: dbPublished.publishedAt,
       socialDescription: dbPublished.socialDescription,
+      featured: dbPublished.featured,
     },
     createdAt: Date.now(), // Draft creation time
     updatedAt: Date.now(),
@@ -107,9 +114,10 @@ export function formDataToPublishedDB(formData: BlogFormData): PublishedBlogDB {
   // Promote draft fields to published
   return {
     blogId: formData.parentBlogId || formData.blogId, // Use parent ID if editing, else draft ID
-    type: formData.type,
+    kind: formData.kind,
+    schemaType: formData.schemaType,
     slug: formData.slug || slugify(formData.title),
-    status: BlogStatus.Published,
+    status: BlogStatus.published,
     title: formData.title,
     dek: formData.dek,
     seoTitle: formData.seoTitle,
@@ -125,6 +133,7 @@ export function formDataToPublishedDB(formData: BlogFormData): PublishedBlogDB {
     publishedAt: formData.publishedVersion?.publishedAt || Date.now(),
     recommendedBlogIds: [],
     socialDescription: formData.socialDescription,
+    featured: formData.featured,
   };
 }
 
@@ -136,7 +145,8 @@ export function createNewBlogFormData(title?: string): BlogFormData {
   return {
     blogId: randomUUID(),
     parentBlogId: null, // New draft (not editing published)
-    type: BlogType.Article,
+    kind: "essay",
+    schemaType: SchemaType.Article,
     slug: "",
     title: title || `Untitled Blog ${new Date().toLocaleDateString()}`,
     dek: "",
@@ -144,13 +154,14 @@ export function createNewBlogFormData(title?: string): BlogFormData {
     tags: [],
     socialTitle: "",
     coverImageUrl: "",
-    content: null,
+    content: { type: "doc", content: [] },
     readTime: 0,
     metaDescription: "",
     createdAt: Date.now(),
     updatedAt: Date.now(),
     hasDraftChanges: true,
     socialDescription: "",
+    featured: false,
   };
 }
 

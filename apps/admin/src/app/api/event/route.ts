@@ -1,22 +1,16 @@
-import type {
+import {
   AnalyticsEvent,
   PageExitEvent,
   PageViewEvent,
   SessionStartEvent,
-} from "@/types/dashboardTypes";
+  analyticsEventSchema,
+} from "@/schemas/dashboardSchemas";
 import { NextRequest, NextResponse } from "next/server";
 import { UAParser } from "ua-parser-js";
 import { db } from "@/config/firebaseAdmin";
 import { firestore } from "firebase-admin";
 
 type FirestoreData = Record<string, firestore.FieldValue | string | number>;
-
-const validEventTypes = new Set([
-  "session_start",
-  "page_view",
-  "page_exit",
-  "portfolio_view",
-]);
 
 const dailyStats = db.collection("daily_stats");
 const geoStats = db.collection("geo_stats");
@@ -25,16 +19,12 @@ const trafficSources = db.collection("traffic_sources");
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await request.json();
-
-    if (
-      !session ||
-      !validEventTypes.has(session.type) ||
-      !session.sessionId ||
-      !session.timestamp
-    ) {
+    const body = await request.json();
+    const parsed = analyticsEventSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json({ error: "Bad Request" }, { status: 400 });
     }
+    const session = parsed.data;
 
     const country = request.headers.get("xCountry") || "unknown";
 

@@ -1,4 +1,4 @@
-import { PublishedBlogDB, BlogStatus } from "@/types/blogTypes";
+import { PublishedBlogDB, BlogStatus } from "@/schemas/blogSchemas";
 import { mutate } from "swr";
 
 export const invalidateBlogOverview = ({
@@ -38,9 +38,9 @@ export const invalidateBlogOverview = ({
               return {
                 ...item,
                 status:
-                  selectedBlog.status === BlogStatus.Published
-                    ? BlogStatus.Unpublished
-                    : BlogStatus.Published,
+                  selectedBlog.status === BlogStatus.published
+                    ? BlogStatus.unpublished
+                    : BlogStatus.published,
               };
             });
         }

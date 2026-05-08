@@ -16,7 +16,11 @@ import {
 } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BlogDraftDB, BlogStatus, PublishedBlogDB } from "@/types/blogTypes";
+import {
+  BlogDraftDB,
+  BlogStatus,
+  PublishedBlogDB,
+} from "@/schemas/blogSchemas";
 import BlogMenu from "./BlogMenu";
 import { clientEnv } from "@/config/env.client";
 import { cn } from "@/lib/utils";
@@ -33,11 +37,11 @@ export default function CMSBlogCard({
   // Get appropriate status color
   const getStatusClass = (status: BlogStatus) => {
     switch (status) {
-      case BlogStatus.Published:
+      case BlogStatus.published:
         return "border-primary/20 bg-primary/10 text-primary";
-      case BlogStatus.Draft:
+      case BlogStatus.draft:
         return "border-accent bg-accent text-accent-foreground";
-      case BlogStatus.Unpublished:
+      case BlogStatus.unpublished:
         return "border-destructive/20 bg-destructive/10 text-destructive";
       default:
         return "border-border bg-muted text-muted-foreground";
@@ -71,7 +75,7 @@ export default function CMSBlogCard({
               confirmDelete={() => confirmDelete(blog.blogId)}
             />
 
-            {blog.status !== BlogStatus.Draft && (
+            {blog.status !== BlogStatus.draft && (
               <Link
                 href={`${clientEnv.ADMIN_ORIGIN}/blogs/${blog.slug}`}
                 target="_blank"
@@ -135,7 +139,7 @@ export default function CMSBlogCard({
       </CardContent>
 
       {/* Stats Section */}
-      {blog.status !== BlogStatus.Draft && (
+      {blog.status !== BlogStatus.draft && (
         <CardFooter className="grid grid-cols-4 gap-4 border-t border-border pb-4 pt-4">
           <MetricItem
             icon={<Eye className="h-4 w-4 text-muted-foreground" />}
