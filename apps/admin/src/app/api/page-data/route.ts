@@ -53,10 +53,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log("Revalidated tabsircg.com");
-
     await fetch("https://tabsircg.com");
-    console.log("Created static cache for tabsircg.com");
+    console.info("Created static cache for tabsircg.com");
 
     return NextResponse.json("OK", { status: 200 });
   } catch (error) {
@@ -71,12 +69,12 @@ async function deleteRemovedMedia(oldData: PageData, newData: PageData) {
 
   const removedUrls = oldUrls.filter((url) => !newUrls.includes(url));
 
-  console.log(removedUrls);
+  console.info(removedUrls);
   if (removedUrls.length > 0) {
     await deleteObjects(S3Bucket.PUBLIC, removedUrls);
   }
 
-  console.log(`Deleted ${removedUrls.length} unused media files`);
+  console.info(`Deleted ${removedUrls.length} unused media files`);
 }
 
 function extractMediaUrls(pageData: PageData): string[] {

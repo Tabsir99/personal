@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { BlogType, BlogFormData } from "@/types/blogTypes";
-import { loadBlogForEditing, saveDraft } from "@/actions/blogActions";
+import { saveDraft } from "@/actions/blogActions";
 import { callWithToast } from "@/lib/utils";
 import type { DocContent } from "@open-notion/editor";
 
@@ -14,7 +14,6 @@ interface BlogEditorState {
   isSaving: boolean;
   lastSaved?: number;
   isPublishedBlog: () => boolean;
-  isLoading: boolean;
 
   // Actions
   setBlogFormData: (data: Partial<BlogFormData>) => void;
@@ -26,23 +25,23 @@ interface BlogEditorState {
   setSaving: (saving: boolean) => void;
   updateLastSaved: () => void;
 
-  loadBlogFormData: (blogId: string) => Promise<string>;
   saveDraft: (latestContent: DocContent, showToast?: boolean) => Promise<void>;
 }
 
 const defaultBlogFormData: BlogFormData = {
   title: "",
-  description: "",
+  metaDescription: "",
   tags: [],
-  recommendationTitle: "Keep reading...",
   socialTitle: "",
-  featuredImageUrl: "",
+  socialDescription: "",
+  coverImageUrl: "",
   content: null,
-  estReadTime: 0,
+  readTime: 0,
   hasDraftChanges: true,
-
+  dek: "",
+  seoTitle: "",
   type: BlogType.Article,
-  link: "",
+  slug: "",
   blogId: "",
   parentBlogId: null,
   createdAt: 0,
@@ -57,7 +56,6 @@ export const useBlogEditorStore = create<BlogEditorState>()(
       isCreateDialogOpen: false,
       isSaving: false,
       lastSaved: undefined,
-      isLoading: true,
 
       // Actions
       setBlogFormData: (data) =>
@@ -116,21 +114,8 @@ export const useBlogEditorStore = create<BlogEditorState>()(
       updateLastSaved: () =>
         set({ lastSaved: Date.now() }, false, "updateLastSaved"),
 
-      async loadBlogFormData(blogId) {
-        if (blogId === get().blogFormData.blogId) return blogId;
-
-        set({ isLoading: true }, false, "loadBlogFormData-start");
-        const { data } = await loadBlogForEditing(blogId);
-
-        if (!data) throw new Error("Blog not found");
-
-        set({ blogFormData: data, isLoading: false }, false);
-        return data.blogId;
-      },
-
       async saveDraft(latestContent, showToast = true) {
         if (!get().blogFormData.blogId) return;
-        console.log(get().blogFormData);
         set((state) => ({
           ...state,
           blogFormData: { ...state.blogFormData, content: latestContent },

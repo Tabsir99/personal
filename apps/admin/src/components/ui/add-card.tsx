@@ -21,7 +21,7 @@ export function AddCard({
   return (
     <Card
       onClick={onClick}
-      className={`group relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border bg-card/60 backdrop-blur-sm transition-all duration-500 hover:border-border/80 hover:bg-card active:scale-[0.95]
+      className={`group relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border bg-card backdrop-blur-sm transition-all duration-500 hover:border-accent-foreground/50 hover:bg-card-foreground/2 active:scale-[0.95]
         ${className}`}
     >
       <CardContent

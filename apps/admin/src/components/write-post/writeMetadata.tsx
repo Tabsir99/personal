@@ -46,34 +46,26 @@ export default function WriteMetadataComp({
 }) {
   const { setBlogFormData, addTag, removeTag } = useBlogEditorStore.getState();
 
-  const [
-    title,
-    socialTitle,
-    type,
-    description,
-    recommendationTitle,
-    tags,
-    featuredImageUrl,
-  ] = useBlogEditorStore(
-    useShallow((state) => {
-      const d = state.blogFormData;
-      return [
-        d.title,
-        d.socialTitle,
-        d.type,
-        d.description,
-        d.recommendationTitle,
-        d.tags,
-        d.featuredImageUrl,
-      ];
-    })
-  );
+  const [title, socialTitle, type, description, tags, coverImageUrl] =
+    useBlogEditorStore(
+      useShallow((state) => {
+        const d = state.blogFormData;
+        return [
+          d.title,
+          d.socialTitle,
+          d.type,
+          d.metaDescription,
+          d.tags,
+          d.coverImageUrl,
+        ];
+      }),
+    );
 
   const [tagInput, setTagInput] = useState("");
   const uploadRef = useRef<HTMLInputElement | null>(null);
 
   const handleThumbnailUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const imageFile = e.target.files?.[0];
     if (!imageFile) return;
@@ -89,10 +81,7 @@ export default function WriteMetadataComp({
 
   return (
     <Sheet open={showSidebar} onOpenChange={closeSidebar}>
-      <SheetContent
-        side="right"
-        className="w-full sm:max-w-2xl border-border p-0 overflow-hidden"
-      >
+      <SheetContent side="right" className="border-border p-0 overflow-hidden">
         <SheetHeader className="px-6 py-6 border-b border-border bg-card/40">
           <SheetTitle className="text-xl font-semibold text-left">
             Blog Metadata
@@ -110,9 +99,7 @@ export default function WriteMetadataComp({
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-2 mb-4">
                     <FileText className="h-4 w-4 text-muted-foreground" />
-                    <h3 className="text-lg font-medium">
-                      Basic Information
-                    </h3>
+                    <h3 className="text-lg font-medium">Basic Information</h3>
                   </div>
 
                   <div className="space-y-4">
@@ -189,9 +176,7 @@ export default function WriteMetadataComp({
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-2 mb-4">
                     <Hash className="h-4 w-4 text-muted-foreground" />
-                    <h3 className="text-lg font-medium">
-                      Tags & Categories
-                    </h3>
+                    <h3 className="text-lg font-medium">Tags & Categories</h3>
                   </div>
 
                   <div className="space-y-4">
@@ -249,25 +234,6 @@ export default function WriteMetadataComp({
                         ))}
                       </div>
                     )}
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="recTitle"
-                        className="text-sm font-medium text-foreground/80"
-                      >
-                        Recommendation Title
-                      </Label>
-                      <Input
-                        id="recTitle"
-                        placeholder="Title for recommendations..."
-                        value={recommendationTitle}
-                        onChange={(e) =>
-                          setBlogFormData({
-                            recommendationTitle: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -277,17 +243,15 @@ export default function WriteMetadataComp({
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-2 mb-4">
                     <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                    <h3 className="text-lg font-medium">
-                      Featured Image
-                    </h3>
+                    <h3 className="text-lg font-medium">Featured Image</h3>
                   </div>
 
                   <div className="space-y-4">
-                    {featuredImageUrl ? (
+                    {coverImageUrl ? (
                       <div className="space-y-3">
                         <div className="relative rounded-lg border border-border overflow-hidden">
                           <Image
-                            src={featuredImageUrl}
+                            src={coverImageUrl}
                             alt="Featured image"
                             width={400}
                             height={200}
@@ -337,25 +301,23 @@ export default function WriteMetadataComp({
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-2 mb-4">
                     <Globe className="h-4 w-4 text-muted-foreground" />
-                    <h3 className="text-lg font-medium">
-                      SEO & Description
-                    </h3>
+                    <h3 className="text-lg font-medium">SEO & Description</h3>
                   </div>
 
                   <div className="space-y-2">
                     <Label
-                      htmlFor="description"
+                      htmlFor="metaDescription"
                       className="text-sm font-medium text-foreground/80"
                     >
                       Blog Description
                     </Label>
                     <Textarea
-                      id="description"
+                      id="metaDescription"
                       rows={4}
                       placeholder="Enter a brief description about the blog..."
                       value={description}
                       onChange={(e) =>
-                        setBlogFormData({ description: e.target.value })
+                        setBlogFormData({ metaDescription: e.target.value })
                       }
                       className="resize-none"
                     />

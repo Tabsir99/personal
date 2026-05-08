@@ -20,15 +20,17 @@ export async function GET(request: NextRequest) {
       fieldsToRead: {
         blogId: true,
         title: true,
-        description: true,
+        dek: true,
+        seoTitle: true,
         tags: true,
-        estReadTime: true,
+        coverImageUrl: true,
+        readTime: true,
+        metaDescription: true,
         stats: true,
         createdAt: true,
         updatedAt: true,
-        link: true,
+        slug: true,
         status: true,
-        featuredImageUrl: true,
         type: true,
       },
       orderBy: {
@@ -37,13 +39,12 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    console.log("Raw data:", JSON.stringify(data, null, 2));
     return NextResponse.json(data);
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json(
       { error: "Failed to fetch blogs" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

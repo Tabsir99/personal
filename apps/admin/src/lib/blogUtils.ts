@@ -19,18 +19,20 @@ export function draftDBToFormData(dbDraft: BlogDraftDB): BlogFormData {
     blogId: dbDraft.blogId,
     parentBlogId: dbDraft.parentBlogId,
     type: dbDraft.type,
-    link: dbDraft.link,
+    slug: dbDraft.slug,
     title: dbDraft.title,
-    description: dbDraft.description,
+    metaDescription: dbDraft.metaDescription,
     tags: dbDraft.tags,
     socialTitle: dbDraft.socialTitle,
-    featuredImageUrl: dbDraft.featuredImageUrl,
-    recommendationTitle: dbDraft.recommendationTitle,
+    coverImageUrl: dbDraft.coverImageUrl,
     content: JSON.parse(dbDraft.content),
-    estReadTime: dbDraft.estReadTime,
+    readTime: dbDraft.readTime,
+    dek: dbDraft.dek,
+    seoTitle: dbDraft.seoTitle,
     createdAt: dbDraft.createdAt,
     updatedAt: dbDraft.updatedAt,
     hasDraftChanges: true,
+    socialDescription: dbDraft.socialDescription,
     // publishedVersion will be added separately if parentBlogId exists
   };
 }
@@ -40,18 +42,20 @@ export function formDataToDraftDB(formData: BlogFormData): BlogDraftDB {
     blogId: formData.blogId,
     parentBlogId: formData.parentBlogId,
     type: formData.type,
-    link: formData.link,
+    slug: formData.slug,
     status: BlogStatus.Draft,
     title: formData.title,
-    description: formData.description,
+    dek: formData.dek,
+    seoTitle: formData.seoTitle,
     tags: formData.tags,
     socialTitle: formData.socialTitle,
-    featuredImageUrl: formData.featuredImageUrl,
-    recommendationTitle: formData.recommendationTitle,
+    coverImageUrl: formData.coverImageUrl,
     content: JSON.stringify(formData.content),
-    estReadTime: formData.estReadTime,
+    readTime: formData.readTime,
+    metaDescription: formData.metaDescription,
     createdAt: formData.createdAt || Date.now(),
     updatedAt: Date.now(),
+    socialDescription: formData.socialDescription,
   };
 }
 
@@ -67,27 +71,31 @@ export function publishedDBToFormData(
     blogId: randomUUID(), // New draft ID
     parentBlogId: dbPublished.blogId, // Link to published blog
     type: dbPublished.type,
-    link: dbPublished.link,
+    slug: dbPublished.slug,
     // Populate draft fields from published (user will edit these)
     title: dbPublished.title,
-    description: dbPublished.description,
+    dek: dbPublished.dek,
+    seoTitle: dbPublished.seoTitle,
     tags: dbPublished.tags,
     socialTitle: dbPublished.socialTitle,
-    featuredImageUrl: dbPublished.featuredImageUrl,
-    recommendationTitle: dbPublished.recommendationTitle,
+    socialDescription: dbPublished.socialDescription,
+    coverImageUrl: dbPublished.coverImageUrl,
     content: JSON.parse(dbPublished.content),
-    estReadTime: dbPublished.estReadTime,
+    readTime: dbPublished.readTime,
+    metaDescription: dbPublished.metaDescription,
     // Store published version for comparison
     publishedVersion: {
       title: dbPublished.title,
-      description: dbPublished.description,
+      dek: dbPublished.dek,
+      seoTitle: dbPublished.seoTitle,
       tags: dbPublished.tags,
       socialTitle: dbPublished.socialTitle,
-      featuredImageUrl: dbPublished.featuredImageUrl,
-      recommendationTitle: dbPublished.recommendationTitle,
+      coverImageUrl: dbPublished.coverImageUrl,
       content: JSON.parse(dbPublished.content),
-      estReadTime: dbPublished.estReadTime,
+      readTime: dbPublished.readTime,
+      metaDescription: dbPublished.metaDescription,
       publishedAt: dbPublished.publishedAt,
+      socialDescription: dbPublished.socialDescription,
     },
     createdAt: Date.now(), // Draft creation time
     updatedAt: Date.now(),
@@ -100,21 +108,23 @@ export function formDataToPublishedDB(formData: BlogFormData): PublishedBlogDB {
   return {
     blogId: formData.parentBlogId || formData.blogId, // Use parent ID if editing, else draft ID
     type: formData.type,
-    link: formData.link || slugify(formData.title),
-    status: BlogStatus.Active,
+    slug: formData.slug || slugify(formData.title),
+    status: BlogStatus.Published,
     title: formData.title,
-    description: formData.description,
+    dek: formData.dek,
+    seoTitle: formData.seoTitle,
     tags: formData.tags,
     socialTitle: formData.socialTitle,
-    featuredImageUrl: formData.featuredImageUrl,
-    recommendationTitle: formData.recommendationTitle,
+    coverImageUrl: formData.coverImageUrl,
     content: JSON.stringify(formData.content),
-    estReadTime: formData.estReadTime,
+    readTime: formData.readTime,
+    metaDescription: formData.metaDescription,
     stats: { views: 0, likes: 0, comments: 0, shares: 0 },
     createdAt: formData.publishedVersion ? formData.createdAt! : Date.now(),
     updatedAt: Date.now(),
     publishedAt: formData.publishedVersion?.publishedAt || Date.now(),
-    recommendations: [],
+    recommendedBlogIds: [],
+    socialDescription: formData.socialDescription,
   };
 }
 
@@ -127,18 +137,20 @@ export function createNewBlogFormData(title?: string): BlogFormData {
     blogId: randomUUID(),
     parentBlogId: null, // New draft (not editing published)
     type: BlogType.Article,
-    link: "",
+    slug: "",
     title: title || `Untitled Blog ${new Date().toLocaleDateString()}`,
-    description: "",
+    dek: "",
+    seoTitle: "",
     tags: [],
     socialTitle: "",
-    featuredImageUrl: "",
-    recommendationTitle: "Keep reading...",
+    coverImageUrl: "",
     content: null,
-    estReadTime: 0,
+    readTime: 0,
+    metaDescription: "",
     createdAt: Date.now(),
     updatedAt: Date.now(),
     hasDraftChanges: true,
+    socialDescription: "",
   };
 }
 
@@ -160,7 +172,7 @@ export async function sendRevalidateRequest(path: string) {
       },
     );
     if (env.RUNTIME === "local") {
-      console.log(res.status, res.statusText);
+      console.info(res.status, res.statusText);
     }
   } catch (error) {
     console.error(error);

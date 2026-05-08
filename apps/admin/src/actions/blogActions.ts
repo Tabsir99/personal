@@ -97,7 +97,7 @@ export const saveDraft = wrap(async (blogFormDataString: string) => {
   }
 
   blogFormData.updatedAt = Date.now();
-  blogFormData.estReadTime = await measureEstReadTime(blogFormData.content);
+  blogFormData.readTime = await measureEstReadTime(blogFormData.content);
 
   const draftDB = formDataToDraftDB(blogFormData);
 
@@ -151,13 +151,15 @@ export const publishBlog = wrap(async (draftId: string) => {
     if (publishedBlog) {
       formData.publishedVersion = {
         title: publishedBlog.title,
-        description: publishedBlog.description,
+        dek: publishedBlog.dek,
+        seoTitle: publishedBlog.seoTitle,
+        socialDescription: publishedBlog.socialDescription,
         tags: publishedBlog.tags,
         socialTitle: publishedBlog.socialTitle,
-        featuredImageUrl: publishedBlog.featuredImageUrl,
-        recommendationTitle: publishedBlog.recommendationTitle,
+        coverImageUrl: publishedBlog.coverImageUrl,
         content: JSON.parse(publishedBlog.content),
-        estReadTime: publishedBlog.estReadTime,
+        readTime: publishedBlog.readTime,
+        metaDescription: publishedBlog.metaDescription,
         publishedAt: publishedBlog.publishedAt,
       };
     }
@@ -181,7 +183,7 @@ export const publishBlog = wrap(async (draftId: string) => {
   }
 
   // Revalidate
-  await sendRevalidateRequest(publishedBlog.link);
+  await sendRevalidateRequest(publishedBlog.slug);
 
   return { data: null };
 });
@@ -194,13 +196,13 @@ export const toggleBlogStatus = wrap(async (blogId: string) => {
   const blogDoc = await readSingleDoc<PublishedBlogDB>({
     collectionName: "BLOGS",
     docId: blogId,
-    fieldsToRead: { status: true, link: true },
+    fieldsToRead: { status: true, slug: true },
   });
 
   if (!blogDoc) throw new Error("Blog does not exist");
 
-  const isActive = blogDoc.status === BlogStatus.Active;
-  const newStatus = isActive ? BlogStatus.Inactive : BlogStatus.Active;
+  const isActive = blogDoc.status === BlogStatus.Published;
+  const newStatus = isActive ? BlogStatus.Unpublished : BlogStatus.Published;
 
   await updateData<PublishedBlogDB>({
     collectionName: "BLOGS",
@@ -211,16 +213,16 @@ export const toggleBlogStatus = wrap(async (blogId: string) => {
     },
   });
 
-  await sendRevalidateRequest(blogDoc.link);
+  await sendRevalidateRequest(blogDoc.slug);
 
   return { data: null };
 });
 
 export const deleteBlog = wrap(async (blogId: string) => {
-  const blogDoc = await readSingleDoc<{ link: string }>({
+  const blogDoc = await readSingleDoc<{ slug: string }>({
     collectionName: "BLOGS",
     docId: blogId,
-    fieldsToRead: { link: true },
+    fieldsToRead: { slug: true },
   });
 
   if (!blogDoc) throw new Error("Blog not found");
@@ -230,7 +232,7 @@ export const deleteBlog = wrap(async (blogId: string) => {
     docId: blogId,
   });
 
-  await sendRevalidateRequest(blogDoc.link);
+  await sendRevalidateRequest(blogDoc.slug);
 
   return { data: null };
 });

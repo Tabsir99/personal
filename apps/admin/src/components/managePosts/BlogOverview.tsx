@@ -25,7 +25,7 @@ const BlogOverview = () => {
       data?.filter((blog) => {
         return (
           blog.title?.includes(searchTerm) ||
-          blog.description?.includes(searchTerm)
+          blog.metaDescription?.includes(searchTerm)
         );
       }) || []
     );

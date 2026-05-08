@@ -17,17 +17,9 @@ export default async function middleware(request: NextRequest) {
   try {
     // const ipAddress = request.headers.get("xIp") ?? "unknown";
     const pathname = request.nextUrl.pathname;
-    const token = request.cookies.get("token")?.value;
+    const token = request.cookies.get(env.COOKIE_NAME)?.value;
     const serverToken = request.headers.get("serverToken");
     const serverAuthenticated = serverToken === env.SERVER_TOKEN;
-
-    if (
-      env.RUNTIME === "local" &&
-      request.method === "POST" &&
-      pathname.startsWith("/dashboard")
-    ) {
-      await new Promise((res) => setTimeout(res, 500));
-    }
 
     // Server auth bypasses everything
     if (serverAuthenticated) return NextResponse.next();
@@ -38,7 +30,7 @@ export default async function middleware(request: NextRequest) {
     // Redirect to dashboard if user is authenticated
     if (pathname === "/" && userAuthenticated)
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_ADMIN_ORIGIN}/dashboard`
+        `${process.env.NEXT_PUBLIC_ADMIN_ORIGIN}/dashboard`,
       );
 
     // Return next if everything is authenticated
@@ -46,7 +38,7 @@ export default async function middleware(request: NextRequest) {
   } catch (error) {
     console.error(error);
     return NextResponse.redirect(
-      process.env.NEXT_PUBLIC_ADMIN_ORIGIN as string
+      process.env.NEXT_PUBLIC_ADMIN_ORIGIN as string,
     );
   }
 }

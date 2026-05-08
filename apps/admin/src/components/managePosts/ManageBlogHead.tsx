@@ -20,9 +20,10 @@ export default function ManagePostHead({
 }) {
   const options: (BlogStatus | "all")[] = [
     "all",
-    BlogStatus.Active,
-    BlogStatus.Inactive,
+    BlogStatus.Published,
+    BlogStatus.Unpublished,
     BlogStatus.Draft,
+    BlogStatus.Archived,
   ];
   return (
     <div className="flex gap-4 relative z-20 max-w-4xl">
@@ -31,7 +32,10 @@ export default function ManagePostHead({
           <SelectTrigger className="capitalize min-h-full">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="rounded-md shadow-xl backdrop-blur-md" sideOffset={4}>
+          <SelectContent
+            className="rounded-md shadow-xl backdrop-blur-md"
+            sideOffset={4}
+          >
             <SelectGroup className="capitalize">
               {options.map((option) => (
                 <SelectItem

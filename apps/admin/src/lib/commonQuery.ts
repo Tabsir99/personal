@@ -50,7 +50,7 @@ export const updateData = async <T>({
 };
 
 export const readAllDocs = async <T = any>(
-  collectionName: string
+  collectionName: string,
 ): Promise<T[]> => {
   try {
     const docs: T[] = [];
@@ -100,7 +100,7 @@ export const readNDocs = async <T>({
 
     if (fieldsToRead) {
       query = query.select(
-        ...Object.keys(fieldsToRead).filter((key) => fieldsToRead[key])
+        ...Object.keys(fieldsToRead).filter((key) => fieldsToRead[key]),
       );
     }
 
@@ -139,7 +139,7 @@ export const readSingleDoc = async <T>({
 
     const finalQuery = fieldsToRead
       ? query.select(
-          ...Object.keys(fieldsToRead).filter((key) => fieldsToRead[key])
+          ...Object.keys(fieldsToRead).filter((key) => fieldsToRead[key]),
         )
       : query;
 
@@ -196,7 +196,7 @@ export const moveDocument = async ({
     await db.collection(targetCollection).doc(targetDocId).set(data!);
     await db.collection(sourceCollection).doc(sourceDocId).delete();
 
-    console.log("Document moved successfully");
+    console.info("Document moved successfully");
   } catch (err) {
     throw err;
   }

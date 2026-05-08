@@ -26,7 +26,7 @@ export async function logInAction(formData: FormData) {
     .sign(new TextEncoder().encode(env.JWT_SECRET));
 
   cookieStore.set({
-    name: "token",
+    name: env.COOKIE_NAME,
     value: jwt,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

@@ -14,11 +14,12 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BlogDraftDB, BlogStatus, PublishedBlogDB } from "@/types/blogTypes";
 import BlogMenu from "./BlogMenu";
 import { clientEnv } from "@/config/env.client";
+import { cn } from "@/lib/utils";
 
 export default function CMSBlogCard({
   blog,
@@ -32,11 +33,11 @@ export default function CMSBlogCard({
   // Get appropriate status color
   const getStatusClass = (status: BlogStatus) => {
     switch (status) {
-      case BlogStatus.Active:
+      case BlogStatus.Published:
         return "border-primary/20 bg-primary/10 text-primary";
       case BlogStatus.Draft:
         return "border-accent bg-accent text-accent-foreground";
-      case BlogStatus.Inactive:
+      case BlogStatus.Unpublished:
         return "border-destructive/20 bg-destructive/10 text-destructive";
       default:
         return "border-border bg-muted text-muted-foreground";
@@ -51,13 +52,11 @@ export default function CMSBlogCard({
         <div className="flex justify-between items-start gap-4">
           {/* Blog Title */}
           <div className="flex flex-col space-y-2">
-            <h2 className="text-xl font-bold capitalize">
-              {blog.title}
-            </h2>
+            <h2 className="text-xl font-bold capitalize">{blog.title}</h2>
 
             {/* Blog Description - single line with ellipsis */}
             <p className="text-sm text-muted-foreground line-clamp-1">
-              {blog.description || "No description yet..."}
+              {blog.metaDescription || "No description yet..."}
             </p>
           </div>
 
@@ -67,26 +66,23 @@ export default function CMSBlogCard({
               blogName={blog.title}
               blogId={blog.blogId}
               status={blog.status!}
-              thumbnailUrl={blog.featuredImageUrl}
+              thumbnailUrl={blog.coverImageUrl}
               toggleStatus={() => toggleStatus(blog.blogId)}
               confirmDelete={() => confirmDelete(blog.blogId)}
             />
 
             {blog.status !== BlogStatus.Draft && (
-              <Button
-                variant="ghost"
-                size="icon"
-                render={
-                  <Link
-                    href={`${clientEnv.BLOG_ORIGIN}/blogs/${blog.link}`}
-                    target="_blank"
-                    title="View Blog"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </Link>
-                }
-                className="text-muted-foreground hover:text-foreground hover:bg-accent"
-              />
+              <Link
+                href={`${clientEnv.ADMIN_ORIGIN}/blogs/${blog.slug}`}
+                target="_blank"
+                title="View Blog"
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "icon" }),
+                  "text-muted-foreground hover:text-foreground hover:bg-accent",
+                )}
+              >
+                <ExternalLink className="w-4 h-4" />
+              </Link>
             )}
           </div>
         </div>
@@ -117,7 +113,7 @@ export default function CMSBlogCard({
           {/* Reading Time */}
           <div className="flex items-center gap-2">
             <Clock className="h-3.5 w-3.5" />
-            <span>{blog.estReadTime} min read</span>
+            <span>{blog.readTime} min read</span>
           </div>
         </div>
 
@@ -125,19 +121,12 @@ export default function CMSBlogCard({
         {blog.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-4">
             {blog.tags.slice(0, 3).map((tag, index) => (
-              <Badge
-                key={index}
-                variant="outline"
-                className="text-xs"
-              >
+              <Badge key={index} variant="outline" className="text-xs">
                 {tag}
               </Badge>
             ))}
             {blog.tags.length > 3 && (
-              <Badge
-                variant="outline"
-                className="text-xs"
-              >
+              <Badge variant="outline" className="text-xs">
                 +{blog.tags.length - 3} more
               </Badge>
             )}

@@ -4,7 +4,6 @@ import { getFirestore } from "firebase-admin/firestore";
 import { env } from "./env.server";
 
 function initFirebase() {
-  console.log(env.RUNTIME);
   if (getApps().length) return getFirestore(getApps()[0]);
 
   let app: App;

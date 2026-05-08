@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (process.env.RUNTIME === "local") {
-      console.log(newSession);
+      console.info(newSession);
     }
 
     const date = new Date(newSession.timestamp).toISOString().split("T")[0];

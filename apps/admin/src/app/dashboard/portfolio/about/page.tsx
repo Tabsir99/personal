@@ -95,11 +95,11 @@ export default function About() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-3xl font-bold mb-2">About Sections</h2>
-          <p className="text-muted-foreground">Manage your about page content cards</p>
-        </div>
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold mb-2">About Sections</h2>
+        <p className="text-muted-foreground">
+          Manage your about page content cards
+        </p>
       </div>
 
       <div className="grid lg:grid-cols-[1fr_400px] gap-12 items-start">

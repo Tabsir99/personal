@@ -94,7 +94,7 @@ export default function BlogMenu({
               onClick={() =>
                 openModal("confirmation", {
                   data: {
-                    message: `Are you sure you want to ${status === "active" ? "deactivate" : "activate"} this post?`,
+                    message: `Are you sure you want to ${status === "published" ? "unpublish" : "publish"} this post?`,
                     onConfirm: toggleStatus,
                   },
                 })
@@ -103,7 +103,7 @@ export default function BlogMenu({
             >
               <Power className="w-4 h-4" />
               <span>
-                {status === "active" ? "Deactivate" : "Activate"} Post
+                {status === "published" ? "Unpublish" : "Publish"} Post
               </span>
             </DropdownMenuItem>
           ))}

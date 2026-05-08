@@ -15,6 +15,7 @@ export const env = {
   ADMIN_USERNAME: requireEnv("ADMIN_USERNAME"),
   ADMIN_PASSWORD: requireEnv("ADMIN_PASSWORD"),
   JWT_SECRET: requireEnv("JWT_SECRET"),
+  COOKIE_NAME: "t",
 
   // ===== Firebase =====
   FIREBASE_PRIVATE_KEY: requireEnv("FIREBASE_PRIVATE_KEY"),

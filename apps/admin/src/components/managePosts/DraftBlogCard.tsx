@@ -25,9 +25,7 @@ export default function DraftBlogCard({
       <Card className="cursor-pointer transition-all hover:border-border/80">
         <CardHeader className="pb-2 pt-4">
           <div className="flex justify-between items-start">
-            <CardTitle className="text-xl font-bold">
-              {blog?.title}
-            </CardTitle>
+            <CardTitle className="text-xl font-bold">{blog?.title}</CardTitle>
 
             <BlogMenu
               blogName={blog.title!}
@@ -37,22 +35,20 @@ export default function DraftBlogCard({
             />
           </div>
           <CardDescription className="line-clamp-2">
-            {blog.description || "No description yet..."}
+            {blog.metaDescription || "No description yet..."}
           </CardDescription>
         </CardHeader>
         <CardContent className="py-2">
           <div className="flex flex-wrap gap-2">
             {blog.tags?.map((tag) => (
-              <Badge
-                key={tag}
-                variant="outline"
-                className="text-xs"
-              >
+              <Badge key={tag} variant="outline" className="text-xs">
                 {tag}
               </Badge>
             ))}
             {blog.tags?.length === 0 && (
-              <span className="text-sm italic text-muted-foreground">No tags yet</span>
+              <span className="text-sm italic text-muted-foreground">
+                No tags yet
+              </span>
             )}
           </div>
         </CardContent>
@@ -62,7 +58,7 @@ export default function DraftBlogCard({
             <span>Updated {getTimeSince(blog.updatedAt || 0)}</span>
           </div>
           <div className="flex items-center">
-            <span>{blog.estReadTime} min read </span>
+            <span>{blog.readTime} min read </span>
           </div>
         </CardFooter>
       </Card>

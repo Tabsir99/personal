@@ -7,9 +7,10 @@ export enum BlogType {
 }
 
 export enum BlogStatus {
-  Active = "active",
-  Inactive = "inactive",
+  Published = "published",
+  Unpublished = "unpublished",
   Draft = "draft",
+  Archived = "archived",
 }
 
 interface BlogStats {
@@ -19,37 +20,49 @@ interface BlogStats {
   shares: number;
 }
 
-interface BlogContent {
+// Editorial content authored by the user
+export interface BlogUserMeta {
   title: string;
-  description: string;
+  dek: string; // subtitle/hook shown below title
   tags: string[];
+  coverImageUrl: string;
+
+  // SEO
+  seoTitle: string;
+  metaDescription: string;
+
+  // Social (OG/Twitter)
   socialTitle: string;
-  featuredImageUrl: string;
-  recommendationTitle: string;
-  estReadTime: number;
+  socialDescription: string;
+
+  // Misc
+  readTime: number;
 }
 
-// Base properties (metadata)
-export interface BaseBlogProperties extends BlogContent {
+// System-level metadata (not authored, set by app/db)
+export interface BlogSystemMeta {
   blogId: string;
   type: BlogType;
-  link: string;
+  slug: string;
   createdAt: number;
   updatedAt: number;
 }
+
+// Base = content + system meta
+export interface BaseBlogProperties extends BlogUserMeta, BlogSystemMeta {}
 
 // BLOGS_DRAFT collection
 export interface BlogDraftDB extends BaseBlogProperties {
   parentBlogId: string | null;
   status: BlogStatus.Draft;
-  content: string; // JSON string
+  content: string; // JSON string of DocContent
 }
 
 // BLOGS collection
 export interface PublishedBlogDB extends BaseBlogProperties {
-  status: BlogStatus.Active | BlogStatus.Inactive;
-  content: string; // JSON string
-  recommendations: string[];
+  status: BlogStatus.Published | BlogStatus.Unpublished | BlogStatus.Archived;
+  content: string; // JSON string of DocContent
+  recommendedBlogIds: string[];
   stats: BlogStats;
   publishedAt: number;
 }
@@ -58,7 +71,7 @@ export interface PublishedBlogDB extends BaseBlogProperties {
 export interface BlogFormData extends BaseBlogProperties {
   parentBlogId: string | null;
   content: DocContent | null;
-  publishedVersion?: BlogContent & {
+  publishedVersion?: BlogUserMeta & {
     content: DocContent;
     publishedAt: number;
   };

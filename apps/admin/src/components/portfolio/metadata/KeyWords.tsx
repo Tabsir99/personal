@@ -21,7 +21,7 @@ const KeywordsSection = memo(
     const [isAddingKeyword, setIsAddingKeyword] = useState(false);
 
     const keywords = usePortfolioStore(
-      useShallow((state) => state.pageData.keywords)
+      useShallow((state) => state.pageData.keywords),
     );
     const updatePageData = usePortfolioStore.getState().updatePageData;
 
@@ -55,7 +55,7 @@ const KeywordsSection = memo(
               <Badge
                 key={i}
                 variant="secondary"
-                className="group border-primary/20 bg-primary/10 px-3 py-1 text-primary transition-colors hover:bg-primary/20"
+                className="group border-primary/20 bg-primary/10 px-3 py-1 h-7 text-primary transition-colors hover:bg-primary/20"
               >
                 {keyword}
                 <button
@@ -119,7 +119,7 @@ const KeywordsSection = memo(
       </Card>
     );
   },
-  () => true
+  () => true,
 );
 
 export default KeywordsSection;

@@ -26,7 +26,7 @@ export default function WriteBlog() {
       data.filter((blog) => {
         const searchTerm = search.toLowerCase();
         const title = blog.title?.toLowerCase() || "";
-        const description = blog.description?.toLowerCase() || "";
+        const description = blog.metaDescription?.toLowerCase() || "";
         const tags = blog.tags?.map((tag) => tag.toLowerCase()) || [];
 
         return (

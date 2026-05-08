@@ -29,7 +29,7 @@ export const invalidateBlogOverview = ({
 
           case "delete":
             return current.filter(
-              (item) => item.blogId !== selectedBlog.blogId
+              (item) => item.blogId !== selectedBlog.blogId,
             );
 
           case "status":
@@ -38,14 +38,14 @@ export const invalidateBlogOverview = ({
               return {
                 ...item,
                 status:
-                  selectedBlog.status === BlogStatus.Active
-                    ? BlogStatus.Inactive
-                    : BlogStatus.Active,
+                  selectedBlog.status === BlogStatus.Published
+                    ? BlogStatus.Unpublished
+                    : BlogStatus.Published,
               };
             });
         }
       },
-      false
+      false,
     );
   });
 };
