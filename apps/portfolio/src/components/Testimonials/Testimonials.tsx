@@ -16,7 +16,7 @@ const TestimonialCard = ({
 
     // YouTube
     const youtubeMatch = url.match(
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/,
     );
     if (youtubeMatch) return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
 
@@ -38,10 +38,10 @@ const TestimonialCard = ({
         testimonial.video
           ? "md:row-span-2"
           : testimonial.size === "large"
-          ? "md:col-span-2"
-          : testimonial.size === "medium"
-          ? "md:col-span-1"
-          : ""
+            ? "md:col-span-2"
+            : testimonial.size === "medium"
+              ? "md:col-span-1"
+              : ""
       }`}
       style={{
         animationDelay: `${index * 400}ms`,
@@ -338,12 +338,12 @@ export default async function Testimonials() {
 
   const activeTestimonials = testimonials.filter((t) => t.isActive);
   const marqueeTestimonials = activeTestimonials.filter(
-    (t) => t.size === "small" && !t.video
+    (t) => t.size === "small" && !t.video,
   );
 
   const featuredTestimonials = activeTestimonials.filter((t) => t.featured);
   const regularTestimonials = activeTestimonials.filter(
-    (t) => !t.featured && t.size !== "small"
+    (t) => !t.featured && t.size !== "small",
   );
 
   return (

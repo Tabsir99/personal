@@ -33,7 +33,7 @@ export default async function About() {
           </div>
 
           <div className="space-y-6 lg:sticky lg:top-8">
-            <Card className="border-white/[0.08] bg-white/[0.02] backdrop-blur-sm overflow-hidden relative group">
+            <Card className="border-white/[0.08] bg-white/2 backdrop-blur-sm overflow-hidden relative group">
               <CardContent className="p-0">
                 <div className="aspect-square relative">
                   <Img
