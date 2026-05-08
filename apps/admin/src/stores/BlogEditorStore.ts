@@ -6,16 +6,13 @@ import { callWithToast } from "@/lib/utils";
 import type { DocContent } from "@open-notion/editor";
 
 interface BlogEditorState {
-  // Blog form data
   blogFormData: BlogFormData;
 
-  // UI state
   isCreateDialogOpen: boolean;
   isSaving: boolean;
   lastSaved?: number;
   isPublishedBlog: () => boolean;
 
-  // Actions
   setBlogFormData: (data: Partial<BlogFormData>) => void;
   addTag: (tag: string) => void;
   removeTag: (tagToRemove: string) => void;
@@ -53,13 +50,11 @@ const defaultBlogFormData: BlogFormData = {
 export const useBlogEditorStore = create<BlogEditorState>()(
   devtools(
     (set, get) => ({
-      // Initial state
       blogFormData: defaultBlogFormData,
       isCreateDialogOpen: false,
       isSaving: false,
       lastSaved: undefined,
 
-      // Actions
       setBlogFormData: (data) =>
         set(
           (state) => ({
@@ -79,12 +74,16 @@ export const useBlogEditorStore = create<BlogEditorState>()(
                 ...state.blogFormData,
                 tags: [...state.blogFormData.tags, trimmedTag],
               },
-              tagInput: "",
             }),
             false,
             "addTag",
           );
         }
+      },
+
+      isPublishedBlog: () => {
+        const { blogFormData } = get();
+        return Boolean(blogFormData.parentBlogId || blogFormData.publishedVersion);
       },
 
       removeTag: (tagToRemove) =>

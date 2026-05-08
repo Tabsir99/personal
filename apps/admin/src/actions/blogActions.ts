@@ -2,7 +2,7 @@
 import { z } from "zod";
 import {
   createData,
-  readSingleDoc,
+  readSingleBlog,
   updateData,
   deleteDoc,
   readNDocs,
@@ -26,10 +26,6 @@ import {
 const blogIdSchema = z.string().min(1);
 const optionalTitleSchema = z.string().optional();
 
-// ============================================================================
-// DRAFT ACTIONS (BLOG_DRAFTS collection)
-// ============================================================================
-
 export const startBlogWriting = wrap(async (title?: string) => {
   const parsedTitle = optionalTitleSchema.parse(title);
   const newBlogFormData = createNewBlogFormData(parsedTitle);
@@ -45,18 +41,15 @@ export const startBlogWriting = wrap(async (title?: string) => {
 
 export const loadBlogForEditing = wrap(async (blogId: string) => {
   const parsedBlogId = blogIdSchema.parse(blogId);
-  const blog = await readSingleDoc<PublishedBlogDB | BlogDraftDB>({
-    collectionName: "BLOGS",
+  const blog = await readSingleBlog<PublishedBlogDB | BlogDraftDB>({
     docId: parsedBlogId,
   });
 
   if (!blog) throw new Error("Blog not found");
 
-  // If it's already a draft, just convert and return
   if (blog.status === BlogStatus.draft)
     return { data: draftDBToFormData(blog) };
 
-  // If published, check for existing draft first
   const existingDraft = (
     await readNDocs<BlogDraftDB>({
       collectionName: "BLOGS",
@@ -68,7 +61,6 @@ export const loadBlogForEditing = wrap(async (blogId: string) => {
 
   if (existingDraft) return { data: draftDBToFormData(existingDraft) };
 
-  // Create new draft from published
   const draftFormData = publishedDBToFormData(blog);
 
   await createData<BlogDraftDB>({
@@ -83,9 +75,7 @@ export const loadBlogForEditing = wrap(async (blogId: string) => {
 export const saveDraft = wrap(async (blogFormDataString: string) => {
   const blogFormData = blogFormDataSchema.parse(JSON.parse(blogFormDataString));
 
-  // VALIDATION: Check if draft exists
-  const existingDraft = await readSingleDoc<BlogDraftDB>({
-    collectionName: "BLOGS",
+  const existingDraft = await readSingleBlog<BlogDraftDB>({
     docId: blogFormData.blogId,
   });
 
@@ -95,7 +85,6 @@ export const saveDraft = wrap(async (blogFormDataString: string) => {
     );
   }
 
-  // VALIDATION: Prevent parentBlogId changes
   if (existingDraft.parentBlogId !== blogFormData.parentBlogId) {
     throw new Error("Cannot modify parentBlogId during save");
   }
@@ -117,13 +106,13 @@ export const saveDraft = wrap(async (blogFormDataString: string) => {
 
 export const discardDraftChanges = wrap(async (draftId: string) => {
   const parsedDraftId = blogIdSchema.parse(draftId);
-  const draft = await readSingleDoc<BlogDraftDB>({
-    collectionName: "BLOGS",
+  const draft = await readSingleBlog<BlogDraftDB>({
     docId: parsedDraftId,
   });
 
-  if (!draft || !draft.parentBlogId)
-    throw new Error("Draft not found or is a new draft");
+  if (!draft) throw new Error("Draft not found");
+  if (!draft.parentBlogId)
+    throw new Error("Cannot discard a new draft — use delete instead");
 
   await deleteDoc({
     collectionName: "BLOGS",
@@ -132,13 +121,8 @@ export const discardDraftChanges = wrap(async (draftId: string) => {
   return { data: null };
 });
 
-// ============================================================================
-// PUBLISH ACTIONS (BLOGS collection)
-// ============================================================================
-
 export const publishBlog = wrap(async (draftId: string) => {
-  const draftDoc = await readSingleDoc<BlogDraftDB>({
-    collectionName: "BLOGS",
+  const draftDoc = await readSingleBlog<BlogDraftDB>({
     docId: draftId,
   });
 
@@ -146,33 +130,14 @@ export const publishBlog = wrap(async (draftId: string) => {
 
   const formData = draftDBToFormData(draftDoc);
 
-  // If editing published blog, load published version for stats
+  let existingPublished: PublishedBlogDB | null = null;
   if (draftDoc.parentBlogId) {
-    const publishedBlog = await readSingleDoc<PublishedBlogDB>({
-      collectionName: "BLOGS",
+    existingPublished = await readSingleBlog<PublishedBlogDB>({
       docId: draftDoc.parentBlogId,
     });
-
-    if (publishedBlog) {
-      formData.publishedVersion = {
-        title: publishedBlog.title,
-        dek: publishedBlog.dek,
-        seoTitle: publishedBlog.seoTitle,
-        socialDescription: publishedBlog.socialDescription,
-        tags: publishedBlog.tags,
-        socialTitle: publishedBlog.socialTitle,
-        coverImageUrl: publishedBlog.coverImageUrl,
-        content: JSON.parse(publishedBlog.content),
-        readTime: publishedBlog.readTime,
-        metaDescription: publishedBlog.metaDescription,
-        publishedAt: publishedBlog.publishedAt,
-        featured: publishedBlog.featured,
-      };
-    }
   }
 
-  // Convert to published format
-  const publishedBlog = formDataToPublishedDB(formData);
+  const publishedBlog = formDataToPublishedDB(formData, existingPublished);
 
   await updateData<PublishedBlogDB>({
     collectionName: "BLOGS",
@@ -188,24 +153,25 @@ export const publishBlog = wrap(async (draftId: string) => {
     });
   }
 
-  // Revalidate
   await sendRevalidateRequest(publishedBlog.slug);
 
   return { data: null };
 });
 
-// ============================================================================
-// PUBLISHED BLOG ACTIONS (BLOGS collection)
-// ============================================================================
-
 export const toggleBlogStatus = wrap(async (blogId: string) => {
-  const blogDoc = await readSingleDoc<PublishedBlogDB>({
-    collectionName: "BLOGS",
+  const blogDoc = await readSingleBlog<PublishedBlogDB>({
     docId: blogId,
     fieldsToRead: { status: true, slug: true },
   });
 
   if (!blogDoc) throw new Error("Blog does not exist");
+
+  if (
+    blogDoc.status !== BlogStatus.published &&
+    blogDoc.status !== BlogStatus.unpublished
+  ) {
+    throw new Error(`Cannot toggle status from "${blogDoc.status}"`);
+  }
 
   const isActive = blogDoc.status === BlogStatus.published;
   const newStatus = isActive ? BlogStatus.unpublished : BlogStatus.published;
@@ -224,9 +190,34 @@ export const toggleBlogStatus = wrap(async (blogId: string) => {
   return { data: null };
 });
 
+export const updateBlogCoverImage = wrap(
+  async (blogId: string, coverImageUrl: string) => {
+    const parsedBlogId = blogIdSchema.parse(blogId);
+    const parsedUrl = z.string().min(1).parse(coverImageUrl);
+
+    const blogDoc = await readSingleBlog<{ slug: string }>({
+      docId: parsedBlogId,
+      fieldsToRead: { slug: true },
+    });
+    if (!blogDoc) throw new Error("Blog not found");
+
+    await updateData<PublishedBlogDB>({
+      collectionName: "BLOGS",
+      docId: parsedBlogId,
+      updatedData: {
+        coverImageUrl: parsedUrl,
+        updatedAt: Date.now(),
+      },
+    });
+
+    await sendRevalidateRequest(blogDoc.slug);
+
+    return { data: null };
+  },
+);
+
 export const deleteBlog = wrap(async (blogId: string) => {
-  const blogDoc = await readSingleDoc<{ slug: string }>({
-    collectionName: "BLOGS",
+  const blogDoc = await readSingleBlog<{ slug: string }>({
     docId: blogId,
     fieldsToRead: { slug: true },
   });

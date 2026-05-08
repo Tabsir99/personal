@@ -21,6 +21,16 @@ export async function callWithToast(
   const id = toast.loading(loading);
   try {
     const result = await func();
+    // `wrap`-ed actions resolve with an ApiResponse rather than throwing.
+    if (
+      result &&
+      typeof result === "object" &&
+      "status" in result &&
+      result.status !== "success"
+    ) {
+      toast.error(result.message || err, { id });
+      return null;
+    }
     toast.success(success, { id });
     return result;
   } catch (error) {

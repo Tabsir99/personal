@@ -61,7 +61,6 @@ const TextEditor = ({ blogFormData }: { blogFormData: BlogFormData }) => {
 
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-      saveDraft(editor.getJSON(), false);
     };
   }, [editor, blogFormData]);
 

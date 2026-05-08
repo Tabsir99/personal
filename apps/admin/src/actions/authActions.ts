@@ -32,12 +32,23 @@ export async function logInAction(formData: FormData) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7 * 1000,
+    maxAge: 60 * 60 * 24 * 7,
   });
 
   return formatResponse({
     status: "success",
     message: "Successfully signed in",
+    data: null,
+  });
+}
+
+export async function logOutAction() {
+  const cookieStore = await cookies();
+  cookieStore.delete(env.COOKIE_NAME);
+
+  return formatResponse({
+    status: "success",
+    message: "Signed out",
     data: null,
   });
 }

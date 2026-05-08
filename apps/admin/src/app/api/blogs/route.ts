@@ -7,15 +7,19 @@ import {
 } from "@/schemas/blogSchemas";
 import { NextRequest, NextResponse } from "next/server";
 
-// /api/blogs only serves published collection; drafts are excluded.
-const publishedStatusSchema = z.enum(["published", "unpublished", "archived"]);
+const blogStatusFilterSchema = z.enum([
+  "published",
+  "unpublished",
+  "archived",
+  "draft",
+]);
 
 const orderByFieldSchema = z
   .enum(["createdAt", "updatedAt", "publishedAt"])
   .default("createdAt");
 
 const querySchema = z.object({
-  status: publishedStatusSchema.optional(),
+  status: blogStatusFilterSchema.optional(),
   kind: blogKindSchema.optional(),
   schemaType: schemaTypeSchema.optional(),
   tag: z.string().optional(),
@@ -39,9 +43,7 @@ export async function GET(request: NextRequest) {
       order: query.get("order") ?? undefined,
     });
 
-    const filters: Partial<
-      Pick<PublishedBlogDB, "status" | "kind" | "schemaType">
-    > = {};
+    const filters: Record<string, unknown> = {};
     if (parsed.status) filters.status = parsed.status;
     if (parsed.kind) filters.kind = parsed.kind;
     if (parsed.schemaType) filters.schemaType = parsed.schemaType;

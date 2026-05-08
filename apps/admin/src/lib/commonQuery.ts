@@ -14,7 +14,7 @@ export const createData = async <T>({
 }: CreateDataParams<T>) => {
   try {
     const docRef = db.collection(Collections[collectionName]).doc(docId);
-    await docRef.set(data as any, { merge: true });
+    await docRef.create(data as any);
     return true;
   } catch (err) {
     console.error(err);
@@ -35,18 +35,22 @@ export const updateData = async <T>({
   updatedData,
   merge = true,
 }: UpdateDataParams<T>) => {
-  const dataToPut = { ...updatedData };
-  Object.entries(dataToPut as any).forEach(([key, value]) => {
-    if (Array.isArray(value) && value.length > 0) {
-      dataToPut[key] = firestore.FieldValue.arrayUnion(...value);
+  const dataToPut: Record<string, unknown> = { ...updatedData };
+  // arrayUnion is only valid with merge:true.
+  if (merge) {
+    for (const [key, value] of Object.entries(dataToPut)) {
+      if (Array.isArray(value) && value.length > 0) {
+        dataToPut[key] = firestore.FieldValue.arrayUnion(...value);
+      }
     }
-  });
+  }
 
   try {
     const docRef = db.collection(Collections[collectionName]).doc(docId);
-    await docRef.set(updatedData as any, { merge });
+    await docRef.set(dataToPut as any, { merge });
   } catch (err) {
     console.error(err);
+    throw err;
   }
 };
 
@@ -135,39 +139,33 @@ export const readNDocs = async <T>({
   }
 };
 
-interface ReadSingleDocParams<T> {
-  collectionName: ValidCollections;
+interface ReadSingleBlogParams<T> {
   docId: string;
   fieldsToRead?: Partial<Record<keyof T, boolean>>;
 }
 
-export const readSingleDoc = async <T>({
-  collectionName,
+export const readSingleBlog = async <T>({
   docId,
   fieldsToRead,
-}: ReadSingleDocParams<T>): Promise<T | null> => {
+}: ReadSingleBlogParams<T>): Promise<T | null> => {
   try {
-    const query = db
-      .collection(Collections[collectionName])
-      .where("blogId", "==", docId)
-      .limit(1);
+    const docRef = db.collection(Collections.BLOGS).doc(docId);
+    const snapshot = await docRef.get();
 
-    const finalQuery = fieldsToRead
-      ? query.select(
-          ...Object.keys(fieldsToRead).filter((key) => fieldsToRead[key]),
-        )
-      : query;
+    if (!snapshot.exists) return null;
 
-    const snapshot = await finalQuery.get();
+    const data = snapshot.data() as Record<string, unknown>;
 
-    if (snapshot.empty) {
-      return null;
+    if (!fieldsToRead) return data as T;
+
+    const projected: Record<string, unknown> = {};
+    for (const [field, include] of Object.entries(fieldsToRead)) {
+      if (include) projected[field] = data[field];
     }
-
-    return snapshot.docs[0].data() as T;
+    return projected as T;
   } catch (error) {
-    console.error(`Error reading document from ${collectionName}:`, error);
-    throw error; // Re-throw to allow handling at higher level
+    console.error(`Error reading blog ${docId}:`, error);
+    throw error;
   }
 };
 
@@ -210,8 +208,6 @@ export const moveDocument = async ({
     const data = sourceDoc.data();
     await db.collection(targetCollection).doc(targetDocId).set(data!);
     await db.collection(sourceCollection).doc(sourceDocId).delete();
-
-    console.info("Document moved successfully");
   } catch (err) {
     throw err;
   }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaImages, FaUpload } from "react-icons/fa6";
 import {
   Dialog,
@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import Img from "../ui/image";
 import useUIStore from "@/stores/UIStore";
 import { useShallow } from "zustand/shallow";
+import { getImageUploadSignedUrl } from "@/actions/mediaActions";
+import { updateBlogCoverImage } from "@/actions/blogActions";
 
 export default function ThumbnailModal() {
   const { isOpen, data } = useUIStore(
@@ -27,15 +29,52 @@ export default function ThumbnailModal() {
 
   const closeModal = useUIStore().closeAllModals;
 
+  // The Dialog stays mounted, so re-sync state when reopened for a different blog.
+  useEffect(() => {
+    setSelectedFile(null);
+    setPreviewUrl(data?.thumbnailUrl ?? null);
+  }, [data?.blogId, data?.thumbnailUrl]);
+
   const updateThumbnail = async (newThumbnail: File) => {
+    if (!data?.blogId) return;
     setIsLoading(true);
     try {
-      console.log("Updating thumbnail", newThumbnail);
+      const signedRes = await getImageUploadSignedUrl(
+        {
+          fileName: newThumbnail.name,
+          contentType: newThumbnail.type,
+          contentLength: newThumbnail.size,
+        },
+        data.blogId,
+        true,
+      );
+      if (signedRes.status !== "success" || !signedRes.data) {
+        throw new Error(signedRes.message || "Failed to get upload URL");
+      }
+
+      const { signedUrl, key } = signedRes.data;
+
+      const uploadRes = await fetch(signedUrl, {
+        method: "PUT",
+        body: newThumbnail,
+        headers: { "Content-Type": newThumbnail.type },
+      });
+      if (!uploadRes.ok) throw new Error("Upload failed");
+
+      const updateRes = await updateBlogCoverImage(data.blogId, key);
+      if (updateRes.status !== "success") {
+        throw new Error(updateRes.message || "Failed to update blog");
+      }
+
+      toast.success("Thumbnail updated");
+      closeModal();
     } catch (error) {
-      toast.error("Error uploading thumbnail");
+      console.error(error);
+      toast.error(
+        error instanceof Error ? error.message : "Error uploading thumbnail",
+      );
     } finally {
       setIsLoading(false);
-      closeModal();
     }
   };
 

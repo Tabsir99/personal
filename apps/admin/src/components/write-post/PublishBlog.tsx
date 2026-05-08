@@ -29,7 +29,12 @@ export const PublishBlog = ({
     setIsPublishing(true);
     const toastId = toast.loading("Publishing...");
     try {
-      await publishBlog(blogId);
+      const result = await publishBlog(blogId);
+      if (result.status !== "success") {
+        toast.error(result.message || "Failed to publish", { id: toastId });
+        setIsPublishing(false);
+        return;
+      }
       toast.success("Blog published!", { id: toastId });
       router.push("/dashboard/write-blog");
     } catch (error) {

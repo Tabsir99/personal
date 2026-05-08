@@ -69,6 +69,7 @@ export default function CMSBlogCard({
             <BlogMenu
               blogName={blog.title}
               blogId={blog.blogId}
+              slug={blog.slug}
               status={blog.status!}
               thumbnailUrl={blog.coverImageUrl}
               toggleStatus={() => toggleStatus(blog.blogId)}

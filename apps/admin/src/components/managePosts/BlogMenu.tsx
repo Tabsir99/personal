@@ -15,6 +15,7 @@ export default function BlogMenu({
   status,
   blogName,
   blogId,
+  slug,
   thumbnailUrl,
   toggleStatus,
   confirmDelete,
@@ -22,6 +23,7 @@ export default function BlogMenu({
   status: BlogStatus;
   blogName: string;
   blogId: string;
+  slug: string;
   thumbnailUrl?: string;
   toggleStatus?: () => void;
   confirmDelete: () => void;
@@ -113,7 +115,7 @@ export default function BlogMenu({
             onClick={() =>
               openModal("blogShare", {
                 data: {
-                  url: `${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${blogId}`,
+                  url: `${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${slug}`,
                   title: blogName,
                 },
               })

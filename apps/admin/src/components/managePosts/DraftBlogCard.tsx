@@ -31,6 +31,7 @@ export default function DraftBlogCard({
               blogName={blog.title!}
               status={BlogStatus.draft}
               blogId={blog.blogId!}
+              slug={blog.slug ?? ""}
               confirmDelete={() => confirmDelete(blog.blogId!)}
             />
           </div>

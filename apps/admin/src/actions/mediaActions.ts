@@ -1,3 +1,4 @@
+"use server";
 import s3, { S3Bucket } from "@/config/cloudflareS3";
 import { formatResponse } from "@/lib/appUtils";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
@@ -31,10 +32,13 @@ export const getImageUploadSignedUrl = async (
   isThumbnail: boolean,
 ) => {
   const key = isThumbnail
-    ? `/${blogId}/thumbnail.${fileInfo.contentType.split("/")[1]}`
-    : `/${blogId}/${fileInfo.fileName}`;
+    ? `${blogId}/thumbnail.${fileInfo.contentType.split("/")[1]}`
+    : `${blogId}/${fileInfo.fileName}`;
 
   const signedUrl = await _getUploadSignedUrl(key, fileInfo);
 
-  return formatResponse({ status: "success", data: signedUrl });
+  return formatResponse<{ signedUrl: string; key: string }>({
+    status: "success",
+    data: { signedUrl, key },
+  });
 };

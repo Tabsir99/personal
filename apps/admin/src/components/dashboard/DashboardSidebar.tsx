@@ -1,5 +1,5 @@
 "use client";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Edit,
   LogOut,
@@ -15,12 +15,23 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Img from "../ui/image";
 import { clientEnv } from "@/config/env.client";
+import { logOutAction } from "@/actions/authActions";
 
 const DashBoardSidebar = () => {
   const rootDashBoardUrl = "/dashboard";
   const pathname = usePathname();
+  const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    await logOutAction();
+    router.replace("/");
+    router.refresh();
+  };
 
   useEffect(() => {
     const hasDarkClass = document.documentElement.classList.contains("dark");
@@ -184,7 +195,8 @@ const DashBoardSidebar = () => {
               "relative h-12 w-full justify-start gap-4 text-base font-medium text-muted-foreground transition-all duration-300 ease-out overflow-hidden group border border-transparent hover:border-destructive/20 hover:text-destructive hover:bg-destructive/10",
               isExpanded ? "px-4" : "px-3 justify-center",
             )}
-            onClick={() => {}}
+            onClick={handleLogout}
+            disabled={isLoggingOut}
           >
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
               <div className="absolute inset-0 bg-linear-to-r from-transparent via-destructive/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />

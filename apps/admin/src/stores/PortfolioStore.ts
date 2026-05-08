@@ -198,11 +198,10 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => {
       const pageDataResponse = await fetch("/api/page-data");
       const pageData = await pageDataResponse.json();
 
-      if (pageData)
-        set({
-          pageData: { ...defaultPageData, ...pageData },
-          initialData: pageData,
-        });
+      if (pageData) {
+        const merged = { ...defaultPageData, ...pageData };
+        set({ pageData: merged, initialData: merged });
+      }
 
       set({ fetching: false, loading: false }, false);
     },
@@ -212,19 +211,17 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => {
       set({ saving: true }, false);
       const id = toast.loading("Saving page data...");
       try {
-        const pageData = get().pageData;
-
-        await extractAndUploadBlobs(pageData);
+        const uploaded = await extractAndUploadBlobs(get().pageData);
 
         const res = await fetch("/api/page-data", {
           method: "POST",
-          body: JSON.stringify(pageData),
+          body: JSON.stringify(uploaded),
           headers: { "Content-Type": "application/json" },
         });
 
         if (!res.ok) throw new Error("Failed to save page data");
 
-        set({ initialData: pageData }, false);
+        set({ pageData: uploaded, initialData: uploaded }, false);
         toast.success("Page data saved", { id });
       } catch (error) {
         toast.error(error.message, { id });
@@ -250,35 +247,37 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => {
   };
 });
 
-async function extractAndUploadBlobs(pageData: PageData): Promise<void> {
+async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
+  // Deep-clone so we don't mutate live Zustand state.
+  const next: PageData = JSON.parse(JSON.stringify(pageData));
+
   const blobsToUpload: Array<{
     url: string;
     path: string;
     blob?: Blob;
   }> = [];
 
-  if (pageData.profilePicture.startsWith("blob:")) {
+  if (next.profilePicture.startsWith("blob:")) {
     blobsToUpload.push({
-      url: pageData.profilePicture,
+      url: next.profilePicture,
       path: "profilePicture",
     });
   }
 
-  pageData.projects.forEach((project, i) => {
+  next.projects.forEach((project, i) => {
     if (project.image.startsWith("blob:")) {
       blobsToUpload.push({ url: project.image, path: `projects/${i}` });
     }
   });
 
-  pageData.credentials.forEach((credential, i) => {
+  next.credentials.forEach((credential, i) => {
     if (credential.image.startsWith("blob:")) {
       blobsToUpload.push({ url: credential.image, path: `credentials/${i}` });
     }
   });
 
-  if (blobsToUpload.length === 0) return;
+  if (blobsToUpload.length === 0) return next;
 
-  // Fetch all blobs
   await Promise.all(
     blobsToUpload.map(async (item) => {
       const response = await fetch(item.url);
@@ -286,7 +285,6 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<void> {
     })
   );
 
-  // Get presigned URLs in batch
   const urlResponse = await fetch("/api/page-data/upload-urls", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -316,13 +314,15 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<void> {
   );
 
   urls.forEach(({ key, path }) => {
-    if (path === "profilePicture") pageData.profilePicture = key;
+    if (path === "profilePicture") next.profilePicture = key;
     else if (path.startsWith("projects/")) {
       const projectIndex = parseInt(path.split("/")[1]);
-      pageData.projects[projectIndex].image = key;
+      next.projects[projectIndex].image = key;
     } else if (path.startsWith("credentials/")) {
       const credentialIndex = parseInt(path.split("/")[1]);
-      pageData.credentials[credentialIndex].image = key;
+      next.credentials[credentialIndex].image = key;
     }
   });
+
+  return next;
 }

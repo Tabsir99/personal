@@ -10,10 +10,6 @@ import { randomUUID } from "crypto";
 import { slugify } from "./appUtils";
 import { env } from "@/config/env.server";
 
-// ============================================================================
-// DRAFT CONVERSIONS (BLOG_DRAFTS collection)
-// ============================================================================
-
 export function draftDBToFormData(dbDraft: BlogDraftDB): BlogFormData {
   return {
     blogId: dbDraft.blogId,
@@ -32,10 +28,9 @@ export function draftDBToFormData(dbDraft: BlogDraftDB): BlogFormData {
     seoTitle: dbDraft.seoTitle,
     createdAt: dbDraft.createdAt,
     updatedAt: dbDraft.updatedAt,
-    hasDraftChanges: true,
+    hasDraftChanges: dbDraft.parentBlogId === null,
     socialDescription: dbDraft.socialDescription,
     featured: dbDraft.featured || false,
-    // publishedVersion will be added separately if parentBlogId exists
   };
 }
 
@@ -63,22 +58,16 @@ export function formDataToDraftDB(formData: BlogFormData): BlogDraftDB {
   };
 }
 
-// ============================================================================
-// PUBLISHED CONVERSIONS (BLOGS collection)
-// ============================================================================
-
 export function publishedDBToFormData(
   dbPublished: PublishedBlogDB,
 ): BlogFormData {
-  // When loading published blog for editing, populate draft fields from published
   return {
-    blogId: randomUUID(), // New draft ID
-    parentBlogId: dbPublished.blogId, // Link to published blog
+    blogId: randomUUID(),
+    parentBlogId: dbPublished.blogId,
     kind: dbPublished.kind,
     schemaType: dbPublished.schemaType,
     slug: dbPublished.slug,
     featured: dbPublished.featured,
-    // Populate draft fields from published (user will edit these)
     title: dbPublished.title,
     dek: dbPublished.dek,
     seoTitle: dbPublished.seoTitle,
@@ -89,7 +78,6 @@ export function publishedDBToFormData(
     content: JSON.parse(dbPublished.content),
     readTime: dbPublished.readTime,
     metaDescription: dbPublished.metaDescription,
-    // Store published version for comparison
     publishedVersion: {
       title: dbPublished.title,
       dek: dbPublished.dek,
@@ -104,16 +92,18 @@ export function publishedDBToFormData(
       socialDescription: dbPublished.socialDescription,
       featured: dbPublished.featured,
     },
-    createdAt: Date.now(), // Draft creation time
+    createdAt: Date.now(),
     updatedAt: Date.now(),
-    hasDraftChanges: false, // No changes yet
+    hasDraftChanges: false,
   };
 }
 
-export function formDataToPublishedDB(formData: BlogFormData): PublishedBlogDB {
-  // Promote draft fields to published
+export function formDataToPublishedDB(
+  formData: BlogFormData,
+  existingPublished?: PublishedBlogDB | null,
+): PublishedBlogDB {
   return {
-    blogId: formData.parentBlogId || formData.blogId, // Use parent ID if editing, else draft ID
+    blogId: formData.parentBlogId || formData.blogId,
     kind: formData.kind,
     schemaType: formData.schemaType,
     slug: formData.slug || slugify(formData.title),
@@ -127,24 +117,25 @@ export function formDataToPublishedDB(formData: BlogFormData): PublishedBlogDB {
     content: JSON.stringify(formData.content),
     readTime: formData.readTime,
     metaDescription: formData.metaDescription,
-    stats: { views: 0, likes: 0, comments: 0, shares: 0 },
-    createdAt: formData.publishedVersion ? formData.createdAt! : Date.now(),
+    stats: existingPublished?.stats ?? {
+      views: 0,
+      likes: 0,
+      comments: 0,
+      shares: 0,
+    },
+    createdAt: existingPublished?.createdAt ?? Date.now(),
     updatedAt: Date.now(),
-    publishedAt: formData.publishedVersion?.publishedAt || Date.now(),
-    recommendedBlogIds: [],
+    publishedAt: existingPublished?.publishedAt ?? Date.now(),
+    recommendedBlogIds: existingPublished?.recommendedBlogIds ?? [],
     socialDescription: formData.socialDescription,
     featured: formData.featured,
   };
 }
 
-// ============================================================================
-// FACTORY FUNCTIONS
-// ============================================================================
-
 export function createNewBlogFormData(title?: string): BlogFormData {
   return {
     blogId: randomUUID(),
-    parentBlogId: null, // New draft (not editing published)
+    parentBlogId: null,
     kind: "essay",
     schemaType: SchemaType.Article,
     slug: "",
@@ -164,10 +155,6 @@ export function createNewBlogFormData(title?: string): BlogFormData {
     featured: false,
   };
 }
-
-// ============================================================================
-// UTILITIES
-// ============================================================================
 
 export async function sendRevalidateRequest(path: string) {
   try {
