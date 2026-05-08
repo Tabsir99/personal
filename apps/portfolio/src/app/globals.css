@@ -112,73 +112,6 @@
   --sidebar-ring: oklch(0.552 0.016 285.938);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-* {
-  box-sizing: border-box !important;
-}
-
-.ul {
-  list-style-type: none;
-}
-
-h2 {
-  font-size: 36px;
-}
-
-#about p {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-
-.text-service {
-  background: linear-gradient(
-    92.66deg,
-    #919191,
-    #eaeaea 19.79%,
-    #828181 33.33%,
-    #c6c6c6 70.31%,
-    #606060
-  );
-  background-clip: border-box;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
-h1,
-h2,
-h3 {
-  font-family: var(--font-oswald);
-}
-
-#hire-now::before {
-  content: "";
-  position: absolute;
-  top: -30px;
-  width: 25px;
-  height: 105px;
-  background: rgb(245, 234, 179, 0.5);
-  box-shadow: 0 0 10px white;
-  filter: blur(1px);
-  opacity: 0.9;
-  transform: rotate(-20deg) translateX(-90px);
-  animation: shine 3s infinite;
-}
-
 @keyframes shine {
   0% {
     transform: rotate(-20deg) translateX(-90px);
@@ -189,16 +122,6 @@ h3 {
   100% {
     transform: rotate(-20deg) translateX(-90px);
   }
-}
-
-.shimmer {
-  animation: shimmerCycle 3s ease-in-out infinite;
-  background: linear-gradient(
-    90deg,
-    rgba(173, 216, 230, 0) 0%,
-    rgba(173, 216, 230, 0.12) 50%,
-    rgba(173, 216, 230, 0) 100%
-  );
 }
 
 @keyframes shimmerCycle {
@@ -212,28 +135,6 @@ h3 {
   100% {
     transform: translateX(100%);
   }
-}
-
-@keyframes gridFloat {
-  0%,
-  100% {
-    background-position: 0 0;
-    opacity: 0.2;
-  }
-  50% {
-    background-position: 2rem 2rem;
-    opacity: 0.35;
-  }
-}
-
-strong {
-  color: white;
-  font-weight: 900;
-}
-
-em {
-  color: white;
-  font-style: italic;
 }
 
 @keyframes blink {
@@ -275,6 +176,7 @@ em {
     transform: scale(1) translateY(0);
   }
 }
+
 @keyframes scanline {
   0% {
     background-position: 0 0;
@@ -284,54 +186,6 @@ em {
   }
 }
 
-.spotlight-text {
-  --mouse-x: 100px;
-  --mouse-y: 50px;
-  position: relative;
-  color: rgb(156, 163, 175);
-  background: radial-gradient(
-      circle 100px at var(--mouse-x) var(--mouse-y),
-      rgba(96, 165, 250, 0.4),
-      transparent 100%
-    ),
-    radial-gradient(
-      circle 180px at var(--mouse-x) var(--mouse-y),
-      rgba(168, 85, 247, 0.3),
-      transparent 70%
-    ),
-    radial-gradient(
-      circle 220px at var(--mouse-x) var(--mouse-y),
-      rgb(96, 165, 250),
-      rgb(168, 85, 247) 40%,
-      rgb(156, 163, 175) 70%
-    );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  transition: background 0.1s ease;
-}
-
-.spotlight-text::before {
-  content: "";
-  position: absolute;
-  inset: -20px;
-  border-radius: 12px;
-  background: radial-gradient(
-    circle 120px at calc(var(--mouse-x) + 20px) calc(var(--mouse-y) + 20px),
-    rgba(96, 165, 250, 0.15),
-    rgba(168, 85, 247, 0.1) 50%,
-    transparent 70%
-  );
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.spotlight-text:hover::before {
-  opacity: 1;
-}
-
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -340,36 +194,6 @@ em {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* Fade In Up Animation */
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out forwards;
-}
-
-/* Fade In Animation */
-.animate-fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
   }
 }
 
@@ -382,11 +206,138 @@ em {
   }
 }
 
-.animate-marquee {
-  animation: marquee 15s linear infinite;
-  will-change: transform;
+@keyframes gridFloat {
+  0%,
+  100% {
+    background-position: 0 0;
+    opacity: 0.2;
+  }
+  50% {
+    background-position: 2rem 2rem;
+    opacity: 0.35;
+  }
 }
 
-.marquee-container:hover .animate-marquee {
-  animation-play-state: paused;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-oswald);
+  }
+  h2 {
+    font-size: 36px;
+  }
+  #about p {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@layer components {
+  .ul {
+    list-style-type: none;
+  }
+  .text-service {
+    background: linear-gradient(
+      92.66deg,
+      #919191,
+      #eaeaea 19.79%,
+      #828181 33.33%,
+      #c6c6c6 70.31%,
+      #606060
+    );
+    background-clip: border-box;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  #hire-now::before {
+    content: "";
+    position: absolute;
+    top: -30px;
+    width: 25px;
+    height: 105px;
+    background: rgb(245, 234, 179, 0.5);
+    box-shadow: 0 0 10px white;
+    filter: blur(1px);
+    opacity: 0.9;
+    transform: rotate(-20deg) translateX(-90px);
+    animation: shine 3s infinite;
+  }
+  .shimmer {
+    animation: shimmerCycle 3s ease-in-out infinite;
+    background: linear-gradient(
+      90deg,
+      rgba(173, 216, 230, 0) 0%,
+      rgba(173, 216, 230, 0.12) 50%,
+      rgba(173, 216, 230, 0) 100%
+    );
+  }
+  .spotlight-text {
+    --mouse-x: 100px;
+    --mouse-y: 50px;
+    position: relative;
+    color: rgb(156, 163, 175);
+    background:
+      radial-gradient(
+        circle 100px at var(--mouse-x) var(--mouse-y),
+        rgba(96, 165, 250, 0.4),
+        transparent 100%
+      ),
+      radial-gradient(
+        circle 180px at var(--mouse-x) var(--mouse-y),
+        rgba(168, 85, 247, 0.3),
+        transparent 70%
+      ),
+      radial-gradient(
+        circle 220px at var(--mouse-x) var(--mouse-y),
+        rgb(96, 165, 250),
+        rgb(168, 85, 247) 40%,
+        rgb(156, 163, 175) 70%
+      );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: background 0.1s ease;
+  }
+  .spotlight-text::before {
+    content: "";
+    position: absolute;
+    inset: -20px;
+    border-radius: 12px;
+    background: radial-gradient(
+      circle 120px at calc(var(--mouse-x) + 20px) calc(var(--mouse-y) + 20px),
+      rgba(96, 165, 250, 0.15),
+      rgba(168, 85, 247, 0.1) 50%,
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .spotlight-text:hover::before {
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-marquee {
+    animation: marquee 15s linear infinite;
+    will-change: transform;
+  }
+  .marquee-container:hover .animate-marquee {
+    animation-play-state: paused;
+  }
 }
