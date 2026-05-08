@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "clean": "rm -rf .next node_modules .next out package-lock.json && npm install",
-    "prebuild": "tsc --noEmit"
+    "tc": "tsc --noEmit"
   },
   "dependencies": {
     "@open-notion/assets": "^1.2.0",

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DocRenderer } from "@open-notion/serializers/react";
 import { docToToc } from "@open-notion/serializers";
-import { getAllPostSlugs, getPost } from "@/lib/posts";
+import { getPost } from "@/lib/posts";
 import PostHeader from "@/components/Blog/post/PostHeader";
 import PostFooter from "@/components/Blog/post/PostFooter";
 import Toc from "@/components/Blog/post/Toc";
@@ -15,8 +15,7 @@ import "./blog-post.css";
 type RouteParams = Promise<{ slug: string }>;
 
 export async function generateStaticParams() {
-  const slugs = await getAllPostSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return [];
 }
 
 export async function generateMetadata({

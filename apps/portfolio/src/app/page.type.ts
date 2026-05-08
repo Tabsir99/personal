@@ -7,8 +7,8 @@ export interface PageData {
   stats: {
     yearsExperience: number;
     projectsCompleted: number;
-    jobSuccessRate: number; // 0-100
-    responseTime: string; // e.g., "<2h"
+    jobSuccessRate: number;
+    responseTime: string;
     happyClients: number;
   };
 
@@ -26,7 +26,6 @@ export interface PageData {
       value: string;
     }[];
     isActive: boolean;
-    // NEW FIELDS
     year: string;
     duration: string;
     role?: string;
@@ -52,7 +51,7 @@ export interface PageData {
     featured: boolean;
   }[];
 
-  about: string[]; // Array of html strings. One Card is rendered for each string.
+  about: string[];
 
   skills: {
     title: string;

@@ -1,5 +1,3 @@
-/* ── Single post page ─────────────────────────────────────────── */
-
 .post {
   --bg:        #f3ede0;
   --bg-2:      #ebe2d0;
@@ -39,7 +37,6 @@
 }
 .post .mono--mute { color: var(--mute); }
 
-/* ── 3-zone layout ────────────────────────────────────────────── */
 .post__grid {
   max-width: var(--maxw);
   margin: 0 auto;
@@ -53,7 +50,6 @@
 .post__rail { position: sticky; top: 32px; }
 .post__main { min-width: 0; max-width: 720px; justify-self: center; width: 100%; }
 
-/* ── Header ───────────────────────────────────────────────────── */
 .post-head { padding: 0 0 40px; border-bottom: 1px solid var(--rule); margin-bottom: 48px; }
 
 .post-head__crumbs {
@@ -149,12 +145,8 @@
 }
 .post .chip:hover { background: var(--warm); color: var(--paper); transform: translateY(-1px); }
 
-/* ── Body wrapper ─────────────────────────────────────────────── */
 .post__body { padding-bottom: 56px; }
 
-/* ============================================================
-   .open-notion-doc — body content rendered by @open-notion/serializers
-   ============================================================ */
 .post .open-notion-doc {
   --d-text:        var(--ink-2);
   --d-text-strong: var(--ink);
@@ -272,7 +264,6 @@
 }
 .post .open-notion-doc a code { color: inherit; }
 
-/* ── Code block (matches @open-notion/serializers data-* output) ── */
 .post .open-notion-doc [data-type="codeBlock"] {
   background: var(--paper);
   border: 1px solid var(--d-border);
@@ -344,7 +335,6 @@
   font-weight: 500;
 }
 
-/* ── Blockquote ── */
 .post .open-notion-doc blockquote {
   position: relative;
   margin: 0.5rem 0;
@@ -359,7 +349,6 @@
 }
 .post .open-notion-doc blockquote p { max-width: 50ch; }
 
-/* ── Horizontal rule ── */
 .post .open-notion-doc hr {
   height: 0;
   border: none;
@@ -377,7 +366,6 @@
   font-size: 11px;
 }
 
-/* ── Image / figure ── */
 .post .open-notion-doc figure { margin: 0.75rem 0; }
 .post .open-notion-doc figure img {
   max-width: 100%;
@@ -394,7 +382,6 @@
   text-align: center;
 }
 
-/* ── Callout ── */
 .post .open-notion-doc [data-type="callout"] {
   display: flex; gap: 14px; align-items: flex-start;
   padding: 1rem 1.2rem;
@@ -414,7 +401,6 @@
 .post .open-notion-doc [data-type="callout"] > div { flex: 1; min-width: 0; }
 .post .open-notion-doc [data-type="callout"] p { font-size: 16px; }
 
-/* ── Lists ── */
 .post .open-notion-doc ul, .post .open-notion-doc ol { padding-left: 1.5rem; margin: 0; }
 .post .open-notion-doc li { padding-left: 0.4rem; }
 .post .open-notion-doc li + li { margin-top: 0.4rem; }
@@ -428,7 +414,6 @@
 .post .open-notion-doc ol { list-style: decimal; }
 .post .open-notion-doc li::marker { color: var(--d-accent); font-family: var(--font-mono-blog); font-weight: 700; }
 
-/* ── Task list ── */
 .post .open-notion-doc [data-type="taskList"] { list-style: none; padding-left: 0.25rem; }
 .post .open-notion-doc [data-type="taskList"] li {
   display: flex; gap: 0.625rem; align-items: baseline; padding-left: 0;
@@ -455,7 +440,6 @@
   transform: translate(-50%, -60%) rotate(45deg);
 }
 
-/* ── Tables ── */
 .post .open-notion-doc [data-type="tableContainer"] {
   overflow-x: auto; width: 100%;
   -webkit-overflow-scrolling: touch;
@@ -494,7 +478,6 @@
   background: color-mix(in srgb, var(--d-accent) 32%, transparent);
 }
 
-/* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 1100px) {
   .post__grid {
     grid-template-columns: minmax(0, 1fr);
@@ -520,9 +503,6 @@
   .post-head__bar > span { animation: none; transform: scaleX(1); }
 }
 
-/* ============================================================
-   Reading progress
-   ============================================================ */
 .rprog {
   position: fixed; left: 0; right: 0; top: 0;
   height: 3px;
@@ -561,9 +541,6 @@
   .rprog__badge { right: 12px; bottom: 12px; padding: 6px 10px; }
 }
 
-/* ============================================================
-   TOC — sticky left rail with scrollspy
-   ============================================================ */
 .post .toc {
   position: relative;
   font-size: 13px;
@@ -707,9 +684,6 @@
   .post .toc__head { padding-left: 18px; }
 }
 
-/* ============================================================
-   Right rail
-   ============================================================ */
 .post__rail-inner {
   position: sticky; top: 32px;
   display: flex; flex-direction: column;
@@ -729,9 +703,6 @@
   .post__rail-inner > * { flex: 1 1 240px; }
 }
 
-/* ============================================================
-   Score
-   ============================================================ */
 .post .score {
   display: flex; flex-direction: column;
   align-items: flex-start;
@@ -840,9 +811,6 @@
 }
 .post .score[data-maxed] .score__global { color: var(--warm); }
 
-/* ============================================================
-   Share
-   ============================================================ */
 .post .share { display: flex; flex-direction: column; gap: 10px; }
 .post .share__head { font-size: 11px; color: var(--mute); letter-spacing: 0.04em; }
 .post .share__row { display: flex; flex-direction: column; gap: 8px; }
@@ -874,9 +842,6 @@
 }
 .post .share__btn-label { font-size: 11px; }
 
-/* ============================================================
-   Post footer — prev / next / back
-   ============================================================ */
 .post-foot {
   margin-top: 96px;
   padding-bottom: 96px;

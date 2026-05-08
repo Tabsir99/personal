@@ -79,7 +79,6 @@ export const NavItems = ({ activeSection = "home" }: NavItemsProps) => {
         {open ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Full-screen overlay with smooth circle expansion */}
       <div
         className={cn(
           "fixed top-0 right-0 bg-zinc-900 transition-all duration-700 ease-in-out sm:hidden",

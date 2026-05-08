@@ -17,7 +17,6 @@ import Img from "../ui/image";
 import { PageData } from "@/app/page.type";
 
 type ClientType = PageData["projects"][0]["clientType"];
-// Helper function for client icons
 const getClientIcon = (type: ClientType) => {
   const iconMap: Record<ClientType, React.ElementType> = {
     Startup: Rocket,
@@ -81,7 +80,6 @@ export default async function PortfolioSection() {
                       {project.title}
                     </h3>
 
-                    {/* Meta information */}
                     <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3.5 w-3.5" />
@@ -106,7 +104,6 @@ export default async function PortfolioSection() {
                     {project.description}
                   </p>
 
-                  {/* Metrics - Compact inline style */}
                   {project.metrics && project.metrics.length > 0 ? (
                     <div className="mb-4 flex gap-4 text-xs border-l-2 border-blue-500/30 pl-3 py-1">
                       {project.metrics.slice(0, 2).map((metric, i) => (
@@ -122,7 +119,6 @@ export default async function PortfolioSection() {
                     <div className="mb-4 py-3" />
                   )}
 
-                  {/* Client type badge with icon */}
                   <div className="mb-4">
                     <Badge
                       variant="outline"

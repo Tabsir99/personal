@@ -1,5 +1,3 @@
-/* ── Blog index page ──────────────────────────────────────────── */
-
 .blog {
   --bg: #f3ede0;
   --bg-2: #ebe2d0;
@@ -65,7 +63,6 @@
   position: relative;
 }
 
-/* ── Page title ───────────────────────────────────────────────── */
 .blog .ptitle {
   padding: 8px 0 56px;
   margin-bottom: 8px;
@@ -168,7 +165,6 @@
   }
 }
 
-/* ── Layout ───────────────────────────────────────────────────── */
 .blog .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
@@ -176,7 +172,6 @@
   align-items: start;
 }
 
-/* ── Featured ─────────────────────────────────────────────────── */
 .blog .feat {
   position: relative;
   background: var(--paper);
@@ -424,7 +419,6 @@
   transform: translateX(6px);
 }
 
-/* ── Filters ──────────────────────────────────────────────────── */
 .blog .filters {
   position: sticky;
   top: 0;
@@ -527,7 +521,6 @@
   box-shadow: 0 0 0 2px var(--bg);
 }
 
-/* ── Rows / posts ─────────────────────────────────────────────── */
 .blog .rows {
   display: flex;
   flex-direction: column;
@@ -766,7 +759,6 @@
   color: var(--warm);
 }
 
-/* ── Aside (sticker + mini card) ──────────────────────────────── */
 .blog .aside {
   position: sticky;
   top: 120px;
@@ -913,7 +905,6 @@
   border-color: var(--warm);
 }
 
-/* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 980px) {
   .blog .layout {
     grid-template-columns: 1fr;

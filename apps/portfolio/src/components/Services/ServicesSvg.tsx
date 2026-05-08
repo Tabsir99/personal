@@ -68,13 +68,11 @@ export default function ServicesSVG() {
         const cycleTime = currentTime % totalCycleTime;
 
         if (cycleTime < duration) {
-          // Regular animation
           const progress = cycleTime / duration;
           snake.setAttribute("d", "");
           updateSnake(progress);
           delayStart = null;
         } else {
-          // Delay period
           if (!delayStart) delayStart = currentTime;
           if (currentTime - delayStart >= delay) {
             snake.setAttribute("d", "");

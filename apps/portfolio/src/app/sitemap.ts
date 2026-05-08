@@ -1,33 +1,61 @@
 import { MetadataRoute } from "next";
 import { getPageData } from "./layout";
-import { getAllPosts } from "@/lib/posts";
+import { getAllBlogs } from "@/lib/posts";
+
+const BASE_URL = "https://tabsircg.com";
+
+export const revalidate = 86400;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const pageData = await getPageData();
-  const posts = await getAllPosts();
+  const [pageData, blogs] = await Promise.all([getPageData(), getAllBlogs()]);
 
-  const portfolioImages = pageData.projects.map((p) => p.image);
-  const images = [...portfolioImages].filter(Boolean);
+  const homepageImages = [
+    pageData.profilePicture,
+    ...pageData.projects.map((p) => p.image),
+    ...pageData.credentials.map((c) => c.image),
+  ].filter(Boolean);
 
-  return [
+  const staticEntries: MetadataRoute.Sitemap = [
     {
-      url: "https://tabsircg.com",
+      url: BASE_URL,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 1,
-      images: [pageData.profilePicture, ...images],
+      images: homepageImages,
     },
     {
-      url: "https://tabsircg.com/blog",
+      url: `${BASE_URL}/blog`,
       lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
+      changeFrequency: "daily",
+      priority: 0.9,
     },
-    ...posts.map((post) => ({
-      url: `https://tabsircg.com/blog/${post.slug}`,
-      lastModified: new Date(post.date),
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    })),
+    {
+      url: `${BASE_URL}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: `${BASE_URL}/terms`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: `${BASE_URL}/refund-policy`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
   ];
+
+  const blogEntries: MetadataRoute.Sitemap = blogs.map((blog) => ({
+    url: `${BASE_URL}/blog/${blog.slug}`,
+    lastModified: new Date(blog.updatedAt ?? blog.publishedAt),
+    changeFrequency: "monthly",
+    priority: 0.8,
+    ...(blog.coverImageUrl ? { images: [blog.coverImageUrl] } : {}),
+  }));
+
+  return [...staticEntries, ...blogEntries];
 }

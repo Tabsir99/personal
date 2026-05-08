@@ -49,7 +49,6 @@ const HeroContent = ({ pageData }: { pageData: PageData }) => {
 
   return (
     <div className="flex flex-col justify-center space-y-8">
-      {/* Heading with Spotlight Effect */}
       <div className="space-y-4">
         <h1 className="text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-6xl lg:text-7xl">
           Turning Ideas Into <HighlightText text="Production-Ready MVPs" />
@@ -64,7 +63,6 @@ const HeroContent = ({ pageData }: { pageData: PageData }) => {
         </p>
       </div>
 
-      {/* Social Proof - Rating + Quick Stats */}
       <div className="flex flex-wrap items-center gap-4 md:gap-6">
         <div className="flex items-center gap-2">
           <div className="flex">
@@ -98,7 +96,6 @@ const HeroContent = ({ pageData }: { pageData: PageData }) => {
         </div>
       </div>
 
-      {/* CTAs */}
       <div className="flex flex-wrap items-center gap-4">
         <a
           href="#portfolio"
@@ -106,7 +103,6 @@ const HeroContent = ({ pageData }: { pageData: PageData }) => {
         >
           <span className="relative z-10">View My Work</span>
           <ArrowRight className="relative z-10 h-5 w-5 transition-transform group-hover:translate-x-1" />
-          {/* Shine effect on hover */}
           <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
         </a>
 
@@ -273,7 +269,6 @@ const HeroVisual = ({ pageData }: { pageData: PageData }) => {
         <TerminalCard />
         <StatsGrid pageData={pageData} />
 
-        {/* Tech Stack */}
         <div className="overflow-hidden rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-6 py-4 backdrop-blur-sm">
           <div className="flex items-center justify-between">
             {[
@@ -293,7 +288,6 @@ const HeroVisual = ({ pageData }: { pageData: PageData }) => {
         </div>
       </div>
 
-      {/* Background Blurs */}
       <div className="absolute -z-10 h-96 w-96 rounded-full bg-blue-500/20 blur-[120px]" />
       <div className="absolute -right-20 -z-10 h-96 w-96 rounded-full bg-purple-500/20 blur-[120px]" />
     </div>

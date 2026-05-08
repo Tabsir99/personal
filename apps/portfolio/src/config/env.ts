@@ -9,7 +9,6 @@ function requireEnv(key: string): string {
 
 export const env = {
   ADMIN_ORIGIN: requireEnv("ADMIN_ORIGIN"),
-  BLOG_ORIGIN: requireEnv("BLOG_ORIGIN"),
   MEDIA_ORIGIN: requireEnv("MEDIA_ORIGIN"),
   SERVER_TOKEN: requireEnv("SERVER_TOKEN"),
 

@@ -49,7 +49,6 @@ export default async function JsonLd() {
       },
     }));
 
-  // CreativeWork Schemas (one per project)
   const projectSchemas = pageData.projects
     .filter((p) => p.isActive)
     .map((project) => ({

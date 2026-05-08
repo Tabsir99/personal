@@ -63,9 +63,7 @@ export default function ScoreMeter({
         lastFlushed.current = tapped;
         persist(tapped);
       }
-    } catch {
-      // leave the diff for next flush
-    }
+    } catch {}
   }, [slug, tapped, persist]);
 
   React.useEffect(() => {

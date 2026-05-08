@@ -14,13 +14,11 @@ const TestimonialCard = ({
   const getVideoEmbedUrl = (url: string) => {
     if (!url) return null;
 
-    // YouTube
     const youtubeMatch = url.match(
       /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/,
     );
     if (youtubeMatch) return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
 
-    // Vimeo
     const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
     if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
 
@@ -54,25 +52,19 @@ const TestimonialCard = ({
             : "border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm hover:border-zinc-700 hover:shadow-xl hover:shadow-emerald-500/5"
         }`}
       >
-        {/* Featured glow effect */}
         {testimonial.featured && (
           <>
-            {/* Animated border glow */}
             <div className="absolute inset-0 rounded-lg bg-linear-to-r from-emerald-500/0 via-emerald-500/30 to-emerald-500/0 blur-xl opacity-50 animate-pulse" />
 
-            {/* Top accent line */}
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-emerald-400 to-transparent" />
           </>
         )}
 
-        {/* Featured badge */}
         {testimonial.featured && (
           <div className="absolute right-4 top-4 z-10">
             <div className="relative">
-              {/* Badge glow */}
               <div className="absolute inset-0 rounded-full bg-emerald-400/30 blur-md" />
 
-              {/* Badge content */}
               <div className="relative flex items-center gap-1.5 rounded-full bg-linear-to-r from-emerald-500 to-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-emerald-500/50">
                 <Star className="h-3.5 w-3.5 fill-white animate-pulse" />
                 FEATURED
@@ -81,7 +73,6 @@ const TestimonialCard = ({
           </div>
         )}
 
-        {/* Hover gradient overlay - different for featured */}
         <div
           className={`absolute inset-0 transition-opacity duration-500 ${
             testimonial.featured
@@ -91,7 +82,6 @@ const TestimonialCard = ({
         />
 
         <div className="relative p-6 h-full flex flex-col">
-          {/* Video embed */}
           {videoUrl ? (
             <div
               className={`relative mb-6 overflow-hidden rounded-lg shrink-0 ${
@@ -111,7 +101,6 @@ const TestimonialCard = ({
             </div>
           ) : null}
 
-          {/* Rating */}
           <div className="mb-4 flex items-center gap-3">
             <div className="flex gap-0.5">
               {[...Array(5)].map((_, i) => (
@@ -136,7 +125,6 @@ const TestimonialCard = ({
             </span>
           </div>
 
-          {/* Testimonial text */}
           {testimonial.text && (
             <blockquote className="mb-6 flex-1">
               <p
@@ -151,7 +139,6 @@ const TestimonialCard = ({
             </blockquote>
           )}
 
-          {/* Author info */}
           <div className="mb-4 flex items-start gap-3">
             {testimonial.avatar && (
               <div className="shrink-0">

@@ -17,17 +17,22 @@ function formatDate(iso: string): string {
   });
 }
 
-export default function PostRow({ post, idx }: { post: PostMeta; idx: number }) {
+export default function PostRow({
+  post,
+  idx,
+}: {
+  post: PostMeta;
+  idx: number;
+}) {
   return (
-    <InViewArticle
-      className={`row row--${post.accent}`}
-      style={{ ["--row-i" as string]: idx }}
-    >
+    <InViewArticle className="row" style={{ ["--row-i" as string]: idx }}>
       <div className="row__num mono">{String(idx + 1).padStart(2, "0")}</div>
       <div className="row__head">
         <div className="row__date mono">{formatDate(post.date)}</div>
         <div className="row__kind">
-          <span className={`kind kind--${post.kind}`}>{KIND_LABEL[post.kind]}</span>
+          <span className={`kind kind--${post.kind}`}>
+            {KIND_LABEL[post.kind]}
+          </span>
         </div>
       </div>
       <h3 className="row__title">
