@@ -45,6 +45,8 @@ export const loadBlogForEditing = wrap(async (blogId: string) => {
     docId: parsedBlogId,
   });
 
+  console.log("blog", parsedBlogId, blogId);
+
   if (!blog) throw new Error("Blog not found");
 
   if (blog.status === BlogStatus.draft) return draftDBToFormData(blog);

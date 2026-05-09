@@ -32,3 +32,6 @@ export const env = {
   // ===== Server to server token =====
   SERVER_TOKEN: requireEnv("SERVER_TOKEN"),
 } as const;
+
+// Boot-time presence check; SDK reads ANTHROPIC_AUTH_TOKEN from process.env itself.
+requireEnv("ANTHROPIC_AUTH_TOKEN");

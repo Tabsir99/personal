@@ -9,7 +9,8 @@
     "./portfolio": "./src/portfolio.ts",
     "./user": "./src/user.ts",
     "./dashboard": "./src/dashboard.ts",
-    "./api": "./src/api.ts"
+    "./api": "./src/api.ts",
+    "./ai": "./src/ai.ts"
   },
   "dependencies": {
     "zod": "^4.4.3"
