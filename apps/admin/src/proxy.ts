@@ -13,35 +13,49 @@ const isLoggedIn = async (token?: string) => {
   }
 };
 
-export default async function middleware(request: NextRequest) {
-  try {
-    // const ipAddress = request.headers.get("xIp") ?? "unknown";
-    const pathname = request.nextUrl.pathname;
-    const token = request.cookies.get(env.COOKIE_NAME)?.value;
-    const serverToken = request.headers.get("serverToken");
-    const serverAuthenticated = serverToken === env.SERVER_TOKEN;
+const isApiRequest = (pathname: string) => pathname.startsWith("/api/");
+const isActionRequest = (request: NextRequest) =>
+  request.headers.get("next-action") != null;
 
-    // Server auth bypasses everything
-    if (serverAuthenticated) return NextResponse.next();
-
-    const userAuthenticated = await isLoggedIn(token);
-    if (pathname !== "/" && !userAuthenticated) throw new Error("Unauthorized");
-
-    // Redirect to dashboard if user is authenticated
-    if (pathname === "/" && userAuthenticated)
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_ADMIN_ORIGIN}/dashboard`,
-      );
-
-    // Return next if everything is authenticated
-    return NextResponse.next();
-  } catch (error) {
-    console.error(error);
-    return NextResponse.redirect(
-      process.env.NEXT_PUBLIC_ADMIN_ORIGIN as string,
+const unauthorizedResponse = (request: NextRequest) => {
+  if (
+    isApiRequest(request.nextUrl.pathname) ||
+    isActionRequest(request)
+  ) {
+    return NextResponse.json(
+      { status: "error", message: "Unauthorized" },
+      { status: 401 },
     );
   }
+  return NextResponse.redirect(process.env.NEXT_PUBLIC_ADMIN_ORIGIN as string);
+};
+
+export default async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  const token = request.cookies.get(env.COOKIE_NAME)?.value;
+  const serverToken = request.headers.get("serverToken");
+
+  // serverToken (portfolio → admin read access) only bypasses /api/*.
+  // It must NOT grant access to dashboard pages or server actions.
+  if (serverToken === env.SERVER_TOKEN && isApiRequest(pathname)) {
+    return NextResponse.next();
+  }
+
+  const userAuthenticated = await isLoggedIn(token);
+
+  // Login page: redirect already-authenticated users to dashboard.
+  if (pathname === "/") {
+    return userAuthenticated
+      ? NextResponse.redirect(
+          `${process.env.NEXT_PUBLIC_ADMIN_ORIGIN}/dashboard`,
+        )
+      : NextResponse.next();
+  }
+
+  if (!userAuthenticated) return unauthorizedResponse(request);
+  return NextResponse.next();
 }
+
 export const config = {
   matcher: ["/", "/api/:path*", "/dashboard/:path*"],
 };

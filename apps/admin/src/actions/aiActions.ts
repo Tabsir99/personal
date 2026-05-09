@@ -1,5 +1,4 @@
 "use server";
-import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import type { ToolUnion } from "@anthropic-ai/sdk/resources/messages/messages";
 import { docToText } from "@open-notion/editor";
@@ -7,6 +6,7 @@ import { z } from "zod";
 import { aiBlogMetadataSchema } from "@tabsircg/schemas/ai";
 import { docContentSchema } from "@tabsircg/schemas/blog";
 import { wrap } from "@/lib/appUtils";
+import { requireAuth } from "@/lib/requireAuth";
 import { readTags } from "@/actions/tagActions";
 
 const client = new Anthropic();
@@ -65,6 +65,7 @@ const buildUserPrompt = ({
 };
 
 export const generateBlogMetadata = wrap(async (rawJson: string) => {
+  await requireAuth();
   const parsedInput = generateInputSchema.parse(JSON.parse(rawJson));
   const { content, title, kind, currentTags } = parsedInput;
 
@@ -78,7 +79,7 @@ export const generateBlogMetadata = wrap(async (rawJson: string) => {
   }
 
   const tools: ToolUnion[] = [
-    { type: "web_search_20250305", name: "web_search", max_uses: 5 },
+    { type: "web_search_20260209", name: "web_search", max_uses: 5 },
     {
       name: "submit_metadata",
       description:
