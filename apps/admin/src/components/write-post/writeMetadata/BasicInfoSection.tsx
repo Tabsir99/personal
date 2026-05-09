@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BlogKind, SchemaType } from "@/schemas/blogSchemas";
+import { BlogKind, SchemaType } from "@tabsircg/schemas/blog";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { useShallow } from "zustand/shallow";
 import { FileText } from "lucide-react";

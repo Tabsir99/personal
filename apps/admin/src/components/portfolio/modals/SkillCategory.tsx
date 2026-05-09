@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
-import { PageData } from "@/schemas/portfolioSchemas";
+import { PageData } from "@tabsircg/schemas/portfolio";
 import { Plus } from "lucide-react";
 
 interface SkillCategoryDialogProps {

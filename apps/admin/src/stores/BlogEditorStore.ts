@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { BlogFormData, SchemaType } from "@/schemas/blogSchemas";
+import { BlogFormData, SchemaType } from "@tabsircg/schemas/blog";
 import { saveDraft } from "@/actions/blogActions";
 import { callWithToast } from "@/lib/utils";
 import type { DocContent } from "@open-notion/editor";

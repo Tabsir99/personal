@@ -4,7 +4,7 @@ import {
   PageViewEvent,
   SessionStartEvent,
   analyticsEventSchema,
-} from "@/schemas/dashboardSchemas";
+} from "@tabsircg/schemas/dashboard";
 import { NextRequest } from "next/server";
 import { UAParser } from "ua-parser-js";
 import { db } from "@/config/firebaseAdmin";

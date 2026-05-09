@@ -21,7 +21,7 @@ import {
   BlogStatus,
   PublishedBlogDB,
   blogFormDataSchema,
-} from "@/schemas/blogSchemas";
+} from "@tabsircg/schemas/blog";
 
 const blogIdSchema = z.string().min(1);
 const optionalTitleSchema = z.string().optional();

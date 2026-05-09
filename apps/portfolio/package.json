@@ -10,7 +10,9 @@
     "tc": "tsc --noEmit"
   },
   "dependencies": {
+    "@tabsircg/schemas": "workspace:*",
     "@open-notion/assets": "^1.2.0",
+    "@open-notion/editor": "^1.4.1",
     "@open-notion/serializers": "^1.3.0",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
@@ -22,7 +24,8 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-icons": "^5.5.0",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.4",

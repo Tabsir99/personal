@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Clock } from "lucide-react";
-import { BlogFormData, BlogStatus } from "@/schemas/blogSchemas";
+import { BlogFormData, BlogStatus } from "@tabsircg/schemas/blog";
 import BlogMenu from "./BlogMenu";
 import Link from "next/link";
 import { getTimeSince } from "@/lib/appUtils";

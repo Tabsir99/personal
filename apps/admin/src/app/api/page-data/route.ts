@@ -1,6 +1,6 @@
 import { env } from "@/config/env.server";
 import { NextRequest } from "next/server";
-import { PageData, pageDataSchema } from "@/schemas/portfolioSchemas";
+import { PageData, pageDataSchema } from "@tabsircg/schemas/portfolio";
 import {
   readObject,
   S3Bucket,

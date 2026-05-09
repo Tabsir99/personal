@@ -1,4 +1,4 @@
-import { PublishedBlogDB, BlogStatus } from "@/schemas/blogSchemas";
+import { PublishedBlogDB, BlogStatus } from "@tabsircg/schemas/blog";
 import { mutate } from "swr";
 
 export const invalidateBlogOverview = ({

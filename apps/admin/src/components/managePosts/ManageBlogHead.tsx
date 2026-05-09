@@ -1,4 +1,4 @@
-import { BlogKind, BlogStatus, SchemaType } from "@/schemas/blogSchemas";
+import { BlogKind, BlogStatus, SchemaType } from "@tabsircg/schemas/blog";
 import SearchInput from "../ui/common/SearchInput";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";

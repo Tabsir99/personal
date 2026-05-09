@@ -22,7 +22,7 @@ import { Plus, Star, Upload, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { useEffect, useState } from "react";
-import { PageData } from "@/schemas/portfolioSchemas";
+import { PageData } from "@tabsircg/schemas/portfolio";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface TestimonialDialogProps {

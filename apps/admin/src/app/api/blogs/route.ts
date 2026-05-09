@@ -4,7 +4,7 @@ import {
   PublishedBlogDB,
   blogKindSchema,
   schemaTypeSchema,
-} from "@/schemas/blogSchemas";
+} from "@tabsircg/schemas/blog";
 import { wrapRoute } from "@/lib/appUtils";
 import { NextRequest } from "next/server";
 
@@ -63,6 +63,7 @@ export const GET = wrapRoute(async (request: NextRequest) => {
       coverImageUrl: true,
       readTime: true,
       metaDescription: true,
+      featured: true,
       stats: true,
       createdAt: true,
       updatedAt: true,

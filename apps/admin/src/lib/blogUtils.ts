@@ -5,7 +5,7 @@ import {
   SchemaType,
   BlogDraftDB,
   PublishedBlogDB,
-} from "@/schemas/blogSchemas";
+} from "@tabsircg/schemas/blog";
 import { randomUUID } from "crypto";
 import { slugify } from "./appUtils";
 import { env } from "@/config/env.server";

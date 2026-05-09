@@ -25,7 +25,7 @@ import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Img from "@/components/ui/image";
-import { PageData } from "@/schemas/portfolioSchemas";
+import { PageData } from "@tabsircg/schemas/portfolio";
 
 interface ProjectDialogProps {
   children?: React.ReactNode;

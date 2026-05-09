@@ -16,7 +16,7 @@ import { Image as ImageIcon, Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import Img from "@/components/ui/image";
-import { PageData } from "@/schemas/portfolioSchemas";
+import { PageData } from "@tabsircg/schemas/portfolio";
 
 interface CredentialDialogProps {
   children: React.ReactNode;

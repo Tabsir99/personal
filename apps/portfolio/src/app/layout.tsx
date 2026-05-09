@@ -9,7 +9,7 @@ import { env } from "@/config/env";
 import { GlobalCursorGlow } from "@/components/ui/GlowCursor";
 import { ScrollAnimationObserver } from "@/components/ui/ScrollObserver";
 import JsonLd from "@/components/JsonLd";
-import { ApiResponse } from "@/types";
+import type { ApiResponse } from "@tabsircg/schemas/api";
 
 const latoFont = Lato({
   weight: ["400", "900"],

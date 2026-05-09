@@ -1,6 +1,6 @@
 import type { Firestore } from "firebase-admin/firestore";
 import { db } from "@/config/firebaseAdmin";
-import { BlogKind, BlogStatus, SchemaType } from "@/schemas/blogSchemas";
+import { BlogKind, BlogStatus, SchemaType } from "@tabsircg/schemas/blog";
 
 type OldStatus = "active" | "inactive" | BlogStatus;
 const BLOGS_COLLECTION = "blogs";

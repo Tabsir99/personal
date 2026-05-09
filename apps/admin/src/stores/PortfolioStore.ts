@@ -1,4 +1,4 @@
-import { PageData } from "@/schemas/portfolioSchemas";
+import { PageData } from "@tabsircg/schemas/portfolio";
 import type { ApiResponse } from "@/lib/appUtils";
 import { callWithToast } from "@/lib/utils";
 import { create } from "zustand";

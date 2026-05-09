@@ -5,7 +5,7 @@ import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { useOpenNotion, OpenNotionView } from "@open-notion/editor";
 import { DocContent } from "@open-notion/editor";
 import WriteMetadataComp from "./writeMetadata";
-import { BlogFormData } from "@/schemas/blogSchemas";
+import { BlogFormData } from "@tabsircg/schemas/blog";
 import EditorHeader from "./EditorHeader";
 import Preview from "./Preview";
 import { PublishBlog } from "./PublishBlog";

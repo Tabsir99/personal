@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import CMSBlogCard from "./BlogCard";
 import ManagePostHead, { BlogFilters } from "./ManageBlogHead";
-import { PublishedBlogDB } from "@/schemas/blogSchemas";
+import { PublishedBlogDB } from "@tabsircg/schemas/blog";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import { BlogCardSkeletonGrid } from "../ui/Skeletons/BlogCardSkeleton";
 import { callWithToast } from "@/lib/utils";

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { db, Collections } from "@/config/firebaseAdmin";
-import { BlogStatus, PublishedBlogDB } from "@/schemas/blogSchemas";
+import { BlogStatus, PublishedBlogDB } from "@tabsircg/schemas/blog";
 import { wrapRoute } from "@/lib/appUtils";
 
 const slugSchema = z.string().min(1);

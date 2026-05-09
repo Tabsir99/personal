@@ -20,7 +20,7 @@ import {
   BlogDraftDB,
   BlogStatus,
   PublishedBlogDB,
-} from "@/schemas/blogSchemas";
+} from "@tabsircg/schemas/blog";
 import BlogMenu from "./BlogMenu";
 import { clientEnv } from "@/config/env.client";
 import { cn } from "@/lib/utils";

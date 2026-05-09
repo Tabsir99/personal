@@ -1,6 +1,9 @@
 import { DocContent, docToText } from "@open-notion/editor";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
+import type { ApiResponse } from "@tabsircg/schemas/api";
+
+export type { ApiResponse };
 
 export function slugify(text: string): string {
   return text
@@ -12,10 +15,6 @@ export function slugify(text: string): string {
     .replace(/[^\w\-]+/g, "")
     .replace(/\-\-+/g, "-");
 }
-
-export type ApiResponse<T> =
-  | { status: "success"; data: T }
-  | { status: "error"; message: string };
 
 const toMessage = (e: unknown) =>
   e instanceof Error ? e.message : String(e);
