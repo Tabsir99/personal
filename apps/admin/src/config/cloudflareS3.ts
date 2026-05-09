@@ -1,0 +1,52 @@
+import "server-only";
+import {
+  DeleteObjectsCommand,
+  GetObjectCommand,
+  NoSuchKey,
+  PutObjectCommand,
+  PutObjectCommandInput,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { env } from "./env.server";
+
+const s3 = new S3Client({
+  credentials: {
+    accessKeyId: env.CLOUDFLARE_R2_AK_ID,
+    secretAccessKey: env.CLOUDFLARE_R2_AK,
+  },
+  endpoint: env.CLOUDFLARE_R2_ENDPOINT,
+  forcePathStyle: true,
+  region: "auto",
+});
+
+export enum S3Bucket {
+  PUBLIC = "public-data",
+  PRIVATE = "private-data",
+}
+
+export const readObject = async (bucket: S3Bucket, key: string) => {
+  // NoSuchKey is a domain "missing" signal that callers want as null;
+  // any other failure (network, auth) should propagate to wrapRoute.
+  const response = await s3
+    .send(new GetObjectCommand({ Bucket: bucket, Key: key }))
+    .catch((error: unknown) => {
+      if (error instanceof NoSuchKey) return null;
+      throw error;
+    });
+  return response?.Body ?? null;
+};
+
+export const deleteObjects = async (bucket: S3Bucket, keys: string[]) => {
+  await s3.send(
+    new DeleteObjectsCommand({
+      Bucket: bucket,
+      Delete: { Objects: keys.map((k) => ({ Key: k })), Quiet: true },
+    }),
+  );
+};
+
+export const uploadObject = async (params: PutObjectCommandInput) => {
+  await s3.send(new PutObjectCommand(params));
+};
+
+export default s3;
