@@ -22,6 +22,7 @@ interface OldBlogBase {
   recommendationTitle?: string;
   estReadTime?: number;
   content?: string;
+  featured?: boolean;
 }
 
 interface OldDraftDoc extends OldBlogBase {
@@ -99,6 +100,7 @@ function buildNewBase(oldData: OldBlogBase, docId: string, now: number) {
     slug: normalizeSlug(sourceSlug, blogId),
     createdAt: oldData.createdAt ?? now,
     updatedAt: oldData.updatedAt ?? now,
+    featuredAt: oldData.featured ? (oldData.updatedAt ?? now) : null,
   };
 }
 

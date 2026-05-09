@@ -4,10 +4,11 @@ import { useMemo, useState } from "react";
 import CMSBlogCard from "./BlogCard";
 import ManagePostHead, { BlogFilters } from "./ManageBlogHead";
 import { PublishedBlogDB } from "@tabsircg/schemas/blog";
+import type { CursorPage } from "@tabsircg/schemas/api";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import { BlogCardSkeletonGrid } from "../ui/Skeletons/BlogCardSkeleton";
 import { callWithToast } from "@/lib/utils";
-import { deleteBlog, toggleBlogStatus } from "@/actions/blogActions";
+import { deleteBlog, featureBlog, toggleBlogStatus } from "@/actions/blogActions";
 
 const DEFAULT_FILTERS: BlogFilters = {
   status: "all",
@@ -29,19 +30,33 @@ const BlogOverview = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<BlogFilters>(DEFAULT_FILTERS);
 
-  const { data, isLoading, mutate } = useCustomSWR<PublishedBlogDB[]>(
+  const { data, isLoading, mutate } = useCustomSWR<CursorPage<PublishedBlogDB>>(
     `/api/blogs${buildBlogsQueryString(filters)}`,
   );
 
+  const items = data?.items ?? [];
+
+  const currentFeaturedId = useMemo(() => {
+    let bestId: string | null = null;
+    let bestAt = -Infinity;
+    for (const b of items) {
+      if (b.featuredAt != null && b.featuredAt > bestAt) {
+        bestAt = b.featuredAt;
+        bestId = b.blogId;
+      }
+    }
+    return bestId;
+  }, [items]);
+
   const filteredPosts = useMemo(() => {
     const term = searchTerm.toLowerCase();
-    if (!term) return data ?? [];
-    return (data ?? []).filter(
+    if (!term) return items;
+    return items.filter(
       (blog) =>
         blog.title?.toLowerCase().includes(term) ||
         blog.metaDescription?.toLowerCase().includes(term),
     );
-  }, [data, searchTerm]);
+  }, [items, searchTerm]);
 
   const handleFilterChange = <K extends keyof BlogFilters>(
     key: K,
@@ -68,8 +83,23 @@ const BlogOverview = () => {
       err: "Failed to delete blog",
     });
     if (result?.status === "success") {
-      mutate((prev) => prev?.filter((p) => p.blogId !== blogId), false);
+      mutate(
+        (prev) =>
+          prev
+            ? { ...prev, items: prev.items.filter((p) => p.blogId !== blogId) }
+            : prev,
+        false,
+      );
     }
+  };
+
+  const setFeatured = async (blogId: string) => {
+    const result = await callWithToast(() => featureBlog(blogId), {
+      loading: "Setting as featured...",
+      success: "Set as featured",
+      err: "Failed to set as featured",
+    });
+    if (result?.status === "success") mutate();
   };
 
   return (
@@ -92,8 +122,10 @@ const BlogOverview = () => {
                 <CMSBlogCard
                   key={post.blogId}
                   blog={post}
+                  isFeatured={post.blogId === currentFeaturedId}
                   toggleStatus={toggleStatus}
                   confirmDelete={confirmDelete}
+                  setFeatured={setFeatured}
                 />
               );
             })
@@ -103,7 +135,7 @@ const BlogOverview = () => {
         {/* Footer */}
         <div className="mt-10 inline-block rounded-lg bg-muted p-4">
           <p className="font-medium text-muted-foreground">
-            Total Posts: {data?.length || 0} <br />
+            Total Posts: {items.length} <br />
             Showing: {filteredPosts.length > 0 ? "1" : "0"} -{" "}
             {filteredPosts.length}
           </p>

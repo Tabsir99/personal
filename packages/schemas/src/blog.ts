@@ -55,6 +55,7 @@ export type BlogStats = z.infer<typeof blogStatsSchema>;
 export const blogUserMetaSchema = z.object({
   title: z.string(),
   dek: z.string().default(""),
+  excerpt: z.string().default(""),
   tags: z.array(z.string()).default([]),
   coverImageUrl: z.string().default(""),
   seoTitle: z.string().default(""),
@@ -62,7 +63,6 @@ export const blogUserMetaSchema = z.object({
   socialTitle: z.string().default(""),
   socialDescription: z.string().default(""),
   readTime: z.number().default(0),
-  featured: z.boolean().default(false),
 });
 export type BlogUserMeta = z.infer<typeof blogUserMetaSchema>;
 
@@ -73,6 +73,7 @@ export const blogSystemMetaSchema = z.object({
   slug: z.string().default(""),
   createdAt: z.number(),
   updatedAt: z.number(),
+  featuredAt: z.number().nullable().default(null),
 });
 export type BlogSystemMeta = z.infer<typeof blogSystemMetaSchema>;
 

@@ -5,6 +5,7 @@ import {
   blogKindSchema,
   schemaTypeSchema,
 } from "@tabsircg/schemas/blog";
+import type { CursorPage } from "@tabsircg/schemas/api";
 import { wrapRoute } from "@/lib/appUtils";
 import { NextRequest } from "next/server";
 
@@ -48,7 +49,7 @@ export const GET = wrapRoute(async (request: NextRequest) => {
   if (parsed.kind) filters.kind = parsed.kind;
   if (parsed.schemaType) filters.schemaType = parsed.schemaType;
 
-  return readNDocs<PublishedBlogDB>({
+  const items = await readNDocs<PublishedBlogDB>({
     collectionName: "BLOGS",
     limit: parsed.limit,
     cursorValue: parsed.cursor,
@@ -58,12 +59,13 @@ export const GET = wrapRoute(async (request: NextRequest) => {
       blogId: true,
       title: true,
       dek: true,
+      excerpt: true,
       seoTitle: true,
       tags: true,
       coverImageUrl: true,
       readTime: true,
       metaDescription: true,
-      featured: true,
+      featuredAt: true,
       stats: true,
       createdAt: true,
       updatedAt: true,
@@ -78,4 +80,12 @@ export const GET = wrapRoute(async (request: NextRequest) => {
       order: parsed.order,
     },
   });
+
+  const nextCursor =
+    items.length === parsed.limit
+      ? String(items[items.length - 1][parsed.orderBy])
+      : null;
+
+  const page: CursorPage<PublishedBlogDB> = { items, nextCursor };
+  return page;
 });

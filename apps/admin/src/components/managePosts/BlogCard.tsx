@@ -7,6 +7,7 @@ import {
   ThumbsUp,
   MessageSquare,
   Share2,
+  Star,
 } from "lucide-react";
 import {
   Card,
@@ -27,12 +28,16 @@ import { cn } from "@/lib/utils";
 
 export default function CMSBlogCard({
   blog,
+  isFeatured = false,
   toggleStatus,
   confirmDelete,
+  setFeatured,
 }: {
   blog: PublishedBlogDB | BlogDraftDB;
+  isFeatured?: boolean;
   toggleStatus: (blogId: string) => void;
   confirmDelete: (blogId: string) => void;
+  setFeatured?: (blogId: string) => void;
 }) {
   // Get appropriate status color
   const getStatusClass = (status: BlogStatus) => {
@@ -56,7 +61,15 @@ export default function CMSBlogCard({
         <div className="flex justify-between items-start gap-4">
           {/* Blog Title */}
           <div className="flex flex-col space-y-2">
-            <h2 className="text-xl font-bold capitalize">{blog.title}</h2>
+            <h2 className="text-xl font-bold capitalize flex items-center gap-2">
+              {isFeatured && (
+                <Star
+                  className="h-4 w-4 text-yellow-500 fill-yellow-500"
+                  aria-label="Currently featured"
+                />
+              )}
+              {blog.title}
+            </h2>
 
             {/* Blog Description - single line with ellipsis */}
             <p className="text-sm text-muted-foreground line-clamp-1">
@@ -74,6 +87,9 @@ export default function CMSBlogCard({
               thumbnailUrl={blog.coverImageUrl}
               toggleStatus={() => toggleStatus(blog.blogId)}
               confirmDelete={() => confirmDelete(blog.blogId)}
+              {...(setFeatured
+                ? { setFeatured: () => setFeatured(blog.blogId) }
+                : {})}
             />
 
             {blog.status !== BlogStatus.draft && (

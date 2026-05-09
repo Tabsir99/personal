@@ -36,6 +36,7 @@ const defaultBlogFormData: BlogFormData = {
   readTime: 0,
   hasDraftChanges: true,
   dek: "",
+  excerpt: "",
   seoTitle: "",
   kind: "essay",
   schemaType: SchemaType.Article,
@@ -44,7 +45,7 @@ const defaultBlogFormData: BlogFormData = {
   parentBlogId: null,
   createdAt: 0,
   updatedAt: 0,
-  featured: false,
+  featuredAt: null,
 };
 
 export const useBlogEditorStore = create<BlogEditorState>()(

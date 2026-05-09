@@ -1,5 +1,5 @@
 import type { DocContent } from "@open-notion/editor";
-import type { ApiResponse } from "@tabsircg/schemas/api";
+import type { ApiResponse, CursorPage } from "@tabsircg/schemas/api";
 import type { BlogKind, PublishedBlogDB } from "@tabsircg/schemas/blog";
 import { env } from "@/config/env";
 
@@ -10,12 +10,13 @@ type BlogListItem = Pick<
   | "blogId"
   | "title"
   | "dek"
+  | "excerpt"
   | "seoTitle"
   | "tags"
   | "coverImageUrl"
   | "readTime"
   | "metaDescription"
-  | "featured"
+  | "featuredAt"
   | "stats"
   | "createdAt"
   | "updatedAt"
@@ -41,7 +42,7 @@ export interface PostMeta {
   kind: BlogKind;
   date: string;
   readTime: number;
-  featured: boolean;
+  featuredAt: number | null;
   publishedAt: number;
   updatedAt: number;
   coverImageUrl: string;
@@ -75,12 +76,12 @@ const toPostMeta = (b: BlogListItem): PostMeta => ({
   slug: b.slug,
   title: b.title,
   dek: b.dek,
-  excerpt: b.dek,
+  excerpt: b.excerpt || b.dek,
   tags: b.tags,
   kind: b.kind,
   date: toIsoDate(b.publishedAt),
   readTime: b.readTime,
-  featured: b.featured,
+  featuredAt: b.featuredAt ?? null,
   publishedAt: b.publishedAt,
   updatedAt: b.updatedAt,
   coverImageUrl: b.coverImageUrl,
@@ -88,10 +89,43 @@ const toPostMeta = (b: BlogListItem): PostMeta => ({
 
 const toNeighbour = ({ slug, title }: PostMeta): Neighbour => ({ slug, title });
 
+// Single-document fetch — used by the /blog index for the featured slot.
+export async function getFeaturedBlog(): Promise<PostMeta | null> {
+  const blog = await fetchJson<PublishedBlogDB | null>("/api/blogs/featured");
+  if (!blog) return null;
+  return toPostMeta(blog);
+}
+
+// Single page — used by the /blog index for the regular list.
+export async function getRecentBlogs(
+  limit: number = 30,
+  cursor?: string,
+): Promise<{ items: PostMeta[]; nextCursor: string | null }> {
+  const params = new URLSearchParams({
+    status: "published",
+    limit: String(limit),
+  });
+  if (cursor) params.set("cursor", cursor);
+  const page = await fetchJson<CursorPage<BlogListItem>>(
+    `/api/blogs?${params.toString()}`,
+  );
+  if (!page) return { items: [], nextCursor: null };
+  return { items: page.items.map(toPostMeta), nextCursor: page.nextCursor };
+}
+
+// Walks all pages — used by sitemap and getPost (prev/next neighbours).
+// Acceptable up to ~100 published blogs; past that, swap in a navigation index.
 export async function getAllBlogs(): Promise<PostMeta[]> {
-  const list = await fetchJson<BlogListItem[]>("/api/blogs?status=published");
-  if (!list) return [];
-  return list.map(toPostMeta);
+  const all: PostMeta[] = [];
+  let cursor: string | undefined = undefined;
+  // Hard cap to avoid runaway loops on a misbehaving server.
+  for (let safety = 0; safety < 50; safety++) {
+    const page = await getRecentBlogs(50, cursor);
+    all.push(...page.items);
+    if (!page.nextCursor) break;
+    cursor = page.nextCursor;
+  }
+  return all;
 }
 
 export async function getPost(slug: string): Promise<Post | null> {
@@ -118,12 +152,12 @@ export async function getPost(slug: string): Promise<Post | null> {
     slug: blog.slug,
     title: blog.title,
     dek: blog.dek,
-    excerpt: blog.dek,
+    excerpt: blog.excerpt || blog.dek,
     tags: blog.tags,
     kind: blog.kind,
     date: toIsoDate(blog.publishedAt),
     readTime: blog.readTime,
-    featured: blog.featured,
+    featuredAt: blog.featuredAt ?? null,
     publishedAt: blog.publishedAt,
     updatedAt: blog.updatedAt,
     coverImageUrl: blog.coverImageUrl,

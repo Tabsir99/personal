@@ -5,7 +5,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Pencil, Trash2, Power, Share2, Image } from "lucide-react";
+import { Pencil, Trash2, Power, Share2, Image, Star } from "lucide-react";
 import useUIStore from "@/stores/UIStore";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,7 @@ export default function BlogMenu({
   thumbnailUrl,
   toggleStatus,
   confirmDelete,
+  setFeatured,
 }: {
   status: BlogStatus;
   blogName: string;
@@ -27,6 +28,7 @@ export default function BlogMenu({
   thumbnailUrl?: string;
   toggleStatus?: () => void;
   confirmDelete: () => void;
+  setFeatured?: () => void;
 }) {
   const openModal = useUIStore.getState().openModal;
 
@@ -109,6 +111,16 @@ export default function BlogMenu({
               </span>
             </DropdownMenuItem>
           ))}
+
+        {setFeatured && status === BlogStatus.published && (
+          <DropdownMenuItem
+            onClick={setFeatured}
+            className="flex items-center space-x-2"
+          >
+            <Star className="w-4 h-4" />
+            <span>Set as featured</span>
+          </DropdownMenuItem>
+        )}
 
         {isDraft || (
           <DropdownMenuItem

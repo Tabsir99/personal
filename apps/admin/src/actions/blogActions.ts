@@ -189,6 +189,30 @@ export const toggleBlogStatus = wrap(async (blogId: string) => {
   return null;
 });
 
+export const featureBlog = wrap(async (blogId: string) => {
+  const parsedBlogId = blogIdSchema.parse(blogId);
+  const blogDoc = await readSingleBlog<{ slug: string; status: BlogStatus }>({
+    docId: parsedBlogId,
+    fieldsToRead: { slug: true, status: true },
+  });
+  if (!blogDoc) throw new Error("Blog not found");
+  if (blogDoc.status === BlogStatus.draft) {
+    throw new Error("Drafts can't be featured — publish first.");
+  }
+
+  await updateData<PublishedBlogDB>({
+    collectionName: "BLOGS",
+    docId: parsedBlogId,
+    updatedData: {
+      featuredAt: Date.now(),
+      updatedAt: Date.now(),
+    },
+  });
+
+  await sendRevalidateRequest(blogDoc.slug);
+  return null;
+});
+
 export const updateBlogCoverImage = wrap(
   async (blogId: string, coverImageUrl: string) => {
     const parsedBlogId = blogIdSchema.parse(blogId);

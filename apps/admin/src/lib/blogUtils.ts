@@ -9,6 +9,7 @@ import {
 import { randomUUID } from "crypto";
 import { slugify } from "./appUtils";
 import { env } from "@/config/env.server";
+import { clientEnv } from "@/config/env.client";
 
 export function draftDBToFormData(dbDraft: BlogDraftDB): BlogFormData {
   return {
@@ -25,12 +26,13 @@ export function draftDBToFormData(dbDraft: BlogDraftDB): BlogFormData {
     content: JSON.parse(dbDraft.content),
     readTime: dbDraft.readTime,
     dek: dbDraft.dek,
+    excerpt: dbDraft.excerpt,
     seoTitle: dbDraft.seoTitle,
     createdAt: dbDraft.createdAt,
     updatedAt: dbDraft.updatedAt,
     hasDraftChanges: dbDraft.parentBlogId === null,
     socialDescription: dbDraft.socialDescription,
-    featured: dbDraft.featured || false,
+    featuredAt: dbDraft.featuredAt ?? null,
   };
 }
 
@@ -44,6 +46,7 @@ export function formDataToDraftDB(formData: BlogFormData): BlogDraftDB {
     status: BlogStatus.draft,
     title: formData.title,
     dek: formData.dek,
+    excerpt: formData.excerpt,
     seoTitle: formData.seoTitle,
     tags: formData.tags,
     socialTitle: formData.socialTitle,
@@ -54,7 +57,7 @@ export function formDataToDraftDB(formData: BlogFormData): BlogDraftDB {
     createdAt: formData.createdAt || Date.now(),
     updatedAt: Date.now(),
     socialDescription: formData.socialDescription,
-    featured: formData.featured || false,
+    featuredAt: formData.featuredAt ?? null,
   };
 }
 
@@ -67,9 +70,10 @@ export function publishedDBToFormData(
     kind: dbPublished.kind,
     schemaType: dbPublished.schemaType,
     slug: dbPublished.slug,
-    featured: dbPublished.featured,
+    featuredAt: dbPublished.featuredAt ?? null,
     title: dbPublished.title,
     dek: dbPublished.dek,
+    excerpt: dbPublished.excerpt,
     seoTitle: dbPublished.seoTitle,
     tags: dbPublished.tags,
     socialTitle: dbPublished.socialTitle,
@@ -81,6 +85,7 @@ export function publishedDBToFormData(
     publishedVersion: {
       title: dbPublished.title,
       dek: dbPublished.dek,
+      excerpt: dbPublished.excerpt,
       seoTitle: dbPublished.seoTitle,
       tags: dbPublished.tags,
       socialTitle: dbPublished.socialTitle,
@@ -90,7 +95,6 @@ export function publishedDBToFormData(
       metaDescription: dbPublished.metaDescription,
       publishedAt: dbPublished.publishedAt,
       socialDescription: dbPublished.socialDescription,
-      featured: dbPublished.featured,
     },
     createdAt: Date.now(),
     updatedAt: Date.now(),
@@ -110,6 +114,7 @@ export function formDataToPublishedDB(
     status: BlogStatus.published,
     title: formData.title,
     dek: formData.dek,
+    excerpt: formData.excerpt,
     seoTitle: formData.seoTitle,
     tags: formData.tags,
     socialTitle: formData.socialTitle,
@@ -128,7 +133,7 @@ export function formDataToPublishedDB(
     publishedAt: existingPublished?.publishedAt ?? Date.now(),
     recommendedBlogIds: existingPublished?.recommendedBlogIds ?? [],
     socialDescription: formData.socialDescription,
-    featured: formData.featured,
+    featuredAt: existingPublished?.featuredAt ?? formData.featuredAt ?? null,
   };
 }
 
@@ -141,6 +146,7 @@ export function createNewBlogFormData(title?: string): BlogFormData {
     slug: "",
     title: title || `Untitled Blog ${new Date().toLocaleDateString()}`,
     dek: "",
+    excerpt: "",
     seoTitle: "",
     tags: [],
     socialTitle: "",
@@ -152,23 +158,20 @@ export function createNewBlogFormData(title?: string): BlogFormData {
     updatedAt: Date.now(),
     hasDraftChanges: true,
     socialDescription: "",
-    featured: false,
+    featuredAt: null,
   };
 }
 
 export async function sendRevalidateRequest(path: string) {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BLOG_ORIGIN}/api/revalidate`,
-      {
-        method: "POST",
-        body: JSON.stringify({ path: `/blogs/${path}` }),
-        headers: {
-          "Content-Type": "application/json",
-          acs_tkn: env.SERVER_TOKEN,
-        },
+    const res = await fetch(`${clientEnv.BLOG_ORIGIN}/api/revalidate`, {
+      method: "POST",
+      body: JSON.stringify({ path: `/blogs/${path}` }),
+      headers: {
+        "Content-Type": "application/json",
+        acs_tkn: env.SERVER_TOKEN,
       },
-    );
+    });
     if (env.RUNTIME === "local") {
       console.info(res.status, res.statusText);
     }

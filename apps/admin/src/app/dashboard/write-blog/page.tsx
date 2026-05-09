@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DraftBlogCard from "@/components/managePosts/DraftBlogCard";
 import { BlogFormData } from "@tabsircg/schemas/blog";
+import type { CursorPage } from "@tabsircg/schemas/api";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { PageHeader } from "@/components/ui/common/PageHeader";
@@ -15,15 +16,14 @@ import { callWithToast } from "@/lib/utils";
 export default function WriteBlog() {
   const [search, setSearch] = useState("");
 
-  const {
-    data = [],
-    isLoading,
-    mutate,
-  } = useCustomSWR<BlogFormData[]>(`/api/blogs?status=draft`);
+  const { data, isLoading, mutate } =
+    useCustomSWR<CursorPage<BlogFormData>>(`/api/blogs?status=draft`);
+
+  const items = data?.items ?? [];
 
   const filteredBlogs = useMemo(
     () =>
-      data.filter((blog) => {
+      items.filter((blog) => {
         const searchTerm = search.toLowerCase();
         const title = blog.title?.toLowerCase() || "";
         const description = blog.metaDescription?.toLowerCase() || "";
@@ -35,7 +35,7 @@ export default function WriteBlog() {
           tags.some((tag) => tag.includes(searchTerm))
         );
       }),
-    [data, search],
+    [items, search],
   );
 
   const isEmpty = filteredBlogs.length < 1;
@@ -48,7 +48,13 @@ export default function WriteBlog() {
     });
 
     if (result?.status === "success") {
-      mutate((prev) => prev?.filter((p) => p.blogId !== id), false);
+      mutate(
+        (prev) =>
+          prev
+            ? { ...prev, items: prev.items.filter((p) => p.blogId !== id) }
+            : prev,
+        false,
+      );
     }
   };
 
@@ -95,7 +101,7 @@ export default function WriteBlog() {
       {/* Footer */}
       <div className="border-t border-border px-6 py-3 text-sm text-muted-foreground">
         <div className="flex justify-between items-center">
-          {data.length} draft{data.length !== 1 ? "s" : ""}
+          {items.length} draft{items.length !== 1 ? "s" : ""}
         </div>
       </div>
     </>
