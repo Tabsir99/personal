@@ -30,20 +30,16 @@ export const CreateBlogModal = () => {
     setNewBlogTitle("");
     closeCreateDialog();
 
-    await callWithToast(
-      async () => {
-        const { data, status } = await startBlogWriting(newBlogTitle);
-        if (status === "success") {
-          setBlogFormData(data!);
-          router.push(`/dashboard/write-blog/${data?.blogId}`);
-        }
-      },
-      {
-        loading: "Creating blog...",
-        success: "Blog created",
-        err: "Failed to create blog",
-      },
-    );
+    const result = await callWithToast(() => startBlogWriting(newBlogTitle), {
+      loading: "Creating blog...",
+      success: "Blog created",
+      err: "Failed to create blog",
+    });
+
+    if (result?.status === "success") {
+      setBlogFormData(result.data);
+      router.push(`/dashboard/write-blog/${result.data.blogId}`);
+    }
   };
 
   return (

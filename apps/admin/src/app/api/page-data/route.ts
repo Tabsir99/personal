@@ -1,5 +1,5 @@
 import { env } from "@/config/env.server";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { PageData, pageDataSchema } from "@/schemas/portfolioSchemas";
 import {
   readObject,
@@ -7,6 +7,7 @@ import {
   deleteObjects,
   uploadObject,
 } from "@/config/cloudflareS3";
+import { wrapRoute } from "@/lib/appUtils";
 
 const PAGEDATA_PATH = "portfolio/page-data.json";
 
@@ -16,60 +17,33 @@ async function fetchPageData(): Promise<PageData | null> {
   return JSON.parse(await response.transformToString());
 }
 
-export async function GET() {
-  try {
-    const pageData = await fetchPageData();
+export const GET = wrapRoute(async () => fetchPageData());
 
-    return NextResponse.json(pageData, { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(null, { status: 500 });
+export const POST = wrapRoute(async (request: NextRequest) => {
+  const body = await request.json();
+  const pageData = pageDataSchema.parse(body);
+
+  const oldPageData = await fetchPageData();
+  if (oldPageData) {
+    await deleteRemovedMedia(oldPageData, pageData);
   }
-}
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const parsed = pageDataSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Invalid page data", issues: parsed.error.issues },
-        { status: 400 },
-      );
-    }
-    const pageData = parsed.data;
+  await uploadObject({
+    Bucket: S3Bucket.PRIVATE,
+    Key: PAGEDATA_PATH,
+    Body: JSON.stringify(pageData),
+    ContentType: "application/json",
+    CacheControl: "no-store, no-cache, must-revalidate",
+    ACL: "private",
+  });
 
-    // Fetch the old page data
-    const oldPageData = await fetchPageData();
-    // Find and delete removed media
-    if (oldPageData) {
-      await deleteRemovedMedia(oldPageData, pageData);
-    }
+  await fetch("https://tabsircg.com/api/revalidate", {
+    headers: { Authorization: env.SERVER_TOKEN },
+  });
+  await fetch("https://tabsircg.com");
 
-    await uploadObject({
-      Bucket: S3Bucket.PRIVATE,
-      Key: PAGEDATA_PATH,
-      Body: JSON.stringify(pageData),
-      ContentType: "application/json",
-      CacheControl: "no-store, no-cache, must-revalidate",
-      ACL: "private",
-    });
-
-    await fetch("https://tabsircg.com/api/revalidate", {
-      headers: {
-        Authorization: env.SERVER_TOKEN,
-      },
-    });
-
-    await fetch("https://tabsircg.com");
-    console.info("Created static cache for tabsircg.com");
-
-    return NextResponse.json("OK", { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(null, { status: 500 });
-  }
-}
+  return null;
+});
 
 async function deleteRemovedMedia(oldData: PageData, newData: PageData) {
   const oldUrls = extractMediaUrls(oldData);

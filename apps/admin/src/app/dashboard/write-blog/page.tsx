@@ -41,13 +41,15 @@ export default function WriteBlog() {
   const isEmpty = filteredBlogs.length < 1;
 
   const confirmDelete = async (id: string) => {
-    await callWithToast(() => deleteBlog(id), {
+    const result = await callWithToast(() => deleteBlog(id), {
       loading: "Deleting draft...",
       success: "Draft has been deleted",
       err: "Failed to delete draft",
     });
 
-    mutate((prev) => prev?.filter((p) => p.blogId !== id), false);
+    if (result?.status === "success") {
+      mutate((prev) => prev?.filter((p) => p.blogId !== id), false);
+    }
   };
 
   return (

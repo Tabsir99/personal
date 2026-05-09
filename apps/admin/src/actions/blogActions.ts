@@ -2,11 +2,11 @@
 import { z } from "zod";
 import {
   createData,
-  readSingleBlog,
   updateData,
   deleteDoc,
   readNDocs,
 } from "@/lib/commonQuery";
+import { readSingleBlog } from "@/lib/blogQuery";
 import { measureEstReadTime, wrap } from "@/lib/appUtils";
 import {
   createNewBlogFormData,
@@ -36,7 +36,7 @@ export const startBlogWriting = wrap(async (title?: string) => {
     data: formDataToDraftDB(newBlogFormData),
   });
 
-  return { data: newBlogFormData };
+  return newBlogFormData;
 });
 
 export const loadBlogForEditing = wrap(async (blogId: string) => {
@@ -47,8 +47,7 @@ export const loadBlogForEditing = wrap(async (blogId: string) => {
 
   if (!blog) throw new Error("Blog not found");
 
-  if (blog.status === BlogStatus.draft)
-    return { data: draftDBToFormData(blog) };
+  if (blog.status === BlogStatus.draft) return draftDBToFormData(blog);
 
   const existingDraft = (
     await readNDocs<BlogDraftDB>({
@@ -59,7 +58,7 @@ export const loadBlogForEditing = wrap(async (blogId: string) => {
     })
   )[0];
 
-  if (existingDraft) return { data: draftDBToFormData(existingDraft) };
+  if (existingDraft) return draftDBToFormData(existingDraft);
 
   const draftFormData = publishedDBToFormData(blog);
 
@@ -69,7 +68,7 @@ export const loadBlogForEditing = wrap(async (blogId: string) => {
     data: formDataToDraftDB(draftFormData),
   });
 
-  return { data: draftFormData };
+  return draftFormData;
 });
 
 export const saveDraft = wrap(async (blogFormDataString: string) => {
@@ -101,7 +100,7 @@ export const saveDraft = wrap(async (blogFormDataString: string) => {
     merge: true,
   });
 
-  return { data: draftDB };
+  return draftDB;
 });
 
 export const discardDraftChanges = wrap(async (draftId: string) => {
@@ -118,7 +117,7 @@ export const discardDraftChanges = wrap(async (draftId: string) => {
     collectionName: "BLOGS",
     docId: parsedDraftId,
   });
-  return { data: null };
+  return null;
 });
 
 export const publishBlog = wrap(async (draftId: string) => {
@@ -155,7 +154,7 @@ export const publishBlog = wrap(async (draftId: string) => {
 
   await sendRevalidateRequest(publishedBlog.slug);
 
-  return { data: null };
+  return null;
 });
 
 export const toggleBlogStatus = wrap(async (blogId: string) => {
@@ -187,7 +186,7 @@ export const toggleBlogStatus = wrap(async (blogId: string) => {
 
   await sendRevalidateRequest(blogDoc.slug);
 
-  return { data: null };
+  return null;
 });
 
 export const updateBlogCoverImage = wrap(
@@ -212,7 +211,7 @@ export const updateBlogCoverImage = wrap(
 
     await sendRevalidateRequest(blogDoc.slug);
 
-    return { data: null };
+    return null;
   },
 );
 
@@ -231,5 +230,5 @@ export const deleteBlog = wrap(async (blogId: string) => {
 
   await sendRevalidateRequest(blogDoc.slug);
 
-  return { data: null };
+  return null;
 });

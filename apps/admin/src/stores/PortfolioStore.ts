@@ -1,5 +1,6 @@
 import { PageData } from "@/schemas/portfolioSchemas";
-import { toast } from "sonner";
+import type { ApiResponse } from "@/lib/appUtils";
+import { callWithToast } from "@/lib/utils";
 import { create } from "zustand";
 
 const defaultPageData: PageData = {
@@ -195,11 +196,11 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => {
     loadPageData: async () => {
       if (get().fetching) return;
       set({ fetching: true, loading: true }, false);
-      const pageDataResponse = await fetch("/api/page-data");
-      const pageData = await pageDataResponse.json();
+      const res = await fetch("/api/page-data");
+      const body = (await res.json()) as ApiResponse<PageData | null>;
 
-      if (pageData) {
-        const merged = { ...defaultPageData, ...pageData };
+      if (body.status === "success" && body.data) {
+        const merged = { ...defaultPageData, ...body.data };
         set({ pageData: merged, initialData: merged });
       }
 
@@ -209,26 +210,29 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => {
     savePageData: async () => {
       if (get().saving) return;
       set({ saving: true }, false);
-      const id = toast.loading("Saving page data...");
-      try {
-        const uploaded = await extractAndUploadBlobs(get().pageData);
 
-        const res = await fetch("/api/page-data", {
-          method: "POST",
-          body: JSON.stringify(uploaded),
-          headers: { "Content-Type": "application/json" },
-        });
+      await callWithToast(
+        async () => {
+          const uploaded = await extractAndUploadBlobs(get().pageData);
+          const res = await fetch("/api/page-data", {
+            method: "POST",
+            body: JSON.stringify(uploaded),
+            headers: { "Content-Type": "application/json" },
+          });
+          const body = (await res.json()) as ApiResponse<unknown>;
+          if (body.status !== "success") throw new Error(body.message);
+          set({ pageData: uploaded, initialData: uploaded }, false);
+          return uploaded;
+        },
+        {
+          loading: "Saving page data...",
+          success: "Page data saved",
+          err: "Failed to save page data",
+        },
+      );
 
-        if (!res.ok) throw new Error("Failed to save page data");
-
-        set({ pageData: uploaded, initialData: uploaded }, false);
-        toast.success("Page data saved", { id });
-      } catch (error) {
-        toast.error(error.message, { id });
-      } finally {
-        set({ saving: false }, false);
-        get()._checkForChanges();
-      }
+      set({ saving: false }, false);
+      get()._checkForChanges();
     },
 
     updatePageData: (updates) => {
@@ -297,20 +301,21 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
     ),
   });
 
-  const urls = (await urlResponse.json()) as Array<{
-    presignedUrl: string;
-    key: string;
-    path: string;
-  }>;
+  const urlBody = (await urlResponse.json()) as ApiResponse<
+    Array<{ presignedUrl: string; key: string; path: string }>
+  >;
+  if (urlBody.status !== "success") throw new Error(urlBody.message);
+  const urls = urlBody.data;
 
   await Promise.all(
-    blobsToUpload.map((item, index) =>
-      fetch(urls[index].presignedUrl, {
+    blobsToUpload.map(async (item, index) => {
+      const res = await fetch(urls[index].presignedUrl, {
         method: "PUT",
         body: item.blob!,
         headers: { "Content-Type": item.blob!.type },
-      })
-    )
+      });
+      if (!res.ok) throw new Error("Upload failed");
+    })
   );
 
   urls.forEach(({ key, path }) => {

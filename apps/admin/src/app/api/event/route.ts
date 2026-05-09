@@ -5,10 +5,11 @@ import {
   SessionStartEvent,
   analyticsEventSchema,
 } from "@/schemas/dashboardSchemas";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { UAParser } from "ua-parser-js";
 import { db } from "@/config/firebaseAdmin";
 import { firestore } from "firebase-admin";
+import { wrapRoute } from "@/lib/appUtils";
 
 type FirestoreData = Record<string, firestore.FieldValue | string | number>;
 
@@ -17,66 +18,51 @@ const geoStats = db.collection("geo_stats");
 const pagePerformance = db.collection("page_performance");
 const trafficSources = db.collection("traffic_sources");
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const parsed = analyticsEventSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ error: "Bad Request" }, { status: 400 });
-    }
-    const session = parsed.data;
+export const POST = wrapRoute(async (request: NextRequest) => {
+  const body = await request.json();
+  const session = analyticsEventSchema.parse(body);
 
-    const country = request.headers.get("xCountry") || "unknown";
+  const country = request.headers.get("xCountry") || "unknown";
 
-    let newSession: AnalyticsEvent = session;
-    if (session.type === "session_start") {
-      const ipAdd = request.headers.get("xIp") || "unknown";
-      const userAgent = request.headers.get("user-agent") || "unknown";
+  let newSession: AnalyticsEvent = session;
+  if (session.type === "session_start") {
+    const ipAdd = request.headers.get("xIp") || "unknown";
+    const userAgent = request.headers.get("user-agent") || "unknown";
 
-      const parser = new UAParser(userAgent);
-      const device = parser.getDevice().type;
+    const parser = new UAParser(userAgent);
+    const device = parser.getDevice().type;
 
-      newSession = {
-        ...session,
-        ip: ipAdd,
-        country,
-        device,
-      };
-    }
-
-    if (process.env.RUNTIME === "local") {
-      console.info(newSession);
-    }
-
-    const date = new Date(newSession.timestamp).toISOString().split("T")[0];
-
-    switch (newSession.type) {
-      case "session_start":
-        await handleSessionStart(newSession as SessionStartEvent, date);
-        break;
-
-      case "page_view":
-        await handlePageView(newSession as PageViewEvent, date, country);
-        break;
-
-      case "page_exit":
-        await handlePageExit(newSession as PageExitEvent, date, country);
-        break;
-
-      case "portfolio_view":
-        await handlePortfolioView(date);
-        break;
-    }
-
-    return NextResponse.json({});
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 },
-    );
+    newSession = {
+      ...session,
+      ip: ipAdd,
+      country,
+      device,
+    };
   }
-}
+
+  if (process.env.RUNTIME === "local") {
+    console.info(newSession);
+  }
+
+  const date = new Date(newSession.timestamp).toISOString().split("T")[0];
+
+  switch (newSession.type) {
+    case "session_start":
+      await handleSessionStart(newSession as SessionStartEvent, date);
+      break;
+    case "page_view":
+      await handlePageView(newSession as PageViewEvent, date, country);
+      break;
+    case "page_exit":
+      await handlePageExit(newSession as PageExitEvent, date, country);
+      break;
+    case "portfolio_view":
+      await handlePortfolioView(date);
+      break;
+  }
+
+  return null;
+});
 
 async function handleSessionStart(event: SessionStartEvent, date: string) {
   const batch = db.batch();

@@ -22,6 +22,8 @@ import { useShallow } from "zustand/shallow";
 import { useState } from "react";
 import { ChevronsUpDown, Hash, Plus, Tag, X } from "lucide-react";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
+import { addTag as addTagAction } from "@/actions/tagActions";
+import { callWithToast } from "@/lib/utils";
 
 export default function TagsSection() {
   const { data, mutate, isLoading } = useCustomSWR<string[]>("/api/tags");
@@ -52,31 +54,18 @@ export default function TagsSection() {
     if (!canCreate) return;
 
     addTag(normalized);
-
     mutate([...available, normalized].sort(), false);
     setSearch("");
 
-    try {
-      const response = await fetch("/api/tags", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ tag: normalized }),
-      });
+    const result = await callWithToast(() => addTagAction(normalized), {
+      loading: "Creating tag...",
+      success: "Tag created",
+      err: "Failed to create tag",
+    });
 
-      if (!response.ok) {
-        throw new Error("Failed to create tag");
-      }
-
-      const result = (await response.json()) as { tags?: string[] };
-      if (Array.isArray(result.tags)) {
-        mutate(result.tags, false);
-        return;
-      }
-
-      await mutate();
-    } catch {
+    if (result?.status === "success") {
+      mutate(result.data.tags, false);
+    } else {
       await mutate();
     }
   };

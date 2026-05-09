@@ -1,20 +1,16 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { formatResponse } from "@/lib/appUtils";
+import { wrap } from "@/lib/appUtils";
 import { SignJWT } from "jose";
 import { env } from "@/config/env.server";
 
-export async function logInAction(formData: FormData) {
+export const logInAction = wrap(async (formData: FormData) => {
   const username = formData.get("username");
   const password = formData.get("password");
 
   if (username !== env.ADMIN_USERNAME || password !== env.ADMIN_PASSWORD) {
-    return formatResponse({
-      status: "error",
-      message: "Incorrect username or password",
-      data: null,
-    });
+    throw new Error("Incorrect username or password");
   }
 
   const cookieStore = await cookies();
@@ -35,20 +31,11 @@ export async function logInAction(formData: FormData) {
     maxAge: 60 * 60 * 24 * 7,
   });
 
-  return formatResponse({
-    status: "success",
-    message: "Successfully signed in",
-    data: null,
-  });
-}
+  return null;
+});
 
-export async function logOutAction() {
+export const logOutAction = wrap(async () => {
   const cookieStore = await cookies();
   cookieStore.delete(env.COOKIE_NAME);
-
-  return formatResponse({
-    status: "success",
-    message: "Signed out",
-    data: null,
-  });
-}
+  return null;
+});

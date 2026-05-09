@@ -1,39 +1,24 @@
 import { z } from "zod";
 import { db, Collections } from "@/config/firebaseAdmin";
 import { BlogStatus, PublishedBlogDB } from "@/schemas/blogSchemas";
-import { NextRequest, NextResponse } from "next/server";
+import { wrapRoute } from "@/lib/appUtils";
 
 const slugSchema = z.string().min(1);
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> },
-) {
-  try {
+export const GET = wrapRoute(
+  async (_req, { params }: { params: Promise<{ slug: string }> }) => {
     const { slug } = await params;
-    const parsedSlug = slugSchema.safeParse(slug);
-    if (!parsedSlug.success) {
-      return NextResponse.json({ error: "Missing slug" }, { status: 400 });
-    }
+    const parsedSlug = slugSchema.parse(slug);
 
     const snapshot = await db
       .collection(Collections.BLOGS)
-      .where("slug", "==", parsedSlug.data)
+      .where("slug", "==", parsedSlug)
       .where("status", "==", BlogStatus.published)
       .limit(1)
       .get();
 
-    if (snapshot.empty) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
+    if (snapshot.empty) throw new Error("Not found");
 
-    const data = snapshot.docs[0].data() as PublishedBlogDB;
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error("API Error (blog by slug):", error);
-    return NextResponse.json(
-      { error: "Failed to fetch blog" },
-      { status: 500 },
-    );
-  }
-}
+    return snapshot.docs[0].data() as PublishedBlogDB;
+  },
+);

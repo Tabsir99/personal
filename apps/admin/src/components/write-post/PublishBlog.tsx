@@ -8,9 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { callWithToast } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 
 interface PublishBlogProps {
   isOpen: boolean;
@@ -27,19 +27,14 @@ export const PublishBlog = ({
 
   const handlePublish = async () => {
     setIsPublishing(true);
-    const toastId = toast.loading("Publishing...");
-    try {
-      const result = await publishBlog(blogId);
-      if (result.status !== "success") {
-        toast.error(result.message || "Failed to publish", { id: toastId });
-        setIsPublishing(false);
-        return;
-      }
-      toast.success("Blog published!", { id: toastId });
+    const result = await callWithToast(() => publishBlog(blogId), {
+      loading: "Publishing...",
+      success: "Blog published!",
+      err: "Failed to publish",
+    });
+    if (result?.status === "success") {
       router.push("/dashboard/write-blog");
-    } catch (error) {
-      console.error("Publish error:", error);
-      toast.error("Failed to publish", { id: toastId });
+    } else {
       setIsPublishing(false);
       setIsOpen(false);
     }

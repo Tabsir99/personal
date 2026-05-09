@@ -1,4 +1,6 @@
 import { DocContent, docToText } from "@open-notion/editor";
+import { NextRequest, NextResponse } from "next/server";
+import { ZodError } from "zod";
 
 export function slugify(text: string): string {
   return text
@@ -11,38 +13,62 @@ export function slugify(text: string): string {
     .replace(/\-\-+/g, "-");
 }
 
-type ResponseStatus = "success" | "error" | "fail";
+export type ApiResponse<T> =
+  | { status: "success"; data: T }
+  | { status: "error"; message: string };
 
-export interface ApiResponse<T> {
-  status: ResponseStatus;
-  data: T | null;
-  message: string;
+const toMessage = (e: unknown) =>
+  e instanceof Error ? e.message : String(e);
+
+export function wrap<Args extends any[], T>(
+  fn: (...args: Args) => Promise<T>,
+): (...args: Args) => Promise<ApiResponse<T>> {
+  return async (...args: Args) => {
+    try {
+      return { status: "success", data: await fn(...args) };
+    } catch (error) {
+      console.error(error);
+      return { status: "error", message: toMessage(error) };
+    }
+  };
 }
 
-export const formatResponse = <T>({
-  status = "success" as ResponseStatus,
-  data,
-  message = "",
-}): ApiResponse<T> => {
-  return {
-    status,
-    data,
-    message,
+export function wrapRoute<T>(
+  handler: (req: NextRequest, ctx: any) => Promise<T>,
+): (req: NextRequest, ctx: any) => Promise<NextResponse<ApiResponse<T>>> {
+  return async (req, ctx) => {
+    try {
+      const data = await handler(req, ctx);
+      return NextResponse.json<ApiResponse<T>>(
+        { status: "success", data },
+        { status: 200 },
+      );
+    } catch (error) {
+      console.error(error);
+      if (error instanceof ZodError) {
+        return NextResponse.json<ApiResponse<T>>(
+          {
+            status: "error",
+            message: error.issues[0]?.message ?? "Invalid input",
+          },
+          { status: 400 },
+        );
+      }
+      return NextResponse.json<ApiResponse<T>>(
+        { status: "error", message: toMessage(error) },
+        { status: 500 },
+      );
+    }
   };
-};
+}
 
 export const measureEstReadTime = async (blogContent: DocContent) => {
   const textsLength = (await docToText(blogContent))
     .trim()
     .split(/\s+/)
-    .filter((word) => {
-      const isLessThanTwoCharacters = word.length < 3;
-      return !isLessThanTwoCharacters;
-    }).length;
+    .filter((word) => word.length >= 3).length;
 
-  const estReadTime = Math.ceil(textsLength / 230);
-
-  return estReadTime;
+  return Math.ceil(textsLength / 230);
 };
 
 export const getTimeSince = (timestamp: number) => {
@@ -63,32 +89,3 @@ export const getTimeSince = (timestamp: number) => {
 
   return "just now";
 };
-
-type ActionResult<T> = {
-  data: T;
-  message?: string;
-};
-
-export function wrap<Args extends any[], T>(
-  fn: (...args: Args) => Promise<ActionResult<T>>,
-) {
-  return async (...args: Args): Promise<ApiResponse<T>> => {
-    try {
-      const { data, message } = await fn(...args);
-
-      return formatResponse<T>({
-        status: "success",
-        data,
-        message,
-      });
-    } catch (error) {
-      console.error(error);
-
-      return formatResponse<T>({
-        status: "error",
-        data: null,
-        message: error.message,
-      });
-    }
-  };
-}

@@ -6,8 +6,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export async function callWithToast(
-  func: () => Promise<any>,
+const isErrorResponse = (
+  v: unknown,
+): v is { status: "error"; message: string } =>
+  !!v &&
+  typeof v === "object" &&
+  "status" in v &&
+  (v as { status: unknown }).status === "error";
+
+export async function callWithToast<T>(
+  func: () => Promise<T>,
   {
     loading = "Loading...",
     success = "Success",
@@ -17,24 +25,19 @@ export async function callWithToast(
     success?: string;
     err?: string;
   },
-) {
+): Promise<T | undefined> {
   const id = toast.loading(loading);
   try {
     const result = await func();
-    // `wrap`-ed actions resolve with an ApiResponse rather than throwing.
-    if (
-      result &&
-      typeof result === "object" &&
-      "status" in result &&
-      result.status !== "success"
-    ) {
+    if (isErrorResponse(result)) {
       toast.error(result.message || err, { id });
-      return null;
+    } else {
+      toast.success(success, { id });
     }
-    toast.success(success, { id });
     return result;
   } catch (error) {
+    console.error(error);
     toast.error(err, { id });
-    return null;
+    return undefined;
   }
 }

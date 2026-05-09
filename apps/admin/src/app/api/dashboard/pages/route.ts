@@ -1,66 +1,61 @@
-import { NextResponse } from "next/server";
 import { db } from "@/config/firebaseAdmin";
+import { wrapRoute } from "@/lib/appUtils";
 
-export async function GET(request: Request) {
+export const GET = wrapRoute(async (request) => {
   const { searchParams } = new URL(request.url);
   const days = parseInt(searchParams.get("days") || "7", 10);
-  
+
   const todayDate = new Date();
   const cutoffDate = new Date();
   cutoffDate.setDate(todayDate.getDate() - days);
-  
+
   const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
   const todayStr = formatDate(todayDate);
   const cutoffStr = formatDate(cutoffDate);
 
-  try {
-    const snapshot = await db
-      .collection("page_performance")
-      .where("date", ">=", cutoffStr)
-      .where("date", "<=", todayStr)
-      .get();
+  const snapshot = await db
+    .collection("page_performance")
+    .where("date", ">=", cutoffStr)
+    .where("date", "<=", todayStr)
+    .get();
 
-    // Aggregate across dates: group by path, sum views/totalTimeOnPage/bounces/exitCount
-    const pagesMap = new Map<string, any>();
+  const pagesMap = new Map<string, any>();
 
-    snapshot.docs.forEach((doc) => {
-      const data = doc.data();
-      const path = data.path;
-      if (!pagesMap.has(path)) {
-        pagesMap.set(path, {
-          path,
-          views: 0,
-          totalTimeOnPage: 0,
-          bounces: 0,
-          exitCount: 0,
-        });
-      }
-      
-      const entry = pagesMap.get(path);
-      entry.views += data.views || 0;
-      entry.totalTimeOnPage += data.totalTimeOnPage || 0;
-      entry.bounces += data.bounces || 0;
-      entry.exitCount += data.exitCount || 0;
-    });
+  snapshot.docs.forEach((doc) => {
+    const data = doc.data();
+    const path = data.path;
+    if (!pagesMap.has(path)) {
+      pagesMap.set(path, {
+        path,
+        views: 0,
+        totalTimeOnPage: 0,
+        bounces: 0,
+        exitCount: 0,
+      });
+    }
 
-    const pages = Array.from(pagesMap.values()).map((p) => {
-      const avgTimeOnPage = p.exitCount > 0 ? p.totalTimeOnPage / p.exitCount : 0;
-      const bounceRate = p.views > 0 ? (p.bounces / p.views) * 100 : 0;
-      return {
-        path: p.path,
-        views: p.views,
-        avgTimeOnPage,
-        bounceRate,
-        bounces: p.bounces,
-      };
-    });
+    const entry = pagesMap.get(path);
+    entry.views += data.views || 0;
+    entry.totalTimeOnPage += data.totalTimeOnPage || 0;
+    entry.bounces += data.bounces || 0;
+    entry.exitCount += data.exitCount || 0;
+  });
 
-    pages.sort((a, b) => b.views - a.views);
+  const pages = Array.from(pagesMap.values()).map((p) => {
+    const avgTimeOnPage =
+      p.exitCount > 0 ? p.totalTimeOnPage / p.exitCount : 0;
+    const bounceRate = p.views > 0 ? (p.bounces / p.views) * 100 : 0;
+    return {
+      path: p.path,
+      views: p.views,
+      avgTimeOnPage,
+      bounceRate,
+      bounces: p.bounces,
+    };
+  });
 
-    return NextResponse.json(pages);
-  } catch (error) {
-    console.error("Error fetching page performance:", error);
-    return NextResponse.json({ error: "Failed to fetch pages" }, { status: 500 });
-  }
-}
+  pages.sort((a, b) => b.views - a.views);
+
+  return pages;
+});

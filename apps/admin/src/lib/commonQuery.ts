@@ -12,14 +12,9 @@ export const createData = async <T>({
   docId,
   data,
 }: CreateDataParams<T>) => {
-  try {
-    const docRef = db.collection(Collections[collectionName]).doc(docId);
-    await docRef.create(data as any);
-    return true;
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
+  const docRef = db.collection(Collections[collectionName]).doc(docId);
+  await docRef.create(data as any);
+  return true;
 };
 
 interface UpdateDataParams<T> {
@@ -45,35 +40,24 @@ export const updateData = async <T>({
     }
   }
 
-  try {
-    const docRef = db.collection(Collections[collectionName]).doc(docId);
-    await docRef.set(dataToPut as any, { merge });
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
+  const docRef = db.collection(Collections[collectionName]).doc(docId);
+  await docRef.set(dataToPut as any, { merge });
 };
 
 export const readAllDocs = async <T = any>(
   collectionName: string,
 ): Promise<T[]> => {
-  try {
-    const docs: T[] = [];
-    const querySnapshot = await db
-      .collection(collectionName)
-      .orderBy("createdAt", "desc")
-      .get();
+  const docs: T[] = [];
+  const querySnapshot = await db
+    .collection(collectionName)
+    .orderBy("createdAt", "desc")
+    .get();
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data() as any;
-      docs.push(data);
-    });
+  querySnapshot.forEach((doc) => {
+    docs.push(doc.data() as T);
+  });
 
-    return docs;
-  } catch (err) {
-    console.error(err);
-    return [];
-  }
+  return docs;
 };
 
 type ArrayContains<T> = {
@@ -102,71 +86,36 @@ export const readNDocs = async <T>({
   fieldsToRead,
   orderBy,
 }: ReadNDocsParams<T>): Promise<T[]> => {
-  try {
-    let query = db.collection(Collections[collectionName]).limit(limit);
+  let query = db.collection(Collections[collectionName]).limit(limit);
 
-    Object.entries(filters).forEach(([field, value]) => {
-      query = query.where(field, "==", value);
+  Object.entries(filters).forEach(([field, value]) => {
+    query = query.where(field, "==", value);
+  });
+
+  if (arrayContainsFilters) {
+    Object.entries(arrayContainsFilters).forEach(([field, value]) => {
+      if (value !== undefined) {
+        query = query.where(field, "array-contains", value);
+      }
     });
-
-    if (arrayContainsFilters) {
-      Object.entries(arrayContainsFilters).forEach(([field, value]) => {
-        if (value !== undefined) {
-          query = query.where(field, "array-contains", value);
-        }
-      });
-    }
-
-    if (fieldsToRead) {
-      query = query.select(
-        ...Object.keys(fieldsToRead).filter((key) => fieldsToRead[key]),
-      );
-    }
-
-    if (orderBy) {
-      query = query.orderBy(orderBy.field as string, orderBy.order);
-    }
-
-    if (cursorValue) {
-      query = query.startAfter(cursorValue);
-    }
-    const querySnapshot = await query.get();
-
-    return querySnapshot.docs.map((d) => d.data()) as T[];
-  } catch (error) {
-    console.error(error);
-    return [];
   }
-};
 
-interface ReadSingleBlogParams<T> {
-  docId: string;
-  fieldsToRead?: Partial<Record<keyof T, boolean>>;
-}
-
-export const readSingleBlog = async <T>({
-  docId,
-  fieldsToRead,
-}: ReadSingleBlogParams<T>): Promise<T | null> => {
-  try {
-    const docRef = db.collection(Collections.BLOGS).doc(docId);
-    const snapshot = await docRef.get();
-
-    if (!snapshot.exists) return null;
-
-    const data = snapshot.data() as Record<string, unknown>;
-
-    if (!fieldsToRead) return data as T;
-
-    const projected: Record<string, unknown> = {};
-    for (const [field, include] of Object.entries(fieldsToRead)) {
-      if (include) projected[field] = data[field];
-    }
-    return projected as T;
-  } catch (error) {
-    console.error(`Error reading blog ${docId}:`, error);
-    throw error;
+  if (fieldsToRead) {
+    query = query.select(
+      ...Object.keys(fieldsToRead).filter((key) => fieldsToRead[key]),
+    );
   }
+
+  if (orderBy) {
+    query = query.orderBy(orderBy.field as string, orderBy.order);
+  }
+
+  if (cursorValue) {
+    query = query.startAfter(cursorValue);
+  }
+  const querySnapshot = await query.get();
+
+  return querySnapshot.docs.map((d) => d.data()) as T[];
 };
 
 export const deleteDoc = async ({
@@ -176,12 +125,8 @@ export const deleteDoc = async ({
   collectionName: ValidCollections;
   docId: string;
 }) => {
-  try {
-    const docRef = db.collection(Collections[collectionName]).doc(docId);
-    await docRef.delete();
-  } catch (err) {
-    throw err;
-  }
+  const docRef = db.collection(Collections[collectionName]).doc(docId);
+  await docRef.delete();
 };
 
 export const moveDocument = async ({
@@ -195,20 +140,16 @@ export const moveDocument = async ({
   targetCollection: string;
   targetDocId: string;
 }) => {
-  try {
-    const sourceDoc = await db
-      .collection(sourceCollection)
-      .doc(sourceDocId)
-      .get();
+  const sourceDoc = await db
+    .collection(sourceCollection)
+    .doc(sourceDocId)
+    .get();
 
-    if (!sourceDoc.exists) {
-      throw new Error("Source document does not exist");
-    }
-
-    const data = sourceDoc.data();
-    await db.collection(targetCollection).doc(targetDocId).set(data!);
-    await db.collection(sourceCollection).doc(sourceDocId).delete();
-  } catch (err) {
-    throw err;
+  if (!sourceDoc.exists) {
+    throw new Error("Source document does not exist");
   }
+
+  const data = sourceDoc.data();
+  await db.collection(targetCollection).doc(targetDocId).set(data!);
+  await db.collection(sourceCollection).doc(sourceDocId).delete();
 };

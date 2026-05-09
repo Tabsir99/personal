@@ -8,8 +8,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import { callWithToast, cn } from "@/lib/utils";
 import Img from "../ui/image";
 import useUIStore from "@/stores/UIStore";
 import { useShallow } from "zustand/shallow";
@@ -38,44 +37,42 @@ export default function ThumbnailModal() {
   const updateThumbnail = async (newThumbnail: File) => {
     if (!data?.blogId) return;
     setIsLoading(true);
-    try {
-      const signedRes = await getImageUploadSignedUrl(
-        {
-          fileName: newThumbnail.name,
-          contentType: newThumbnail.type,
-          contentLength: newThumbnail.size,
-        },
-        data.blogId,
-        true,
-      );
-      if (signedRes.status !== "success" || !signedRes.data) {
-        throw new Error(signedRes.message || "Failed to get upload URL");
-      }
+    const result = await callWithToast(
+      async () => {
+        const signed = await getImageUploadSignedUrl(
+          {
+            fileName: newThumbnail.name,
+            contentType: newThumbnail.type,
+            contentLength: newThumbnail.size,
+          },
+          data.blogId,
+          true,
+        );
+        if (signed.status !== "success") throw new Error(signed.message);
 
-      const { signedUrl, key } = signedRes.data;
+        const put = await fetch(signed.data.signedUrl, {
+          method: "PUT",
+          body: newThumbnail,
+          headers: { "Content-Type": newThumbnail.type },
+        });
+        if (!put.ok) throw new Error("Upload failed");
 
-      const uploadRes = await fetch(signedUrl, {
-        method: "PUT",
-        body: newThumbnail,
-        headers: { "Content-Type": newThumbnail.type },
-      });
-      if (!uploadRes.ok) throw new Error("Upload failed");
+        const updated = await updateBlogCoverImage(
+          data.blogId,
+          signed.data.key,
+        );
+        if (updated.status !== "success") throw new Error(updated.message);
 
-      const updateRes = await updateBlogCoverImage(data.blogId, key);
-      if (updateRes.status !== "success") {
-        throw new Error(updateRes.message || "Failed to update blog");
-      }
-
-      toast.success("Thumbnail updated");
-      closeModal();
-    } catch (error) {
-      console.error(error);
-      toast.error(
-        error instanceof Error ? error.message : "Error uploading thumbnail",
-      );
-    } finally {
-      setIsLoading(false);
-    }
+        return updated;
+      },
+      {
+        loading: "Uploading thumbnail...",
+        success: "Thumbnail updated",
+        err: "Failed to upload thumbnail",
+      },
+    );
+    setIsLoading(false);
+    if (result?.status === "success") closeModal();
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {

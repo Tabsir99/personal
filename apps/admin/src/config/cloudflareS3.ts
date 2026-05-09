@@ -2,6 +2,7 @@ import "server-only";
 import {
   DeleteObjectsCommand,
   GetObjectCommand,
+  NoSuchKey,
   PutObjectCommand,
   PutObjectCommandInput,
   S3Client,
@@ -24,38 +25,28 @@ export enum S3Bucket {
 }
 
 export const readObject = async (bucket: S3Bucket, key: string) => {
-  try {
-    const command = new GetObjectCommand({
-      Bucket: bucket,
-      Key: key,
+  // NoSuchKey is a domain "missing" signal that callers want as null;
+  // any other failure (network, auth) should propagate to wrapRoute.
+  const response = await s3
+    .send(new GetObjectCommand({ Bucket: bucket, Key: key }))
+    .catch((error: unknown) => {
+      if (error instanceof NoSuchKey) return null;
+      throw error;
     });
-    const response = await s3.send(command);
-    return response.Body;
-  } catch (error) {
-    console.error("Failed to read object:", error);
-    return null;
-  }
+  return response?.Body ?? null;
 };
 
 export const deleteObjects = async (bucket: S3Bucket, keys: string[]) => {
-  try {
-    const command = new DeleteObjectsCommand({
+  await s3.send(
+    new DeleteObjectsCommand({
       Bucket: bucket,
       Delete: { Objects: keys.map((k) => ({ Key: k })), Quiet: true },
-    });
-    await s3.send(command);
-  } catch (error) {
-    console.error("Failed to delete object:", error);
-  }
+    }),
+  );
 };
 
 export const uploadObject = async (params: PutObjectCommandInput) => {
-  try {
-    const command = new PutObjectCommand(params);
-    await s3.send(command);
-  } catch (error) {
-    console.error(error);
-  }
+  await s3.send(new PutObjectCommand(params));
 };
 
 export default s3;

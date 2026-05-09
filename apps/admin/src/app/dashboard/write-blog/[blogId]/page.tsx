@@ -1,5 +1,5 @@
 import { loadBlogForEditing } from "@/actions/blogActions";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import TextEditor from "@/components/write-post/AppEditor";
 
 export default async function Page({
@@ -8,11 +8,9 @@ export default async function Page({
   params: Promise<{ blogId: string }>;
 }) {
   const { blogId } = await params;
-  const { data } = await loadBlogForEditing(blogId);
+  const result = await loadBlogForEditing(blogId);
 
-  if (!data) {
-    return redirect("/dashboard/write-blog");
-  }
+  if (result.status !== "success") return notFound();
 
-  return <TextEditor blogFormData={data} />;
+  return <TextEditor blogFormData={result.data} />;
 }

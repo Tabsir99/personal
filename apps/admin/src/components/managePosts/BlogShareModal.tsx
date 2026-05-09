@@ -16,9 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 import useUIStore from "@/stores/UIStore";
 import { useShallow } from "zustand/shallow";
+import { callWithToast } from "@/lib/utils";
 
 const ShareButton = ({
   children,
@@ -87,15 +87,18 @@ const BlogShareModal = () => {
   ];
 
   const copyToClipboard = async () => {
-    try {
-      if (!url) return;
-      await navigator.clipboard.writeText(url);
+    if (!url) return;
+    const result = await callWithToast(
+      () => navigator.clipboard.writeText(url),
+      {
+        loading: "Copying...",
+        success: "Link copied to clipboard!",
+        err: "Failed to copy link",
+      },
+    );
+    if (result !== undefined) {
       setCopySuccess(true);
-      toast.success("Link copied to clipboard!");
       setTimeout(() => setCopySuccess(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
-      toast.error("Failed to copy link");
     }
   };
 

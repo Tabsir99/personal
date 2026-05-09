@@ -53,21 +53,23 @@ const BlogOverview = () => {
   const handleClearFilters = () => setFilters(DEFAULT_FILTERS);
 
   const toggleStatus = async (blogId: string) => {
-    const result = await callWithToast(async () => toggleBlogStatus(blogId), {
+    const result = await callWithToast(() => toggleBlogStatus(blogId), {
       loading: "Toggling status...",
       success: "Status toggled successfully",
       err: "Failed to toggle status",
     });
-    if (result) mutate();
+    if (result?.status === "success") mutate();
   };
 
   const confirmDelete = async (blogId: string) => {
-    const result = await callWithToast(async () => deleteBlog(blogId), {
+    const result = await callWithToast(() => deleteBlog(blogId), {
       loading: "Deleting blog...",
       success: "Blog deleted successfully",
       err: "Failed to delete blog",
     });
-    if (result) mutate((prev) => prev?.filter((p) => p.blogId !== blogId), false);
+    if (result?.status === "success") {
+      mutate((prev) => prev?.filter((p) => p.blogId !== blogId), false);
+    }
   };
 
   return (

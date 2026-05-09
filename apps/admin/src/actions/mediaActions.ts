@@ -1,6 +1,6 @@
 "use server";
 import s3, { S3Bucket } from "@/config/cloudflareS3";
-import { formatResponse } from "@/lib/appUtils";
+import { wrap } from "@/lib/appUtils";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -19,26 +19,17 @@ const _getUploadSignedUrl = async (key: string, fileInfo: FileInfo) => {
     CacheControl: "public, max-age=31536000, immutable",
   });
 
-  const singedUrl = await getSignedUrl(s3, command, {
-    expiresIn: 60 * 60 * 24 * 30,
-  });
-
-  return singedUrl;
+  return getSignedUrl(s3, command, { expiresIn: 60 * 60 * 24 * 30 });
 };
 
-export const getImageUploadSignedUrl = async (
-  fileInfo: FileInfo,
-  blogId: string,
-  isThumbnail: boolean,
-) => {
-  const key = isThumbnail
-    ? `${blogId}/thumbnail.${fileInfo.contentType.split("/")[1]}`
-    : `${blogId}/${fileInfo.fileName}`;
+export const getImageUploadSignedUrl = wrap(
+  async (fileInfo: FileInfo, blogId: string, isThumbnail: boolean) => {
+    const key = isThumbnail
+      ? `${blogId}/thumbnail.${fileInfo.contentType.split("/")[1]}`
+      : `${blogId}/${fileInfo.fileName}`;
 
-  const signedUrl = await _getUploadSignedUrl(key, fileInfo);
+    const signedUrl = await _getUploadSignedUrl(key, fileInfo);
 
-  return formatResponse<{ signedUrl: string; key: string }>({
-    status: "success",
-    data: { signedUrl, key },
-  });
-};
+    return { signedUrl, key };
+  },
+);

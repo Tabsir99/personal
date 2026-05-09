@@ -1,4 +1,5 @@
 import useSWR, { SWRConfiguration, Fetcher } from "swr";
+import type { ApiResponse } from "@/lib/appUtils";
 
 const defaultConfig: SWRConfiguration = {
   revalidateOnFocus: false,
@@ -11,12 +12,13 @@ const defaultConfig: SWRConfiguration = {
 
 const fetcher: Fetcher<any> = async (url: string) => {
   const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`Error fetching data: ${response.statusText}`);
+  const body = (await response.json()) as ApiResponse<unknown>;
+  if (!response.ok || body.status !== "success") {
+    throw new Error(
+      body.status === "error" ? body.message : `HTTP ${response.status}`,
+    );
   }
-
-  return response.json();
+  return body.data;
 };
 
 export function useCustomSWR<T = any>(
@@ -24,6 +26,5 @@ export function useCustomSWR<T = any>(
   config: SWRConfiguration = {},
 ) {
   const mergedConfig = { ...defaultConfig, ...config };
-
   return useSWR<T>(key, fetcher, mergedConfig);
 }

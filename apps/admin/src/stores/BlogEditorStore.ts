@@ -122,19 +122,19 @@ export const useBlogEditorStore = create<BlogEditorState>()(
           blogFormData: { ...state.blogFormData, content: latestContent },
         }));
 
-        showToast
-          ? await callWithToast(
-              // Important to stringify the blogFormData as NextJS server actions corrupt the serialization of complex objects
-              () => saveDraft(JSON.stringify(get().blogFormData)),
-              {
-                loading: "Drafting blog...",
-                success: "Blog drafted",
-                err: "Failed to draft blog",
-              },
-            )
-          : await saveDraft(JSON.stringify(get().blogFormData)).catch((err) => {
-              console.error(err);
-            });
+        // Important to stringify the blogFormData as NextJS server actions corrupt the serialization of complex objects.
+        const payload = JSON.stringify(get().blogFormData);
+
+        if (showToast) {
+          await callWithToast(() => saveDraft(payload), {
+            loading: "Drafting blog...",
+            success: "Blog drafted",
+            err: "Failed to draft blog",
+          });
+        } else {
+          const result = await saveDraft(payload);
+          if (result.status === "error") console.error(result.message);
+        }
       },
     }),
 
