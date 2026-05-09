@@ -32,7 +32,12 @@ export default function DashBoardLayout({
         visibleToasts={3}
         swipeDirections={["left", "bottom"]}
         duration={5000}
-        theme="system"
+        toastOptions={{
+          classNames: {
+            title: "text-sm font-semibold",
+            icon: "mr-2!",
+          },
+        }}
       />
       <CreateBlogModal />
       <ConfirmationModal />

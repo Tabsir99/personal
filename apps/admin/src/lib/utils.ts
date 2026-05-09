@@ -36,8 +36,10 @@ export async function callWithToast<T>(
     }
     return result;
   } catch (error) {
-    console.error(error);
-    toast.error(err, { id });
+    toast.error(err, {
+      id,
+      ...("message" in error ? { description: error.message } : {}),
+    });
     return undefined;
   }
 }

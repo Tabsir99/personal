@@ -16,5 +16,8 @@
   },
   "peerDependencies": {
     "@open-notion/editor": "^1.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.3"
   }
 }
