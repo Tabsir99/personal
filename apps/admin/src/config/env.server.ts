@@ -10,7 +10,6 @@ function requireEnv(key: string): string {
 
 export const env = {
   RUNTIME: requireEnv("RUNTIME"),
-
   // ===== Auth =====
   ADMIN_USERNAME: requireEnv("ADMIN_USERNAME"),
   ADMIN_PASSWORD: requireEnv("ADMIN_PASSWORD"),

@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "NODE_OPTIONS=--max-old-space-size=4096 next dev --turbopack -H 0.0.0.0 -p 5000",
+    "dev:server": "NODE_OPTIONS=--max-old-space-size=2048 next dev --turbopack -H 0.0.0.0 -p 5000",
+    "emulators": "firebase emulators:start --import=./emulator-data --export-on-exit=./emulator-data",
+    "dev": "pnpm run \"/^(dev:server|emulators)$/\"",
     "build": "next build",
     "start": "next start -p 5000",
     "lint": "next lint",
@@ -12,8 +14,7 @@
     "prebuild": "tsc --noEmit",
     "clean": "rm -rf .next .vercel",
     "cil": "rm -rf node_modules pnpm-lock.yaml && pnpm install",
-    "typecheck": "tsc -b && rm -rf dist",
-    "emulator": "firebase emulators:start --import=./emulator-data --export-on-exit=./emulator-data"
+    "typecheck": "tsc -b && rm -rf dist"
   },
   "dependencies": {
     "@tabsircg/schemas": "workspace:*",
