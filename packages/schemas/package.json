@@ -1,0 +1,20 @@
+{
+  "name": "@tabsircg/schemas",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./blog": "./src/blog.ts",
+    "./portfolio": "./src/portfolio.ts",
+    "./user": "./src/user.ts",
+    "./dashboard": "./src/dashboard.ts",
+    "./api": "./src/api.ts"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "peerDependencies": {
+    "@open-notion/editor": "^1.4.1"
+  }
+}
