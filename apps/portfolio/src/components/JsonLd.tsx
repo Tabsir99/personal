@@ -2,6 +2,7 @@ import { getPageData } from "@/app/layout";
 
 export default async function JsonLd() {
   const pageData = await getPageData();
+  console.log(pageData);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -13,7 +14,7 @@ export default async function JsonLd() {
     email: pageData.contact.email,
     sameAs: pageData.contact.social.map((s) => s.url),
     knowsAbout: pageData.skills.flatMap((category) =>
-      category.skills.map((skill) => skill.name)
+      category.skills.map((skill) => skill.name),
     ),
     worksFor: {
       "@type": "Organization",

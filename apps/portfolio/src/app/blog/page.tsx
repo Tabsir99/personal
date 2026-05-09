@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ALL_TAGS, getAllPosts } from "@/lib/posts";
+import { ALL_TAGS, getAllBlogs } from "@/lib/posts";
 import PageTitle from "@/components/Blog/PageTitle";
 import FeaturedCard from "@/components/Blog/FeaturedCard";
 import PostRow from "@/components/Blog/PostRow";
@@ -30,11 +30,11 @@ export default async function BlogIndexPage({
   const sp = await searchParams;
   const activeTag = sp.tag ?? "all";
 
-  const posts = await getAllPosts();
-  const featured = posts.find((p) => p.featured) ?? null;
-  const rest = posts.filter((p) => !p.featured);
+  const blogs = await getAllBlogs();
+  const featured = blogs.find((b) => b.featured) ?? null;
+  const rest = blogs.filter((b) => !b.featured);
   const filtered =
-    activeTag === "all" ? rest : rest.filter((p) => p.tags.includes(activeTag));
+    activeTag === "all" ? rest : rest.filter((b) => b.tags.includes(activeTag));
 
   return (
     <div className="blog page">

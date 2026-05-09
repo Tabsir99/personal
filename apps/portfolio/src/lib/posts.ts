@@ -1,5 +1,5 @@
 import { env } from "@/config/env";
-import { PublishedBlogDB } from "../../types/blogtypes";
+import { PublishedBlogDB } from "@/types";
 
 export async function getBlog(slug: string): Promise<PublishedBlogDB | null> {
   return fetch(`${env.ADMIN_ORIGIN}/api/blogs/${slug}`, {

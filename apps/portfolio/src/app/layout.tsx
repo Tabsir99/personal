@@ -9,6 +9,7 @@ import { env } from "@/config/env";
 import { GlobalCursorGlow } from "@/components/ui/GlowCursor";
 import { ScrollAnimationObserver } from "@/components/ui/ScrollObserver";
 import JsonLd from "@/components/JsonLd";
+import { ApiResponse } from "@/types";
 
 const latoFont = Lato({
   weight: ["400", "900"],
@@ -38,8 +39,9 @@ export const getPageData = cache(async (): Promise<PageData> => {
         serverToken: env.SERVER_TOKEN,
       },
     });
-    const data = await response.json();
-    return data;
+    const res = (await response.json()) as ApiResponse<PageData>;
+    if (res.status === "error") throw new Error(res.message);
+    return res.data;
   } catch (error) {
     console.error(error);
     return {
