@@ -43,16 +43,18 @@ export default function WriteMetadataComp({
 
   const hasContent = (content?.content?.length ?? 0) > 0;
 
-  const currentValues = useBlogEditorStore((state) => ({
-    title: state.blogFormData.title,
-    dek: state.blogFormData.dek,
-    excerpt: state.blogFormData.excerpt,
-    seoTitle: state.blogFormData.seoTitle,
-    metaDescription: state.blogFormData.metaDescription,
-    socialTitle: state.blogFormData.socialTitle,
-    socialDescription: state.blogFormData.socialDescription,
-    tags: state.blogFormData.tags,
-  }));
+  const currentValues = useBlogEditorStore(
+    useShallow((state) => ({
+      title: state.blogFormData.title,
+      dek: state.blogFormData.dek,
+      excerpt: state.blogFormData.excerpt,
+      seoTitle: state.blogFormData.seoTitle,
+      metaDescription: state.blogFormData.metaDescription,
+      socialTitle: state.blogFormData.socialTitle,
+      socialDescription: state.blogFormData.socialDescription,
+      tags: state.blogFormData.tags,
+    })),
+  );
 
   const handleGenerate = () => {
     if (!hasContent) return;

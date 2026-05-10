@@ -43,8 +43,7 @@ export const GET = wrapRoute(async (request) => {
   });
 
   const pages = Array.from(pagesMap.values()).map((p) => {
-    const avgTimeOnPage =
-      p.exitCount > 0 ? p.totalTimeOnPage / p.exitCount : 0;
+    const avgTimeOnPage = p.exitCount > 0 ? p.totalTimeOnPage / p.exitCount : 0;
     const bounceRate = p.views > 0 ? (p.bounces / p.views) * 100 : 0;
     return {
       path: p.path,
