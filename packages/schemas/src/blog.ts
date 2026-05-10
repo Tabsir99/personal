@@ -5,22 +5,24 @@ import type { DocContent } from "@open-notion/editor";
 // ENUMS (defined in zod, source of truth)
 // ============================================================================
 
-export const blogKindSchema = z.enum([
+export const DEFAULT_BLOG_KINDS = [
   "essay",
   "deep-dive",
   "war-story",
   "notes",
-]);
-export type BlogKind = z.infer<typeof blogKindSchema>;
-export const BlogKind = blogKindSchema.enum;
+] as const;
 
-export const schemaTypeSchema = z.enum([
+export const DEFAULT_SCHEMA_TYPES = [
   "Article",
   "BlogPosting",
   "NewsArticle",
-]);
+] as const;
+
+export const blogKindSchema = z.string().min(1);
+export type BlogKind = z.infer<typeof blogKindSchema>;
+
+export const schemaTypeSchema = z.string().min(1);
 export type SchemaType = z.infer<typeof schemaTypeSchema>;
-export const SchemaType = schemaTypeSchema.enum;
 
 export const blogStatusSchema = z.enum([
   "published",

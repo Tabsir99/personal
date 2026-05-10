@@ -2,7 +2,6 @@ import "server-only";
 import {
   BlogFormData,
   BlogStatus,
-  SchemaType,
   BlogDraftDB,
   PublishedBlogDB,
 } from "@tabsircg/schemas/blog";
@@ -142,7 +141,7 @@ export function createNewBlogFormData(title?: string): BlogFormData {
     blogId: randomUUID(),
     parentBlogId: null,
     kind: "essay",
-    schemaType: SchemaType.Article,
+    schemaType: "Article",
     slug: "",
     title: title || `Untitled Blog ${new Date().toLocaleDateString()}`,
     dek: "",

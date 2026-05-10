@@ -1,4 +1,6 @@
-import { BlogKind, BlogStatus, SchemaType } from "@tabsircg/schemas/blog";
+"use client";
+
+import { BlogStatus } from "@tabsircg/schemas/blog";
 import SearchInput from "../ui/common/SearchInput";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";
@@ -11,11 +13,12 @@ import {
   SelectGroup,
   SelectItem,
 } from "../ui/select";
+import { useCustomSWR } from "@/hooks/useCustomSwr";
 
 export type BlogFilters = {
   status: BlogStatus | "all";
-  kind: BlogKind | "all";
-  schemaType: SchemaType | "all";
+  kind: string | "all";
+  schemaType: string | "all";
 };
 
 const STATUS_OPTIONS: { value: BlogFilters["status"]; label: string }[] = [
@@ -24,24 +27,6 @@ const STATUS_OPTIONS: { value: BlogFilters["status"]; label: string }[] = [
   { value: BlogStatus.unpublished, label: "Unpublished" },
   { value: BlogStatus.draft, label: "Draft" },
   { value: BlogStatus.archived, label: "Archived" },
-];
-
-const KIND_OPTIONS: { value: BlogFilters["kind"]; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "essay", label: "Essay" },
-  { value: "deep-dive", label: "Deep Dive" },
-  { value: "war-story", label: "War Story" },
-  { value: "notes", label: "Notes" },
-];
-
-const SCHEMA_TYPE_OPTIONS: {
-  value: BlogFilters["schemaType"];
-  label: string;
-}[] = [
-  { value: "all", label: "All" },
-  { value: SchemaType.Article, label: "Article" },
-  { value: SchemaType.BlogPosting, label: "Blog Posting" },
-  { value: SchemaType.NewsArticle, label: "News Article" },
 ];
 
 type FilterChipProps<T extends string> = {
@@ -106,6 +91,18 @@ export default function ManagePostHead({
   ) => void;
   onClearFilters: () => void;
 }) {
+  const { data: kinds } = useCustomSWR<string[]>("/api/kinds");
+  const { data: schemaTypes } = useCustomSWR<string[]>("/api/schema-types");
+
+  const kindOptions: { value: string; label: string }[] = [
+    { value: "all", label: "All" },
+    ...(kinds ?? []).map((v) => ({ value: v, label: v })),
+  ];
+  const schemaTypeOptions: { value: string; label: string }[] = [
+    { value: "all", label: "All" },
+    ...(schemaTypes ?? []).map((v) => ({ value: v, label: v })),
+  ];
+
   const anyActive =
     filters.status !== "all" ||
     filters.kind !== "all" ||
@@ -125,14 +122,14 @@ export default function ManagePostHead({
         value={filters.kind}
         defaultValue="all"
         onChange={(v) => onFilterChange("kind", v)}
-        options={KIND_OPTIONS}
+        options={kindOptions}
       />
       <FilterChip
         label="Schema"
         value={filters.schemaType}
         defaultValue="all"
         onChange={(v) => onFilterChange("schemaType", v)}
-        options={SCHEMA_TYPE_OPTIONS}
+        options={schemaTypeOptions}
       />
       {anyActive && (
         <Button

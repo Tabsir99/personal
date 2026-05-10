@@ -6,26 +6,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { BlogKind, SchemaType } from "@tabsircg/schemas/blog";
+import type { AIBlogMetadata } from "@tabsircg/schemas/ai";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { useShallow } from "zustand/shallow";
 import { FileText, Star } from "lucide-react";
 import { featureBlog } from "@/actions/blogActions";
 import { callWithToast } from "@/lib/utils";
+import { FieldSuggestion } from "./ai-suggestions";
+import ConfigSingleSelect from "./ConfigSingleSelect";
 
-const KIND_OPTIONS: { value: BlogKind; label: string }[] = [
-  { value: "essay", label: "Essay" },
-  { value: "deep-dive", label: "Deep Dive" },
-  { value: "war-story", label: "War Story" },
-  { value: "notes", label: "Notes" },
-];
+type ProseField = Exclude<keyof AIBlogMetadata, "tags">;
 
 function formatRelative(ms: number): string {
   const diff = Date.now() - ms;
@@ -44,7 +34,17 @@ function formatRelative(ms: number): string {
   });
 }
 
-export default function BasicInfoSection() {
+interface BasicInfoSectionProps {
+  suggestion: AIBlogMetadata | null;
+  onApplyField: (key: ProseField) => void;
+  onSkipField: (key: ProseField) => void;
+}
+
+export default function BasicInfoSection({
+  suggestion,
+  onApplyField,
+  onSkipField,
+}: BasicInfoSectionProps) {
   const { setBlogFormData } = useBlogEditorStore.getState();
   const [isFeaturing, startFeaturing] = useTransition();
   const [optimisticFeaturedAt, setOptimisticFeaturedAt] = useState<
@@ -108,6 +108,13 @@ export default function BasicInfoSection() {
               value={title}
               onChange={(e) => setBlogFormData({ title: e.target.value })}
             />
+            <FieldSuggestion
+              current={title}
+              suggested={suggestion?.title}
+              max={120}
+              onApply={() => onApplyField("title")}
+              onSkip={() => onSkipField("title")}
+            />
           </div>
 
           <div className="space-y-2">
@@ -124,6 +131,13 @@ export default function BasicInfoSection() {
               value={dek}
               onChange={(e) => setBlogFormData({ dek: e.target.value })}
               className="resize-none"
+            />
+            <FieldSuggestion
+              current={dek}
+              suggested={suggestion?.dek}
+              max={200}
+              onApply={() => onApplyField("dek")}
+              onSkip={() => onSkipField("dek")}
             />
           </div>
 
@@ -142,6 +156,13 @@ export default function BasicInfoSection() {
               onChange={(e) => setBlogFormData({ excerpt: e.target.value })}
               className="resize-none"
             />
+            <FieldSuggestion
+              current={excerpt}
+              suggested={suggestion?.excerpt}
+              max={280}
+              onApply={() => onApplyField("excerpt")}
+              onSkip={() => onSkipField("excerpt")}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -149,48 +170,28 @@ export default function BasicInfoSection() {
               <Label className="text-sm font-medium text-foreground/80">
                 Kind
               </Label>
-              <Select
+              <ConfigSingleSelect
                 value={kind}
-                onValueChange={(value: BlogKind) =>
-                  setBlogFormData({ kind: value })
-                }
-              >
-                <SelectTrigger className="capitalize">
-                  <SelectValue placeholder="Select kind..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {KIND_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onValueChange={(value) => setBlogFormData({ kind: value })}
+                field="kinds"
+                apiPath="/api/kinds"
+                placeholder="Select kind..."
+              />
             </div>
 
             <div className="space-y-2">
               <Label className="text-sm font-medium text-foreground/80">
                 Schema Type
               </Label>
-              <Select
+              <ConfigSingleSelect
                 value={schemaType}
-                onValueChange={(value: SchemaType) =>
+                onValueChange={(value) =>
                   setBlogFormData({ schemaType: value })
                 }
-              >
-                <SelectTrigger className="capitalize">
-                  <SelectValue placeholder="Select schema type..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={SchemaType.Article}>Article</SelectItem>
-                  <SelectItem value={SchemaType.BlogPosting}>
-                    Blog Posting
-                  </SelectItem>
-                  <SelectItem value={SchemaType.NewsArticle}>
-                    News Article
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                field="schemaTypes"
+                apiPath="/api/schema-types"
+                placeholder="Select schema type..."
+              />
             </div>
           </div>
 

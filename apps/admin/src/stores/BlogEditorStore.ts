@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { BlogFormData, SchemaType } from "@tabsircg/schemas/blog";
+import { BlogFormData } from "@tabsircg/schemas/blog";
 import { saveDraft } from "@/actions/blogActions";
 import { callWithToast } from "@/lib/utils";
 import type { DocContent } from "@open-notion/editor";
@@ -39,7 +39,7 @@ const defaultBlogFormData: BlogFormData = {
   excerpt: "",
   seoTitle: "",
   kind: "essay",
-  schemaType: SchemaType.Article,
+  schemaType: "Article",
   slug: "",
   blogId: "",
   parentBlogId: null,
@@ -84,7 +84,9 @@ export const useBlogEditorStore = create<BlogEditorState>()(
 
       isPublishedBlog: () => {
         const { blogFormData } = get();
-        return Boolean(blogFormData.parentBlogId || blogFormData.publishedVersion);
+        return Boolean(
+          blogFormData.parentBlogId || blogFormData.publishedVersion,
+        );
       },
 
       removeTag: (tagToRemove) =>

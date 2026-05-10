@@ -22,10 +22,26 @@ import { useShallow } from "zustand/shallow";
 import { useState } from "react";
 import { ChevronsUpDown, Hash, Plus, Tag, X } from "lucide-react";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
-import { addTag as addTagAction } from "@/actions/tagActions";
+import { addConfigValue } from "@/actions/configActions";
 import { callWithToast } from "@/lib/utils";
+import type { AIBlogMetadata } from "@tabsircg/schemas/ai";
+import { TagSuggestions } from "./ai-suggestions";
 
-export default function TagsSection() {
+interface TagsSectionProps {
+  suggestion: AIBlogMetadata | null;
+  onApplyTagAddition: (tag: string) => void;
+  onApplyTagRemoval: (tag: string) => void;
+  onDismissTagAddition: (tag: string) => void;
+  onDismissTagRemoval: (tag: string) => void;
+}
+
+export default function TagsSection({
+  suggestion,
+  onApplyTagAddition,
+  onApplyTagRemoval,
+  onDismissTagAddition,
+  onDismissTagRemoval,
+}: TagsSectionProps) {
   const { data, mutate, isLoading } = useCustomSWR<string[]>("/api/tags");
   const available = data ?? [];
 
@@ -57,14 +73,17 @@ export default function TagsSection() {
     mutate([...available, normalized].sort(), false);
     setSearch("");
 
-    const result = await callWithToast(() => addTagAction(normalized), {
-      loading: "Creating tag...",
-      success: "Tag created",
-      err: "Failed to create tag",
-    });
+    const result = await callWithToast(
+      () => addConfigValue("tags", normalized),
+      {
+        loading: "Creating tag...",
+        success: "Tag created",
+        err: "Failed to create tag",
+      },
+    );
 
     if (result?.status === "success") {
-      mutate(result.data.tags, false);
+      mutate(result.data.values, false);
     } else {
       await mutate();
     }
@@ -173,6 +192,15 @@ export default function TagsSection() {
               ))}
             </div>
           )}
+
+          <TagSuggestions
+            current={tags ?? []}
+            suggested={suggestion?.tags}
+            onAdd={onApplyTagAddition}
+            onRemove={onApplyTagRemoval}
+            onDismissAddition={onDismissTagAddition}
+            onDismissRemoval={onDismissTagRemoval}
+          />
         </div>
       </CardContent>
     </Card>

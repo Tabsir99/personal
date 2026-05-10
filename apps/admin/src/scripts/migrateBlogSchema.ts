@@ -1,15 +1,15 @@
 import type { Firestore } from "firebase-admin/firestore";
 import { db } from "@/config/firebaseAdmin";
-import { BlogKind, BlogStatus, SchemaType } from "@tabsircg/schemas/blog";
+import { BlogStatus } from "@tabsircg/schemas/blog";
 
 type OldStatus = "active" | "inactive" | BlogStatus;
 const BLOGS_COLLECTION = "blogs";
 
 interface OldBlogBase {
   blogId: string;
-  type?: SchemaType;
-  schemaType?: SchemaType;
-  kind?: BlogKind;
+  type?: string;
+  schemaType?: string;
+  kind?: string;
   link?: string;
   slug?: string;
   createdAt?: number;
@@ -79,9 +79,8 @@ function buildNewBase(oldData: OldBlogBase, docId: string, now: number) {
   const socialTitle = oldData.socialTitle ?? title;
   const readTime = oldData.estReadTime ?? 0;
   const blogId = oldData.blogId || docId;
-  const schemaType =
-    oldData.schemaType ?? oldData.type ?? SchemaType.BlogPosting;
-  const kind: BlogKind = oldData.kind ?? "essay";
+  const schemaType = oldData.schemaType ?? oldData.type ?? "BlogPosting";
+  const kind = oldData.kind ?? "essay";
   const sourceSlug = oldData.slug ?? oldData.link;
 
   return {

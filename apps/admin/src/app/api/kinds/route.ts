@@ -1,4 +1,4 @@
 import { wrapRoute } from "@/lib/appUtils";
 import { readConfigField } from "@/actions/configActions";
 
-export const GET = wrapRoute(async () => readConfigField("tags"));
+export const GET = wrapRoute(async () => readConfigField("kinds"));

@@ -1,12 +1,16 @@
 import { randomUUID } from "crypto";
-import { BlogKind, BlogStatus, SchemaType } from "@tabsircg/schemas/blog";
+import {
+  BlogStatus,
+  DEFAULT_BLOG_KINDS,
+  DEFAULT_SCHEMA_TYPES,
+} from "@tabsircg/schemas/blog";
 import { db, Collections } from "@/config/firebaseAdmin";
 
 type BlogSeedInput = {
   title: string;
   slug: string;
-  kind: BlogKind;
-  schemaType: SchemaType;
+  kind: string;
+  schemaType: string;
   dek: string;
   excerpt: string;
   tags: string[];
@@ -150,8 +154,8 @@ function buildDraft({
   return {
     blogId,
     parentBlogId,
-    kind: "notes" as BlogKind,
-    schemaType: SchemaType.BlogPosting,
+    kind: "notes",
+    schemaType: "BlogPosting",
     slug: title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
     status: BlogStatus.draft,
     title,
@@ -202,7 +206,7 @@ async function seedBlogs() {
       title: "Designing a Draft/Publish Flow That Survives Real Edits",
       slug: "draft-publish-flow-real-edits",
       kind: "deep-dive",
-      schemaType: SchemaType.Article,
+      schemaType: "Article",
       dek: "How to model drafts, published versions, and editorial confidence without losing data integrity.",
       excerpt:
         "A practical architecture for keeping drafts independent while preserving canonical published IDs.",
@@ -216,7 +220,7 @@ async function seedBlogs() {
       title: "Fast Firestore Query Patterns for Blog Index Endpoints",
       slug: "fast-firestore-query-patterns-blog-index",
       kind: "essay",
-      schemaType: SchemaType.BlogPosting,
+      schemaType: "BlogPosting",
       dek: "Reliable pagination, cursor handling, and index-safe query composition for public blog APIs.",
       excerpt:
         "Patterns that keep `/api/blogs` fast as content volume grows past trivial limits.",
@@ -229,7 +233,7 @@ async function seedBlogs() {
       title: "The Editorial Cost of Ambiguous Slugs",
       slug: "editorial-cost-of-ambiguous-slugs",
       kind: "war-story",
-      schemaType: SchemaType.Article,
+      schemaType: "Article",
       dek: "A migration story on why slug ownership and history should be explicit from day one.",
       excerpt:
         "Lessons from conflicting permalink assumptions and late-stage SEO cleanup.",
@@ -243,7 +247,7 @@ async function seedBlogs() {
       title: "Shipping Better Meta Tags Without Overfitting",
       slug: "shipping-better-meta-tags-without-overfitting",
       kind: "notes",
-      schemaType: SchemaType.NewsArticle,
+      schemaType: "NewsArticle",
       dek: "A short checklist for social previews, search snippets, and metadata fallbacks.",
       excerpt:
         "Treat SEO metadata as product UX, not an afterthought attached at publish time.",
@@ -289,7 +293,11 @@ async function seedBlogs() {
   [...published, ...drafts].forEach((post) => post.tags.forEach((tag) => tagSet.add(tag)));
   batch.set(
     db.collection(Collections.CONFIG).doc("blog"),
-    { tags: Array.from(tagSet).sort() },
+    {
+      tags: Array.from(tagSet).sort(),
+      kinds: [...DEFAULT_BLOG_KINDS].sort(),
+      schemaTypes: [...DEFAULT_SCHEMA_TYPES].sort(),
+    },
     { merge: true },
   );
 

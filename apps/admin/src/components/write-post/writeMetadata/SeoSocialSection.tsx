@@ -4,18 +4,37 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { AIBlogMetadata } from "@tabsircg/schemas/ai";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { useShallow } from "zustand/shallow";
 import { Globe, Share2 } from "lucide-react";
+import { FieldSuggestion } from "./ai-suggestions";
 
-export default function SeoSocialSection() {
+type ProseField = Exclude<keyof AIBlogMetadata, "tags">;
+
+interface SeoSocialSectionProps {
+  suggestion: AIBlogMetadata | null;
+  onApplyField: (key: ProseField) => void;
+  onSkipField: (key: ProseField) => void;
+}
+
+export default function SeoSocialSection({
+  suggestion,
+  onApplyField,
+  onSkipField,
+}: SeoSocialSectionProps) {
   const { setBlogFormData } = useBlogEditorStore.getState();
 
   const [seoTitle, metaDescription, socialTitle, socialDescription] =
     useBlogEditorStore(
       useShallow((state) => {
         const d = state.blogFormData;
-        return [d.seoTitle, d.metaDescription, d.socialTitle, d.socialDescription];
+        return [
+          d.seoTitle,
+          d.metaDescription,
+          d.socialTitle,
+          d.socialDescription,
+        ];
       }),
     );
 
@@ -45,6 +64,13 @@ export default function SeoSocialSection() {
               <p className="text-xs text-muted-foreground">
                 {seoTitle?.length || 0}/60 characters (recommended for SEO)
               </p>
+              <FieldSuggestion
+                current={seoTitle}
+                suggested={suggestion?.seoTitle}
+                max={60}
+                onApply={() => onApplyField("seoTitle")}
+                onSkip={() => onSkipField("seoTitle")}
+              />
             </div>
 
             <div className="space-y-2">
@@ -68,6 +94,13 @@ export default function SeoSocialSection() {
                 {metaDescription?.length || 0}/160 characters (recommended for
                 SEO)
               </p>
+              <FieldSuggestion
+                current={metaDescription}
+                suggested={suggestion?.metaDescription}
+                max={160}
+                onApply={() => onApplyField("metaDescription")}
+                onSkip={() => onSkipField("metaDescription")}
+              />
             </div>
           </div>
         </CardContent>
@@ -96,6 +129,13 @@ export default function SeoSocialSection() {
                   setBlogFormData({ socialTitle: e.target.value })
                 }
               />
+              <FieldSuggestion
+                current={socialTitle}
+                suggested={suggestion?.socialTitle}
+                max={70}
+                onApply={() => onApplyField("socialTitle")}
+                onSkip={() => onSkipField("socialTitle")}
+              />
             </div>
 
             <div className="space-y-2">
@@ -114,6 +154,13 @@ export default function SeoSocialSection() {
                   setBlogFormData({ socialDescription: e.target.value })
                 }
                 className="resize-none"
+              />
+              <FieldSuggestion
+                current={socialDescription}
+                suggested={suggestion?.socialDescription}
+                max={200}
+                onApply={() => onApplyField("socialDescription")}
+                onSkip={() => onSkipField("socialDescription")}
               />
             </div>
           </div>
