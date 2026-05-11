@@ -41,8 +41,28 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html className={cn("font-sans", geist.variable)}>
-      <body className={"overflow-x-hidden" + LatoFont.className}>
+    <html
+      className={cn("font-sans", geist.variable)}
+      suppressHydrationWarning
+      lang="en"
+    >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+        (function() {
+          try {
+            var stored = localStorage.getItem('theme');
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var isDark = stored ? stored === 'dark' : prefersDark;
+            if (isDark) document.documentElement.classList.add('dark');
+          } catch (e) {}
+        })();
+      `,
+          }}
+        />
+      </head>
+      <body className={"overflow-x-hidden " + LatoFont.className}>
         {children}
       </body>
     </html>

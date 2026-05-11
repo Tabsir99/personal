@@ -20,13 +20,6 @@ function formatDate(iso: string): string {
 export default function FeaturedCard({ post }: { post: PostMeta }) {
   return (
     <InViewArticle className="feat">
-      <div className="feat__sticker" aria-hidden="true">
-        <div className="feat__sticker-inner">
-          <span>★ pinned</span>
-          <span>★ pinned</span>
-          <span>★ pinned</span>
-        </div>
-      </div>
       <div className="feat__media" aria-hidden="true">
         <div className="feat__media-grid">
           {Array.from({ length: 60 }).map((_, i) => (
@@ -35,7 +28,9 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
         </div>
         <div className="feat__media-caption">
           <span className="mono">EXPLAIN ANALYZE</span>
-          <span className="mono mono--mute">— rows=4_207_388 · cost=14_902.11</span>
+          <span className="mono mono--mute">
+            — rows=4_207_388 · cost=14_902.11
+          </span>
         </div>
         <div className="feat__media-bar">
           <div className="feat__media-bar-fill" />
@@ -51,7 +46,9 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
         <p className="feat__excerpt">{post.excerpt}</p>
         <div className="feat__tags">
           {post.tags.map((t) => (
-            <span key={t} className="chip chip--ghost">#{t}</span>
+            <span key={t} className="chip chip--ghost">
+              #{t}
+            </span>
           ))}
         </div>
         <Link className="feat__read" href={`/blog/${post.slug}`}>

@@ -34,8 +34,8 @@ const DashBoardSidebar = () => {
   };
 
   useEffect(() => {
-    const hasDarkClass = document.documentElement.classList.contains("dark");
-    setIsDark(hasDarkClass);
+    const theme = localStorage.getItem("theme");
+    setIsDark(theme === "dark");
   }, []);
 
   const toggleTheme = () => {
