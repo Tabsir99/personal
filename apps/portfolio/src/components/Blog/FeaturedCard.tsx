@@ -21,21 +21,31 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
   return (
     <InViewArticle className="feat">
       <div className="feat__media" aria-hidden="true">
-        <div className="feat__media-grid">
-          {Array.from({ length: 60 }).map((_, i) => (
-            <span key={i} style={{ animationDelay: `${(i % 12) * 80}ms` }} />
-          ))}
-        </div>
-        <div className="feat__media-caption">
-          <span className="mono">EXPLAIN ANALYZE</span>
-          <span className="mono mono--mute">
-            — rows=4_207_388 · cost=14_902.11
-          </span>
-        </div>
-        <div className="feat__media-bar">
-          <div className="feat__media-bar-fill" />
-          <span className="mono mono--mute">↓ 40s → 412ms</span>
-        </div>
+        {post.coverImageUrl ? (
+          <img
+            src={post.coverImageUrl}
+            alt=""
+            className="feat__media-img"
+          />
+        ) : (
+          <>
+            <div className="feat__media-grid">
+              {Array.from({ length: 60 }).map((_, i) => (
+                <span key={i} style={{ animationDelay: `${(i % 12) * 80}ms` }} />
+              ))}
+            </div>
+            <div className="feat__media-caption">
+              <span className="mono">EXPLAIN ANALYZE</span>
+              <span className="mono mono--mute">
+                — rows=4_207_388 · cost=14_902.11
+              </span>
+            </div>
+            <div className="feat__media-bar">
+              <div className="feat__media-bar-fill" />
+              <span className="mono mono--mute">↓ 40s → 412ms</span>
+            </div>
+          </>
+        )}
       </div>
       <div className="feat__body">
         <div className="feat__kicker">
@@ -52,7 +62,7 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
           ))}
         </div>
         <Link className="feat__read" href={`/blog/${post.slug}`}>
-          <span>read the full incident</span>
+          <span>read the post</span>
           <span className="feat__arrow">
             <svg viewBox="0 0 40 14" width="40" height="14" aria-hidden="true">
               <path

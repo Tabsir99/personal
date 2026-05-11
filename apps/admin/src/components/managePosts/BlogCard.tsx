@@ -4,8 +4,7 @@ import {
   Clock,
   Calendar,
   Eye,
-  ThumbsUp,
-  MessageSquare,
+  Sparkles,
   Share2,
   Star,
 } from "lucide-react";
@@ -157,21 +156,16 @@ export default function CMSBlogCard({
 
       {/* Stats Section */}
       {blog.status !== BlogStatus.draft && (
-        <CardFooter className="grid grid-cols-4 gap-4 border-t border-border pb-4 pt-4">
+        <CardFooter className="grid grid-cols-3 gap-4 border-t border-border pb-4 pt-4">
           <MetricItem
             icon={<Eye className="h-4 w-4 text-muted-foreground" />}
             label="Views"
             value={blog.stats.views}
           />
           <MetricItem
-            icon={<ThumbsUp className="h-4 w-4 text-muted-foreground" />}
-            label="Likes"
-            value={blog.stats.likes}
-          />
-          <MetricItem
-            icon={<MessageSquare className="h-4 w-4 text-muted-foreground" />}
-            label="Comments"
-            value={blog.stats.comments}
+            icon={<Sparkles className="h-4 w-4 text-muted-foreground" />}
+            label="Score"
+            value={blog.stats.score}
           />
           <MetricItem
             icon={<Share2 className="h-4 w-4 text-muted-foreground" />}

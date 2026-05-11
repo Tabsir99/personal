@@ -29,8 +29,7 @@ export async function seedBlogs(
     const views = slugViews.get(seed.slug) ?? 0;
     const stats: BlogStats = {
       views,
-      likes: Math.round(views * (0.06 + Math.random() * 0.06)), // 6–12%
-      comments: Math.max(0, Math.round(views * 0.015) + rand(-1, 2)),
+      score: Math.round(views * (0.06 + Math.random() * 0.06)), // 6–12%
       shares: Math.round(views * (0.02 + Math.random() * 0.03)),
     };
 

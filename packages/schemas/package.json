@@ -10,7 +10,8 @@
     "./user": "./src/user.ts",
     "./dashboard": "./src/dashboard.ts",
     "./api": "./src/api.ts",
-    "./ai": "./src/ai.ts"
+    "./ai": "./src/ai.ts",
+    "./site": "./src/site.ts"
   },
   "dependencies": {
     "zod": "^4.4.3"

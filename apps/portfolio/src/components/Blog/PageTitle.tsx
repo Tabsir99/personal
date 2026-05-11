@@ -1,4 +1,10 @@
-export default function PageTitle() {
+export default function PageTitle({
+  heading,
+  tagline,
+}: {
+  heading: string;
+  tagline: string;
+}) {
   return (
     <header className="ptitle">
       <nav className="ptitle__crumbs mono" aria-label="Breadcrumb">
@@ -8,13 +14,11 @@ export default function PageTitle() {
       </nav>
       <h1 className="ptitle__h">
         <span className="ptitle__word">
-          Writing<span className="ptitle__dot">.</span>
+          {heading}
+          <span className="ptitle__dot">.</span>
         </span>
       </h1>
-      <p className="ptitle__tag">
-        Field notes on <em>databases</em>, <em>type systems</em>, and the
-        occasional 3&nbsp;a.m. pager incident.
-      </p>
+      <p className="ptitle__tag">{tagline}</p>
     </header>
   );
 }

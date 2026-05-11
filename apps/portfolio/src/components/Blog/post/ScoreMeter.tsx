@@ -7,13 +7,13 @@ const FLUSH_MS = 800;
 
 export default function ScoreMeter({
   slug,
-  initialGlobal = 0,
+  initialScore = 0,
 }: {
   slug: string;
-  initialGlobal?: number;
+  initialScore?: number;
 }) {
   const [tapped, setTapped] = React.useState(0);
-  const [global, setGlobal] = React.useState(initialGlobal);
+  const [score, setScore] = React.useState(initialScore);
   const [bursts, setBursts] = React.useState<{ id: number }[]>([]);
   const [pulseKey, setPulseKey] = React.useState(0);
   const lastFlushed = React.useRef(0);
@@ -56,10 +56,10 @@ export default function ScoreMeter({
       });
       if (res.ok) {
         const data = (await res.json().catch(() => null)) as
-          | { global?: number }
+          | { score?: number }
           | null;
-        if (data && typeof data.global === "number") setGlobal(data.global);
-        else setGlobal((g) => g + delta);
+        if (data && typeof data.score === "number") setScore(data.score);
+        else setScore((s) => s + delta);
         lastFlushed.current = tapped;
         persist(tapped);
       }
@@ -142,7 +142,7 @@ export default function ScoreMeter({
         </span>
       </button>
       <div className="score__meta mono" aria-live="polite">
-        <span className="score__global">{global.toLocaleString()}</span>
+        <span className="score__global">{score.toLocaleString()}</span>
         <span className="score__global-label">global</span>
       </div>
     </div>

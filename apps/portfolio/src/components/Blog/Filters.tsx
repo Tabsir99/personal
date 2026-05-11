@@ -16,9 +16,6 @@ export default function Filters({
           <span className="filters__title-num">{String(count).padStart(2, "0")}</span>
           <span className="filters__title-text">posts in the archive</span>
         </h2>
-        <div className="filters__sort mono">
-          sort: <strong>newest first</strong> ▾
-        </div>
       </div>
       <div className="filters__chips" role="tablist" aria-label="Filter by tag">
         {tags.map((t) => {

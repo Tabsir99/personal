@@ -1,6 +1,7 @@
 import type { DocContent } from "@open-notion/editor";
 import type { ApiResponse, CursorPage } from "@tabsircg/schemas/api";
 import type { PublishedBlogDB } from "@tabsircg/schemas/blog";
+import type { SiteConfig } from "@tabsircg/schemas/site";
 import { env } from "@/config/env";
 
 // The /api/blogs list endpoint returns these fields per item.
@@ -41,6 +42,7 @@ export interface PostMeta {
   tags: string[];
   kind: string;
   date: string;
+  updatedAtIso: string;
   readTime: number;
   featuredAt: number | null;
   publishedAt: number;
@@ -80,6 +82,7 @@ const toPostMeta = (b: BlogListItem): PostMeta => ({
   tags: b.tags,
   kind: b.kind,
   date: toIsoDate(b.publishedAt),
+  updatedAtIso: toIsoDate(b.updatedAt),
   readTime: b.readTime,
   featuredAt: b.featuredAt ?? null,
   publishedAt: b.publishedAt,
@@ -156,6 +159,7 @@ export async function getPost(slug: string): Promise<Post | null> {
     tags: blog.tags,
     kind: blog.kind,
     date: toIsoDate(blog.publishedAt),
+    updatedAtIso: toIsoDate(blog.updatedAt),
     readTime: blog.readTime,
     featuredAt: blog.featuredAt ?? null,
     publishedAt: blog.publishedAt,
@@ -167,16 +171,18 @@ export async function getPost(slug: string): Promise<Post | null> {
   };
 }
 
-export const ALL_TAGS: string[] = [
-  "all",
-  "react",
-  "next.js",
-  "tailwindcss",
-  "typescript",
-  "javascript",
-  "html",
-  "css",
-  "node.js",
-  "express",
-  "mongodb",
-];
+export async function getSiteConfig(): Promise<SiteConfig | null> {
+  return fetchJson<SiteConfig>("/api/site-config");
+}
+
+export async function getBlogTags(): Promise<string[]> {
+  const cfg = await fetchJson<{ tags: string[] }>("/api/config");
+  return ["all", ...(cfg?.tags ?? [])];
+}
+
+export async function getPostScore(slug: string): Promise<number> {
+  const r = await fetchJson<{ score: number }>(
+    `/api/blogs/${encodeURIComponent(slug)}/score`,
+  );
+  return r?.score ?? 0;
+}

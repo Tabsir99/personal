@@ -29,8 +29,7 @@ export const docContentSchema = z.custom<DocContent>(
 
 export const blogStatsSchema = z.object({
   views: z.number().default(0),
-  likes: z.number().default(0),
-  comments: z.number().default(0),
+  score: z.number().default(0),
   shares: z.number().default(0),
 });
 export type BlogStats = z.infer<typeof blogStatsSchema>;

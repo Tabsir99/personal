@@ -1,4 +1,4 @@
-import type { Firestore } from "firebase-admin/firestore";
+import { type Firestore, FieldValue } from "firebase-admin/firestore";
 import { db } from "@/config/firebaseAdmin";
 import { BlogStatus } from "@tabsircg/schemas/blog";
 
@@ -122,8 +122,7 @@ function buildPublishedMigrationPayload(oldData: OldPublishedDoc, docId: string,
     recommendedBlogIds: oldData.recommendations ?? [],
     stats: {
       views: oldData.stats?.views ?? 0,
-      likes: oldData.stats?.likes ?? 0,
-      comments: oldData.stats?.comments ?? 0,
+      score: 0,
       shares: oldData.stats?.shares ?? 0,
     },
     publishedAt: oldData.publishedAt ?? base.updatedAt,
@@ -182,6 +181,49 @@ export async function migrateBlogSchema(options: MigrationOptions = {}) {
     if (writeCount >= 450) {
       await commitBatch();
     }
+  }
+
+  await commitBatch();
+  return summary;
+}
+
+// One-shot pass for blogs that already match the current schema except for the
+// stats shape change (likes/comments → score). Idempotent; safe to re-run.
+export async function migrateBlogStats(options: MigrationOptions = {}) {
+  const firestore = options.firestore ?? db;
+  const dryRun = options.dryRun ?? true;
+
+  const snapshot = await firestore.collection(BLOGS_COLLECTION).get();
+  const targets = snapshot.docs.filter((doc) => {
+    const stats = (doc.data() as { stats?: Record<string, unknown> }).stats;
+    if (!stats) return false;
+    return (
+      "likes" in stats || "comments" in stats || !("score" in stats)
+    );
+  });
+
+  const summary = { dryRun, writesPlanned: targets.length };
+  if (dryRun) return summary;
+
+  let batch = firestore.batch();
+  let writeCount = 0;
+  const commitBatch = async () => {
+    if (!writeCount) return;
+    await batch.commit();
+    batch = firestore.batch();
+    writeCount = 0;
+  };
+
+  for (const doc of targets) {
+    const stats = (doc.data() as { stats?: Record<string, unknown> }).stats ?? {};
+    const update: Record<string, unknown> = {
+      "stats.likes": FieldValue.delete(),
+      "stats.comments": FieldValue.delete(),
+    };
+    if (!("score" in stats)) update["stats.score"] = 0;
+    batch.update(doc.ref, update);
+    writeCount += 1;
+    if (writeCount >= 450) await commitBatch();
   }
 
   await commitBatch();

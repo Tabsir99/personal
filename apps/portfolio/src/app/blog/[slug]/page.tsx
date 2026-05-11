@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DocRenderer } from "@open-notion/serializers/react";
 import { docToToc } from "@open-notion/serializers";
-import { getPost } from "@/lib/posts";
+import { getAllBlogs, getPost, getPostScore } from "@/lib/posts";
 import PostHeader from "@/components/Blog/post/PostHeader";
 import PostFooter from "@/components/Blog/post/PostFooter";
 import Toc from "@/components/Blog/post/Toc";
@@ -15,7 +15,8 @@ import "./blog-post.css";
 type RouteParams = Promise<{ slug: string }>;
 
 export async function generateStaticParams() {
-  return [];
+  const blogs = await getAllBlogs();
+  return blogs.map((b) => ({ slug: b.slug }));
 }
 
 export async function generateMetadata({
@@ -55,6 +56,7 @@ export default async function PostPage({ params }: { params: RouteParams }) {
 
   const toc = docToToc(post.body);
   const url = `https://tabsircg.com/blog/${post.slug}`;
+  const initialScore = await getPostScore(post.slug);
 
   return (
     <article className="post">
@@ -76,7 +78,7 @@ export default async function PostPage({ params }: { params: RouteParams }) {
 
         <aside className="post__rail" aria-label="Article actions">
           <div className="post__rail-inner">
-            <ScoreMeter slug={post.slug} initialGlobal={0} />
+            <ScoreMeter slug={post.slug} initialScore={initialScore} />
             <Share url={url} title={post.title} />
           </div>
         </aside>

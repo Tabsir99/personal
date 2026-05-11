@@ -2,9 +2,13 @@
 import { z } from "zod";
 import { db, Collections } from "@/config/firebaseAdmin";
 import { wrap } from "@/lib/appUtils";
+import { siteConfigSchema, type SiteConfig } from "@tabsircg/schemas/site";
 
 const CONFIG_DOC = "blog";
 const CONFIG_DOC_REF = db.collection(Collections.CONFIG).doc(CONFIG_DOC);
+
+const SITE_DOC = "site";
+const SITE_DOC_REF = db.collection(Collections.CONFIG).doc(SITE_DOC);
 
 export type ConfigField = "tags" | "kinds" | "schemaTypes";
 
@@ -40,3 +44,17 @@ export const addConfigValue = wrap(
     return { value: normalized, values };
   },
 );
+
+export async function readSiteConfig(): Promise<SiteConfig> {
+  const snap = await SITE_DOC_REF.get();
+  return siteConfigSchema.parse(snap.data() ?? {});
+}
+
+export const updateSiteConfig = wrap(async (patch: Partial<SiteConfig>) => {
+  const merged = siteConfigSchema.parse({
+    ...(await readSiteConfig()),
+    ...patch,
+  });
+  await SITE_DOC_REF.set(merged);
+  return merged;
+});

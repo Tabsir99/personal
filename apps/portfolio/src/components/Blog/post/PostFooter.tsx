@@ -26,7 +26,7 @@ export default function PostFooter({
           </Link>
         ) : (
           <div className="post-foot__card post-foot__card--empty" aria-hidden="true">
-            <span className="post-foot__dir mono">— start of series</span>
+            <span className="post-foot__dir mono">— oldest</span>
           </div>
         )}
 
@@ -43,7 +43,7 @@ export default function PostFooter({
           </Link>
         ) : (
           <div className="post-foot__card post-foot__card--empty" aria-hidden="true">
-            <span className="post-foot__dir mono">end of series —</span>
+            <span className="post-foot__dir mono">newest —</span>
           </div>
         )}
       </div>

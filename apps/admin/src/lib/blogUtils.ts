@@ -123,8 +123,7 @@ export function formDataToPublishedDB(
     metaDescription: formData.metaDescription,
     stats: existingPublished?.stats ?? {
       views: 0,
-      likes: 0,
-      comments: 0,
+      score: 0,
       shares: 0,
     },
     createdAt: existingPublished?.createdAt ?? Date.now(),

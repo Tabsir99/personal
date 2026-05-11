@@ -8,7 +8,7 @@ export default function BlogPostJsonLd({ post }: { post: Post }) {
     headline: post.title,
     description: post.dek,
     datePublished: post.date,
-    dateModified: post.date,
+    dateModified: post.updatedAtIso,
     author: {
       "@type": "Person",
       name: "Tabsir CG",

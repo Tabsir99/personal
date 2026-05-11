@@ -13,6 +13,7 @@
 //     resulting page metrics reference slugs that may not exist as documents.
 export const SEED = {
   config: true,
+  siteConfig: true,
   blogs: true,
   validLinks: true,
   analytics: true,
