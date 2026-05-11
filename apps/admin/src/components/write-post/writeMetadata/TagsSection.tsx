@@ -2,8 +2,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Popover,
   PopoverContent,
@@ -22,10 +20,11 @@ import { useShallow } from "zustand/shallow";
 import { useState } from "react";
 import { ChevronsUpDown, Hash, Plus, Tag, X } from "lucide-react";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
-import { addConfigValue } from "@/actions/configActions";
+import { addConfigValue, type BlogConfig } from "@/actions/configActions";
 import { callWithToast } from "@/lib/utils";
 import type { AIBlogMetadata } from "@tabsircg/schemas/ai";
-import { TagSuggestions } from "./ai-suggestions";
+import { TagSuggestions } from "./TagSuggestion";
+import { SectionHeader } from "./SectionHeader";
 
 interface TagsSectionProps {
   suggestion: AIBlogMetadata | null;
@@ -42,8 +41,8 @@ export default function TagsSection({
   onDismissTagAddition,
   onDismissTagRemoval,
 }: TagsSectionProps) {
-  const { data, mutate, isLoading } = useCustomSWR<string[]>("/api/tags");
-  const available = data ?? [];
+  const { data, mutate, isLoading } = useCustomSWR<BlogConfig>("/api/config");
+  const available = data?.tags ?? [];
 
   const { addTag, removeTag } = useBlogEditorStore.getState();
   const tags = useBlogEditorStore(
@@ -61,6 +60,8 @@ export default function TagsSection({
   const canCreate =
     normalized.length > 0 && !exactMatch && !selected.has(normalized);
 
+  const isComplete = (tags?.length ?? 0) > 0;
+
   const handleSelect = (tag: string) => {
     addTag(tag);
     setSearch("");
@@ -70,7 +71,8 @@ export default function TagsSection({
     if (!canCreate) return;
 
     addTag(normalized);
-    mutate([...available, normalized].sort(), false);
+    const optimistic = [...available, normalized].sort();
+    mutate((prev) => (prev ? { ...prev, tags: optimistic } : prev), false);
     setSearch("");
 
     const result = await callWithToast(
@@ -83,25 +85,26 @@ export default function TagsSection({
     );
 
     if (result?.status === "success") {
-      mutate(result.data.values, false);
+      mutate(
+        (prev) => (prev ? { ...prev, tags: result.data.values } : prev),
+        false,
+      );
     } else {
       await mutate();
     }
   };
 
   return (
-    <Card className="bg-card/70 border-border">
+    <Card className="bg-card/60 border-border">
       <CardContent className="p-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <Hash className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-lg font-medium">Tags & Categories</h3>
-        </div>
+        <SectionHeader
+          icon={Hash}
+          title="Tags & Categories"
+          complete={isComplete}
+        />
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-foreground/80">
-              Add Tags
-            </Label>
             <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger
                 render={
@@ -128,8 +131,14 @@ export default function TagsSection({
                   />
                   <CommandList>
                     {isLoading ? (
-                      <div className="p-4 text-sm text-muted-foreground text-center">
-                        Loading tags...
+                      <div className="p-2 space-y-1">
+                        {[0, 1, 2].map((i) => (
+                          <div
+                            key={i}
+                            className="h-7 rounded bg-muted/50 animate-pulse"
+                            style={{ animationDelay: `${i * 100}ms` }}
+                          />
+                        ))}
                       </div>
                     ) : (
                       <>
@@ -171,24 +180,25 @@ export default function TagsSection({
           </div>
 
           {tags && tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 animate-in fade-in duration-200">
               {tags.map((tag) => (
-                <Badge
+                <span
                   key={tag}
-                  variant="secondary"
-                  className="bg-muted text-foreground hover:bg-accent pr-1"
+                  className="inline-flex items-stretch overflow-hidden rounded-full border border-border bg-muted text-xs font-medium text-foreground"
                 >
-                  <Tag className="h-3 w-3 mr-1" />
-                  {tag}
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <span className="flex items-center gap-1 py-1 pl-2.5 pr-1.5">
+                    <Tag className="h-3 w-3 text-muted-foreground" />
+                    {tag}
+                  </span>
+                  <button
+                    type="button"
                     onClick={() => removeTag(tag)}
-                    className="ml-2 h-4 w-4 p-0 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
+                    aria-label={`Remove ${tag}`}
+                    className="flex items-center px-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                   >
                     <X className="h-3 w-3" />
-                  </Button>
-                </Badge>
+                  </button>
+                </span>
               ))}
             </div>
           )}

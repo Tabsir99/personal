@@ -13,15 +13,16 @@ const configDocSchema = z.object({
   kinds: z.array(z.string()).default([]),
   schemaTypes: z.array(z.string()).default([]),
 });
+export type BlogConfig = z.infer<typeof configDocSchema>;
 
 const valueInputSchema = z.string().trim().min(1, "Value cannot be empty");
 
 const normalize = (field: ConfigField, value: string) =>
   field === "tags" ? value.toLowerCase() : value;
 
-export async function readConfigField(field: ConfigField): Promise<string[]> {
+export async function readConfigFields() {
   const snap = await CONFIG_DOC_REF.get();
-  return configDocSchema.parse(snap.data() ?? {})[field];
+  return configDocSchema.parse(snap.data() ?? {});
 }
 
 export const addConfigValue = wrap(
@@ -29,7 +30,7 @@ export const addConfigValue = wrap(
     const trimmed = valueInputSchema.parse(value);
     const normalized = normalize(field, trimmed);
 
-    const existing = await readConfigField(field);
+    const existing = (await readConfigFields())[field];
     const seen = new Set(existing.map((v) => v.toLowerCase()));
     if (!seen.has(normalized.toLowerCase())) existing.push(normalized);
     const values = existing.slice().sort((a, b) => a.localeCompare(b));

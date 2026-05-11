@@ -14,6 +14,7 @@ import {
   SelectItem,
 } from "../ui/select";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
+import type { BlogConfig } from "@/actions/configActions";
 
 export type BlogFilters = {
   status: BlogStatus | "all";
@@ -91,16 +92,15 @@ export default function ManagePostHead({
   ) => void;
   onClearFilters: () => void;
 }) {
-  const { data: kinds } = useCustomSWR<string[]>("/api/kinds");
-  const { data: schemaTypes } = useCustomSWR<string[]>("/api/schema-types");
+  const { data: config } = useCustomSWR<BlogConfig>("/api/config");
 
   const kindOptions: { value: string; label: string }[] = [
     { value: "all", label: "All" },
-    ...(kinds ?? []).map((v) => ({ value: v, label: v })),
+    ...(config?.kinds ?? []).map((v) => ({ value: v, label: v })),
   ];
   const schemaTypeOptions: { value: string; label: string }[] = [
     { value: "all", label: "All" },
-    ...(schemaTypes ?? []).map((v) => ({ value: v, label: v })),
+    ...(config?.schemaTypes ?? []).map((v) => ({ value: v, label: v })),
   ];
 
   const anyActive =

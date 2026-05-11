@@ -17,7 +17,11 @@ import {
 } from "@/components/ui/command";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
-import { addConfigValue, ConfigField } from "@/actions/configActions";
+import {
+  addConfigValue,
+  type BlogConfig,
+  type ConfigField,
+} from "@/actions/configActions";
 import { callWithToast } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +29,6 @@ interface ConfigSingleSelectProps {
   value: string;
   onValueChange: (value: string) => void;
   field: Exclude<ConfigField, "tags">;
-  apiPath: string;
   placeholder?: string;
   className?: string;
 }
@@ -34,12 +37,11 @@ export default function ConfigSingleSelect({
   value,
   onValueChange,
   field,
-  apiPath,
   placeholder = "Select...",
   className,
 }: ConfigSingleSelectProps) {
-  const { data, mutate, isLoading } = useCustomSWR<string[]>(apiPath);
-  const available = data ?? [];
+  const { data, mutate, isLoading } = useCustomSWR<BlogConfig>("/api/config");
+  const available = data?.[field] ?? [];
 
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -60,10 +62,10 @@ export default function ConfigSingleSelect({
     if (!canCreate) return;
 
     onValueChange(trimmed);
-    mutate(
-      [...available, trimmed].sort((a, b) => a.localeCompare(b)),
-      false,
+    const optimistic = [...available, trimmed].sort((a, b) =>
+      a.localeCompare(b),
     );
+    mutate((prev) => (prev ? { ...prev, [field]: optimistic } : prev), false);
     setSearch("");
     setOpen(false);
 
@@ -74,7 +76,10 @@ export default function ConfigSingleSelect({
     });
 
     if (result?.status === "success") {
-      mutate(result.data.values, false);
+      mutate(
+        (prev) => (prev ? { ...prev, [field]: result.data.values } : prev),
+        false,
+      );
       onValueChange(result.data.value);
     } else {
       await mutate();
@@ -95,7 +100,7 @@ export default function ConfigSingleSelect({
               className,
             )}
           >
-            <span className="truncate">{value || placeholder}</span>
+            <span className="truncate capitalize">{value || placeholder}</span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         }
@@ -110,8 +115,14 @@ export default function ConfigSingleSelect({
           />
           <CommandList>
             {isLoading ? (
-              <div className="p-4 text-sm text-muted-foreground text-center">
-                Loading...
+              <div className="p-2 space-y-1">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="h-7 rounded bg-muted/50 animate-pulse"
+                    style={{ animationDelay: `${i * 100}ms` }}
+                  />
+                ))}
               </div>
             ) : (
               <>

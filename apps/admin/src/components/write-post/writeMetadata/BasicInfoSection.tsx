@@ -3,17 +3,16 @@
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import type { AIBlogMetadata } from "@tabsircg/schemas/ai";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { useShallow } from "zustand/shallow";
 import { FileText, Star } from "lucide-react";
 import { featureBlog } from "@/actions/blogActions";
 import { callWithToast } from "@/lib/utils";
-import { FieldSuggestion } from "./ai-suggestions";
+import { SuggestionField } from "./ComparsionInput";
 import ConfigSingleSelect from "./ConfigSingleSelect";
+import { SectionHeader } from "./SectionHeader";
+import { Label } from "@/components/ui/label";
 
 type ProseField = Exclude<keyof AIBlogMetadata, "tags">;
 
@@ -69,6 +68,7 @@ export default function BasicInfoSection({
 
   const effectiveFeaturedAt = optimisticFeaturedAt ?? featuredAt;
   const canFeature = parentBlogId != null;
+  const isComplete = Boolean(title && dek && excerpt && kind && schemaType);
 
   const handleSetFeatured = () => {
     if (!parentBlogId) return;
@@ -87,100 +87,68 @@ export default function BasicInfoSection({
   };
 
   return (
-    <Card className="bg-card/70 border-border">
+    <Card className="border-border bg-card shadow-sm">
       <CardContent className="p-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <FileText className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-lg font-medium">Basic Information</h3>
-        </div>
+        <SectionHeader
+          icon={FileText}
+          title="Basic Information"
+          complete={isComplete}
+          size="large"
+        />
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label
-              htmlFor="blogTitle"
-              className="text-sm font-medium text-foreground/80"
-            >
-              Blog Title *
-            </Label>
-            <Input
+            <Label className="text-xs text-muted-foreground">Blog Title</Label>
+            <SuggestionField
               id="blogTitle"
-              placeholder="Enter your blog title..."
+              onAccept={() => onApplyField("title")}
+              onReject={() => onSkipField("title")}
+              onChange={(v) => setBlogFormData({ title: v })}
               value={title}
-              onChange={(e) => setBlogFormData({ title: e.target.value })}
-            />
-            <FieldSuggestion
-              current={title}
               suggested={suggestion?.title}
-              max={120}
-              onApply={() => onApplyField("title")}
-              onSkip={() => onSkipField("title")}
+              placeholder="Enter blog title..."
             />
           </div>
 
           <div className="space-y-2">
-            <Label
-              htmlFor="dek"
-              className="text-sm font-medium text-foreground/80"
-            >
+            <Label className="text-xs text-muted-foreground">
               Subtitle / Hook
             </Label>
-            <Textarea
+            <SuggestionField
               id="dek"
-              rows={2}
-              placeholder="A short hook displayed beneath the title..."
               value={dek}
-              onChange={(e) => setBlogFormData({ dek: e.target.value })}
-              className="resize-none"
-            />
-            <FieldSuggestion
-              current={dek}
               suggested={suggestion?.dek}
-              max={200}
-              onApply={() => onApplyField("dek")}
-              onSkip={() => onSkipField("dek")}
+              onAccept={() => onApplyField("dek")}
+              onReject={() => onSkipField("dek")}
+              onChange={(v) => setBlogFormData({ dek: v })}
             />
           </div>
 
           <div className="space-y-2">
-            <Label
-              htmlFor="excerpt"
-              className="text-sm font-medium text-foreground/80"
-            >
-              Excerpt
-            </Label>
-            <Textarea
+            <Label className="text-xs text-muted-foreground">Excerpt</Label>
+            <SuggestionField
               id="excerpt"
-              rows={3}
-              placeholder="One- or two-sentence summary shown on blog list cards and SEO previews..."
+              onAccept={() => onApplyField("excerpt")}
+              onReject={() => onSkipField("excerpt")}
+              onChange={(v) => setBlogFormData({ excerpt: v })}
               value={excerpt}
-              onChange={(e) => setBlogFormData({ excerpt: e.target.value })}
-              className="resize-none"
-            />
-            <FieldSuggestion
-              current={excerpt}
               suggested={suggestion?.excerpt}
-              max={280}
-              onApply={() => onApplyField("excerpt")}
-              onSkip={() => onSkipField("excerpt")}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-foreground/80">
-                Kind
-              </Label>
+              <Label className="text-xs text-muted-foreground">Kind</Label>
               <ConfigSingleSelect
                 value={kind}
                 onValueChange={(value) => setBlogFormData({ kind: value })}
                 field="kinds"
-                apiPath="/api/kinds"
                 placeholder="Select kind..."
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-foreground/80">
+              <Label className="text-xs text-muted-foreground">
                 Schema Type
               </Label>
               <ConfigSingleSelect
@@ -189,16 +157,12 @@ export default function BasicInfoSection({
                   setBlogFormData({ schemaType: value })
                 }
                 field="schemaTypes"
-                apiPath="/api/schema-types"
                 placeholder="Select schema type..."
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-foreground/80">
-              Featured
-            </Label>
             <div className="flex items-center gap-3">
               <Button
                 type="button"

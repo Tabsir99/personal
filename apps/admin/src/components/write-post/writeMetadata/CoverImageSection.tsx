@@ -7,6 +7,7 @@ import { useShallow } from "zustand/shallow";
 import { useRef } from "react";
 import { Image as ImageIcon, Upload } from "lucide-react";
 import Image from "next/image";
+import { SectionHeader } from "./SectionHeader";
 
 export default function CoverImageSection() {
   const coverImageUrl = useBlogEditorStore(
@@ -23,30 +24,31 @@ export default function CoverImageSection() {
   };
 
   return (
-    <Card className="bg-card/70 border-border">
+    <Card className="bg-card/60 border-border">
       <CardContent className="p-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <ImageIcon className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-lg font-medium">Featured Image</h3>
-        </div>
+        <SectionHeader
+          icon={ImageIcon}
+          title="Featured Image"
+          complete={Boolean(coverImageUrl)}
+        />
 
         <div className="space-y-4">
           {coverImageUrl ? (
             <div className="space-y-3">
-              <div className="relative rounded-lg border border-border overflow-hidden">
+              <div className="group relative rounded-lg border border-border overflow-hidden">
                 <Image
                   src={coverImageUrl}
                   alt="Featured image"
                   width={400}
                   height={200}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-foreground/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                <div className="absolute inset-0 bg-foreground/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <Button
                     variant="secondary"
                     size="sm"
                     onClick={() => uploadRef.current?.click()}
-                    className="bg-background/20 backdrop-blur-sm text-background hover:bg-background/30"
+                    className="bg-background/90 backdrop-blur-sm text-foreground hover:bg-background"
                   >
                     <Upload className="h-4 w-4" />
                     Change Image
@@ -55,18 +57,21 @@ export default function CoverImageSection() {
               </div>
             </div>
           ) : (
-            <div
+            <button
+              type="button"
               onClick={() => uploadRef.current?.click()}
-              className="cursor-pointer rounded-lg border-2 border-dashed border-border p-8 text-center transition-all hover:bg-accent/30"
+              className="group w-full cursor-pointer rounded-lg border-2 border-dashed border-border p-8 text-center transition-all hover:border-primary/40 hover:bg-accent/30"
             >
-              <Upload className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+                <Upload className="h-5 w-5" />
+              </div>
               <p className="mb-1 font-medium text-foreground">
                 Upload Featured Image
               </p>
-              <p className="text-sm text-muted-foreground">
-                Click to select an image file
+              <p className="text-xs text-muted-foreground">
+                PNG or JPEG · click to select
               </p>
-            </div>
+            </button>
           )}
 
           <input

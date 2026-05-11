@@ -34,7 +34,7 @@ const DEFAULT_OPTIONS: Options = {
   tools: ENABLED_TOOLS,
 
   // Session behaviour
-  maxTurns: 5,
+  maxTurns: 7,
   promptSuggestions: false,
   agentProgressSummaries: false,
   includeHookEvents: false,
