@@ -61,7 +61,21 @@ export function SessionsChart() {
               data={chartData}
               margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <defs>
+                <linearGradient id="sessions-gradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.32} />
+                  <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="pageviews-gradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--chart-2)" stopOpacity={0.28} />
+                  <stop offset="100%" stopColor="var(--chart-2)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="var(--chart-grid)"
+                vertical={false}
+              />
               <XAxis
                 dataKey="date"
                 fontSize={12}
@@ -76,10 +90,11 @@ export function SessionsChart() {
                 axisLine={false}
               />
               <Tooltip
+                cursor={{ stroke: "var(--chart-1)", strokeOpacity: 0.35, strokeDasharray: "3 3" }}
                 content={({ active, payload, label }) => {
                   if (!active || !payload) return null;
                   return (
-                    <div className="rounded-lg border bg-background p-3 shadow-md">
+                    <div className="rounded-lg border bg-background/80 backdrop-blur-md p-3 shadow-lg">
                       <p className="text-sm font-medium mb-2">{label}</p>
                       {payload.map((entry, index) => (
                         <div
@@ -105,18 +120,16 @@ export function SessionsChart() {
                 type="monotone"
                 dataKey="sessions"
                 name="Sessions"
-                stroke="hsl(var(--primary))"
-                fill="hsl(var(--primary))"
-                fillOpacity={0.15}
+                stroke="var(--chart-1)"
+                fill="url(#sessions-gradient)"
                 strokeWidth={2}
               />
               <Area
                 type="monotone"
                 dataKey="pageViews"
                 name="Page Views"
-                stroke="hsl(var(--muted-foreground))"
-                fill="hsl(var(--muted-foreground))"
-                fillOpacity={0.1}
+                stroke="var(--chart-2)"
+                fill="url(#pageviews-gradient)"
                 strokeWidth={2}
               />
             </AreaChart>

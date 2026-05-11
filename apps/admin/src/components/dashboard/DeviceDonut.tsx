@@ -31,9 +31,9 @@ export function DeviceDonut() {
   ].filter((d) => d.value > 0);
 
   const COLORS = [
-    "hsl(var(--primary))",
-    "hsl(var(--chart-1))",
-    "hsl(var(--chart-2))",
+    "var(--chart-1)", // Desktop — indigo
+    "var(--chart-2)", // Mobile  — cyan
+    "var(--chart-3)", // Tablet  — violet
   ];
   const total = mobile + desktop + tablet;
 
@@ -81,7 +81,7 @@ export function DeviceDonut() {
                     if (!active || !payload || !payload.length) return null;
                     const data = payload[0];
                     return (
-                      <div className="rounded-lg border bg-background p-2 shadow-md flex items-center gap-2 text-sm">
+                      <div className="rounded-lg border bg-background/80 backdrop-blur-md p-2 shadow-lg flex items-center gap-2 text-sm">
                         <div
                           className="w-2 h-2 rounded-full"
                           style={{ backgroundColor: data.payload.fill }}

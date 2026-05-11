@@ -44,17 +44,19 @@ export function MetricCard({ title, value, trend, data, isLoading, isError, tren
   const chartData = data;
   const isPositive = trend > 0;
   const isNegative = trend < 0;
-  
+
   let trendColor = "text-muted-foreground";
-  let AreaFillColor = "hsl(var(--muted-foreground))";
-  
+  let areaColor = "var(--chart-1)";
+
   if ((isPositive && !trendHigherIsBad) || (isNegative && trendHigherIsBad)) {
-    trendColor = "text-primary";
-    AreaFillColor = "hsl(var(--primary))";
+    trendColor = "text-[var(--chart-positive)]";
+    areaColor = "var(--chart-positive)";
   } else if ((isNegative && !trendHigherIsBad) || (isPositive && trendHigherIsBad)) {
-    trendColor = "text-destructive";
-    AreaFillColor = "hsl(var(--destructive))";
+    trendColor = "text-[var(--chart-negative)]";
+    areaColor = "var(--chart-negative)";
   }
+
+  const gradientId = `metric-gradient-${title.replace(/\s+/g, "-").toLowerCase()}`;
 
   return (
     <Card className="flex flex-col bg-card">
@@ -72,25 +74,30 @@ export function MetricCard({ title, value, trend, data, isLoading, isError, tren
           <div className="mt-2 h-[60px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={areaColor} stopOpacity={0.35} />
+                    <stop offset="100%" stopColor={areaColor} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
                 <Tooltip
                   content={({ active, payload }: any) => {
                     if (!active || !payload || !payload.length) return null;
                     const item = payload[0].payload;
                     return (
-                      <div className="rounded-md border bg-background px-2 py-1 text-xs shadow-md">
+                      <div className="rounded-md border bg-background/80 backdrop-blur-md px-2 py-1 text-xs shadow-lg">
                         <div className="font-medium">{item.date}</div>
                         <div className="text-muted-foreground">{item.value.toFixed(1)}</div>
                       </div>
                     );
                   }}
-                  cursor={{ fill: "hsl(var(--muted))", opacity: 0.2 }}
+                  cursor={{ stroke: areaColor, strokeOpacity: 0.4, strokeDasharray: "3 3" }}
                 />
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke={AreaFillColor}
-                  fill={AreaFillColor}
-                  fillOpacity={0.2}
+                  stroke={areaColor}
+                  fill={`url(#${gradientId})`}
                   strokeWidth={2}
                   isAnimationActive={false}
                 />

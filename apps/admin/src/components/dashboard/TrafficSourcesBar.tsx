@@ -42,10 +42,16 @@ export function TrafficSourcesBar() {
                 layout="vertical"
                 margin={{ top: 0, right: 30, left: -20, bottom: 0 }}
               >
+                <defs>
+                  <linearGradient id="traffic-bar-gradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.5} />
+                    <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.95} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   horizontal={false}
-                  className="stroke-muted"
+                  stroke="var(--chart-grid)"
                 />
                 <XAxis
                   type="number"
@@ -68,7 +74,7 @@ export function TrafficSourcesBar() {
                   content={({ active, payload }) => {
                     if (!active || !payload || !payload.length) return null;
                     return (
-                      <div className="rounded-lg border bg-background p-2 shadow-md text-sm">
+                      <div className="rounded-lg border bg-background/80 backdrop-blur-md p-2 shadow-lg text-sm">
                         <span className="font-medium mr-2">
                           {payload[0].payload.source}:
                         </span>
@@ -76,15 +82,15 @@ export function TrafficSourcesBar() {
                       </div>
                     );
                   }}
-                  cursor={{ fill: "hsl(var(--muted))", opacity: 0.4 }}
+                  cursor={{ fill: "var(--chart-1)", opacity: 0.08 }}
                 />
                 <Bar
                   dataKey="sessions"
-                  fill="hsl(var(--primary))"
+                  fill="url(#traffic-bar-gradient)"
                   radius={[0, 4, 4, 0]}
                   label={{
                     position: "right",
-                    fill: "hsl(var(--muted-foreground))",
+                    className: "fill-muted-foreground",
                     fontSize: 12,
                   }}
                 />

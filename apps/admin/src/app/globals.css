@@ -21,6 +21,9 @@
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+  --color-chart-positive: var(--chart-positive);
+  --color-chart-negative: var(--chart-negative);
+  --color-chart-grid: var(--chart-grid);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -77,11 +80,16 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* Dashboard charts — cool indigo/cyan/violet trio + warm semantic accents.
+     Tuned for legibility on light card surfaces with a modern, glassy feel. */
+  --chart-1: oklch(0.6 0.19 258);   /* indigo  — primary series */
+  --chart-2: oklch(0.7 0.13 215);   /* cyan    — secondary series */
+  --chart-3: oklch(0.6 0.21 295);   /* violet  — tertiary series */
+  --chart-4: oklch(0.66 0.15 162);  /* emerald — positive trend */
+  --chart-5: oklch(0.62 0.21 18);   /* rose    — negative trend */
+  --chart-positive: var(--chart-4);
+  --chart-negative: var(--chart-5);
+  --chart-grid: oklch(0.92 0.005 260);
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -120,11 +128,16 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* Dark variants — slightly lighter & a touch desaturated so they feel
+     glassy rather than neon against the deep background. */
+  --chart-1: oklch(0.72 0.16 258);
+  --chart-2: oklch(0.8 0.11 215);
+  --chart-3: oklch(0.74 0.17 295);
+  --chart-4: oklch(0.78 0.13 162);
+  --chart-5: oklch(0.74 0.17 18);
+  --chart-positive: var(--chart-4);
+  --chart-negative: var(--chart-5);
+  --chart-grid: oklch(1 0 0 / 8%);
   --sidebar: oklch(21% 0.006 285.885);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
