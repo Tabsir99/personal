@@ -1,6 +1,6 @@
 import type { DocContent } from "@open-notion/editor";
 import type { ApiResponse, CursorPage } from "@tabsircg/schemas/api";
-import type { BlogKind, PublishedBlogDB } from "@tabsircg/schemas/blog";
+import type { PublishedBlogDB } from "@tabsircg/schemas/blog";
 import { env } from "@/config/env";
 
 // The /api/blogs list endpoint returns these fields per item.
@@ -39,7 +39,7 @@ export interface PostMeta {
   dek: string;
   excerpt: string;
   tags: string[];
-  kind: BlogKind;
+  kind: string;
   date: string;
   readTime: number;
   featuredAt: number | null;

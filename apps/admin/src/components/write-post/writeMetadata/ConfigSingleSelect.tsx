@@ -17,10 +17,7 @@ import {
 } from "@/components/ui/command";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
-import {
-  addConfigValue,
-  type ConfigField,
-} from "@/actions/configActions";
+import { addConfigValue, ConfigField } from "@/actions/configActions";
 import { callWithToast } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -63,18 +60,18 @@ export default function ConfigSingleSelect({
     if (!canCreate) return;
 
     onValueChange(trimmed);
-    mutate([...available, trimmed].sort((a, b) => a.localeCompare(b)), false);
+    mutate(
+      [...available, trimmed].sort((a, b) => a.localeCompare(b)),
+      false,
+    );
     setSearch("");
     setOpen(false);
 
-    const result = await callWithToast(
-      () => addConfigValue(field, trimmed),
-      {
-        loading: "Saving...",
-        success: "Added",
-        err: "Failed to add",
-      },
-    );
+    const result = await callWithToast(() => addConfigValue(field, trimmed), {
+      loading: "Saving...",
+      success: "Added",
+      err: "Failed to add",
+    });
 
     if (result?.status === "success") {
       mutate(result.data.values, false);
@@ -140,9 +137,7 @@ export default function ConfigSingleSelect({
                     })}
                   </CommandGroup>
                 )}
-                <CommandEmpty>
-                  {canCreate ? null : "No matches."}
-                </CommandEmpty>
+                <CommandEmpty>{canCreate ? null : "No matches."}</CommandEmpty>
                 {canCreate && (
                   <CommandGroup>
                     <CommandItem

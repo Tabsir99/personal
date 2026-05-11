@@ -6,8 +6,7 @@ import { wrap } from "@/lib/appUtils";
 const CONFIG_DOC = "blog";
 const CONFIG_DOC_REF = db.collection(Collections.CONFIG).doc(CONFIG_DOC);
 
-export const CONFIG_FIELDS = ["tags", "kinds", "schemaTypes"] as const;
-export type ConfigField = (typeof CONFIG_FIELDS)[number];
+export type ConfigField = "tags" | "kinds" | "schemaTypes";
 
 const configDocSchema = z.object({
   tags: z.array(z.string()).default([]),

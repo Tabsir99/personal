@@ -5,25 +5,6 @@ import type { DocContent } from "@open-notion/editor";
 // ENUMS (defined in zod, source of truth)
 // ============================================================================
 
-export const DEFAULT_BLOG_KINDS = [
-  "essay",
-  "deep-dive",
-  "war-story",
-  "notes",
-] as const;
-
-export const DEFAULT_SCHEMA_TYPES = [
-  "Article",
-  "BlogPosting",
-  "NewsArticle",
-] as const;
-
-export const blogKindSchema = z.string().min(1);
-export type BlogKind = z.infer<typeof blogKindSchema>;
-
-export const schemaTypeSchema = z.string().min(1);
-export type SchemaType = z.infer<typeof schemaTypeSchema>;
-
 export const blogStatusSchema = z.enum([
   "published",
   "unpublished",
@@ -70,8 +51,8 @@ export type BlogUserMeta = z.infer<typeof blogUserMetaSchema>;
 
 export const blogSystemMetaSchema = z.object({
   blogId: z.string().min(1),
-  kind: blogKindSchema,
-  schemaType: schemaTypeSchema,
+  kind: z.string().min(1),
+  schemaType: z.string().min(1),
   slug: z.string().default(""),
   createdAt: z.number(),
   updatedAt: z.number(),

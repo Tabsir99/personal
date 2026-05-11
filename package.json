@@ -6,12 +6,18 @@
     "dev:portfolio": "pnpm --filter portfolio dev",
     "dev": "pnpm -r --parallel dev",
     "build": "pnpm -r build",
-    "tc": "pnpm -r tc"
+    "tc": "pnpm -r tc",
+    "seed:firestore": "cd apps/admin && tsx src/scripts/seed/index.ts"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["sharp", "msw", "protobufjs", "unrs-resolver"]
+    "onlyBuiltDependencies": [
+      "sharp",
+      "msw",
+      "protobufjs",
+      "unrs-resolver"
+    ]
   }
 }

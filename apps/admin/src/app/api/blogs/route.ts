@@ -1,10 +1,6 @@
 import { z } from "zod";
 import { readNDocs } from "@/lib/commonQuery";
-import {
-  PublishedBlogDB,
-  blogKindSchema,
-  schemaTypeSchema,
-} from "@tabsircg/schemas/blog";
+import { PublishedBlogDB } from "@tabsircg/schemas/blog";
 import type { CursorPage } from "@tabsircg/schemas/api";
 import { wrapRoute } from "@/lib/appUtils";
 import { NextRequest } from "next/server";
@@ -22,8 +18,8 @@ const orderByFieldSchema = z
 
 const querySchema = z.object({
   status: blogStatusFilterSchema.optional(),
-  kind: blogKindSchema.optional(),
-  schemaType: schemaTypeSchema.optional(),
+  kind: z.string().optional(),
+  schemaType: z.string().optional(),
   tag: z.string().optional(),
   cursor: z.string().nullable().default(null),
   limit: z.coerce.number().int().positive().max(50).default(30),
