@@ -1,0 +1,134 @@
+"use client";
+
+import { useShallow } from "zustand/react/shallow";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useSiteConfigStore } from "@/stores/SiteConfigStore";
+import Panel from "./Panel";
+import Field from "./Field";
+import Eyebrow from "./Eyebrow";
+
+export default function CurrentlyBuildingPanel() {
+  const [draft, initial] = useSiteConfigStore(
+    useShallow((s) => [s.draft.currentlyBuilding, s.initial.currentlyBuilding]),
+  );
+  const setCurrentlyBuilding = useSiteConfigStore(
+    (s) => s.setCurrentlyBuilding,
+  );
+  const edited = (k: keyof typeof draft) => draft[k] !== initial[k];
+
+  return (
+    <Panel
+      eyebrow="03 · sidebar"
+      title="Currently building"
+      description="The small card under the now-reading sticker. Leave code or body empty to hide it."
+    >
+      <div className="grid gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-[140px_minmax(0,1fr)]">
+          <Field
+            label="Code"
+            hint="mono"
+            edited={edited("code")}
+          >
+            <Input
+              value={draft.code}
+              onChange={(e) => setCurrentlyBuilding({ code: e.target.value })}
+              placeholder="tinypg"
+              className="font-mono text-sm tracking-tight"
+            />
+          </Field>
+          <Field label="Body" edited={edited("body")}>
+            <Textarea
+              value={draft.body}
+              onChange={(e) => setCurrentlyBuilding({ body: e.target.value })}
+              placeholder="One-line description shown beside the code."
+              rows={2}
+              className="resize-none leading-relaxed"
+            />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_1fr]">
+          <Field label="Link label" edited={edited("linkLabel")}>
+            <Input
+              value={draft.linkLabel}
+              onChange={(e) =>
+                setCurrentlyBuilding({ linkLabel: e.target.value })
+              }
+              placeholder="→ /lab"
+              className="font-mono text-sm"
+            />
+          </Field>
+          <Field label="Link href" edited={edited("linkHref")}>
+            <Input
+              value={draft.linkHref}
+              onChange={(e) =>
+                setCurrentlyBuilding({ linkHref: e.target.value })
+              }
+              placeholder="/lab"
+              className="font-mono text-sm"
+            />
+          </Field>
+        </div>
+
+        <Preview
+          code={draft.code}
+          body={draft.body}
+          linkLabel={draft.linkLabel}
+          linkHref={draft.linkHref}
+        />
+      </div>
+    </Panel>
+  );
+}
+
+function Preview({
+  code,
+  body,
+  linkLabel,
+  linkHref,
+}: {
+  code: string;
+  body: string;
+  linkLabel: string;
+  linkHref: string;
+}) {
+  const visible = !!code || !!body;
+  return (
+    <div>
+      <div className="mb-2 flex items-center gap-2">
+        <Eyebrow>Preview</Eyebrow>
+        <span className="font-mono text-[10px] text-foreground/30">
+          · rendered as /blog sees it
+        </span>
+      </div>
+      <div className="rounded-md border border-foreground/[0.06] bg-background/60 p-4">
+        {visible ? (
+          <>
+            <div className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+              <span className="text-foreground/40">// </span>currently building
+            </div>
+            <div className="mt-3 text-sm leading-relaxed text-foreground/85">
+              {code && (
+                <code className="rounded bg-foreground/[0.04] px-1.5 py-0.5 font-mono text-[12px] text-foreground/80">
+                  {code}
+                </code>
+              )}
+              {code && body && " "}
+              {body}
+            </div>
+            {linkHref && (
+              <div className="mt-3 inline-block border-b border-foreground/30 pb-px font-mono text-[11px] text-foreground/80">
+                {linkLabel || linkHref}
+              </div>
+            )}
+          </>
+        ) : (
+          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-foreground/40">
+            Hidden · neither code nor body set
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}

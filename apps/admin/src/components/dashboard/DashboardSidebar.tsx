@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   FileText,
   Briefcase,
+  Globe,
   Moon,
   Sun,
 } from "lucide-react";
@@ -70,6 +71,12 @@ const DashBoardSidebar = () => {
       menuName: "Portfolio",
       menuLink: `${rootDashBoardUrl}/portfolio/metadata`,
       isActive: pathname.includes("/portfolio"),
+    },
+    {
+      Icon: Globe,
+      menuName: "Blog Site",
+      menuLink: `${rootDashBoardUrl}/blog-site`,
+      isActive: pathname.includes("/blog-site"),
     },
   ];
 

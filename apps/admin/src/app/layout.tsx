@@ -1,9 +1,16 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Lato, Geist } from "next/font/google";
+import { Lato, Geist, JetBrains_Mono } from "next/font/google";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 const LatoFont = Lato({
   subsets: ["latin"],
@@ -42,7 +49,7 @@ export default async function RootLayout({
 }) {
   return (
     <html
-      className={cn("font-sans", geist.variable)}
+      className={cn("font-sans", geist.variable, jetbrainsMono.variable)}
       suppressHydrationWarning
       lang="en"
     >
