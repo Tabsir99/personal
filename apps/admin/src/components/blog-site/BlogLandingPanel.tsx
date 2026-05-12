@@ -8,11 +8,15 @@ import Panel from "./Panel";
 import Field from "./Field";
 
 export default function BlogLandingPanel() {
-  const [draft, initial] = useSiteConfigStore(
-    useShallow((s) => [s.draft.blogLanding, s.initial.blogLanding]),
+  const { draft, initial } = useSiteConfigStore(
+    useShallow((s) => ({
+      draft: s.draft.blogLanding,
+      initial: s.initial.blogLanding,
+    })),
   );
-  const setBlogLanding = useSiteConfigStore((s) => s.setBlogLanding);
 
+  const setBlogLanding = (patch: Partial<typeof draft>) =>
+    useSiteConfigStore.getState().setBlogLanding(patch);
   const edited = (k: keyof typeof draft) => draft[k] !== initial[k];
 
   return (

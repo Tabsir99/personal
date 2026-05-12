@@ -1,22 +1,18 @@
 "use client";
 
-import * as React from "react";
-import Eyebrow from "./Eyebrow";
+import { useShallow } from "zustand/react/shallow";
+import { useSiteConfigStore } from "@/stores/SiteConfigStore";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
-export default function SaveBar({
-  isDirty,
-  saving,
-  onSave,
-  onReset,
-}: {
-  isDirty: boolean;
-  saving: boolean;
-  onSave: () => void;
-  onReset: () => void;
-}) {
+export default function SaveBar() {
+  const { isDirty, saving } = useSiteConfigStore(
+    useShallow((s) => ({ isDirty: s.isDirty, saving: s.saving })),
+  );
+
   if (!isDirty && !saving) return null;
   return (
-    <div className="pointer-events-none fixed bottom-6 left-1/2 z-40 -translate-x-1/2">
+    <div className="pointer-events-none fixed bottom-6 left-1/2 z-40 -translate-x-1/2 animate-in fade-in slide-in-from-bottom-2 duration-200 ease-out">
       <div
         className="pointer-events-auto flex items-center gap-4 rounded-full border border-foreground/[0.08] bg-card/95 px-4 py-2.5 backdrop-blur"
         style={{
@@ -30,33 +26,44 @@ export default function SaveBar({
             style={{ animation: "blogSitePulse 2.4s ease-in-out infinite" }}
             aria-hidden
           />
-          <Eyebrow>{saving ? "Saving" : "Unsaved changes"}</Eyebrow>
+          <Label>{saving ? "Saving" : "Unsaved changes"}</Label>
         </div>
 
         <div className="h-4 w-px bg-foreground/10" aria-hidden />
 
-        <button
+        <Button
           type="button"
-          onClick={onReset}
+          variant="ghost"
+          size="sm"
+          onClick={() => useSiteConfigStore.getState().reset()}
           disabled={saving}
-          className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
+          className="text-muted-foreground hover:text-foreground"
         >
           Discard
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
-          onClick={onSave}
+          size="sm"
+          onClick={() => useSiteConfigStore.getState().save()}
           disabled={saving}
-          className="inline-flex items-center gap-2.5 rounded-full bg-foreground px-3.5 py-1.5 text-xs font-medium text-background transition-colors disabled:opacity-60"
+          className="rounded-full bg-foreground text-background hover:bg-foreground/90"
           style={{
             boxShadow:
               "inset 0 1px 0 0 rgb(255 255 255 / 0.04), 0 1px 2px 0 rgb(0 0 0 / 0.16)",
           }}
         >
           <span>{saving ? "Saving…" : "Save changes"}</span>
-          <Kbd>⌘S</Kbd>
-        </button>
+          <kbd
+            className="inline-flex h-[18px] items-center rounded-[4px] bg-background/15 px-1.5 text-[10px] font-semibold text-background/80"
+            style={{
+              boxShadow:
+                "inset 0 -1px 0 0 rgb(0 0 0 / 0.25), 0 1px 0 0 rgb(255 255 255 / 0.04)",
+            }}
+          >
+            ⌘S
+          </kbd>
+        </Button>
       </div>
 
       <style jsx global>{`
@@ -66,20 +73,5 @@ export default function SaveBar({
         }
       `}</style>
     </div>
-  );
-}
-
-function Kbd({ children }: { children: React.ReactNode }) {
-  return (
-    <kbd
-      className="inline-flex h-[18px] items-center rounded-[4px] bg-background/15 px-1.5 font-mono text-[10px] font-semibold text-background/80"
-      style={{
-        letterSpacing: "-0.02em",
-        boxShadow:
-          "inset 0 -1px 0 0 rgb(0 0 0 / 0.25), 0 1px 0 0 rgb(255 255 255 / 0.04)",
-      }}
-    >
-      {children}
-    </kbd>
   );
 }

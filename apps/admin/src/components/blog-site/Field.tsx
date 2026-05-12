@@ -1,10 +1,8 @@
 "use client";
 
 import * as React from "react";
-import Eyebrow from "./Eyebrow";
+import { Label } from "@/components/ui/label";
 
-// Form field with eyebrow label + optional "edited" accent rail.
-// `edited` shows a 1px primary rail on the left, the only place accent appears.
 export default function Field({
   label,
   hint,
@@ -17,25 +15,25 @@ export default function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="block">
+    <div className="block">
       <div className="mb-2 flex items-baseline justify-between gap-3">
-        <Eyebrow tone={edited ? "accent" : "muted"}>{label}</Eyebrow>
+        <Label className={edited ? "text-primary" : undefined}>{label}</Label>
         {hint && (
-          <span className="font-mono text-[10px] tracking-[0.04em] text-foreground/40">
+          <span className="text-[10px] tabular-nums text-foreground/40">
             {hint}
           </span>
         )}
       </div>
-      <div
-        className={[
-          "relative",
-          edited
-            ? "before:absolute before:-left-3 before:top-1 before:bottom-1 before:w-px before:bg-primary"
-            : "",
-        ].join(" ")}
-      >
+      <div className="relative">
+        <span
+          aria-hidden
+          className={[
+            "pointer-events-none absolute -left-3 top-1 bottom-1 w-px bg-primary transition-opacity duration-200 ease-out",
+            edited ? "opacity-100" : "opacity-0",
+          ].join(" ")}
+        />
         {children}
       </div>
-    </label>
+    </div>
   );
 }

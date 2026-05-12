@@ -1,8 +1,6 @@
 import * as React from "react";
-import Eyebrow from "./Eyebrow";
+import { Label } from "@/components/ui/label";
 
-// Multi-layer card shadow: 1px contact + soft wide ambient.
-// rgb(0 0 0 / x) so it reads in both light and dark themes.
 const CARD_SHADOW =
   "0 1px 2px 0 rgb(0 0 0 / 0.04), 0 8px 24px -16px rgb(0 0 0 / 0.10)";
 
@@ -29,9 +27,12 @@ export default function Panel({
       <div className="flex items-start justify-between gap-6 px-6 pt-5">
         <div className="min-w-0">
           <div className="flex items-center gap-3">
-            <Eyebrow>{eyebrow}</Eyebrow>
+            <Label>{eyebrow}</Label>
             {count && (
-              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/40">
+              <span
+                className="text-[10px] uppercase text-foreground/40"
+                style={{ letterSpacing: "0.16em" }}
+              >
                 · {count}
               </span>
             )}

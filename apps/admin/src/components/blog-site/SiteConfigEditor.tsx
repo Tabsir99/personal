@@ -15,9 +15,6 @@ export default function SiteConfigEditor({
 }: {
   initial: SiteConfig;
 }) {
-  // Hydrate synchronously before first paint so the form never flashes the
-  // schema's zero-state defaults. useRef-gated so the call happens once per
-  // mount and doesn't trigger a subscription dance.
   const didInit = React.useRef(false);
   if (!didInit.current) {
     didInit.current = true;
@@ -26,38 +23,39 @@ export default function SiteConfigEditor({
     }
   }
 
-  const [isDirty, saving] = useSiteConfigStore(
-    useShallow((s) => [s.isDirty, s.saving]),
+  const { isDirty, saving } = useSiteConfigStore(
+    useShallow((s) => ({ isDirty: s.isDirty, saving: s.saving })),
   );
-  const save = useSiteConfigStore((s) => s.save);
-  const reset = useSiteConfigStore((s) => s.reset);
 
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const meta = e.metaKey || e.ctrlKey;
       if (meta && e.key.toLowerCase() === "s") {
         e.preventDefault();
-        if (isDirty && !saving) save();
+        if (isDirty && !saving) useSiteConfigStore.getState().save();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isDirty, saving, save]);
+  }, [isDirty, saving]);
 
   return (
     <div className="mx-auto max-w-4xl pb-32">
-      <EditorChrome />
-      <div className="mt-8 space-y-6">
-        <BlogLandingPanel />
-        <NowReadingPanel />
-        <CurrentlyBuildingPanel />
+      <div className="animate-in fade-in slide-in-from-bottom-1 duration-400 ease-out">
+        <EditorChrome />
       </div>
-      <SaveBar
-        isDirty={isDirty}
-        saving={saving}
-        onSave={save}
-        onReset={reset}
-      />
+      <div className="mt-8 space-y-6">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out [animation-delay:60ms] [animation-fill-mode:both]">
+          <BlogLandingPanel />
+        </div>
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out [animation-delay:140ms] [animation-fill-mode:both]">
+          <NowReadingPanel />
+        </div>
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out [animation-delay:220ms] [animation-fill-mode:both]">
+          <CurrentlyBuildingPanel />
+        </div>
+      </div>
+      <SaveBar />
     </div>
   );
 }

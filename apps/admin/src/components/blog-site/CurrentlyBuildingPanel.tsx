@@ -6,16 +6,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { useSiteConfigStore } from "@/stores/SiteConfigStore";
 import Panel from "./Panel";
 import Field from "./Field";
-import Eyebrow from "./Eyebrow";
+import { Label } from "@/components/ui/label";
+import HeightTransition from "./HeightTransition";
 
 export default function CurrentlyBuildingPanel() {
-  const [draft, initial] = useSiteConfigStore(
-    useShallow((s) => [s.draft.currentlyBuilding, s.initial.currentlyBuilding]),
+  const { draft, initial } = useSiteConfigStore(
+    useShallow((s) => ({
+      draft: s.draft.currentlyBuilding,
+      initial: s.initial.currentlyBuilding,
+    })),
   );
-  const setCurrentlyBuilding = useSiteConfigStore(
-    (s) => s.setCurrentlyBuilding,
-  );
+
+  const setCurrentlyBuilding = (patch: Partial<typeof draft>) =>
+    useSiteConfigStore.getState().setCurrentlyBuilding(patch);
   const edited = (k: keyof typeof draft) => draft[k] !== initial[k];
+  const previewVisible = !!draft.code || !!draft.body;
 
   return (
     <Panel
@@ -25,16 +30,11 @@ export default function CurrentlyBuildingPanel() {
     >
       <div className="grid gap-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[140px_minmax(0,1fr)]">
-          <Field
-            label="Code"
-            hint="mono"
-            edited={edited("code")}
-          >
+          <Field label="Code" edited={edited("code")}>
             <Input
               value={draft.code}
               onChange={(e) => setCurrentlyBuilding({ code: e.target.value })}
               placeholder="tinypg"
-              className="font-mono text-sm tracking-tight"
             />
           </Field>
           <Field label="Body" edited={edited("body")}>
@@ -56,7 +56,6 @@ export default function CurrentlyBuildingPanel() {
                 setCurrentlyBuilding({ linkLabel: e.target.value })
               }
               placeholder="→ /lab"
-              className="font-mono text-sm"
             />
           </Field>
           <Field label="Link href" edited={edited("linkHref")}>
@@ -66,69 +65,51 @@ export default function CurrentlyBuildingPanel() {
                 setCurrentlyBuilding({ linkHref: e.target.value })
               }
               placeholder="/lab"
-              className="font-mono text-sm"
             />
           </Field>
         </div>
 
-        <Preview
-          code={draft.code}
-          body={draft.body}
-          linkLabel={draft.linkLabel}
-          linkHref={draft.linkHref}
-        />
+        <div>
+          <div className="mb-2 flex items-center gap-2">
+            <Label>Preview</Label>
+            <span className="text-[10px] text-foreground/30">
+              · rendered as /blog sees it
+            </span>
+          </div>
+          <div className="rounded-md border border-foreground/[0.06] bg-background/60 p-4">
+            <HeightTransition show={previewVisible}>
+              <div
+                className="text-[11px] uppercase text-muted-foreground"
+                style={{ letterSpacing: "0.12em" }}
+              >
+                <span className="text-foreground/40">// </span>currently building
+              </div>
+              <div className="mt-3 text-sm leading-relaxed text-foreground/85">
+                {draft.code && (
+                  <span className="rounded bg-foreground/[0.04] px-1.5 py-0.5 text-[12px] text-foreground/80">
+                    {draft.code}
+                  </span>
+                )}
+                {draft.code && draft.body && " "}
+                {draft.body}
+              </div>
+              {draft.linkHref && (
+                <div className="mt-3 inline-block border-b border-foreground/30 pb-px text-[12px] text-foreground/80">
+                  {draft.linkLabel || draft.linkHref}
+                </div>
+              )}
+            </HeightTransition>
+            <HeightTransition show={!previewVisible}>
+              <span
+                className="text-[11px] uppercase text-foreground/40"
+                style={{ letterSpacing: "0.12em" }}
+              >
+                Hidden · neither code nor body set
+              </span>
+            </HeightTransition>
+          </div>
+        </div>
       </div>
     </Panel>
-  );
-}
-
-function Preview({
-  code,
-  body,
-  linkLabel,
-  linkHref,
-}: {
-  code: string;
-  body: string;
-  linkLabel: string;
-  linkHref: string;
-}) {
-  const visible = !!code || !!body;
-  return (
-    <div>
-      <div className="mb-2 flex items-center gap-2">
-        <Eyebrow>Preview</Eyebrow>
-        <span className="font-mono text-[10px] text-foreground/30">
-          · rendered as /blog sees it
-        </span>
-      </div>
-      <div className="rounded-md border border-foreground/[0.06] bg-background/60 p-4">
-        {visible ? (
-          <>
-            <div className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-              <span className="text-foreground/40">// </span>currently building
-            </div>
-            <div className="mt-3 text-sm leading-relaxed text-foreground/85">
-              {code && (
-                <code className="rounded bg-foreground/[0.04] px-1.5 py-0.5 font-mono text-[12px] text-foreground/80">
-                  {code}
-                </code>
-              )}
-              {code && body && " "}
-              {body}
-            </div>
-            {linkHref && (
-              <div className="mt-3 inline-block border-b border-foreground/30 pb-px font-mono text-[11px] text-foreground/80">
-                {linkLabel || linkHref}
-              </div>
-            )}
-          </>
-        ) : (
-          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-foreground/40">
-            Hidden · neither code nor body set
-          </span>
-        )}
-      </div>
-    </div>
   );
 }
