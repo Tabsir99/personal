@@ -2,7 +2,6 @@ import { getPageData } from "@/app/layout";
 
 export default async function JsonLd() {
   const pageData = await getPageData();
-  console.log(pageData);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -52,21 +51,27 @@ export default async function JsonLd() {
 
   const projectSchemas = pageData.projects
     .filter((p) => p.isActive)
-    .map((project) => ({
-      "@context": "https://schema.org",
-      "@type": "CreativeWork",
-      name: project.title,
-      description: project.description,
-      image: project.image,
-      url: project.link1.url,
-      creator: {
-        "@type": "Person",
-        name: "Tabsir CG",
-        url: "https://tabsircg.com",
-      },
-      dateCreated: project.year,
-      keywords: project.skills.join(", "),
-    }));
+    .map((project) => {
+      const primaryUrl =
+        project.links.find((l) => l.type === "live")?.url ||
+        project.links[0]?.url ||
+        "";
+      return {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        name: project.title,
+        description: project.description,
+        image: project.image,
+        url: primaryUrl,
+        creator: {
+          "@type": "Person",
+          name: "Tabsir CG",
+          url: "https://tabsircg.com",
+        },
+        dateCreated: project.year,
+        keywords: project.skills.join(", "),
+      };
+    });
 
   return (
     <>

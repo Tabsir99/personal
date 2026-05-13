@@ -7,6 +7,10 @@ import {
   Building2,
   Rocket,
   UserCircle,
+  FileText,
+  Play,
+  Link as LinkIcon,
+  type LucideIcon,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,15 +20,22 @@ import { getPageData } from "@/app/layout";
 import Img from "../ui/image";
 import { PageData } from "@/app/page.type";
 
-type ClientType = PageData["projects"][0]["clientType"];
-const getClientIcon = (type: ClientType) => {
-  const iconMap: Record<ClientType, React.ElementType> = {
-    Startup: Rocket,
-    Enterprise: Building2,
-    Personal: UserCircle,
-  };
-  const Icon = iconMap[type] || Building2;
-  return Icon;
+const clientIconMap: Record<string, LucideIcon> = {
+  Startup: Rocket,
+  Enterprise: Building2,
+  Personal: UserCircle,
+};
+const getClientIcon = (type: string): LucideIcon =>
+  clientIconMap[type] ?? Building2;
+
+type LinkType = PageData["projects"][number]["links"][number]["type"];
+
+const linkIconMap: Record<LinkType, LucideIcon> = {
+  live: ExternalLink,
+  repo: Github,
+  "case-study": FileText,
+  video: Play,
+  other: LinkIcon,
 };
 
 export default async function PortfolioSection() {
@@ -150,36 +161,35 @@ export default async function PortfolioSection() {
                     )}
                   </div>
 
-                  <div className="flex flex-col gap-3 sm:flex-row">
-                    <Button
-                      asChild
-                      className="flex-[1.2] rounded-xl bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/20 transition-all hover:shadow-xl hover:shadow-blue-500/30 sm:flex-[1.5]"
-                    >
-                      <a
-                        href={project.link1.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink className="mr-2 h-4 w-4" />
-                        {project.link1.text}
-                      </a>
-                    </Button>
-
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="flex-1 rounded-xl border-zinc-700 bg-zinc-800/50 text-zinc-200 hover:text-white transition-all hover:border-zinc-600 hover:bg-zinc-700/50"
-                    >
-                      <a
-                        href={project.link2.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Github className="mr-2 h-4 w-4" />
-                        {project.link2.text}
-                      </a>
-                    </Button>
-                  </div>
+                  {project.links.length > 0 && (
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                      {project.links.map((link, i) => {
+                        const Icon = linkIconMap[link.type] ?? LinkIcon;
+                        const isPrimary = i === 0;
+                        return (
+                          <Button
+                            key={i}
+                            asChild
+                            variant={isPrimary ? "default" : "outline"}
+                            className={
+                              isPrimary
+                                ? "flex-[1.2] rounded-xl bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/20 transition-all hover:shadow-xl hover:shadow-blue-500/30 sm:flex-[1.5]"
+                                : "flex-1 rounded-xl border-zinc-700 bg-zinc-800/50 text-zinc-200 hover:text-white transition-all hover:border-zinc-600 hover:bg-zinc-700/50"
+                            }
+                          >
+                            <a
+                              href={link.url || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Icon className="mr-2 h-4 w-4" />
+                              {link.text || link.type}
+                            </a>
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </CardContent>
 
                 <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-white/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />

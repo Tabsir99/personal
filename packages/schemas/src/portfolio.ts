@@ -1,17 +1,22 @@
 import { z } from "zod";
 
+// Optional URL field that also accepts empty string
+const optionalUrl = z.url().or(z.literal("")).default("");
+
 const linkSchema = z.object({
   text: z.string().default(""),
-  url: z.string().default(""),
+  url: optionalUrl,
+  type: z
+    .enum(["live", "repo", "case-study", "video", "other"])
+    .default("other"),
 });
 
 export const projectSchema = z.object({
-  image: z.string().default(""),
+  image: optionalUrl,
   title: z.string(),
   type: z.enum(["Personal", "Demo", "Freelance"]),
   description: z.string().default(""),
-  link1: linkSchema,
-  link2: linkSchema,
+  links: z.array(linkSchema).default([]),
   skills: z.array(z.string()).default([]),
   featured: z.boolean().default(false),
   metrics: z
@@ -23,7 +28,7 @@ export const projectSchema = z.object({
     )
     .default([]),
   isActive: z.boolean().default(true),
-  year: z.string().default(""),
+  year: z.string().default(""), // string to allow ranges like "2023–2024"
   duration: z.string().default(""),
   role: z.string().default(""),
   clientType: z.string().default(""),
@@ -35,13 +40,14 @@ export const testimonialSchema = z.object({
   location: z.string().default(""),
   role: z.string().default(""),
   project: z.string().default(""),
+  // NOTE: layout concern — consider moving to a display config eventually
   size: z.enum(["large", "medium", "small"]),
-  rating: z.number(),
+  rating: z.number().min(0).max(5),
   text: z.string().default(""),
-  video: z.string().default(""),
+  video: optionalUrl,
   isActive: z.boolean().default(true),
-  avatar: z.string().default(""),
-  date: z.string().default(""),
+  avatar: optionalUrl,
+  date: z.string().default(""), // free-form ("March 2024", "2024", etc.)
   projectDuration: z.string().default(""),
   projectBudget: z.string().default(""),
   featured: z.boolean().default(false),
@@ -54,7 +60,7 @@ export const skillGroupSchema = z.object({
     .array(
       z.object({
         name: z.string(),
-        level: z.number(),
+        level: z.number().min(0).max(100), // adjust if your scale differs
         icon: z.string().default(""),
       }),
     )
@@ -67,8 +73,8 @@ export const credentialSchema = z.object({
   issuer: z.string().default(""),
   date: z.string().default(""),
   description: z.string().default(""),
-  link: z.string().default(""),
-  image: z.string().default(""),
+  link: optionalUrl,
+  image: optionalUrl,
   isActive: z.boolean().default(true),
 });
 
@@ -85,7 +91,7 @@ export const contactSchema = z.object({
     .array(
       z.object({
         name: z.string(),
-        url: z.string(),
+        url: z.url(), // required — if a social exists, the URL must be valid
         icon: z.string().default(""),
       }),
     )
@@ -96,13 +102,13 @@ export const pageDataSchema = z.object({
   title: z.string(),
   description: z.string().default(""),
   keywords: z.array(z.string()).default([]),
-  profilePicture: z.string().default(""),
+  profilePicture: optionalUrl,
   stats: z.object({
-    yearsExperience: z.number().default(0),
-    projectsCompleted: z.number().default(0),
+    yearsExperience: z.number().int().nonnegative().default(0),
+    projectsCompleted: z.number().int().nonnegative().default(0),
     jobSuccessRate: z.number().min(0).max(100).default(0),
     responseTime: z.string().default(""),
-    happyClients: z.number().default(0),
+    happyClients: z.number().int().nonnegative().default(0),
   }),
   projects: z.array(projectSchema).default([]),
   testimonials: z.array(testimonialSchema).default([]),
@@ -120,5 +126,4 @@ export const uploadFileInfoSchema = z.object({
   path: z.string().min(1),
 });
 export type UploadFileInfo = z.infer<typeof uploadFileInfoSchema>;
-
 export const uploadFileInfoArraySchema = z.array(uploadFileInfoSchema);

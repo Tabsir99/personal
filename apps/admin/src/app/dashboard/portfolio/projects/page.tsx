@@ -1,7 +1,13 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
+import {
+  ExternalLink,
+  FileText,
+  Play,
+  Link as LinkIcon,
+  type LucideIcon,
+} from "lucide-react";
 import Github from "@devicon/react/github/original";
 import { Badge } from "@/components/ui/badge";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
@@ -11,6 +17,17 @@ import Img from "@/components/ui/image";
 import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
 import { useState } from "react";
+import { PageData } from "@tabsircg/schemas/portfolio";
+
+type LinkType = PageData["projects"][number]["links"][number]["type"];
+
+const LINK_ICONS: Record<LinkType, LucideIcon | typeof Github> = {
+  live: ExternalLink,
+  repo: Github,
+  "case-study": FileText,
+  video: Play,
+  other: LinkIcon,
+};
 
 export default function Projects() {
   const projects = usePortfolioStore(
@@ -83,36 +100,35 @@ export default function Projects() {
                 )}
               </div>
 
-              <div className="flex gap-3">
-                <Button
-                  render={
-                    <a
-                      href={projectItem.link1.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      {projectItem.link1.text}
-                    </a>
-                  }
-                  className="flex-1 rounded-xl border border-border/60 bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                />
-
-                <Button
-                  render={
-                    <a
-                      href={projectItem.link2.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Github className="w-4 h-4" />
-                      {projectItem.link2.text}
-                    </a>
-                  }
-                  variant="outline"
-                  className="flex-1 rounded-xl border-border/60 bg-transparent text-foreground/80 hover:bg-accent"
-                />
-              </div>
+              {projectItem.links.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {projectItem.links.map((link, i) => {
+                    const Icon = LINK_ICONS[link.type] ?? LinkIcon;
+                    const isPrimary = i === 0;
+                    return (
+                      <Button
+                        key={i}
+                        render={
+                          <a
+                            href={link.url || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Icon className="w-4 h-4" />
+                            {link.text || link.type}
+                          </a>
+                        }
+                        variant={isPrimary ? "default" : "outline"}
+                        className={
+                          isPrimary
+                            ? "min-w-32 flex-1 rounded-xl border border-border/60 bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                            : "min-w-32 flex-1 rounded-xl border-border/60 bg-transparent text-foreground/80 hover:bg-accent"
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
 
             <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-border to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />

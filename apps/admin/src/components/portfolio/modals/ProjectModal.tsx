@@ -35,13 +35,27 @@ interface ProjectDialogProps {
   projectIndex?: number | null;
 }
 
+type ProjectLink = PageData["projects"][number]["links"][number];
+type LinkType = ProjectLink["type"];
+
+const LINK_TYPE_OPTIONS: {
+  value: LinkType;
+  label: string;
+  placeholder: string;
+}[] = [
+  { value: "live", label: "Live", placeholder: "Live Demo" },
+  { value: "repo", label: "Repo", placeholder: "GitHub" },
+  { value: "case-study", label: "Case Study", placeholder: "Case Study" },
+  { value: "video", label: "Video", placeholder: "Watch Video" },
+  { value: "other", label: "Other", placeholder: "Visit" },
+];
+
 const defaultFormData: PageData["projects"][number] = {
   image: "",
   title: "",
-  type: "Personal" as "Personal" | "Demo" | "Freelance",
+  type: "Personal",
   description: "",
-  link1: { text: "Live Demo", url: "" },
-  link2: { text: "GitHub", url: "" },
+  links: [],
   skills: [],
   isActive: true,
   featured: false,
@@ -95,6 +109,29 @@ export default function ProjectDialog({
     setFormData({
       ...formData,
       skills: formData.skills.filter((skill) => skill !== skillToRemove),
+    });
+  };
+
+  const handleAddLink = () => {
+    setFormData({
+      ...formData,
+      links: [...formData.links, { text: "", url: "", type: "other" }],
+    });
+  };
+
+  const handleUpdateLink = (i: number, patch: Partial<ProjectLink>) => {
+    setFormData({
+      ...formData,
+      links: formData.links.map((l, idx) =>
+        idx === i ? { ...l, ...patch } : l,
+      ),
+    });
+  };
+
+  const handleRemoveLink = (i: number) => {
+    setFormData({
+      ...formData,
+      links: formData.links.filter((_, idx) => idx !== i),
     });
   };
 
@@ -226,74 +263,85 @@ export default function ProjectDialog({
           </div>
 
           {/* Links */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Label className="block text-foreground/80">Links</Label>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="mb-2 block text-xs text-muted-foreground">
-                  Link 1 Text
-                </Label>
-                <Input
-                  placeholder="Live Demo"
-                  value={formData.link1.text}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      link1: { ...formData.link1, text: e.target.value },
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <Label className="mb-2 block text-xs text-muted-foreground">
-                  Link 1 URL
-                </Label>
-                <Input
-                  placeholder="https://demo.com"
-                  value={formData.link1.url}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      link1: { ...formData.link1, url: e.target.value },
-                    })
-                  }
-                />
-              </div>
-            </div>
+            {formData.links.map((link, i) => {
+              const placeholder =
+                LINK_TYPE_OPTIONS.find((o) => o.value === link.type)
+                  ?.placeholder ?? "Link text";
+              return (
+                <div
+                  key={i}
+                  className="grid grid-cols-[140px_1fr_1fr_auto] items-end gap-2"
+                >
+                  <div>
+                    <Label className="mb-1.5 block text-xs text-muted-foreground">
+                      Type
+                    </Label>
+                    <Select
+                      value={link.type}
+                      onValueChange={(value: LinkType) =>
+                        handleUpdateLink(i, { type: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LINK_TYPE_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="mb-1.5 block text-xs text-muted-foreground">
+                      Text
+                    </Label>
+                    <Input
+                      placeholder={placeholder}
+                      value={link.text}
+                      onChange={(e) =>
+                        handleUpdateLink(i, { text: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label className="mb-1.5 block text-xs text-muted-foreground">
+                      URL
+                    </Label>
+                    <Input
+                      placeholder="https://..."
+                      value={link.url}
+                      onChange={(e) =>
+                        handleUpdateLink(i, { url: e.target.value })
+                      }
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleRemoveLink(i)}
+                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <X size={16} />
+                  </Button>
+                </div>
+              );
+            })}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="mb-2 block text-xs text-muted-foreground">
-                  Link 2 Text
-                </Label>
-                <Input
-                  placeholder="GitHub"
-                  value={formData.link2.text}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      link2: { ...formData.link2, text: e.target.value },
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <Label className="mb-2 block text-xs text-muted-foreground">
-                  Link 2 URL
-                </Label>
-                <Input
-                  placeholder="https://github.com/..."
-                  value={formData.link2.url}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      link2: { ...formData.link2, url: e.target.value },
-                    })
-                  }
-                />
-              </div>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddLink}
+              className="w-full border-dashed border-border hover:bg-accent"
+            >
+              <Plus size={14} /> Add Link
+            </Button>
           </div>
 
           {/* Skills */}
