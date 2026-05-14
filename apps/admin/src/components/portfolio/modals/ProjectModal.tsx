@@ -20,12 +20,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Image as ImageIcon, Plus } from "lucide-react";
+import { X, Image as ImageIcon, Plus, Code, Briefcase } from "lucide-react";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import Img from "@/components/ui/image";
 import { PageData } from "@tabsircg/schemas/portfolio";
+import { ConfigMultiSelect } from "@/components/ui/configMultiSelect";
+import { useCustomSWR } from "@/hooks/useCustomSwr";
+import {
+  addPortfolioSkill,
+  addPortfolioClientType,
+  type PortfolioCatalog,
+} from "@/actions/configActions";
 
 interface ProjectDialogProps {
   children?: React.ReactNode;
@@ -89,34 +95,34 @@ export default function ProjectDialog({
     }
   }, [existingProject, projectIndex]);
 
-  const [currentSkill, setCurrentSkill] = useState("");
   const [metricLabel, setMetricLabel] = useState("");
   const [metricValue, setMetricValue] = useState("");
 
+  const [isAddingLink, setIsAddingLink] = useState(false);
+  const emptyNewLink: ProjectLink = { text: "", url: "", type: "other" };
+  const [newLink, setNewLink] = useState<ProjectLink>(emptyNewLink);
+
   const project = usePortfolioStore().projects;
 
-  const handleAddSkill = () => {
-    if (currentSkill.trim() && !formData.skills.includes(currentSkill.trim())) {
-      setFormData({
-        ...formData,
-        skills: [...formData.skills, currentSkill.trim()],
-      });
-      setCurrentSkill("");
-    }
-  };
+  const {
+    data: catalog,
+    mutate: mutateCatalog,
+    isLoading: catalogLoading,
+  } = useCustomSWR<PortfolioCatalog>("/api/config/portfolio");
 
-  const handleRemoveSkill = (skillToRemove: string) => {
+  const handleCommitNewLink = () => {
+    if (!newLink.text.trim() && !newLink.url.trim()) return;
     setFormData({
       ...formData,
-      skills: formData.skills.filter((skill) => skill !== skillToRemove),
+      links: [...formData.links, newLink],
     });
+    setNewLink(emptyNewLink);
+    setIsAddingLink(false);
   };
 
-  const handleAddLink = () => {
-    setFormData({
-      ...formData,
-      links: [...formData.links, { text: "", url: "", type: "other" }],
-    });
+  const handleCancelNewLink = () => {
+    setNewLink(emptyNewLink);
+    setIsAddingLink(false);
   };
 
   const handleUpdateLink = (i: number, patch: Partial<ProjectLink>) => {
@@ -163,7 +169,7 @@ export default function ProjectDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {children && <DialogTrigger render={children as React.ReactElement} />}
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl pb-0">
         <DialogHeader>
           <DialogTitle className="text-2xl">
             {isUpdating ? "Edit Project" : "Add New Project"}
@@ -174,97 +180,103 @@ export default function ProjectDialog({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Image Upload */}
-          <div>
-            <Label className="mb-2 block text-foreground/80">
-              Project Image
-            </Label>
-            <div className="flex items-center gap-4">
-              <div
-                onClick={() => imageInputRef.current?.click()}
-                className="flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-muted/40"
-              >
-                {formData.image ? (
-                  <Img
-                    src={formData.image}
-                    alt="Preview"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <ImageIcon size={32} className="text-muted-foreground" />
-                )}
+          {/* Basics */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground">
+              Basics
+            </h3>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="mb-2 block">Title</Label>
+                <Input
+                  placeholder="E-commerce Platform"
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                />
               </div>
 
-              <Input
-                type="file"
-                ref={imageInputRef}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setFormData({
-                      ...formData,
-                      image: URL.createObjectURL(file),
-                    });
+              <div>
+                <Label className="mb-2 block">Type</Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value: "Personal" | "Demo" | "Freelance") =>
+                    setFormData({ ...formData, type: value })
                   }
-                }}
-                className="hidden"
-              />
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Personal">Personal</SelectItem>
+                    <SelectItem value="Demo">Demo</SelectItem>
+                    <SelectItem value="Freelance">Freelance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {/* Title */}
             <div>
-              <Label className="mb-2 block text-foreground/80">
-                Project Title
-              </Label>
-              <Input
-                placeholder="E-commerce Platform"
-                value={formData.title}
+              <Label className="mb-2 block">Description</Label>
+              <Textarea
+                placeholder="A full-featured e-commerce platform with payment integration..."
+                value={formData.description}
                 onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
+                  setFormData({ ...formData, description: e.target.value })
                 }
               />
             </div>
-
-            {/* Type */}
-            <div>
-              <Label className="mb-2 block text-foreground/80">
-                Project Type
-              </Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value: "Personal" | "Demo" | "Freelance") =>
-                  setFormData({ ...formData, type: value })
-                }
-              >
-                <SelectTrigger className="capitalize">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Personal">Personal</SelectItem>
-                  <SelectItem value="Demo">Demo</SelectItem>
-                  <SelectItem value="Freelance">Freelance</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
-          {/* Description */}
-          <div>
-            <Label className="mb-2 block text-foreground/80">Description</Label>
-            <Textarea
-              placeholder="A full-featured e-commerce platform with payment integration..."
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-            />
+          {/* Media */}
+          <div className="pt-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
+              Media
+            </h3>
+
+            <div>
+              <Label className="mb-2 block">Project Image</Label>
+              <div className="flex items-center gap-4">
+                <div
+                  onClick={() => imageInputRef.current?.click()}
+                  className="flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-muted/40"
+                >
+                  {formData.image ? (
+                    <Img
+                      src={formData.image}
+                      alt="Preview"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <ImageIcon size={32} className="text-muted-foreground" />
+                  )}
+                </div>
+
+                <Input
+                  type="file"
+                  ref={imageInputRef}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setFormData({
+                        ...formData,
+                        image: URL.createObjectURL(file),
+                      });
+                    }
+                  }}
+                  className="hidden"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Links */}
-          <div className="space-y-3">
-            <Label className="block text-foreground/80">Links</Label>
+          <div className="pt-4 space-y-3">
+            <h3 className="text-sm font-semibold text-muted-foreground">
+              Links
+            </h3>
 
             {formData.links.map((link, i) => {
               const placeholder =
@@ -334,69 +346,323 @@ export default function ProjectDialog({
               );
             })}
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAddLink}
-              className="w-full border-dashed border-border hover:bg-accent"
+            <div
+              className={`${
+                isAddingLink
+                  ? "max-h-120 border-border p-4"
+                  : "max-h-0 border-transparent p-0"
+              } mt-2 overflow-hidden rounded-lg border-2 border-dashed transition-all duration-300`}
             >
-              <Plus size={14} /> Add Link
-            </Button>
-          </div>
-
-          {/* Skills */}
-          <div>
-            <Label className="mb-2 block text-foreground/80">
-              Technologies & Skills
-            </Label>
-            <div className="mb-3 flex gap-2">
-              <Input
-                placeholder="Add a skill..."
-                value={currentSkill}
-                onChange={(e) => setCurrentSkill(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddSkill();
-                  }
-                }}
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                onClick={handleAddSkill}
-                className="bg-primary hover:bg-primary/90"
-              >
-                <Plus size={16} />
-              </Button>
+              <div className="grid grid-cols-[140px_1fr_1fr] gap-2 mb-3">
+                <div>
+                  <Label className="mb-1.5 block text-xs text-muted-foreground">
+                    Type
+                  </Label>
+                  <Select
+                    value={newLink.type}
+                    onValueChange={(value: LinkType) =>
+                      setNewLink({ ...newLink, type: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LINK_TYPE_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="mb-1.5 block text-xs text-muted-foreground">
+                    Text
+                  </Label>
+                  <Input
+                    placeholder={
+                      LINK_TYPE_OPTIONS.find((o) => o.value === newLink.type)
+                        ?.placeholder ?? "Link text"
+                    }
+                    value={newLink.text}
+                    onChange={(e) =>
+                      setNewLink({ ...newLink, text: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <Label className="mb-1.5 block text-xs text-muted-foreground">
+                    URL
+                  </Label>
+                  <Input
+                    placeholder="https://..."
+                    value={newLink.url}
+                    onChange={(e) =>
+                      setNewLink({ ...newLink, url: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCancelNewLink}
+                  className="h-8 text-muted-foreground"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleCommitNewLink}
+                  className="h-8"
+                  disabled={!newLink.text.trim() && !newLink.url.trim()}
+                >
+                  <Plus size={14} /> Add Link
+                </Button>
+              </div>
             </div>
 
-            {formData.skills.length > 0 && (
-              <div className="flex flex-wrap gap-2 rounded-lg border border-border bg-muted/30 p-4">
-                {formData.skills.map((skill, i) => (
-                  <Badge
-                    key={i}
-                    variant="secondary"
-                    className="border-primary/30 bg-primary/20 py-1 pl-3 pr-1 text-primary"
-                  >
-                    {skill}
-                    <button
-                      onClick={() => handleRemoveSkill(skill)}
-                      className="ml-2 rounded-full p-0.5 hover:bg-primary/30"
-                    >
-                      <X size={12} />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
+            {isAddingLink || (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAddingLink(true)}
+                className="w-full border-dashed border-border hover:bg-accent"
+              >
+                <Plus size={14} /> Add Link
+              </Button>
             )}
           </div>
 
-          {/* Featured Toggle */}
-          <div>
-            <Label className="mb-2 block text-foreground/80">
-              Featured Project
-            </Label>
+          {/* Tech & Outcomes */}
+          <div className="pt-4 space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground">
+              Tech & Outcomes
+            </h3>
+
+            <div>
+              <Label className="mb-2 block">Skills</Label>
+              <ConfigMultiSelect
+                value={formData.skills}
+                onChange={(next) => setFormData({ ...formData, skills: next })}
+                available={catalog?.skillCatalog ?? []}
+                loading={catalogLoading}
+                onCreate={addPortfolioSkill}
+                onOptimisticCreate={(values) =>
+                  mutateCatalog(
+                    (prev) =>
+                      prev
+                        ? { ...prev, skillCatalog: values }
+                        : {
+                            skillCatalog: values,
+                            clientTypeCatalog: [],
+                          },
+                    false,
+                  )
+                }
+                onAfterCreate={(values) =>
+                  mutateCatalog(
+                    (prev) =>
+                      prev
+                        ? { ...prev, skillCatalog: values }
+                        : {
+                            skillCatalog: values,
+                            clientTypeCatalog: [],
+                          },
+                    false,
+                  )
+                }
+                placeholder="Select or create skills..."
+                searchPlaceholder="Search or create a skill..."
+                selectedLabel={(s) =>
+                  s.length
+                    ? `${s.length} skill${s.length > 1 ? "s" : ""} selected`
+                    : "Select or create skills..."
+                }
+                itemIcon={Code}
+                toastMessages={{
+                  loading: "Creating skill...",
+                  success: "Skill added to catalog",
+                  err: "Failed to create skill",
+                }}
+              />
+            </div>
+
+            <div>
+              <Label className="mb-2 block">Metrics</Label>
+              <p className="mb-3 text-xs text-muted-foreground">
+                Add up to 2 metrics to showcase results (e.g., "10K users",
+                "0.8s load time")
+              </p>
+
+              {formData.metrics.length < 2 && (
+                <div className="mb-3 grid grid-cols-2 gap-4">
+                  <Input
+                    placeholder="Metric label (e.g., Users)"
+                    value={metricLabel}
+                    onChange={(e) => setMetricLabel(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddMetric();
+                      }
+                    }}
+                  />
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Value (e.g., 10K+)"
+                      value={metricValue}
+                      onChange={(e) => setMetricValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddMetric();
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleAddMetric}
+                      className="bg-primary hover:bg-primary/90"
+                    >
+                      <Plus size={16} />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {formData.metrics.length > 0 && (
+                <div className="flex gap-3 rounded-lg border border-border bg-muted/30 p-4">
+                  {formData.metrics.map((metric, i) => (
+                    <div
+                      key={i}
+                      className="group relative flex-1 rounded-lg border border-border/70 bg-muted/60 p-3"
+                    >
+                      <button
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            metrics: formData.metrics.filter(
+                              (_, idx) => idx !== i,
+                            ),
+                          })
+                        }
+                        className="absolute -right-2 -top-2 rounded-full bg-destructive/80 p-1 opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100"
+                      >
+                        <X size={12} className="text-destructive-foreground" />
+                      </button>
+                      <div className="text-xs text-muted-foreground">
+                        {metric.label}
+                      </div>
+                      <div className="text-sm font-bold text-foreground">
+                        {metric.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {formData.metrics.length >= 2 && (
+                <p className="mt-2 text-xs text-destructive/80">
+                  Maximum 2 metrics reached. Remove one to add another.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Engagement */}
+          <div className="pt-4 space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground">
+              Engagement
+            </h3>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="mb-2 block">Year</Label>
+                <Input
+                  placeholder="2024"
+                  value={formData.year}
+                  onChange={(e) =>
+                    setFormData({ ...formData, year: e.target.value })
+                  }
+                />
+              </div>
+
+              <div>
+                <Label className="mb-2 block">Duration</Label>
+                <Input
+                  placeholder="3 months"
+                  value={formData.duration}
+                  onChange={(e) =>
+                    setFormData({ ...formData, duration: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="mb-2 block">Role</Label>
+                <Input
+                  placeholder="Full Stack Developer"
+                  value={formData.role || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, role: e.target.value })
+                  }
+                />
+              </div>
+
+              <div>
+                <Label className="mb-2 block">Client Type</Label>
+                <ConfigMultiSelect
+                  mode="single"
+                  value={formData.clientType ? [formData.clientType] : []}
+                  onChange={(next) =>
+                    setFormData({ ...formData, clientType: next[0] ?? "" })
+                  }
+                  available={catalog?.clientTypeCatalog ?? []}
+                  loading={catalogLoading}
+                  onCreate={addPortfolioClientType}
+                  onOptimisticCreate={(values) =>
+                    mutateCatalog(
+                      (prev) =>
+                        prev
+                          ? { ...prev, clientTypeCatalog: values }
+                          : {
+                              skillCatalog: [],
+                              clientTypeCatalog: values,
+                            },
+                      false,
+                    )
+                  }
+                  onAfterCreate={(values) =>
+                    mutateCatalog(
+                      (prev) =>
+                        prev
+                          ? { ...prev, clientTypeCatalog: values }
+                          : {
+                              skillCatalog: [],
+                              clientTypeCatalog: values,
+                            },
+                      false,
+                    )
+                  }
+                  placeholder="Pick or create a client type..."
+                  searchPlaceholder="Search or create..."
+                  itemIcon={Briefcase}
+                  toastMessages={{
+                    loading: "Creating client type...",
+                    success: "Client type added to catalog",
+                    err: "Failed to create client type",
+                  }}
+                />
+              </div>
+            </div>
+
             <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-4">
               <Checkbox
                 id="featured"
@@ -405,151 +671,14 @@ export default function ProjectDialog({
                   setFormData({ ...formData, featured: checked as boolean })
                 }
               />
-              <Label
-                htmlFor="featured"
-                className="cursor-pointer text-foreground/80"
-              >
+              <Label htmlFor="featured" className="cursor-pointer">
                 Highlight this project with a featured badge
               </Label>
             </div>
           </div>
-
-          {/* Metrics */}
-          <div>
-            <Label className="mb-2 block text-foreground/80">
-              Project Metrics (Optional)
-            </Label>
-            <p className="mb-3 text-xs text-muted-foreground">
-              Add up to 2 metrics to showcase results (e.g., "10K users", "0.8s
-              load time")
-            </p>
-
-            {formData.metrics.length < 2 && (
-              <div className="mb-3 grid grid-cols-2 gap-4">
-                <Input
-                  placeholder="Metric label (e.g., Users)"
-                  value={metricLabel}
-                  onChange={(e) => setMetricLabel(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleAddMetric();
-                    }
-                  }}
-                />
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Value (e.g., 10K+)"
-                    value={metricValue}
-                    onChange={(e) => setMetricValue(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleAddMetric();
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleAddMetric}
-                    className="bg-primary hover:bg-primary/90"
-                  >
-                    <Plus size={16} />
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {formData.metrics.length > 0 && (
-              <div className="flex gap-3 rounded-lg border border-border bg-muted/30 p-4">
-                {formData.metrics.map((metric, i) => (
-                  <div
-                    key={i}
-                    className="group relative flex-1 rounded-lg border border-border/70 bg-muted/60 p-3"
-                  >
-                    <button
-                      onClick={() =>
-                        setFormData({
-                          ...formData,
-                          metrics: formData.metrics.filter(
-                            (_, idx) => idx !== i,
-                          ),
-                        })
-                      }
-                      className="absolute -right-2 -top-2 rounded-full bg-destructive/80 p-1 opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100"
-                    >
-                      <X size={12} className="text-destructive-foreground" />
-                    </button>
-                    <div className="text-xs text-muted-foreground">
-                      {metric.label}
-                    </div>
-                    <div className="text-sm font-bold text-foreground">
-                      {metric.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {formData.metrics.length >= 2 && (
-              <p className="mt-2 text-xs text-destructive/80">
-                Maximum 2 metrics reached. Remove one to add another.
-              </p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="mb-2 block text-foreground/80">Year</Label>
-              <Input
-                placeholder="2024"
-                value={formData.year}
-                onChange={(e) =>
-                  setFormData({ ...formData, year: e.target.value })
-                }
-              />
-            </div>
-
-            <div>
-              <Label className="mb-2 block text-foreground/80">Duration</Label>
-              <Input
-                placeholder="3 months"
-                value={formData.duration}
-                onChange={(e) =>
-                  setFormData({ ...formData, duration: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="mb-2 block text-foreground/80">
-                Role (Optional)
-              </Label>
-              <Input
-                placeholder="Full Stack Developer"
-                value={formData.role || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, role: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label className="mb-2 block text-foreground/80">Client Type</Label>
-            <Input
-              placeholder="Startup, Enterprise, Personal, etc."
-              value={formData.clientType}
-              onChange={(e) =>
-                setFormData({ ...formData, clientType: e.target.value })
-              }
-            />
-          </div>
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="sticky bottom-0 bg-inherit">
           <DialogClose render={<Button variant="outline">Cancel</Button>} />
 
           <DialogClose

@@ -46,7 +46,7 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
   return (
     <Dialog>
       <DialogTrigger render={children as React.ReactElement} />
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto pb-0">
         <DialogHeader>
           <DialogTitle className="text-2xl">Add New Credential</DialogTitle>
           <DialogDescription>
@@ -55,47 +55,14 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Certificate Image */}
-          <div>
-            <Label className="mb-2 block">Certificate Image</Label>
-            <div className="flex items-center gap-4">
-              <div
-                onClick={() => imageInputRef.current?.click()}
-                className="flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-muted/30"
-              >
-                {formData.image ? (
-                  <Img
-                    src={formData.image}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <ImageIcon size={32} className="text-muted-foreground" />
-                )}
-              </div>
-
-              <Input
-                type="file"
-                ref={imageInputRef}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setFormData({
-                      ...formData,
-                      image: URL.createObjectURL(file),
-                    });
-                  }
-                }}
-                className="hidden"
-                accept="image/*"
-              />
-            </div>
-          </div>
-
-          {/* Basic Information */}
+          {/* Basics */}
           <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground">
+              Basics
+            </h3>
+
             <div>
-              <Label className="mb-2 block">Certificate Title</Label>
+              <Label className="mb-2 block">Title</Label>
               <Input
                 placeholder="AWS Certified Developer"
                 value={formData.title}
@@ -148,6 +115,56 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
                 }
               />
             </div>
+          </div>
+
+          {/* Media */}
+          <div className="pt-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
+              Media
+            </h3>
+
+            <div>
+              <Label className="mb-2 block">Certificate Image</Label>
+              <div className="flex items-center gap-4">
+                <div
+                  onClick={() => imageInputRef.current?.click()}
+                  className="flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-muted/30"
+                >
+                  {formData.image ? (
+                    <Img
+                      src={formData.image}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <ImageIcon size={32} className="text-muted-foreground" />
+                  )}
+                </div>
+
+                <Input
+                  type="file"
+                  ref={imageInputRef}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setFormData({
+                        ...formData,
+                        image: URL.createObjectURL(file),
+                      });
+                    }
+                  }}
+                  className="hidden"
+                  accept="image/*"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Reference */}
+          <div className="pt-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
+              Reference
+            </h3>
 
             <div>
               <Label className="mb-2 block">Certificate Link</Label>
@@ -165,7 +182,7 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="sticky bottom-0 bg-inherit">
           <DialogClose render={<Button variant="outline">Cancel</Button>} />
 
           <DialogClose

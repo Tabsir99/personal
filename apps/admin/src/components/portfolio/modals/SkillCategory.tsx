@@ -41,7 +41,7 @@ export default function SkillCategoryDialog({
   return (
     <Dialog>
       <DialogTrigger render={children as React.ReactElement} />
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md pb-0">
         <DialogHeader>
           <DialogTitle className="text-2xl">Add Skill Category</DialogTitle>
           <DialogDescription>
@@ -50,34 +50,47 @@ export default function SkillCategoryDialog({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          <div>
-            <Label className="mb-2 block">Category Title</Label>
-            <Input
-              placeholder="Frontend Development"
-              value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
-            />
+          {/* Basics */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground">
+              Basics
+            </h3>
+
+            <div>
+              <Label className="mb-2 block">Title</Label>
+              <Input
+                placeholder="Frontend Development"
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+              />
+            </div>
           </div>
 
-          <div>
-            <Label className="mb-2 block">Icon (Image URL)</Label>
-            <Input
-              placeholder="https://example.com/icon.png"
-              value={formData.icon}
-              onChange={(e) =>
-                setFormData({ ...formData, icon: e.target.value })
-              }
-              className="text-2xl"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Use an image URL to represent this category
-            </p>
+          {/* Media */}
+          <div className="pt-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
+              Media
+            </h3>
+
+            <div>
+              <Label className="mb-2 block">Icon (Image URL)</Label>
+              <Input
+                placeholder="https://example.com/icon.png"
+                value={formData.icon}
+                onChange={(e) =>
+                  setFormData({ ...formData, icon: e.target.value })
+                }
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Use an image URL to represent this category
+              </p>
+            </div>
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="sticky bottom-0 bg-inherit">
           <DialogClose render={<Button variant="outline">Cancel</Button>} />
 
           <DialogClose

@@ -181,8 +181,8 @@ export default function TestimonialDialog({
           </div>
 
           {/* Project Details */}
-          <div className="pt-4">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
+          <div className="pt-4 space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground">
               Project Details
             </h3>
 
@@ -206,7 +206,7 @@ export default function TestimonialDialog({
                     setFormData({ ...formData, size: value })
                   }
                 >
-                  <SelectTrigger className="capitalize">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -218,7 +218,7 @@ export default function TestimonialDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="mb-2 block">Project Duration</Label>
                 <Input
@@ -245,7 +245,7 @@ export default function TestimonialDialog({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 mt-4">
+            <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-4">
               <Checkbox
                 id="featured"
                 checked={formData.featured}
@@ -259,9 +259,9 @@ export default function TestimonialDialog({
             </div>
           </div>
 
-          {/* Rating */}
-          <div className="pt-4">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
+          {/* Rating & Review */}
+          <div className="pt-4 space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground">
               Rating & Review
             </h3>
 
@@ -293,7 +293,7 @@ export default function TestimonialDialog({
               </div>
             </div>
 
-            <div className="mt-4">
+            <div>
               <Label className="mb-2 block">Testimonial Text</Label>
               <Textarea
                 placeholder="Excellent work! Very professional and delivered on time..."
@@ -310,8 +310,8 @@ export default function TestimonialDialog({
           </div>
 
           {/* Video Testimonial */}
-          <div className="pt-4">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
+          <div className="pt-4 space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground">
               Video Testimonial (Optional)
             </h3>
 
@@ -336,7 +336,7 @@ export default function TestimonialDialog({
             </div>
 
             {formData.video && (
-              <div className="mt-4 p-3 bg-muted rounded-lg border flex items-center gap-3">
+              <div className="p-3 bg-muted rounded-lg border flex items-center gap-3">
                 <Video size={20} className="text-muted-foreground" />
                 <span className="text-sm flex-1 truncate">
                   {formData.video}
@@ -346,7 +346,7 @@ export default function TestimonialDialog({
           </div>
         </div>
 
-        <DialogFooter className="sticky bottom-0 gap-2 bg-background py-4">
+        <DialogFooter className="sticky bottom-0 bg-inherit">
           <DialogClose render={<Button variant="outline">Cancel</Button>} />
 
           <DialogClose

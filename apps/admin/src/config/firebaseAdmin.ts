@@ -57,7 +57,7 @@ export const Collections = {
   /** Denormalized list of published blog slugs for sitemap/link validation. Docs: `blogs`. */
   VALID_LINKS: "valid-links",
 
-  /** App-level config edited from the CMS. Docs: `blog`, `site`. */
+  /** App-level config edited from the CMS. Docs: `blog`, `site`, `portfolio`. */
   CONFIG: "config",
 } as const;
 

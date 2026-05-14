@@ -226,7 +226,7 @@ const AddServiceModal = () => {
           />
         }
       />
-      <DialogContent className="sm:max-w-[550px] border border-border shadow-2xl backdrop-blur-xl">
+      <DialogContent className="sm:max-w-[550px] border border-border shadow-2xl backdrop-blur-xl pb-0">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             Add New Service
@@ -235,58 +235,68 @@ const AddServiceModal = () => {
             Create a new service to showcase on your portfolio
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-5 py-6">
-          <div className="space-y-2">
-            <Label htmlFor="icon" className="text-sm font-medium text-foreground/90">
-              Icon URL
-            </Label>
-            <Input
-              id="icon"
-              value={newService.icon}
-              onChange={(e) =>
-                setNewService({ ...newService, icon: e.target.value })
-              }
-              placeholder="https://example.com/icon.png"
-            />
-            <p className="text-xs text-muted-foreground">
-              Paste a public URL to your service icon
-            </p>
+        <div className="space-y-6 py-4">
+          {/* Basics */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground">
+              Basics
+            </h3>
+
+            <div>
+              <Label htmlFor="title" className="mb-2 block">
+                Title
+              </Label>
+              <Input
+                id="title"
+                value={newService.title}
+                onChange={(e) =>
+                  setNewService({ ...newService, title: e.target.value })
+                }
+                placeholder="Full-Stack Application Development"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="description" className="mb-2 block">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                value={newService.content}
+                onChange={(e) =>
+                  setNewService({ ...newService, content: e.target.value })
+                }
+                placeholder="Building scalable, modern web applications..."
+                rows={5}
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label
-              htmlFor="title"
-              className="text-sm font-medium text-foreground/90"
-            >
-              Service Title
-            </Label>
-            <Input
-              id="title"
-              value={newService.title}
-              onChange={(e) =>
-                setNewService({ ...newService, title: e.target.value })
-              }
-              placeholder="Full-Stack Application Development"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label
-              htmlFor="description"
-              className="text-sm font-medium text-foreground/90"
-            >
-              Description
-            </Label>
-            <Textarea
-              id="description"
-              value={newService.content}
-              onChange={(e) =>
-                setNewService({ ...newService, content: e.target.value })
-              }
-              placeholder="Building scalable, modern web applications..."
-              rows={5}
-            />
+
+          {/* Media */}
+          <div className="pt-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
+              Media
+            </h3>
+
+            <div>
+              <Label htmlFor="icon" className="mb-2 block">
+                Icon URL
+              </Label>
+              <Input
+                id="icon"
+                value={newService.icon}
+                onChange={(e) =>
+                  setNewService({ ...newService, icon: e.target.value })
+                }
+                placeholder="https://example.com/icon.png"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Paste a public URL to your service icon
+              </p>
+            </div>
           </div>
         </div>
-        <DialogFooter className="gap-2">
+        <DialogFooter className="sticky bottom-0 bg-inherit">
           <Button
             type="button"
             variant="ghost"

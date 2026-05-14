@@ -3,12 +3,16 @@ import { z } from "zod";
 import { db, Collections } from "@/config/firebaseAdmin";
 import { wrap } from "@/lib/appUtils";
 import { siteConfigSchema, type SiteConfig } from "@tabsircg/schemas/site";
+import type { PageData } from "@tabsircg/schemas/portfolio";
 
 const CONFIG_DOC = "blog";
 const CONFIG_DOC_REF = db.collection(Collections.CONFIG).doc(CONFIG_DOC);
 
 const SITE_DOC = "site";
 const SITE_DOC_REF = db.collection(Collections.CONFIG).doc(SITE_DOC);
+
+const PORTFOLIO_DOC = "portfolio";
+const PORTFOLIO_DOC_REF = db.collection(Collections.CONFIG).doc(PORTFOLIO_DOC);
 
 export type ConfigField = "tags" | "kinds" | "schemaTypes";
 
@@ -58,3 +62,52 @@ export const updateSiteConfig = wrap(async (patch: Partial<SiteConfig>) => {
   await SITE_DOC_REF.set(merged);
   return merged;
 });
+
+// --- Portfolio (page data + skill catalog) -----------------------------------
+
+const portfolioCatalogSchema = z.object({
+  skillCatalog: z.array(z.string()).default([]),
+  clientTypeCatalog: z.array(z.string()).default([]),
+});
+export type PortfolioCatalog = z.infer<typeof portfolioCatalogSchema>;
+
+type PortfolioCatalogField = "skillCatalog" | "clientTypeCatalog";
+
+async function addPortfolioCatalogValue(
+  field: PortfolioCatalogField,
+  value: string,
+) {
+  const trimmed = valueInputSchema.parse(value);
+
+  const existing = (await readPortfolioCatalog())[field];
+  const seen = new Set(existing.map((v) => v.toLowerCase()));
+  if (!seen.has(trimmed.toLowerCase())) existing.push(trimmed);
+  const values = existing.slice().sort((a, b) => a.localeCompare(b));
+
+  await PORTFOLIO_DOC_REF.set({ [field]: values }, { merge: true });
+
+  return { value: trimmed, values };
+}
+
+export async function readPortfolioPageData(): Promise<PageData | null> {
+  const snap = await PORTFOLIO_DOC_REF.get();
+  const data = snap.data();
+  return (data?.pageData as PageData | undefined) ?? null;
+}
+
+export async function writePortfolioPageData(data: PageData): Promise<void> {
+  await PORTFOLIO_DOC_REF.set({ pageData: data }, { merge: true });
+}
+
+export async function readPortfolioCatalog(): Promise<PortfolioCatalog> {
+  const snap = await PORTFOLIO_DOC_REF.get();
+  return portfolioCatalogSchema.parse(snap.data() ?? {});
+}
+
+export const addPortfolioSkill = wrap((value: string) =>
+  addPortfolioCatalogValue("skillCatalog", value),
+);
+
+export const addPortfolioClientType = wrap((value: string) =>
+  addPortfolioCatalogValue("clientTypeCatalog", value),
+);

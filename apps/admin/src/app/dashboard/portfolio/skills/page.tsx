@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Check, Trash2 } from "lucide-react";
+import { Plus, X, Check, Trash2, Code } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { useShallow } from "zustand/shallow";
@@ -11,6 +11,12 @@ import { Input } from "@/components/ui/input";
 import Img from "@/components/ui/image";
 import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
+import { ConfigMultiSelect } from "@/components/ui/configMultiSelect";
+import { useCustomSWR } from "@/hooks/useCustomSwr";
+import {
+  addPortfolioSkill,
+  type PortfolioCatalog,
+} from "@/actions/configActions";
 
 export default function Skills() {
   const [addingSkillTo, setAddingSkillTo] = useState<number | null>(null);
@@ -25,6 +31,9 @@ export default function Skills() {
   );
 
   const skill = usePortfolioStore().skills;
+
+  const { data: catalog, mutate: mutateCatalog, isLoading: catalogLoading } =
+    useCustomSWR<PortfolioCatalog>("/api/config/portfolio");
 
   const handleAddSkill = (categoryIndex: number) => {
     if (newSkill.name.trim() && newSkill.icon.trim()) {
@@ -178,22 +187,55 @@ export default function Skills() {
                 <div className="overflow-hidden min-h-0">
                   <div className="mt-8">
                     <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-4">
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input
-                          placeholder="Skill name"
-                          value={newSkill.name}
-                          onChange={(e) =>
-                            setNewSkill({ ...newSkill, name: e.target.value })
-                          }
-                        />
-                        <Input
-                          placeholder="Icon URL"
-                          value={newSkill.icon}
-                          onChange={(e) =>
-                            setNewSkill({ ...newSkill, icon: e.target.value })
-                          }
-                        />
-                      </div>
+                      <ConfigMultiSelect
+                        mode="single"
+                        value={newSkill.name ? [newSkill.name] : []}
+                        onChange={(next) =>
+                          setNewSkill({ ...newSkill, name: next[0] ?? "" })
+                        }
+                        available={catalog?.skillCatalog ?? []}
+                        loading={catalogLoading}
+                        onCreate={addPortfolioSkill}
+                        onOptimisticCreate={(values) =>
+                          mutateCatalog(
+                            (prev) =>
+                              prev
+                                ? { ...prev, skillCatalog: values }
+                                : {
+                                    skillCatalog: values,
+                                    clientTypeCatalog: [],
+                                  },
+                            false,
+                          )
+                        }
+                        onAfterCreate={(values) =>
+                          mutateCatalog(
+                            (prev) =>
+                              prev
+                                ? { ...prev, skillCatalog: values }
+                                : {
+                                    skillCatalog: values,
+                                    clientTypeCatalog: [],
+                                  },
+                            false,
+                          )
+                        }
+                        placeholder="Pick or create a skill..."
+                        searchPlaceholder="Search or create a skill..."
+                        itemIcon={Code}
+                        toastMessages={{
+                          loading: "Creating skill...",
+                          success: "Skill added to catalog",
+                          err: "Failed to create skill",
+                        }}
+                      />
+                      <Input
+                        placeholder="Icon URL"
+                        value={newSkill.icon}
+                        onChange={(e) =>
+                          setNewSkill({ ...newSkill, icon: e.target.value })
+                        }
+                      />
 
                       <div>
                         <div className="flex items-center justify-between mb-2">

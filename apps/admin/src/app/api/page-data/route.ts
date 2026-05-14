@@ -1,41 +1,25 @@
 import { env } from "@/config/env.server";
 import { NextRequest } from "next/server";
 import { PageData, pageDataSchema } from "@tabsircg/schemas/portfolio";
-import {
-  readObject,
-  S3Bucket,
-  deleteObjects,
-  uploadObject,
-} from "@/config/cloudflareS3";
+import { S3Bucket, deleteObjects } from "@/config/cloudflareS3";
 import { wrapRoute } from "@/lib/appUtils";
+import {
+  readPortfolioPageData,
+  writePortfolioPageData,
+} from "@/actions/configActions";
 
-const PAGEDATA_PATH = "portfolio/page-data.json";
-
-async function fetchPageData(): Promise<PageData | null> {
-  const response = await readObject(S3Bucket.PRIVATE, PAGEDATA_PATH);
-  if (!response) return null;
-  return JSON.parse(await response.transformToString());
-}
-
-export const GET = wrapRoute(async () => fetchPageData());
+export const GET = wrapRoute(async () => readPortfolioPageData());
 
 export const POST = wrapRoute(async (request: NextRequest) => {
   const body = await request.json();
   const pageData = pageDataSchema.parse(body);
 
-  const oldPageData = await fetchPageData();
+  const oldPageData = await readPortfolioPageData();
   if (oldPageData) {
     await deleteRemovedMedia(oldPageData, pageData);
   }
 
-  await uploadObject({
-    Bucket: S3Bucket.PRIVATE,
-    Key: PAGEDATA_PATH,
-    Body: JSON.stringify(pageData),
-    ContentType: "application/json",
-    CacheControl: "no-store, no-cache, must-revalidate",
-    ACL: "private",
-  });
+  await writePortfolioPageData(pageData);
 
   await fetch("https://tabsircg.com/api/revalidate", {
     headers: { Authorization: env.SERVER_TOKEN },
