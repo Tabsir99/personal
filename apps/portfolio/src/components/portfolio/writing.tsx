@@ -1,4 +1,5 @@
 "use client";
+import { cn } from "@/lib/utils";
 import { useReveal } from "./useReveal";
 
 /* ===== Writing ===== */
@@ -40,31 +41,68 @@ export function Writing() {
   const [ref, vis] = useReveal();
   return (
     <section id="writing" data-screen-label="06 Writing">
-      <div className="container">
-        <div className="work-head">
-          <h2 className="work-title display">
+      <div className={"container"}>
+        <div
+          className={cn(
+            "flex justify-between items-end mb-14",
+            "max-[1100px]:flex-col max-[1100px]:items-start max-[1100px]:gap-4",
+          )}
+        >
+          <h2
+            className={cn(
+              "font-serif font-normal tracking-[-0.02em] font-features-['liga','kern']",
+              "text-[clamp(52px,7vw,96px)] leading-none",
+              "[&_em]:text-accent [&_em]:italic",
+            )}
+          >
             <em>Notes</em>
             <br />
             from the keyboard.
           </h2>
-          <div className="work-count">
+          <div
+            className={cn(
+              "font-mono text-[11px] tracking-[0.14em] text-muted text-right",
+              "max-[1100px]:text-left",
+            )}
+          >
             <div>{ARTICLES.length} posts</div>
-            <div style={{ marginTop: 6, color: "var(--muted-2)" }}>
-              read more →
-            </div>
+            <div className="mt-1.5 text-muted-2">read more →</div>
           </div>
         </div>
         <div
-          className={`writing-list reveal-stagger ${vis ? "in" : ""}`}
+          className={cn(
+            "border-t border-line reveal-stagger",
+            vis ? "in" : undefined,
+          )}
           ref={ref}
         >
           {ARTICLES.map((a) => (
-            <a key={a.num} className="write-row" href="#">
-              <div className="write-num">{a.num}</div>
-              <div className="write-date">{a.date}</div>
-              <div className="write-title-text display">{a.title}</div>
-              <div className="write-meta">{a.meta}</div>
-              <div className="write-arrow">Read ↗</div>
+            <a
+              key={a.num}
+              className={cn(
+                "group grid grid-cols-[80px_100px_1fr_140px_100px] gap-10 items-center",
+                "py-7 border-b border-line cursor-pointer",
+                "transition-colors duration-300 hover:bg-accent/2",
+              )}
+              href="#"
+            >
+              <div className="font-mono text-[11px] text-muted-2">{a.num}</div>
+              <div className="font-mono text-[11px] text-muted">{a.date}</div>
+              <div
+                className={cn(
+                  "font-serif font-normal tracking-[-0.01em] font-features-['liga','kern']",
+                  "text-[26px] leading-[1.2]",
+                  "transition-colors duration-300 group-hover:text-accent",
+                )}
+              >
+                {a.title}
+              </div>
+              <div className="font-mono text-[11px] text-muted tracking-wider">
+                {a.meta}
+              </div>
+              <div className="justify-self-end font-mono text-[11px] text-muted">
+                Read ↗
+              </div>
             </a>
           ))}
         </div>

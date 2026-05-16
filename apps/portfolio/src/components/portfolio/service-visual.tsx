@@ -28,12 +28,12 @@ export function ServiceVisual({
           <linearGradient id="g1" x1="0" x2="1">
             <stop
               offset="0%"
-              style={{ stopColor: "var(--accent)" }}
+              style={{ stopColor: "var(--color-accent)" }}
               stopOpacity="0.15"
             />
             <stop
               offset="100%"
-              style={{ stopColor: "var(--accent)" }}
+              style={{ stopColor: "var(--color-accent)" }}
               stopOpacity="0"
             />
           </linearGradient>
@@ -49,7 +49,7 @@ export function ServiceVisual({
                 width={280}
                 height={36}
                 fill="none"
-                style={{ stroke: "var(--accent)" }}
+                style={{ stroke: "var(--color-accent)" }}
                 strokeOpacity={0.4}
               />
               <rect
@@ -62,7 +62,7 @@ export function ServiceVisual({
               <text
                 x={70 + off}
                 y={y + 22}
-                style={{ fill: "var(--cream)" }}
+                style={{ fill: "var(--color-cream)" }}
                 fontFamily="JetBrains Mono"
                 fontSize="10"
                 letterSpacing="0.1em"
@@ -79,7 +79,12 @@ export function ServiceVisual({
             </g>
           );
         })}
-        <circle cx="200" cy="80" r="3" style={{ fill: "var(--phosphor)" }}>
+        <circle
+          cx="200"
+          cy="80"
+          r="3"
+          style={{ fill: "var(--color-phosphor)" }}
+        >
           <animate
             attributeName="opacity"
             values="1;0.2;1"
@@ -100,22 +105,22 @@ export function ServiceVisual({
           width="320"
           height="380"
           fill="none"
-          style={{ stroke: "var(--line)" }}
+          style={{ stroke: "var(--color-line)" }}
         />
         <rect
           x="40"
           y="60"
           width="320"
           height="32"
-          style={{ fill: "var(--ink-2)" }}
+          style={{ fill: "var(--color-ink-2)" }}
         />
-        <circle cx="56" cy="76" r="4" style={{ fill: "var(--accent)" }} />
+        <circle cx="56" cy="76" r="4" style={{ fill: "var(--color-accent)" }} />
         <rect
           x="60"
           y="120"
           width="160"
           height="14"
-          style={{ fill: "var(--accent)" }}
+          style={{ fill: "var(--color-accent)" }}
           opacity={active ? 0.6 + t * 0.4 : 0.3}
         />
         <rect
@@ -123,7 +128,7 @@ export function ServiceVisual({
           y="142"
           width="240"
           height="6"
-          style={{ fill: "var(--muted)" }}
+          style={{ fill: "var(--color-muted)" }}
           opacity="0.5"
         />
         <rect
@@ -131,7 +136,7 @@ export function ServiceVisual({
           y="154"
           width="220"
           height="6"
-          style={{ fill: "var(--muted)" }}
+          style={{ fill: "var(--color-muted)" }}
           opacity="0.5"
         />
         <rect
@@ -140,7 +145,7 @@ export function ServiceVisual({
           width="100"
           height="100"
           fill="none"
-          style={{ stroke: "var(--line)" }}
+          style={{ stroke: "var(--color-line)" }}
         />
         <rect
           x="170"
@@ -148,7 +153,7 @@ export function ServiceVisual({
           width="100"
           height="100"
           fill="none"
-          style={{ stroke: "var(--line)" }}
+          style={{ stroke: "var(--color-line)" }}
         />
         <rect
           x="280"
@@ -156,7 +161,7 @@ export function ServiceVisual({
           width="60"
           height="100"
           fill="none"
-          style={{ stroke: "var(--accent)" }}
+          style={{ stroke: "var(--color-accent)" }}
           strokeOpacity={active ? 1 : 0.4}
         />
         <line
@@ -164,7 +169,7 @@ export function ServiceVisual({
           y1={190 + (active ? t * 100 : 0)}
           x2="340"
           y2={190 + (active ? t * 100 : 0)}
-          style={{ stroke: "var(--accent)" }}
+          style={{ stroke: "var(--color-accent)" }}
         />
       </svg>
     );
@@ -187,14 +192,14 @@ export function ServiceVisual({
               cy={y}
               r={i === 0 ? 16 : 10}
               fill="none"
-              style={{ stroke: "var(--accent)" }}
+              style={{ stroke: "var(--color-accent)" }}
               strokeOpacity={active ? 0.7 : 0.3}
             />
             <circle
               cx={x}
               cy={y}
               r={active ? 4 + Math.sin(t * Math.PI * 4 + i) * 2 : 4}
-              style={{ fill: "var(--accent)" }}
+              style={{ fill: "var(--color-accent)" }}
               opacity={active ? 0.8 : 0.3}
             />
           </g>
@@ -213,7 +218,7 @@ export function ServiceVisual({
             y1={y1}
             x2={x2}
             y2={y2}
-            style={{ stroke: "var(--line)" }}
+            style={{ stroke: "var(--color-line)" }}
             strokeDasharray="2 4"
           />
         ))}
@@ -230,17 +235,17 @@ export function ServiceVisual({
           cy="240"
           r={r + (active ? t * 8 : 0)}
           fill="none"
-          style={{ stroke: "var(--accent)" }}
+          style={{ stroke: "var(--color-accent)" }}
           strokeOpacity={0.15 + i * 0.12}
           strokeDasharray={i === 2 ? "4 6" : "none"}
         />
       ))}
-      <circle cx="200" cy="240" r="6" style={{ fill: "var(--accent)" }} />
+      <circle cx="200" cy="240" r="6" style={{ fill: "var(--color-accent)" }} />
       <text
         x="200"
         y="244"
         textAnchor="middle"
-        style={{ fill: "var(--ink)" }}
+        style={{ fill: "var(--color-ink)" }}
         fontFamily="JetBrains Mono"
         fontSize="8"
         fontWeight="700"

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 import { useReveal } from "./useReveal";
 
 function FooterClock() {
@@ -21,8 +22,8 @@ function FooterClock() {
     return () => clearInterval(id);
   }, []);
   return (
-    <span className="clock">
-      <span className="dot"></span>
+    <span className="inline-flex items-center gap-2">
+      <span className="w-[5px] h-[5px] rounded-full bg-phosphor"></span>
       {time} · Dhaka
     </span>
   );
@@ -31,76 +32,90 @@ function FooterClock() {
 export function Footer() {
   const [ref, vis] = useReveal();
   return (
-    <footer id="contact" className="footer" data-screen-label="08 Contact">
-      <div className="container" ref={ref}>
-        <div className={`footer-eyebrow eyebrow reveal ${vis ? "in" : ""}`}>
+    <footer
+      id="contact"
+      className="relative pt-[180px] pb-[60px] border-t border-line bg-[linear-gradient(180deg,transparent,color-mix(in_oklab,black_40%,transparent))]"
+      data-screen-label="08 Contact"
+    >
+      <div
+        className={"container"}
+        ref={ref}
+      >
+        <div
+          className={cn(
+            "inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted before:content-[''] before:w-6 before:h-px before:bg-muted",
+            "mb-10 reveal",
+            vis && "in",
+          )}
+        >
           Currently taking projects · Q3 2026
         </div>
-        <h2 className={`footer-mega display reveal ${vis ? "in" : ""}`}>
-          <span className="stroke">Let's build</span>
-          <br />
-          <em>something</em>
-          <span className="muted" style={{ color: "var(--muted)" }}>
-            {" "}
-            small,
+        <h2
+          className={cn(
+            "font-serif font-normal leading-[0.96] tracking-[-0.02em] font-features-['liga','kern']",
+            "text-[clamp(72px,13vw,220px)] leading-[0.88]! tracking-[-0.03em] mb-20 reveal",
+            vis && "in",
+          )}
+        >
+          <span className="[-webkit-text-stroke:1px_var(--color-cream)] text-transparent">
+            Let&apos;s build
           </span>
           <br />
-          <span className="muted" style={{ color: "var(--muted)" }}>
-            sturdy,
-          </span>{" "}
-          &amp; <em>true.</em>
+          <em className="italic text-accent">something</em>
+          <span className="text-muted"> small,</span>
+          <br />
+          <span className="text-muted">sturdy,</span> &amp;{" "}
+          <em className="italic text-accent">true.</em>
         </h2>
         <a
           href="mailto:hello@tabsircg.com"
-          className={`footer-cta reveal ${vis ? "in" : ""}`}
+          className={cn(
+            "group inline-flex items-center gap-4 px-7 py-[18px] border border-cream rounded-[2px] font-mono text-[12px] tracking-[0.14em] uppercase mb-[120px] transition-all duration-300 hover:bg-accent hover:border-accent hover:text-ink reveal",
+            vis && "in",
+          )}
         >
           hello@tabsircg.com
-          <span className="arrow">↗</span>
+          <span className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">
+            ↗
+          </span>
         </a>
-        <div className="footer-grid">
-          <div className="footer-col">
+        <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] max-[1100px]:grid-cols-2 gap-[60px] pt-[60px] border-t border-line [&_h5]:font-mono [&_h5]:text-[10px] [&_h5]:tracking-[0.16em] [&_h5]:uppercase [&_h5]:text-muted [&_h5]:mb-[18px] [&_h5]:font-normal">
+          <div>
             <h5>Studio</h5>
-            <p
-              style={{
-                fontFamily: "var(--serif)",
-                fontSize: 22,
-                lineHeight: 1.3,
-                marginBottom: 14,
-                color: "var(--cream)",
-              }}
-            >
+            <p className="block text-[14px] text-cream mb-2 leading-[1.5]">
               Tabsir CG · Independent practice
             </p>
-            <p style={{ color: "var(--muted)", fontSize: 13 }}>
+            <p className="block text-[13px] text-muted mb-2 leading-[1.5]">
               Apt 4B, Banani Road 11
               <br />
               Dhaka 1213, Bangladesh
             </p>
           </div>
-          <div className="footer-col">
+          <div className="[&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:font-mono [&_a]:text-[12px] [&_a]:text-cream [&_a]:mb-2 [&_a]:leading-[1.5] [&_a]:transition-colors [&_a]:duration-200 [&_a:hover]:text-accent">
             <h5>Direct</h5>
             <a href="mailto:hello@tabsircg.com">hello@tabsircg.com</a>
             <a href="#">
-              +880 17 ████ ████ <span className="ext">(on request)</span>
+              +880 17 ████ ████{" "}
+              <span className="text-muted-2 text-[10px]">(on request)</span>
             </a>
             <a href="#">Cal.com / tabsir</a>
           </div>
-          <div className="footer-col">
+          <div className="[&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:font-mono [&_a]:text-[12px] [&_a]:text-cream [&_a]:mb-2 [&_a]:leading-[1.5] [&_a]:transition-colors [&_a]:duration-200 [&_a:hover]:text-accent">
             <h5>Elsewhere</h5>
             <a href="#">
-              GitHub <span className="ext">↗</span>
+              GitHub <span className="text-muted-2 text-[10px]">↗</span>
             </a>
             <a href="#">
-              Read.cv <span className="ext">↗</span>
+              Read.cv <span className="text-muted-2 text-[10px]">↗</span>
             </a>
             <a href="#">
-              Bluesky <span className="ext">↗</span>
+              Bluesky <span className="text-muted-2 text-[10px]">↗</span>
             </a>
             <a href="#">
-              LinkedIn <span className="ext">↗</span>
+              LinkedIn <span className="text-muted-2 text-[10px]">↗</span>
             </a>
           </div>
-          <div className="footer-col">
+          <div className="[&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:font-mono [&_a]:text-[12px] [&_a]:text-cream [&_a]:mb-2 [&_a]:leading-[1.5] [&_a]:transition-colors [&_a]:duration-200 [&_a:hover]:text-accent">
             <h5>Work with me</h5>
             <a href="#">Full project (~6 wks +)</a>
             <a href="#">Sprint engagement (1–2 wks)</a>
@@ -108,7 +123,7 @@ export function Footer() {
             <a href="#">Code-review on call</a>
           </div>
         </div>
-        <div className="footer-bot">
+        <div className="mt-20 pt-8 border-t border-line flex justify-between items-center font-mono text-[10px] tracking-[0.1em] text-muted-2">
           <FooterClock />
           <span>© 2026 · Tabsir CG · v2.6 · No tracking</span>
           <span>↑ back to top</span>

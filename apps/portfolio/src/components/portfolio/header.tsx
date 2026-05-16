@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 import { SECTIONS } from "./sections-data";
 
 /* ===== Header ===== */
@@ -37,35 +38,41 @@ export function Header() {
   }
 
   return (
-    <header className={`header ${scrolled ? "scrolled" : ""}`}>
+    <header
+      className={cn(
+        "fixed top-[20px] left-1/2 z-[100] inline-flex -translate-x-1/2 -translate-y-2 items-center gap-5 rounded-full border py-[6px] pr-[8px] pl-[14px] whitespace-nowrap opacity-0 shadow-[0_10px_40px_color-mix(in_oklab,black_45%,transparent),inset_0_1px_0_color-mix(in_oklab,white_3%,transparent)] backdrop-blur-[20px] backdrop-saturate-[180%]",
+        "bg-ink/[0.78] transition-[border-color,background] duration-300 ease-linear",
+        "animate-header-in",
+        scrolled ? "border-accent/[0.18]" : "border-line",
+      )}
+    >
       <a
         href="#hero"
         onClick={(e) => {
           e.preventDefault();
           window.scrollTo({ top: 0, behavior: "smooth" });
         }}
-        className="brand"
+        className="flex items-center gap-2 font-serif text-[15px] tracking-[-0.01em]"
       >
-        <span style={{ fontStyle: "italic" }}>Tabsir</span>
-        <span className="brand-sep">·</span>
-        <span
-          style={{
-            fontFamily: "var(--mono)",
-            fontSize: "10px",
-            letterSpacing: "0.12em",
-            color: "var(--muted)",
-          }}
-        >
+        <span className="italic">Tabsir</span>
+        <span className="text-[11px] text-muted-2">·</span>
+        <span className="font-mono text-[10px] tracking-[0.12em] text-muted">
           CG
         </span>
       </a>
-      <nav className="nav">
+      <nav className="ml-1 flex gap-[18px] border-l border-line py-0 pr-1 pl-2 font-mono text-[10.5px] tracking-[0.06em] max-[1100px]:hidden">
         {navItems.map((it) => (
           <a
             key={it.id}
             href={`#${it.id}`}
             data-num={it.num}
-            className={active === it.id ? "active" : ""}
+            className={cn(
+              "relative inline-flex items-center gap-[5px] transition-colors duration-200",
+              "before:mr-0 before:text-[8px] before:content-[attr(data-num)]",
+              active === it.id
+                ? "text-cream before:text-accent"
+                : "text-muted before:text-muted-2 hover:text-cream",
+            )}
             onClick={(e) => {
               e.preventDefault();
               jumpTo(it.id);
@@ -77,13 +84,13 @@ export function Header() {
       </nav>
       <a
         href="#contact"
-        className="header-cta"
+        className="inline-flex items-center gap-[7px] rounded-full border border-line px-3 py-[6px] font-mono text-[9.5px] tracking-[0.08em] uppercase transition-all duration-200 hover:border-accent hover:bg-accent/[0.08]"
         onClick={(e) => {
           e.preventDefault();
           jumpTo("contact");
         }}
       >
-        <span className="pulse"></span>
+        <span className="h-[6px] w-[6px] animate-pulse-soft rounded-full bg-phosphor shadow-[0_0_8px_var(--color-phosphor)]"></span>
         Available
       </a>
     </header>

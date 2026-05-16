@@ -33,7 +33,7 @@ const WAYPOINTS: Waypoint[] = [
 export function CoordOverlay() {
   return (
     <svg
-      className="atm-coords"
+      className="absolute inset-0 w-full h-full"
       viewBox="0 0 100 220"
       preserveAspectRatio="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -43,14 +43,15 @@ export function CoordOverlay() {
         const [x, y, kind, label] = w;
         if (kind === "cross") {
           return (
-            <g key={i} stroke="rgba(232, 227, 216, 0.20)" strokeWidth="0.08">
+            <g key={i} className="stroke-cream/20" strokeWidth="0.08">
               <line x1={x - 0.7} y1={y} x2={x + 0.7} y2={y} />
               <line x1={x} y1={y - 0.7} x2={x} y2={y + 0.7} />
-              <circle cx={x} cy={y} r="0.15" fill="rgba(232, 148, 85, 0.6)" stroke="none" />
+              <circle cx={x} cy={y} r="0.15" className="fill-accent/60" stroke="none" />
               {label && (
                 <text
                   x={x + 1.2}
                   y={y + 0.3}
+                  /* Warm field-gray (#a8a18b) — no token */
                   fill="rgba(168, 161, 139, 0.35)"
                   fontFamily="JetBrains Mono, monospace"
                   fontSize="0.65"
@@ -69,7 +70,7 @@ export function CoordOverlay() {
               cx={x}
               cy={y}
               r="0.22"
-              fill="rgba(184, 216, 156, 0.30)"
+              className="fill-phosphor/30"
               stroke="none"
             />
           );
@@ -81,6 +82,7 @@ export function CoordOverlay() {
             y1={y}
             x2={x + 0.5}
             y2={y}
+            /* Warm field-gray (#a8a18b) — no token */
             stroke="rgba(168, 161, 139, 0.25)"
             strokeWidth="0.06"
           />

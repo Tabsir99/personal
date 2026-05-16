@@ -23,12 +23,5 @@
 /* Sections, in document order -------------------------------------- */
 @import url("styles/hero.css");
 @import url("styles/terminal.css");
-@import url("styles/endorsement.css");
-@import url("styles/about.css");
-@import url("styles/services.css");
 @import url("styles/work.css");
 @import url("styles/voices.css");
-@import url("styles/stack.css");
-@import url("styles/writing.css");
-@import url("styles/now.css");
-@import url("styles/footer.css");

@@ -35,13 +35,13 @@ export function ContourSVG() {
 
   return (
     <svg
-      className="atm-topo"
+      className="absolute inset-0 w-full h-full animate-atm-far-breathe motion-reduce:animate-none"
       viewBox="0 0 1600 2400"
       preserveAspectRatio="xMidYMid slice"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <g fill="none" strokeWidth="1" stroke="rgba(232, 148, 85, 0.10)">
+      <g fill="none" strokeWidth="1" className="stroke-accent/10">
         {summitA.map((r, i) => (
           <ellipse
             key={`a${i}`}
@@ -54,7 +54,7 @@ export function ContourSVG() {
           />
         ))}
       </g>
-      <g fill="none" strokeWidth="1" stroke="rgba(184, 216, 156, 0.07)">
+      <g fill="none" strokeWidth="1" className="stroke-phosphor/7">
         {summitB.map((r, i) => (
           <ellipse
             key={`b${i}`}
@@ -67,7 +67,7 @@ export function ContourSVG() {
           />
         ))}
       </g>
-      <g fill="none" strokeWidth="1" stroke="rgba(232, 148, 85, 0.08)">
+      <g fill="none" strokeWidth="1" className="stroke-accent/8">
         {summitC.map((r, i) => (
           <ellipse
             key={`c${i}`}
@@ -81,6 +81,7 @@ export function ContourSVG() {
         ))}
       </g>
       {/* a few stray triangulation lines connecting peaks */}
+      {/* Warm field-gray (#a8a18b) — no token, matches the temp prototype */}
       <g stroke="rgba(168, 161, 139, 0.06)" strokeWidth="0.5" strokeDasharray="2 6">
         <line x1="420" y1="780" x2="1240" y2="1780" />
         <line x1="420" y1="780" x2="1380" y2="380" />

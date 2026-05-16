@@ -1,100 +1,20 @@
 /* =====================================================================
-   header.css — Floating pill header.
+   header.css — Residue after Tailwind v4 conversion.
 
-   Compact. Sits inside the viewport on all sides — leaves the rail
-   uninterrupted. The `pulse` keyframe used by .header-cta .pulse is
-   defined in base.css (shared with hero/now).
+   All styling for the floating pill header now lives as utility classes
+   in header.tsx. The only thing left here is the @keyframes block: the
+   `animate-header-in` token in globals.css (@theme) references this
+   keyframe by name. Since @keyframes are globally scoped, leaving the
+   definition in this file (which is imported via styles.css) keeps the
+   animation working without touching globals.css.
    ===================================================================== */
-.header {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
-  padding: 6px 8px 6px 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 20px;
-  background: rgba(15, 14, 12, 0.78);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  opacity: 0;
-  transform: translate(-50%, -8px);
-  animation: header-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards 0.05s;
-  transition: border-color 0.3s ease, background 0.3s ease;
-  white-space: nowrap;
-}
+/* Uses the new `translate` property so it composes with Tailwind v4's
+   `-translate-x-1/2 -translate-y-2` on the pill (v4 translate utilities
+   emit `translate: …` not `transform: …`). With `forwards` fill, the
+   final state becomes `translate: -50% 0` → properly centered. */
 @keyframes header-in {
-  to { opacity: 1; transform: translate(-50%, 0); }
-}
-.header.scrolled {
-  border-color: rgba(232, 148, 85, 0.18);
-}
-.brand {
-  font-family: var(--serif);
-  font-size: 15px;
-  letter-spacing: -0.01em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.brand-sep { color: var(--muted-2); font-size: 11px; }
-
-.nav {
-  display: flex;
-  gap: 18px;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  padding: 0 4px 0 8px;
-  border-left: 1px solid var(--line);
-  margin-left: 4px;
-}
-.nav a {
-  position: relative;
-  color: var(--muted);
-  transition: color 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-.nav a::before {
-  content: attr(data-num);
-  font-size: 8px;
-  color: var(--muted-2);
-}
-.nav a:hover, .nav a.active { color: var(--cream); }
-.nav a.active::before { color: var(--accent); }
-
-.header-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 12px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transition: all 0.2s;
-}
-.header-cta:hover {
-  border-color: var(--accent);
-  background: rgba(232, 148, 85, 0.08);
-}
-.header-cta .pulse {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--phosphor);
-  box-shadow: 0 0 8px var(--phosphor);
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-@media (max-width: 1100px) {
-  .nav { display: none; }
+  to {
+    opacity: 1;
+    translate: -50% 0;
+  }
 }

@@ -72,7 +72,10 @@ export function ScrambleWord({
   }, [idx]);
 
   return (
-    <span className="scramble-word" aria-live="polite">
+    <span
+      aria-live="polite"
+      className="inline-block min-w-[11ch] whitespace-nowrap [text-shadow:0_0_22px_color-mix(in_oklab,var(--color-accent)_25%,transparent)]"
+    >
       {display}
     </span>
   );

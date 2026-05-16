@@ -1,7 +1,12 @@
 "use client";
 import { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 import { ContourSVG } from "./contour-svg";
 import { CoordOverlay } from "./coord-overlay";
+
+/* Shared plane class group — taller than viewport so parallax never reveals
+   an empty edge. The parallax rAF loop overrides `transform` per frame. */
+const PLANE = "absolute left-0 right-0 top-[-20vh] h-[240vh] [will-change:transform]";
 
 /* =====================================================================
    Atmosphere — parallax background story.
@@ -150,34 +155,81 @@ export function Atmosphere() {
     };
   }, []);
 
+  /* Shared orb base: position + circular shape + `will-change`. Per-orb
+     size, placement, radial-gradient paint and animation are appended. */
+  const ORB = "absolute rounded-full [will-change:transform]";
+
   return (
-    <div className="atm" aria-hidden="true">
-      <div className="atm-base"></div>
+    <div
+      className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-ink"
+      aria-hidden="true"
+    >
+      {/* Base wash — top-to-bottom luminance shift; bottom is fractionally
+          warmer/lighter than top so content sits ON the page. */}
+      <div
+        className={cn(
+          "absolute inset-0",
+          "bg-[radial-gradient(120%_80%_at_50%_110%,color-mix(in_oklab,var(--color-accent)_4.5%,transparent),transparent_55%),radial-gradient(90%_70%_at_50%_-10%,color-mix(in_oklab,var(--color-ink-3)_55%,transparent),transparent_65%),linear-gradient(180deg,#0c0b0a_0%,#100e0c_50%,#14110e_100%)]",
+        )}
+      ></div>
 
       {/* Far: topographic contours — deepest plane */}
-      <div className="atm-plane atm-far" ref={farRef}>
+      <div className={cn(PLANE, "opacity-85")} ref={farRef}>
         <ContourSVG />
       </div>
 
-      {/* Subtle section-driven tint */}
-      <div className="atm-tint" ref={tintRef}></div>
+      {/* Subtle section-driven tint (background set per-frame from JS) */}
+      <div className="absolute inset-0 bg-transparent" ref={tintRef}></div>
 
       {/* Mid: drifting signal-fire orbs */}
-      <div className="atm-plane atm-mid" ref={midRef}>
-        <div className="atm-orb atm-orb-1"></div>
-        <div className="atm-orb atm-orb-2"></div>
-        <div className="atm-orb atm-orb-3"></div>
-        <div className="atm-orb atm-orb-4"></div>
+      <div className={PLANE} ref={midRef}>
+        <div
+          className={cn(
+            ORB,
+            "w-[720px] h-[720px] top-[4vh] left-[-160px]",
+            "bg-[radial-gradient(circle,color-mix(in_oklab,var(--color-accent)_22%,transparent)_0%,color-mix(in_oklab,var(--color-accent)_10%,transparent)_30%,transparent_70%)]",
+            "animate-atm-orb-drift-a motion-reduce:animate-none",
+          )}
+        ></div>
+        <div
+          className={cn(
+            ORB,
+            "w-[620px] h-[620px] top-[60vh] right-[-120px]",
+            "bg-[radial-gradient(circle,color-mix(in_oklab,var(--color-phosphor)_12%,transparent)_0%,color-mix(in_oklab,var(--color-phosphor)_5%,transparent)_30%,transparent_70%)]",
+            "animate-atm-orb-drift-b motion-reduce:animate-none",
+          )}
+        ></div>
+        <div
+          className={cn(
+            ORB,
+            "w-[860px] h-[860px] top-[130vh] left-[28vw]",
+            "bg-[radial-gradient(circle,color-mix(in_oklab,var(--color-accent-2)_14%,transparent)_0%,color-mix(in_oklab,var(--color-accent-2)_6%,transparent)_30%,transparent_70%)]",
+            "animate-atm-orb-drift-c motion-reduce:animate-none",
+          )}
+        ></div>
+        <div
+          className={cn(
+            ORB,
+            "w-[560px] h-[560px] top-[195vh] right-[16vw]",
+            "bg-[radial-gradient(circle,color-mix(in_oklab,var(--color-accent)_18%,transparent)_0%,color-mix(in_oklab,var(--color-accent)_7%,transparent)_30%,transparent_70%)]",
+            "animate-[atm-orb-drift-a_32s_ease-in-out_infinite_reverse] motion-reduce:animate-none",
+          )}
+        ></div>
       </div>
 
       {/* Near: coordinate waypoints */}
-      <div className="atm-plane atm-near" ref={nearRef}>
+      <div className={cn(PLANE, "opacity-85")} ref={nearRef}>
         <CoordOverlay />
       </div>
 
-      {/* Optics layer (fixed): grain + vignette */}
+      {/* Optics layer (fixed): grain (CSS residue — SVG data-URI) + vignette */}
       <div className="atm-grain"></div>
-      <div className="atm-vignette"></div>
+      <div
+        className={cn(
+          "absolute inset-0 pointer-events-none",
+          "bg-[radial-gradient(ellipse_at_center,transparent_55%,color-mix(in_oklab,black_35%,transparent)_100%),radial-gradient(ellipse_at_top,transparent_70%,color-mix(in_oklab,black_25%,transparent)_100%)]",
+        )}
+      ></div>
     </div>
   );
 }
