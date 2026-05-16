@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSiteConfigStore } from "@/stores/SiteConfigStore";
 import Panel from "./Panel";
-import { Label } from "@/components/ui/label";
+import { Eyebrow } from "@/components/ui/Eyebrow";
 import HeightTransition from "./HeightTransition";
 
 export default function NowReadingPanel() {
@@ -70,9 +70,11 @@ export default function NowReadingPanel() {
       }
     >
       <HeightTransition show={isEmpty}>
-        <div className="flex flex-col items-start gap-2 rounded-md border border-dashed border-foreground/[0.08] px-4 py-6">
-          <Label>Empty</Label>
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col items-start gap-2 rounded-md border border-foreground/[0.06] bg-foreground/[0.02] px-4 py-6">
+          <Eyebrow tone="muted" family="mono">
+            Empty
+          </Eyebrow>
+          <p className="text-sm leading-relaxed text-muted-foreground">
             Nothing pinned. Add a book and it shows up in the /blog sticker.
           </p>
         </div>
@@ -98,7 +100,7 @@ export default function NowReadingPanel() {
                     ].join(" ")}
                   />
                   <div className="flex items-center gap-3 pl-2">
-                    <span className="w-5 text-[11px] tabular-nums text-foreground/40">
+                    <span className="w-5 font-mono text-[11px] tabular-nums text-foreground/40">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <Button

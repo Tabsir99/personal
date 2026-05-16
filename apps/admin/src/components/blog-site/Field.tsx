@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Label } from "@/components/ui/label";
+
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { cn } from "@/lib/utils";
 
 export default function Field({
   label,
@@ -17,20 +19,20 @@ export default function Field({
   return (
     <div className="block">
       <div className="mb-2 flex items-baseline justify-between gap-3">
-        <Label className={edited ? "text-primary" : undefined}>{label}</Label>
+        <Eyebrow tone={edited ? "primary" : "muted"}>{label}</Eyebrow>
         {hint && (
-          <span className="text-[10px] tabular-nums text-foreground/40">
+          <span className="font-mono text-[10px] tabular-nums text-foreground/40">
             {hint}
           </span>
         )}
       </div>
       <div className="relative">
         <span
-          aria-hidden
-          className={[
-            "pointer-events-none absolute -left-3 top-1 bottom-1 w-px bg-primary transition-opacity duration-200 ease-out",
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute -left-3 top-1 bottom-1 w-px bg-primary transition-opacity duration-160 ease-out",
             edited ? "opacity-100" : "opacity-0",
-          ].join(" ")}
+          )}
         />
         {children}
       </div>

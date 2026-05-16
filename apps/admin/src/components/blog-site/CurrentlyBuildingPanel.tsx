@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useSiteConfigStore } from "@/stores/SiteConfigStore";
 import Panel from "./Panel";
 import Field from "./Field";
-import { Label } from "@/components/ui/label";
+import { Eyebrow } from "@/components/ui/Eyebrow";
 import HeightTransition from "./HeightTransition";
 
 export default function CurrentlyBuildingPanel() {
@@ -70,23 +70,20 @@ export default function CurrentlyBuildingPanel() {
         </div>
 
         <div>
-          <div className="mb-2 flex items-center gap-2">
-            <Label>Preview</Label>
-            <span className="text-[10px] text-foreground/30">
+          <div className="mb-2 flex items-baseline gap-2">
+            <Eyebrow tone="muted">Preview</Eyebrow>
+            <Eyebrow tone="muted" family="mono">
               · rendered as /blog sees it
-            </span>
+            </Eyebrow>
           </div>
           <div className="rounded-md border border-foreground/[0.06] bg-background/60 p-4">
             <HeightTransition show={previewVisible}>
-              <div
-                className="text-[11px] uppercase text-muted-foreground"
-                style={{ letterSpacing: "0.12em" }}
-              >
+              <Eyebrow tone="muted" family="mono">
                 <span className="text-foreground/40">// </span>currently building
-              </div>
+              </Eyebrow>
               <div className="mt-3 text-sm leading-relaxed text-foreground/85">
                 {draft.code && (
-                  <span className="rounded bg-foreground/[0.04] px-1.5 py-0.5 text-[12px] text-foreground/80">
+                  <span className="rounded-sm bg-foreground/[0.04] px-1.5 py-0.5 font-mono text-xs text-foreground/80">
                     {draft.code}
                   </span>
                 )}
@@ -94,18 +91,15 @@ export default function CurrentlyBuildingPanel() {
                 {draft.body}
               </div>
               {draft.linkHref && (
-                <div className="mt-3 inline-block border-b border-foreground/30 pb-px text-[12px] text-foreground/80">
+                <div className="mt-3 inline-block border-b border-foreground/30 pb-px font-mono text-xs text-foreground/80">
                   {draft.linkLabel || draft.linkHref}
                 </div>
               )}
             </HeightTransition>
             <HeightTransition show={!previewVisible}>
-              <span
-                className="text-[11px] uppercase text-foreground/40"
-                style={{ letterSpacing: "0.12em" }}
-              >
+              <Eyebrow tone="muted" family="mono">
                 Hidden · neither code nor body set
-              </span>
+              </Eyebrow>
             </HeightTransition>
           </div>
         </div>
