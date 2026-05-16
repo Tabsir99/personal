@@ -1,10 +1,7 @@
-"use client";
 import { cn } from "@/lib/utils";
-import { useReveal } from "./useReveal";
 
 /* ===== About ===== */
 export function About() {
-  const [ref, vis] = useReveal({ threshold: 0.1 });
   const text =
     "I write code for the messy middle — where product specs collide with reality. I care about response budgets, accessible focus rings, sensible primary keys, and shipping things small enough to fix on a Friday. Two years in, mostly across SaaS dashboards, marketplaces, and a handful of internal tools nobody ever sees but everyone depends on.";
   const words = text.split(" ");
@@ -19,9 +16,8 @@ export function About() {
             "grid items-start gap-[120px]",
             "grid-cols-[1fr_2fr] max-[1100px]:grid-cols-1 max-[1100px]:gap-10",
           )}
-          ref={ref}
         >
-          <div className={cn("reveal", vis ? "in" : undefined)}>
+          <div data-reveal>
             <div
               className={cn(
                 "inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted",
@@ -71,8 +67,8 @@ export function About() {
             </div>
           </div>
           <div
+            data-reveal-words
             className={cn(
-              "word-reveal",
               "font-serif text-[clamp(28px,3.2vw,42px)] leading-[1.22] tracking-[-0.015em] text-cream",
             )}
           >
@@ -83,8 +79,8 @@ export function About() {
               return (
                 <span
                   key={i}
-                  className={cn("word", vis ? "on" : undefined)}
-                  style={{ transitionDelay: `${0.3 + i * 0.025}s` }}
+                  className="word"
+                  style={{ "--word-i": i } as React.CSSProperties}
                 >
                   {isAccent ? <em className="text-accent italic">{w}</em> : w}
                 </span>

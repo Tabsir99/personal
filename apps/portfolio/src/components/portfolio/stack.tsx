@@ -1,6 +1,4 @@
-"use client";
 import { cn } from "@/lib/utils";
-import { useReveal } from "./useReveal";
 
 /* =====================================================================
    Tech stack — categories of tools, with proficiency dots.
@@ -50,7 +48,6 @@ const STACK_CATEGORIES: { label: string; items: [string, number][] }[] = [
 ];
 
 export function Stack() {
-  const [ref, vis] = useReveal();
   return (
     <section
       id="stack"
@@ -102,17 +99,16 @@ export function Stack() {
           </p>
         </div>
         <div
-          ref={ref}
+          data-reveal-stagger
           className={cn(
             "grid grid-cols-4 border-t border-l border-line",
             "max-[1100px]:grid-cols-2",
-            "reveal-stagger",
-            vis ? "in" : undefined,
           )}
         >
           {STACK_CATEGORIES.map((cat, i) => (
             <div
               key={i}
+              style={{ "--i": i } as React.CSSProperties}
               className={cn(
                 "border-r border-b border-line",
                 "px-6 py-7 min-h-[220px]",

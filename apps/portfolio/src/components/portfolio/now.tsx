@@ -1,28 +1,13 @@
-"use client";
 import { cn } from "@/lib/utils";
-import { useReveal } from "./useReveal";
 
 /* ===== Now ===== */
 
 export function Now() {
-  const [ref, vis] = useReveal();
   return (
-    <section
-      id="now"
-      className="relative py-40"
-      data-screen-label="07 Now"
-    >
+    <section id="now" className="relative py-40" data-screen-label="07 Now">
       <div className={"container"}>
-        <div
-          className="grid items-start gap-[100px] grid-cols-[1fr_1.4fr] max-[1100px]:grid-cols-1"
-          ref={ref}
-        >
-          <div
-            className={cn(
-              "sticky top-[120px] reveal",
-              vis ? "in" : undefined,
-            )}
-          >
+        <div className="grid items-start gap-[100px] grid-cols-[1fr_1.4fr] max-[1100px]:grid-cols-1">
+          <div data-reveal className="sticky top-[120px]">
             <div
               className={cn(
                 "inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted before:content-[''] before:w-6 before:h-px before:bg-muted",
@@ -46,13 +31,11 @@ export function Now() {
               Updated · May 2026
             </div>
           </div>
-          <div
-            className={cn(
-              "flex flex-col gap-10 reveal-stagger",
-              vis ? "in" : undefined,
-            )}
-          >
-            <div className="border-t border-line pt-7 grid grid-cols-[140px_1fr] gap-10">
+          <div data-reveal-stagger className="flex flex-col gap-10">
+            <div
+              style={{ "--i": 0 } as React.CSSProperties}
+              className="border-t border-line pt-7 grid grid-cols-[140px_1fr] gap-10"
+            >
               <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
                 Building
               </div>
@@ -66,7 +49,10 @@ export function Now() {
                 </span>
               </div>
             </div>
-            <div className="border-t border-line pt-7 grid grid-cols-[140px_1fr] gap-10">
+            <div
+              style={{ "--i": 1 } as React.CSSProperties}
+              className="border-t border-line pt-7 grid grid-cols-[140px_1fr] gap-10"
+            >
               <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
                 Working with
               </div>
@@ -77,7 +63,10 @@ export function Now() {
                 platform.
               </div>
             </div>
-            <div className="border-t border-line pt-7 grid grid-cols-[140px_1fr] gap-10">
+            <div
+              style={{ "--i": 2 } as React.CSSProperties}
+              className="border-t border-line pt-7 grid grid-cols-[140px_1fr] gap-10"
+            >
               <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
                 Reading
               </div>
@@ -92,7 +81,10 @@ export function Now() {
                 <span className="muted"> newsletter, faithfully.</span>
               </div>
             </div>
-            <div className="border-t border-line pt-7 grid grid-cols-[140px_1fr] gap-10">
+            <div
+              style={{ "--i": 3 } as React.CSSProperties}
+              className="border-t border-line pt-7 grid grid-cols-[140px_1fr] gap-10"
+            >
               <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
                 Learning
               </div>
@@ -101,7 +93,10 @@ export function Now() {
                 Re-learning DSP for an audio side-project nobody asked for.
               </div>
             </div>
-            <div className="border-t border-line pt-7 grid grid-cols-[140px_1fr] gap-10">
+            <div
+              style={{ "--i": 4 } as React.CSSProperties}
+              className="border-t border-line pt-7 grid grid-cols-[140px_1fr] gap-10"
+            >
               <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
                 Listening
               </div>
@@ -114,7 +109,10 @@ export function Now() {
                 </span>
               </div>
             </div>
-            <div className="border-t border-line pt-7 grid grid-cols-[140px_1fr] gap-10">
+            <div
+              style={{ "--i": 5 } as React.CSSProperties}
+              className="border-t border-line pt-7 grid grid-cols-[140px_1fr] gap-10"
+            >
               <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
                 Not doing
               </div>
@@ -123,7 +121,10 @@ export function Now() {
                 like scope creep. Coffee after 4pm.
               </div>
             </div>
-            <div className="font-mono text-[10px] text-muted-2 mt-3 tracking-widest">
+            <div
+              style={{ "--i": 6 } as React.CSSProperties}
+              className="font-mono text-[10px] text-muted-2 mt-3 tracking-widest"
+            >
               / inspired by Derek Sivers · /now-page movement
             </div>
           </div>

@@ -1,6 +1,4 @@
-"use client";
 import { cn } from "@/lib/utils";
-import { useReveal } from "./useReveal";
 
 /* ===== Endorsement =====
    Sits between the Hero and the About section as an early-page hook —
@@ -10,20 +8,18 @@ import { useReveal } from "./useReveal";
    typography on the page so it reads as a real pull quote.
    --------------------------------------------------------------------- */
 export function Endorsement() {
-  const [ref, vis] = useReveal<HTMLElement>({ threshold: 0.2 });
   return (
     <section
       id="endorsement"
+      data-reveal
       className={cn(
         "relative pt-24 pb-20 max-[1100px]:pt-[72px] max-[1100px]:pb-16",
         // Hairline rules bracketing the strip — left=rail-gutter (180px),
         // right=gutter (96px). Matches base.css :root layout vars.
         "before:content-[''] before:absolute before:top-0 before:left-(--rail-gutter) before:right-(--gutter) before:h-px before:bg-line",
         "after:content-[''] after:absolute after:bottom-0 after:left-(--rail-gutter) after:right-(--gutter) after:h-px after:bg-line",
-        vis && "in",
       )}
       data-screen-label="01a Endorsement"
-      ref={ref}
       aria-label="Client testimonial from Zohaib at DataZoro, verified on Upwork"
     >
       <div className={"container"}>

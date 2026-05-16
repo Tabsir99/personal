@@ -1,7 +1,8 @@
-"use client";
-
 import * as React from "react";
 
+/* Server-component passthrough. Marks the `<article>` with `data-reveal`
+   so the global ScrollObserver script adds `is-in` on viewport entry;
+   blog.css handles the fade-up. */
 export default function InViewArticle({
   className = "",
   style,
@@ -11,34 +12,8 @@ export default function InViewArticle({
   style?: React.CSSProperties;
   children: React.ReactNode;
 }) {
-  const ref = React.useRef<HTMLElement | null>(null);
-  const [seen, setSeen] = React.useState(false);
-
-  React.useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            setSeen(true);
-            io.disconnect();
-            break;
-          }
-        }
-      },
-      { threshold: 0.2 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
   return (
-    <article
-      ref={ref}
-      className={`${className}${seen ? " is-in" : ""}`}
-      style={style}
-    >
+    <article data-reveal className={className} style={style}>
       {children}
     </article>
   );

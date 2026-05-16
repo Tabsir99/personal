@@ -112,7 +112,7 @@ export function Services() {
       <div ref={wrapRef} className="relative h-[400vh]">
         <div className="sticky top-0 flex h-screen items-center overflow-hidden">
           <div className="mx-auto grid w-full max-w-(--max-w) grid-cols-[0.85fr_1fr] items-center gap-16 pr-(--gutter) pl-(--rail-gutter) max-[1100px]:grid-cols-[1fr] max-[1100px]:gap-10">
-            <div className="sticky top-0">
+            <div data-reveal className="sticky top-0">
               <div className="mb-6 font-mono text-[11px] tracking-[0.16em] text-muted">
                 <span className="text-accent">
                   {String(step + 1).padStart(2, "0")}

@@ -121,64 +121,87 @@
     margin: 0 0 8px auto;
   }
 
-  /* ===== Reveal helpers ===== */
-  .reveal {
-    opacity: 0;
-    transform: translateY(24px);
-    transition:
-      opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  /* ===== Reveal helpers — class-toggle, driven by ScrollObserver =====
+     [components/ui/ScrollObserver.tsx](apps/portfolio/src/components/ui/ScrollObserver.tsx)
+     adds `is-in` to any element carrying one of the three data attrs
+     when it enters the viewport. CSS does the rest.
+
+     Note: uses `animation` (not `transition`) for the entry effect.
+     Tailwind utilities in `@layer utilities` can override a `transition`
+     property in `@layer components` (e.g. `transition-[background]` on
+     a Stack card replaces our opacity/translate transition). Using a
+     keyframe animation sidesteps the conflict — animations layer
+     alongside transitions, they don't share the same property slot. */
+  @keyframes reveal-in {
+    from {
+      opacity: 0;
+      translate: 0 24px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
   }
-  .reveal.in {
-    opacity: 1;
-    transform: translateY(0);
+  [data-reveal] {
+    opacity: 0;
+    translate: 0 24px;
+  }
+  [data-reveal].is-in {
+    animation: reveal-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
-  .reveal-stagger > * {
+  /* Stagger — each child carries inline style="--i: N" which drives the
+     per-child animation-delay. All children flip simultaneously when
+     the parent gets `is-in`; the delay is what cascades them. */
+  @keyframes reveal-stagger-in {
+    from {
+      opacity: 0;
+      translate: 0 20px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+  [data-reveal-stagger] > * {
     opacity: 0;
-    transform: translateY(20px);
-    transition:
-      opacity 0.7s ease,
-      transform 0.7s ease;
+    translate: 0 20px;
   }
-  .reveal-stagger.in > * {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .reveal-stagger.in > *:nth-child(1) {
-    transition-delay: 0.05s;
-  }
-  .reveal-stagger.in > *:nth-child(2) {
-    transition-delay: 0.12s;
-  }
-  .reveal-stagger.in > *:nth-child(3) {
-    transition-delay: 0.19s;
-  }
-  .reveal-stagger.in > *:nth-child(4) {
-    transition-delay: 0.26s;
-  }
-  .reveal-stagger.in > *:nth-child(5) {
-    transition-delay: 0.33s;
-  }
-  .reveal-stagger.in > *:nth-child(6) {
-    transition-delay: 0.4s;
-  }
-  .reveal-stagger.in > *:nth-child(7) {
-    transition-delay: 0.47s;
-  }
-  .reveal-stagger.in > *:nth-child(8) {
-    transition-delay: 0.54s;
+  [data-reveal-stagger].is-in > * {
+    animation: reveal-stagger-in 0.7s cubic-bezier(0.22, 1, 0.36, 1)
+      forwards;
+    animation-delay: calc(var(--i, 0) * 70ms);
   }
 
-  /* word-by-word reveal */
-  .word-reveal .word {
+  /* Word-by-word — each .word carries inline style="--word-i: N".
+     Delay formula mirrors the original useReveal pattern:
+     `${0.3 + i * 0.025}s`. */
+  @keyframes word-on {
+    from {
+      opacity: 0.15;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  [data-reveal-words] .word {
     display: inline-block;
-    opacity: 0.15;
-    transition: opacity 0.6s ease;
     margin-right: 0.22em;
+    opacity: 0.15;
   }
-  .word-reveal .word.on {
-    opacity: 1;
+  [data-reveal-words].is-in .word {
+    animation: word-on 0.6s ease forwards;
+    animation-delay: calc(300ms + var(--word-i, 0) * 25ms);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal],
+    [data-reveal-stagger] > *,
+    [data-reveal-words] .word {
+      animation: none;
+      opacity: 1;
+      translate: none;
+    }
   }
 }
 

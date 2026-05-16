@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { useReveal } from "./useReveal";
 import { ProjectStill } from "./project-still";
 import { cn } from "@/lib/utils";
 
@@ -189,7 +188,28 @@ const LINK_BG: Record<string, string> = {
 };
 
 export function Work() {
-  const [revealRef, vis] = useReveal<HTMLElement>({ threshold: 0.18 });
+  // One-shot visibility flag — gates the auto-advance RAF so it doesn't burn
+  // CPU while the section is off-screen. The reveal-style fade-in on the four
+  // sub-blocks (header, stage, rows, meta) still uses `vis` to toggle their
+  // opacity/translate; conversion to a CSS view-timeline would require per-
+  // element ranges that don't map cleanly to the current row-cascade.
+  const revealRef = useRef<HTMLElement>(null);
+  const [vis, setVis] = useState(false);
+  useEffect(() => {
+    if (!revealRef.current) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setVis(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.18, rootMargin: "0px 0px -10% 0px" },
+    );
+    io.observe(revealRef.current);
+    return () => io.disconnect();
+  }, []);
+
   const [active, setActive] = useState(0);
   const [stillIdx, setStillIdx] = useState(0);
   const [tick, setTick] = useState(0); // 0..1 auto-advance progress

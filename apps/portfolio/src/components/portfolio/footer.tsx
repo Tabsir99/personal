@@ -1,30 +1,27 @@
-"use client";
 import { cn } from "@/lib/utils";
-import { useReveal } from "./useReveal";
 
 export function Footer() {
-  const [ref, vis] = useReveal({ threshold: 0.4 });
   return (
     <footer
       id="contact"
       className="relative pt-[180px] pb-[60px] border-t border-line bg-[linear-gradient(180deg,transparent,color-mix(in_oklab,black_40%,transparent))]"
       data-screen-label="08 Contact"
     >
-      <div className={"container"} ref={ref}>
+      <div className={"container"}>
         <div
+          data-reveal
           className={cn(
             "inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted before:content-[''] before:w-6 before:h-px before:bg-muted",
-            "mb-10 reveal",
-            vis && "in",
+            "mb-10",
           )}
         >
           Currently taking projects · Q3 2026
         </div>
         <h2
+          data-reveal
           className={cn(
             "font-serif font-normal leading-[0.96] tracking-[-0.02em] font-features-['liga','kern']",
-            "text-[clamp(72px,13vw,220px)] leading-[0.88]! tracking-[-0.03em] mb-20 reveal",
-            vis && "in",
+            "text-[clamp(72px,13vw,220px)] leading-[0.88]! tracking-[-0.03em] mb-20",
           )}
         >
           <span className="[-webkit-text-stroke:1px_var(--color-cream)] text-transparent">
@@ -39,10 +36,8 @@ export function Footer() {
         </h2>
         <a
           href="mailto:hello@tabsircg.com"
-          className={cn(
-            "group inline-flex items-center gap-4 px-7 py-[18px] border border-cream rounded-[2px] font-mono text-[12px] tracking-[0.14em] uppercase mb-[120px] transition-all duration-300 hover:bg-accent hover:border-accent hover:text-ink reveal",
-            vis && "in",
-          )}
+          data-reveal
+          className="group inline-flex items-center gap-4 px-7 py-[18px] border border-cream rounded-[2px] font-mono text-[12px] tracking-[0.14em] uppercase mb-[120px] transition-all duration-300 hover:bg-accent hover:border-accent hover:text-ink"
         >
           hello@tabsircg.com
           <span className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">

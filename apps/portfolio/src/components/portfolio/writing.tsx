@@ -1,6 +1,4 @@
-"use client";
 import { cn } from "@/lib/utils";
-import { useReveal } from "./useReveal";
 
 /* ===== Writing ===== */
 
@@ -38,7 +36,6 @@ const ARTICLES = [
 ];
 
 export function Writing() {
-  const [ref, vis] = useReveal();
   return (
     <section id="writing" data-screen-label="06 Writing">
       <div className={"container"}>
@@ -69,16 +66,11 @@ export function Writing() {
             <div className="mt-1.5 text-muted-2">read more →</div>
           </div>
         </div>
-        <div
-          className={cn(
-            "border-t border-line reveal-stagger",
-            vis ? "in" : undefined,
-          )}
-          ref={ref}
-        >
-          {ARTICLES.map((a) => (
+        <div data-reveal-stagger className="border-t border-line">
+          {ARTICLES.map((a, i) => (
             <a
               key={a.num}
+              style={{ "--i": i } as React.CSSProperties}
               className={cn(
                 "group grid grid-cols-[80px_100px_1fr_140px_100px] gap-10 items-center",
                 "py-7 border-b border-line cursor-pointer",
