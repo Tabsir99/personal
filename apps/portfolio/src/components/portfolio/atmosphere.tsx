@@ -6,7 +6,7 @@ import { CoordOverlay } from "./coord-overlay";
 
 /* Shared plane class group — taller than viewport so parallax never reveals
    an empty edge. The parallax rAF loop overrides `transform` per frame. */
-const PLANE = "absolute left-0 right-0 top-[-20vh] h-[240vh] [will-change:transform]";
+const PLANE = "absolute left-0 right-0 top-[-20vh] h-[240vh] will-change-transform";
 
 /* =====================================================================
    Atmosphere — parallax background story.
@@ -157,7 +157,7 @@ export function Atmosphere() {
 
   /* Shared orb base: position + circular shape + `will-change`. Per-orb
      size, placement, radial-gradient paint and animation are appended. */
-  const ORB = "absolute rounded-full [will-change:transform]";
+  const ORB = "absolute rounded-full will-change-transform";
 
   return (
     <div

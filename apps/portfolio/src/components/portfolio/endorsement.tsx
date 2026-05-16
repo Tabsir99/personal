@@ -86,7 +86,7 @@ export function Endorsement() {
             >
               <span
                 className={cn(
-                  "inline-flex items-center justify-center w-4 h-4 rounded-full bg-phosphor text-ink text-[9px] font-bold leading-none flex-shrink-0",
+                  "inline-flex items-center justify-center w-4 h-4 rounded-full bg-phosphor text-ink text-[9px] font-bold leading-none shrink-0",
                   "[box-shadow:0_0_12px_color-mix(in_oklab,var(--color-phosphor)_32%,transparent)]",
                 )}
                 aria-hidden="true"
@@ -117,13 +117,13 @@ export function Endorsement() {
               className={cn(
                 "font-serif italic text-cream",
                 "text-[clamp(26px,2.8vw,40px)] leading-[1.22] tracking-[-0.015em]",
-                "[text-wrap:balance]",
+                "text-balance",
               )}
             >
               <span
                 className={cn(
                   "absolute font-serif not-italic text-accent leading-none pointer-events-none",
-                  "left-[clamp(24px,3vw,48px)] -ml-[0.55em] -mt-[0.15em] text-[1.6em] opacity-50",
+                  "left-[clamp(24px,3vw,48px)] ml-[-0.55em] mt-[-0.15em] text-[1.6em] opacity-50",
                   "max-[1100px]:left-5",
                 )}
                 aria-hidden="true"
@@ -135,7 +135,7 @@ export function Endorsement() {
               <em
                 className={cn(
                   "italic text-accent px-0.5",
-                  "[background-image:linear-gradient(transparent_78%,color-mix(in_oklab,var(--color-accent)_15%,transparent)_78%,color-mix(in_oklab,var(--color-accent)_15%,transparent)_100%)]",
+                  "bg-[linear-gradient(transparent_78%,color-mix(in_oklab,var(--color-accent)_15%,transparent)_78%,color-mix(in_oklab,var(--color-accent)_15%,transparent)_100%)]",
                 )}
               >
                 communication

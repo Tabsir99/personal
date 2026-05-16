@@ -89,15 +89,15 @@ export function Hero() {
         <div
           ref={glowRef}
           className={cn(
-            "absolute -inset-[10%] opacity-50 transition-opacity duration-[400ms] ease-[ease]",
+            "absolute inset-[-10%] opacity-50 transition-opacity duration-400 ease-[ease]",
             "bg-[radial-gradient(520px_circle_at_var(--gx,40%)_var(--gy,50%),color-mix(in_oklab,var(--color-accent)_14%,transparent),color-mix(in_oklab,var(--color-accent)_4%,transparent)_40%,transparent_70%)]",
           )}
         ></div>
         <div
           className={cn(
             "absolute inset-0",
-            "bg-[linear-gradient(to_right,color-mix(in_oklab,var(--color-cream)_4%,transparent)_1px,transparent_1px)] bg-[size:12.5%_100%]",
-            "[mask-image:radial-gradient(ellipse_at_60%_50%,black_30%,transparent_75%)]",
+            "bg-[linear-gradient(to_right,color-mix(in_oklab,var(--color-cream)_4%,transparent)_1px,transparent_1px)] bg-size-[12.5%_100%]",
+            "mask-[radial-gradient(ellipse_at_60%_50%,black_30%,transparent_75%)]",
             "[-webkit-mask-image:radial-gradient(ellipse_at_60%_50%,black_30%,transparent_75%)]",
           )}
         ></div>
@@ -106,7 +106,7 @@ export function Hero() {
       <div
         className={cn(
           "container",
-          "z-[1] flex h-full flex-col justify-between pt-24 pb-9",
+          "z-1 flex h-full flex-col justify-between pt-24 pb-9",
           "max-[1100px]:pt-[110px] max-[1100px]:pb-14",
         )}
       >

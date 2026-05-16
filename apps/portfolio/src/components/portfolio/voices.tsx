@@ -142,7 +142,7 @@ export function Voices() {
     >
       <span
         className={cn(
-          "pointer-events-none absolute right-8 z-[5] max-w-[160px] text-right font-serif italic text-[13px] tracking-[0.005em] leading-[1.35] text-accent opacity-60 max-[1100px]:hidden before:content-[''] before:block before:w-3.5 before:h-px before:bg-accent before:opacity-45 before:mb-2 before:ml-auto",
+          "pointer-events-none absolute right-8 z-5 max-w-[160px] text-right font-serif italic text-[13px] tracking-[0.005em] leading-[1.35] text-accent opacity-60 max-[1100px]:hidden before:content-[''] before:block before:w-3.5 before:h-px before:bg-accent before:opacity-45 before:mb-2 before:ml-auto",
           "top-[260px]",
         )}
       >
@@ -177,7 +177,7 @@ export function Voices() {
             metadata loads to skip past any black opening frame. The
             poster overlay sits on top until the user clicks play. */}
         <div
-          className="relative w-full aspect-[16/9] bg-black border border-line rounded-[4px] overflow-hidden scale-[0.72] [transform-origin:center_60%] transition-[border-color] duration-500 ease-[ease] will-change-transform hover:border-accent/45"
+          className="relative w-full aspect-video bg-black border border-line rounded-[4px] overflow-hidden scale-[0.72] origin-[center_60%] transition-[border-color] duration-500 ease-[ease] will-change-transform hover:border-accent/45"
           ref={frameRef}
         >
           <video
@@ -196,7 +196,7 @@ export function Voices() {
 
           {!started && (
             <button
-              className="group absolute inset-0 border-0 p-0 m-0 bg-transparent cursor-pointer block text-left z-[2]"
+              className="group absolute inset-0 border-0 p-0 m-0 bg-transparent cursor-pointer block text-left z-2"
               onClick={start}
               aria-label="Play testimonial"
             >
@@ -226,7 +226,7 @@ export function Voices() {
         {started && (
           <div className="flex items-center gap-4 px-4 py-3 mt-3.5 border border-line bg-ink-2/60 rounded-[3px] opacity-0 animate-voices-fade max-[1100px]:flex-wrap max-[1100px]:gap-2.5 max-[1100px]:p-2.5">
             <button
-              className="font-mono text-[12px] tracking-[0.16em] uppercase text-cream-2 px-2.5 py-1.5 border border-line rounded-[2px] bg-transparent transition-all duration-[250ms] ease-[ease] inline-flex items-center justify-center min-w-9 hover:border-accent hover:text-accent"
+              className="font-mono text-[12px] tracking-[0.16em] uppercase text-cream-2 px-2.5 py-1.5 border border-line rounded-[2px] bg-transparent transition-all duration-250 ease-[ease] inline-flex items-center justify-center min-w-9 hover:border-accent hover:text-accent"
               onClick={toggle}
               aria-label={playing ? "Pause" : "Play"}
             >
@@ -241,7 +241,7 @@ export function Voices() {
 
             <div
               ref={scrubRef}
-              className="group/scrub relative flex-1 h-[26px] cursor-pointer flex items-center max-[1100px]:order-[-1] max-[1100px]:basis-full"
+              className="group/scrub relative flex-1 h-[26px] cursor-pointer flex items-center max-[1100px]:-order-1 max-[1100px]:basis-full"
               onClick={seekFromEvent}
               role="slider"
               aria-valuemin={0}
@@ -260,7 +260,7 @@ export function Voices() {
             </div>
 
             <button
-              className="font-mono text-[11px] tracking-[0.16em] uppercase text-cream-2 px-2.5 py-1.5 border border-line rounded-[2px] bg-transparent transition-all duration-[250ms] ease-[ease] inline-flex items-center justify-center min-w-16 hover:border-accent hover:text-accent"
+              className="font-mono text-[11px] tracking-[0.16em] uppercase text-cream-2 px-2.5 py-1.5 border border-line rounded-[2px] bg-transparent transition-all duration-250 ease-[ease] inline-flex items-center justify-center min-w-16 hover:border-accent hover:text-accent"
               onClick={toggleMute}
               aria-label={muted ? "Unmute" : "Mute"}
             >
@@ -280,7 +280,7 @@ export function Voices() {
             aria-hidden="true"
           ></span>
           <a
-            className="inline-flex items-center gap-1.5 text-accent pb-0.5 border-b border-b-transparent transition-[gap,border-color,color] duration-[250ms] ease-[ease] hover:gap-2.5 hover:border-b-accent/50 hover:text-cream"
+            className="inline-flex items-center gap-1.5 text-accent pb-0.5 border-b border-b-transparent transition-[gap,border-color,color] duration-250 ease-[ease] hover:gap-2.5 hover:border-b-accent/50 hover:text-cream"
             href="#work"
             onClick={(e) => {
               e.preventDefault();
@@ -310,7 +310,7 @@ export function Voices() {
           </span>
           <p
             className={cn(
-              "font-serif italic text-[clamp(22px,2.2vw,32px)] leading-[1.32] tracking-[-0.015em] text-cream [text-wrap:balance]",
+              "font-serif italic text-[clamp(22px,2.2vw,32px)] leading-[1.32] tracking-[-0.015em] text-cream text-balance",
               "[&_em]:not-italic [&_em]:font-mono [&_em]:text-[0.55em] [&_em]:tracking-[0.18em] [&_em]:uppercase [&_em]:text-accent [&_em]:bg-accent/8 [&_em]:px-2 [&_em]:py-0.5 [&_em]:rounded-[2px] [&_em]:align-[0.18em] [&_em]:mr-1.5",
             )}
           >

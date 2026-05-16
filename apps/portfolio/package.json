@@ -11,12 +11,12 @@
     "tc": "tsc --noEmit"
   },
   "dependencies": {
-    "@tabsircg/schemas": "workspace:*",
     "@open-notion/assets": "^1.2.0",
     "@open-notion/editor": "^1.4.1",
     "@open-notion/serializers": "^1.3.0",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "@tabsircg/schemas": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
@@ -29,11 +29,11 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.4",
+    "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "tailwindcss": "^4.2.4",
+    "tailwindcss": "^4.3.0",
     "tw-animate-css": "^1.4.0",
     "typescript": "^5"
   }

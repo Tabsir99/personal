@@ -173,7 +173,7 @@ const LINK_ICONS: Record<string, string> = {
 const AUTO_MS = 9000;
 
 /* Per-row stagger delays for the cascade-in animation. */
-const ROW_DELAYS = ["delay-[180ms]", "delay-[260ms]", "delay-[340ms]", "delay-[420ms]", "delay-[500ms]"];
+const ROW_DELAYS = ["delay-[180ms]", "delay-[260ms]", "delay-[340ms]", "delay-[420ms]", "delay-500"];
 
 /* Row status pill — color + border per status. */
 const ROW_STATUS_STYLES: Record<string, string> = {
@@ -260,7 +260,7 @@ export function Work() {
         <header
           className={cn(
             "grid grid-cols-[0.9fr_1fr] items-end gap-20 mb-[72px] opacity-0 translate-y-5",
-            "transition-[opacity,translate] duration-[900ms] ease-soft",
+            "transition-[opacity,translate] duration-900 ease-soft",
             "max-[1100px]:grid-cols-1 max-[1100px]:gap-8",
             vis && "opacity-100 translate-y-0",
           )}
@@ -279,7 +279,7 @@ export function Work() {
             <a
               className={cn(
                 "inline-flex items-center gap-2.5 w-max font-mono text-[11px] tracking-[0.16em] uppercase text-muted-2 pb-1 border-b border-transparent",
-                "transition-[color,gap,border-color] duration-[250ms] ease-out",
+                "transition-[color,gap,border-color] duration-250 ease-out",
                 "hover:text-accent hover:gap-3.5 hover:border-b-accent/40",
                 "[&_.arrow]:opacity-70",
               )}
@@ -320,7 +320,7 @@ export function Work() {
                     vis && "opacity-100 translate-y-0",
                     vis && ROW_DELAYS[i],
                     // Accent bar (left edge) — only visible when --on.
-                    "before:content-[''] before:absolute before:left-0 before:top-1/2 before:w-[3px] before:bg-accent before:-translate-y-1/2 before:transition-[height] before:duration-[400ms] before:ease-soft",
+                    "before:content-[''] before:absolute before:left-0 before:top-1/2 before:w-[3px] before:bg-accent before:-translate-y-1/2 before:transition-[height] before:duration-400 before:ease-soft",
                     isOn ? "before:h-[64%]" : "before:h-0",
                     // --on: shift right, warm gradient wash. Padding + bg
                     // mutually exclusive between states (focus-visible bg
@@ -337,9 +337,9 @@ export function Work() {
                 >
                   <span
                     className={cn(
-                      "font-mono text-[14px] w-[18px] text-center transition-[color,rotate] duration-[400ms]",
+                      "font-mono text-[14px] w-[18px] text-center transition-[color,rotate] duration-400",
                       "max-[1100px]:hidden",
-                      isOn ? "text-accent rotate-45 duration-[600ms] ease-soft" : "text-muted-2",
+                      isOn ? "text-accent rotate-45 duration-600 ease-soft" : "text-muted-2",
                     )}
                     aria-hidden="true"
                   >
@@ -362,7 +362,7 @@ export function Work() {
                   <span
                     className={cn(
                       "inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase text-muted-2 whitespace-nowrap",
-                      "transition-[opacity,translate] duration-[400ms] delay-[50ms]",
+                      "transition-[opacity,translate] duration-400 delay-[50ms]",
                       isOn ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2",
                     )}
                   >
@@ -399,7 +399,7 @@ export function Work() {
 
             <div
               className={cn(
-                "relative aspect-[16/10] bg-ink-2 border border-line overflow-hidden rounded-[3px]",
+                "relative aspect-16/10 bg-ink-2 border border-line overflow-hidden rounded-[3px]",
                 // Transit wipe — when active project switches.
                 transit &&
                   "after:content-[''] after:absolute after:inset-0 after:z-6 after:pointer-events-none after:bg-[linear-gradient(to_bottom,transparent_0%,color-mix(in_oklab,var(--color-accent)_18%,transparent)_48%,color-mix(in_oklab,var(--color-accent)_42%,transparent)_50%,color-mix(in_oklab,var(--color-accent)_18%,transparent)_52%,transparent_100%)] after:animate-vp-wipe",
@@ -434,14 +434,14 @@ export function Work() {
 
               {/* Thumb strip */}
               {project.stills.length > 1 && (
-                <div className="absolute bottom-3.5 left-3.5 right-3.5 z-5 flex items-center gap-3.5 px-3 py-2 bg-ink/[0.78] backdrop-blur-sm border border-line rounded-[2px] max-[1100px]:static max-[1100px]:-mt-0.5">
+                <div className="absolute bottom-3.5 left-3.5 right-3.5 z-5 flex items-center gap-3.5 px-3 py-2 bg-ink/78 backdrop-blur-sm border border-line rounded-[2px] max-[1100px]:static max-[1100px]:-mt-0.5">
                   <div className="flex gap-1.5 flex-1">
                     {project.stills.map((s, j) => (
                       <button
                         key={j}
                         className={cn(
-                          "relative flex-1 h-[30px] border font-mono text-[10px] tracking-[0.1em] cursor-pointer",
-                          "transition-all duration-[250ms] ease-out",
+                          "relative flex-1 h-[30px] border font-mono text-[10px] tracking-widest cursor-pointer",
+                          "transition-all duration-250 ease-out",
                           "flex items-center justify-center gap-1",
                           j === stillIdx
                             ? "bg-accent border-accent text-ink"
@@ -533,7 +533,7 @@ export function Work() {
                 href={l.url || "#"}
                 className={cn(
                   "group/link inline-flex items-center gap-2.5 px-4 py-2.5 border border-line rounded-[2px] font-mono text-[11px] tracking-[0.12em] uppercase text-cream-2 bg-transparent",
-                  "transition-all duration-[250ms] ease-out",
+                  "transition-all duration-250 ease-out",
                   "hover:border-accent hover:text-accent hover:-translate-y-px",
                   LINK_BG[l.type],
                 )}
@@ -542,7 +542,7 @@ export function Work() {
                   {LINK_ICONS[l.type] || "→"}
                 </span>
                 <span>{l.text}</span>
-                <span className="opacity-50 transition-[translate,opacity] duration-[250ms] ease-out group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 group-hover/link:opacity-100">
+                <span className="opacity-50 transition-[translate,opacity] duration-250 ease-out group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 group-hover/link:opacity-100">
                   ↗
                 </span>
               </a>

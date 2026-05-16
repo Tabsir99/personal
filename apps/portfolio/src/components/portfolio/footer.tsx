@@ -82,16 +82,16 @@ export function Footer() {
         <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] max-[1100px]:grid-cols-2 gap-[60px] pt-[60px] border-t border-line [&_h5]:font-mono [&_h5]:text-[10px] [&_h5]:tracking-[0.16em] [&_h5]:uppercase [&_h5]:text-muted [&_h5]:mb-[18px] [&_h5]:font-normal">
           <div>
             <h5>Studio</h5>
-            <p className="block text-[14px] text-cream mb-2 leading-[1.5]">
+            <p className="block text-[14px] text-cream mb-2 leading-normal">
               Tabsir CG · Independent practice
             </p>
-            <p className="block text-[13px] text-muted mb-2 leading-[1.5]">
+            <p className="block text-[13px] text-muted mb-2 leading-normal">
               Apt 4B, Banani Road 11
               <br />
               Dhaka 1213, Bangladesh
             </p>
           </div>
-          <div className="[&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:font-mono [&_a]:text-[12px] [&_a]:text-cream [&_a]:mb-2 [&_a]:leading-[1.5] [&_a]:transition-colors [&_a]:duration-200 [&_a:hover]:text-accent">
+          <div className="[&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:font-mono [&_a]:text-[12px] [&_a]:text-cream [&_a]:mb-2 [&_a]:leading-normal [&_a]:transition-colors [&_a]:duration-200 [&_a:hover]:text-accent">
             <h5>Direct</h5>
             <a href="mailto:hello@tabsircg.com">hello@tabsircg.com</a>
             <a href="#">
@@ -100,7 +100,7 @@ export function Footer() {
             </a>
             <a href="#">Cal.com / tabsir</a>
           </div>
-          <div className="[&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:font-mono [&_a]:text-[12px] [&_a]:text-cream [&_a]:mb-2 [&_a]:leading-[1.5] [&_a]:transition-colors [&_a]:duration-200 [&_a:hover]:text-accent">
+          <div className="[&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:font-mono [&_a]:text-[12px] [&_a]:text-cream [&_a]:mb-2 [&_a]:leading-normal [&_a]:transition-colors [&_a]:duration-200 [&_a:hover]:text-accent">
             <h5>Elsewhere</h5>
             <a href="#">
               GitHub <span className="text-muted-2 text-[10px]">↗</span>
@@ -115,7 +115,7 @@ export function Footer() {
               LinkedIn <span className="text-muted-2 text-[10px]">↗</span>
             </a>
           </div>
-          <div className="[&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:font-mono [&_a]:text-[12px] [&_a]:text-cream [&_a]:mb-2 [&_a]:leading-[1.5] [&_a]:transition-colors [&_a]:duration-200 [&_a:hover]:text-accent">
+          <div className="[&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:font-mono [&_a]:text-[12px] [&_a]:text-cream [&_a]:mb-2 [&_a]:leading-normal [&_a]:transition-colors [&_a]:duration-200 [&_a:hover]:text-accent">
             <h5>Work with me</h5>
             <a href="#">Full project (~6 wks +)</a>
             <a href="#">Sprint engagement (1–2 wks)</a>
@@ -123,7 +123,7 @@ export function Footer() {
             <a href="#">Code-review on call</a>
           </div>
         </div>
-        <div className="mt-20 pt-8 border-t border-line flex justify-between items-center font-mono text-[10px] tracking-[0.1em] text-muted-2">
+        <div className="mt-20 pt-8 border-t border-line flex justify-between items-center font-mono text-[10px] tracking-widest text-muted-2">
           <FooterClock />
           <span>© 2026 · Tabsir CG · v2.6 · No tracking</span>
           <span>↑ back to top</span>

@@ -33,15 +33,15 @@ export function Now() {
             </div>
             <h2
               className={cn(
-                "font-serif font-normal leading-[0.96] tracking-[-0.02em] [font-feature-settings:'liga','kern']",
-                "text-[clamp(48px,6vw,84px)] !leading-none mb-6",
+                "font-serif font-normal leading-[0.96] tracking-[-0.02em] font-features-['liga','kern']",
+                "text-[clamp(48px,6vw,84px)] leading-none! mb-6",
               )}
             >
               What I&apos;m into
               <br />
               <em className="italic text-accent">right now.</em>
             </h2>
-            <div className="inline-flex items-center gap-[10px] font-mono text-[11px] uppercase tracking-[0.1em] px-[14px] py-2 border border-line rounded-[2px] bg-ink-2">
+            <div className="inline-flex items-center gap-[10px] font-mono text-[11px] uppercase tracking-widest px-[14px] py-2 border border-line rounded-[2px] bg-ink-2">
               <span className="w-[7px] h-[7px] rounded-full bg-phosphor shadow-[0_0_10px_var(--color-phosphor)] animate-pulse-soft"></span>
               Updated · May 2026
             </div>
@@ -123,7 +123,7 @@ export function Now() {
                 like scope creep. Coffee after 4pm.
               </div>
             </div>
-            <div className="font-mono text-[10px] text-muted-2 mt-3 tracking-[0.1em]">
+            <div className="font-mono text-[10px] text-muted-2 mt-3 tracking-widest">
               / inspired by Derek Sivers · /now-page movement
             </div>
           </div>
