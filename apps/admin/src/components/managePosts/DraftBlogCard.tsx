@@ -1,16 +1,15 @@
+import Link from "next/link";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import { Clock } from "lucide-react";
+import { Eyebrow } from "@/components/ui/Eyebrow";
 import { BlogFormData, BlogStatus } from "@tabsircg/schemas/blog";
 import BlogMenu from "./BlogMenu";
-import Link from "next/link";
 import { getTimeSince } from "@/lib/appUtils";
 
 export default function DraftBlogCard({
@@ -20,13 +19,30 @@ export default function DraftBlogCard({
   blog: Partial<BlogFormData>;
   confirmDelete: (blogId: string) => void;
 }) {
-  return (
-    <Link draggable={false} href={`write-blog/${blog.blogId}`}>
-      <Card className="cursor-pointer transition-all hover:border-border/80">
-        <CardHeader className="pb-2 pt-4">
-          <div className="flex justify-between items-start">
-            <CardTitle className="text-xl font-bold">{blog?.title}</CardTitle>
+  const tags = blog.tags ?? [];
+  const visibleTags = tags.slice(0, 2);
+  const overflowTags = tags.length - visibleTags.length;
 
+  return (
+    <Link
+      draggable={false}
+      href={`write-blog/${blog.blogId}`}
+      className="block"
+    >
+      <Card className="group/draft-card cursor-pointer transition-shadow hover:shadow-card-hover">
+        <CardHeader className="pt-5 pb-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 flex-col gap-2">
+              <Eyebrow tone="muted" size="xs" family="mono">
+                Draft
+              </Eyebrow>
+              <h3 className="truncate text-lg leading-snug font-semibold tracking-tight text-foreground">
+                {blog?.title || "Untitled"}
+              </h3>
+              <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+                {blog.metaDescription || "No description yet…"}
+              </p>
+            </div>
             <BlogMenu
               blogName={blog.title!}
               status={BlogStatus.draft}
@@ -35,31 +51,29 @@ export default function DraftBlogCard({
               confirmDelete={() => confirmDelete(blog.blogId!)}
             />
           </div>
-          <CardDescription className="line-clamp-2">
-            {blog.metaDescription || "No description yet..."}
-          </CardDescription>
         </CardHeader>
-        <CardContent className="py-2">
-          <div className="flex flex-wrap gap-2">
-            {blog.tags?.map((tag) => (
-              <Badge key={tag} variant="outline" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-            {blog.tags?.length === 0 && (
-              <span className="text-sm italic text-muted-foreground">
-                No tags yet
-              </span>
-            )}
-          </div>
+        <CardContent className="pt-1 pb-4">
+          {visibleTags.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {visibleTags.map((tag) => (
+                <Badge key={tag} variant="neutral">
+                  {tag}
+                </Badge>
+              ))}
+              {overflowTags > 0 && (
+                <Badge variant="ghost">+{overflowTags}</Badge>
+              )}
+            </div>
+          ) : (
+            <Eyebrow tone="muted" size="xs">
+              No tags yet
+            </Eyebrow>
+          )}
         </CardContent>
-        <CardFooter className="flex items-center justify-between pb-4 pt-2 text-sm text-muted-foreground">
-          <div className="flex items-center">
-            <Clock className="mr-1 h-3 w-3" />
+        <CardFooter className="pt-3 pb-4">
+          <div className="flex w-full items-center justify-between font-mono text-[12px] text-muted-foreground">
             <span>Updated {getTimeSince(blog.updatedAt || 0)}</span>
-          </div>
-          <div className="flex items-center">
-            <span>{blog.readTime} min read </span>
+            <span>{blog.readTime ?? 0} min read</span>
           </div>
         </CardFooter>
       </Card>

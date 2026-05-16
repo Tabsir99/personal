@@ -1,13 +1,6 @@
 import Link from "next/link";
-import {
-  ExternalLink,
-  Clock,
-  Calendar,
-  Eye,
-  Sparkles,
-  Share2,
-  Star,
-} from "lucide-react";
+import { ExternalLink, Star } from "lucide-react";
+
 import {
   Card,
   CardContent,
@@ -16,6 +9,8 @@ import {
 } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { MetricNumber } from "@/components/ui/MetricNumber";
 import {
   BlogDraftDB,
   BlogStatus,
@@ -24,6 +19,34 @@ import {
 import BlogMenu from "./BlogMenu";
 import { clientEnv } from "@/config/env.client";
 import { cn } from "@/lib/utils";
+
+type BadgeVariant =
+  | "success"
+  | "destructive"
+  | "neutral"
+  | "warning"
+  | "default"
+  | "accent"
+  | "outline";
+
+function statusVariant(status: BlogStatus): BadgeVariant {
+  switch (status) {
+    case BlogStatus.published:
+      return "success";
+    case BlogStatus.unpublished:
+      return "destructive";
+    case BlogStatus.draft:
+      return "neutral";
+    default:
+      return "outline";
+  }
+}
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+});
 
 export default function CMSBlogCard({
   blog,
@@ -38,46 +61,35 @@ export default function CMSBlogCard({
   confirmDelete: (blogId: string) => void;
   setFeatured?: (blogId: string) => void;
 }) {
-  // Get appropriate status color
-  const getStatusClass = (status: BlogStatus) => {
-    switch (status) {
-      case BlogStatus.published:
-        return "border-primary/20 bg-primary/10 text-primary";
-      case BlogStatus.draft:
-        return "border-accent bg-accent text-accent-foreground";
-      case BlogStatus.unpublished:
-        return "border-destructive/20 bg-destructive/10 text-destructive";
-      default:
-        return "border-border bg-muted text-muted-foreground";
-    }
-  };
-
-  const statusClass = getStatusClass(blog.status);
+  const isPublished = blog.status !== BlogStatus.draft;
+  const visibleTags = blog.tags.slice(0, 2);
+  const overflowTags = blog.tags.length - visibleTags.length;
 
   return (
-    <Card className="flex flex-col justify-between transition-all hover:border-border/80">
-      <CardHeader className="pb-3 pt-5">
-        <div className="flex justify-between items-start gap-4">
-          {/* Blog Title */}
-          <div className="flex flex-col space-y-2">
-            <h2 className="text-xl font-bold capitalize flex items-center gap-2">
-              {isFeatured && (
+    <Card className="group/blog-card flex flex-col justify-between transition-shadow hover:shadow-card-hover">
+      <CardHeader className="pt-5 pb-3">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex min-w-0 flex-col gap-2">
+            {isFeatured && (
+              <span className="inline-flex items-center gap-1.5">
                 <Star
-                  className="h-4 w-4 text-yellow-500 fill-yellow-500"
-                  aria-label="Currently featured"
+                  className="h-3 w-3 fill-star text-star"
+                  aria-hidden="true"
                 />
-              )}
+                <Eyebrow tone="primary" size="xs" family="mono">
+                  Featured
+                </Eyebrow>
+              </span>
+            )}
+            <h2 className="truncate text-lg leading-snug font-semibold tracking-tight text-foreground">
               {blog.title}
             </h2>
-
-            {/* Blog Description - single line with ellipsis */}
-            <p className="text-sm text-muted-foreground line-clamp-1">
-              {blog.metaDescription || "No description yet..."}
+            <p className="line-clamp-1 text-sm leading-relaxed text-muted-foreground">
+              {blog.metaDescription || "No description yet…"}
             </p>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center">
+          <div className="flex shrink-0 items-center">
             <BlogMenu
               blogName={blog.title}
               blogId={blog.blogId}
@@ -91,110 +103,68 @@ export default function CMSBlogCard({
                 : {})}
             />
 
-            {blog.status !== BlogStatus.draft && (
+            {isPublished && (
               <Link
                 href={`${clientEnv.ADMIN_ORIGIN}/blogs/${blog.slug}`}
                 target="_blank"
                 title="View Blog"
                 className={cn(
-                  buttonVariants({ variant: "ghost", size: "icon" }),
-                  "text-muted-foreground hover:text-foreground hover:bg-accent",
+                  buttonVariants({ variant: "ghost", size: "icon-sm" }),
+                  "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="h-3.5 w-3.5" />
               </Link>
             )}
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="pb-4 pt-2">
-        <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-          {/* Status Badge */}
-          <Badge
-            variant="outline"
-            className={`${statusClass} text-xs px-2 py-1`}
-          >
+      <CardContent className="pt-1 pb-4">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[12px] text-muted-foreground">
+          <Badge variant={statusVariant(blog.status!)} className="font-sans">
             {blog.status}
           </Badge>
-
-          {/* Publication Date */}
-          <div className="flex items-center gap-2">
-            <Calendar className="h-3.5 w-3.5" />
-            <time>
-              {new Date(blog.createdAt!).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </time>
-          </div>
-
-          {/* Reading Time */}
-          <div className="flex items-center gap-2">
-            <Clock className="h-3.5 w-3.5" />
-            <span>{blog.readTime} min read</span>
-          </div>
+          <span aria-hidden="true">·</span>
+          <time dateTime={new Date(blog.createdAt!).toISOString()}>
+            {dateFormatter.format(new Date(blog.createdAt!))}
+          </time>
+          <span aria-hidden="true">·</span>
+          <span>{blog.readTime} min read</span>
         </div>
 
-        {/* Tags */}
-        {blog.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-4">
-            {blog.tags.slice(0, 3).map((tag, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
+        {visibleTags.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center gap-1.5">
+            {visibleTags.map((tag, index) => (
+              <Badge key={index} variant="neutral">
                 {tag}
               </Badge>
             ))}
-            {blog.tags.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{blog.tags.length - 3} more
-              </Badge>
+            {overflowTags > 0 && (
+              <Badge variant="ghost">+{overflowTags}</Badge>
             )}
           </div>
         )}
       </CardContent>
 
-      {/* Stats Section */}
-      {blog.status !== BlogStatus.draft && (
-        <CardFooter className="grid grid-cols-3 gap-4 border-t border-border pb-4 pt-4">
-          <MetricItem
-            icon={<Eye className="h-4 w-4 text-muted-foreground" />}
-            label="Views"
-            value={blog.stats.views}
-          />
-          <MetricItem
-            icon={<Sparkles className="h-4 w-4 text-muted-foreground" />}
-            label="Score"
-            value={blog.stats.score}
-          />
-          <MetricItem
-            icon={<Share2 className="h-4 w-4 text-muted-foreground" />}
-            label="Shares"
-            value={blog.stats.shares}
-          />
+      {isPublished && (
+        <CardFooter className="grid grid-cols-3 gap-4 pt-4 pb-4">
+          <Stat label="Views" value={blog.stats.views} />
+          <Stat label="Score" value={blog.stats.score} />
+          <Stat label="Shares" value={blog.stats.shares} />
         </CardFooter>
       )}
     </Card>
   );
 }
 
-// Metric item with icon
-const MetricItem = ({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: number | undefined;
-  icon: React.ReactNode;
-}) => (
-  <div className="flex items-center gap-2">
-    {icon}
-    <div className="flex flex-col">
-      <span className="text-base font-semibold text-foreground">
-        {value ?? 0}
-      </span>
-      <span className="text-xs text-muted-foreground">{label}</span>
+function Stat({ label, value }: { label: string; value: number | undefined }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <Eyebrow tone="muted" size="xs">
+        {label}
+      </Eyebrow>
+      <MetricNumber size="md" value={value ?? 0} />
     </div>
-  </div>
-);
+  );
+}
