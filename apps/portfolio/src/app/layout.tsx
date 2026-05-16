@@ -7,6 +7,7 @@ import { Header } from "@/components/portfolio/header";
 import { Footer } from "@/components/portfolio/footer";
 import { Atmosphere } from "@/components/portfolio/atmosphere";
 import { ScrollObserver } from "@/components/ui/ScrollObserver";
+import { ActiveSectionTracker } from "@/components/ui/active-section";
 
 const latoFont = Lato({
   weight: ["300", "400", "700"],
@@ -73,6 +74,7 @@ export default function RootLayout({
         <Header />
         <Atmosphere />
         <ScrollObserver />
+        <ActiveSectionTracker />
         <main>
           {children}
           <Footer />

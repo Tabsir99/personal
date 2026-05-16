@@ -28,22 +28,35 @@ export function Rail() {
     };
   }, []);
 
+  // Progress fill + breath-dot position. Tier C target — moves to CSS
+  // scroll-timeline later.
   useEffect(() => {
     function onScroll() {
       const docH = document.documentElement.scrollHeight;
-      // fill + cursor track scroll position, using the SAME divisor as tick positions
       setProgress((window.scrollY / docH) * 100);
-      const y = window.scrollY + window.innerHeight * 0.35;
-      let cur = 0;
-      SECTIONS.forEach((s, i) => {
-        const el = document.getElementById(s.id);
-        if (el && el.offsetTop <= y) cur = i;
-      });
-      setActive(cur);
     }
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Active section comes from the shared ActiveSectionTracker which writes
+  // `data-active-section` to <html>. MutationObserver here is much lighter
+  // than the previous per-scroll-tick SECTIONS.forEach loop.
+  useEffect(() => {
+    function update() {
+      const id = document.documentElement.dataset.activeSection;
+      if (!id) return;
+      const idx = SECTIONS.findIndex((s) => s.id === id);
+      if (idx >= 0) setActive(idx);
+    }
+    update();
+    const obs = new MutationObserver(update);
+    obs.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-active-section"],
+    });
+    return () => obs.disconnect();
   }, []);
 
   return (

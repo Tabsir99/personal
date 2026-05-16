@@ -1,24 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { SECTIONS } from "./sections-data";
 
-/* ===== Header ===== */
+/* ===== Header =====
+   Active-nav highlighting now comes from [components/ui/active-section.tsx]
+   which toggles `.is-active` on every `[data-nav]` element. The local
+   scroll listener only tracks the `scrolled` border swap (Tier C target). */
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
-  const [active, setActive] = useState("hero");
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 60);
-      const y = window.scrollY + window.innerHeight * 0.4;
-      let cur = "hero";
-      SECTIONS.forEach((s) => {
-        const el = document.getElementById(s.id);
-        if (el && el.offsetTop <= y) cur = s.id;
-      });
-      setActive(cur);
-    };
+    const onScroll = () => setScrolled(window.scrollY > 60);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -56,13 +48,13 @@ export function Header() {
           <a
             key={it.id}
             href={`#${it.id}`}
+            data-nav={it.id}
             data-num={it.num}
             className={cn(
               "relative inline-flex items-center gap-[5px] transition-colors duration-200",
               "before:mr-0 before:text-[8px] before:content-[attr(data-num)]",
-              active === it.id
-                ? "text-cream before:text-accent"
-                : "text-muted before:text-muted-2 hover:text-cream",
+              "text-muted before:text-muted-2 hover:text-cream",
+              "[&.is-active]:text-cream [&.is-active]:before:text-accent",
             )}
           >
             {it.label}
