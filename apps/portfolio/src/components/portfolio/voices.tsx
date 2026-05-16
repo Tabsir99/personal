@@ -16,14 +16,15 @@ const useRefV = useRef;
    timecode, scrubber, audio) sit beneath the frame.
    --------------------------------------------------------------------- */
 
-const VIDEO_URL = 'https://media.tabsircg.com/portfolio/testimonials/client-testimonial-ERIC-Postchart.mov';
+const VIDEO_URL =
+  "https://media.tabsircg.com/portfolio/testimonials/client-testimonial-ERIC-Postchart.mov";
 const DURATION_GUESS = 73; // 1:13 — replaced by real duration on loadedmetadata
 
 function fmtTime(s: number) {
   if (!isFinite(s) || s < 0) s = 0;
   const m = Math.floor(s / 60);
   const sec = Math.floor(s % 60);
-  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 }
 
 export function Voices() {
@@ -32,7 +33,7 @@ export function Voices() {
   const videoRef = useRefV<HTMLVideoElement>(null);
   const scrubRef = useRefV<HTMLDivElement>(null);
 
-  const [started, setStarted] = useStateV(false);    // user clicked play
+  const [started, setStarted] = useStateV(false); // user clicked play
   const [playing, setPlaying] = useStateV(false);
   const [muted, setMuted] = useStateV(false);
   const [time, setTime] = useStateV(0);
@@ -75,11 +76,11 @@ export function Voices() {
       rafId = requestAnimationFrame(update);
     }
     onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, []);
@@ -87,7 +88,9 @@ export function Voices() {
   function start() {
     const v = videoRef.current;
     if (v) {
-      try { v.currentTime = 0; } catch (e) {}
+      try {
+        v.currentTime = 0;
+      } catch (e) {}
       v.play().catch(() => {
         v.muted = true;
         setMuted(true);
@@ -125,21 +128,33 @@ export function Voices() {
     setDuration(v.duration || DURATION_GUESS);
     setLoaded(true);
     if (!started && v.duration > 2) {
-      try { v.currentTime = 1.8; } catch (err) {}
+      try {
+        v.currentTime = 1.8;
+      } catch (err) {}
     }
   }
 
   const pct = duration > 0 ? (time / duration) * 100 : 0;
 
   return (
-    <section id="voices" className="voices" data-screen-label="06 Voices" ref={sectionRef}>
-      <span className="section-tag">/ 03a — Voices</span>
-      <span className="margin-note" style={{ top: '260px' }}>one minute,<br/>one client.</span>
+    <section
+      id="voices"
+      className="voices"
+      data-screen-label="06 Voices"
+      ref={sectionRef}
+    >
+      <span className="margin-note" style={{ top: "260px" }}>
+        one minute,
+        <br />
+        one client.
+      </span>
 
       <div className="container">
         <header className="voices-header">
           <h2 className="voices-title display">
-            <em>In their</em><br/>own words.
+            <em>In their</em>
+            <br />
+            own words.
           </h2>
           <p className="voices-blurb">
             A short walkthrough from Eric at Postchart — the project was a
@@ -165,10 +180,15 @@ export function Voices() {
             onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
-            onEnded={() => setPlaying(false)} />
+            onEnded={() => setPlaying(false)}
+          />
 
-          {!started &&
-          <button className="voices-overlay" onClick={start} aria-label="Play testimonial">
+          {!started && (
+            <button
+              className="voices-overlay"
+              onClick={start}
+              aria-label="Play testimonial"
+            >
               <div className="voices-overlay-veil" aria-hidden="true"></div>
               <div className="voices-overlay-name">Eric &middot; Postchart</div>
               <div className="voices-overlay-play" aria-hidden="true">
@@ -176,14 +196,18 @@ export function Voices() {
               </div>
               <div className="voices-overlay-time">01:13</div>
             </button>
-          }
+          )}
         </div>
 
         {/* Controls — visible only once the video is started. */}
-        {started &&
-        <div className="voices-controls">
-            <button className="voices-ctl voices-ctl--play" onClick={toggle} aria-label={playing ? 'Pause' : 'Play'}>
-              {playing ? '❚❚' : '▶'}
+        {started && (
+          <div className="voices-controls">
+            <button
+              className="voices-ctl voices-ctl--play"
+              onClick={toggle}
+              aria-label={playing ? "Pause" : "Play"}
+            >
+              {playing ? "❚❚" : "▶"}
             </button>
 
             <div className="voices-time">
@@ -193,24 +217,34 @@ export function Voices() {
             </div>
 
             <div
-            ref={scrubRef}
-            className="voices-scrub"
-            onClick={seekFromEvent}
-            role="slider"
-            aria-valuemin={0}
-            aria-valuemax={duration}
-            aria-valuenow={time}>
-
+              ref={scrubRef}
+              className="voices-scrub"
+              onClick={seekFromEvent}
+              role="slider"
+              aria-valuemin={0}
+              aria-valuemax={duration}
+              aria-valuenow={time}
+            >
               <div className="voices-scrub-track"></div>
-              <div className="voices-scrub-fill" style={{ width: `${pct}%` }}></div>
-              <div className="voices-scrub-thumb" style={{ left: `${pct}%` }}></div>
+              <div
+                className="voices-scrub-fill"
+                style={{ width: `${pct}%` }}
+              ></div>
+              <div
+                className="voices-scrub-thumb"
+                style={{ left: `${pct}%` }}
+              ></div>
             </div>
 
-            <button className="voices-ctl voices-ctl--mute" onClick={toggleMute} aria-label={muted ? 'Unmute' : 'Mute'}>
-              {muted ? 'MUTED' : 'AUDIO'}
+            <button
+              className="voices-ctl voices-ctl--mute"
+              onClick={toggleMute}
+              aria-label={muted ? "Unmute" : "Mute"}
+            >
+              {muted ? "MUTED" : "AUDIO"}
             </button>
           </div>
-        }
+        )}
 
         {/* Caption row — always visible under the frame. */}
         <div className="voices-meta">
@@ -222,10 +256,11 @@ export function Voices() {
             href="#work"
             onClick={(e) => {
               e.preventDefault();
-              const el = document.getElementById('work');
-              if (el) window.scrollTo({ top: el.offsetTop - 40, behavior: 'smooth' });
-            }}>
-
+              const el = document.getElementById("work");
+              if (el)
+                window.scrollTo({ top: el.offsetTop - 40, behavior: "smooth" });
+            }}
+          >
             See the project<span> ↗</span>
           </a>
           <span className="voices-meta-grow"></span>
@@ -237,13 +272,16 @@ export function Voices() {
 
         {/* Pull-quote — placeholder text for now, swap with the line from the video */}
         <blockquote className="voices-quote">
-          <span className="voices-quote-mark" aria-hidden="true">&ldquo;</span>
+          <span className="voices-quote-mark" aria-hidden="true">
+            &ldquo;
+          </span>
           <p className="voices-quote-line">
-            <em>[Placeholder]</em> &nbsp;Drop in the strongest line from Eric&rsquo;s
-            walkthrough here — the one sentence that sells the relationship.
+            <em>[Placeholder]</em> &nbsp;Drop in the strongest line from
+            Eric&rsquo;s walkthrough here — the one sentence that sells the
+            relationship.
           </p>
         </blockquote>
       </div>
-    </section>);
-
+    </section>
+  );
 }

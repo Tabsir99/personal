@@ -15,7 +15,11 @@
   opacity: 0;
   animation: rail-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards 0.1s;
 }
-@keyframes rail-in { to { opacity: 1; } }
+@keyframes rail-in {
+  to {
+    opacity: 1;
+  }
+}
 .rail-track {
   position: absolute;
   inset: 0;
@@ -46,8 +50,13 @@
   animation: rail-breath 2.4s ease-in-out infinite;
 }
 @keyframes rail-breath {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 .rail-cursor::after {
   content: "";
@@ -68,7 +77,9 @@
   background: var(--muted-2);
   transition: background 0.4s ease;
 }
-.rail-tick.past { background: var(--accent); }
+.rail-tick.past {
+  background: var(--accent);
+}
 .rail-tick-label {
   position: absolute;
   left: 22px;
@@ -81,8 +92,12 @@
   white-space: nowrap;
   transition: color 0.3s ease;
 }
-.rail-tick.active .rail-tick-label { color: var(--cream); }
-.rail-tick.past .rail-tick-label { color: var(--muted); }
+.rail-tick.active .rail-tick-label {
+  color: var(--cream);
+}
+.rail-tick.past .rail-tick-label {
+  color: var(--muted);
+}
 .rail-endcap {
   position: absolute;
   left: -3px;
@@ -92,5 +107,9 @@
   border-radius: 50%;
   background: var(--ink);
 }
-.rail-endcap.top { top: -3px; }
-.rail-endcap.bot { bottom: -3px; }
+.rail-endcap.top {
+  top: -3px;
+}
+.rail-endcap.bot {
+  bottom: -3px;
+}

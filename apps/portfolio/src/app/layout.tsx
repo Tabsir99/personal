@@ -36,14 +36,16 @@ export const metadata: Metadata = {
   description: "Full-stack web work for teams who'd rather move than rewrite.",
   openGraph: {
     title: "Tabsir CG — Full-stack developer",
-    description: "Full-stack web work for teams who'd rather move than rewrite.",
+    description:
+      "Full-stack web work for teams who'd rather move than rewrite.",
     type: "website",
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
     title: "Tabsir CG — Full-stack developer",
-    description: "Full-stack web work for teams who'd rather move than rewrite.",
+    description:
+      "Full-stack web work for teams who'd rather move than rewrite.",
   },
   alternates: { canonical: "/" },
   authors: [{ name: "Tabsir CG" }],
@@ -67,8 +69,10 @@ export default function RootLayout({
     <html lang="en" style={fontVars}>
       <body>
         <Header />
-        <main>{children}</main>
-        <Footer />
+        <main>
+          {children}
+          <Footer />
+        </main>
       </body>
     </html>
   );

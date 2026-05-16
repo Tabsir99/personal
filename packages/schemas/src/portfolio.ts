@@ -145,29 +145,3 @@ export const uploadFileInfoSchema = z.object({
 });
 export type UploadFileInfo = z.infer<typeof uploadFileInfoSchema>;
 export const uploadFileInfoArraySchema = z.array(uploadFileInfoSchema);
-
-export const labItemSchema = z.object({
-  title: z.string(),
-  pitch: z.string().default(""), // 1–2 line description
-
-  status: z.enum(["working", "wip", "broken", "abandoned"]).default("working"),
-
-  // Visual representation. GIFs/short videos work especially well for lab.
-  image: optionalUrl,
-  video: optionalUrl,
-
-  links: z.array(linkSchema).default([]),
-  skills: z.array(z.string()).default([]),
-
-  // Optional context
-  takeaway: z.string().default(""), // "what I learned / what broke / why I stopped"
-  year: z.string().default(""),
-
-  // Display
-  order: z.number().default(0),
-  visible: z.boolean().default(true),
-
-  // Metadata
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
-});
