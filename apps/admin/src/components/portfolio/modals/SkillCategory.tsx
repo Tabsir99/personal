@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Plus } from "lucide-react";
+
 import {
   Dialog,
   DialogClose,
@@ -10,11 +12,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { FormField } from "@/components/ui/FormField";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { PageData } from "@tabsircg/schemas/portfolio";
-import { Plus } from "lucide-react";
+
+import { ModalSection } from "./_shared";
 
 interface SkillCategoryDialogProps {
   children: React.ReactNode;
@@ -26,11 +30,11 @@ const defaultFormData: PageData["skills"][number] = {
   skills: [],
   isActive: true,
 };
+
 export default function SkillCategoryDialog({
   children,
 }: SkillCategoryDialogProps) {
   const [formData, setFormData] = useState(defaultFormData);
-
   const skillCategory = usePortfolioStore().skills;
 
   const handleSubmit = () => {
@@ -43,63 +47,57 @@ export default function SkillCategoryDialog({
       <DialogTrigger render={children as React.ReactElement} />
       <DialogContent className="max-w-md pb-0">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Add Skill Category</DialogTitle>
+          <Eyebrow tone="muted" family="mono">
+            New category
+          </Eyebrow>
+          <DialogTitle className="text-lg font-semibold tracking-tight">
+            Add skill category
+          </DialogTitle>
           <DialogDescription>
-            Create a new category for your skills
+            Group related skills under a single icon header.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Basics */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground">
-              Basics
-            </h3>
-
-            <div>
-              <Label className="mb-2 block">Title</Label>
+          <ModalSection eyebrow="Basics">
+            <FormField label="Title">
               <Input
-                placeholder="Frontend Development"
+                placeholder="Frontend development"
                 value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
               />
-            </div>
-          </div>
+            </FormField>
+          </ModalSection>
 
-          {/* Media */}
-          <div className="pt-4">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
-              Media
-            </h3>
-
-            <div>
-              <Label className="mb-2 block">Icon (Image URL)</Label>
+          <ModalSection eyebrow="Media">
+            <FormField
+              label="Icon URL"
+              hint="Use a small image (PNG / SVG) to represent this category."
+            >
               <Input
-                placeholder="https://example.com/icon.png"
+                placeholder="https://…/icon.png"
                 value={formData.icon}
                 onChange={(e) =>
                   setFormData({ ...formData, icon: e.target.value })
                 }
+                className="font-mono text-xs"
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Use an image URL to represent this category
-              </p>
-            </div>
-          </div>
+            </FormField>
+          </ModalSection>
         </div>
 
         <DialogFooter className="sticky bottom-0 bg-inherit">
           <DialogClose render={<Button variant="outline">Cancel</Button>} />
-
           <DialogClose
             render={
               <Button
                 onClick={handleSubmit}
                 disabled={!formData.title || !formData.icon}
               >
-                <Plus /> Add Category
+                <Plus className="h-3.5 w-3.5" />
+                Add category
               </Button>
             }
           />
