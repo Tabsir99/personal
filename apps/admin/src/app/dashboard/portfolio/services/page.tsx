@@ -1,8 +1,9 @@
 "use client";
-import { Card, CardContent } from "@/components/ui/card";
-import Img from "@/components/ui/image";
-import { usePortfolioStore } from "@/stores/PortfolioStore";
+import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { Plus } from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,11 +16,28 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
-import { useState } from "react";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { FormField } from "@/components/ui/FormField";
+import Img from "@/components/ui/image";
 import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
+
+import { usePortfolioStore } from "@/stores/PortfolioStore";
+import { ModalSection } from "@/components/portfolio/modals/_shared";
+
+interface ServiceDraft {
+  title: string;
+  content: string;
+  icon: string;
+  isActive: boolean;
+}
+
+const EMPTY_DRAFT: ServiceDraft = {
+  title: "",
+  content: "",
+  icon: "",
+  isActive: true,
+};
 
 export default function Services() {
   const services = usePortfolioStore(
@@ -28,12 +46,7 @@ export default function Services() {
   const service = usePortfolioStore().services;
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState({
-    title: "",
-    content: "",
-    icon: "",
-    isActive: true,
-  });
+  const [editForm, setEditForm] = useState<ServiceDraft>(EMPTY_DRAFT);
 
   const handleEdit = (index: number) => {
     setEditingIndex(index);
@@ -47,143 +60,105 @@ export default function Services() {
 
   const handleCancelEdit = () => {
     setEditingIndex(null);
-    setEditForm({ title: "", content: "", icon: "", isActive: true });
+    setEditForm(EMPTY_DRAFT);
   };
 
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold mb-2">Services</h2>
-        <p className="text-muted-foreground">Manage your portfolio services</p>
-      </div>
+    <div className="space-y-6">
+      <header className="space-y-1.5">
+        <Eyebrow tone="muted" family="mono">
+          Portfolio · services
+        </Eyebrow>
+        <h1 className="text-2xl leading-tight font-semibold tracking-tight">
+          Services
+        </h1>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          The offerings shown on the portfolio landing page.
+        </p>
+      </header>
 
-      <div className="grid grid-cols-3 gap-6 items-start">
+      <div className="stagger-cascade-tight grid grid-cols-1 items-start gap-4 md:grid-cols-2 lg:grid-cols-3">
         {services.map((item, index) => {
           const isEditing = editingIndex === index;
-
           return (
-            <Card
-              key={index}
-              className="group relative min-h-52 w-full overflow-hidden rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm transition-all duration-500 hover:border-border hover:bg-card"
+            <div
+              key={item.title + index}
+              style={{ ["--stagger-index" as string]: index }}
             >
-              {!isEditing ? (
+              <Card className="group/service relative tactile-lift">
                 <ActionButtonGroup
-                  buttons={[
-                    {
-                      onClick: () => service.moveUp(index),
-                      variant: "moveUp",
-                      disabled: index === 0,
-                    },
-                    {
-                      onClick: () => service.moveDown(index),
-                      variant: "moveDown",
-                      disabled: index === services.length - 1,
-                    },
-                    {
-                      onClick: () => service.toggle(index, "isActive"),
-                      variant: "toggle",
-                      active: item.isActive,
-                    },
-                    { onClick: () => handleEdit(index), variant: "edit" },
-                    {
-                      onClick: () => service.delete(index),
-                      variant: "delete",
-                    },
-                  ]}
+                  buttons={
+                    isEditing
+                      ? [
+                          { onClick: () => handleSaveEdit(index), variant: "save" as const },
+                          { onClick: handleCancelEdit, variant: "cancel" as const },
+                        ]
+                      : [
+                          { onClick: () => service.moveUp(index), variant: "moveUp", disabled: index === 0 },
+                          { onClick: () => service.moveDown(index), variant: "moveDown", disabled: index === services.length - 1 },
+                          { onClick: () => service.toggle(index, "isActive"), variant: "toggle", active: item.isActive },
+                          { onClick: () => handleEdit(index), variant: "edit" },
+                          { onClick: () => service.delete(index), variant: "delete" },
+                        ]
+                  }
                   entityName="service"
                 />
-              ) : (
-                <ActionButtonGroup
-                  buttons={[
-                    { onClick: () => handleSaveEdit(index), variant: "save" },
-                    { onClick: handleCancelEdit, variant: "cancel" },
-                  ]}
-                />
-              )}
-
-              <CardContent className="p-8 overflow-hidden">
-                {/* View Mode */}
-                <div
-                  className="grid transition-[grid-template-rows] duration-300 ease-in-out"
-                  style={{ gridTemplateRows: isEditing ? "0fr" : "1fr" }}
-                >
-                  <div className="overflow-hidden min-h-0">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="rounded-xl bg-muted/60 p-2 ring-1 ring-border/60 transition-all duration-300 group-hover:bg-muted group-hover:ring-border">
-                        <Img
-                          src={item.icon}
-                          alt={item.title}
-                          width={36}
-                          height={36}
-                        />
+                <CardContent className="p-6">
+                  {!isEditing ? (
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-md border border-foreground/[0.06] bg-foreground/[0.02] p-2">
+                          <Img
+                            src={item.icon}
+                            alt={item.title}
+                            width={28}
+                            height={28}
+                          />
+                        </div>
+                        <h3 className="truncate text-base leading-snug font-semibold tracking-tight">
+                          {item.title}
+                        </h3>
                       </div>
-                      <h3 className="text-xl font-semibold tracking-tight text-foreground">
-                        {item.title}
-                      </h3>
+                      <p className="text-sm leading-relaxed text-muted-foreground">
+                        {item.content}
+                      </p>
                     </div>
-                    <p className="text-[15px] leading-relaxed text-muted-foreground">
-                      {item.content}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Edit Mode */}
-                <div
-                  className="grid transition-[grid-template-rows] duration-300 ease-in-out"
-                  style={{ gridTemplateRows: isEditing ? "1fr" : "0fr" }}
-                >
-                  <div className="overflow-hidden min-h-0">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-foreground/90">
-                          Icon URL
-                        </label>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      <FormField label="Icon URL">
                         <Input
                           value={editForm.icon}
                           onChange={(e) =>
                             setEditForm({ ...editForm, icon: e.target.value })
                           }
-                          placeholder="https://example.com/icon.png"
+                          placeholder="https://…/icon.png"
+                          className="font-mono text-xs"
                         />
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-foreground/90">
-                          Title
-                        </label>
+                      </FormField>
+                      <FormField label="Title">
                         <Input
                           value={editForm.title}
                           onChange={(e) =>
-                            setEditForm({
-                              ...editForm,
-                              title: e.target.value,
-                            })
+                            setEditForm({ ...editForm, title: e.target.value })
                           }
                           placeholder="Service title"
                         />
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-foreground/90">
-                          Description
-                        </label>
+                      </FormField>
+                      <FormField label="Description">
                         <Textarea
                           value={editForm.content}
                           onChange={(e) =>
-                            setEditForm({
-                              ...editForm,
-                              content: e.target.value,
-                            })
+                            setEditForm({ ...editForm, content: e.target.value })
                           }
-                          placeholder="Service description"
+                          placeholder="Short description of this service"
                           rows={4}
                         />
-                      </div>
+                      </FormField>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-border to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           );
         })}
 
@@ -193,129 +168,97 @@ export default function Services() {
   );
 }
 
-const AddServiceModal = () => {
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [newService, setNewService] = useState({
-    title: "",
-    content: "",
-    icon: "",
-    isActive: true,
-  });
+function AddServiceModal() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [newService, setNewService] = useState<ServiceDraft>(EMPTY_DRAFT);
   const serviceHandler = usePortfolioStore().services;
+
   const handleAddService = () => {
     if (newService.title && newService.content && newService.icon) {
       serviceHandler.add(newService);
-      setNewService({
-        title: "",
-        content: "",
-        icon: "",
-        isActive: true,
-      });
-      setIsAddDialogOpen(false);
+      setNewService(EMPTY_DRAFT);
+      setIsOpen(false);
     }
   };
 
   return (
-    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger
         render={
           <AddCard
-            title="Add Service"
+            title="Add service"
             description="Add a new service to your portfolio"
             className="min-h-52"
           />
         }
       />
-      <DialogContent className="sm:max-w-[550px] border border-border shadow-2xl backdrop-blur-xl pb-0">
+      <DialogContent className="sm:max-w-lg pb-0">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">
-            Add New Service
+          <Eyebrow tone="muted" family="mono">
+            New service
+          </Eyebrow>
+          <DialogTitle className="text-lg font-semibold tracking-tight">
+            Add service
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            Create a new service to showcase on your portfolio
+          <DialogDescription>
+            A short offering shown on the portfolio landing page.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-6 py-4">
-          {/* Basics */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground">
-              Basics
-            </h3>
 
-            <div>
-              <Label htmlFor="title" className="mb-2 block">
-                Title
-              </Label>
+        <div className="space-y-6 py-4">
+          <ModalSection eyebrow="Basics">
+            <FormField label="Title">
               <Input
-                id="title"
                 value={newService.title}
                 onChange={(e) =>
                   setNewService({ ...newService, title: e.target.value })
                 }
-                placeholder="Full-Stack Application Development"
+                placeholder="Full-stack application development"
               />
-            </div>
-
-            <div>
-              <Label htmlFor="description" className="mb-2 block">
-                Description
-              </Label>
+            </FormField>
+            <FormField label="Description">
               <Textarea
-                id="description"
                 value={newService.content}
                 onChange={(e) =>
                   setNewService({ ...newService, content: e.target.value })
                 }
-                placeholder="Building scalable, modern web applications..."
+                placeholder="Building scalable, modern web applications…"
                 rows={5}
               />
-            </div>
-          </div>
+            </FormField>
+          </ModalSection>
 
-          {/* Media */}
-          <div className="pt-4">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
-              Media
-            </h3>
-
-            <div>
-              <Label htmlFor="icon" className="mb-2 block">
-                Icon URL
-              </Label>
+          <ModalSection eyebrow="Media">
+            <FormField
+              label="Icon URL"
+              hint="Use a public URL pointing at a small PNG / SVG."
+            >
               <Input
-                id="icon"
                 value={newService.icon}
                 onChange={(e) =>
                   setNewService({ ...newService, icon: e.target.value })
                 }
-                placeholder="https://example.com/icon.png"
+                placeholder="https://…/icon.png"
+                className="font-mono text-xs"
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Paste a public URL to your service icon
-              </p>
-            </div>
-          </div>
+            </FormField>
+          </ModalSection>
         </div>
+
         <DialogFooter className="sticky bottom-0 bg-inherit">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => setIsAddDialogOpen(false)}
-          >
+          <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>
             Cancel
           </Button>
           <Button
             type="submit"
             onClick={handleAddService}
-            disabled={
-              !newService.title || !newService.content || !newService.icon
-            }
+            disabled={!newService.title || !newService.content || !newService.icon}
           >
-            <Plus className="h-4 w-4" />
-            Add Service
+            <Plus className="h-3.5 w-3.5" />
+            Add service
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}

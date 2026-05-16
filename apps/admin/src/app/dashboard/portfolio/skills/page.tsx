@@ -1,313 +1,304 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Plus, X, Check, Trash2, Code } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { usePortfolioStore } from "@/stores/PortfolioStore";
-import { useShallow } from "zustand/shallow";
-import { Slider } from "@/components/ui/slider";
 import { useState } from "react";
-import SkillCategoryDialog from "@/components/portfolio/modals/SkillCategory";
+import { useShallow } from "zustand/shallow";
+import { Check, Code, Plus, Trash2, X } from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { FormField } from "@/components/ui/FormField";
 import Img from "@/components/ui/image";
 import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
 import { ConfigMultiSelect } from "@/components/ui/configMultiSelect";
+
+import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import {
   addPortfolioSkill,
   type PortfolioCatalog,
 } from "@/actions/configActions";
+import SkillCategoryDialog from "@/components/portfolio/modals/SkillCategory";
+import { cn } from "@/lib/utils";
+
+interface SkillDraft {
+  name: string;
+  level: number;
+  icon: string;
+}
+
+const EMPTY_DRAFT: SkillDraft = { name: "", level: 50, icon: "" };
 
 export default function Skills() {
-  const [addingSkillTo, setAddingSkillTo] = useState<number | null>(null);
-  const [newSkill, setNewSkill] = useState({
-    name: "",
-    level: 50,
-    icon: "",
-  });
+  const [addingTo, setAddingTo] = useState<number | null>(null);
+  const [newSkill, setNewSkill] = useState<SkillDraft>(EMPTY_DRAFT);
 
   const skillCategories = usePortfolioStore(
     useShallow((state) => state.pageData.skills),
   );
-
   const skill = usePortfolioStore().skills;
 
   const { data: catalog, mutate: mutateCatalog, isLoading: catalogLoading } =
     useCustomSWR<PortfolioCatalog>("/api/config/portfolio");
 
-  const handleAddSkill = (categoryIndex: number) => {
-    if (newSkill.name.trim() && newSkill.icon.trim()) {
-      skill.update(categoryIndex, {
-        ...skillCategories[categoryIndex],
-        skills: [...skillCategories[categoryIndex].skills, newSkill],
-      });
-      setNewSkill({
-        name: "",
-        level: 50,
-        icon: "",
-      });
-      setAddingSkillTo(null);
-    }
+  const commitNew = (categoryIndex: number) => {
+    if (!newSkill.name.trim() || !newSkill.icon.trim()) return;
+    skill.update(categoryIndex, {
+      ...skillCategories[categoryIndex],
+      skills: [...skillCategories[categoryIndex].skills, newSkill],
+    });
+    setNewSkill(EMPTY_DRAFT);
+    setAddingTo(null);
   };
 
-  const handleCancelAddSkill = () => {
-    setAddingSkillTo(null);
-    setNewSkill({
-      name: "",
-      level: 50,
-      icon: "",
-    });
+  const cancelNew = () => {
+    setAddingTo(null);
+    setNewSkill(EMPTY_DRAFT);
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-3xl font-bold mb-2">Skills</h2>
-          <p className="text-muted-foreground">
-            Manage your technical skills and proficiency levels
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <header className="space-y-1.5">
+        <Eyebrow tone="muted" family="mono">
+          Portfolio · skills
+        </Eyebrow>
+        <h1 className="text-2xl leading-tight font-semibold tracking-tight">
+          Technical skills
+        </h1>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Grouped categories with per-skill proficiency.
+        </p>
+      </header>
 
-      <div className="grid grid-cols-2 gap-6 items-start">
-        {skillCategories.map((categoryItem, categoryIndex) => (
-          <Card
-            key={categoryItem.title}
-            className="group relative rounded-2xl border-border/50 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-border hover:bg-card"
+      <div className="stagger-cascade-tight grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+        {skillCategories.map((category, categoryIndex) => (
+          <div
+            key={category.title + categoryIndex}
+            style={{ ["--stagger-index" as string]: categoryIndex }}
           >
-            <ActionButtonGroup
-              buttons={[
-                {
-                  variant: "moveUp",
-                  onClick: () => skill.moveUp(categoryIndex),
-                  disabled: categoryIndex === 0,
-                },
-                {
-                  variant: "moveDown",
-                  onClick: () => skill.moveDown(categoryIndex),
-                  disabled: categoryIndex === skillCategories.length - 1,
-                },
-                {
-                  variant: "toggle",
-                  onClick: () => skill.toggle(categoryIndex, "isActive"),
-                  active: categoryItem.isActive,
-                },
-                {
-                  variant: "edit",
-                  onClick: () => setAddingSkillTo(categoryIndex),
-                },
-                {
-                  variant: "delete",
-                  onClick: () => skill.delete(categoryIndex),
-                },
-              ]}
-              entityName="Skill Category"
-            />
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="rounded-xl bg-muted/60 p-2 ring-1 ring-border/60 transition-all duration-300 group-hover:bg-muted group-hover:ring-border">
-                  <Img
-                    width={28}
-                    height={28}
-                    src={categoryItem.icon}
-                    alt={categoryItem.title}
-                    fetchPriority="low"
-                    loading="lazy"
-                  />
+            <Card className="group/category relative tactile-lift">
+              <ActionButtonGroup
+                buttons={[
+                  {
+                    variant: "moveUp",
+                    onClick: () => skill.moveUp(categoryIndex),
+                    disabled: categoryIndex === 0,
+                  },
+                  {
+                    variant: "moveDown",
+                    onClick: () => skill.moveDown(categoryIndex),
+                    disabled: categoryIndex === skillCategories.length - 1,
+                  },
+                  {
+                    variant: "toggle",
+                    onClick: () => skill.toggle(categoryIndex, "isActive"),
+                    active: category.isActive,
+                  },
+                  {
+                    variant: "edit",
+                    onClick: () => setAddingTo(categoryIndex),
+                  },
+                  {
+                    variant: "delete",
+                    onClick: () => skill.delete(categoryIndex),
+                  },
+                ]}
+                entityName="Skill Category"
+              />
+              <CardContent className="p-6">
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="rounded-md border border-foreground/[0.06] bg-foreground/[0.02] p-2">
+                    <Img
+                      width={24}
+                      height={24}
+                      src={category.icon}
+                      alt={category.title}
+                      fetchPriority="low"
+                      loading="lazy"
+                    />
+                  </div>
+                  <h3 className="text-base leading-snug font-semibold tracking-tight">
+                    {category.title}
+                  </h3>
                 </div>
-                <h3 className="text-xl font-semibold text-foreground">
-                  {categoryItem.title}
-                </h3>
-              </div>
 
-              <div className="space-y-4">
-                {categoryItem.skills.map((skillItem, skillIndex) => {
-                  return (
-                    <div
+                <ul className="flex flex-col gap-3">
+                  {category.skills.map((skillItem, skillIndex) => (
+                    <li
                       key={skillItem.name}
-                      className="group/skill transition-all duration-200 hover:translate-x-1"
+                      className="group/skill flex flex-col gap-1.5"
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
                           <Img
-                            width={20}
-                            height={20}
+                            width={16}
+                            height={16}
                             src={skillItem.icon}
                             alt={skillItem.name}
                             fetchPriority="low"
                             loading="lazy"
                           />
-                          <span className="text-sm font-medium text-foreground/90">
+                          <span className="truncate text-sm font-medium text-foreground">
                             {skillItem.name}
                           </span>
                         </div>
-                      </div>
-
-                      <div className="h-1.5 rounded-full flex items-center justify-between gap-4">
-                        <div className="flex-1  rounded-full overflow-hidden h-full">
-                          <div
-                            className="h-full rounded-full bg-linear-to-r from-transparent to-primary transition-all duration-1000"
-                            style={{ width: `${skillItem.level}%` }}
-                          />
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                            {skillItem.level}%
+                          </span>
+                          <Button
+                            size="icon-xs"
+                            variant="ghost"
+                            onClick={() =>
+                              skill.update(categoryIndex, {
+                                ...skillCategories[categoryIndex],
+                                skills: skillCategories[
+                                  categoryIndex
+                                ].skills.filter((_, i) => i !== skillIndex),
+                              })
+                            }
+                            className="opacity-0 hover:bg-destructive/[0.08] hover:text-destructive group-hover/skill:opacity-100 focus-visible:opacity-100"
+                            aria-label={`Remove ${skillItem.name}`}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
                         </div>
-                        <span className="min-w-[35px] text-right text-xs text-muted-foreground">
-                          {skillItem.level}%
-                        </span>
+                      </div>
+                      <div className="h-1 overflow-hidden rounded-full bg-foreground/[0.06]">
+                        <div
+                          className="h-full rounded-full bg-primary transition-[width] duration-500"
+                          style={{ width: `${skillItem.level}%` }}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
 
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() =>
-                            skill.update(categoryIndex, {
-                              ...skillCategories[categoryIndex],
-                              skills: skillCategories[
-                                categoryIndex
-                              ].skills.filter((_, i) => i !== skillIndex),
-                            })
+                <div
+                  className="grid transition-[grid-template-rows] duration-300 ease-out"
+                  style={{
+                    gridTemplateRows: addingTo === categoryIndex ? "1fr" : "0fr",
+                  }}
+                >
+                  <div className="min-h-0 overflow-hidden">
+                    <div className="mt-6 space-y-3 rounded-md border border-foreground/[0.06] bg-foreground/[0.02] p-3">
+                      <FormField label="Skill">
+                        <ConfigMultiSelect
+                          mode="single"
+                          value={newSkill.name ? [newSkill.name] : []}
+                          onChange={(next) =>
+                            setNewSkill({ ...newSkill, name: next[0] ?? "" })
                           }
-                          className="h-7 w-7 rounded-lg border border-border/50 bg-muted/50 text-muted-foreground opacity-0 backdrop-blur-sm transition-all duration-300 hover:border-destructive/40 hover:bg-destructive/90 hover:text-destructive-foreground group-hover/skill:opacity-100"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Add Skill Form */}
-              <div
-                className="grid transition-[grid-template-rows] duration-300 ease-in-out"
-                style={{
-                  gridTemplateRows:
-                    addingSkillTo === categoryIndex ? "1fr" : "0fr",
-                }}
-              >
-                <div className="overflow-hidden min-h-0">
-                  <div className="mt-8">
-                    <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-4">
-                      <ConfigMultiSelect
-                        mode="single"
-                        value={newSkill.name ? [newSkill.name] : []}
-                        onChange={(next) =>
-                          setNewSkill({ ...newSkill, name: next[0] ?? "" })
-                        }
-                        available={catalog?.skillCatalog ?? []}
-                        loading={catalogLoading}
-                        onCreate={addPortfolioSkill}
-                        onOptimisticCreate={(values) =>
-                          mutateCatalog(
-                            (prev) =>
-                              prev
-                                ? { ...prev, skillCatalog: values }
-                                : {
-                                    skillCatalog: values,
-                                    clientTypeCatalog: [],
-                                  },
-                            false,
-                          )
-                        }
-                        onAfterCreate={(values) =>
-                          mutateCatalog(
-                            (prev) =>
-                              prev
-                                ? { ...prev, skillCatalog: values }
-                                : {
-                                    skillCatalog: values,
-                                    clientTypeCatalog: [],
-                                  },
-                            false,
-                          )
-                        }
-                        placeholder="Pick or create a skill..."
-                        searchPlaceholder="Search or create a skill..."
-                        itemIcon={Code}
-                        toastMessages={{
-                          loading: "Creating skill...",
-                          success: "Skill added to catalog",
-                          err: "Failed to create skill",
-                        }}
-                      />
-                      <Input
-                        placeholder="Icon URL"
-                        value={newSkill.icon}
-                        onChange={(e) =>
-                          setNewSkill({ ...newSkill, icon: e.target.value })
-                        }
-                      />
-
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs text-muted-foreground">
-                            Proficiency Level
+                          available={catalog?.skillCatalog ?? []}
+                          loading={catalogLoading}
+                          onCreate={addPortfolioSkill}
+                          onOptimisticCreate={(values) =>
+                            mutateCatalog(
+                              (prev) =>
+                                prev
+                                  ? { ...prev, skillCatalog: values }
+                                  : { skillCatalog: values, clientTypeCatalog: [] },
+                              false,
+                            )
+                          }
+                          onAfterCreate={(values) =>
+                            mutateCatalog(
+                              (prev) =>
+                                prev
+                                  ? { ...prev, skillCatalog: values }
+                                  : { skillCatalog: values, clientTypeCatalog: [] },
+                              false,
+                            )
+                          }
+                          placeholder="Pick or create a skill…"
+                          searchPlaceholder="Search or create a skill…"
+                          itemIcon={Code}
+                          toastMessages={{
+                            loading: "Creating skill…",
+                            success: "Skill added to catalog",
+                            err: "Failed to create skill",
+                          }}
+                        />
+                      </FormField>
+                      <FormField label="Icon URL">
+                        <Input
+                          placeholder="https://…/icon.png"
+                          value={newSkill.icon}
+                          onChange={(e) =>
+                            setNewSkill({ ...newSkill, icon: e.target.value })
+                          }
+                          className="font-mono text-xs"
+                        />
+                      </FormField>
+                      <FormField
+                        label={
+                          <span className="inline-flex items-center justify-between gap-2 w-full">
+                            <span>Proficiency</span>
+                            <span className="font-mono normal-case tabular-nums tracking-normal text-foreground/80">
+                              {newSkill.level}%
+                            </span>
                           </span>
-                          <span className="text-xs font-medium text-foreground/90">
-                            {newSkill.level}%
-                          </span>
-                        </div>
+                        }
+                      >
                         <Slider
                           value={[newSkill.level]}
                           onValueChange={(value) =>
-                            setNewSkill({ ...newSkill, level: value[0] })
+                            setNewSkill({
+                              ...newSkill,
+                              level: value[0] ?? 0,
+                            })
                           }
                           min={0}
                           max={100}
                           step={1}
                           className="w-full"
                         />
-                      </div>
-
-                      <div className="flex gap-2 pt-2">
+                      </FormField>
+                      <div className="flex items-center gap-1.5 pt-1">
                         <Button
                           size="sm"
-                          onClick={() => handleAddSkill(categoryIndex)}
+                          onClick={() => commitNew(categoryIndex)}
                           className="flex-1"
                           disabled={!newSkill.name || !newSkill.icon}
                         >
-                          <Check size={14} />
-                          Add Skill
+                          <Check className="h-3 w-3" />
+                          Add skill
                         </Button>
                         <Button
-                          size="icon"
+                          size="icon-sm"
                           variant="ghost"
-                          onClick={handleCancelAddSkill}
+                          onClick={cancelNew}
+                          aria-label="Cancel"
                         >
-                          <X size={14} />
+                          <X className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Add Skill Button */}
-              <div
-                className="grid transition-[grid-template-rows] duration-300 ease-in-out"
-                style={{
-                  gridTemplateRows:
-                    addingSkillTo === categoryIndex ? "0fr" : "1fr",
-                }}
-              >
-                <div className="overflow-hidden min-h-0">
-                  <div className="mt-8">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full border-dashed text-foreground/80"
-                      onClick={() => setAddingSkillTo(categoryIndex)}
-                    >
-                      <Plus size={14} />
-                      Add Skill
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                {addingTo !== categoryIndex && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setAddingTo(categoryIndex)}
+                    className={cn(
+                      "mt-5 w-full text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <Plus className="h-3 w-3" />
+                    Add skill
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         ))}
+
         <SkillCategoryDialog>
-          <AddCard title="Add Category" className="min-h-full" />
+          <AddCard title="Add category" className="min-h-full" />
         </SkillCategoryDialog>
       </div>
     </div>

@@ -1,23 +1,26 @@
 "use client";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useShallow } from "zustand/shallow";
 import {
   ExternalLink,
   FileText,
-  Play,
   Link as LinkIcon,
+  Play,
   type LucideIcon,
 } from "lucide-react";
 import Github from "@devicon/react/github/original";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { usePortfolioStore } from "@/stores/PortfolioStore";
-import { useShallow } from "zustand/shallow";
-import ProjectDialog from "@/components/portfolio/modals/ProjectModal";
+import { Eyebrow } from "@/components/ui/Eyebrow";
 import Img from "@/components/ui/image";
 import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
-import { useState } from "react";
+import { usePortfolioStore } from "@/stores/PortfolioStore";
+import ProjectDialog from "@/components/portfolio/modals/ProjectModal";
 import { PageData } from "@tabsircg/schemas/portfolio";
+import { cn } from "@/lib/utils";
 
 type LinkType = PageData["projects"][number]["links"][number]["type"];
 
@@ -33,139 +36,142 @@ export default function Projects() {
   const projects = usePortfolioStore(
     useShallow((state) => state.pageData.projects),
   );
-
   const project = usePortfolioStore().projects;
-
   const [editingIndex, setEditingIndex] = useState<number | "new" | null>(null);
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-3xl font-bold mb-2">Projects</h2>
-          <p className="text-muted-foreground">Manage your portfolio projects</p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <header className="space-y-1.5">
+        <Eyebrow tone="muted" family="mono">
+          Portfolio · projects
+        </Eyebrow>
+        <h1 className="text-2xl leading-tight font-semibold tracking-tight">
+          Projects
+        </h1>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          The case studies, demos, and freelance work surfaced on the projects
+          page.
+        </p>
+      </header>
 
-      <div className="grid grid-cols-2 gap-6">
-        {projects.map((projectItem, index) => (
-          <Card
-            key={index}
-            className="group relative overflow-hidden border-border/50 bg-card/60 pt-0 backdrop-blur-sm transition-all duration-500 hover:border-border"
+      <div className="stagger-cascade-tight grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {projects.map((p, index) => (
+          <div
+            key={p.title + index}
+            style={{ ["--stagger-index" as string]: index }}
           >
-            <div className="relative aspect-video overflow-hidden bg-muted/30">
-              <Img
-                src={projectItem.image}
-                alt={projectItem.title}
-                className="h-full transition-transform duration-700 group-hover:scale-105"
-                fetchPriority="low"
-                loading="lazy"
-              />
-
-              <div className="absolute inset-0 bg-linear-to-t from-foreground/80 via-foreground/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-              <Badge
-                variant="secondary"
-                className="absolute left-4 top-4 border-border/60 bg-background/70 text-foreground backdrop-blur-md"
-              >
-                {projectItem.type}
-              </Badge>
-            </div>
-
-            <CardContent className="p-6">
-              <h3 className="mb-2 text-2xl font-semibold text-foreground transition-colors group-hover:text-foreground">
-                {projectItem.title}
-              </h3>
-
-              <p className="mb-4 line-clamp-2 text-[15px] leading-relaxed text-muted-foreground">
-                {projectItem.description}
-              </p>
-
-              <div className="flex flex-wrap gap-2 mb-6">
-                {projectItem.skills.slice(0, 4).map((skill) => (
+            <Card className="group/project relative flex h-full flex-col overflow-hidden tactile-lift pt-0">
+              <div className="relative aspect-video overflow-hidden bg-foreground/[0.04]">
+                <Img
+                  src={p.image}
+                  alt={p.title}
+                  className="h-full w-full object-cover"
+                  fetchPriority="low"
+                  loading="lazy"
+                />
+                <Badge
+                  variant="neutral"
+                  className="absolute top-3 left-3 border-foreground/[0.08] bg-card/85 backdrop-blur-md"
+                >
+                  {p.type}
+                </Badge>
+                {p.featured && (
                   <Badge
-                    key={skill}
-                    variant="outline"
-                    className="border-border/60 bg-muted/60 text-xs font-normal text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                    variant="accent"
+                    className="absolute top-3 right-3 border-primary/30 bg-primary/[0.12] backdrop-blur-md"
                   >
-                    {skill}
-                  </Badge>
-                ))}
-                {projectItem.skills.length > 4 && (
-                  <Badge
-                    variant="outline"
-                    className="border-border/60 bg-muted/60 text-xs font-normal text-muted-foreground"
-                  >
-                    +{projectItem.skills.length - 4}
+                    Featured
                   </Badge>
                 )}
               </div>
 
-              {projectItem.links.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {projectItem.links.map((link, i) => {
-                    const Icon = LINK_ICONS[link.type] ?? LinkIcon;
-                    const isPrimary = i === 0;
-                    return (
-                      <Button
-                        key={i}
-                        render={
-                          <a
-                            href={link.url || "#"}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Icon className="w-4 h-4" />
-                            {link.text || link.type}
-                          </a>
-                        }
-                        variant={isPrimary ? "default" : "outline"}
-                        className={
-                          isPrimary
-                            ? "min-w-32 flex-1 rounded-xl border border-border/60 bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                            : "min-w-32 flex-1 rounded-xl border-border/60 bg-transparent text-foreground/80 hover:bg-accent"
-                        }
-                      />
-                    );
-                  })}
+              <CardContent className="flex flex-1 flex-col gap-3 p-5">
+                <div className="flex flex-col gap-1">
+                  <h3 className="truncate text-base leading-snug font-semibold tracking-tight text-foreground">
+                    {p.title}
+                  </h3>
+                  <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+                    {p.description}
+                  </p>
                 </div>
-              )}
-            </CardContent>
 
-            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-border to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                {p.skills.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1">
+                    {p.skills.slice(0, 4).map((skill) => (
+                      <Badge key={skill} variant="neutral">
+                        {skill}
+                      </Badge>
+                    ))}
+                    {p.skills.length > 4 && (
+                      <Badge variant="ghost">+{p.skills.length - 4}</Badge>
+                    )}
+                  </div>
+                )}
 
-            <ActionButtonGroup
-              buttons={[
-                {
-                  variant: "moveUp",
-                  onClick: () => project.moveUp(index),
-                  disabled: index === 0,
-                },
-                {
-                  variant: "moveDown",
-                  onClick: () => project.moveDown(index),
-                  disabled: index === projects.length - 1,
-                },
-                {
-                  variant: "toggle",
-                  onClick: () => project.toggle(index, "isActive"),
-                  active: projectItem.isActive,
-                },
-                {
-                  variant: "edit",
-                  onClick: () => setEditingIndex(index),
-                },
-                {
-                  variant: "delete",
-                  onClick: () => project.delete(index),
-                },
-              ]}
-              entityName="Project"
-            />
-          </Card>
+                {p.links.length > 0 && (
+                  <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
+                    {p.links.map((link, i) => {
+                      const Icon = LINK_ICONS[link.type] ?? LinkIcon;
+                      const isPrimary = i === 0;
+                      return (
+                        <a
+                          key={i}
+                          href={link.url || "#"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={cn(
+                            buttonVariants({
+                              variant: isPrimary ? "default" : "outline",
+                              size: "sm",
+                            }),
+                            "min-w-24 gap-1.5",
+                          )}
+                        >
+                          <Icon className="h-3 w-3" />
+                          <span className="truncate">
+                            {link.text || link.type}
+                          </span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+
+              <ActionButtonGroup
+                buttons={[
+                  {
+                    variant: "moveUp",
+                    onClick: () => project.moveUp(index),
+                    disabled: index === 0,
+                  },
+                  {
+                    variant: "moveDown",
+                    onClick: () => project.moveDown(index),
+                    disabled: index === projects.length - 1,
+                  },
+                  {
+                    variant: "toggle",
+                    onClick: () => project.toggle(index, "isActive"),
+                    active: p.isActive,
+                  },
+                  {
+                    variant: "edit",
+                    onClick: () => setEditingIndex(index),
+                  },
+                  {
+                    variant: "delete",
+                    onClick: () => project.delete(index),
+                  },
+                ]}
+                entityName="Project"
+              />
+            </Card>
+          </div>
         ))}
 
         <AddCard
-          title="Add Project"
+          title="Add project"
           description="Add a new project to your portfolio"
           onClick={() => setEditingIndex("new")}
         />

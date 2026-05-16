@@ -1,114 +1,115 @@
 "use client";
-
-import { CheckCircle2, Award, Calendar } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { ExternalLink } from "lucide-react";
-import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { useShallow } from "zustand/shallow";
+import { Award, Calendar, CheckCircle2, ExternalLink } from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { usePortfolioStore } from "@/stores/PortfolioStore";
 import CredentialDialog from "@/components/portfolio/modals/Credential";
 import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
+import { cn } from "@/lib/utils";
 
 export default function Credentials() {
   const credentials = usePortfolioStore(
-    useShallow((state) => state.pageData.credentials)
+    useShallow((state) => state.pageData.credentials),
   );
-
   const credential = usePortfolioStore().credentials;
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-3xl font-bold mb-2">Credentials</h2>
-          <p className="text-muted-foreground">
-            Manage certifications and achievements
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <header className="space-y-1.5">
+        <Eyebrow tone="muted" family="mono">
+          Portfolio · credentials
+        </Eyebrow>
+        <h1 className="text-2xl leading-tight font-semibold tracking-tight">
+          Certifications &amp; achievements
+        </h1>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Public-facing record of what you&apos;ve completed.
+        </p>
+      </header>
 
-      <div className="grid grid-cols-2 gap-6">
-        {credentials.map((credentialItem, index) => (
-          <Card
-            key={index}
-            className="group relative rounded-xl border-border/50 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-border hover:bg-card"
+      <div className="stagger-cascade-tight grid grid-cols-1 gap-4 md:grid-cols-2">
+        {credentials.map((c, index) => (
+          <div
+            key={c.title + index}
+            style={{ ["--stagger-index" as string]: index }}
           >
-            <ActionButtonGroup
-              buttons={[
-                {
-                  variant: "moveUp",
-                  onClick: () => credential.moveUp(index),
-                  disabled: index === 0,
-                },
-                {
-                  variant: "moveDown",
-                  onClick: () => credential.moveDown(index),
-                  disabled: index === credentials.length - 1,
-                },
-                {
-                  variant: "toggle",
-                  onClick: () => credential.toggle(index, "isActive"),
-                  active: credentialItem.isActive,
-                },
-                {
-                  variant: "delete",
-                  onClick: () => credential.delete(index),
-                },
-              ]}
-              entityName="Credential"
-            />
-
-            <CardContent className="p-6 h-full flex flex-col">
-              <div className="flex items-start gap-3 mb-4">
-                <div className="rounded-lg border border-primary/20 bg-primary/10 p-2 transition-all duration-300 group-hover:border-primary/30 group-hover:bg-primary/20">
-                  <Award className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="mb-1 text-lg font-semibold text-foreground transition-colors duration-300 group-hover:text-primary">
-                    {credentialItem.title}
-                  </h3>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    <span>{credentialItem.issuer}</span>
+            <Card className="group/credential relative tactile-lift">
+              <ActionButtonGroup
+                buttons={[
+                  {
+                    variant: "moveUp",
+                    onClick: () => credential.moveUp(index),
+                    disabled: index === 0,
+                  },
+                  {
+                    variant: "moveDown",
+                    onClick: () => credential.moveDown(index),
+                    disabled: index === credentials.length - 1,
+                  },
+                  {
+                    variant: "toggle",
+                    onClick: () => credential.toggle(index, "isActive"),
+                    active: c.isActive,
+                  },
+                  {
+                    variant: "delete",
+                    onClick: () => credential.delete(index),
+                  },
+                ]}
+                entityName="Credential"
+              />
+              <CardContent className="flex h-full flex-col p-6">
+                <div className="mb-3 flex items-start gap-3">
+                  <div className="rounded-md border border-primary/15 bg-primary/[0.08] p-2 text-primary">
+                    <Award className="h-4 w-4" />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <h3 className="truncate text-base leading-snug font-semibold tracking-tight text-foreground">
+                      {c.title}
+                    </h3>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <CheckCircle2 className="h-3 w-3 text-success" />
+                      <span className="truncate">{c.issuer}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <p className="mb-4 grow text-sm leading-relaxed text-foreground/80">
-                {credentialItem.description}
-              </p>
+                <p className="mb-4 grow text-sm leading-relaxed text-foreground/80">
+                  {c.description}
+                </p>
 
-              <div className="flex items-center justify-between border-t border-border/60 pt-4">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Calendar className="h-3.5 w-3.5" />
-                  <span>{credentialItem.date}</span>
+                <div className="flex items-center justify-between border-t border-foreground/[0.06] pt-3 font-mono text-[11px] text-muted-foreground">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Calendar className="h-3 w-3" />
+                    {c.date}
+                  </span>
+                  {c.link && (
+                    <a
+                      href={c.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cn(
+                        buttonVariants({ variant: "outline", size: "xs" }),
+                        "gap-1.5",
+                      )}
+                    >
+                      <span>Verify</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
                 </div>
-                <div className="flex gap-2">
-                  <a
-                    href={`#cert-${index}`}
-                    className="rounded-lg border border-border/60 bg-muted/60 px-3 py-1.5 text-xs text-foreground/80 transition-all duration-300 hover:bg-accent active:scale-95"
-                  >
-                    View
-                  </a>
-
-                  <a
-                    href={credentialItem.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 rounded-lg border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs text-primary transition-all duration-300 hover:border-primary/30 hover:bg-primary/20 active:scale-95"
-                  >
-                    Verify
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         ))}
 
         <CredentialDialog>
           <AddCard
-            title="Add Credential"
+            title="Add credential"
             description="Add a new certification or achievement"
           />
         </CredentialDialog>
