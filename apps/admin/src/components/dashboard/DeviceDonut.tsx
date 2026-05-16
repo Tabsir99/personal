@@ -1,123 +1,120 @@
 "use client";
 import { useState } from "react";
-import { useGeoStats } from "@/hooks/useDashboardData";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { Skeleton } from "@/components/ui/skeleton";
+
+import { useGeoStats } from "@/hooks/useDashboardData";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { MetricNumber } from "@/components/ui/MetricNumber";
+
 import { DateRangeSelector } from "./DateRangeSelector";
+import { ChartCard } from "./ChartCard";
+import { ChartTooltipShell, ChartTooltipRow } from "./ChartTooltip";
+
+interface GeoStat {
+  devices?: { mobile?: number; desktop?: number; tablet?: number };
+}
+
+const SEGMENTS = [
+  { key: "desktop", name: "Desktop", color: "var(--chart-1)" },
+  { key: "mobile", name: "Mobile", color: "var(--chart-2)" },
+  { key: "tablet", name: "Tablet", color: "var(--chart-3)" },
+] as const;
+
+const numberFormat = new Intl.NumberFormat();
 
 export function DeviceDonut() {
   const [days, setDays] = useState(7);
   const { data, error, isLoading } = useGeoStats(days);
 
-  let mobile = 0;
-  let desktop = 0;
-  let tablet = 0;
-
+  const totals = { mobile: 0, desktop: 0, tablet: 0 };
   if (data) {
-    data.forEach((d: any) => {
-      if (d.devices) {
-        mobile += d.devices.mobile || 0;
-        desktop += d.devices.desktop || 0;
-        tablet += d.devices.tablet || 0;
-      }
+    (data as GeoStat[]).forEach((d) => {
+      if (!d.devices) return;
+      totals.mobile += d.devices.mobile ?? 0;
+      totals.desktop += d.devices.desktop ?? 0;
+      totals.tablet += d.devices.tablet ?? 0;
     });
   }
+  const total = totals.mobile + totals.desktop + totals.tablet;
 
-  const chartData = [
-    { name: "Desktop", value: desktop },
-    { name: "Mobile", value: mobile },
-    { name: "Tablet", value: tablet },
-  ].filter((d) => d.value > 0);
+  const chartData = SEGMENTS.map((seg) => ({
+    name: seg.name,
+    value: totals[seg.key],
+    color: seg.color,
+  })).filter((d) => d.value > 0);
 
-  const COLORS = [
-    "var(--chart-1)", // Desktop — indigo
-    "var(--chart-2)", // Mobile  — cyan
-    "var(--chart-3)", // Tablet  — violet
-  ];
-  const total = mobile + desktop + tablet;
+  const isEmpty = !error && !isLoading && total === 0;
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle>Devices</CardTitle>
-        <DateRangeSelector value={days} onChange={setDays} />
-      </CardHeader>
-      <CardContent className="h-[280px] relative">
-        {error ? (
-          <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
-            Failed to load
+    <ChartCard
+      eyebrow="Audience"
+      title="Devices"
+      action={<DateRangeSelector value={days} onChange={setDays} />}
+      height={300}
+      isLoading={isLoading}
+      isError={!!error}
+      isEmpty={isEmpty}
+    >
+      <div className="relative flex h-full flex-col">
+        <div className="relative flex-1">
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1">
+            <MetricNumber value={numberFormat.format(total)} size="lg" />
+            <Eyebrow tone="muted" family="mono">
+              Total sessions
+            </Eyebrow>
           </div>
-        ) : isLoading ? (
-          <Skeleton className="h-full w-full rounded-xl" />
-        ) : total > 0 ? (
-          <>
-            <div className="absolute inset-0 flex items-center justify-center pt-8">
-              <div className="text-center">
-                <div className="text-2xl font-bold">
-                  {new Intl.NumberFormat().format(total)}
-                </div>
-                <div className="text-xs text-muted-foreground">Sessions</div>
-              </div>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData}
+                innerRadius={64}
+                outerRadius={92}
+                paddingAngle={2}
+                dataKey="value"
+                stroke="var(--card)"
+                strokeWidth={2}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={index} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (!active || !payload?.length) return null;
+                  const seg = payload[0];
+                  const value = seg.value as number;
+                  const pct = total > 0 ? ((value / total) * 100).toFixed(1) : "0";
+                  return (
+                    <ChartTooltipShell>
+                      <ChartTooltipRow
+                        swatch={seg.payload.color}
+                        name={seg.name}
+                        value={value}
+                        suffix={`(${pct}%)`}
+                      />
+                    </ChartTooltipShell>
+                  );
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="flex justify-center gap-4 pt-2">
+          {chartData.map((entry) => (
+            <div
+              key={entry.name}
+              className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground"
+            >
+              <span
+                aria-hidden="true"
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ backgroundColor: entry.color }}
+              />
+              <span>{entry.name}</span>
             </div>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={2}
-                  dataKey="value"
-                >
-                  {chartData.map((_, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip
-                  content={({ active, payload }: any) => {
-                    if (!active || !payload || !payload.length) return null;
-                    const data = payload[0];
-                    return (
-                      <div className="rounded-lg border bg-background/80 backdrop-blur-md p-2 shadow-lg flex items-center gap-2 text-sm">
-                        <div
-                          className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: data.payload.fill }}
-                        />
-                        <span className="font-medium">{data.name}:</span>
-                        <span>{data.value}</span>
-                        <span className="text-muted-foreground ml-1">
-                          ({((data.value / total) * 100).toFixed(1)}%)
-                        </span>
-                      </div>
-                    );
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="flex justify-center gap-4 mt-2">
-              {chartData.map((entry, index) => (
-                <div
-                  key={entry.name}
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground"
-                >
-                  <div
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                  />
-                  <span>{entry.name}</span>
-                </div>
-              ))}
-            </div>
-          </>
-        ) : (
-          <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
-            No data
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          ))}
+        </div>
+      </div>
+    </ChartCard>
   );
 }
