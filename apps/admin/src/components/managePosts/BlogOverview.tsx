@@ -9,6 +9,8 @@ import { useCustomSWR } from "@/hooks/useCustomSwr";
 import { BlogCardSkeletonGrid } from "../ui/Skeletons/BlogCardSkeleton";
 import { callWithToast } from "@/lib/utils";
 import { deleteBlog, featureBlog, toggleBlogStatus } from "@/actions/blogActions";
+import { Eyebrow } from "../ui/Eyebrow";
+import { Button } from "../ui/button";
 
 const DEFAULT_FILTERS: BlogFilters = {
   status: "all",
@@ -113,36 +115,66 @@ const BlogOverview = () => {
       />
 
       <div className="mx-auto w-full max-w-full py-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="stagger-cascade-tight grid grid-cols-1 md:grid-cols-2 gap-4">
           {isLoading ? (
             <BlogCardSkeletonGrid />
-          ) : (
-            filteredPosts?.map((post) => {
+          ) : filteredPosts.length > 0 ? (
+            filteredPosts.map((post, index) => {
               return (
-                <CMSBlogCard
+                <div
                   key={post.blogId}
-                  blog={post}
-                  isFeatured={post.blogId === currentFeaturedId}
-                  toggleStatus={toggleStatus}
-                  confirmDelete={confirmDelete}
-                  setFeatured={setFeatured}
-                />
+                  style={{ ["--stagger-index" as string]: index }}
+                >
+                  <CMSBlogCard
+                    blog={post}
+                    isFeatured={post.blogId === currentFeaturedId}
+                    toggleStatus={toggleStatus}
+                    confirmDelete={confirmDelete}
+                    setFeatured={setFeatured}
+                  />
+                </div>
               );
             })
+          ) : (
+            <div className="col-span-full">
+              <EmptyFilters onClear={handleClearFilters} />
+            </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="mt-10 inline-block rounded-lg bg-muted p-4">
-          <p className="font-medium text-muted-foreground">
-            Total Posts: {items.length} <br />
-            Showing: {filteredPosts.length > 0 ? "1" : "0"} -{" "}
-            {filteredPosts.length}
-          </p>
+        <div className="mt-10 inline-flex items-baseline gap-3 rounded-md border border-foreground/[0.06] bg-card px-4 py-2.5 font-mono text-xs text-muted-foreground">
+          <span>
+            <span className="text-foreground">{items.length}</span> total
+          </span>
+          <span aria-hidden="true">·</span>
+          <span>
+            showing <span className="text-foreground">{filteredPosts.length}</span>
+          </span>
         </div>
       </div>
     </>
   );
 };
+
+function EmptyFilters({ onClear }: { onClear: () => void }) {
+  return (
+    <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed border-foreground/[0.08] bg-card/40 px-6 py-10">
+      <Eyebrow tone="muted" size="xs" family="mono">
+        No matches
+      </Eyebrow>
+      <h3 className="text-base font-semibold tracking-tight text-foreground">
+        No blogs match these filters
+      </h3>
+      <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
+        Try adjusting status, kind, or schema — or clear all filters to see
+        everything you&apos;ve published.
+      </p>
+      <Button variant="outline" size="sm" onClick={onClear} className="mt-1">
+        Clear filters
+      </Button>
+    </div>
+  );
+}
 
 export default BlogOverview;

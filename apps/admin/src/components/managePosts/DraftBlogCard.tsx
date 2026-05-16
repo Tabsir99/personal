@@ -29,7 +29,7 @@ export default function DraftBlogCard({
       href={`write-blog/${blog.blogId}`}
       className="block"
     >
-      <Card className="group/draft-card cursor-pointer transition-shadow hover:shadow-card-hover">
+      <Card className="group/draft-card tactile-lift cursor-pointer">
         <CardHeader className="pt-5 pb-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 flex-col gap-2">

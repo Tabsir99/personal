@@ -33,19 +33,26 @@ const LogIn = () => {
       {/* Ambient glow */}
       <div className="fixed top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/5 blur-[80px] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-[420px]">
+      <div className="stagger-cascade relative z-10 w-full max-w-[420px]">
         {/* Top meta row */}
-        <div className="flex items-center justify-between mb-5 px-0.5">
+        <div
+          className="flex items-center justify-between mb-5 px-0.5"
+          style={{ ["--stagger-index" as string]: 0 }}
+        >
           <span className="font-mono text-[0.65rem] tracking-widest text-muted-foreground uppercase">
             sys / admin
           </span>
           <span className="font-mono text-[0.65rem] tracking-widest uppercase text-primary bg-primary/10 border border-primary/25 px-2 py-0.5 rounded-sm">
-            ● Secure
+            <span className="inline-block size-1 mr-1 animate-breathe rounded-full bg-primary align-middle" />
+            Secure
           </span>
         </div>
 
         {/* Card */}
-        <Card className="relative overflow-hidden border border-border bg-card shadow-2xl rounded-xl">
+        <Card
+          className="relative overflow-hidden border border-border bg-card shadow-card-rest rounded-xl"
+          style={{ ["--stagger-index" as string]: 1 }}
+        >
           <CardHeader className="px-8 pt-8 pb-6">
             <div>
               <h1 className="font-sans font-extrabold text-[1.75rem] tracking-tight leading-none text-foreground mb-2">
@@ -147,7 +154,10 @@ const LogIn = () => {
         </Card>
 
         {/* Footer note */}
-        <p className="text-center mt-5 font-mono text-[0.6rem] tracking-widest uppercase text-muted-foreground/40">
+        <p
+          className="text-center mt-5 font-mono text-[0.6rem] tracking-widest uppercase text-muted-foreground/40"
+          style={{ ["--stagger-index" as string]: 2 }}
+        >
           All access attempts are logged and monitored
         </p>
       </div>

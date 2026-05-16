@@ -122,6 +122,117 @@
   }
 }
 
+/* ============================================================
+   Motion language — three pillars, used everywhere.
+
+   1. Stagger Cascade — a page reveals as a single composed move.
+      Children of `.stagger-cascade` fade up with an --stagger-index
+      derived delay. Read like "the whole composition was thought
+      through" rather than "everything blinks in at once".
+
+   2. Tactile Lift — hover/focus on interactive surfaces gains 1px
+      of Y-shift + shadow depth. Says "this thing responds".
+
+   3. Breathing Status — already in StatusDot via animate-breathe.
+
+   Reduced motion strips all of it.
+   ============================================================ */
+
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stagger-in-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.stagger-cascade > * {
+  opacity: 0;
+  animation: stagger-in 480ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--stagger-index, 0) * 60ms + 80ms);
+}
+
+.stagger-cascade-tight > * {
+  opacity: 0;
+  animation: stagger-in 360ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--stagger-index, 0) * 40ms + 40ms);
+}
+
+.tactile-lift {
+  transition:
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 160ms;
+}
+
+.tactile-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.tactile-lift:active {
+  transform: translateY(0);
+  transition-duration: 80ms;
+}
+
+/* Root-level view transition crossfade for route changes — kicks in
+   automatically when Next 16 wraps a navigation in startViewTransition. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 240ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: view-fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: stagger-in;
+}
+
+@keyframes view-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* The sidebar active rail uses a shared view-transition-name so that
+   when the route changes the rail slides between positions instead of
+   fading out + in. See [data-active-rail] on the nav links. */
+[data-active-rail="true"] {
+  view-transition-name: sidebar-active-rail;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+  .stagger-cascade > *,
+  .stagger-cascade-tight > * {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

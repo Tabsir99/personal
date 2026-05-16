@@ -66,7 +66,7 @@ export default function CMSBlogCard({
   const overflowTags = blog.tags.length - visibleTags.length;
 
   return (
-    <Card className="group/blog-card flex flex-col justify-between transition-shadow hover:shadow-card-hover">
+    <Card className="group/blog-card tactile-lift flex flex-col justify-between">
       <CardHeader className="pt-5 pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-2">

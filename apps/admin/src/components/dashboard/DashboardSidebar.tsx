@@ -157,14 +157,16 @@ const DashBoardSidebar = () => {
                     : "text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground",
                 )}
               >
-                {/* Quiet active-state hairline — no glow, no gradient */}
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "absolute top-1/2 left-0 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary transition-opacity duration-200",
-                    item.isActive ? "opacity-100" : "opacity-0",
-                  )}
-                />
+                {/* Quiet active-state hairline — no glow, no gradient.
+                    view-transition-name on the active rail makes it slide
+                    between positions on route change instead of fade. */}
+                {item.isActive && (
+                  <span
+                    aria-hidden="true"
+                    data-active-rail="true"
+                    className="absolute top-1/2 left-0 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary"
+                  />
+                )}
                 <item.Icon
                   className={cn(
                     "h-[18px] w-[18px] shrink-0 transition-colors",
