@@ -32,11 +32,6 @@ export function Header() {
     { id: "now", label: "Now", num: "06" },
   ];
 
-  function jumpTo(id: string) {
-    const el = document.getElementById(id);
-    if (el) window.scrollTo({ top: el.offsetTop - 40, behavior: "smooth" });
-  }
-
   return (
     <header
       className={cn(
@@ -47,11 +42,7 @@ export function Header() {
       )}
     >
       <a
-        href="#hero"
-        onClick={(e) => {
-          e.preventDefault();
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }}
+        href="/#hero"
         className="flex items-center gap-2 font-serif text-[15px] tracking-[-0.01em]"
       >
         <span className="italic">Tabsir</span>
@@ -73,10 +64,6 @@ export function Header() {
                 ? "text-cream before:text-accent"
                 : "text-muted before:text-muted-2 hover:text-cream",
             )}
-            onClick={(e) => {
-              e.preventDefault();
-              jumpTo(it.id);
-            }}
           >
             {it.label}
           </a>
@@ -85,10 +72,6 @@ export function Header() {
       <a
         href="#contact"
         className="inline-flex items-center gap-[7px] rounded-full border border-line px-3 py-[6px] font-mono text-[9.5px] tracking-[0.08em] uppercase transition-all duration-200 hover:border-accent hover:bg-accent/8"
-        onClick={(e) => {
-          e.preventDefault();
-          jumpTo("contact");
-        }}
       >
         <span className="h-[6px] w-[6px] animate-pulse-soft rounded-full bg-phosphor shadow-[0_0_8px_var(--color-phosphor)]"></span>
         Available

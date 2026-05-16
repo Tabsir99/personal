@@ -1,17 +1,8 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Terminal } from "./terminal";
 import { ScrambleWord } from "./scramble-word";
 import { cn } from "@/lib/utils";
-
-function formatClock() {
-  // Approximate Dhaka time (UTC+6) using user clock offset isn't reliable;
-  // just use local time for warmth — labelled "Field station · Dhaka".
-  const d = new Date();
-  const h = String(d.getHours()).padStart(2, "0");
-  const m = String(d.getMinutes()).padStart(2, "0");
-  return `${h}:${m}`;
-}
 
 /* ===== Hero =====
    Pain-point first. The hook word ([FRICTION]) scrambles through related
@@ -63,14 +54,6 @@ export function Hero() {
       cancelAnimationFrame(raf);
     };
   }, []);
-
-  // Local time for the field-station meta line.
-  const [clock, setClock] = useState(() => formatClock());
-  useEffect(() => {
-    const id = setInterval(() => setClock(formatClock()), 30 * 1000);
-    return () => clearInterval(id);
-  }, []);
-  void clock;
 
   return (
     <section
@@ -202,15 +185,6 @@ export function Hero() {
             >
               <a
                 href="#contact"
-                onClick={(e) => {
-                  e.preventDefault();
-                  const el = document.getElementById("contact");
-                  if (el)
-                    window.scrollTo({
-                      top: el.offsetTop - 40,
-                      behavior: "smooth",
-                    });
-                }}
                 className={cn(
                   "group inline-flex items-center gap-3.5",
                   "px-6 py-4",
@@ -232,15 +206,6 @@ export function Hero() {
               </a>
               <a
                 href="#services"
-                onClick={(e) => {
-                  e.preventDefault();
-                  const el = document.getElementById("services");
-                  if (el)
-                    window.scrollTo({
-                      top: el.offsetTop - 40,
-                      behavior: "smooth",
-                    });
-                }}
                 className={cn(
                   "group relative inline-flex items-center gap-2.5",
                   "pb-1",
