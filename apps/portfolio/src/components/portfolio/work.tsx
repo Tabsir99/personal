@@ -1,10 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { useReveal } from "./core";
-
-const useStateW = useState;
-const useEffectW = useEffect;
-const useRefW = useRef;
+import { useReveal } from "./useReveal";
+import { ProjectStill } from "./project-still";
 
 /* =====================================================================
    Selected work — "The Reel"
@@ -162,7 +159,7 @@ const PROJECTS = [
   },
 ];
 
-type ProjectType = (typeof PROJECTS)[number];
+export type Project = (typeof PROJECTS)[number];
 
 const LINK_ICONS: Record<string, string> = {
   live: "↗",
@@ -176,17 +173,17 @@ const AUTO_MS = 9000;
 
 export function Work() {
   const [revealRef, vis] = useReveal<HTMLElement>({ threshold: 0.18 });
-  const [active, setActive] = useStateW(0);
-  const [stillIdx, setStillIdx] = useStateW(0);
-  const [tick, setTick] = useStateW(0); // 0..1 auto-advance progress
-  const [paused, setPaused] = useStateW(false);
-  const [transit, setTransit] = useStateW(false);
-  const lastActive = useRefW(0);
+  const [active, setActive] = useState(0);
+  const [stillIdx, setStillIdx] = useState(0);
+  const [tick, setTick] = useState(0); // 0..1 auto-advance progress
+  const [paused, setPaused] = useState(false);
+  const [transit, setTransit] = useState(false);
+  const lastActive = useRef(0);
 
   const project = PROJECTS[active];
 
   // Reset still index when project changes; flash a brief scan-line wipe.
-  useEffectW(() => {
+  useEffect(() => {
     if (lastActive.current !== active) {
       lastActive.current = active;
       setStillIdx(0);
@@ -197,7 +194,7 @@ export function Work() {
   }, [active]);
 
   // Auto-advance timer. Pauses if section not visible or hovered.
-  useEffectW(() => {
+  useEffect(() => {
     if (!vis || paused) return;
     const start = performance.now();
     let raf = 0;
@@ -397,52 +394,5 @@ export function Work() {
         </div>
       </div>
     </section>
-  );
-}
-
-/* ---------------------------------------------------------------------
-   ProjectStill — placeholder "still" for the viewing window.
-   Renders a viewfinder-style frame: striped tint background,
-   big ghosted serif word, mono spec line. One unique tint per project.
-   --------------------------------------------------------------------- */
-export function ProjectStill({
-  project,
-  active,
-  stillIdx,
-}: {
-  project: ProjectType;
-  active: boolean;
-  stillIdx: number;
-}) {
-  const still = project.stills[stillIdx] || project.stills[0];
-  const isVideo = still?.kind === "video";
-  return (
-    <div
-      className={`work-still ${active ? "on" : ""}`}
-      data-glyph={project.glyph}
-    >
-      <div className="work-still-pattern" aria-hidden="true"></div>
-      <div className="work-still-grid" aria-hidden="true"></div>
-      <div className="work-still-ghost display" aria-hidden="true">
-        {project.title}
-      </div>
-      <div className="work-still-glyph" aria-hidden="true">
-        {project.glyph}
-      </div>
-
-      <div className="work-still-spec">
-        <span>{still?.label}</span>
-        <span className="work-still-spec-sep">·</span>
-        <span>{isVideo ? "00:42 · 24fps" : "1920×1080 · 16:9"}</span>
-      </div>
-
-      {isVideo && (
-        <div className="work-still-play">
-          <span className="work-still-play-ring"></span>
-          <span className="work-still-play-icon">▶</span>
-          <span className="work-still-play-label">PREVIEW</span>
-        </div>
-      )}
-    </div>
   );
 }

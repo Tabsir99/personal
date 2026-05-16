@@ -1,10 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 
-const useStateV = useState;
-const useEffectV = useEffect;
-const useRefV = useRef;
-
 /* =====================================================================
    Voices — Video testimonial section
    --------------------------------------------------------------------
@@ -28,17 +24,17 @@ function fmtTime(s: number) {
 }
 
 export function Voices() {
-  const sectionRef = useRefV<HTMLElement>(null);
-  const frameRef = useRefV<HTMLDivElement>(null);
-  const videoRef = useRefV<HTMLVideoElement>(null);
-  const scrubRef = useRefV<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const scrubRef = useRef<HTMLDivElement>(null);
 
-  const [started, setStarted] = useStateV(false); // user clicked play
-  const [playing, setPlaying] = useStateV(false);
-  const [muted, setMuted] = useStateV(false);
-  const [time, setTime] = useStateV(0);
-  const [duration, setDuration] = useStateV(DURATION_GUESS);
-  const [loaded, setLoaded] = useStateV(false);
+  const [started, setStarted] = useState(false); // user clicked play
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [time, setTime] = useState(0);
+  const [duration, setDuration] = useState(DURATION_GUESS);
+  const [loaded, setLoaded] = useState(false);
   void loaded;
 
   /* Scroll-into-view scale: the frame grows from 0.72 to 1.0 as the
@@ -46,7 +42,7 @@ export function Voices() {
      section's TOP edge — starts when it touches the bottom of the
      viewport, completes when it reaches ~20% from the top, and locks
      at 1.0 from there on. */
-  useEffectV(() => {
+  useEffect(() => {
     let rafId = 0;
     function update() {
       rafId = 0;

@@ -1,10 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-
-const useStateTerm = useState;
-const useEffectTerm = useEffect;
-// useRef imported above; kept symmetry with original temp aliasing
-void useRef;
+import { useState, useEffect } from "react";
 
 /* ===== Animated Terminal =====
    Translucent right-column companion to the hero headline.
@@ -49,13 +44,13 @@ const defaultTerminalData: TerminalData = {
 };
 
 export function Terminal({ terminal = defaultTerminalData }: { terminal?: TerminalData } = {}) {
-  const [step, setStep] = useStateTerm(0);
-  const [typed, setTyped] = useStateTerm('');
-  const [responseShown, setResponseShown] = useStateTerm('');
-  const [phase, setPhase] = useStateTerm<'cmd' | 'resp' | 'idle'>('cmd'); // 'cmd' | 'resp' | 'idle'
+  const [step, setStep] = useState(0);
+  const [typed, setTyped] = useState('');
+  const [responseShown, setResponseShown] = useState('');
+  const [phase, setPhase] = useState<'cmd' | 'resp' | 'idle'>('cmd'); // 'cmd' | 'resp' | 'idle'
   const lines = terminal?.lines || [];
 
-  useEffectTerm(() => {
+  useEffect(() => {
     if (!lines.length) return;
     const line = lines[step % lines.length];
 

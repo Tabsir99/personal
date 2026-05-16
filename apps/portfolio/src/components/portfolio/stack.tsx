@@ -1,5 +1,5 @@
 "use client";
-import { useReveal } from "./core";
+import { useReveal } from "./useReveal";
 
 /* =====================================================================
    Tech stack — categories of tools, with proficiency dots.

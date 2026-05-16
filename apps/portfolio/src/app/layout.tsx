@@ -3,8 +3,8 @@ import "@/components/portfolio/styles.css";
 import React from "react";
 import { type Metadata } from "next";
 import { Lato, Instrument_Serif, JetBrains_Mono } from "next/font/google";
-import { Header } from "@/components/portfolio/core";
-import { Footer } from "@/components/portfolio/tail";
+import { Header } from "@/components/portfolio/header";
+import { Footer } from "@/components/portfolio/footer";
 
 const latoFont = Lato({
   weight: ["300", "400", "700"],
