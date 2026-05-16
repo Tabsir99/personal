@@ -50,9 +50,9 @@ function FilterChip<T extends string>({
     <Select value={value} onValueChange={(v) => onChange(v as T)}>
       <SelectTrigger
         className={cn(
-          "w-auto capitalize h-9 px-3 gap-1.5 rounded-full border bg-card text-sm transition-colors hover:bg-accent/50",
+          "w-auto capitalize h-9 px-3 gap-1.5 rounded-md border bg-card text-sm transition-colors hover:bg-foreground/[0.03]",
           isActive
-            ? "border-primary/40 bg-primary/5 text-foreground hover:bg-primary/10"
+            ? "border-primary/30 bg-primary/[0.05] text-foreground hover:bg-primary/[0.08]"
             : "border-border text-foreground",
         )}
       >

@@ -5,7 +5,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Pencil, Trash2, Power, Share2, Image, Star } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  Power,
+  Share2,
+  Image,
+  Star,
+  MoreHorizontal,
+} from "lucide-react";
 import useUIStore from "@/stores/UIStore";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
@@ -43,24 +51,11 @@ export default function BlogMenu({
         render={
           <Button
             variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            size="icon-sm"
+            aria-label="Open menu"
+            className="text-muted-foreground hover:text-foreground"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="1"></circle>
-              <circle cx="12" cy="5" r="1"></circle>
-              <circle cx="12" cy="19" r="1"></circle>
-            </svg>
+            <MoreHorizontal className="h-4 w-4" />
           </Button>
         }
       />
