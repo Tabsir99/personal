@@ -1,0 +1,34 @@
+/* =====================================================================
+   styles.css — entry point.
+
+   This file owns nothing of its own. It imports the modular CSS files
+   under styles/, in cascade order. To edit any section's styles, open
+   the matching file under styles/ instead of touching this one.
+
+   Module order matters: base.css MUST come first (defines design tokens
+   and shared keyframes that the section files reference). Everything
+   else is independent; the listed order matches the order sections
+   appear in the rendered page, which makes the DevTools cascade easier
+   to read.
+   ===================================================================== */
+
+/* Tokens, reset, primitives, shared helpers + keyframes ------------ */
+@import url("styles/base.css");
+
+/* Persistent UI (sit above content via z-index) -------------------- */
+@import url("styles/atmosphere.css");
+@import url("styles/rail.css");
+@import url("styles/header.css");
+
+/* Sections, in document order -------------------------------------- */
+@import url("styles/hero.css");
+@import url("styles/terminal.css");
+@import url("styles/endorsement.css");
+@import url("styles/about.css");
+@import url("styles/services.css");
+@import url("styles/work.css");
+@import url("styles/voices.css");
+@import url("styles/stack.css");
+@import url("styles/writing.css");
+@import url("styles/now.css");
+@import url("styles/footer.css");

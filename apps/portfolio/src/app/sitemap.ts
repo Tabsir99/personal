@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { getPageData } from "./layout";
+import { getPageData } from "@/lib/pageData";
 import { getAllBlogs } from "@/lib/posts";
 
 const BASE_URL = "https://tabsircg.com";

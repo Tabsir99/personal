@@ -1,4 +1,4 @@
-import { getPageData } from "@/app/layout";
+import { getPageData } from "@/lib/pageData";
 
 export default async function JsonLd() {
   const pageData = await getPageData();
@@ -50,7 +50,7 @@ export default async function JsonLd() {
     }));
 
   const projectSchemas = pageData.projects
-    .filter((p) => p.isActive)
+    .filter((p) => p.visible)
     .map((project) => {
       const primaryUrl =
         project.links.find((l) => l.type === "live")?.url ||
@@ -60,7 +60,7 @@ export default async function JsonLd() {
         "@context": "https://schema.org",
         "@type": "CreativeWork",
         name: project.title,
-        description: project.description,
+        description: project.dek,
         image: project.image,
         url: primaryUrl,
         creator: {

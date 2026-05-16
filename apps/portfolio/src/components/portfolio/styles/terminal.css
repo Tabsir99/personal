@@ -1,0 +1,121 @@
+/* =====================================================================
+   terminal.css — Translucent terminal card (used in hero/right column).
+
+   Dark cream-over-ink wash with phosphor-tinted border. Pinned height so
+   content swaps don't bounce the layout.
+   ===================================================================== */
+.term-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(184, 216, 156, 0.20);
+  background:
+    linear-gradient(180deg, rgba(38, 34, 30, 0.45), rgba(15, 14, 12, 0.55));
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow:
+    0 0 60px rgba(184, 216, 156, 0.05),
+    0 30px 80px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  font-family: var(--mono);
+  opacity: 0;
+  transform: translateY(16px);
+  animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards 0.85s;
+}
+@keyframes fade-up { to { opacity: 1; transform: translateY(0); } }
+
+.term-chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(184, 216, 156, 0.16);
+  background: rgba(0, 0, 0, 0.18);
+}
+.term-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.term-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.term-dot--r { background: rgba(232, 148, 85, 0.80); }
+.term-dot--y { background: rgba(168, 161, 139, 0.40); }
+.term-dot--g {
+  background: rgba(184, 216, 156, 0.85);
+  animation: term-pulse-dot 2s ease-in-out infinite;
+}
+@keyframes term-pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.term-chrome-title {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(168, 161, 139, 0.75);
+}
+.term-chrome-ver {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: rgba(168, 161, 139, 0.4);
+}
+.term-pane {
+  position: relative;
+  min-height: 232px;
+  padding: 16px 20px 20px;
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+.term-content { position: relative; z-index: 1; }
+.term-line { color: rgba(168, 161, 139, 0.65); }
+.term-line--idle { margin-top: 4px; }
+.term-user { color: var(--phosphor); }
+.term-host { color: var(--accent); }
+.term-dim { opacity: 0.55; }
+.term-input { color: var(--cream); }
+.term-response {
+  margin-top: 6px;
+  white-space: pre-wrap;
+  color: rgba(232, 227, 216, 0.85);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+.term-cursor {
+  display: inline-block;
+  vertical-align: text-bottom;
+  margin-left: 2px;
+  margin-bottom: 1px;
+  width: 6px;
+  height: 14px;
+  background: var(--phosphor);
+  animation: term-cursor-blink 1s steps(2) infinite;
+}
+@keyframes term-cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.term-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  overflow: hidden;
+}
+.term-scan-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--phosphor), transparent);
+  animation: term-scan 4.4s linear infinite;
+}
+@keyframes term-scan {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(260px); }
+}

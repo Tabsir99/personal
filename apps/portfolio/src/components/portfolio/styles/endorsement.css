@@ -1,0 +1,219 @@
+/* =====================================================================
+   endorsement.css — Editorial pull-quote testimonial between Hero and
+   About. Full-width breathing room, large stars, big italic serif quote.
+   No card chrome — just typography on the page so it reads as part of
+   the editorial rhythm, not another floating UI.
+
+   Layout: 2-col grid. Left meta column carries the eyebrow, star block,
+   and the "Verified on Upwork" link. Right column holds the quote itself
+   and the signature.
+   ===================================================================== */
+
+.endorsement {
+  /* Tight, on-purpose padding — sits at the seam between Hero and About
+     without becoming its own "section weight". The hero ends at the
+     viewport; this strip starts immediately under it. */
+  padding: 96px 0 80px;
+  position: relative;
+}
+
+/* A pair of hairlines bracket the strip horizontally — quiet editorial
+   rules that pin the quote into the page rhythm without a hard card. */
+.endorsement::before,
+.endorsement::after {
+  content: "";
+  position: absolute;
+  left: var(--rail-gutter);
+  right: var(--gutter);
+  height: 1px;
+  background: var(--line);
+}
+.endorsement::before { top: 0; }
+.endorsement::after  { bottom: 0; }
+
+.endorsement-grid {
+  display: grid;
+  grid-template-columns: 0.85fr 2fr;
+  gap: clamp(48px, 7vw, 96px);
+  align-items: start;
+}
+
+/* ---------------- Meta column ---------------- */
+.endorsement-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding-top: 8px;
+}
+
+.endorsement-rating {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.endorsement-stars {
+  display: inline-flex;
+  gap: 6px;
+  color: var(--accent);
+  font-size: 32px;
+  line-height: 1;
+  text-shadow:
+    0 0 12px rgba(232, 148, 85, 0.35),
+    0 0 28px rgba(232, 148, 85, 0.18);
+}
+.endorsement-stars span { display: inline-block; }
+
+.endorsement-score {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--serif);
+  color: var(--cream);
+}
+.endorsement-score-num {
+  font-size: 36px;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.endorsement-score-of {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.endorsement-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 0.3s ease, gap 0.3s ease;
+}
+.endorsement-verified:hover {
+  color: var(--cream);
+  gap: 12px;
+}
+.endorsement-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--phosphor);
+  color: var(--ink);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 0 12px rgba(184, 216, 156, 0.32);
+  flex-shrink: 0;
+}
+.endorsement-verified-label { color: var(--cream-2); }
+.endorsement-verified-arrow {
+  color: var(--muted-2);
+  font-size: 11px;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+.endorsement-verified:hover .endorsement-verified-arrow {
+  transform: translate(2px, -2px);
+  color: var(--phosphor);
+}
+
+/* ---------------- Quote column ---------------- */
+.endorsement-quote {
+  position: relative;
+  padding-left: clamp(24px, 3vw, 48px);
+  border-left: 1px solid var(--line);
+}
+
+.endorsement-line {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(26px, 2.8vw, 40px);
+  line-height: 1.22;
+  letter-spacing: -0.015em;
+  color: var(--cream);
+  text-wrap: balance;
+}
+.endorsement-line em {
+  font-style: italic;
+  color: var(--accent);
+  background-image: linear-gradient(transparent 78%, rgba(232, 148, 85, 0.15) 78%, rgba(232, 148, 85, 0.15) 100%);
+  padding: 0 2px;
+}
+
+/* Oversized opening quote — sits in the negative space to the left of
+   the first character so the quote breathes typographically. */
+.endorsement-mark {
+  position: absolute;
+  left: clamp(24px, 3vw, 48px);
+  margin-left: -0.55em;
+  margin-top: -0.15em;
+  font-family: var(--serif);
+  font-style: normal;
+  font-size: 1.6em;
+  color: var(--accent);
+  opacity: 0.5;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Signature — mono row with separators, sits clearly under the quote */
+.endorsement-sig {
+  margin-top: clamp(28px, 3vw, 40px);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.endorsement-sig-name {
+  color: var(--cream);
+  font-weight: 500;
+}
+.endorsement-sig-co {
+  color: var(--muted);
+}
+.endorsement-sig-when {
+  color: var(--muted);
+}
+.endorsement-sig-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px 4px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  color: var(--accent);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+.endorsement-sig-sep {
+  display: inline-block;
+  width: 18px;
+  height: 1px;
+  background: var(--line);
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 1100px) {
+  .endorsement { padding: 72px 0 64px; }
+  .endorsement-grid { grid-template-columns: 1fr; gap: 32px; }
+  .endorsement-quote { padding-left: 20px; }
+  .endorsement-mark { left: 20px; }
+  .endorsement::before, .endorsement::after {
+    left: var(--rail-gutter); right: var(--gutter);
+  }
+  .endorsement-stars { font-size: 26px; gap: 4px; }
+  .endorsement-score-num { font-size: 30px; }
+}

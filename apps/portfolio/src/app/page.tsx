@@ -1,30 +1,25 @@
-import React from "react";
-import HeroSection from "@/components/HeroSection/HeroSection";
-import Services from "@/components/Services/Services";
-import Skills from "@/components/About/SkillsSection";
-import Credentials from "@/components/About/Credentials";
-import About from "@/components/About/About";
-import Projects from "@/components/Projects/PortfolioSection";
-import Testimonials from "@/components/Testimonials/Testimonials";
+import { Atmosphere } from "@/components/portfolio/atmosphere";
+import { Rail, Hero, Endorsement, About } from "@/components/portfolio/core";
+import { Services } from "@/components/portfolio/services";
+import { Work } from "@/components/portfolio/work";
+import { Voices } from "@/components/portfolio/voices";
+import { Stack } from "@/components/portfolio/stack";
+import { Writing, Now } from "@/components/portfolio/tail";
 
-const Home = () => {
+export default function Home() {
   return (
     <>
-      <HeroSection />
-
-      <Services />
-
-      <Projects />
-
-      <Testimonials />
-
+      <Atmosphere />
+      <Rail />
+      <Hero />
+      <Endorsement />
       <About />
-
-      <Skills />
-
-      <Credentials />
+      <Services />
+      <Work />
+      <Voices />
+      <Stack />
+      <Writing />
+      <Now />
     </>
   );
-};
-
-export default Home;
+}

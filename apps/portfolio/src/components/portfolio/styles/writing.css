@@ -1,0 +1,74 @@
+/* =====================================================================
+   writing.css — Writing list (notes from the keyboard).
+   ===================================================================== */
+
+/* Section head (shared visual rhythm with other sections) */
+.work-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  margin-bottom: 56px;
+}
+.work-title {
+  font-family: var(--serif);
+  font-size: clamp(52px, 7vw, 96px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.work-title em { color: var(--accent); font-style: italic; }
+.work-count {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  text-align: right;
+}
+@media (max-width: 1100px) {
+  .work-head { flex-direction: column; align-items: start; gap: 16px; }
+  .work-count { text-align: left; }
+}
+
+.writing-list {
+  border-top: 1px solid var(--line);
+}
+.write-row {
+  display: grid;
+  grid-template-columns: 80px 100px 1fr 140px 100px;
+  gap: 40px;
+  align-items: center;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.write-row:hover { background: rgba(232, 148, 85, 0.02); }
+.write-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted-2);
+}
+.write-date {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.write-title-text {
+  font-family: var(--serif);
+  font-size: 26px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  transition: color 0.3s;
+}
+.write-row:hover .write-title-text { color: var(--accent); }
+.write-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+.write-arrow {
+  justify-self: end;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}

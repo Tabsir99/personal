@@ -1,143 +1,74 @@
 import "./globals.css";
-import React, { cache } from "react";
-import Footer from "../components/ui/Footer";
-import Navbar from "@/components/ui/Header";
+import "@/components/portfolio/styles.css";
+import React from "react";
 import { type Metadata } from "next";
-import { Lato, Oswald } from "next/font/google";
-import { PageData } from "./page.type";
-import { env } from "@/config/env";
-import { GlobalCursorGlow } from "@/components/ui/GlowCursor";
-import { ScrollAnimationObserver } from "@/components/ui/ScrollObserver";
-import JsonLd from "@/components/JsonLd";
-import type { ApiResponse } from "@tabsircg/schemas/api";
+import { Lato, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { Header } from "@/components/portfolio/core";
+import { Footer } from "@/components/portfolio/tail";
 
 const latoFont = Lato({
-  weight: ["400", "900"],
+  weight: ["300", "400", "700"],
   display: "swap",
   preload: true,
   subsets: ["latin"],
-  style: "normal",
-  fallback: [
-    "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;",
-  ],
 });
-const osWaldFont = Oswald({
+
+const instrumentSerifFont = Instrument_Serif({
   weight: "400",
   display: "swap",
   preload: true,
   subsets: ["latin"],
-  variable: "--font-oswald",
-  fallback: [
-    "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;",
-  ],
+  style: ["normal", "italic"],
 });
 
-export const getPageData = cache(async (): Promise<PageData> => {
-  try {
-    const response = await fetch(`${env.ADMIN_ORIGIN}/api/page-data`, {
-      headers: {
-        serverToken: env.SERVER_TOKEN,
-      },
-    });
-    const res = (await response.json()) as ApiResponse<PageData>;
-    if (res.status === "error") throw new Error(res.message);
-    return res.data;
-  } catch (error) {
-    console.error(error);
-    return {
-      about: [],
-      credentials: [],
-      services: [],
-      stats: {
-        yearsExperience: 0,
-        projectsCompleted: 0,
-        jobSuccessRate: 0,
-        responseTime: "",
-        happyClients: 0,
-      },
-      skills: [],
-      projects: [],
-      testimonials: [],
-      title: "",
-      description: "",
-      keywords: [],
-      profilePicture: "",
-      contact: {
-        email: "",
-        social: [],
-      },
-    };
-  }
+const jetbrainsMonoFont = JetBrains_Mono({
+  weight: ["400", "500"],
+  display: "swap",
+  preload: true,
+  subsets: ["latin"],
 });
 
-export async function generateMetadata(): Promise<Metadata> {
-  const pageData = await getPageData();
-  return {
-    metadataBase: new URL("https://tabsircg.com"),
-    title: pageData.title,
-    description: pageData.description,
-    keywords: pageData.keywords,
-    icons: { icon: env.FAVICON_URL },
-    openGraph: {
-      title: pageData.title,
-      description: pageData.description,
-      type: "website",
-      url: "/",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: pageData.title,
-      description: pageData.description,
-    },
-    alternates: {
-      canonical: `/`,
-    },
-    authors: [{ name: "Tabsir CG" }],
-    robots: {
-      index: true,
-      follow: true,
-    },
-  };
-}
+// TODO: re-wire CMS via getPageData() once the redesigned portfolio
+// is mapped onto the admin schema.
+export const metadata: Metadata = {
+  metadataBase: new URL("https://tabsircg.com"),
+  title: "Tabsir CG — Full-stack developer",
+  description: "Full-stack web work for teams who'd rather move than rewrite.",
+  openGraph: {
+    title: "Tabsir CG — Full-stack developer",
+    description: "Full-stack web work for teams who'd rather move than rewrite.",
+    type: "website",
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tabsir CG — Full-stack developer",
+    description: "Full-stack web work for teams who'd rather move than rewrite.",
+  },
+  alternates: { canonical: "/" },
+  authors: [{ name: "Tabsir CG" }],
+  robots: { index: true, follow: true },
+};
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Override the temp CSS's --sans/--serif/--mono vars with next/font's
+  // optimized fonts so base.css's `font-family: var(--sans)` etc. resolve.
+  const fontVars = {
+    "--sans": `${latoFont.style.fontFamily}, -apple-system, BlinkMacSystemFont, sans-serif`,
+    "--serif": `${instrumentSerifFont.style.fontFamily}, "Cormorant Garamond", Georgia, serif`,
+    "--mono": `${jetbrainsMonoFont.style.fontFamily}, "SF Mono", Menlo, monospace`,
+  } as React.CSSProperties;
+
   return (
-    <html
-      lang="en"
-      style={{
-        fontSize: "18px",
-        margin: 0,
-        padding: 0,
-        scrollBehavior: "smooth",
-        overflow: "hidden",
-      }}
-    >
-      <head>
-        <JsonLd />
-      </head>
-      <body style={{ margin: 0, padding: 0, backgroundColor: "#101010" }}>
-        <div
-          id="root"
-          style={{
-            width: "100vw",
-            height: "100vh",
-            padding: "4.1rem 0 0",
-            overflowY: "scroll",
-            overflowX: "hidden",
-            scrollBehavior: "smooth",
-          }}
-          className={latoFont.className + " " + osWaldFont.variable}
-        >
-          <Navbar />
-          <main className=" [word-spacing:0.1rem]">{children}</main>
-          <Footer />
-        </div>
-        <GlobalCursorGlow />
-        <ScrollAnimationObserver />
+    <html lang="en" style={fontVars}>
+      <body>
+        <Header />
+        <main>{children}</main>
+        <Footer />
       </body>
     </html>
   );

@@ -1,0 +1,358 @@
+/* =====================================================================
+   voices.css — Inline video testimonial.
+
+   No modal, no scan-lines, no pulsing rings, no corner brackets, no
+   ghost text. Just a clean 16:9 frame that scales up as the section
+   enters the viewport, with a simple poster → click-to-play → inline
+   playback flow. Custom controls live beneath the frame.
+   ===================================================================== */
+
+.voices {
+  padding: 180px 0 160px;
+  position: relative;
+}
+
+/* ---------- Header ---------- */
+.voices-header {
+  display: grid;
+  grid-template-columns: 0.9fr 1fr;
+  gap: 80px;
+  align-items: end;
+  margin-bottom: 64px;
+}
+.voices-title {
+  font-family: var(--serif);
+  font-size: clamp(48px, 6.4vw, 96px);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+.voices-title em { font-style: italic; color: var(--accent); }
+.voices-blurb {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--cream-2);
+  max-width: 540px;
+  padding-bottom: 12px;
+}
+
+/* ===================================================================
+   The frame — 16:9, dark, scales on scroll via inline transform.
+   ================================================================= */
+.voices-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+
+  /* Initial transform set by JS via inline style; this is the smoothing. */
+  transform: scale(0.72);
+  transform-origin: center 60%;
+  transition: border-color 0.5s ease;
+  will-change: transform;
+}
+.voices-frame:hover { border-color: rgba(232, 148, 85, 0.45); }
+
+.voices-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  background: #000;
+  cursor: pointer;
+}
+
+/* ---------- Overlay (sits on top of the video until clicked) ---------- */
+.voices-overlay {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+  text-align: left;
+  z-index: 2;
+}
+
+/* Calm dark veil so the video frame reads as a poster, not a paused video. */
+.voices-overlay-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.45) 100%),
+    radial-gradient(ellipse at center, rgba(15, 14, 12, 0.0) 35%, rgba(15, 14, 12, 0.55) 100%);
+}
+
+/* Name in lower-left, small and confident. Italic serif name + mono affiliation. */
+.voices-overlay-name {
+  position: absolute;
+  left: clamp(20px, 2.5vw, 40px);
+  bottom: clamp(20px, 2.5vw, 36px);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(18px, 1.6vw, 24px);
+  color: var(--cream);
+  letter-spacing: -0.005em;
+  line-height: 1;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Centered play button — clean disc, no rings, no pulses. */
+.voices-overlay-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(72px, 7vw, 104px);
+  height: clamp(72px, 7vw, 104px);
+  border-radius: 50%;
+  background: rgba(232, 148, 85, 0.95);
+  color: var(--ink);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              background 0.3s ease;
+  box-shadow:
+    0 0 0 1px rgba(232, 148, 85, 0.5),
+    0 16px 32px -10px rgba(0, 0, 0, 0.6);
+}
+.voices-overlay:hover .voices-overlay-play {
+  transform: translate(-50%, -50%) scale(1.06);
+  background: var(--accent);
+}
+.voices-overlay-play-icon {
+  font-size: clamp(22px, 2vw, 30px);
+  line-height: 1;
+  margin-left: 4px; /* optical centering of the triangle */
+}
+
+/* Duration tag in lower-right, mono. */
+.voices-overlay-time {
+  position: absolute;
+  right: clamp(20px, 2.5vw, 40px);
+  bottom: clamp(22px, 2.5vw, 38px);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--cream-2);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- Controls — sit BELOW the frame, always visible while playing. */
+.voices-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  background: rgba(26, 24, 22, 0.6);
+  border-radius: 3px;
+  animation: voices-fade 0.4s ease forwards;
+  opacity: 0;
+}
+@keyframes voices-fade {
+  to { opacity: 1; }
+}
+
+.voices-ctl {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cream-2);
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: transparent;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+}
+.voices-ctl:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.voices-ctl--play { font-size: 12px; }
+.voices-ctl--mute { min-width: 64px; }
+
+.voices-time {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--cream);
+  min-width: 96px;
+  white-space: nowrap;
+}
+.voices-time-sep { color: var(--line); }
+.voices-time-tot { color: var(--muted); }
+
+.voices-scrub {
+  position: relative;
+  flex: 1;
+  height: 26px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.voices-scrub-track {
+  width: 100%;
+  height: 2px;
+  background: var(--line);
+  border-radius: 1px;
+}
+.voices-scrub-fill {
+  position: absolute;
+  left: 0; top: 50%;
+  height: 2px;
+  background: var(--accent);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.voices-scrub-thumb {
+  position: absolute;
+  top: 50%;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--phosphor);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: transform 0.15s ease;
+}
+.voices-scrub:hover .voices-scrub-thumb {
+  transform: translate(-50%, -50%) scale(1.3);
+}
+
+/* ===================================================================
+   Caption row — always visible under the frame/controls.
+   ================================================================= */
+.voices-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 18px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.voices-meta-name {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--cream);
+}
+.voices-meta-co { color: var(--muted); }
+.voices-meta-sep {
+  display: inline-block;
+  width: 18px;
+  height: 1px;
+  background: var(--line);
+}
+.voices-meta-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition: gap 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+.voices-meta-link:hover {
+  gap: 10px;
+  border-bottom-color: rgba(232, 148, 85, 0.5);
+  color: var(--cream);
+}
+.voices-meta-grow { flex: 1; }
+.voices-meta-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cream-2);
+}
+.voices-meta-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--phosphor);
+  color: var(--ink);
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ===================================================================
+   Pull-quote — below everything else.
+   ================================================================= */
+.voices-quote {
+  margin-top: 56px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 24px;
+  align-items: start;
+  max-width: 900px;
+}
+.voices-quote-mark {
+  font-family: var(--serif);
+  font-size: 96px;
+  line-height: 0.7;
+  color: var(--accent);
+  opacity: 0.55;
+  padding-top: 6px;
+}
+.voices-quote-line {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(22px, 2.2vw, 32px);
+  line-height: 1.32;
+  letter-spacing: -0.015em;
+  color: var(--cream);
+  text-wrap: balance;
+}
+.voices-quote-line em {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 0.55em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(232, 148, 85, 0.08);
+  padding: 2px 8px;
+  border-radius: 2px;
+  vertical-align: 0.18em;
+  margin-right: 6px;
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 1100px) {
+  .voices { padding: 130px 0 120px; }
+  .voices-header { grid-template-columns: 1fr; gap: 28px; }
+  .voices-blurb { padding-bottom: 0; }
+
+  .voices-controls { flex-wrap: wrap; gap: 10px; padding: 10px; }
+  .voices-scrub { order: -1; flex-basis: 100%; }
+  .voices-meta { gap: 10px; }
+  .voices-meta-grow { display: none; }
+
+  .voices-quote { grid-template-columns: 1fr; }
+  .voices-quote-mark { font-size: 56px; padding-bottom: 0; }
+}
