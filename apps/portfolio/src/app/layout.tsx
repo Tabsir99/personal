@@ -5,6 +5,7 @@ import { type Metadata } from "next";
 import { Lato, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { Header } from "@/components/portfolio/header";
 import { Footer } from "@/components/portfolio/footer";
+import { Atmosphere } from "@/components/portfolio/atmosphere";
 
 const latoFont = Lato({
   weight: ["300", "400", "700"],
@@ -69,6 +70,7 @@ export default function RootLayout({
     <html lang="en" style={fontVars}>
       <body>
         <Header />
+        <Atmosphere />
         <main>
           {children}
           <Footer />

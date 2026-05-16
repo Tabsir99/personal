@@ -1,46 +1,16 @@
 "use client";
-import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useReveal } from "./useReveal";
 
-function FooterClock() {
-  const [time, setTime] = useState("");
-  useEffect(() => {
-    const tick = () => {
-      const d = new Date();
-      const opts: Intl.DateTimeFormatOptions = {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-        timeZone: "Asia/Dhaka",
-      };
-      setTime(d.toLocaleTimeString("en-GB", opts) + " · GMT+6");
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
-  return (
-    <span className="inline-flex items-center gap-2">
-      <span className="w-[5px] h-[5px] rounded-full bg-phosphor"></span>
-      {time} · Dhaka
-    </span>
-  );
-}
-
 export function Footer() {
-  const [ref, vis] = useReveal();
+  const [ref, vis] = useReveal({ threshold: 0.4 });
   return (
     <footer
       id="contact"
       className="relative pt-[180px] pb-[60px] border-t border-line bg-[linear-gradient(180deg,transparent,color-mix(in_oklab,black_40%,transparent))]"
       data-screen-label="08 Contact"
     >
-      <div
-        className={"container"}
-        ref={ref}
-      >
+      <div className={"container"} ref={ref}>
         <div
           className={cn(
             "inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted before:content-[''] before:w-6 before:h-px before:bg-muted",
@@ -124,7 +94,6 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-20 pt-8 border-t border-line flex justify-between items-center font-mono text-[10px] tracking-widest text-muted-2">
-          <FooterClock />
           <span>© 2026 · Tabsir CG · v2.6 · No tracking</span>
           <span>↑ back to top</span>
         </div>

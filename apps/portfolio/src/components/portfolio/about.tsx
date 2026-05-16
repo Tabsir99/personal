@@ -4,20 +4,14 @@ import { useReveal } from "./useReveal";
 
 /* ===== About ===== */
 export function About() {
-  const [ref, vis] = useReveal();
+  const [ref, vis] = useReveal({ threshold: 0.1 });
   const text =
     "I write code for the messy middle — where product specs collide with reality. I care about response budgets, accessible focus rings, sensible primary keys, and shipping things small enough to fix on a Friday. Two years in, mostly across SaaS dashboards, marketplaces, and a handful of internal tools nobody ever sees but everyone depends on.";
   const words = text.split(" ");
 
   return (
-    <section
-      id="about"
-      className="py-[200px]"
-      data-screen-label="02 About"
-    >
-      <span className="margin-note top-[220px]">
-        no frameworks worshipped.
-      </span>
+    <section id="about" className="py-[200px]" data-screen-label="02 About">
+      <span className="margin-note top-[220px]">no frameworks worshipped.</span>
 
       <div className={"container"}>
         <div
@@ -92,11 +86,7 @@ export function About() {
                   className={cn("word", vis ? "on" : undefined)}
                   style={{ transitionDelay: `${0.3 + i * 0.025}s` }}
                 >
-                  {isAccent ? (
-                    <em className="text-accent italic">{w}</em>
-                  ) : (
-                    w
-                  )}
+                  {isAccent ? <em className="text-accent italic">{w}</em> : w}
                 </span>
               );
             })}
