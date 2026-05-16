@@ -1,14 +1,19 @@
 "use client";
 import { FormEvent, useState } from "react";
-import { logInAction } from "@/actions/authActions";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+
+import { logInAction } from "@/actions/authActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { FormField } from "@/components/ui/FormField";
+import { Kbd } from "@/components/ui/Kbd";
+import { StatusDot } from "@/components/ui/StatusDot";
 
-const LogIn = () => {
+export default function LogIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -22,84 +27,74 @@ const LogIn = () => {
     if (response.status === "success") {
       router.push("/dashboard");
       return;
-    } else {
-      toast.error(response.message);
     }
+    toast.error(response.message);
     setIsLoading(false);
   };
 
   return (
-    <div className="min-h-screen dark bg-background bg-[radial-gradient(hsl(var(--border))_1px,transparent_1px)] bg-size-[28px_28px] flex items-center justify-center p-4">
-      {/* Ambient glow */}
-      <div className="fixed top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/5 blur-[80px] pointer-events-none" />
+    <div className="dark flex min-h-screen items-center justify-center bg-background bg-[radial-gradient(hsl(var(--border))_1px,transparent_1px)] bg-[size:28px_28px] p-4">
+      {/* Ambient glow — single tight focal point */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed top-1/4 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-primary/[0.04] blur-[80px]"
+      />
 
-      <div className="stagger-cascade relative z-10 w-full max-w-[420px]">
+      <div className="stagger-cascade relative z-10 w-full max-w-md">
         {/* Top meta row */}
         <div
-          className="flex items-center justify-between mb-5 px-0.5"
+          className="mb-5 flex items-center justify-between px-0.5"
           style={{ ["--stagger-index" as string]: 0 }}
         >
-          <span className="font-mono text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+          <Eyebrow tone="muted" family="mono">
             sys / admin
-          </span>
-          <span className="font-mono text-[0.65rem] tracking-widest uppercase text-primary bg-primary/10 border border-primary/25 px-2 py-0.5 rounded-sm">
-            <span className="inline-block size-1 mr-1 animate-breathe rounded-full bg-primary align-middle" />
-            Secure
+          </Eyebrow>
+          <span className="inline-flex items-center gap-1.5 rounded-sm border border-primary/25 bg-primary/[0.08] px-2 py-0.5">
+            <StatusDot tone="primary" size="xs" breathing />
+            <Eyebrow tone="primary" family="mono">
+              Secure
+            </Eyebrow>
           </span>
         </div>
 
         {/* Card */}
         <Card
-          className="relative overflow-hidden border border-border bg-card shadow-card-rest rounded-xl"
+          className="relative overflow-hidden bg-card shadow-dialog"
           style={{ ["--stagger-index" as string]: 1 }}
         >
-          <CardHeader className="px-8 pt-8 pb-6">
-            <div>
-              <h1 className="font-sans font-extrabold text-[1.75rem] tracking-tight leading-none text-foreground mb-2">
-                Admin Portal
-              </h1>
-              <p className="font-mono text-xs text-muted-foreground tracking-wide">
-                Restricted access — authenticate to continue
-              </p>
-            </div>
+          <CardHeader className="px-8 pt-8 pb-2">
+            <Eyebrow tone="muted" family="mono">
+              Authentication required
+            </Eyebrow>
+            <h1 className="mt-1.5 text-[1.75rem] leading-tight font-semibold tracking-tight text-foreground">
+              Admin Portal
+            </h1>
+            <p className="font-mono text-xs leading-relaxed tracking-wide text-muted-foreground">
+              Restricted access — authenticate to continue.
+            </p>
           </CardHeader>
 
-          <CardContent className="px-8 pb-8">
+          <CardContent className="px-8 pt-2 pb-8">
             <form
               onSubmit={handleSubmit}
-              className="space-y-5"
-              autoComplete=""
-              autoSave=""
+              className="space-y-4"
+              autoComplete="off"
             >
-              {/* Username */}
-              <div className="flex flex-col gap-2">
-                <Label
-                  htmlFor="username"
-                  className="font-mono text-[0.65rem] tracking-widest uppercase text-muted-foreground"
-                >
-                  Username
-                </Label>
+              <FormField label="Username">
                 <Input
                   type="text"
                   id="username"
                   name="username"
                   value={username}
-                  placeholder="enter username"
+                  placeholder="username"
                   onChange={(e) => setUsername(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="h-11 rounded-md font-mono text-sm bg-background border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-primary disabled:opacity-50"
+                  className="h-10 font-mono text-sm"
                 />
-              </div>
+              </FormField>
 
-              {/* Password */}
-              <div className="flex flex-col gap-2">
-                <Label
-                  htmlFor="password"
-                  className="font-mono text-[0.65rem] tracking-widest uppercase text-muted-foreground"
-                >
-                  Password
-                </Label>
+              <FormField label="Password">
                 <Input
                   type="password"
                   id="password"
@@ -109,60 +104,47 @@ const LogIn = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="h-11 rounded-md font-mono text-sm bg-background border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-primary disabled:opacity-50"
+                  className="h-10 font-mono text-sm"
                 />
-              </div>
+              </FormField>
 
-              {/* Submit */}
-              <div className="pt-2">
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full h-11 rounded-md font-sans font-bold text-xs tracking-[0.08em] uppercase bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-45 disabled:cursor-not-allowed disabled:active:scale-100"
-                >
-                  {isLoading ? (
-                    <span className="flex items-center justify-center gap-2.5">
-                      <svg
-                        className="animate-spin w-3.5 h-3.5 shrink-0"
-                        viewBox="0 0 15 15"
-                        fill="none"
-                      >
-                        <circle
-                          cx="7.5"
-                          cy="7.5"
-                          r="6"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeOpacity="0.25"
-                        />
-                        <path
-                          d="M7.5 1.5a6 6 0 0 1 6 6"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      Authenticating...
-                    </span>
-                  ) : (
-                    "Sign In →"
-                  )}
-                </Button>
-              </div>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                size="lg"
+                className="mt-2 h-10 w-full justify-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Authenticating…</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Sign in</span>
+                    <Kbd
+                      size="sm"
+                      className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground"
+                    >
+                      ⌘⏎
+                    </Kbd>
+                  </>
+                )}
+              </Button>
             </form>
           </CardContent>
         </Card>
 
         {/* Footer note */}
-        <p
-          className="text-center mt-5 font-mono text-[0.6rem] tracking-widest uppercase text-muted-foreground/40"
+        <div
+          className="mt-5 text-center"
           style={{ ["--stagger-index" as string]: 2 }}
         >
-          All access attempts are logged and monitored
-        </p>
+          <Eyebrow tone="muted" family="mono">
+            All access attempts are logged
+          </Eyebrow>
+        </div>
       </div>
     </div>
   );
-};
-
-export default LogIn;
+}

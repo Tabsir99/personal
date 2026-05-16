@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
+import { Toaster } from "sonner";
 
 import DashBoardSidebar from "@/components/dashboard/DashboardSidebar";
-import { Toaster } from "sonner";
 import { CreateBlogModal } from "@/components/ui/common/CreateBlogModal";
 import { AiDraftBlogModal } from "@/components/ui/common/AiDraftBlogModal";
 import ConfirmationModal from "@/components/ui/common/ConfirmationModal";
@@ -28,15 +28,30 @@ export default function DashBoardLayout({
       </main>
 
       <Toaster
-        richColors
         position="bottom-right"
         visibleToasts={3}
         swipeDirections={["left", "bottom"]}
         duration={5000}
         toastOptions={{
           classNames: {
-            title: "text-sm font-semibold",
-            icon: "mr-2!",
+            // Surface
+            toast:
+              "!bg-card !text-card-foreground !border !border-foreground/[0.08] !shadow-card-rest !rounded-md !font-sans",
+            // Slots
+            title: "!text-sm !font-semibold !tracking-tight",
+            description: "!text-[12px] !leading-relaxed !text-muted-foreground",
+            actionButton:
+              "!bg-foreground !text-background !rounded-sm !font-medium",
+            cancelButton:
+              "!bg-foreground/[0.04] !text-muted-foreground !rounded-sm !font-medium",
+            // Semantic tints — quiet, consistent with badges
+            success:
+              "!bg-card !text-foreground [&_[data-icon]]:!text-success",
+            error:
+              "!bg-card !text-foreground [&_[data-icon]]:!text-destructive",
+            warning:
+              "!bg-card !text-foreground [&_[data-icon]]:!text-warning",
+            info: "!bg-card !text-foreground [&_[data-icon]]:!text-primary",
           },
         }}
       />
