@@ -58,11 +58,25 @@ export default function WriteBlog() {
     }
   };
 
+  const { openCreateDialog, openAiDraftDialog } = useBlogEditorStore.getState();
+
   return (
     <>
       <PageHeader title="Blog Drafts" />
 
       <div className="flex flex-col gap-4">
+        {/* Top action row */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button onClick={openCreateDialog}>
+            <Plus className="h-4 w-4" />
+            Create a New Blog
+          </Button>
+          <Button variant="outline" onClick={openAiDraftDialog}>
+            <Sparkles className="h-4 w-4" />
+            Create from AI
+          </Button>
+        </div>
+
         {/* Search and Filters */}
         {isEmpty || (
           <div className="flex flex-col gap-4 items-start justify-between">
@@ -98,7 +112,7 @@ export default function WriteBlog() {
           </div>
         </div>
       </div>
-      {/* Footer */}
+
       <div className="border-t border-border px-6 py-3 text-sm text-muted-foreground">
         <div className="flex justify-between items-center">
           {items.length} draft{items.length !== 1 ? "s" : ""}
@@ -109,7 +123,8 @@ export default function WriteBlog() {
 }
 
 const NoBlogs = ({ search }: { search: string }) => {
-  const openCreateDialog = useBlogEditorStore().openCreateDialog;
+  const { openCreateDialog, openAiDraftDialog } =
+    useBlogEditorStore.getState();
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center mt-12">
       <Sparkles className="mb-4 h-12 w-12 text-muted-foreground" />
@@ -119,10 +134,16 @@ const NoBlogs = ({ search }: { search: string }) => {
           ? "Try a different search term"
           : "Create your first blog post to get started"}
       </p>
-      <Button onClick={openCreateDialog}>
-        <Plus className="h-4 w-4" />
-        Create a New Blog
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button onClick={openCreateDialog}>
+          <Plus className="h-4 w-4" />
+          Create a New Blog
+        </Button>
+        <Button variant="outline" onClick={openAiDraftDialog}>
+          <Sparkles className="h-4 w-4" />
+          Create from AI
+        </Button>
+      </div>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { type Metadata } from "next";
 import DashBoardSidebar from "@/components/dashboard/DashboardSidebar";
 import { Toaster } from "sonner";
 import { CreateBlogModal } from "@/components/ui/common/CreateBlogModal";
+import { AiDraftBlogModal } from "@/components/ui/common/AiDraftBlogModal";
 import ConfirmationModal from "@/components/ui/common/ConfirmationModal";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -40,6 +41,7 @@ export default function DashBoardLayout({
         }}
       />
       <CreateBlogModal />
+      <AiDraftBlogModal />
       <ConfirmationModal />
     </TooltipProvider>
   );

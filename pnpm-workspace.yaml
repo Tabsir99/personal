@@ -2,4 +2,7 @@ packages:
   - "apps/*"
   - "packages/*"
 allowBuilds:
+  msw: set this to true or false
+  protobufjs: set this to true or false
   sharp: true
+  unrs-resolver: set this to true or false

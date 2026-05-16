@@ -11,14 +11,26 @@ const linkSchema = z.object({
     .default("other"),
 });
 
+const imageSchema = z.object({
+  url: optionalUrl,
+  alt: z.string().default(""),
+});
+
 export const projectSchema = z.object({
-  image: optionalUrl,
   title: z.string(),
+  dek: z.string().default(""),
+
   type: z.enum(["Personal", "Demo", "Freelance"]),
-  description: z.string().default(""),
+  status: z
+    .enum(["shipped", "in-progress", "archived", "discontinued"])
+    .default("shipped"),
+
+  image: optionalUrl,
+  video: optionalUrl,
+  gallery: z.array(imageSchema).default([]),
+
   links: z.array(linkSchema).default([]),
   skills: z.array(z.string()).default([]),
-  featured: z.boolean().default(false),
   metrics: z
     .array(
       z.object({
@@ -27,11 +39,17 @@ export const projectSchema = z.object({
       }),
     )
     .default([]),
-  isActive: z.boolean().default(true),
-  year: z.string().default(""), // string to allow ranges like "2023–2024"
-  duration: z.string().default(""),
+
   role: z.string().default(""),
-  clientType: z.string().default(""),
+  year: z.string().default(""),
+
+  featured: z.boolean().default(false),
+  order: z.number().default(0),
+  visible: z.boolean().default(true),
+
+  // Metadata
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
 });
 
 export const testimonialSchema = z.object({
@@ -60,7 +78,7 @@ export const skillGroupSchema = z.object({
     .array(
       z.object({
         name: z.string(),
-        level: z.number().min(0).max(100), // adjust if your scale differs
+        level: z.number().min(1).max(5),
         icon: z.string().default(""),
       }),
     )
@@ -127,3 +145,29 @@ export const uploadFileInfoSchema = z.object({
 });
 export type UploadFileInfo = z.infer<typeof uploadFileInfoSchema>;
 export const uploadFileInfoArraySchema = z.array(uploadFileInfoSchema);
+
+export const labItemSchema = z.object({
+  title: z.string(),
+  pitch: z.string().default(""), // 1–2 line description
+
+  status: z.enum(["working", "wip", "broken", "abandoned"]).default("working"),
+
+  // Visual representation. GIFs/short videos work especially well for lab.
+  image: optionalUrl,
+  video: optionalUrl,
+
+  links: z.array(linkSchema).default([]),
+  skills: z.array(z.string()).default([]),
+
+  // Optional context
+  takeaway: z.string().default(""), // "what I learned / what broke / why I stopped"
+  year: z.string().default(""),
+
+  // Display
+  order: z.number().default(0),
+  visible: z.boolean().default(true),
+
+  // Metadata
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+});

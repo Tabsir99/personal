@@ -9,6 +9,7 @@ interface BlogEditorState {
   blogFormData: BlogFormData;
 
   isCreateDialogOpen: boolean;
+  isAiDraftDialogOpen: boolean;
   isSaving: boolean;
   lastSaved?: number;
   isPublishedBlog: () => boolean;
@@ -19,6 +20,8 @@ interface BlogEditorState {
   resetBlogFormData: () => void;
   openCreateDialog: () => void;
   closeCreateDialog: () => void;
+  openAiDraftDialog: () => void;
+  closeAiDraftDialog: () => void;
   setSaving: (saving: boolean) => void;
   updateLastSaved: () => void;
 
@@ -53,6 +56,7 @@ export const useBlogEditorStore = create<BlogEditorState>()(
     (set, get) => ({
       blogFormData: defaultBlogFormData,
       isCreateDialogOpen: false,
+      isAiDraftDialogOpen: false,
       isSaving: false,
       lastSaved: undefined,
 
@@ -112,6 +116,11 @@ export const useBlogEditorStore = create<BlogEditorState>()(
 
       closeCreateDialog: () =>
         set({ isCreateDialogOpen: false }, false, "closeCreateDialog"),
+
+      openAiDraftDialog: () =>
+        set({ isAiDraftDialogOpen: true }, false, "openAiDraftDialog"),
+      closeAiDraftDialog: () =>
+        set({ isAiDraftDialogOpen: false }, false, "closeAiDraftDialog"),
 
       setSaving: (saving) => set({ isSaving: saving }, false, "setSaving"),
 
