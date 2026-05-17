@@ -1,17 +1,7 @@
-/* =====================================================================
-   header.css — Residue after Tailwind v4 conversion.
-
-   All styling for the floating pill header now lives as utility classes
-   in header.tsx. The only thing left here is the @keyframes block: the
-   `animate-header-in` token in globals.css (@theme) references this
-   keyframe by name. Since @keyframes are globally scoped, leaving the
-   definition in this file (which is imported via styles.css) keeps the
-   animation working without touching globals.css.
-   ===================================================================== */
-/* Uses the new `translate` property so it composes with Tailwind v4's
-   `-translate-x-1/2 -translate-y-2` on the pill (v4 translate utilities
-   emit `translate: …` not `transform: …`). With `forwards` fill, the
-   final state becomes `translate: -50% 0` → properly centered. */
+/* Uses `translate` (not `transform: translate(…)`) so it composes with
+   Tailwind v4's `-translate-x-1/2 -translate-y-2` on the pill — v4
+   translate utilities emit `translate: …`, and `transform` on the same
+   element would stack independently. */
 @keyframes header-in {
   to {
     opacity: 1;

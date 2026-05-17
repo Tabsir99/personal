@@ -1,12 +1,3 @@
-/* =====================================================================
-   rail.css — Persistent left rail.
-
-   Phase-2 residue: all rule bodies were converted to Tailwind v4 utilities
-   inline on the JSX call sites in rail.tsx. Only the @keyframes blocks
-   remain — they are referenced by the `--animate-rail-in` and
-   `--animate-rail-breath` aliases declared in app/globals.css @theme.
-   ===================================================================== */
-
 @keyframes rail-in {
   to {
     opacity: 1;

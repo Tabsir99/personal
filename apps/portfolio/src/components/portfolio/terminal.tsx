@@ -7,58 +7,40 @@ import { cn } from "@/lib/utils";
    Cycles through a short fake shell session: type command, reveal response, idle, next.
 */
 
-type TerminalLine = {
-  command: string;
-  response: string;
-  delayBefore: number;
-};
+const TITLE = "tabsir@field-station";
+const LINES: { command: string; response: string; delayBefore: number }[] = [
+  {
+    command: "whoami",
+    response: "full-stack engineer · 2y in production · javascript by default",
+    delayBefore: 400,
+  },
+  {
+    command: "cat stack.txt",
+    response:
+      "react · node · typescript · postgres\nnext.js · prisma · docker · aws",
+    delayBefore: 500,
+  },
+  {
+    command: "ls ./recent-work",
+    response:
+      "✓ field-survey.app    [shipped]\n✓ contour-cli         [shipped]\n· terminal-os         [in flight]",
+    delayBefore: 500,
+  },
+  {
+    command: "echo $STATUS",
+    response: "available for work — Dhaka, BD",
+    delayBefore: 500,
+  },
+];
 
-type TerminalData = {
-  title: string;
-  lines: TerminalLine[];
-};
-
-const defaultTerminalData: TerminalData = {
-  title: "tabsir@field-station",
-  lines: [
-    {
-      command: "whoami",
-      response:
-        "full-stack engineer · 2y in production · javascript by default",
-      delayBefore: 400,
-    },
-    {
-      command: "cat stack.txt",
-      response:
-        "react · node · typescript · postgres\nnext.js · prisma · docker · aws",
-      delayBefore: 500,
-    },
-    {
-      command: "ls ./recent-work",
-      response:
-        "✓ field-survey.app    [shipped]\n✓ contour-cli         [shipped]\n· terminal-os         [in flight]",
-      delayBefore: 500,
-    },
-    {
-      command: "echo $STATUS",
-      response: "available for work — Dhaka, BD",
-      delayBefore: 500,
-    },
-  ],
-};
-
-export function Terminal({
-  terminal = defaultTerminalData,
-}: { terminal?: TerminalData } = {}) {
+export function Terminal() {
   const [step, setStep] = useState(0);
   const [typed, setTyped] = useState("");
   const [responseShown, setResponseShown] = useState("");
-  const [phase, setPhase] = useState<"cmd" | "resp" | "idle">("cmd"); // 'cmd' | 'resp' | 'idle'
-  const lines = terminal?.lines || [];
+  const [phase, setPhase] = useState<"cmd" | "resp" | "idle">("cmd");
 
   useEffect(() => {
-    if (!lines.length) return;
-    const line = lines[step % lines.length];
+    const line = LINES[step % LINES.length];
 
     let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -132,7 +114,7 @@ export function Terminal({
           <span className="w-2 h-2 rounded-full bg-phosphor/85 animate-term-pulse-dot"></span>
         </div>
         <div className="text-[10px] tracking-[0.22em] uppercase text-muted/75">
-          {terminal?.title || "tabsir@field-station"}
+          {TITLE}
         </div>
         <div className="text-[10px] tracking-[0.22em] text-muted/40">v0.4</div>
       </div>

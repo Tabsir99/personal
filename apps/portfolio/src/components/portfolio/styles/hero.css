@@ -1,23 +1,7 @@
-/* =====================================================================
-   hero.css — residue after Tailwind v4 conversion.
-
-   All layout/typography/state rules now live as utility classes on the
-   JSX call sites in hero.tsx and scramble-word.tsx. The only thing left
-   here is the @keyframes definitions referenced by the hero's animation
-   utilities (animate-hero-rise / animate-hero-fade / animate-hero-foot-bob,
-   plus their staggered arbitrary variants like
-   animate-[hero-rise_0.9s_var(--ease-soft)_forwards_0.3s]).
-
-   Keyframes cannot be expressed as Tailwind utilities, so they remain
-   here as authored CSS. The matching --animate-* aliases live in
-   apps/portfolio/src/app/globals.css @theme.
-   ===================================================================== */
-
-/* Uses the new `translate` property (not `transform: translateY(…)`) so
-   it composes correctly with Tailwind v4 translate utilities — v4 emits
-   `translate: var(--tw-translate-x) var(--tw-translate-y)` and the two
-   would otherwise stack instead of overriding, leaving each animated
-   element offset by its initial translate-y value. */
+/* Uses `translate` (not `transform: translateY(…)`) to compose with the
+   `translate-y-*` utilities on the hero target spans — Tailwind v4
+   emits these utilities on the `translate` property, so `transform`
+   would stack independently instead of overriding. */
 @keyframes hero-rise {
   to {
     opacity: 1;

@@ -2,14 +2,11 @@ import { Terminal } from "./terminal";
 import { ScrambleWord } from "./scramble-word";
 import { cn } from "@/lib/utils";
 
-/* ===== Hero — server-rendered =====
+/* ===== Hero =====
    Pain-point first. The hook word ([FRICTION]) scrambles through related
    nouns — friction → fragility → frustration → re-writes → slow ships.
    Title left, translucent terminal right. The whole composition is locked
-   to a single viewport, no scroll needed to "get" it.
-   The cursor-following glow is page-wide and lives in app/layout.tsx
-   alongside Atmosphere; only the grid-lines decoration is hero-local.
-   ScrambleWord and Terminal are client islands; Hero itself is pure JSX. */
+   to a single viewport, no scroll needed to "get" it. */
 export function Hero() {
   return (
     <section
@@ -190,7 +187,6 @@ export function Hero() {
           >
             <Terminal />
 
-            {/* Social-proof line — pure typography, no card. */}
             <a
               href="https://www.upwork.com/"
               target="_blank"

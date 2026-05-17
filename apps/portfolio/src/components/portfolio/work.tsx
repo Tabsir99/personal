@@ -188,11 +188,8 @@ const LINK_BG: Record<string, string> = {
 };
 
 export function Work() {
-  // One-shot visibility flag — gates the auto-advance RAF so it doesn't burn
-  // CPU while the section is off-screen. The reveal-style fade-in on the four
-  // sub-blocks (header, stage, rows, meta) still uses `vis` to toggle their
-  // opacity/translate; conversion to a CSS view-timeline would require per-
-  // element ranges that don't map cleanly to the current row-cascade.
+  // `vis` gates the auto-advance RAF so it doesn't burn CPU off-screen,
+  // and also drives the cascade-in fade on the four sub-blocks.
   const revealRef = useRef<HTMLElement>(null);
   const [vis, setVis] = useState(false);
   useEffect(() => {

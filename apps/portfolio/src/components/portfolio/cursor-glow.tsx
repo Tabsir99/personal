@@ -3,11 +3,8 @@
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
-/* Page-wide cursor-following accent glow.
-   Fixed across the viewport; tracks the cursor anywhere on the page,
-   not just within a single section. Sits at z-0 with Atmosphere (which
-   it visually overlays) and below <main> (z-1) so it stays behind all
-   content. Idles at the upper-center when the cursor leaves the page. */
+/* Page-wide cursor-following accent glow. Sits at z-0 (above Atmosphere,
+   below <main>'s z-1) so it stays behind all content. */
 export function CursorGlow() {
   const glowRef = useRef<HTMLDivElement>(null);
 
@@ -27,8 +24,6 @@ export function CursorGlow() {
     }
 
     function tick() {
-      // Magnetic follow — smaller factor = more lag behind the cursor.
-      // 0.04 ≈ ~25 frames to close half the gap (vs ~9 frames at 0.08).
       cx += (tx - cx) * 0.05;
       cy += (ty - cy) * 0.05;
       const el = glowRef.current;

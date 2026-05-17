@@ -2,26 +2,13 @@
 
 import { useEffect } from "react";
 
-/* Single global scroll-state writer for the portfolio.
-
-   1. Active section — IntersectionObserver watches every <section id="…">
-      and writes `data-active-section={id}` to <html> + toggles `.is-active`
-      on every `[data-nav={id}]` element. Header / Rail consume this.
-
-   2. Scroll progress — one RAF-throttled scroll listener writes a numeric
-      `--scroll-progress` (0-100) custom property on <html>, and toggles
-      a `data-scrolled` boolean attribute when scrollY > 60. Header reads
-      `data-scrolled` via CSS; Rail reads `--scroll-progress` from inline
-      style on its fill bar + breath dot.
-
-   3. Rail tick positions — ResizeObserver on <body> writes a
-      `--rail-pos-{id}` percentage to <html> for every section. Fires on
-      viewport resize AND on content-driven height changes (fonts settling,
-      images loading, mobile breakpoint reflow). Rail's ticks reference
-      these via inline style, so Rail itself stays server-rendered.
-
-   Replaces the per-component scroll listeners + measurement effects that
-   header.tsx and rail.tsx used to each maintain. */
+/* Writes three signals to <html> for Header + Rail to consume:
+   - data-active-section={id} + .is-active on matching [data-nav={id}]
+     (IntersectionObserver on every <section id>)
+   - --scroll-progress (0-100) + data-scrolled (scrollY > 60)
+   - --rail-pos-{id} per section, kept in sync via ResizeObserver so
+     content-driven height changes (fonts, images, breakpoint reflow)
+     reposition the rail ticks. */
 export function ActiveSectionTracker() {
   useEffect(() => {
     let current = "";

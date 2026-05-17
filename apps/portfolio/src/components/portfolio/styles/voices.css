@@ -1,13 +1,3 @@
-/* =====================================================================
-   voices.css — residue after Phase-2 Tailwind v4 conversion.
-
-   All component styles for the Voices testimonial section moved to
-   utility classes in voices.tsx. Only the @keyframes block remains,
-   because globals.css declares `--animate-voices-fade: voices-fade ...`
-   but per Phase-2 ownership rules we keep the keyframe body here.
-   The keyframe is globally scoped once loaded.
-   ===================================================================== */
-
 @keyframes voices-fade {
   to {
     opacity: 1;

@@ -121,17 +121,11 @@
     margin: 0 0 8px auto;
   }
 
-  /* ===== Reveal helpers — class-toggle, driven by ScrollObserver =====
-     [components/ui/ScrollObserver.tsx](apps/portfolio/src/components/ui/ScrollObserver.tsx)
-     adds `is-in` to any element carrying one of the three data attrs
-     when it enters the viewport. CSS does the rest.
-
-     Note: uses `animation` (not `transition`) for the entry effect.
-     Tailwind utilities in `@layer utilities` can override a `transition`
-     property in `@layer components` (e.g. `transition-[background]` on
-     a Stack card replaces our opacity/translate transition). Using a
-     keyframe animation sidesteps the conflict — animations layer
-     alongside transitions, they don't share the same property slot. */
+  /* Reveal helpers — ScrollObserver adds `is-in` to any element with
+     one of the three data attrs.
+     Uses `animation` (not `transition`) because Tailwind's
+     `transition-*` utilities (in @layer utilities) would otherwise
+     replace our transition slot on children like Stack cards. */
   @keyframes reveal-in {
     from {
       opacity: 0;

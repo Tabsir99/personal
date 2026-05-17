@@ -1,16 +1,3 @@
-/* =====================================================================
-   work.css — Selected work showcase.
-
-   PHASE-2 RESIDUE: everything previously declared here has been moved
-   to Tailwind v4 utilities at the JSX call sites in:
-     - components/portfolio/work.tsx
-     - components/portfolio/project-still.tsx
-
-   Only the three keyframes used by --animate-* aliases in globals.css
-   remain. They are globally scoped once loaded, so the aliases there
-   resolve regardless of where the rule bodies live.
-   ===================================================================== */
-
 @keyframes vp-wipe {
   0%   { transform: translateY(-100%); opacity: 0; }
   15%  { opacity: 1; }

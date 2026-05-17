@@ -1,21 +1,3 @@
-/* =====================================================================
-   atmosphere.css — RESIDUE after Tailwind v4 migration.
-
-   All layer/positioning/gradient rules moved to utility classes at the
-   JSX call sites in atmosphere.tsx / contour-svg.tsx / coord-overlay.tsx.
-   What remains here:
-     1. The 4 @keyframes referenced by the `animate-atm-*` aliases declared
-        in app/globals.css. They live here (not in @theme) so they can be
-        relocated later without forcing a global edit.
-     2. The `.atm-grain` rule — its background-image is a base64-ish SVG
-        fractal-noise data-URI. Inlining that into JSX as an arbitrary
-        `[background-image:url(...)]` value would be unreadable, so we
-        keep this one rule in CSS. The class is still applied directly
-        in atmosphere.tsx.
-   ===================================================================== */
-
-/* --- Keyframes --------------------------------------------------------- */
-
 @keyframes atm-far-breathe {
   0%, 100% { transform: scale(1) translateY(0); opacity: 0.85; }
   50%      { transform: scale(1.015) translateY(-8px); opacity: 1; }
@@ -37,12 +19,8 @@
   66%      { transform: translate(-40px, 30px) scale(0.95); }
 }
 
-/* --- Grain overlay — kept in CSS because the SVG noise data-URI is too
-   long to inline as a Tailwind arbitrary value without hurting readability.
-   Wrapped in @layer components so Tailwind utilities can win the cascade
-   if ever applied to the same node.
-   `motion-reduce` handling for the orb/topo animations is on the JSX nodes
-   via the `motion-reduce:animate-none` variant. */
+/* Grain overlay — the SVG noise data-URI is too long to inline as a
+   Tailwind arbitrary value, so the rule stays here. */
 @layer components {
   .atm-grain {
     position: absolute;

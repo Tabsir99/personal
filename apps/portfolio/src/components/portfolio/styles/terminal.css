@@ -1,14 +1,3 @@
-/* =====================================================================
-   terminal.css — Residue only.
-
-   All terminal styles were converted to Tailwind v4 utilities in
-   terminal.tsx. These @keyframes definitions must remain because their
-   --animate-term-* aliases (declared in app/globals.css @theme) reference
-   these rule bodies. Globals.css is owned by a different agent in the
-   refactor; once it absorbs these blocks (or imports them another way),
-   this file can be deleted and the @import line in styles.css removed.
-   ===================================================================== */
-
 /* Uses `translate` (not `transform: translateY(…)`) to compose with
    Tailwind v4 translate utilities on .term-card. */
 @keyframes fade-up {

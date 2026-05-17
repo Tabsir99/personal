@@ -35,12 +35,11 @@ export function Rail() {
           className={cn(
             "absolute left-[-4px] w-[9px] h-px transition-colors duration-400 ease-[ease]",
             "[&_.rail-tick-label]:transition-colors [&_.rail-tick-label]:duration-300 [&_.rail-tick-label]:ease-[ease]",
-            // Default — future (no following sibling is active, not the active one)
+            // Future (default)
             "bg-muted-2 [&_.rail-tick-label]:text-muted-2",
-            // Current — this tick has .is-active
+            // Current
             "[&.is-active_.rail-tick-label]:text-cream",
-            // Past — a later sibling tick has .is-active (i.e. user has
-            // scrolled past this section)
+            // Past — a later sibling tick has .is-active
             "[&:has(~_[data-rail-tick].is-active)]:bg-accent",
             "[&:has(~_[data-rail-tick].is-active)_.rail-tick-label]:text-muted",
           )}

@@ -1,9 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Native smooth-scroll for in-page anchors. Replaces per-handler
-   window.scrollTo({behavior:"smooth"}) in Hero/Header. The 40px padding
-   matches the previous JS offset (`el.offsetTop - 40`). */
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 40px;
