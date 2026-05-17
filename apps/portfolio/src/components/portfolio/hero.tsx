@@ -1,6 +1,32 @@
-import { Terminal } from "./terminal";
+import { Terminal, type TerminalLine } from "./terminal";
 import { ScrambleWord } from "./scramble-word";
 import { cn } from "@/lib/utils";
+
+const TERMINAL_TITLE = "tabsir@field-station";
+const TERMINAL_LINES: TerminalLine[] = [
+  {
+    command: "whoami",
+    response: "full-stack engineer · 2y in production · javascript by default",
+    delayBefore: 400,
+  },
+  {
+    command: "cat stack.txt",
+    response:
+      "react · node · typescript · postgres\nnext.js · prisma · docker · aws",
+    delayBefore: 500,
+  },
+  {
+    command: "ls ./recent-work",
+    response:
+      "✓ field-survey.app    [shipped]\n✓ contour-cli         [shipped]\n· terminal-os         [in flight]",
+    delayBefore: 500,
+  },
+  {
+    command: "echo $STATUS",
+    response: "available for work — Dhaka, BD",
+    delayBefore: 500,
+  },
+];
 
 /* ===== Hero =====
    Pain-point first. The hook word ([FRICTION]) scrambles through related
@@ -185,53 +211,7 @@ export function Hero() {
               "max-[1100px]:max-w-[540px]",
             )}
           >
-            <Terminal />
-
-            <a
-              href="https://www.upwork.com/"
-              target="_blank"
-              rel="noreferrer noopener"
-              aria-label="Top Rated on Upwork, 5.0 out of 5 stars"
-              className={cn(
-                "group inline-flex items-baseline gap-3 self-end",
-                "w-max max-w-full",
-                "font-mono text-[11px] tracking-[0.16em] uppercase",
-                "text-muted transition-colors duration-300 ease-[ease]",
-                "hover:text-cream",
-                "opacity-0 animate-[hero-fade_0.9s_ease_forwards_1.2s]",
-              )}
-            >
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "text-accent text-[12px] tracking-[0.12em]",
-                  "[text-shadow:0_0_10px_color-mix(in_oklab,var(--color-accent)_35%,transparent)]",
-                )}
-              >
-                ★★★★★
-              </span>
-              <span
-                className={cn(
-                  "font-mono text-[10.5px] tracking-[0.18em] uppercase",
-                  "[&_em]:font-serif [&_em]:italic [&_em]:text-[14px]",
-                  "[&_em]:tracking-normal [&_em]:normal-case",
-                  "[&_em]:text-phosphor [&_em]:ml-0.5",
-                )}
-              >
-                Top Rated on <em>Upwork</em>
-              </span>
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "text-[11px] text-muted-2",
-                  "transition-[translate,color] duration-300 ease-[ease]",
-                  "group-hover:translate-x-0.5 group-hover:-translate-y-0.5",
-                  "group-hover:text-phosphor",
-                )}
-              >
-                ↗
-              </span>
-            </a>
+            <Terminal title={TERMINAL_TITLE} lines={TERMINAL_LINES} />
           </div>
         </div>
 

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 /* ===== Animated Terminal =====
@@ -7,40 +7,26 @@ import { cn } from "@/lib/utils";
    Cycles through a short fake shell session: type command, reveal response, idle, next.
 */
 
-const TITLE = "tabsir@field-station";
-const LINES: { command: string; response: string; delayBefore: number }[] = [
-  {
-    command: "whoami",
-    response: "full-stack engineer · 2y in production · javascript by default",
-    delayBefore: 400,
-  },
-  {
-    command: "cat stack.txt",
-    response:
-      "react · node · typescript · postgres\nnext.js · prisma · docker · aws",
-    delayBefore: 500,
-  },
-  {
-    command: "ls ./recent-work",
-    response:
-      "✓ field-survey.app    [shipped]\n✓ contour-cli         [shipped]\n· terminal-os         [in flight]",
-    delayBefore: 500,
-  },
-  {
-    command: "echo $STATUS",
-    response: "available for work — Dhaka, BD",
-    delayBefore: 500,
-  },
-];
+export type TerminalLine = {
+  command: string;
+  response: string;
+  delayBefore: number;
+};
 
-export function Terminal() {
+export function Terminal({
+  title,
+  lines,
+}: {
+  title: string;
+  lines: TerminalLine[];
+}) {
   const [step, setStep] = useState(0);
-  const [typed, setTyped] = useState("");
-  const [responseShown, setResponseShown] = useState("");
   const [phase, setPhase] = useState<"cmd" | "resp" | "idle">("cmd");
+  const typedRef = useRef<HTMLSpanElement>(null);
+  const respRef = useRef<HTMLPreElement>(null);
 
   useEffect(() => {
-    const line = LINES[step % LINES.length];
+    const line = lines[step % lines.length];
 
     let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -52,8 +38,8 @@ export function Terminal() {
 
     after(line.delayBefore || 300, () => {
       if (cancelled) return;
-      setTyped("");
-      setResponseShown("");
+      if (typedRef.current) typedRef.current.textContent = "";
+      if (respRef.current) respRef.current.textContent = "";
       setPhase("cmd");
 
       // Type the command character by character.
@@ -61,7 +47,7 @@ export function Terminal() {
       const tick = () => {
         if (cancelled) return;
         if (i <= line.command.length) {
-          setTyped(line.command.slice(0, i));
+          if (typedRef.current) typedRef.current.textContent = line.command.slice(0, i);
           i += 1;
           after(38 + Math.random() * 60, tick);
         } else {
@@ -71,7 +57,7 @@ export function Terminal() {
           const respTick = () => {
             if (cancelled) return;
             if (j <= line.response.length) {
-              setResponseShown(line.response.slice(0, j));
+              if (respRef.current) respRef.current.textContent = line.response.slice(0, j);
               j += 1;
               after(8 + Math.random() * 14, respTick);
             } else {
@@ -92,7 +78,7 @@ export function Terminal() {
       cancelled = true;
       timers.forEach(clearTimeout);
     };
-  }, [step]);
+  }, [step, lines]);
 
   return (
     <div
@@ -114,7 +100,7 @@ export function Terminal() {
           <span className="w-2 h-2 rounded-full bg-phosphor/85 animate-term-pulse-dot"></span>
         </div>
         <div className="text-[10px] tracking-[0.22em] uppercase text-muted/75">
-          {TITLE}
+          {title}
         </div>
         <div className="text-[10px] tracking-[0.22em] text-muted/40">v0.4</div>
       </div>
@@ -127,17 +113,16 @@ export function Terminal() {
             <span className="opacity-55">@</span>
             <span className="text-accent">field</span>
             <span className="opacity-55">:~$ </span>
-            <span className="text-cream">{typed}</span>
+            <span ref={typedRef} className="text-cream"></span>
             {phase === "cmd" && (
               <span className="inline-block align-text-bottom ml-0.5 mb-px w-1.5 h-3.5 bg-phosphor animate-term-cursor-blink"></span>
             )}
           </div>
 
-          {responseShown && (
-            <pre className="mt-1.5 whitespace-pre-wrap text-cream/85 font-mono text-[12.5px] leading-[1.7]">
-              {responseShown}
-            </pre>
-          )}
+          <pre
+            ref={respRef}
+            className="mt-1.5 whitespace-pre-wrap text-cream/85 font-mono text-[12.5px] leading-[1.7] empty:hidden"
+          />
 
           {phase === "idle" && (
             <div className="text-muted/65 mt-1">
