@@ -23,5 +23,6 @@
 /* Sections, in document order -------------------------------------- */
 @import url("styles/hero.css");
 @import url("styles/terminal.css");
+@import url("styles/services.css");
 @import url("styles/work.css");
 @import url("styles/voices.css");

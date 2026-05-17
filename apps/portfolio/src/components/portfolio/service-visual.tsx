@@ -1,4 +1,15 @@
-/* abstract visual per service — placeholder-y geometric scenes that animate */
+"use client";
+import { useEffect, useRef } from "react";
+
+/* Abstract visual per service. Was a pure-render component driven by
+   `sub` prop; now the parent <Services> is server-rendered, so each
+   instance subscribes to its containing [data-pin-steps] wrap:
+   - MutationObserver watches data-pin-step to toggle "am I active"
+   - When active, a RAF reads --pin-sub from the wrap and mutates SVG
+     attributes (sin-driven offsets, growing radii, etc.)
+   - When inactive, the parent .svc-frame is opacity 0, so we just stop
+     the RAF and freeze the SVG at its last frame. */
+
 const visStyle: React.CSSProperties = {
   position: "absolute",
   inset: 0,
@@ -6,26 +17,51 @@ const visStyle: React.CSSProperties = {
   height: "100%",
 };
 
-export function ServiceVisual({
-  idx,
-  active,
-  sub,
-}: {
-  idx: number;
-  active: boolean;
-  sub: number;
-}) {
-  const t = active ? sub : 0;
+export function ServiceVisual({ idx }: { idx: number }) {
+  const ref = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const wrap = root.closest<HTMLElement>("[data-pin-steps]");
+    if (!wrap) return;
+
+    let raf = 0;
+    const tick = () => {
+      raf = 0;
+      const sub =
+        parseFloat(getComputedStyle(wrap).getPropertyValue("--pin-sub")) || 0;
+      apply(idx, sub, root);
+      raf = requestAnimationFrame(tick);
+    };
+    const sync = () => {
+      const active = wrap.dataset.pinStep === String(idx);
+      if (active && !raf) raf = requestAnimationFrame(tick);
+      else if (!active && raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
+    };
+    const mo = new MutationObserver(sync);
+    mo.observe(wrap, { attributes: true, attributeFilter: ["data-pin-step"] });
+    sync();
+
+    return () => {
+      mo.disconnect();
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [idx]);
+
   if (idx === 0) {
-    // Stacked layers (full-stack metaphor)
     return (
       <svg
+        ref={ref}
         viewBox="0 0 400 500"
         style={visStyle}
         preserveAspectRatio="xMidYMid slice"
       >
         <defs>
-          <linearGradient id="g1" x1="0" x2="1">
+          <linearGradient id="svc-g1" x1="0" x2="1">
             <stop
               offset="0%"
               style={{ stopColor: "var(--color-accent)" }}
@@ -40,11 +76,12 @@ export function ServiceVisual({
         </defs>
         {[0, 1, 2, 3].map((i) => {
           const y = 120 + i * 50;
-          const off = active ? Math.sin(t * Math.PI * 2 + i) * 8 : 0;
           return (
             <g key={i}>
               <rect
-                x={60 + off}
+                data-anim-i={i}
+                data-anim-base="60"
+                x={60}
                 y={y}
                 width={280}
                 height={36}
@@ -53,14 +90,18 @@ export function ServiceVisual({
                 strokeOpacity={0.4}
               />
               <rect
-                x={60 + off}
+                data-anim-i={i}
+                data-anim-base="60"
+                x={60}
                 y={y}
-                width={280 * (active ? 0.3 + i * 0.2 : 0.3)}
+                width={280 * (0.3 + i * 0.2)}
                 height={36}
-                fill="url(#g1)"
+                fill="url(#svc-g1)"
               />
               <text
-                x={70 + off}
+                data-anim-i={i}
+                data-anim-base="70"
+                x={70}
                 y={y + 22}
                 style={{ fill: "var(--color-cream)" }}
                 fontFamily="JetBrains Mono"
@@ -79,12 +120,7 @@ export function ServiceVisual({
             </g>
           );
         })}
-        <circle
-          cx="200"
-          cy="80"
-          r="3"
-          style={{ fill: "var(--color-phosphor)" }}
-        >
+        <circle cx="200" cy="80" r="3" style={{ fill: "var(--color-phosphor)" }}>
           <animate
             attributeName="opacity"
             values="1;0.2;1"
@@ -96,9 +132,8 @@ export function ServiceVisual({
     );
   }
   if (idx === 1) {
-    // Frame composition (interfaces)
     return (
-      <svg viewBox="0 0 400 500" style={visStyle}>
+      <svg ref={ref} viewBox="0 0 400 500" style={visStyle}>
         <rect
           x="40"
           y="60"
@@ -116,12 +151,13 @@ export function ServiceVisual({
         />
         <circle cx="56" cy="76" r="4" style={{ fill: "var(--color-accent)" }} />
         <rect
+          data-anim="main"
           x="60"
           y="120"
           width="160"
           height="14"
           style={{ fill: "var(--color-accent)" }}
-          opacity={active ? 0.6 + t * 0.4 : 0.3}
+          opacity={0.6}
         />
         <rect
           x="60"
@@ -162,30 +198,39 @@ export function ServiceVisual({
           height="100"
           fill="none"
           style={{ stroke: "var(--color-accent)" }}
-          strokeOpacity={active ? 1 : 0.4}
+          strokeOpacity={1}
         />
         <line
+          data-anim="line"
           x1="280"
-          y1={190 + (active ? t * 100 : 0)}
+          y1="190"
           x2="340"
-          y2={190 + (active ? t * 100 : 0)}
+          y2="190"
           style={{ stroke: "var(--color-accent)" }}
         />
       </svg>
     );
   }
   if (idx === 2) {
-    // Graph nodes (data)
+    const nodes: Array<[number, number]> = [
+      [100, 150],
+      [250, 130],
+      [320, 220],
+      [180, 250],
+      [80, 320],
+      [220, 340],
+    ];
+    const edges: Array<[number, number, number, number]> = [
+      [100, 150, 250, 130],
+      [250, 130, 320, 220],
+      [320, 220, 180, 250],
+      [180, 250, 80, 320],
+      [80, 320, 220, 340],
+      [100, 150, 180, 250],
+    ];
     return (
-      <svg viewBox="0 0 400 500" style={visStyle}>
-        {[
-          [100, 150],
-          [250, 130],
-          [320, 220],
-          [180, 250],
-          [80, 320],
-          [220, 340],
-        ].map(([x, y], i) => (
+      <svg ref={ref} viewBox="0 0 400 500" style={visStyle}>
+        {nodes.map(([x, y], i) => (
           <g key={i}>
             <circle
               cx={x}
@@ -193,25 +238,19 @@ export function ServiceVisual({
               r={i === 0 ? 16 : 10}
               fill="none"
               style={{ stroke: "var(--color-accent)" }}
-              strokeOpacity={active ? 0.7 : 0.3}
+              strokeOpacity={0.7}
             />
             <circle
+              data-anim-i={i}
               cx={x}
               cy={y}
-              r={active ? 4 + Math.sin(t * Math.PI * 4 + i) * 2 : 4}
+              r={4}
               style={{ fill: "var(--color-accent)" }}
-              opacity={active ? 0.8 : 0.3}
+              opacity={0.8}
             />
           </g>
         ))}
-        {[
-          [100, 150, 250, 130],
-          [250, 130, 320, 220],
-          [320, 220, 180, 250],
-          [180, 250, 80, 320],
-          [80, 320, 220, 340],
-          [100, 150, 180, 250],
-        ].map(([x1, y1, x2, y2], i) => (
+        {edges.map(([x1, y1, x2, y2], i) => (
           <line
             key={i}
             x1={x1}
@@ -227,13 +266,15 @@ export function ServiceVisual({
   }
   // idx 3 — advisory: concentric rings
   return (
-    <svg viewBox="0 0 400 500" style={visStyle}>
+    <svg ref={ref} viewBox="0 0 400 500" style={visStyle}>
       {[60, 100, 140, 180].map((r, i) => (
         <circle
           key={i}
+          data-anim-i={i}
+          data-anim-base={r}
           cx="200"
           cy="240"
-          r={r + (active ? t * 8 : 0)}
+          r={r}
           fill="none"
           style={{ stroke: "var(--color-accent)" }}
           strokeOpacity={0.15 + i * 0.12}
@@ -254,4 +295,35 @@ export function ServiceVisual({
       </text>
     </svg>
   );
+}
+
+function apply(idx: number, sub: number, root: SVGSVGElement) {
+  if (idx === 0) {
+    const els = root.querySelectorAll<SVGGraphicsElement>("[data-anim-i]");
+    els.forEach((el) => {
+      const i = Number(el.dataset.animI);
+      const off = Math.sin(sub * Math.PI * 2 + i) * 8;
+      const base = Number(el.dataset.animBase || 0);
+      el.setAttribute("x", String(base + off));
+    });
+  } else if (idx === 1) {
+    const main = root.querySelector<SVGRectElement>("[data-anim='main']");
+    if (main) main.setAttribute("opacity", String(0.6 + sub * 0.4));
+    const line = root.querySelector<SVGLineElement>("[data-anim='line']");
+    if (line) {
+      const y = 190 + sub * 100;
+      line.setAttribute("y1", String(y));
+      line.setAttribute("y2", String(y));
+    }
+  } else if (idx === 2) {
+    root.querySelectorAll<SVGCircleElement>("[data-anim-i]").forEach((c) => {
+      const i = Number(c.dataset.animI);
+      c.setAttribute("r", String(4 + Math.sin(sub * Math.PI * 4 + i) * 2));
+    });
+  } else if (idx === 3) {
+    root.querySelectorAll<SVGCircleElement>("[data-anim-i]").forEach((c) => {
+      const base = Number(c.dataset.animBase);
+      c.setAttribute("r", String(base + sub * 8));
+    });
+  }
 }

@@ -101,7 +101,10 @@ export function ActiveSectionTracker() {
         const idx = Math.min(t.steps - 1, Math.floor(p * t.steps));
         const sub = p * t.steps - idx;
         const idxStr = String(idx);
-        if (t.el.dataset.pinStep !== idxStr) t.el.dataset.pinStep = idxStr;
+        if (t.el.dataset.pinStep !== idxStr) {
+          t.el.dataset.pinStep = idxStr;
+          t.el.style.setProperty("--pin-step", idxStr);
+        }
         t.el.style.setProperty("--pin-sub", sub.toFixed(3));
       }
     }
