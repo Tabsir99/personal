@@ -19,9 +19,29 @@
   66%      { transform: translate(-40px, 30px) scale(0.95); }
 }
 
-/* Grain overlay — the SVG noise data-URI is too long to inline as a
-   Tailwind arbitrary value, so the rule stays here. */
 @layer components {
+  /* Parallax planes — scroll-y is published by the active-section island
+     as a unitless number on <html>. Per-plane factor + px unit happen
+     in the calc(). Lower factor = slower drift = deeper feel. */
+  .atm-far  { transform: translate3d(0, calc(var(--scroll-y, 0) * -0.025px), 0); }
+  .atm-mid  { transform: translate3d(0, calc(var(--scroll-y, 0) * -0.10px), 0); }
+  .atm-near { transform: translate3d(0, calc(var(--scroll-y, 0) * -0.20px), 0); }
+
+  /* Section-driven tint. CSS transition handles the cross-section smoothing
+     that the old per-frame RGB lerp used to do. All alphas < 0.05. */
+  .atm-tint {
+    background-color: transparent;
+    transition: background-color 600ms ease;
+  }
+  html[data-active-section="about"]    .atm-tint { background-color: rgba(160, 180, 210, 0.022); }
+  html[data-active-section="services"] .atm-tint { background-color: rgba(232, 148, 85, 0.038); }
+  html[data-active-section="stack"]    .atm-tint { background-color: rgba(184, 216, 156, 0.030); }
+  html[data-active-section="writing"]  .atm-tint { background-color: rgba(220, 180, 130, 0.030); }
+  html[data-active-section="now"]      .atm-tint { background-color: rgba(140, 175, 200, 0.024); }
+  html[data-active-section="contact"]  .atm-tint { background-color: rgba(232, 148, 85, 0.048); }
+
+  /* Grain overlay — the SVG noise data-URI is too long to inline as a
+     Tailwind arbitrary value, so the rule stays here. */
   .atm-grain {
     position: absolute;
     inset: 0;

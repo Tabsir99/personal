@@ -3,3 +3,20 @@
     opacity: 1;
   }
 }
+
+@layer components {
+  /* Frame scales 0.72 → 1.0 as the section's top crosses the viewport.
+     Driven by --scroll-y + --section-voices-top from the active-section
+     island. Default for --section-voices-top is huge so pre-mount the
+     formula clamps to scale 0.72 (matches the prior initial state). */
+  .voices-frame {
+    --voices-p: clamp(
+      0,
+      (var(--scroll-y, 0) * 1px + 100vh - var(--section-voices-top, 999999) * 1px) / 80vh,
+      1
+    );
+    /* ease-out quadratic — visually equivalent to easeOutCubic, no pow() */
+    --voices-e: calc(var(--voices-p) * (2 - var(--voices-p)));
+    transform: scale(calc(0.72 + 0.28 * var(--voices-e)));
+  }
+}
