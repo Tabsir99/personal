@@ -100,7 +100,7 @@ export default function NowReadingPanel() {
                     ].join(" ")}
                   />
                   <div className="flex items-center gap-3 pl-2">
-                    <span className="w-5 font-mono text-[11px] tabular-nums text-foreground/40">
+                    <span className="w-5 font-mono text-kbd tabular-nums text-foreground/40">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <Button

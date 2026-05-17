@@ -71,7 +71,7 @@ export default function DraftBlogCard({
           )}
         </CardContent>
         <CardFooter className="pt-3 pb-4">
-          <div className="flex w-full items-center justify-between font-mono text-[12px] text-muted-foreground">
+          <div className="flex w-full items-center justify-between font-mono text-xs text-muted-foreground">
             <span>Updated {getTimeSince(blog.updatedAt || 0)}</span>
             <span>{blog.readTime ?? 0} min read</span>
           </div>

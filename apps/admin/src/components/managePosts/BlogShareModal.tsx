@@ -125,7 +125,7 @@ const BlogShareModal = () => {
               <Input
                 value={url}
                 readOnly
-                className="flex-1 font-mono text-[12px]"
+                className="flex-1 font-mono text-xs"
               />
               <Button
                 onClick={copyToClipboard}

@@ -19,6 +19,7 @@ interface MetricCardProps {
   isLoading: boolean;
   isError: boolean;
   trendHigherIsBad?: boolean;
+  staggerIndex?: number;
 }
 
 type TrendTone = "success" | "destructive" | "muted";
@@ -47,6 +48,7 @@ export function MetricCard({
   isLoading,
   isError,
   trendHigherIsBad,
+  staggerIndex,
 }: MetricCardProps) {
   if (isError) {
     return (
@@ -99,7 +101,7 @@ export function MetricCard({
           <MetricNumber value={value} size="lg" />
           <div
             className={cn(
-              "flex items-center gap-1 font-mono text-[11px] tabular-nums",
+              "flex items-center gap-1 font-mono text-kbd tabular-nums",
               trendToneClass[tone],
             )}
           >
@@ -150,7 +152,10 @@ export function MetricCard({
                   stroke={areaColor}
                   strokeWidth={1.5}
                   fill={`url(#${gradientId})`}
-                  isAnimationActive={false}
+                  isAnimationActive
+                  animationDuration={1100}
+                  animationBegin={(staggerIndex ?? 0) * 80}
+                  animationEasing="ease-out"
                 />
               </AreaChart>
             </ResponsiveContainer>

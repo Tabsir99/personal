@@ -167,6 +167,7 @@ export function MetricCards() {
               data={card.data}
               isLoading={isLoading}
               isError={!!error}
+              staggerIndex={index}
               {...("trendHigherIsBad" in card
                 ? { trendHigherIsBad: card.trendHigherIsBad }
                 : {})}

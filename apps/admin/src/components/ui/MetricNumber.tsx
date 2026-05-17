@@ -66,7 +66,7 @@ function MetricNumber({
           data-slot="metric-delta"
           data-tone={deltaTone}
           className={cn(
-            "ml-1 font-sans text-[11px] font-medium tabular-nums",
+            "ml-1 font-sans text-kbd font-medium tabular-nums",
             deltaToneClass[deltaTone],
           )}
         >

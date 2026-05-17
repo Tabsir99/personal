@@ -121,7 +121,7 @@ export default function CMSBlogCard({
       </CardHeader>
 
       <CardContent className="pt-1 pb-4">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[12px] text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-muted-foreground">
           <Badge variant={statusVariant(blog.status!)} className="font-sans">
             {blog.status}
           </Badge>

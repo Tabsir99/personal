@@ -72,14 +72,11 @@ function SuggestionRow({
   return (
     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1.5">
       <div className="flex shrink-0 items-baseline gap-1.5 text-muted-foreground">
-        <span
-          className="text-[10px] font-medium uppercase"
-          style={{ letterSpacing: "0.14em" }}
-        >
+        <span className="text-eyebrow font-medium tracking-[0.14em] uppercase">
           {eyebrow}
         </span>
-        <span className="text-[10px] text-muted-foreground/50">·</span>
-        <span className="text-[10px] tabular-nums">{count}</span>
+        <span className="text-eyebrow text-muted-foreground/50">·</span>
+        <span className="text-eyebrow tabular-nums">{count}</span>
       </div>
       <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>

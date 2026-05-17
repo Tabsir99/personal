@@ -16,8 +16,8 @@ const eyebrowVariants = cva(
         destructive: "text-destructive",
       },
       size: {
-        xs: "text-[10px] tracking-[0.16em]",
-        sm: "text-[11px] tracking-[0.14em]",
+        xs: "text-eyebrow tracking-[0.16em]",
+        sm: "text-kbd tracking-[0.14em]",
       },
       family: {
         sans: "font-sans",

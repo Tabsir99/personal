@@ -240,7 +240,7 @@ const DashBoardSidebar = () => {
 
         {expanded && (
           <div className="mt-1 flex items-center justify-between border-t border-sidebar-border px-3 pt-2 pb-1">
-            <span className="font-mono text-[10px] text-muted-foreground/60">
+            <span className="font-mono text-eyebrow text-muted-foreground/60">
               {isPinned ? "Pinned" : "Hover to expand"}
             </span>
             <Kbd size="sm" className="border-sidebar-border/60">

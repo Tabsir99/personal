@@ -39,7 +39,7 @@ export default function DashBoardLayout({
               "!bg-card !text-card-foreground !border !border-foreground/[0.08] !shadow-card-rest !rounded-md !font-sans",
             // Slots
             title: "!text-sm !font-semibold !tracking-tight",
-            description: "!text-[12px] !leading-relaxed !text-muted-foreground",
+            description: "!text-xs !leading-relaxed !text-muted-foreground",
             actionButton:
               "!bg-foreground !text-background !rounded-sm !font-medium",
             cancelButton:

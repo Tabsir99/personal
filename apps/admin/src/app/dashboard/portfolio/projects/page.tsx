@@ -13,7 +13,6 @@ import Github from "@devicon/react/github/original";
 import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import Img from "@/components/ui/image";
 import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";

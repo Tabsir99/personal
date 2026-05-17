@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { FormField } from "@/components/ui/FormField";
 import Img from "@/components/ui/image";
 import { AddCard } from "@/components/ui/add-card";
@@ -142,7 +141,7 @@ export default function Skills() {
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                          <span className="font-mono text-kbd tabular-nums text-muted-foreground">
                             {skillItem.level}%
                           </span>
                           <Button

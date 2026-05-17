@@ -100,7 +100,7 @@ export function PagesTable() {
                       key={col.key}
                       onClick={() => handleSort(col.key)}
                       className={cn(
-                        "h-9 cursor-pointer px-2 text-[10px] font-medium tracking-[0.14em] uppercase text-muted-foreground select-none hover:text-foreground",
+                        "h-9 cursor-pointer px-2 text-eyebrow font-medium tracking-[0.14em] uppercase text-muted-foreground select-none hover:text-foreground",
                         col.align === "right" && "text-right",
                       )}
                     >
@@ -148,7 +148,7 @@ export function PagesTable() {
                   >
                     <TableCell
                       title={page.path}
-                      className="max-w-xs truncate px-2 py-2 font-mono text-[12px] text-foreground"
+                      className="max-w-xs truncate px-2 py-2 font-mono text-xs text-foreground"
                     >
                       {page.path}
                     </TableCell>
@@ -170,7 +170,7 @@ export function PagesTable() {
             <button
               type="button"
               onClick={() => setShowAll(!showAll)}
-              className="mt-3 font-mono text-[11px] tracking-[0.14em] uppercase text-muted-foreground transition-colors hover:text-foreground"
+              className="mt-3 font-mono text-kbd tracking-[0.14em] uppercase text-muted-foreground transition-colors hover:text-foreground"
             >
               {showAll ? "Show less" : `Show all ${sortedData.length}`}
             </button>

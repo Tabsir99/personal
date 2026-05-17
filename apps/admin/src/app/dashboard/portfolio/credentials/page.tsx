@@ -4,7 +4,6 @@ import { Award, Calendar, CheckCircle2, ExternalLink } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import CredentialDialog from "@/components/portfolio/modals/Credential";
 import { AddCard } from "@/components/ui/add-card";
@@ -79,7 +78,7 @@ export default function Credentials() {
                   {c.description}
                 </p>
 
-                <div className="flex items-center justify-between border-t border-foreground/[0.06] pt-3 font-mono text-[11px] text-muted-foreground">
+                <div className="flex items-center justify-between border-t border-foreground/[0.06] pt-3 font-mono text-kbd text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5">
                     <Calendar className="h-3 w-3" />
                     {c.date}

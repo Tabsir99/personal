@@ -102,7 +102,7 @@ export function DeviceDonut() {
           {chartData.map((entry) => (
             <div
               key={entry.name}
-              className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground"
+              className="flex items-center gap-1.5 font-mono text-kbd text-muted-foreground"
             >
               <span
                 aria-hidden="true"

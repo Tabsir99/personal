@@ -63,7 +63,7 @@ export function SessionsChart() {
                   size="sm"
                   style={{ backgroundColor: s.color }}
                 />
-                <span className="font-mono text-[11px] text-muted-foreground">
+                <span className="font-mono text-kbd text-muted-foreground">
                   {s.name}
                 </span>
               </span>
@@ -128,7 +128,7 @@ export function SessionsChart() {
               if (!active || !payload?.length) return null;
               return (
                 <ChartTooltipShell>
-                  <div className="mb-1.5 font-mono text-[10px] tracking-[0.14em] uppercase text-muted-foreground">
+                  <div className="mb-1.5 font-mono text-eyebrow tracking-[0.14em] uppercase text-muted-foreground">
                     {label}
                   </div>
                   <div className="flex flex-col gap-1">
@@ -145,7 +145,7 @@ export function SessionsChart() {
               );
             }}
           />
-          {SERIES.map((s) => (
+          {SERIES.map((s, i) => (
             <Area
               key={s.key}
               type="monotone"
@@ -154,7 +154,10 @@ export function SessionsChart() {
               stroke={s.color}
               strokeWidth={1.5}
               fill={`url(#sessions-grad-${s.key})`}
-              isAnimationActive={false}
+              isAnimationActive
+              animationDuration={1100}
+              animationBegin={i * 120}
+              animationEasing="ease-out"
             />
           ))}
         </AreaChart>

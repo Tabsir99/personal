@@ -58,6 +58,10 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-star: var(--star);
 
+  /* Editorial text-size tokens — the 10/11px design language */
+  --text-eyebrow: 10px;
+  --text-kbd: 11px;
+
   /* Radius scale (3xl/4xl removed — temptation gone) */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);

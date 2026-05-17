@@ -21,7 +21,7 @@ export default function Field({
       <div className="mb-2 flex items-baseline justify-between gap-3">
         <Eyebrow tone={edited ? "primary" : "muted"}>{label}</Eyebrow>
         {hint && (
-          <span className="font-mono text-[10px] tabular-nums text-foreground/40">
+          <span className="font-mono text-eyebrow tabular-nums text-foreground/40">
             {hint}
           </span>
         )}
