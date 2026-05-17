@@ -1,61 +1,123 @@
-import * as React from "react";
+"use client";
 
-import { Eyebrow } from "@/components/ui/Eyebrow";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-interface ModalSectionProps {
-  eyebrow: string;
-  title?: string;
-  description?: string;
-  className?: string;
+export const ModalSection = ({
+  title,
+  children,
+}: {
+  title: string;
   children: React.ReactNode;
-}
+}) => {
+  return (
+    <section title={title} className="space-y-6">
+      {children}
+    </section>
+  );
+};
 
-/**
- * Inner section grouping inside a modal: tracked eyebrow + optional title +
- * stacked content. Replaces the `<h3 class="text-sm font-semibold
- * text-muted-foreground">` pattern repeated across every portfolio modal.
- */
-export function ModalSection({
-  eyebrow,
+export type PortfolioModalSize = "sm" | "md" | "lg";
+
+const modalSizeClass: Record<PortfolioModalSize, string> = {
+  sm: "sm:max-w-md",
+  md: "sm:max-w-2xl",
+  lg: "sm:max-w-3xl",
+};
+
+type PortfolioModalFrameProps = {
+  title: React.ReactNode;
+  description: React.ReactNode;
+  size?: PortfolioModalSize;
+  children: React.ReactNode;
+  footer: React.ReactNode;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+};
+
+export function PortfolioModalFrame({
+  open,
+  onOpenChange,
+  trigger,
   title,
   description,
-  className,
+  size = "md",
   children,
-}: ModalSectionProps) {
+  footer,
+}: PortfolioModalFrameProps) {
   return (
-    <section className={cn("space-y-3", className)}>
-      <div className="space-y-1">
-        <Eyebrow tone="muted" family="mono">
-          {eyebrow}
-        </Eyebrow>
-        {title && (
-          <h3 className="text-base leading-tight font-semibold tracking-tight">
+    <Dialog
+      {...(open !== undefined && onOpenChange ? { open, onOpenChange } : {})}
+    >
+      {trigger && <DialogTrigger render={trigger as React.ReactElement} />}
+      <DialogContent
+        className={cn(
+          "flex max-h-[90vh] flex-col overflow-hidden p-0",
+          modalSizeClass[size],
+        )}
+      >
+        <DialogHeader className="shrink-0 border-b border-foreground/6 px-6 py-4">
+          <DialogTitle className="text-lg font-semibold tracking-tight">
             {title}
-          </h3>
-        )}
-        {description && (
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {description}
-          </p>
-        )}
-      </div>
-      <div className="space-y-4">{children}</div>
-    </section>
+          </DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+
+        <div className="min-h-0 flex-1 space-y-10 overflow-y-auto px-6 py-4">
+          {children}
+        </div>
+
+        <DialogFooter>{footer}</DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
-interface ModalSectionDividerProps {
-  className?: string;
-}
+type PortfolioModalActionsProps = {
+  onSubmit: () => void;
+  submitDisabled?: boolean;
+  submitLabel: React.ReactNode;
+  updateLabel: React.ReactNode;
+  isUpdating?: boolean;
+  submitIcon?: React.ReactNode;
+};
 
-export function ModalSectionDivider({ className }: ModalSectionDividerProps) {
+export function PortfolioModalActions({
+  onSubmit,
+  submitDisabled,
+  submitLabel,
+  updateLabel,
+  isUpdating,
+  submitIcon,
+}: PortfolioModalActionsProps) {
   return (
-    <hr
-      className={cn(
-        "my-2 h-px border-0 bg-foreground/[0.06]",
-        className,
-      )}
-    />
+    <>
+      <DialogClose render={<Button variant="outline">Cancel</Button>} />
+      <DialogClose
+        render={
+          <Button onClick={onSubmit} disabled={submitDisabled}>
+            {isUpdating ? (
+              updateLabel
+            ) : (
+              <>
+                {submitIcon}
+                {submitLabel}
+              </>
+            )}
+          </Button>
+        }
+      />
+    </>
   );
 }

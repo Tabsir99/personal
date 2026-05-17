@@ -65,13 +65,15 @@ export default function BlogMenu({
         className="w-48"
         onClick={(e) => e.stopPropagation()}
       >
-        <DropdownMenuItem
-          onClick={handleBlogEdit}
-          className="flex items-center space-x-2"
-        >
-          <Pencil className="w-4 h-4" />
-          <span>Edit Post</span>
-        </DropdownMenuItem>
+        {!isDraft && (
+          <DropdownMenuItem
+            onClick={handleBlogEdit}
+            className="flex items-center space-x-2"
+          >
+            <Pencil className="w-4 h-4" />
+            <span>Edit Post</span>
+          </DropdownMenuItem>
+        )}
 
         {isDraft || (
           <DropdownMenuItem

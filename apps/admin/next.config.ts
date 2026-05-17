@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   transpilePackages: ["@tabsircg/schemas"],
   logging: { serverFunctions: false },
+  devIndicators: false,
   /* config options here */
   images: {
     remotePatterns: [

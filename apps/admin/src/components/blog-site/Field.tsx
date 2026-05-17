@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { Eyebrow } from "@/components/ui/Eyebrow";
+import { FieldLabel } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 export default function Field({
@@ -19,7 +19,11 @@ export default function Field({
   return (
     <div className="block">
       <div className="mb-2 flex items-baseline justify-between gap-3">
-        <Eyebrow tone={edited ? "primary" : "muted"}>{label}</Eyebrow>
+        <FieldLabel
+          className={edited ? "text-primary" : undefined}
+        >
+          {label}
+        </FieldLabel>
         {hint && (
           <span className="font-mono text-eyebrow tabular-nums text-foreground/40">
             {hint}

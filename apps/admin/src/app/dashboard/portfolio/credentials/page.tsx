@@ -60,7 +60,7 @@ export default function Credentials() {
               />
               <CardContent className="flex h-full flex-col p-6">
                 <div className="mb-3 flex items-start gap-3">
-                  <div className="rounded-md border border-primary/15 bg-primary/[0.08] p-2 text-primary">
+                  <div className="rounded-md border border-primary/15 bg-primary/8 p-2 text-primary">
                     <Award className="h-4 w-4" />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -78,7 +78,7 @@ export default function Credentials() {
                   {c.description}
                 </p>
 
-                <div className="flex items-center justify-between border-t border-foreground/[0.06] pt-3 font-mono text-kbd text-muted-foreground">
+                <div className="flex items-center justify-between border-t border-foreground/6 pt-3 font-mono text-kbd text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5">
                     <Calendar className="h-3 w-3" />
                     {c.date}

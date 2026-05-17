@@ -9,7 +9,6 @@ import { useCustomSWR } from "@/hooks/useCustomSwr";
 import { BlogCardSkeletonGrid } from "../ui/Skeletons/BlogCardSkeleton";
 import { callWithToast } from "@/lib/utils";
 import { deleteBlog, featureBlog, toggleBlogStatus } from "@/actions/blogActions";
-import { Eyebrow } from "../ui/Eyebrow";
 import { Button } from "../ui/button";
 
 const DEFAULT_FILTERS: BlogFilters = {
@@ -128,6 +127,7 @@ const BlogOverview = () => {
                   <CMSBlogCard
                     blog={post}
                     isFeatured={post.blogId === currentFeaturedId}
+                    hideStatusBadge={filters.status !== "all"}
                     toggleStatus={toggleStatus}
                     confirmDelete={confirmDelete}
                     setFeatured={setFeatured}
@@ -143,7 +143,7 @@ const BlogOverview = () => {
         </div>
 
         {/* Footer */}
-        <div className="mt-10 inline-flex items-baseline gap-3 rounded-md border border-foreground/[0.06] bg-card px-4 py-2.5 font-mono text-xs text-muted-foreground">
+        <div className="mt-10 inline-flex items-baseline gap-3 rounded-md border border-foreground/6 bg-card px-4 py-2.5 font-mono text-xs text-muted-foreground">
           <span>
             <span className="text-foreground">{items.length}</span> total
           </span>
@@ -159,10 +159,7 @@ const BlogOverview = () => {
 
 function EmptyFilters({ onClear }: { onClear: () => void }) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed border-foreground/[0.08] bg-card/40 px-6 py-10">
-      <Eyebrow tone="muted" size="xs" family="mono">
-        No matches
-      </Eyebrow>
+    <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed border-foreground/8 bg-card/40 px-6 py-10">
       <h3 className="text-base font-semibold tracking-tight text-foreground">
         No blogs match these filters
       </h3>

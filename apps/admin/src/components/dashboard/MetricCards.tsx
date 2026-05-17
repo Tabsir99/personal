@@ -149,7 +149,7 @@ export function MetricCards() {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 className="text-lg leading-tight font-semibold tracking-tight">
+        <h2 className="text-base leading-tight font-semibold tracking-tight">
           Key metrics
         </h2>
         <DateRangeSelector value={days} onChange={setDays} />

@@ -32,6 +32,7 @@ const EMPTY_DRAFT: SkillDraft = { name: "", level: 50, icon: "" };
 
 export default function Skills() {
   const [addingTo, setAddingTo] = useState<number | null>(null);
+  const [editingCategory, setEditingCategory] = useState<number | null>(null);
   const [newSkill, setNewSkill] = useState<SkillDraft>(EMPTY_DRAFT);
 
   const skillCategories = usePortfolioStore(
@@ -94,7 +95,7 @@ export default function Skills() {
                   },
                   {
                     variant: "edit",
-                    onClick: () => setAddingTo(categoryIndex),
+                    onClick: () => setEditingCategory(categoryIndex),
                   },
                   {
                     variant: "delete",
@@ -105,7 +106,7 @@ export default function Skills() {
               />
               <CardContent className="p-6">
                 <div className="mb-5 flex items-center gap-3">
-                  <div className="rounded-md border border-foreground/[0.06] bg-foreground/[0.02] p-2">
+                  <div className="rounded-md border border-foreground/6 bg-foreground/2 p-2">
                     <Img
                       width={24}
                       height={24}
@@ -155,14 +156,14 @@ export default function Skills() {
                                 ].skills.filter((_, i) => i !== skillIndex),
                               })
                             }
-                            className="opacity-0 hover:bg-destructive/[0.08] hover:text-destructive group-hover/skill:opacity-100 focus-visible:opacity-100"
+                            className="opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/skill:opacity-100 focus-visible:opacity-100"
                             aria-label={`Remove ${skillItem.name}`}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
                       </div>
-                      <div className="h-1 overflow-hidden rounded-full bg-foreground/[0.06]">
+                      <div className="h-1 overflow-hidden rounded-full bg-foreground/6">
                         <div
                           className="h-full rounded-full bg-primary transition-[width] duration-500"
                           style={{ width: `${skillItem.level}%` }}
@@ -179,7 +180,7 @@ export default function Skills() {
                   }}
                 >
                   <div className="min-h-0 overflow-hidden">
-                    <div className="mt-6 space-y-3 rounded-md border border-foreground/[0.06] bg-foreground/[0.02] p-3">
+                    <div className="mt-6 space-y-3 rounded-md border border-foreground/6 bg-foreground/2 p-3">
                       <FormField label="Skill">
                         <ConfigMultiSelect
                           mode="single"
@@ -297,6 +298,15 @@ export default function Skills() {
           <AddCard title="Add category" className="min-h-full" />
         </SkillCategoryDialog>
       </div>
+
+      <SkillCategoryDialog
+        open={editingCategory !== null}
+        onOpenChange={(open) => !open && setEditingCategory(null)}
+        categoryIndex={editingCategory}
+        {...(editingCategory !== null
+          ? { category: skillCategories[editingCategory] }
+          : {})}
+      />
     </div>
   );
 }

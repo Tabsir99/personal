@@ -51,12 +51,14 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 export default function CMSBlogCard({
   blog,
   isFeatured = false,
+  hideStatusBadge = false,
   toggleStatus,
   confirmDelete,
   setFeatured,
 }: {
   blog: PublishedBlogDB | BlogDraftDB;
   isFeatured?: boolean;
+  hideStatusBadge?: boolean;
   toggleStatus: (blogId: string) => void;
   confirmDelete: (blogId: string) => void;
   setFeatured?: (blogId: string) => void;
@@ -66,7 +68,7 @@ export default function CMSBlogCard({
   const overflowTags = blog.tags.length - visibleTags.length;
 
   return (
-    <Card className="group/blog-card tactile-lift flex flex-col justify-between">
+    <Card className="group/blog-card tactile-lift flex flex-col justify-between border border-foreground/6 shadow-card-rest">
       <CardHeader className="pt-5 pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-2">
@@ -81,7 +83,7 @@ export default function CMSBlogCard({
                 </Eyebrow>
               </span>
             )}
-            <h2 className="truncate text-lg leading-snug font-semibold tracking-tight text-foreground">
+            <h2 className="truncate text-lg leading-snug font-semibold tracking-tight text-foreground transition-colors group-hover/blog-card:text-foreground/90">
               {blog.title}
             </h2>
             <p className="line-clamp-1 text-sm leading-relaxed text-muted-foreground">
@@ -122,10 +124,14 @@ export default function CMSBlogCard({
 
       <CardContent className="pt-1 pb-4">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-muted-foreground">
-          <Badge variant={statusVariant(blog.status!)} className="font-sans">
-            {blog.status}
-          </Badge>
-          <span aria-hidden="true">·</span>
+          {!hideStatusBadge && (
+            <>
+              <Badge variant={statusVariant(blog.status!)} className="font-sans">
+                {blog.status}
+              </Badge>
+              <span aria-hidden="true">·</span>
+            </>
+          )}
           <time dateTime={new Date(blog.createdAt!).toISOString()}>
             {dateFormatter.format(new Date(blog.createdAt!))}
           </time>

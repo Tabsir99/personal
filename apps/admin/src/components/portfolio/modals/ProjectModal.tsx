@@ -1,16 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { X, Image as ImageIcon, Plus, Code, Briefcase } from "lucide-react";
+import { X, Image as ImageIcon, Plus, Code } from "lucide-react";
 
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,13 +21,16 @@ import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import {
   addPortfolioSkill,
-  addPortfolioClientType,
   type PortfolioCatalog,
 } from "@/actions/configActions";
 import { PageData } from "@tabsircg/schemas/portfolio";
 import { cn } from "@/lib/utils";
 
-import { ModalSection } from "./_shared";
+import {
+  ModalSection,
+  PortfolioModalActions,
+  PortfolioModalFrame,
+} from "./_shared";
 
 interface ProjectDialogProps {
   children?: React.ReactNode;
@@ -65,17 +58,19 @@ const LINK_TYPE_OPTIONS: {
 const defaultFormData: PageData["projects"][number] = {
   image: "",
   title: "",
+  dek: "",
   type: "Personal",
-  description: "",
+  status: "shipped",
+  video: "",
+  gallery: [],
   links: [],
   skills: [],
-  isActive: true,
+  visible: true,
   featured: false,
+  order: 0,
   metrics: [],
   year: "",
-  duration: "",
   role: "",
-  clientType: "",
 };
 
 const emptyNewLink: ProjectLink = { text: "", url: "", type: "other" };
@@ -164,24 +159,25 @@ export default function ProjectDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      {children && <DialogTrigger render={children as React.ReactElement} />}
-      <DialogContent className="flex max-h-[90vh] flex-col overflow-y-auto pb-0 sm:max-w-3xl">
-        <DialogHeader>
-          <Eyebrow tone="muted" family="mono">
-            {isUpdating ? "Edit project" : "New project"}
-          </Eyebrow>
-          <DialogTitle className="text-lg font-semibold tracking-tight">
-            {isUpdating ? formData.title || "Edit project" : "Add project"}
-          </DialogTitle>
-          <DialogDescription>
-            Image, links, skills, metrics — everything that appears on the
-            project card.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-6 py-4">
-          <ModalSection eyebrow="Basics">
+    <PortfolioModalFrame
+      open={open}
+      onOpenChange={onOpenChange}
+      {...(children ? { trigger: children } : {})}
+      size="lg"
+      title={isUpdating ? formData.title || "Edit project" : "Add project"}
+      description="Image, links, skills, metrics — everything that appears on the project card."
+      footer={
+        <PortfolioModalActions
+          onSubmit={handleSubmit}
+          submitDisabled={!formData.title || !formData.dek}
+          submitLabel="Add project"
+          updateLabel="Update project"
+          isUpdating={isUpdating}
+          submitIcon={<Plus className="h-3.5 w-3.5" />}
+        />
+      }
+    >
+      <ModalSection title="Basics">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <FormField label="Title">
                 <Input
@@ -213,19 +209,19 @@ export default function ProjectDialog({
             <FormField label="Description">
               <Textarea
                 placeholder="A full-featured e-commerce platform with payment integration…"
-                value={formData.description}
+                value={formData.dek}
                 onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
+                  setFormData({ ...formData, dek: e.target.value })
                 }
               />
             </FormField>
           </ModalSection>
 
-          <ModalSection eyebrow="Media">
+          <ModalSection title="Media">
             <FormField label="Project image">
               <div
                 onClick={() => imageInputRef.current?.click()}
-                className="flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-md border border-foreground/[0.06] bg-foreground/[0.02] transition-colors hover:bg-foreground/[0.04]"
+                className="flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-md border border-foreground/6 bg-foreground/2 transition-colors hover:bg-foreground/4"
               >
                 {formData.image ? (
                   <Img
@@ -259,7 +255,7 @@ export default function ProjectDialog({
             </FormField>
           </ModalSection>
 
-          <ModalSection eyebrow="Links">
+          <ModalSection title="Links">
             {formData.links.map((link, i) => {
               const placeholder =
                 LINK_TYPE_OPTIONS.find((o) => o.value === link.type)
@@ -312,7 +308,7 @@ export default function ProjectDialog({
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => handleRemoveLink(i)}
-                    className="text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/[0.08] hover:text-destructive group-hover/link:opacity-100 focus-visible:opacity-100"
+                    className="text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/link:opacity-100 focus-visible:opacity-100"
                     aria-label="Remove link"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -323,9 +319,9 @@ export default function ProjectDialog({
 
             <div
               className={cn(
-                "overflow-hidden rounded-md border bg-foreground/[0.02] transition-all duration-300",
+                "overflow-hidden rounded-md border bg-foreground/2 transition-all duration-300",
                 isAddingLink
-                  ? "max-h-72 border-foreground/[0.06] p-3"
+                  ? "max-h-72 border-foreground/6 p-3"
                   : "max-h-0 border-transparent p-0",
               )}
             >
@@ -407,7 +403,7 @@ export default function ProjectDialog({
             )}
           </ModalSection>
 
-          <ModalSection eyebrow="Tech & outcomes">
+          <ModalSection title="Tech & outcomes">
             <FormField label="Skills">
               <ConfigMultiSelect
                 value={formData.skills}
@@ -493,7 +489,7 @@ export default function ProjectDialog({
                   {formData.metrics.map((metric, i) => (
                     <div
                       key={i}
-                      className="group/metric relative flex flex-col gap-1 rounded-md border border-foreground/[0.06] bg-foreground/[0.02] px-3 py-2.5"
+                      className="group/metric relative flex flex-col gap-1 rounded-md border border-foreground/6 bg-foreground/2 px-3 py-2.5"
                     >
                       <button
                         type="button"
@@ -506,7 +502,7 @@ export default function ProjectDialog({
                           })
                         }
                         aria-label={`Remove ${metric.label}`}
-                        className="absolute right-1.5 top-1.5 rounded-sm p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/[0.08] hover:text-destructive group-hover/metric:opacity-100 focus-visible:opacity-100"
+                        className="absolute right-1.5 top-1.5 rounded-sm p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/metric:opacity-100 focus-visible:opacity-100"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -527,7 +523,7 @@ export default function ProjectDialog({
             </FormField>
           </ModalSection>
 
-          <ModalSection eyebrow="Engagement">
+          <ModalSection title="Engagement">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <FormField label="Year">
                 <Input
@@ -535,15 +531,6 @@ export default function ProjectDialog({
                   value={formData.year}
                   onChange={(e) =>
                     setFormData({ ...formData, year: e.target.value })
-                  }
-                />
-              </FormField>
-              <FormField label="Duration">
-                <Input
-                  placeholder="3 months"
-                  value={formData.duration}
-                  onChange={(e) =>
-                    setFormData({ ...formData, duration: e.target.value })
                   }
                 />
               </FormField>
@@ -556,47 +543,9 @@ export default function ProjectDialog({
                   }
                 />
               </FormField>
-              <FormField label="Client type">
-                <ConfigMultiSelect
-                  mode="single"
-                  value={formData.clientType ? [formData.clientType] : []}
-                  onChange={(next) =>
-                    setFormData({ ...formData, clientType: next[0] ?? "" })
-                  }
-                  available={catalog?.clientTypeCatalog ?? []}
-                  loading={catalogLoading}
-                  onCreate={addPortfolioClientType}
-                  onOptimisticCreate={(values) =>
-                    mutateCatalog(
-                      (prev) =>
-                        prev
-                          ? { ...prev, clientTypeCatalog: values }
-                          : { skillCatalog: [], clientTypeCatalog: values },
-                      false,
-                    )
-                  }
-                  onAfterCreate={(values) =>
-                    mutateCatalog(
-                      (prev) =>
-                        prev
-                          ? { ...prev, clientTypeCatalog: values }
-                          : { skillCatalog: [], clientTypeCatalog: values },
-                      false,
-                    )
-                  }
-                  placeholder="Pick or create a client type…"
-                  searchPlaceholder="Search or create…"
-                  itemIcon={Briefcase}
-                  toastMessages={{
-                    loading: "Creating client type…",
-                    success: "Client type added to catalog",
-                    err: "Failed to create client type",
-                  }}
-                />
-              </FormField>
             </div>
 
-            <label className="flex items-center gap-3 rounded-md border border-foreground/[0.06] bg-foreground/[0.02] px-4 py-3">
+            <label className="flex items-center gap-3 rounded-md border border-foreground/6 bg-foreground/2 px-4 py-3">
               <Checkbox
                 id="featured"
                 checked={formData.featured || false}
@@ -614,29 +563,6 @@ export default function ProjectDialog({
               </span>
             </label>
           </ModalSection>
-        </div>
-
-        <DialogFooter className="sticky bottom-0 bg-inherit">
-          <DialogClose render={<Button variant="outline">Cancel</Button>} />
-          <DialogClose
-            render={
-              <Button
-                onClick={handleSubmit}
-                disabled={!formData.title || !formData.description}
-              >
-                {isUpdating ? (
-                  "Update project"
-                ) : (
-                  <>
-                    <Plus className="h-3.5 w-3.5" />
-                    Add project
-                  </>
-                )}
-              </Button>
-            }
-          />
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </PortfolioModalFrame>
   );
 }

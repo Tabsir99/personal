@@ -36,22 +36,22 @@ export default function DashBoardLayout({
           classNames: {
             // Surface
             toast:
-              "!bg-card !text-card-foreground !border !border-foreground/[0.08] !shadow-card-rest !rounded-md !font-sans",
+              "bg-card! text-card-foreground! border! border-foreground/8! shadow-card-rest! rounded-md! font-sans!",
             // Slots
-            title: "!text-sm !font-semibold !tracking-tight",
-            description: "!text-xs !leading-relaxed !text-muted-foreground",
+            title: "text-sm! font-semibold! tracking-tight!",
+            description: "text-xs! leading-relaxed! text-muted-foreground!",
             actionButton:
-              "!bg-foreground !text-background !rounded-sm !font-medium",
+              "bg-foreground! text-background! rounded-sm! font-medium!",
             cancelButton:
-              "!bg-foreground/[0.04] !text-muted-foreground !rounded-sm !font-medium",
+              "bg-foreground/4! text-muted-foreground! rounded-sm! font-medium!",
             // Semantic tints — quiet, consistent with badges
             success:
-              "!bg-card !text-foreground [&_[data-icon]]:!text-success",
+              "bg-card! text-foreground! **:data-icon:text-success!",
             error:
-              "!bg-card !text-foreground [&_[data-icon]]:!text-destructive",
+              "bg-card! text-foreground! **:data-icon:text-destructive!",
             warning:
-              "!bg-card !text-foreground [&_[data-icon]]:!text-warning",
-            info: "!bg-card !text-foreground [&_[data-icon]]:!text-primary",
+              "bg-card! text-foreground! **:data-icon:text-warning!",
+            info: "bg-card! text-foreground! **:data-icon:text-primary!",
           },
         }}
       />

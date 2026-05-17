@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { FormField } from "@/components/ui/FormField";
 import { StatusDot } from "@/components/ui/StatusDot";
 import ConfigSingleSelect from "@/components/write-post/writeMetadata/ConfigSingleSelect";
@@ -74,11 +73,8 @@ export const AiDraftBlogModal = () => {
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <Eyebrow tone="muted" family="mono">
-            Generated draft
-          </Eyebrow>
           <DialogTitle className="text-lg font-semibold tracking-tight">
-            Start from a topic
+            Draft with AI
           </DialogTitle>
           <DialogDescription>
             Web research and a structured outline returned as a working draft.

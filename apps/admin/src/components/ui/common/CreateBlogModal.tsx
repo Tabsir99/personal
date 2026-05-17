@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { FormField } from "@/components/ui/FormField";
 import { Kbd } from "@/components/ui/Kbd";
 import { startBlogWriting } from "@/actions/blogActions";
@@ -50,11 +49,8 @@ export const CreateBlogModal = () => {
     <Dialog open={isOpen} onOpenChange={closeCreateDialog}>
       <DialogContent>
         <DialogHeader>
-          <Eyebrow tone="muted" family="mono">
-            New blog
-          </Eyebrow>
           <DialogTitle className="text-lg font-semibold tracking-tight">
-            Create a new blog
+            New blog
           </DialogTitle>
           <DialogDescription>
             Start with a working title. You can rename, retag, and SEO it in the

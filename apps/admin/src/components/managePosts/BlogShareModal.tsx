@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Kbd } from "@/components/ui/Kbd";
 import useUIStore from "@/stores/UIStore";
 import { useShallow } from "zustand/shallow";
@@ -88,19 +87,13 @@ const BlogShareModal = () => {
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="space-y-1.5">
-          <Eyebrow tone="muted" family="mono">
-            Share
-          </Eyebrow>
           <DialogTitle className="text-xl font-semibold tracking-tight">
-            {title || "this article"}
+            Share {title ? `"${title}"` : "post"}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 pt-2">
           <div className="space-y-2.5">
-            <Eyebrow tone="muted" size="xs">
-              Share on social
-            </Eyebrow>
             <div className="grid grid-cols-2 gap-2">
               {platforms.map(({ name, Icon, link }) => (
                 <Button
@@ -118,9 +111,6 @@ const BlogShareModal = () => {
           </div>
 
           <div className="space-y-2.5">
-            <Eyebrow tone="muted" size="xs">
-              Copy link
-            </Eyebrow>
             <div className="flex items-center gap-2">
               <Input
                 value={url}

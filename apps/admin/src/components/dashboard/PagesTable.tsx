@@ -74,16 +74,25 @@ export function PagesTable() {
     <ChartCard
       title="Top pages"
       action={<DateRangeSelector value={days} onChange={setDays} />}
-      height={"auto" as unknown as number}
-      isLoading={false}
-      isError={false}
+      height={isLoading ? 280 : Math.max(displayData.length, 1) * 44 + 48}
+      isLoading={isLoading}
+      isError={!!error}
     >
       {error ? (
-        <Eyebrow tone="muted" family="mono">
-          Failed to load
-        </Eyebrow>
+        <p className="text-sm text-muted-foreground">Failed to load</p>
       ) : isLoading ? (
         <div className="space-y-2">
+          <div className="flex gap-2 border-b border-foreground/6 pb-2">
+            {COLUMNS.map((col) => (
+              <Skeleton
+                key={col.key}
+                className={cn(
+                  "h-4 rounded-sm",
+                  col.key === "path" ? "flex-1" : "w-16",
+                )}
+              />
+            ))}
+          </div>
           {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className="h-9 w-full rounded-sm" />
           ))}
@@ -92,7 +101,7 @@ export function PagesTable() {
         <>
           <Table>
             <TableHeader>
-              <TableRow className="border-foreground/[0.06] hover:bg-transparent">
+              <TableRow className="border-foreground/6 hover:bg-transparent">
                 {COLUMNS.map((col) => {
                   const isActive = sortKey === col.key;
                   return (
@@ -100,7 +109,7 @@ export function PagesTable() {
                       key={col.key}
                       onClick={() => handleSort(col.key)}
                       className={cn(
-                        "h-9 cursor-pointer px-2 text-eyebrow font-medium tracking-[0.14em] uppercase text-muted-foreground select-none hover:text-foreground",
+                        "h-9 cursor-pointer px-2 text-xs font-medium text-muted-foreground select-none hover:text-foreground",
                         col.align === "right" && "text-right",
                       )}
                     >
@@ -144,7 +153,7 @@ export function PagesTable() {
                 displayData.map((page, i) => (
                   <TableRow
                     key={i}
-                    className="border-foreground/[0.04] transition-colors hover:bg-foreground/[0.03]"
+                    className="border-foreground/4 transition-colors hover:bg-foreground/3"
                   >
                     <TableCell
                       title={page.path}

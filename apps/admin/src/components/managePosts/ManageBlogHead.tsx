@@ -26,7 +26,6 @@ const STATUS_OPTIONS: { value: BlogFilters["status"]; label: string }[] = [
   { value: "all", label: "All" },
   { value: BlogStatus.published, label: "Published" },
   { value: BlogStatus.unpublished, label: "Unpublished" },
-  { value: BlogStatus.draft, label: "Draft" },
   { value: BlogStatus.archived, label: "Archived" },
 ];
 
@@ -50,9 +49,9 @@ function FilterChip<T extends string>({
     <Select value={value} onValueChange={(v) => onChange(v as T)}>
       <SelectTrigger
         className={cn(
-          "w-auto capitalize h-9 px-3 gap-1.5 rounded-md border bg-card text-sm transition-colors hover:bg-foreground/[0.03]",
+          "w-auto capitalize h-9 px-3 gap-1.5 rounded-md border bg-card text-sm transition-colors hover:bg-foreground/3",
           isActive
-            ? "border-primary/30 bg-primary/[0.05] text-foreground hover:bg-primary/[0.08]"
+            ? "border-primary/30 bg-primary/5 text-foreground hover:bg-primary/8"
             : "border-border text-foreground",
         )}
       >

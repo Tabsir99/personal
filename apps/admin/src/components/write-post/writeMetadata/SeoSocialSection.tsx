@@ -7,7 +7,7 @@ import { useShallow } from "zustand/shallow";
 import { Globe, Share2 } from "lucide-react";
 import { SuggestionField } from "./ComparsionInput";
 import { SectionHeader } from "./SectionHeader";
-import { Label } from "@/components/ui/label";
+import { FieldLabel } from "@/components/ui/label";
 
 type ProseField = Exclude<keyof AIBlogMetadata, "tags">;
 
@@ -49,7 +49,7 @@ export default function SeoSocialSection({
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">SEO Title</Label>
+              <FieldLabel>SEO Title</FieldLabel>
               <SuggestionField
                 id="seoTitle"
                 placeholder="Title used in search results..."
@@ -62,9 +62,9 @@ export default function SeoSocialSection({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">
+              <FieldLabel>
                 Meta Description
-              </Label>
+              </FieldLabel>
               <SuggestionField
                 id="metaDescription"
                 placeholder="Brief description shown in search results..."
@@ -93,9 +93,9 @@ export default function SeoSocialSection({
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">
+              <FieldLabel>
                 Social Title
-              </Label>
+              </FieldLabel>
               <SuggestionField
                 id="socialTitle"
                 placeholder="Title used when shared on social media..."
@@ -108,9 +108,9 @@ export default function SeoSocialSection({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">
+              <FieldLabel>
                 Social Description
-              </Label>
+              </FieldLabel>
               <SuggestionField
                 id="socialDescription"
                 placeholder="Description shown when shared on social media..."

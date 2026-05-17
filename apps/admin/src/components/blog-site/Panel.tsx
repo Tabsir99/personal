@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { cn } from "@/lib/utils";
 
 /**
  * Editorial section card for the blog-site config pages.
@@ -16,7 +17,7 @@ export default function Panel({
   children,
   action,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   description?: string;
   count?: string;
@@ -24,20 +25,29 @@ export default function Panel({
   action?: React.ReactNode;
 }) {
   return (
-    <section className="rounded-lg border border-foreground/[0.06] bg-card shadow-card-rest">
+    <section className="rounded-lg border border-foreground/6 bg-card shadow-card-rest">
       <div className="flex items-start justify-between gap-6 px-6 pt-5">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <Eyebrow size="xs" tone="muted">
-              {eyebrow}
-            </Eyebrow>
-            {count && (
-              <Eyebrow size="xs" tone="muted" family="mono">
-                · {count}
-              </Eyebrow>
+          {(eyebrow || count) && (
+            <div className="flex items-center gap-2">
+              {eyebrow && (
+                <Eyebrow size="xs" tone="muted">
+                  {eyebrow}
+                </Eyebrow>
+              )}
+              {count != null && count !== "" && (
+                <Eyebrow size="xs" tone="muted" family="mono">
+                  · {count}
+                </Eyebrow>
+              )}
+            </div>
+          )}
+          <h2
+            className={cn(
+              "text-base leading-snug font-semibold tracking-tight",
+              eyebrow || count ? "mt-2" : "",
             )}
-          </div>
-          <h2 className="mt-2 text-lg leading-snug font-semibold tracking-tight">
+          >
             {title}
           </h2>
           {description && (
@@ -48,7 +58,7 @@ export default function Panel({
         </div>
         {action && <div className="shrink-0">{action}</div>}
       </div>
-      <div className="mt-5 border-t border-foreground/[0.06] px-6 py-5">
+      <div className="mt-5 border-t border-foreground/6 px-6 py-5">
         {children}
       </div>
     </section>

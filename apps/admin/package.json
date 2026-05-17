@@ -26,7 +26,7 @@
     "@floating-ui/dom": "^1.7.6",
     "@open-notion/editor": "^1.7.0",
     "@tabsircg/schemas": "workspace:*",
-    "@tailwindcss/postcss": "^4.2.4",
+    "@tailwindcss/postcss": "^4.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -44,7 +44,7 @@
     "sonner": "^2.0.7",
     "swr": "^2.4.1",
     "tailwind-merge": "^3.5.0",
-    "tailwindcss": "^4.2.4",
+    "tailwindcss": "^4.3.0",
     "ua-parser-js": "^2.0.9",
     "zod": "^4.4.3",
     "zustand": "^5.0.12"

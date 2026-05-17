@@ -6,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useSiteConfigStore } from "@/stores/SiteConfigStore";
 import Panel from "./Panel";
 import Field from "./Field";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import HeightTransition from "./HeightTransition";
 
 export default function CurrentlyBuildingPanel() {
@@ -24,7 +23,6 @@ export default function CurrentlyBuildingPanel() {
 
   return (
     <Panel
-      eyebrow="03 · sidebar"
       title="Currently building"
       description="The small card under the now-reading sticker. Leave code or body empty to hide it."
     >
@@ -70,20 +68,14 @@ export default function CurrentlyBuildingPanel() {
         </div>
 
         <div>
-          <div className="mb-2 flex items-baseline gap-2">
-            <Eyebrow tone="muted">Preview</Eyebrow>
-            <Eyebrow tone="muted" family="mono">
-              · rendered as /blog sees it
-            </Eyebrow>
-          </div>
-          <div className="rounded-md border border-foreground/[0.06] bg-background/60 p-4">
+          <p className="mb-2 text-sm font-medium text-muted-foreground">
+            Preview
+          </p>
+          <div className="rounded-md border border-foreground/6 bg-background/60 p-4">
             <HeightTransition show={previewVisible}>
-              <Eyebrow tone="muted" family="mono">
-                <span className="text-foreground/40">// </span>currently building
-              </Eyebrow>
               <div className="mt-3 text-sm leading-relaxed text-foreground/85">
                 {draft.code && (
-                  <span className="rounded-sm bg-foreground/[0.04] px-1.5 py-0.5 font-mono text-xs text-foreground/80">
+                  <span className="rounded-sm bg-foreground/4 px-1.5 py-0.5 font-mono text-xs text-foreground/80">
                     {draft.code}
                   </span>
                 )}
@@ -97,9 +89,9 @@ export default function CurrentlyBuildingPanel() {
               )}
             </HeightTransition>
             <HeightTransition show={!previewVisible}>
-              <Eyebrow tone="muted" family="mono">
-                Hidden · neither code nor body set
-              </Eyebrow>
+              <p className="text-sm text-muted-foreground">
+                Hidden — neither code nor body set
+              </p>
             </HeightTransition>
           </div>
         </div>

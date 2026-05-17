@@ -103,7 +103,7 @@ export default function ThumbnailModal() {
       <DialogContent className="sm:max-w-3xl shadow-lg">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
-            Update Thumbnail
+            Cover image
           </DialogTitle>
         </DialogHeader>
 
@@ -178,7 +178,7 @@ export default function ThumbnailModal() {
                 Updating...
               </span>
             ) : (
-              "Update Thumbnail"
+              "Save"
             )}
           </Button>
           <Button

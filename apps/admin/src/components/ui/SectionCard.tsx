@@ -30,7 +30,7 @@ function SectionCard({
     <section
       data-slot="section-card"
       className={cn(
-        "rounded-lg border border-foreground/[0.06] bg-card text-card-foreground shadow-card-rest",
+        "rounded-lg border border-foreground/6 bg-card text-card-foreground shadow-card-rest",
         className,
       )}
       {...props}
@@ -76,7 +76,7 @@ function SectionCardDivider({
     <hr
       data-slot="section-card-divider"
       className={cn(
-        "my-4 -mx-5 h-px border-0 bg-foreground/[0.06]",
+        "my-4 -mx-5 h-px border-0 bg-foreground/6",
         className,
       )}
       {...props}

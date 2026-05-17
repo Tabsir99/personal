@@ -48,7 +48,7 @@ const KeywordsSection = memo(
           </p>
         </CardHeader>
         <CardContent className="pt-1 pb-5">
-          <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-md border border-foreground/[0.06] bg-foreground/[0.02] p-2.5">
+          <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-md border border-foreground/6 bg-foreground/2 p-2.5">
             {keywords.map((keyword, i) => (
               <Badge key={i} variant="neutral" className="gap-1 pr-1">
                 <span>{keyword}</span>

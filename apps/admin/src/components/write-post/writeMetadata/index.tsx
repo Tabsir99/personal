@@ -194,7 +194,7 @@ export default function WriteMetadataComp({
     <Sheet open={showSidebar} onOpenChange={closeSidebar}>
       <SheetContent side="right" className="border-border p-0 overflow-hidden">
         <SheetHeader className="px-6 py-6 border-b border-border bg-card/40">
-          <SheetTitle className="text-xl font-semibold tracking-tight text-left">
+          <SheetTitle className="text-lg font-semibold tracking-tight text-left">
             Blog Metadata
           </SheetTitle>
           <SheetDescription className="mt-1 text-sm text-muted-foreground text-left">

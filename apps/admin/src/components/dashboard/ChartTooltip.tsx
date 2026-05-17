@@ -19,7 +19,7 @@ export function ChartTooltipShell({
   return (
     <div
       className={cn(
-        "rounded-md border border-foreground/[0.08] bg-card/95 px-3 py-2 text-xs shadow-card-rest backdrop-blur-md",
+        "rounded-md border border-foreground/8 bg-card/95 px-3 py-2 text-xs shadow-card-rest backdrop-blur-md",
         className,
       )}
     >

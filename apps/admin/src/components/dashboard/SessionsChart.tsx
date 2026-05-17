@@ -128,16 +128,16 @@ export function SessionsChart() {
               if (!active || !payload?.length) return null;
               return (
                 <ChartTooltipShell>
-                  <div className="mb-1.5 font-mono text-eyebrow tracking-[0.14em] uppercase text-muted-foreground">
+                  <div className="mb-1.5 text-xs text-muted-foreground">
                     {label}
                   </div>
                   <div className="flex flex-col gap-1">
                     {payload.map((entry, i) => (
                       <ChartTooltipRow
                         key={i}
-                        swatch={entry.color}
-                        name={entry.name}
-                        value={entry.value}
+                        {...(entry.color ? { swatch: entry.color } : {})}
+                        name={entry.name ?? ""}
+                        value={entry.value ?? ""}
                       />
                     ))}
                   </div>

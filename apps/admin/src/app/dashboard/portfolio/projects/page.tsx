@@ -57,7 +57,7 @@ export default function Projects() {
             style={{ ["--stagger-index" as string]: index }}
           >
             <Card className="group/project relative flex h-full flex-col overflow-hidden tactile-lift pt-0">
-              <div className="relative aspect-video overflow-hidden bg-foreground/[0.04]">
+              <div className="relative aspect-video overflow-hidden bg-foreground/4">
                 <Img
                   src={p.image}
                   alt={p.title}
@@ -67,14 +67,14 @@ export default function Projects() {
                 />
                 <Badge
                   variant="neutral"
-                  className="absolute top-3 left-3 border-foreground/[0.08] bg-card/85 backdrop-blur-md"
+                  className="absolute top-3 left-3 border-foreground/8 bg-card/85 backdrop-blur-md"
                 >
                   {p.type}
                 </Badge>
                 {p.featured && (
                   <Badge
                     variant="accent"
-                    className="absolute top-3 right-3 border-primary/30 bg-primary/[0.12] backdrop-blur-md"
+                    className="absolute top-3 right-3 border-primary/30 bg-primary/12 backdrop-blur-md"
                   >
                     Featured
                   </Badge>
@@ -87,7 +87,7 @@ export default function Projects() {
                     {p.title}
                   </h3>
                   <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-                    {p.description}
+                    {p.dek}
                   </p>
                 </div>
 
@@ -148,8 +148,8 @@ export default function Projects() {
                   },
                   {
                     variant: "toggle",
-                    onClick: () => project.toggle(index, "isActive"),
-                    active: p.isActive,
+                    onClick: () => project.toggle(index, "visible"),
+                    active: p.visible,
                   },
                   {
                     variant: "edit",

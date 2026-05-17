@@ -7,7 +7,6 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { BlogFormData, BlogStatus } from "@tabsircg/schemas/blog";
 import BlogMenu from "./BlogMenu";
 import { getTimeSince } from "@/lib/appUtils";
@@ -27,16 +26,13 @@ export default function DraftBlogCard({
     <Link
       draggable={false}
       href={`write-blog/${blog.blogId}`}
-      className="block"
+      className="block rounded-xl border border-foreground/6 shadow-card-rest tactile-lift"
     >
-      <Card className="group/draft-card tactile-lift cursor-pointer">
+      <Card className="group/draft-card border-0 shadow-none ring-0">
         <CardHeader className="pt-5 pb-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 flex-col gap-2">
-              <Eyebrow tone="muted" size="xs" family="mono">
-                Draft
-              </Eyebrow>
-              <h3 className="truncate text-lg leading-snug font-semibold tracking-tight text-foreground">
+              <h3 className="truncate text-lg leading-snug font-semibold tracking-tight text-foreground transition-colors group-hover/draft-card:text-foreground/90">
                 {blog?.title || "Untitled"}
               </h3>
               <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
@@ -53,7 +49,7 @@ export default function DraftBlogCard({
           </div>
         </CardHeader>
         <CardContent className="pt-1 pb-4">
-          {visibleTags.length > 0 ? (
+          {visibleTags.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
               {visibleTags.map((tag) => (
                 <Badge key={tag} variant="neutral">
@@ -64,10 +60,6 @@ export default function DraftBlogCard({
                 <Badge variant="ghost">+{overflowTags}</Badge>
               )}
             </div>
-          ) : (
-            <Eyebrow tone="muted" size="xs">
-              No tags yet
-            </Eyebrow>
           )}
         </CardContent>
         <CardFooter className="pt-3 pb-4">

@@ -4,7 +4,6 @@ import { useShallow } from "zustand/react/shallow";
 
 import { useSiteConfigStore } from "@/stores/SiteConfigStore";
 import { Button } from "@/components/ui/button";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Kbd } from "@/components/ui/Kbd";
 import { StatusDot } from "@/components/ui/StatusDot";
 
@@ -16,12 +15,12 @@ export default function SaveBar() {
   if (!isDirty && !saving) return null;
   return (
     <div className="pointer-events-none fixed bottom-6 left-1/2 z-40 -translate-x-1/2 animate-in fade-in slide-in-from-bottom-2 duration-200 ease-out">
-      <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-foreground/[0.08] bg-card/95 px-4 py-2 shadow-dialog backdrop-blur">
+      <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-foreground/8 bg-card/95 px-4 py-2 shadow-dialog backdrop-blur">
         <div className="flex items-center gap-2">
           <StatusDot tone="primary" size="sm" breathing />
-          <Eyebrow tone="foreground" size="sm">
-            {saving ? "Saving" : "Unsaved changes"}
-          </Eyebrow>
+          <span className="text-sm text-muted-foreground">
+            {saving ? "Saving…" : "Unsaved changes"}
+          </span>
         </div>
 
         <div className="h-4 w-px bg-foreground/10" aria-hidden />

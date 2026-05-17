@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import { Eyebrow } from "./Eyebrow";
+import { FieldLabel } from "./label";
 
 interface FormFieldProps extends React.ComponentProps<"div"> {
   label: React.ReactNode;
@@ -12,7 +12,7 @@ interface FormFieldProps extends React.ComponentProps<"div"> {
 /**
  * Labelled form field. Replaces the `<Label class="mb-2 block">` + `<Input>`
  * stack that was repeated 40+ times across the portfolio modals and write
- * metadata. Label renders as a tracked Eyebrow; optional hint sits below the
+ * metadata. Label renders as FieldLabel; optional hint sits below the
  * control in muted body type.
  */
 export function FormField({
@@ -25,14 +25,14 @@ export function FormField({
 }: FormFieldProps) {
   return (
     <div className={cn("flex flex-col gap-1.5", className)} {...props}>
-      <Eyebrow tone="muted">
+      <FieldLabel>
         {label}
         {required && (
           <span aria-hidden="true" className="ml-1 text-destructive">
             *
           </span>
         )}
-      </Eyebrow>
+      </FieldLabel>
       {children}
       {hint && (
         <span className="text-xs leading-relaxed text-muted-foreground">

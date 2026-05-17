@@ -33,11 +33,11 @@ export default function LogIn() {
   };
 
   return (
-    <div className="dark flex min-h-screen items-center justify-center bg-background bg-[radial-gradient(hsl(var(--border))_1px,transparent_1px)] bg-[size:28px_28px] p-4">
+    <div className="dark flex min-h-screen items-center justify-center bg-background bg-[radial-gradient(hsl(var(--border))_1px,transparent_1px)] bg-size-[28px_28px] p-4">
       {/* Ambient glow — single tight focal point */}
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed top-1/4 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-primary/[0.04] blur-[80px]"
+        className="pointer-events-none fixed top-1/4 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-primary/4 blur-[80px]"
       />
 
       <div className="stagger-cascade relative z-10 w-full max-w-md">
@@ -49,7 +49,7 @@ export default function LogIn() {
           <Eyebrow tone="muted" family="mono">
             sys / admin
           </Eyebrow>
-          <span className="inline-flex items-center gap-1.5 rounded-sm border border-primary/25 bg-primary/[0.08] px-2 py-0.5">
+          <span className="inline-flex items-center gap-1.5 rounded-sm border border-primary/25 bg-primary/8 px-2 py-0.5">
             <StatusDot tone="primary" size="xs" breathing />
             <Eyebrow tone="primary" family="mono">
               Secure

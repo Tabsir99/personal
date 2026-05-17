@@ -89,7 +89,7 @@ export default function Testimonials() {
                   &ldquo;{t.text}&rdquo;
                 </p>
 
-                <div className="flex items-start justify-between gap-4 border-t border-foreground/[0.06] pt-4">
+                <div className="flex items-start justify-between gap-4 border-t border-foreground/6 pt-4">
                   <div className="flex min-w-0 flex-col gap-0.5">
                     <span className="truncate text-sm font-semibold tracking-tight text-foreground">
                       {t.name}
@@ -104,7 +104,9 @@ export default function Testimonials() {
                       </Eyebrow>
                     )}
                   </div>
-                  <Badge variant="accent">Upwork</Badge>
+                  {t.featured && (
+                    <Badge variant="accent">Featured</Badge>
+                  )}
                 </div>
 
                 {t.project && (

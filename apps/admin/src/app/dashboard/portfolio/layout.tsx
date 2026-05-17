@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Kbd } from "@/components/ui/Kbd";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
@@ -90,7 +89,7 @@ export default function PortfolioDashboard({
   return (
     <div className="absolute top-0 w-[calc(100%-6rem)] text-foreground">
       <div className="flex">
-        <aside className="flex min-h-screen w-52 shrink-0 flex-col gap-5 border-r border-foreground/[0.06] px-3 py-6">
+        <aside className="flex min-h-screen w-52 shrink-0 flex-col gap-5 border-r border-foreground/6 px-3 py-6">
           <div className="px-2">
             <h1 className="text-lg leading-tight font-semibold tracking-tight">
               Portfolio
@@ -117,8 +116,8 @@ export default function PortfolioDashboard({
                         className={cn(
                           "group/nav-item relative flex h-9 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
                           isActive
-                            ? "bg-primary/[0.06] text-foreground"
-                            : "text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground",
+                            ? "bg-primary/6 text-foreground"
+                            : "text-muted-foreground hover:bg-foreground/4 hover:text-foreground",
                         )}
                       >
                         {isActive && (
@@ -186,9 +185,9 @@ export default function PortfolioDashboard({
             <div className="flex h-full items-center justify-center">
               <div className="flex flex-col items-center gap-3">
                 <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
-                <Eyebrow tone="muted" family="mono">
-                  Loading portfolio
-                </Eyebrow>
+                <p className="text-sm text-muted-foreground">
+                  Loading portfolio…
+                </p>
               </div>
             </div>
           ) : (

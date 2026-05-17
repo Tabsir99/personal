@@ -22,7 +22,7 @@ export const PageHeader = ({
   actionButton,
 }: PageHeaderProps) => {
   return (
-    <header className="col-span-1 mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-foreground/[0.06] pb-4 md:col-span-2 lg:col-span-3">
+    <header className="col-span-1 mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-foreground/6 pb-4 md:col-span-2 lg:col-span-3">
       <div className="flex min-w-0 flex-col gap-1.5">
         {eyebrow && (
           <Eyebrow tone="muted" family="mono">

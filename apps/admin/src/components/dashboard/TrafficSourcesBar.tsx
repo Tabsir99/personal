@@ -21,7 +21,8 @@ export function TrafficSourcesBar() {
 
   const chartData = data ? data.slice(0, 7) : [];
   const isEmpty = !error && !isLoading && chartData.length === 0;
-  const height = chartData.length > 0 ? chartData.length * 36 + 24 : 280;
+  const loadedHeight = chartData.length > 0 ? chartData.length * 36 + 24 : 120;
+  const height = isLoading ? 280 : loadedHeight;
 
   return (
     <ChartCard

@@ -52,10 +52,13 @@ export default function NowReadingPanel() {
 
   return (
     <Panel
-      eyebrow="02 · sidebar"
       title="Now reading"
       description="The pinned books shown in the /blog sticker. Order matters — top of the list shows first."
-      count={`${draftRows.length} item${draftRows.length === 1 ? "" : "s"}`}
+      {...(draftRows.length > 0
+        ? {
+            count: `${draftRows.length} item${draftRows.length === 1 ? "" : "s"}`,
+          }
+        : {})}
       action={
         <Button
           type="button"
@@ -70,7 +73,7 @@ export default function NowReadingPanel() {
       }
     >
       <HeightTransition show={isEmpty}>
-        <div className="flex flex-col items-start gap-2 rounded-md border border-foreground/[0.06] bg-foreground/[0.02] px-4 py-6">
+        <div className="flex flex-col items-start gap-2 rounded-md border border-foreground/6 bg-foreground/2 px-4 py-6">
           <Eyebrow tone="muted" family="mono">
             Empty
           </Eyebrow>
@@ -91,7 +94,7 @@ export default function NowReadingPanel() {
             const anyEdited = titleEdited || authorEdited;
             return (
               <RowShell key={id} isLeaving={isLeaving} isNew={isNew}>
-                <div className="group relative grid grid-cols-[auto_minmax(0,1.4fr)_minmax(0,1fr)_auto] items-center gap-3 border-b border-foreground/[0.05] py-3 last:border-b-0">
+                <div className="group relative grid grid-cols-[auto_minmax(0,1.4fr)_minmax(0,1fr)_auto] items-center gap-3 border-b border-foreground/5 py-3 last:border-b-0 pl-2">
                   <span
                     aria-hidden
                     className={[
@@ -99,10 +102,7 @@ export default function NowReadingPanel() {
                       anyEdited ? "opacity-100" : "opacity-0",
                     ].join(" ")}
                   />
-                  <div className="flex items-center gap-3 pl-2">
-                    <span className="w-5 font-mono text-kbd tabular-nums text-foreground/40">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
+                  <div className="flex items-center pl-2">
                     <Button
                       type="button"
                       variant="ghost"
@@ -113,10 +113,10 @@ export default function NowReadingPanel() {
                       aria-label={row.done ? "Mark unfinished" : "Mark finished"}
                       title={row.done ? "Finished" : "Mark finished"}
                       className={[
-                        "relative !h-4 !w-4 !p-0 !rounded-[3px] border transition-all",
+                        "relative h-4! w-4! p-0! rounded-[3px]! border transition-all",
                         row.done
-                          ? "!border-primary !bg-primary hover:!bg-primary/90"
-                          : "!border-foreground/15 !bg-background hover:!border-foreground/30",
+                          ? "border-primary! bg-primary! hover:bg-primary/90!"
+                          : "border-foreground/15! bg-background! hover:border-foreground/30!",
                       ].join(" ")}
                       style={{
                         boxShadow: row.done
@@ -151,7 +151,7 @@ export default function NowReadingPanel() {
                     }
                     placeholder="Book title"
                     aria-label={`Book ${i + 1} title`}
-                    className="border-transparent bg-transparent text-sm font-medium shadow-none focus-visible:border-foreground/10 focus-visible:bg-background"
+                    className="border-transparent bg-transparent text-sm font-normal shadow-none focus-visible:border-foreground/10 focus-visible:bg-background"
                   />
                   <Input
                     value={row.author}
@@ -162,9 +162,9 @@ export default function NowReadingPanel() {
                     }
                     placeholder="Author"
                     aria-label={`Book ${i + 1} author`}
-                    className="border-transparent bg-transparent text-sm text-muted-foreground shadow-none focus-visible:border-foreground/10 focus-visible:bg-background"
+                    className="border-transparent bg-transparent text-sm font-normal text-muted-foreground shadow-none focus-visible:border-foreground/10 focus-visible:bg-background"
                   />
-                  <div className="invisible flex items-center gap-1 group-hover:visible focus-within:visible">
+                  <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
                     <IconBtn
                       label="Move up"
                       disabled={i === 0}

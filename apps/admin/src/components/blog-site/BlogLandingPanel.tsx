@@ -21,7 +21,6 @@ export default function BlogLandingPanel() {
 
   return (
     <Panel
-      eyebrow="01 · landing"
       title="Hero & metadata"
       description="The headline, tagline, and SEO fields that wrap /blog."
     >
@@ -36,7 +35,7 @@ export default function BlogLandingPanel() {
               value={draft.heroHeading}
               onChange={(e) => setBlogLanding({ heroHeading: e.target.value })}
               placeholder="Writing"
-              className="font-sans text-base"
+              className="font-sans"
             />
           </Field>
           <Field

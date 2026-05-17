@@ -66,7 +66,7 @@ export default function CoverImageSection() {
                 <Upload className="h-5 w-5" />
               </div>
               <p className="mb-1 font-medium text-foreground">
-                Upload Featured Image
+                Upload
               </p>
               <p className="text-xs text-muted-foreground">
                 PNG or JPEG · click to select

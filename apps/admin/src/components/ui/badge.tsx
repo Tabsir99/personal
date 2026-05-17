@@ -11,23 +11,23 @@ const badgeVariants = cva(
       variant: {
         default: "bg-primary text-primary-foreground [a]:hover:bg-primary/85",
         accent:
-          "border-primary/20 bg-primary/[0.08] text-primary [a]:hover:bg-primary/[0.12]",
+          "border-primary/20 bg-primary/8 text-primary [a]:hover:bg-primary/12",
         success:
-          "border-success/20 bg-success/[0.10] text-success [a]:hover:bg-success/[0.16]",
+          "border-success/20 bg-success/10 text-success [a]:hover:bg-success/16",
         warning:
-          "border-warning/30 bg-warning/[0.12] text-warning-foreground dark:text-warning [a]:hover:bg-warning/[0.18]",
+          "border-warning/30 bg-warning/12 text-warning-foreground dark:text-warning [a]:hover:bg-warning/18",
         destructive:
-          "border-destructive/20 bg-destructive/[0.10] text-destructive [a]:hover:bg-destructive/[0.16]",
+          "border-destructive/20 bg-destructive/10 text-destructive [a]:hover:bg-destructive/16",
         neutral:
-          "border-foreground/[0.08] bg-foreground/[0.04] text-foreground/80 [a]:hover:bg-foreground/[0.06]",
+          "border-foreground/8 bg-foreground/4 text-foreground/80 [a]:hover:bg-foreground/6",
         outline:
-          "border-border text-foreground [a]:hover:bg-foreground/[0.04] [a]:hover:text-foreground",
+          "border-border text-foreground [a]:hover:bg-foreground/4 [a]:hover:text-foreground",
         ghost:
-          "text-muted-foreground [a]:hover:bg-foreground/[0.04] [a]:hover:text-foreground",
+          "text-muted-foreground [a]:hover:bg-foreground/4 [a]:hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         // Retained for back-compat with current callers; reads as neutral now.
         secondary:
-          "border-foreground/[0.08] bg-foreground/[0.04] text-foreground/80 [a]:hover:bg-foreground/[0.06]",
+          "border-foreground/8 bg-foreground/4 text-foreground/80 [a]:hover:bg-foreground/6",
       },
     },
     defaultVariants: {

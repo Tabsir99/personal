@@ -26,13 +26,21 @@ interface NavItem {
   isActive: boolean;
 }
 
+function readDarkPreference(): boolean {
+  if (typeof document === "undefined") return false;
+  const stored = localStorage.getItem("theme");
+  if (stored === "dark") return true;
+  if (stored === "light") return false;
+  return document.documentElement.classList.contains("dark");
+}
+
 const DashBoardSidebar = () => {
   const rootDashBoardUrl = "/dashboard";
   const pathname = usePathname();
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(readDarkPreference);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -44,8 +52,7 @@ const DashBoardSidebar = () => {
   };
 
   useEffect(() => {
-    const theme = localStorage.getItem("theme");
-    setIsDark(theme === "dark");
+    setIsDark(readDarkPreference());
   }, []);
 
   useEffect(() => {
@@ -63,7 +70,6 @@ const DashBoardSidebar = () => {
     const nextIsDark = !isDark;
     setIsDark(nextIsDark);
     document.documentElement.classList.toggle("dark", nextIsDark);
-    document.body.classList.toggle("dark", nextIsDark);
     localStorage.setItem("theme", nextIsDark ? "dark" : "light");
   };
 
@@ -105,7 +111,7 @@ const DashBoardSidebar = () => {
   return (
     <aside
       className={cn(
-        "fixed top-0 left-0 z-30 flex h-screen flex-col border-r border-sidebar-border bg-sidebar/95 backdrop-blur-xl transition-[width] duration-200 ease-out",
+        "fixed top-0 left-0 z-30 flex h-screen flex-col border-r border-sidebar-border bg-sidebar/95 backdrop-blur-xl transition-[width,box-shadow] duration-200 ease-out",
         expanded ? "w-56 shadow-card-rest" : "w-[72px]",
       )}
       onMouseEnter={() => setIsExpanded(true)}
@@ -113,10 +119,9 @@ const DashBoardSidebar = () => {
       aria-expanded={expanded}
       aria-label="Primary navigation"
     >
-      {/* Brand — collapsed: centered logo only. Expanded: logo + label. */}
       <div
         className={cn(
-          "flex h-16 shrink-0 items-center border-b border-sidebar-border",
+          "flex h-16 shrink-0 items-center border-b border-sidebar-border transition-[padding,gap] duration-200 ease-out",
           expanded ? "gap-3 px-4" : "justify-center px-0",
         )}
       >
@@ -134,7 +139,6 @@ const DashBoardSidebar = () => {
         )}
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-2 py-3">
         <ul className="flex flex-col gap-0.5">
           {sidebarItems.map((item) => (
@@ -144,11 +148,11 @@ const DashBoardSidebar = () => {
                 aria-current={item.isActive ? "page" : undefined}
                 title={!expanded ? item.menuName : undefined}
                 className={cn(
-                  "group relative flex h-10 items-center rounded-md text-sm font-medium transition-colors",
+                  "group relative flex h-10 items-center rounded-md text-sm font-medium transition-[padding,gap,colors] duration-200 ease-out",
                   expanded ? "gap-3 px-3" : "justify-center px-0",
                   item.isActive
-                    ? "bg-primary/[0.06] text-foreground"
-                    : "text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground",
+                    ? "bg-primary/6 text-foreground"
+                    : "text-muted-foreground hover:bg-foreground/4 hover:text-foreground",
                 )}
               >
                 {item.isActive && (
@@ -167,9 +171,7 @@ const DashBoardSidebar = () => {
                   )}
                 />
                 {expanded && (
-                  <span className="min-w-0 flex-1 truncate">
-                    {item.menuName}
-                  </span>
+                  <span className="min-w-0 flex-1 truncate">{item.menuName}</span>
                 )}
               </Link>
             </li>
@@ -177,7 +179,6 @@ const DashBoardSidebar = () => {
         </ul>
       </nav>
 
-      {/* Footer — stable vertical stack regardless of expand state */}
       <div className="flex shrink-0 flex-col gap-0.5 border-t border-sidebar-border px-2 py-2">
         <button
           type="button"
@@ -185,14 +186,14 @@ const DashBoardSidebar = () => {
           title={!expanded ? (isDark ? "Light mode" : "Dark mode") : undefined}
           aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
           className={cn(
-            "flex h-9 items-center rounded-md text-muted-foreground transition-colors hover:bg-foreground/[0.04] hover:text-foreground",
+            "flex h-9 items-center rounded-md text-muted-foreground transition-colors hover:bg-foreground/4 hover:text-foreground",
             expanded ? "gap-3 px-3" : "justify-center px-0",
           )}
         >
           <div className="relative h-4 w-4 shrink-0">
             <Sun
               className={cn(
-                "absolute inset-0 transition-all duration-200",
+                "absolute inset-0 h-4 w-4 transition-all duration-200",
                 isDark
                   ? "rotate-90 scale-0 opacity-0"
                   : "rotate-0 scale-100 opacity-100",
@@ -200,7 +201,7 @@ const DashBoardSidebar = () => {
             />
             <Moon
               className={cn(
-                "absolute inset-0 transition-all duration-200",
+                "absolute inset-0 h-4 w-4 transition-all duration-200",
                 isDark
                   ? "rotate-0 scale-100 opacity-100"
                   : "-rotate-90 scale-0 opacity-0",
@@ -208,14 +209,9 @@ const DashBoardSidebar = () => {
             />
           </div>
           {expanded && (
-            <>
-              <span className="flex-1 text-left text-sm font-medium">
-                {isDark ? "Light mode" : "Dark mode"}
-              </span>
-              <Kbd size="sm" className="border-sidebar-border/60">
-                ⇧⌘L
-              </Kbd>
-            </>
+            <span className="flex-1 text-left text-sm font-medium">
+              {isDark ? "Light mode" : "Dark mode"}
+            </span>
           )}
         </button>
 
@@ -226,15 +222,13 @@ const DashBoardSidebar = () => {
           title={!expanded ? "Sign out" : undefined}
           aria-label="Sign out"
           className={cn(
-            "flex h-9 items-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive disabled:pointer-events-none disabled:opacity-50",
+            "flex h-9 items-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/8 hover:text-destructive disabled:pointer-events-none disabled:opacity-50",
             expanded ? "gap-3 px-3" : "justify-center px-0",
           )}
         >
           <LogOut className="h-4 w-4 shrink-0" />
           {expanded && (
-            <span className="flex-1 text-left text-sm font-medium">
-              Sign out
-            </span>
+            <span className="flex-1 text-left text-sm font-medium">Sign out</span>
           )}
         </button>
 

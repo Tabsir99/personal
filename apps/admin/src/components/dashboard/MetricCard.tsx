@@ -5,7 +5,6 @@ import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { MetricNumber } from "@/components/ui/MetricNumber";
 import { cn } from "@/lib/utils";
 
@@ -54,12 +53,10 @@ export function MetricCard({
     return (
       <Card>
         <CardHeader className="pt-5 pb-2">
-          <Eyebrow tone="muted">{title}</Eyebrow>
+          <p className="text-sm text-muted-foreground">{title}</p>
         </CardHeader>
         <CardContent className="pt-1 pb-5">
-          <Eyebrow tone="muted" family="mono">
-            Failed to load
-          </Eyebrow>
+          <p className="text-sm text-muted-foreground">Failed to load</p>
         </CardContent>
       </Card>
     );
@@ -69,11 +66,12 @@ export function MetricCard({
     return (
       <Card>
         <CardHeader className="pt-5 pb-2">
-          <Eyebrow tone="muted">{title}</Eyebrow>
+          <p className="text-sm text-muted-foreground">{title}</p>
         </CardHeader>
         <CardContent className="space-y-3 pt-1 pb-5">
           <Skeleton className="h-7 w-1/2" />
-          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-14 w-full" />
         </CardContent>
       </Card>
     );
@@ -94,7 +92,7 @@ export function MetricCard({
   return (
     <Card className="flex flex-col">
       <CardHeader className="pt-5 pb-2">
-        <Eyebrow tone="muted">{title}</Eyebrow>
+        <p className="text-sm text-muted-foreground">{title}</p>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col justify-between gap-3 pt-1 pb-5">
         <div className="flex flex-col gap-1">
@@ -162,9 +160,7 @@ export function MetricCard({
           </div>
         ) : (
           <div className="flex h-14 items-center">
-            <Eyebrow tone="muted" family="mono">
-              No chart data
-            </Eyebrow>
+            <p className="text-sm text-muted-foreground">No chart data</p>
           </div>
         )}
       </CardContent>

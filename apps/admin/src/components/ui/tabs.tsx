@@ -57,7 +57,7 @@ function TabsList({
           data-slot="tabs-indicator"
           className={cn(
             "pointer-events-none absolute bottom-0 h-0.5 rounded-full bg-foreground",
-            "left-[var(--active-tab-left)] w-[var(--active-tab-width)]",
+            "left-(--active-tab-left) w-(--active-tab-width)",
             "transition-[left,width] duration-200 ease-out",
             "motion-reduce:transition-none"
           )}

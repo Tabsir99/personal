@@ -3,7 +3,6 @@ import { Eye, Settings, Send } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Kbd } from "@/components/ui/Kbd";
 import { StatusDot } from "@/components/ui/StatusDot";
 
@@ -19,7 +18,7 @@ export default function EditorHeader({
   onPublish: () => void;
 }) {
   return (
-    <div className="sticky -top-6 z-10 flex h-14 w-full items-center justify-between border-b border-foreground/[0.06] bg-background/85 px-6 backdrop-blur-md">
+    <div className="sticky -top-6 z-10 flex h-14 w-full items-center justify-between border-b border-foreground/6 bg-background/85 px-6 backdrop-blur-md">
       <div className="relative h-5 w-28" aria-live="polite">
         <div
           className={cn(
@@ -28,9 +27,7 @@ export default function EditorHeader({
           )}
         >
           <StatusDot tone="warning" size="sm" breathing />
-          <Eyebrow tone="warning" family="mono">
-            Saving…
-          </Eyebrow>
+          <span className="text-sm text-muted-foreground">Saving…</span>
         </div>
         <div
           className={cn(
@@ -39,9 +36,7 @@ export default function EditorHeader({
           )}
         >
           <StatusDot tone="success" size="sm" />
-          <Eyebrow tone="success" family="mono">
-            Saved
-          </Eyebrow>
+          <span className="text-sm text-muted-foreground">Saved</span>
         </div>
       </div>
 

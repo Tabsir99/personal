@@ -13,7 +13,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import useUIStore from "@/stores/UIStore";
 
 const ConfirmationModal = () => {
@@ -33,19 +32,13 @@ const ConfirmationModal = () => {
             <div
               className={
                 isDestructive
-                  ? "flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-destructive/20 bg-destructive/[0.08] text-destructive"
-                  : "flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-warning/20 bg-warning/[0.08] text-warning"
+                  ? "flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-destructive/20 bg-destructive/8 text-destructive"
+                  : "flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-warning/20 bg-warning/8 text-warning"
               }
             >
               <AlertTriangle className="h-4 w-4" />
             </div>
             <div className="flex flex-col gap-1">
-              <Eyebrow
-                tone={isDestructive ? "destructive" : "warning"}
-                family="mono"
-              >
-                {isDestructive ? "Destructive action" : "Confirm action"}
-              </Eyebrow>
               <DialogTitle className="text-base leading-snug font-semibold tracking-tight">
                 {data?.headerText || "Are you sure?"}
               </DialogTitle>

@@ -45,13 +45,13 @@ export default function SiteConfigEditor({
         <EditorChrome />
       </div>
       <div className="mt-8 space-y-6">
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out [animation-delay:60ms] [animation-fill-mode:both]">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out [animation-delay:60ms] fill-mode-[both]">
           <BlogLandingPanel />
         </div>
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out [animation-delay:140ms] [animation-fill-mode:both]">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out [animation-delay:140ms] fill-mode-[both]">
           <NowReadingPanel />
         </div>
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out [animation-delay:220ms] [animation-fill-mode:both]">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out [animation-delay:220ms] fill-mode-[both]">
           <CurrentlyBuildingPanel />
         </div>
       </div>
