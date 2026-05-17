@@ -61,9 +61,6 @@ export default function Skills() {
   return (
     <div className="space-y-6">
       <header className="space-y-1.5">
-        <Eyebrow tone="muted" family="mono">
-          Portfolio · skills
-        </Eyebrow>
         <h1 className="text-2xl leading-tight font-semibold tracking-tight">
           Technical skills
         </h1>

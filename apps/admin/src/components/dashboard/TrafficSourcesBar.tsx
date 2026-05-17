@@ -25,7 +25,6 @@ export function TrafficSourcesBar() {
 
   return (
     <ChartCard
-      eyebrow="Acquisition"
       title="Traffic sources"
       action={<DateRangeSelector value={days} onChange={setDays} />}
       height={height}

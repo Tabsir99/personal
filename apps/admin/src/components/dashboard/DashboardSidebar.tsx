@@ -15,9 +15,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import Img from "../ui/image";
-import { Eyebrow } from "../ui/Eyebrow";
 import { Kbd } from "../ui/Kbd";
-import { StatusDot } from "../ui/StatusDot";
 import { clientEnv } from "@/config/env.client";
 import { logOutAction } from "@/actions/authActions";
 
@@ -50,7 +48,6 @@ const DashBoardSidebar = () => {
     setIsDark(theme === "dark");
   }, []);
 
-  // Cmd/Ctrl + \ pins/unpins the sidebar — Linear/Stripe pattern.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
@@ -116,8 +113,13 @@ const DashBoardSidebar = () => {
       aria-expanded={expanded}
       aria-label="Primary navigation"
     >
-      {/* Brand */}
-      <div className="flex h-16 shrink-0 items-center gap-3 border-b border-sidebar-border px-4">
+      {/* Brand — collapsed: centered logo only. Expanded: logo + label. */}
+      <div
+        className={cn(
+          "flex h-16 shrink-0 items-center border-b border-sidebar-border",
+          expanded ? "gap-3 px-4" : "justify-center px-0",
+        )}
+      >
         <Img
           src={`${clientEnv.MEDIA_ORIGIN}/logo.png`}
           alt="Logo"
@@ -125,19 +127,11 @@ const DashBoardSidebar = () => {
           height={36}
           className="shrink-0 rounded-md"
         />
-        <div
-          className={cn(
-            "flex min-w-0 flex-col gap-0.5 transition-opacity duration-200",
-            expanded ? "opacity-100" : "pointer-events-none opacity-0",
-          )}
-        >
-          <Eyebrow size="xs" tone="muted" family="mono">
-            TABSIRCG · ADMIN
-          </Eyebrow>
-          <span className="truncate text-[13px] font-medium text-foreground">
+        {expanded && (
+          <span className="min-w-0 truncate text-sm font-semibold tracking-tight text-foreground">
             Studio
           </span>
-        </div>
+        )}
       </div>
 
       {/* Navigation */}
@@ -150,16 +144,13 @@ const DashBoardSidebar = () => {
                 aria-current={item.isActive ? "page" : undefined}
                 title={!expanded ? item.menuName : undefined}
                 className={cn(
-                  "group relative flex h-10 items-center gap-3 rounded-md text-sm font-medium transition-colors",
-                  expanded ? "px-3" : "justify-center px-0",
+                  "group relative flex h-10 items-center rounded-md text-sm font-medium transition-colors",
+                  expanded ? "gap-3 px-3" : "justify-center px-0",
                   item.isActive
                     ? "bg-primary/[0.06] text-foreground"
                     : "text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground",
                 )}
               >
-                {/* Quiet active-state hairline — no glow, no gradient.
-                    view-transition-name on the active rail makes it slide
-                    between positions on route change instead of fade. */}
                 {item.isActive && (
                   <span
                     aria-hidden="true"
@@ -175,16 +166,10 @@ const DashBoardSidebar = () => {
                       : "text-muted-foreground/70 group-hover:text-foreground",
                   )}
                 />
-                <span
-                  className={cn(
-                    "min-w-0 flex-1 truncate transition-opacity duration-200",
-                    expanded ? "opacity-100" : "pointer-events-none w-0 opacity-0",
-                  )}
-                >
-                  {item.menuName}
-                </span>
-                {item.isActive && expanded && (
-                  <StatusDot tone="primary" size="sm" aria-hidden="true" />
+                {expanded && (
+                  <span className="min-w-0 flex-1 truncate">
+                    {item.menuName}
+                  </span>
                 )}
               </Link>
             </li>
@@ -192,38 +177,22 @@ const DashBoardSidebar = () => {
         </ul>
       </nav>
 
-      {/* Footer cluster */}
-      <div className="shrink-0 border-t border-sidebar-border">
-        {expanded && (
-          <div className="flex items-center justify-between px-3 pt-3 pb-2">
-            <Eyebrow size="xs" tone="muted" family="mono">
-              ⌘\ to pin
-            </Eyebrow>
-            {isPinned && (
-              <Eyebrow size="xs" tone="primary" family="mono">
-                PINNED
-              </Eyebrow>
-            )}
-          </div>
-        )}
-        <div
+      {/* Footer — stable vertical stack regardless of expand state */}
+      <div className="flex shrink-0 flex-col gap-0.5 border-t border-sidebar-border px-2 py-2">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          title={!expanded ? (isDark ? "Light mode" : "Dark mode") : undefined}
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
           className={cn(
-            "flex items-center gap-1 p-2",
-            expanded ? "justify-between" : "flex-col",
+            "flex h-9 items-center rounded-md text-muted-foreground transition-colors hover:bg-foreground/[0.04] hover:text-foreground",
+            expanded ? "gap-3 px-3" : "justify-center px-0",
           )}
         >
-          <button
-            type="button"
-            onClick={toggleTheme}
-            title={isDark ? "Light mode" : "Dark mode"}
-            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            className={cn(
-              "relative inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-foreground/[0.04] hover:text-foreground",
-            )}
-          >
+          <div className="relative h-4 w-4 shrink-0">
             <Sun
               className={cn(
-                "absolute h-4 w-4 transition-all duration-200",
+                "absolute inset-0 transition-all duration-200",
                 isDark
                   ? "rotate-90 scale-0 opacity-0"
                   : "rotate-0 scale-100 opacity-100",
@@ -231,32 +200,54 @@ const DashBoardSidebar = () => {
             />
             <Moon
               className={cn(
-                "absolute h-4 w-4 transition-all duration-200",
+                "absolute inset-0 transition-all duration-200",
                 isDark
                   ? "rotate-0 scale-100 opacity-100"
                   : "-rotate-90 scale-0 opacity-0",
               )}
             />
-          </button>
+          </div>
           {expanded && (
-            <Kbd size="sm" className="border-sidebar-border/60">
-              ⇧⌘L
-            </Kbd>
+            <>
+              <span className="flex-1 text-left text-sm font-medium">
+                {isDark ? "Light mode" : "Dark mode"}
+              </span>
+              <Kbd size="sm" className="border-sidebar-border/60">
+                ⇧⌘L
+              </Kbd>
+            </>
           )}
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            title="Sign out"
-            aria-label="Sign out"
-            className={cn(
-              "inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive disabled:pointer-events-none disabled:opacity-50",
-              expanded && "ml-auto",
-            )}
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
-        </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          title={!expanded ? "Sign out" : undefined}
+          aria-label="Sign out"
+          className={cn(
+            "flex h-9 items-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive disabled:pointer-events-none disabled:opacity-50",
+            expanded ? "gap-3 px-3" : "justify-center px-0",
+          )}
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          {expanded && (
+            <span className="flex-1 text-left text-sm font-medium">
+              Sign out
+            </span>
+          )}
+        </button>
+
+        {expanded && (
+          <div className="mt-1 flex items-center justify-between border-t border-sidebar-border px-3 pt-2 pb-1">
+            <span className="font-mono text-[10px] text-muted-foreground/60">
+              {isPinned ? "Pinned" : "Hover to expand"}
+            </span>
+            <Kbd size="sm" className="border-sidebar-border/60">
+              ⌘\
+            </Kbd>
+          </div>
+        )}
       </div>
     </aside>
   );

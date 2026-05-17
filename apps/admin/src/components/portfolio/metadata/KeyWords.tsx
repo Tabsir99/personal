@@ -11,7 +11,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 
 const KeywordsSection = memo(
@@ -40,16 +39,12 @@ const KeywordsSection = memo(
 
     return (
       <Card>
-        <CardHeader className="flex flex-col gap-1.5 pt-5 pb-3">
-          <Eyebrow tone="muted" family="mono">
-            SEO · keywords
-          </Eyebrow>
+        <CardHeader className="flex flex-col gap-1 pt-5 pb-3">
           <h2 className="text-base leading-tight font-semibold tracking-tight">
             Keywords
           </h2>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            Used by search engines to surface this portfolio. Comma-style topic
-            tags.
+            Topic tags search engines use to surface this portfolio.
           </p>
         </CardHeader>
         <CardContent className="pt-1 pb-5">

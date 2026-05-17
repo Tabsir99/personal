@@ -72,7 +72,6 @@ export function PagesTable() {
 
   return (
     <ChartCard
-      eyebrow="Pages"
       title="Top pages"
       action={<DateRangeSelector value={days} onChange={setDays} />}
       height={"auto" as unknown as number}

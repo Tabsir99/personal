@@ -47,7 +47,6 @@ export function DeviceDonut() {
 
   return (
     <ChartCard
-      eyebrow="Audience"
       title="Devices"
       action={<DateRangeSelector value={days} onChange={setDays} />}
       height={300}

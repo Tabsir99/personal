@@ -11,7 +11,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { NumericInput } from "@/components/ui/NumericInput";
 import { Textarea } from "@/components/ui/textarea";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { FormField } from "@/components/ui/FormField";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 
@@ -31,9 +30,6 @@ export default function PortfolioMetadata() {
   return (
     <div className="space-y-6">
       <header className="space-y-1.5">
-        <Eyebrow tone="muted" family="mono">
-          Portfolio · metadata
-        </Eyebrow>
         <h1 className="text-2xl leading-tight font-semibold tracking-tight">
           Site metadata
         </h1>
@@ -43,10 +39,7 @@ export default function PortfolioMetadata() {
       </header>
 
       <Card>
-        <CardHeader className="flex flex-col gap-1.5 pt-5 pb-3">
-          <Eyebrow tone="muted" family="mono">
-            Basics
-          </Eyebrow>
+        <CardHeader className="flex flex-col gap-1 pt-5 pb-3">
           <h2 className="text-base leading-tight font-semibold tracking-tight">
             Title & description
           </h2>
@@ -82,13 +75,13 @@ export default function PortfolioMetadata() {
       <SocialLinksSection />
 
       <Card>
-        <CardHeader className="flex flex-col gap-1.5 pt-5 pb-3">
-          <Eyebrow tone="muted" family="mono">
-            Headline stats
-          </Eyebrow>
+        <CardHeader className="flex flex-col gap-1 pt-5 pb-3">
           <h2 className="text-base leading-tight font-semibold tracking-tight">
-            Numbers shown above the fold
+            Headline stats
           </h2>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Numbers shown above the fold.
+          </p>
         </CardHeader>
         <CardContent className="pt-1 pb-5">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

@@ -62,7 +62,6 @@ export default function WriteBlog() {
   return (
     <>
       <PageHeader
-        eyebrow="Blog · drafts"
         title="Blog drafts"
         description="Started but not yet published. Open one to keep writing or spin up a new draft."
       />

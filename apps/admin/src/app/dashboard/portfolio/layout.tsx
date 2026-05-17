@@ -20,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Kbd } from "@/components/ui/Kbd";
 import { Skeleton } from "@/components/ui/skeleton";
-import { StatusDot } from "@/components/ui/StatusDot";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import useUIStore from "@/stores/UIStore";
 import { cn } from "@/lib/utils";
@@ -91,12 +90,9 @@ export default function PortfolioDashboard({
   return (
     <div className="absolute top-0 w-[calc(100%-6rem)] text-foreground">
       <div className="flex">
-        <aside className="flex min-h-screen w-56 shrink-0 flex-col gap-6 border-r border-foreground/[0.06] py-8 pr-6 pl-2">
+        <aside className="flex min-h-screen w-52 shrink-0 flex-col gap-5 border-r border-foreground/[0.06] px-3 py-6">
           <div className="px-2">
-            <Eyebrow tone="muted" family="mono">
-              Section
-            </Eyebrow>
-            <h1 className="mt-1.5 text-lg leading-tight font-semibold tracking-tight">
+            <h1 className="text-lg leading-tight font-semibold tracking-tight">
               Portfolio
             </h1>
           </div>
@@ -125,13 +121,12 @@ export default function PortfolioDashboard({
                             : "text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground",
                         )}
                       >
-                        <span
-                          aria-hidden="true"
-                          className={cn(
-                            "absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-r-full bg-primary transition-opacity duration-200",
-                            isActive ? "opacity-100" : "opacity-0",
-                          )}
-                        />
+                        {isActive && (
+                          <span
+                            aria-hidden="true"
+                            className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-r-full bg-primary"
+                          />
+                        )}
                         <Icon
                           className={cn(
                             "h-4 w-4 shrink-0 transition-colors",
@@ -141,7 +136,6 @@ export default function PortfolioDashboard({
                           )}
                         />
                         <span className="flex-1 truncate">{section.label}</span>
-                        {isActive && <StatusDot tone="primary" size="sm" />}
                       </Link>
                     </li>
                   );
@@ -150,13 +144,13 @@ export default function PortfolioDashboard({
             )}
           </nav>
 
-          <div className="mt-auto flex flex-col gap-2 px-2 pt-6">
+          <div className="mt-auto flex flex-col gap-1.5 px-2">
             <Button
               type="button"
               size="sm"
               disabled={saving || !isDirty}
               onClick={() => usePortfolioStore.getState().savePageData()}
-              className="w-full justify-between gap-1.5"
+              className="w-full justify-between"
             >
               <span className="inline-flex items-center gap-1.5">
                 {saving ? (

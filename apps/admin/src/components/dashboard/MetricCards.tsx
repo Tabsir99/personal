@@ -2,7 +2,6 @@
 import { useState } from "react";
 
 import { useDailyStats } from "@/hooks/useDashboardData";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 
 import { MetricCard } from "./MetricCard";
 import { DateRangeSelector } from "./DateRangeSelector";
@@ -150,14 +149,9 @@ export function MetricCards() {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex flex-col gap-1.5">
-          <Eyebrow tone="muted" family="mono">
-            Overview
-          </Eyebrow>
-          <h2 className="text-lg leading-tight font-semibold tracking-tight">
-            Key metrics
-          </h2>
-        </div>
+        <h2 className="text-lg leading-tight font-semibold tracking-tight">
+          Key metrics
+        </h2>
         <DateRangeSelector value={days} onChange={setDays} />
       </div>
       <div className="stagger-cascade-tight grid grid-cols-2 gap-3 md:grid-cols-3">

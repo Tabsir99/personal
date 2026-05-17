@@ -66,10 +66,7 @@ const SocialLinksSection = memo(
 
     return (
       <Card>
-        <CardHeader className="flex flex-col gap-1.5 pt-5 pb-3">
-          <Eyebrow tone="muted" family="mono">
-            Contact
-          </Eyebrow>
+        <CardHeader className="flex flex-col gap-1 pt-5 pb-3">
           <h2 className="text-base leading-tight font-semibold tracking-tight">
             How people reach you
           </h2>

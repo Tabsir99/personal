@@ -52,7 +52,6 @@ export function SessionsChart() {
 
   return (
     <ChartCard
-      eyebrow="Traffic"
       title="Sessions & Page Views"
       action={
         <div className="flex items-center gap-4">

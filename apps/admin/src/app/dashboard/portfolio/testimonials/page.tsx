@@ -22,9 +22,6 @@ export default function Testimonials() {
   return (
     <div className="space-y-6">
       <header className="space-y-1.5">
-        <Eyebrow tone="muted" family="mono">
-          Portfolio · testimonials
-        </Eyebrow>
         <h1 className="text-2xl leading-tight font-semibold tracking-tight">
           Client testimonials
         </h1>

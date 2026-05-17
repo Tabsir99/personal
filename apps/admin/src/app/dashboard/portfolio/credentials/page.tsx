@@ -20,9 +20,6 @@ export default function Credentials() {
   return (
     <div className="space-y-6">
       <header className="space-y-1.5">
-        <Eyebrow tone="muted" family="mono">
-          Portfolio · credentials
-        </Eyebrow>
         <h1 className="text-2xl leading-tight font-semibold tracking-tight">
           Certifications &amp; achievements
         </h1>

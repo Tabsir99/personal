@@ -25,7 +25,6 @@ export function CountriesBar() {
 
   return (
     <ChartCard
-      eyebrow="Geo"
       title="Top countries"
       action={<DateRangeSelector value={days} onChange={setDays} />}
       height={height}
