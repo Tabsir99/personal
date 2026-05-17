@@ -1,65 +1,20 @@
-"use client";
-import { useEffect, useRef } from "react";
 import { Terminal } from "./terminal";
 import { ScrambleWord } from "./scramble-word";
 import { cn } from "@/lib/utils";
 
-/* ===== Hero =====
+/* ===== Hero — server-rendered =====
    Pain-point first. The hook word ([FRICTION]) scrambles through related
    nouns — friction → fragility → frustration → re-writes → slow ships.
    Title left, translucent terminal right. The whole composition is locked
-   to a single viewport, no scroll needed to "get" it. */
+   to a single viewport, no scroll needed to "get" it.
+   The cursor-following glow is page-wide and lives in app/layout.tsx
+   alongside Atmosphere; only the grid-lines decoration is hero-local.
+   ScrambleWord and Terminal are client islands; Hero itself is pure JSX. */
 export function Hero() {
-  const heroRef = useRef<HTMLElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
-
-  // Cursor-following accent glow — subtle ambient interaction.
-  useEffect(() => {
-    if (!heroRef.current || !glowRef.current) return;
-    let raf = 0;
-    let tx = 0.4,
-      ty = 0.5;
-    let cx = 0.4,
-      cy = 0.5;
-    let inside = false;
-
-    function onMove(e: MouseEvent) {
-      const r = heroRef.current!.getBoundingClientRect();
-      tx = (e.clientX - r.left) / r.width;
-      ty = (e.clientY - r.top) / r.height;
-      inside = true;
-    }
-    function onLeave() {
-      inside = false;
-      tx = 0.4;
-      ty = 0.5;
-    }
-    function tick() {
-      cx += (tx - cx) * 0.08;
-      cy += (ty - cy) * 0.08;
-      if (glowRef.current) {
-        glowRef.current.style.setProperty("--gx", `${cx * 100}%`);
-        glowRef.current.style.setProperty("--gy", `${cy * 100}%`);
-        glowRef.current.style.opacity = inside ? "1" : "0.5";
-      }
-      raf = requestAnimationFrame(tick);
-    }
-    const el = heroRef.current;
-    el.addEventListener("mousemove", onMove);
-    el.addEventListener("mouseleave", onLeave);
-    raf = requestAnimationFrame(tick);
-    return () => {
-      el.removeEventListener("mousemove", onMove);
-      el.removeEventListener("mouseleave", onLeave);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
-
   return (
     <section
       id="hero"
       data-screen-label="01 Hero"
-      ref={heroRef}
       className={cn(
         "relative h-screen min-h-[720px] overflow-hidden p-0",
         "max-[1100px]:h-auto max-[1100px]:min-h-screen",
@@ -69,13 +24,6 @@ export function Hero() {
         className="pointer-events-none absolute inset-0 z-0"
         aria-hidden="true"
       >
-        <div
-          ref={glowRef}
-          className={cn(
-            "absolute inset-[-10%] opacity-50 transition-opacity duration-400 ease-[ease]",
-            "bg-[radial-gradient(520px_circle_at_var(--gx,40%)_var(--gy,50%),color-mix(in_oklab,var(--color-accent)_14%,transparent),color-mix(in_oklab,var(--color-accent)_4%,transparent)_40%,transparent_70%)]",
-          )}
-        ></div>
         <div
           className={cn(
             "absolute inset-0",
