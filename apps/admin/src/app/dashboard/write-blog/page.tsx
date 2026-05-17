@@ -67,7 +67,19 @@ export default function WriteBlog() {
       />
 
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-6">
+          {!isEmpty && (
+            <div className="relative w-full max-w-md flex-1">
+              <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="pl-9"
+                placeholder="Search by title, tag…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          )}
+
           <div className="flex flex-wrap items-center gap-2">
             <Button onClick={openCreateDialog}>
               <Plus className="h-3.5 w-3.5" />
@@ -78,17 +90,6 @@ export default function WriteBlog() {
               Draft with AI
             </Button>
           </div>
-          {!isEmpty && (
-            <div className="relative ml-auto w-full max-w-md flex-1">
-              <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="pl-9"
-                placeholder="Search by title, tag…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-          )}
         </div>
 
         <div className="overflow-auto">
@@ -107,10 +108,7 @@ export default function WriteBlog() {
                     key={blog.blogId}
                     style={{ ["--stagger-index" as string]: index }}
                   >
-                    <DraftBlogCard
-                      blog={blog}
-                      confirmDelete={confirmDelete}
-                    />
+                    <DraftBlogCard blog={blog} confirmDelete={confirmDelete} />
                   </div>
                 ))}
             </div>
@@ -129,8 +127,7 @@ export default function WriteBlog() {
 }
 
 const NoBlogs = ({ search }: { search: string }) => {
-  const { openCreateDialog, openAiDraftDialog } =
-    useBlogEditorStore.getState();
+  const { openCreateDialog, openAiDraftDialog } = useBlogEditorStore.getState();
   return (
     <div className="mt-8 flex flex-col items-center justify-center gap-3 rounded-lg border border-foreground/6 bg-foreground/2 px-6 py-12 text-center">
       <div className="rounded-md border border-foreground/6 bg-card p-2 text-muted-foreground">

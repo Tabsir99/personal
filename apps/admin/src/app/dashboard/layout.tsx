@@ -31,29 +31,8 @@ export default function DashBoardLayout({
         position="bottom-right"
         visibleToasts={3}
         swipeDirections={["left", "bottom"]}
+        richColors
         duration={5000}
-        toastOptions={{
-          classNames: {
-            // Surface
-            toast:
-              "bg-card! text-card-foreground! border! border-foreground/8! shadow-card-rest! rounded-md! font-sans!",
-            // Slots
-            title: "text-sm! font-semibold! tracking-tight!",
-            description: "text-xs! leading-relaxed! text-muted-foreground!",
-            actionButton:
-              "bg-foreground! text-background! rounded-sm! font-medium!",
-            cancelButton:
-              "bg-foreground/4! text-muted-foreground! rounded-sm! font-medium!",
-            // Semantic tints — quiet, consistent with badges
-            success:
-              "bg-card! text-foreground! **:data-icon:text-success!",
-            error:
-              "bg-card! text-foreground! **:data-icon:text-destructive!",
-            warning:
-              "bg-card! text-foreground! **:data-icon:text-warning!",
-            info: "bg-card! text-foreground! **:data-icon:text-primary!",
-          },
-        }}
       />
       <CreateBlogModal />
       <AiDraftBlogModal />
