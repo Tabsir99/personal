@@ -1,21 +1,10 @@
-"use client";
-import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
-/* ===== Header =====
-   Active-nav highlighting now comes from [components/ui/active-section.tsx]
-   which toggles `.is-active` on every `[data-nav]` element. The local
-   scroll listener only tracks the `scrolled` border swap (Tier C target). */
+/* ===== Header — server-rendered =====
+   All scroll-driven state comes from [components/ui/active-section.tsx]:
+   `.is-active` on the matching `[data-nav]` link, plus `data-scrolled`
+   on `<html>` (read by the border-color variant below). */
 export function Header() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   const navItems = [
     { id: "about", label: "About", num: "01" },
     { id: "work", label: "Work", num: "03" },
@@ -30,7 +19,8 @@ export function Header() {
         "fixed top-[20px] left-1/2 z-100 inline-flex -translate-x-1/2 -translate-y-2 items-center gap-5 rounded-full border py-[6px] pr-[8px] pl-[14px] whitespace-nowrap opacity-0 shadow-[0_10px_40px_color-mix(in_oklab,black_45%,transparent),inset_0_1px_0_color-mix(in_oklab,white_3%,transparent)] backdrop-blur-[20px] backdrop-saturate-180",
         "bg-ink/78 transition-[border-color,background] duration-300 ease-linear",
         "animate-header-in",
-        scrolled ? "border-accent/18" : "border-line",
+        "border-line",
+        "[html[data-scrolled]_&]:border-accent/18",
       )}
     >
       <a
