@@ -73,7 +73,12 @@ export default function RootLayout({
     <html lang="en" style={fontVars}>
       {process.env.NODE_ENV === "development" && (
         <head>
-          <script src="https://unpkg.com/react-scan/dist/auto.global.js"></script>
+          <script
+            src="https://unpkg.com/react-scan/dist/auto.global.js"
+            async
+            defer
+            fetchPriority="low"
+          ></script>
         </head>
       )}
       <body>

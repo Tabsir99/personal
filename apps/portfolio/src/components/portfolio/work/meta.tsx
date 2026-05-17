@@ -1,0 +1,82 @@
+import { cn } from "@/lib/utils";
+import { LINK_BG, LINK_ICONS, PROJECTS } from "./data";
+
+/* Meta block under the stage — dek + role/stack/metrics + project links.
+   Server component. All 5 projects' blocks render stacked in one grid
+   cell (grid-area 1/1 in work.css); only the active one has opacity 1. */
+export function WorkMeta() {
+  return (
+    <div
+      data-reveal
+      className="work-meta-stack mt-14"
+      style={{ animationDelay: "100ms" }}
+    >
+      {PROJECTS.map((project, i) => (
+        <div
+          key={i}
+          data-work-meta-idx={i}
+          style={{ "--i": i } as React.CSSProperties}
+          className="work-meta grid grid-cols-[0.78fr_1.22fr] gap-14 items-start max-[1100px]:grid-cols-1 max-[1100px]:gap-8"
+        >
+          <p className="font-serif text-[clamp(20px,1.7vw,26px)] leading-[1.4] text-cream-2 opacity-85 tracking-[-0.005em] text-pretty pr-3 border-l border-accent pl-6 max-[1100px]:border-l-0 max-[1100px]:pl-0 max-[1100px]:border-t max-[1100px]:border-t-accent max-[1100px]:pt-4">
+            {project.dek}
+          </p>
+
+          <dl className="grid grid-cols-2 gap-x-10 gap-y-7 [&_dt]:font-mono [&_dt]:text-[10px] [&_dt]:tracking-[0.18em] [&_dt]:uppercase [&_dt]:text-muted-2 [&_dt]:mb-2.5 [&_dd]:font-mono [&_dd]:text-[13px] [&_dd]:leading-[1.55] [&_dd]:text-muted [&_dd]:tracking-[0.02em]">
+            <div className="border-t border-line pt-3.5">
+              <dt>Role</dt>
+              <dd>{project.role}</dd>
+            </div>
+            <div className="border-t border-line pt-3.5">
+              <dt>Stack</dt>
+              <dd>{project.skills.join(" · ")}</dd>
+            </div>
+            {project.metrics.length > 0 && (
+              <div className="border-t border-line pt-3.5 col-span-full">
+                <dt>Metrics</dt>
+                <dd className="flex flex-wrap gap-8">
+                  {project.metrics.map((m, j) => (
+                    <span
+                      className="flex flex-col gap-1 min-w-[140px]"
+                      key={j}
+                    >
+                      <span className="font-serif italic text-[clamp(28px,2.6vw,38px)] leading-none text-cream-2 opacity-80 tracking-[-0.01em]">
+                        {m.value}
+                      </span>
+                      <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-muted-2">
+                        {m.label}
+                      </span>
+                    </span>
+                  ))}
+                </dd>
+              </div>
+            )}
+          </dl>
+
+          <div className="col-start-1 flex flex-wrap gap-2.5 mt-[22px] pl-6 max-[1100px]:col-start-1 max-[1100px]:pl-0">
+            {project.links.map((l, j) => (
+              <a
+                key={j}
+                href={l.url || "#"}
+                className={cn(
+                  "group/link inline-flex items-center gap-2.5 px-4 py-2.5 border border-line rounded-[2px] font-mono text-[11px] tracking-[0.12em] uppercase text-cream-2 bg-transparent",
+                  "transition-all duration-250 ease-out",
+                  "hover:border-accent hover:text-accent hover:-translate-y-px",
+                  LINK_BG[l.type],
+                )}
+              >
+                <span className="font-mono text-[11px] text-accent">
+                  {LINK_ICONS[l.type] || "→"}
+                </span>
+                <span>{l.text}</span>
+                <span className="opacity-50 transition-[translate,opacity] duration-250 ease-out group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 group-hover/link:opacity-100">
+                  ↗
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
