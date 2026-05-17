@@ -63,7 +63,7 @@ export function PortfolioModalFrame({
       {trigger && <DialogTrigger render={trigger as React.ReactElement} />}
       <DialogContent
         className={cn(
-          "flex max-h-[90vh] flex-col overflow-hidden p-0",
+          "flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0",
           modalSizeClass[size],
         )}
       >
@@ -74,7 +74,7 @@ export function PortfolioModalFrame({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 space-y-10 overflow-y-auto px-6 py-4">
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-4">
           {children}
         </div>
 
