@@ -1,5 +1,4 @@
 import "./globals.css";
-import "@/components/portfolio/styles.css";
 import React from "react";
 import { type Metadata } from "next";
 import { Lato, Instrument_Serif, JetBrains_Mono } from "next/font/google";
