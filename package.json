@@ -5,7 +5,7 @@
     "dev:admin": "pnpm --filter admin dev",
     "dev:portfolio": "pnpm --filter portfolio dev",
     "dev": "pnpm -r --parallel dev",
-    "dev:clean": "rm -rf apps/*/.next && pnpm dev",
+    "dev:clean": "rm -rf apps/*/.next packages/*/.next && pnpm dev",
     "build": "pnpm -r build",
     "tc": "pnpm -r tc",
     "test": "pnpm -r test",

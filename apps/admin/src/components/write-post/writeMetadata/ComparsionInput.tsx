@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Kbd } from "@/components/ui/Kbd";
 import { cn } from "@/lib/utils";
 import {
   useState,
@@ -17,31 +18,6 @@ const differs = (
   a: string | null | undefined,
   b: string | null | undefined,
 ): boolean => norm(a).toLowerCase() !== norm(b).toLowerCase();
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Primitives
-// ─────────────────────────────────────────────────────────────────────────────
-interface KbdProps {
-  children: ReactNode;
-  pressed?: boolean | undefined;
-}
-
-function Kbd({ children, pressed = false }: KbdProps) {
-  return (
-    <kbd
-      className={[
-        "inline-flex items-center justify-center min-w-[22px] h-[20px] px-[5px]",
-        "text-[12px] font-medium border rounded-[5px] transition-colors duration-100",
-        "font-mono tracking-[-0.02em]",
-        pressed
-          ? "bg-foreground text-background border-foreground/80 shadow-[inset_0_1px_1px_0_rgba(0,0,0,0.3)]"
-          : "bg-background text-muted-foreground border-border shadow-[inset_0_-1px_0_0_rgba(0,0,0,0.04),0_1px_0_0_rgba(0,0,0,0.02)]",
-      ].join(" ")}
-    >
-      {children}
-    </kbd>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -176,13 +152,13 @@ export function SuggestionField({
           )}
         >
           {applyingOrApplied ? (
-            <div className="flex items-center gap-2 py-1">
+            <div className="flex items-center gap-2 py-1 text-success">
               <svg
                 width="11"
                 height="11"
                 viewBox="0 0 12 12"
                 fill="none"
-                stroke="rgb(16,185,129)"
+                stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -192,13 +168,13 @@ export function SuggestionField({
               <span>Applied</span>
             </div>
           ) : phase === "dismissed" ? (
-            <div className="flex items-center gap-2 py-1">
+            <div className="flex items-center gap-2 py-1 text-muted-foreground">
               <svg
                 width="11"
                 height="11"
                 viewBox="0 0 12 12"
                 fill="none"
-                stroke="rgb(161,161,170)"
+                stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -240,7 +216,7 @@ export function SuggestionField({
 
       {/* Helper text */}
       {helperText && (
-        <p className="mt-2 text-xs text-zinc-400 px-0.5">{helperText}</p>
+        <p className="mt-2 px-0.5 text-xs text-muted-foreground">{helperText}</p>
       )}
     </div>
   );

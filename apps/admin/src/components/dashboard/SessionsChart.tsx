@@ -1,7 +1,5 @@
 "use client";
 import { useState } from "react";
-import { useDailyStats } from "@/hooks/useDashboardData";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AreaChart,
   Area,
@@ -10,16 +8,31 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
-import { Skeleton } from "@/components/ui/skeleton";
+
+import { useDailyStats } from "@/hooks/useDashboardData";
+import { StatusDot } from "@/components/ui/StatusDot";
+
 import { DateRangeSelector } from "./DateRangeSelector";
+import { ChartCard } from "./ChartCard";
+import { ChartTooltipShell, ChartTooltipRow } from "./ChartTooltip";
+
+interface DailyStat {
+  date: string;
+  sessions?: number;
+  pageViews?: number;
+}
+
+const SERIES = [
+  { key: "sessions", name: "Sessions", color: "var(--chart-1)" },
+  { key: "pageViews", name: "Page Views", color: "var(--chart-2)" },
+] as const;
 
 export function SessionsChart() {
   const [days, setDays] = useState(7);
   const { data, error, isLoading } = useDailyStats(days);
 
-  let currentPeriod: any[] = [];
+  let currentPeriod: DailyStat[] = [];
   if (data && Array.isArray(data)) {
     const splitIndex = Math.max(0, data.length - days);
     currentPeriod = data.slice(splitIndex);
@@ -27,115 +40,128 @@ export function SessionsChart() {
 
   const chartData = currentPeriod.map((d) => {
     const dateObj = new Date(d.date);
-    const formattedDate = dateObj.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
     return {
-      date: formattedDate,
-      sessions: d.sessions || 0,
-      pageViews: d.pageViews || 0,
+      date: dateObj.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      sessions: d.sessions ?? 0,
+      pageViews: d.pageViews ?? 0,
     };
   });
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle>Sessions & Page Views</CardTitle>
-        <DateRangeSelector value={days} onChange={setDays} />
-      </CardHeader>
-      <CardContent className="h-[350px]">
-        {error ? (
-          <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
-            Failed to load
+    <ChartCard
+      title="Sessions & Page Views"
+      action={
+        <div className="flex items-center gap-4">
+          <div className="hidden items-center gap-3 sm:flex">
+            {SERIES.map((s) => (
+              <span key={s.key} className="flex items-center gap-1.5">
+                <StatusDot
+                  tone={s.key === "sessions" ? "primary" : "muted"}
+                  size="sm"
+                  style={{ backgroundColor: s.color }}
+                />
+                <span className="font-mono text-kbd text-muted-foreground">
+                  {s.name}
+                </span>
+              </span>
+            ))}
           </div>
-        ) : isLoading ? (
-          <Skeleton className="h-[320px] w-full rounded-xl" />
-        ) : chartData.length === 0 ? (
-          <div className="h-full flex items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 text-sm text-muted-foreground">
-            No graph data available for this range
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={chartData}
-              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-            >
-              <defs>
-                <linearGradient id="sessions-gradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.32} />
-                  <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="pageviews-gradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--chart-2)" stopOpacity={0.28} />
-                  <stop offset="100%" stopColor="var(--chart-2)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="var(--chart-grid)"
-                vertical={false}
-              />
-              <XAxis
-                dataKey="date"
-                fontSize={12}
-                className="fill-muted-foreground"
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                fontSize={12}
-                className="fill-muted-foreground"
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip
-                cursor={{ stroke: "var(--chart-1)", strokeOpacity: 0.35, strokeDasharray: "3 3" }}
-                content={({ active, payload, label }) => {
-                  if (!active || !payload) return null;
-                  return (
-                    <div className="rounded-lg border bg-background/80 backdrop-blur-md p-3 shadow-lg">
-                      <p className="text-sm font-medium mb-2">{label}</p>
-                      {payload.map((entry, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-2 text-sm"
-                        >
-                          <div
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: entry.color }}
-                          />
-                          <span className="text-muted-foreground capitalize">
-                            {entry.name}:
-                          </span>
-                          <span className="font-medium">{entry.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                }}
-              />
-              <Legend wrapperStyle={{ fontSize: "12px" }} />
-              <Area
-                type="monotone"
-                dataKey="sessions"
-                name="Sessions"
-                stroke="var(--chart-1)"
-                fill="url(#sessions-gradient)"
-                strokeWidth={2}
-              />
-              <Area
-                type="monotone"
-                dataKey="pageViews"
-                name="Page Views"
-                stroke="var(--chart-2)"
-                fill="url(#pageviews-gradient)"
-                strokeWidth={2}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        )}
-      </CardContent>
-    </Card>
+          <DateRangeSelector value={days} onChange={setDays} />
+        </div>
+      }
+      height={320}
+      isLoading={isLoading}
+      isError={!!error}
+      isEmpty={!error && !isLoading && chartData.length === 0}
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart
+          data={chartData}
+          margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+        >
+          <defs>
+            {SERIES.map((s) => (
+              <linearGradient
+                key={s.key}
+                id={`sessions-grad-${s.key}`}
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop offset="0%" stopColor={s.color} stopOpacity={0.12} />
+                <stop offset="100%" stopColor={s.color} stopOpacity={0} />
+              </linearGradient>
+            ))}
+          </defs>
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="var(--chart-grid)"
+            vertical={false}
+          />
+          <XAxis
+            dataKey="date"
+            fontSize={11}
+            className="fill-muted-foreground"
+            style={{ fontFamily: "var(--font-mono)" }}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis
+            fontSize={11}
+            className="fill-muted-foreground"
+            style={{ fontFamily: "var(--font-mono)" }}
+            tickLine={false}
+            axisLine={false}
+            width={32}
+          />
+          <Tooltip
+            cursor={{
+              stroke: "var(--chart-1)",
+              strokeOpacity: 0.4,
+              strokeDasharray: "3 3",
+            }}
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              return (
+                <ChartTooltipShell>
+                  <div className="mb-1.5 text-xs text-muted-foreground">
+                    {label}
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    {payload.map((entry, i) => (
+                      <ChartTooltipRow
+                        key={i}
+                        {...(entry.color ? { swatch: entry.color } : {})}
+                        name={entry.name ?? ""}
+                        value={entry.value ?? ""}
+                      />
+                    ))}
+                  </div>
+                </ChartTooltipShell>
+              );
+            }}
+          />
+          {SERIES.map((s, i) => (
+            <Area
+              key={s.key}
+              type="monotone"
+              dataKey={s.key}
+              name={s.name}
+              stroke={s.color}
+              strokeWidth={1.5}
+              fill={`url(#sessions-grad-${s.key})`}
+              isAnimationActive
+              animationDuration={1100}
+              animationBegin={i * 120}
+              animationEasing="ease-out"
+            />
+          ))}
+        </AreaChart>
+      </ResponsiveContainer>
+    </ChartCard>
   );
 }

@@ -1,13 +1,13 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   FaTwitter,
   FaFacebook,
   FaLinkedin,
   FaReddit,
-  FaLink,
-  FaCheck,
 } from "react-icons/fa";
+import { Check, Link2 } from "lucide-react";
+
 import {
   Dialog,
   DialogContent,
@@ -16,33 +16,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Kbd } from "@/components/ui/Kbd";
 import useUIStore from "@/stores/UIStore";
 import { useShallow } from "zustand/shallow";
 import { callWithToast } from "@/lib/utils";
 
-const ShareButton = ({
-  children,
-  handleClick,
-  className,
-}: {
-  children: React.ReactNode;
-  handleClick: () => void;
-  className?: string;
-}) => {
-  return (
-    <Button
-      onClick={handleClick}
-      variant="outline"
-      className={`h-14 border-2 border-border bg-muted/30 transition-colors duration-200 hover:bg-accent ${className}`}
-    >
-      {children}
-    </Button>
-  );
-};
-
 const BlogShareModal = () => {
   const { isOpen, data } = useUIStore(
-    useShallow((state) => state.modals.blogShare)
+    useShallow((state) => state.modals.blogShare),
   );
   const closeModal = useUIStore().closeAllModals;
 
@@ -54,34 +35,30 @@ const BlogShareModal = () => {
   const platforms = [
     {
       name: "Twitter",
-      icon: FaTwitter,
-      color: "#1DA1F2",
+      Icon: FaTwitter,
       link: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-        `${url}?utm_source=twitter`
+        `${url}?utm_source=twitter`,
       )}${title ? `&text=${encodeURIComponent(title)}` : ""}`,
     },
     {
       name: "Facebook",
-      icon: FaFacebook,
-      color: "#1877F2",
+      Icon: FaFacebook,
       link: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-        `${url}?utm_source=facebook`
+        `${url}?utm_source=facebook`,
       )}`,
     },
     {
       name: "LinkedIn",
-      icon: FaLinkedin,
-      color: "#0A66C2",
+      Icon: FaLinkedin,
       link: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-        `${url}?utm_source=linkedin`
+        `${url}?utm_source=linkedin`,
       )}`,
     },
     {
       name: "Reddit",
-      icon: FaReddit,
-      color: "#FF4500",
+      Icon: FaReddit,
       link: `https://reddit.com/submit?url=${encodeURIComponent(
-        `${url}?utm_source=reddit`
+        `${url}?utm_source=reddit`,
       )}${title ? `&title=${encodeURIComponent(title)}` : ""}`,
     },
   ];
@@ -108,61 +85,56 @@ const BlogShareModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="sm:max-w-lg shadow-2xl">
-        <DialogHeader className="space-y-3">
-          <DialogTitle className="text-2xl font-bold">
-            Share this article
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader className="space-y-1.5">
+          <DialogTitle className="text-xl font-semibold tracking-tight">
+            Share {title ? `"${title}"` : "post"}
           </DialogTitle>
-          <div className="h-0.5 w-12 rounded-full bg-primary" />
         </DialogHeader>
 
-        <div className="space-y-8 pt-2">
-          {/* Social Platforms */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-              Share on social
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {platforms.map((platform) => (
-                <ShareButton
-                  key={platform.name}
-                  handleClick={() => handlePlatformClick(platform.link)}
+        <div className="space-y-6 pt-2">
+          <div className="space-y-2.5">
+            <div className="grid grid-cols-2 gap-2">
+              {platforms.map(({ name, Icon, link }) => (
+                <Button
+                  key={name}
+                  onClick={() => handlePlatformClick(link)}
+                  variant="outline"
+                  size="lg"
+                  className="h-11 justify-start gap-3 text-sm font-medium"
                 >
-                  <platform.icon size={18} style={{ color: platform.color }} />
-                  <span className="text-sm font-medium text-foreground">
-                    {platform.name}
-                  </span>
-                </ShareButton>
+                  <Icon size={16} aria-hidden="true" />
+                  <span>{name}</span>
+                </Button>
               ))}
             </div>
           </div>
 
-          {/* Copy Link Section */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-              Copy link
-            </h3>
-            <div className="flex gap-3">
-              <Input value={url} readOnly className="flex-1" />
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2">
+              <Input
+                value={url}
+                readOnly
+                className="flex-1 font-mono text-xs"
+              />
               <Button
                 onClick={copyToClipboard}
-                variant="secondary"
-                size="lg"
-                className={`shrink-0 px-6 transition-colors duration-200 ${
-                  copySuccess
-                    ? "bg-primary text-primary-foreground hover:bg-primary"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                }`}
+                variant={copySuccess ? "default" : "outline"}
+                size="default"
+                className="shrink-0 gap-1.5"
               >
                 {copySuccess ? (
                   <>
-                    <FaCheck className="w-4 h-4" />
-                    Copied!
+                    <Check className="h-3.5 w-3.5" />
+                    Copied
                   </>
                 ) : (
                   <>
-                    <FaLink className="w-4 h-4" />
+                    <Link2 className="h-3.5 w-3.5" />
                     Copy
+                    <Kbd size="sm" className="ml-1">
+                      ⌘C
+                    </Kbd>
                   </>
                 )}
               </Button>

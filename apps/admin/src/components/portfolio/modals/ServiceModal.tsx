@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/ui/FormField";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { PageData } from "@tabsircg/schemas/portfolio";
@@ -12,31 +13,31 @@ import {
   PortfolioModalFrame,
 } from "./_shared";
 
-interface SkillCategoryDialogProps {
+interface ServiceDialogProps {
   children?: React.ReactNode;
-  category?: PageData["skills"][number];
+  service?: PageData["services"][number];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  categoryIndex?: number | null;
+  serviceIndex?: number | null;
 }
 
-const defaultFormData: PageData["skills"][number] = {
+const defaultFormData: PageData["services"][number] = {
   title: "",
+  content: "",
   icon: "",
-  skills: [],
   isActive: true,
 };
 
-export default function SkillCategoryDialog({
+export default function ServiceDialog({
   children,
-  category: existingCategory,
+  service: existingService,
   open: controlledOpen,
   onOpenChange,
-  categoryIndex,
-}: SkillCategoryDialogProps) {
+  serviceIndex,
+}: ServiceDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [formData, setFormData] = useState(defaultFormData);
-  const skillCategory = usePortfolioStore().skills;
+  const services = usePortfolioStore().services;
 
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = (next: boolean) => {
@@ -45,24 +46,21 @@ export default function SkillCategoryDialog({
   };
 
   const isUpdating =
-    existingCategory !== undefined && typeof categoryIndex === "number";
+    existingService !== undefined && typeof serviceIndex === "number";
 
   useEffect(() => {
-    if (existingCategory && typeof categoryIndex === "number") {
-      setFormData(existingCategory);
+    if (existingService && typeof serviceIndex === "number") {
+      setFormData(existingService);
     } else if (!open) {
       setFormData(defaultFormData);
     }
-  }, [existingCategory, categoryIndex, open]);
+  }, [existingService, serviceIndex, open]);
 
   const handleSubmit = () => {
     if (isUpdating) {
-      skillCategory.update(categoryIndex!, {
-        ...formData,
-        skills: existingCategory?.skills ?? formData.skills,
-      });
+      services.update(serviceIndex!, formData);
     } else {
-      skillCategory.add(formData);
+      services.add(formData);
     }
     setFormData(defaultFormData);
     setOpen(false);
@@ -75,16 +73,16 @@ export default function SkillCategoryDialog({
       {...(children ? { trigger: children } : {})}
       size="sm"
       title={
-        isUpdating
-          ? formData.title || "Edit category"
-          : "Add skill category"
+        isUpdating ? formData.title || "Edit service" : "Add service"
       }
-      description="Group related skills under a single icon header."
+      description="A short offering shown on the portfolio landing page."
       footer={
         <PortfolioModalActions
           onSubmit={handleSubmit}
-          submitDisabled={!formData.title || !formData.icon}
-          submitLabel="Add category"
+          submitDisabled={
+            !formData.title || !formData.content || !formData.icon
+          }
+          submitLabel="Add service"
           updateLabel="Save changes"
           isUpdating={isUpdating}
           submitIcon={<Plus className="h-3.5 w-3.5" />}
@@ -94,11 +92,21 @@ export default function SkillCategoryDialog({
       <ModalSection title="Basics">
         <FormField label="Title">
           <Input
-            placeholder="Frontend development"
+            placeholder="Full-stack application development"
             value={formData.title}
             onChange={(e) =>
               setFormData({ ...formData, title: e.target.value })
             }
+          />
+        </FormField>
+        <FormField label="Description">
+          <Textarea
+            placeholder="Building scalable, modern web applications…"
+            value={formData.content}
+            onChange={(e) =>
+              setFormData({ ...formData, content: e.target.value })
+            }
+            rows={5}
           />
         </FormField>
       </ModalSection>
@@ -106,7 +114,7 @@ export default function SkillCategoryDialog({
       <ModalSection title="Media">
         <FormField
           label="Icon URL"
-          hint="Use a small image (PNG / SVG) to represent this category."
+          hint="Use a public URL pointing at a small PNG / SVG."
         >
           <Input
             placeholder="https://…/icon.png"

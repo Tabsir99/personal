@@ -1,19 +1,17 @@
-// components/admin/metadata/KeywordsSection.tsx
 "use client";
+import { memo, useState } from "react";
+import { Plus, X } from "lucide-react";
+import { useShallow } from "zustand/shallow";
+
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Plus } from "lucide-react";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
-import { memo, useState } from "react";
-import { useShallow } from "zustand/shallow";
 
 const KeywordsSection = memo(
   function KeywordsSection() {
@@ -25,17 +23,15 @@ const KeywordsSection = memo(
     );
     const updatePageData = usePortfolioStore.getState().updatePageData;
 
-    const handleAddKeyword = () => {
-      if (newKeyword.trim()) {
-        updatePageData({
-          keywords: [...keywords, newKeyword.trim()],
-        });
-        setNewKeyword("");
-        setIsAddingKeyword(false);
-      }
+    const handleAdd = () => {
+      const value = newKeyword.trim();
+      if (!value) return;
+      updatePageData({ keywords: [...keywords, value] });
+      setNewKeyword("");
+      setIsAddingKeyword(false);
     };
 
-    const handleRemoveKeyword = (index: number) => {
+    const handleRemove = (index: number) => {
       updatePageData({
         keywords: keywords.filter((_, i) => i !== index),
       });
@@ -43,52 +39,47 @@ const KeywordsSection = memo(
 
     return (
       <Card>
-        <CardHeader className="space-y-1 pb-4">
-          <CardTitle className="text-2xl">Keywords</CardTitle>
-          <CardDescription>
-            Add relevant keywords to improve search discoverability
-          </CardDescription>
+        <CardHeader className="flex flex-col gap-1 pt-5 pb-3">
+          <h2 className="text-base leading-tight font-semibold tracking-tight">
+            Keywords
+          </h2>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Topic tags search engines use to surface this portfolio.
+          </p>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex min-h-[40px] flex-wrap gap-2 rounded-lg border border-border p-3">
+        <CardContent className="pt-1 pb-5">
+          <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-md border border-foreground/6 bg-foreground/2 p-2.5">
             {keywords.map((keyword, i) => (
-              <Badge
-                key={i}
-                variant="secondary"
-                className="group border-primary/20 bg-primary/10 px-3 py-1 h-7 text-primary transition-colors hover:bg-primary/20"
-              >
-                {keyword}
+              <Badge key={i} variant="neutral" className="gap-1 pr-1">
+                <span>{keyword}</span>
                 <button
-                  onClick={() => handleRemoveKeyword(i)}
-                  className="ml-2 transition-colors hover:text-primary/70"
+                  type="button"
+                  onClick={() => handleRemove(i)}
                   aria-label={`Remove ${keyword}`}
+                  className="ml-0.5 inline-flex items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <X
-                    size={14}
-                    className="group-hover:scale-110 transition-transform"
-                  />
+                  <X className="h-3 w-3" />
                 </button>
               </Badge>
             ))}
 
             {isAddingKeyword ? (
-              <div className="flex gap-2 items-center">
+              <span className="flex items-center gap-1.5">
                 <Input
                   value={newKeyword}
                   onChange={(e) => setNewKeyword(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") handleAddKeyword();
-                    if (e.key === "Escape") setIsAddingKeyword(false);
+                    if (e.key === "Enter") handleAdd();
+                    if (e.key === "Escape") {
+                      setIsAddingKeyword(false);
+                      setNewKeyword("");
+                    }
                   }}
-                  className="h-7 w-32 text-sm"
-                  placeholder="Type keyword..."
+                  className="h-7 w-36 text-sm"
+                  placeholder="Type keyword…"
                   autoFocus
                 />
-                <Button
-                  onClick={handleAddKeyword}
-                  size="sm"
-                  className="h-7 px-2"
-                >
+                <Button onClick={handleAdd} size="xs">
                   Add
                 </Button>
                 <Button
@@ -96,22 +87,21 @@ const KeywordsSection = memo(
                     setIsAddingKeyword(false);
                     setNewKeyword("");
                   }}
-                  size="sm"
+                  size="xs"
                   variant="ghost"
-                  className="h-7 px-2"
                 >
                   Cancel
                 </Button>
-              </div>
+              </span>
             ) : (
               <Button
-                variant="outline"
-                size="sm"
+                variant="ghost"
+                size="xs"
                 onClick={() => setIsAddingKeyword(true)}
-                className="h-7 border-dashed border-border transition-colors hover:bg-accent"
+                className="text-muted-foreground hover:text-foreground"
               >
-                <Plus size={14} className="mr-1" />
-                Add Keyword
+                <Plus className="h-3 w-3" />
+                Add keyword
               </Button>
             )}
           </div>

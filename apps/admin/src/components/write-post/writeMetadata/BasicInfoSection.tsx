@@ -12,7 +12,7 @@ import { callWithToast } from "@/lib/utils";
 import { SuggestionField } from "./ComparsionInput";
 import ConfigSingleSelect from "./ConfigSingleSelect";
 import { SectionHeader } from "./SectionHeader";
-import { Label } from "@/components/ui/label";
+import { FieldLabel } from "@/components/ui/label";
 
 type ProseField = Exclude<keyof AIBlogMetadata, "tags">;
 
@@ -98,7 +98,7 @@ export default function BasicInfoSection({
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Blog Title</Label>
+            <FieldLabel>Blog Title</FieldLabel>
             <SuggestionField
               id="blogTitle"
               onAccept={() => onApplyField("title")}
@@ -111,9 +111,7 @@ export default function BasicInfoSection({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">
-              Subtitle / Hook
-            </Label>
+            <FieldLabel>Subtitle / Hook</FieldLabel>
             <SuggestionField
               id="dek"
               value={dek}
@@ -125,7 +123,7 @@ export default function BasicInfoSection({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Excerpt</Label>
+            <FieldLabel>Excerpt</FieldLabel>
             <SuggestionField
               id="excerpt"
               onAccept={() => onApplyField("excerpt")}
@@ -138,7 +136,7 @@ export default function BasicInfoSection({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Kind</Label>
+              <FieldLabel>Kind</FieldLabel>
               <ConfigSingleSelect
                 value={kind}
                 onValueChange={(value) => setBlogFormData({ kind: value })}
@@ -148,9 +146,7 @@ export default function BasicInfoSection({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">
-                Schema Type
-              </Label>
+              <FieldLabel>Schema Type</FieldLabel>
               <ConfigSingleSelect
                 value={schemaType}
                 onValueChange={(value) =>

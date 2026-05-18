@@ -1,22 +1,19 @@
 import { useRef, useState } from "react";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Image as ImageIcon, Calendar, Plus } from "lucide-react";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Image as ImageIcon, Calendar, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { FormField } from "@/components/ui/FormField";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import Img from "@/components/ui/image";
 import { PageData } from "@tabsircg/schemas/portfolio";
+
+import {
+  ModalSection,
+  PortfolioModalActions,
+  PortfolioModalFrame,
+} from "./_shared";
 
 interface CredentialDialogProps {
   children: React.ReactNode;
@@ -34,174 +31,140 @@ const defaultFormData: PageData["credentials"][number] = {
 
 export default function CredentialDialog({ children }: CredentialDialogProps) {
   const [formData, setFormData] = useState(defaultFormData);
-
   const credential = usePortfolioStore().credentials;
   const imageInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     credential.add(formData);
     setFormData(defaultFormData);
   };
 
   return (
-    <Dialog>
-      <DialogTrigger render={children as React.ReactElement} />
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto pb-0">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">Add New Credential</DialogTitle>
-          <DialogDescription>
-            Add a new certification or achievement to your portfolio
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-6 py-4">
-          {/* Basics */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground">
-              Basics
-            </h3>
-
-            <div>
-              <Label className="mb-2 block">Title</Label>
-              <Input
-                placeholder="AWS Certified Developer"
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="mb-2 block">Issuing Organization</Label>
-                <Input
-                  placeholder="Amazon Web Services"
-                  value={formData.issuer}
-                  onChange={(e) =>
-                    setFormData({ ...formData, issuer: e.target.value })
-                  }
-                />
-              </div>
-
-              <div>
-                <Label className="mb-2 block">Issue Date</Label>
-                <div className="relative">
-                  <Input
-                    placeholder="2024"
-                    value={formData.date}
-                    onChange={(e) =>
-                      setFormData({ ...formData, date: e.target.value })
-                    }
-                  />
-                  <Calendar
-                    size={16}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  e.g., "2024" or "January 2024"
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <Label className="mb-2 block">Description</Label>
-              <Textarea
-                placeholder="Professional certification for AWS development..."
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
-          {/* Media */}
-          <div className="pt-4">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
-              Media
-            </h3>
-
-            <div>
-              <Label className="mb-2 block">Certificate Image</Label>
-              <div className="flex items-center gap-4">
-                <div
-                  onClick={() => imageInputRef.current?.click()}
-                  className="flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-muted/30"
-                >
-                  {formData.image ? (
-                    <Img
-                      src={formData.image}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <ImageIcon size={32} className="text-muted-foreground" />
-                  )}
-                </div>
-
-                <Input
-                  type="file"
-                  ref={imageInputRef}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setFormData({
-                        ...formData,
-                        image: URL.createObjectURL(file),
-                      });
-                    }
-                  }}
-                  className="hidden"
-                  accept="image/*"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Reference */}
-          <div className="pt-4">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
-              Reference
-            </h3>
-
-            <div>
-              <Label className="mb-2 block">Certificate Link</Label>
-              <Input
-                placeholder="https://aws.amazon.com/verification/..."
-                value={formData.link}
-                onChange={(e) =>
-                  setFormData({ ...formData, link: e.target.value })
-                }
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Link to verify or view the certificate
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter className="sticky bottom-0 bg-inherit">
-          <DialogClose render={<Button variant="outline">Cancel</Button>} />
-
-          <DialogClose
-            render={
-              <Button
-                onClick={handleSubmit}
-                disabled={
-                  !formData.title ||
-                  !formData.issuer ||
-                  !formData.date ||
-                  !formData.description
-                }
-              >
-                <Plus /> Add Credential
-              </Button>
+    <PortfolioModalFrame
+      trigger={children}
+      title="Add credential"
+      description="Certifications, awards, or anything you want to prove."
+      footer={
+        <PortfolioModalActions
+          onSubmit={handleSubmit}
+          submitDisabled={
+            !formData.title ||
+            !formData.issuer ||
+            !formData.date ||
+            !formData.description
+          }
+          submitLabel="Add credential"
+          updateLabel="Add credential"
+          submitIcon={<Plus className="h-3.5 w-3.5" />}
+        />
+      }
+    >
+      <ModalSection title="Basics">
+        <FormField label="Title">
+          <Input
+            placeholder="AWS Certified Developer"
+            value={formData.title}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
             }
           />
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </FormField>
+
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <FormField label="Issuer">
+            <Input
+              placeholder="Amazon Web Services"
+              value={formData.issuer}
+              onChange={(e) =>
+                setFormData({ ...formData, issuer: e.target.value })
+              }
+            />
+          </FormField>
+          <FormField
+            label="Issue date"
+            hint={"e.g. “2024” or “January 2024”"}
+          >
+            <div className="relative">
+              <Input
+                placeholder="2024"
+                value={formData.date}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
+              />
+              <Calendar
+                className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/60"
+                aria-hidden="true"
+              />
+            </div>
+          </FormField>
+        </div>
+
+        <FormField label="Description">
+          <Textarea
+            placeholder="Professional certification for AWS development…"
+            value={formData.description}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
+          />
+        </FormField>
+      </ModalSection>
+
+      <ModalSection title="Media">
+        <FormField label="Certificate image">
+          <div
+            onClick={() => imageInputRef.current?.click()}
+            className="group/upload flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-md border border-foreground/6 bg-foreground/2 transition-colors hover:bg-foreground/4"
+          >
+            {formData.image ? (
+              <Img
+                src={formData.image}
+                alt="Preview"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-1.5">
+                <ImageIcon className="h-5 w-5 text-muted-foreground/60" />
+                <Eyebrow tone="muted" family="mono">
+                  Click to upload
+                </Eyebrow>
+              </div>
+            )}
+          </div>
+          <Input
+            type="file"
+            ref={imageInputRef}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setFormData({
+                  ...formData,
+                  image: URL.createObjectURL(file),
+                });
+              }
+            }}
+            className="hidden"
+            accept="image/*"
+          />
+        </FormField>
+      </ModalSection>
+
+      <ModalSection title="Reference">
+        <FormField
+          label="Verification link"
+          hint="A public URL that proves the credential."
+        >
+          <Input
+            placeholder="https://aws.amazon.com/verification/…"
+            value={formData.link}
+            onChange={(e) =>
+              setFormData({ ...formData, link: e.target.value })
+            }
+            className="font-mono text-xs"
+          />
+        </FormField>
+      </ModalSection>
+    </PortfolioModalFrame>
   );
 }

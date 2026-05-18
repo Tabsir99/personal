@@ -1,17 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { X, Image as ImageIcon, Plus, Code } from "lucide-react";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -20,18 +11,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Image as ImageIcon, Plus, Code, Briefcase } from "lucide-react";
-import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { Button } from "@/components/ui/button";
 import Img from "@/components/ui/image";
-import { PageData } from "@tabsircg/schemas/portfolio";
 import { ConfigMultiSelect } from "@/components/ui/configMultiSelect";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { FormField } from "@/components/ui/FormField";
+
+import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import {
   addPortfolioSkill,
-  addPortfolioClientType,
   type PortfolioCatalog,
 } from "@/actions/configActions";
+import { PageData } from "@tabsircg/schemas/portfolio";
+import { cn } from "@/lib/utils";
+
+import {
+  ModalSection,
+  PortfolioModalActions,
+  PortfolioModalFrame,
+} from "./_shared";
 
 interface ProjectDialogProps {
   children?: React.ReactNode;
@@ -49,28 +48,32 @@ const LINK_TYPE_OPTIONS: {
   label: string;
   placeholder: string;
 }[] = [
-  { value: "live", label: "Live", placeholder: "Live Demo" },
+  { value: "live", label: "Live", placeholder: "Live demo" },
   { value: "repo", label: "Repo", placeholder: "GitHub" },
-  { value: "case-study", label: "Case Study", placeholder: "Case Study" },
-  { value: "video", label: "Video", placeholder: "Watch Video" },
+  { value: "case-study", label: "Case Study", placeholder: "Case study" },
+  { value: "video", label: "Video", placeholder: "Watch video" },
   { value: "other", label: "Other", placeholder: "Visit" },
 ];
 
 const defaultFormData: PageData["projects"][number] = {
   image: "",
   title: "",
+  dek: "",
   type: "Personal",
-  description: "",
+  status: "shipped",
+  video: "",
+  gallery: [],
   links: [],
   skills: [],
-  isActive: true,
+  visible: true,
   featured: false,
+  order: 0,
   metrics: [],
   year: "",
-  duration: "",
   role: "",
-  clientType: "",
 };
+
+const emptyNewLink: ProjectLink = { text: "", url: "", type: "other" };
 
 export default function ProjectDialog({
   children,
@@ -81,6 +84,10 @@ export default function ProjectDialog({
 }: ProjectDialogProps) {
   const [formData, setFormData] = useState(existingProject || defaultFormData);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [metricLabel, setMetricLabel] = useState("");
+  const [metricValue, setMetricValue] = useState("");
+  const [isAddingLink, setIsAddingLink] = useState(false);
+  const [newLink, setNewLink] = useState<ProjectLink>(emptyNewLink);
 
   useEffect(() => {
     if (existingProject && typeof projectIndex === "number") {
@@ -95,27 +102,18 @@ export default function ProjectDialog({
     }
   }, [existingProject, projectIndex]);
 
-  const [metricLabel, setMetricLabel] = useState("");
-  const [metricValue, setMetricValue] = useState("");
-
-  const [isAddingLink, setIsAddingLink] = useState(false);
-  const emptyNewLink: ProjectLink = { text: "", url: "", type: "other" };
-  const [newLink, setNewLink] = useState<ProjectLink>(emptyNewLink);
-
   const project = usePortfolioStore().projects;
-
   const {
     data: catalog,
     mutate: mutateCatalog,
     isLoading: catalogLoading,
   } = useCustomSWR<PortfolioCatalog>("/api/config/portfolio");
 
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
   const handleCommitNewLink = () => {
     if (!newLink.text.trim() && !newLink.url.trim()) return;
-    setFormData({
-      ...formData,
-      links: [...formData.links, newLink],
-    });
+    setFormData({ ...formData, links: [...formData.links, newLink] });
     setNewLink(emptyNewLink);
     setIsAddingLink(false);
   };
@@ -142,64 +140,55 @@ export default function ProjectDialog({
   };
 
   const handleAddMetric = () => {
-    if (
-      metricLabel.trim() &&
-      metricValue.trim() &&
-      formData.metrics.length < 2
-    ) {
-      setFormData({
-        ...formData,
-        metrics: [
-          ...formData.metrics,
-          { label: metricLabel.trim(), value: metricValue.trim() },
-        ],
-      });
-      setMetricLabel("");
-      setMetricValue("");
-    }
+    if (!metricLabel.trim() || !metricValue.trim()) return;
+    if (formData.metrics.length >= 2) return;
+    setFormData({
+      ...formData,
+      metrics: [
+        ...formData.metrics,
+        { label: metricLabel.trim(), value: metricValue.trim() },
+      ],
+    });
+    setMetricLabel("");
+    setMetricValue("");
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (isUpdating) project.update(projectIndex!, formData);
     else project.add(formData);
   };
 
-  const imageInputRef = useRef<HTMLInputElement>(null);
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      {children && <DialogTrigger render={children as React.ReactElement} />}
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl pb-0">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">
-            {isUpdating ? "Edit Project" : "Add New Project"}
-          </DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            Fill in the details for your project
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-6 py-4">
-          {/* Basics */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground">
-              Basics
-            </h3>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="mb-2 block">Title</Label>
+    <PortfolioModalFrame
+      open={open}
+      onOpenChange={onOpenChange}
+      {...(children ? { trigger: children } : {})}
+      size="lg"
+      title={isUpdating ? formData.title || "Edit project" : "Add project"}
+      description="Image, links, skills, metrics — everything that appears on the project card."
+      footer={
+        <PortfolioModalActions
+          onSubmit={handleSubmit}
+          submitDisabled={!formData.title || !formData.dek}
+          submitLabel="Add project"
+          updateLabel="Update project"
+          isUpdating={isUpdating}
+          submitIcon={<Plus className="h-3.5 w-3.5" />}
+        />
+      }
+    >
+      <ModalSection title="Basics">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <FormField label="Title">
                 <Input
-                  placeholder="E-commerce Platform"
+                  placeholder="E-commerce platform"
                   value={formData.title}
                   onChange={(e) =>
                     setFormData({ ...formData, title: e.target.value })
                   }
                 />
-              </div>
-
-              <div>
-                <Label className="mb-2 block">Type</Label>
+              </FormField>
+              <FormField label="Type">
                 <Select
                   value={formData.type}
                   onValueChange={(value: "Personal" | "Demo" | "Freelance") =>
@@ -215,69 +204,58 @@ export default function ProjectDialog({
                     <SelectItem value="Freelance">Freelance</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </FormField>
             </div>
-
-            <div>
-              <Label className="mb-2 block">Description</Label>
+            <FormField label="Description">
               <Textarea
-                placeholder="A full-featured e-commerce platform with payment integration..."
-                value={formData.description}
+                placeholder="A full-featured e-commerce platform with payment integration…"
+                value={formData.dek}
                 onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
+                  setFormData({ ...formData, dek: e.target.value })
                 }
               />
-            </div>
-          </div>
+            </FormField>
+          </ModalSection>
 
-          {/* Media */}
-          <div className="pt-4">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
-              Media
-            </h3>
-
-            <div>
-              <Label className="mb-2 block">Project Image</Label>
-              <div className="flex items-center gap-4">
-                <div
-                  onClick={() => imageInputRef.current?.click()}
-                  className="flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-muted/40"
-                >
-                  {formData.image ? (
-                    <Img
-                      src={formData.image}
-                      alt="Preview"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <ImageIcon size={32} className="text-muted-foreground" />
-                  )}
-                </div>
-
-                <Input
-                  type="file"
-                  ref={imageInputRef}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setFormData({
-                        ...formData,
-                        image: URL.createObjectURL(file),
-                      });
-                    }
-                  }}
-                  className="hidden"
-                />
+          <ModalSection title="Media">
+            <FormField label="Project image">
+              <div
+                onClick={() => imageInputRef.current?.click()}
+                className="flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-md border border-foreground/6 bg-foreground/2 transition-colors hover:bg-foreground/4"
+              >
+                {formData.image ? (
+                  <Img
+                    src={formData.image}
+                    alt="Preview"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-1.5">
+                    <ImageIcon className="h-5 w-5 text-muted-foreground/60" />
+                    <Eyebrow tone="muted" family="mono">
+                      Click to upload
+                    </Eyebrow>
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
+              <Input
+                type="file"
+                ref={imageInputRef}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setFormData({
+                      ...formData,
+                      image: URL.createObjectURL(file),
+                    });
+                  }
+                }}
+                className="hidden"
+              />
+            </FormField>
+          </ModalSection>
 
-          {/* Links */}
-          <div className="pt-4 space-y-3">
-            <h3 className="text-sm font-semibold text-muted-foreground">
-              Links
-            </h3>
-
+          <ModalSection title="Links">
             {formData.links.map((link, i) => {
               const placeholder =
                 LINK_TYPE_OPTIONS.find((o) => o.value === link.type)
@@ -285,12 +263,9 @@ export default function ProjectDialog({
               return (
                 <div
                   key={i}
-                  className="grid grid-cols-[140px_1fr_1fr_auto] items-end gap-2"
+                  className="group/link grid grid-cols-[120px_1fr_1fr_auto] items-end gap-2"
                 >
-                  <div>
-                    <Label className="mb-1.5 block text-xs text-muted-foreground">
-                      Type
-                    </Label>
+                  <FormField label="Type">
                     <Select
                       value={link.type}
                       onValueChange={(value: LinkType) =>
@@ -308,11 +283,8 @@ export default function ProjectDialog({
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-                  <div>
-                    <Label className="mb-1.5 block text-xs text-muted-foreground">
-                      Text
-                    </Label>
+                  </FormField>
+                  <FormField label="Text">
                     <Input
                       placeholder={placeholder}
                       value={link.text}
@@ -320,44 +292,41 @@ export default function ProjectDialog({
                         handleUpdateLink(i, { text: e.target.value })
                       }
                     />
-                  </div>
-                  <div>
-                    <Label className="mb-1.5 block text-xs text-muted-foreground">
-                      URL
-                    </Label>
+                  </FormField>
+                  <FormField label="URL">
                     <Input
-                      placeholder="https://..."
+                      placeholder="https://…"
                       value={link.url}
                       onChange={(e) =>
                         handleUpdateLink(i, { url: e.target.value })
                       }
+                      className="font-mono text-xs"
                     />
-                  </div>
+                  </FormField>
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon"
+                    size="icon-sm"
                     onClick={() => handleRemoveLink(i)}
-                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    className="text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/link:opacity-100 focus-visible:opacity-100"
+                    aria-label="Remove link"
                   >
-                    <X size={16} />
+                    <X className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               );
             })}
 
             <div
-              className={`${
+              className={cn(
+                "overflow-hidden rounded-md border bg-foreground/2 transition-all duration-300",
                 isAddingLink
-                  ? "max-h-120 border-border p-4"
-                  : "max-h-0 border-transparent p-0"
-              } mt-2 overflow-hidden rounded-lg border-2 border-dashed transition-all duration-300`}
+                  ? "max-h-72 border-foreground/6 p-3"
+                  : "max-h-0 border-transparent p-0",
+              )}
             >
-              <div className="grid grid-cols-[140px_1fr_1fr] gap-2 mb-3">
-                <div>
-                  <Label className="mb-1.5 block text-xs text-muted-foreground">
-                    Type
-                  </Label>
+              <div className="mb-2 grid grid-cols-[120px_1fr_1fr] gap-2">
+                <FormField label="Type">
                   <Select
                     value={newLink.type}
                     onValueChange={(value: LinkType) =>
@@ -375,11 +344,8 @@ export default function ProjectDialog({
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-                <div>
-                  <Label className="mb-1.5 block text-xs text-muted-foreground">
-                    Text
-                  </Label>
+                </FormField>
+                <FormField label="Text">
                   <Input
                     placeholder={
                       LINK_TYPE_OPTIONS.find((o) => o.value === newLink.type)
@@ -390,27 +356,25 @@ export default function ProjectDialog({
                       setNewLink({ ...newLink, text: e.target.value })
                     }
                   />
-                </div>
-                <div>
-                  <Label className="mb-1.5 block text-xs text-muted-foreground">
-                    URL
-                  </Label>
+                </FormField>
+                <FormField label="URL">
                   <Input
-                    placeholder="https://..."
+                    placeholder="https://…"
                     value={newLink.url}
                     onChange={(e) =>
                       setNewLink({ ...newLink, url: e.target.value })
                     }
+                    className="font-mono text-xs"
                   />
-                </div>
+                </FormField>
               </div>
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-1.5">
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={handleCancelNewLink}
-                  className="h-8 text-muted-foreground"
+                  className="text-muted-foreground"
                 >
                   Cancel
                 </Button>
@@ -418,34 +382,29 @@ export default function ProjectDialog({
                   type="button"
                   size="sm"
                   onClick={handleCommitNewLink}
-                  className="h-8"
                   disabled={!newLink.text.trim() && !newLink.url.trim()}
                 >
-                  <Plus size={14} /> Add Link
+                  <Plus className="h-3 w-3" />
+                  Add link
                 </Button>
               </div>
             </div>
 
-            {isAddingLink || (
+            {!isAddingLink && (
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setIsAddingLink(true)}
-                className="w-full border-dashed border-border hover:bg-accent"
+                className="w-full text-muted-foreground hover:text-foreground"
               >
-                <Plus size={14} /> Add Link
+                <Plus className="h-3.5 w-3.5" />
+                Add link
               </Button>
             )}
-          </div>
+          </ModalSection>
 
-          {/* Tech & Outcomes */}
-          <div className="pt-4 space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground">
-              Tech & Outcomes
-            </h3>
-
-            <div>
-              <Label className="mb-2 block">Skills</Label>
+          <ModalSection title="Tech & outcomes">
+            <FormField label="Skills">
               <ConfigMultiSelect
                 value={formData.skills}
                 onChange={(next) => setFormData({ ...formData, skills: next })}
@@ -457,10 +416,7 @@ export default function ProjectDialog({
                     (prev) =>
                       prev
                         ? { ...prev, skillCatalog: values }
-                        : {
-                            skillCatalog: values,
-                            clientTypeCatalog: [],
-                          },
+                        : { skillCatalog: values, clientTypeCatalog: [] },
                     false,
                   )
                 }
@@ -469,40 +425,34 @@ export default function ProjectDialog({
                     (prev) =>
                       prev
                         ? { ...prev, skillCatalog: values }
-                        : {
-                            skillCatalog: values,
-                            clientTypeCatalog: [],
-                          },
+                        : { skillCatalog: values, clientTypeCatalog: [] },
                     false,
                   )
                 }
-                placeholder="Select or create skills..."
-                searchPlaceholder="Search or create a skill..."
+                placeholder="Select or create skills…"
+                searchPlaceholder="Search or create a skill…"
                 selectedLabel={(s) =>
                   s.length
                     ? `${s.length} skill${s.length > 1 ? "s" : ""} selected`
-                    : "Select or create skills..."
+                    : "Select or create skills…"
                 }
                 itemIcon={Code}
                 toastMessages={{
-                  loading: "Creating skill...",
+                  loading: "Creating skill…",
                   success: "Skill added to catalog",
                   err: "Failed to create skill",
                 }}
               />
-            </div>
+            </FormField>
 
-            <div>
-              <Label className="mb-2 block">Metrics</Label>
-              <p className="mb-3 text-xs text-muted-foreground">
-                Add up to 2 metrics to showcase results (e.g., "10K users",
-                "0.8s load time")
-              </p>
-
+            <FormField
+              label="Metrics"
+              hint="Up to two results worth showcasing (10K users, 0.8s load time)."
+            >
               {formData.metrics.length < 2 && (
-                <div className="mb-3 grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
                   <Input
-                    placeholder="Metric label (e.g., Users)"
+                    placeholder="Label"
                     value={metricLabel}
                     onChange={(e) => setMetricLabel(e.target.value)}
                     onKeyDown={(e) => {
@@ -512,37 +462,37 @@ export default function ProjectDialog({
                       }
                     }}
                   />
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Value (e.g., 10K+)"
-                      value={metricValue}
-                      onChange={(e) => setMetricValue(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddMetric();
-                        }
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      onClick={handleAddMetric}
-                      className="bg-primary hover:bg-primary/90"
-                    >
-                      <Plus size={16} />
-                    </Button>
-                  </div>
+                  <Input
+                    placeholder="Value"
+                    value={metricValue}
+                    onChange={(e) => setMetricValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddMetric();
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    size="default"
+                    onClick={handleAddMetric}
+                    aria-label="Add metric"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               )}
 
               {formData.metrics.length > 0 && (
-                <div className="flex gap-3 rounded-lg border border-border bg-muted/30 p-4">
+                <div className="mt-3 grid grid-cols-2 gap-2">
                   {formData.metrics.map((metric, i) => (
                     <div
                       key={i}
-                      className="group relative flex-1 rounded-lg border border-border/70 bg-muted/60 p-3"
+                      className="group/metric relative flex flex-col gap-1 rounded-md border border-foreground/6 bg-foreground/2 px-3 py-2.5"
                     >
                       <button
+                        type="button"
                         onClick={() =>
                           setFormData({
                             ...formData,
@@ -551,38 +501,31 @@ export default function ProjectDialog({
                             ),
                           })
                         }
-                        className="absolute -right-2 -top-2 rounded-full bg-destructive/80 p-1 opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100"
+                        aria-label={`Remove ${metric.label}`}
+                        className="absolute right-1.5 top-1.5 rounded-sm p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/metric:opacity-100 focus-visible:opacity-100"
                       >
-                        <X size={12} className="text-destructive-foreground" />
+                        <X className="h-3 w-3" />
                       </button>
-                      <div className="text-xs text-muted-foreground">
-                        {metric.label}
-                      </div>
-                      <div className="text-sm font-bold text-foreground">
+                      <Eyebrow tone="muted">{metric.label}</Eyebrow>
+                      <span className="font-mono text-base font-semibold tabular-nums text-foreground">
                         {metric.value}
-                      </div>
+                      </span>
                     </div>
                   ))}
                 </div>
               )}
 
               {formData.metrics.length >= 2 && (
-                <p className="mt-2 text-xs text-destructive/80">
-                  Maximum 2 metrics reached. Remove one to add another.
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  Two metrics max — remove one to add another.
                 </p>
               )}
-            </div>
-          </div>
+            </FormField>
+          </ModalSection>
 
-          {/* Engagement */}
-          <div className="pt-4 space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground">
-              Engagement
-            </h3>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="mb-2 block">Year</Label>
+          <ModalSection title="Engagement">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <FormField label="Year">
                 <Input
                   placeholder="2024"
                   value={formData.year}
@@ -590,80 +533,19 @@ export default function ProjectDialog({
                     setFormData({ ...formData, year: e.target.value })
                   }
                 />
-              </div>
-
-              <div>
-                <Label className="mb-2 block">Duration</Label>
+              </FormField>
+              <FormField label="Role">
                 <Input
-                  placeholder="3 months"
-                  value={formData.duration}
-                  onChange={(e) =>
-                    setFormData({ ...formData, duration: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="mb-2 block">Role</Label>
-                <Input
-                  placeholder="Full Stack Developer"
+                  placeholder="Full stack developer"
                   value={formData.role || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, role: e.target.value })
                   }
                 />
-              </div>
-
-              <div>
-                <Label className="mb-2 block">Client Type</Label>
-                <ConfigMultiSelect
-                  mode="single"
-                  value={formData.clientType ? [formData.clientType] : []}
-                  onChange={(next) =>
-                    setFormData({ ...formData, clientType: next[0] ?? "" })
-                  }
-                  available={catalog?.clientTypeCatalog ?? []}
-                  loading={catalogLoading}
-                  onCreate={addPortfolioClientType}
-                  onOptimisticCreate={(values) =>
-                    mutateCatalog(
-                      (prev) =>
-                        prev
-                          ? { ...prev, clientTypeCatalog: values }
-                          : {
-                              skillCatalog: [],
-                              clientTypeCatalog: values,
-                            },
-                      false,
-                    )
-                  }
-                  onAfterCreate={(values) =>
-                    mutateCatalog(
-                      (prev) =>
-                        prev
-                          ? { ...prev, clientTypeCatalog: values }
-                          : {
-                              skillCatalog: [],
-                              clientTypeCatalog: values,
-                            },
-                      false,
-                    )
-                  }
-                  placeholder="Pick or create a client type..."
-                  searchPlaceholder="Search or create..."
-                  itemIcon={Briefcase}
-                  toastMessages={{
-                    loading: "Creating client type...",
-                    success: "Client type added to catalog",
-                    err: "Failed to create client type",
-                  }}
-                />
-              </div>
+              </FormField>
             </div>
 
-            <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-4">
+            <label className="flex items-center gap-3 rounded-md border border-foreground/6 bg-foreground/2 px-4 py-3">
               <Checkbox
                 id="featured"
                 checked={formData.featured || false}
@@ -671,35 +553,16 @@ export default function ProjectDialog({
                   setFormData({ ...formData, featured: checked as boolean })
                 }
               />
-              <Label htmlFor="featured" className="cursor-pointer">
-                Highlight this project with a featured badge
-              </Label>
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter className="sticky bottom-0 bg-inherit">
-          <DialogClose render={<Button variant="outline">Cancel</Button>} />
-
-          <DialogClose
-            render={
-              <Button
-                onClick={handleSubmit}
-                className="bg-primary hover:bg-primary/90"
-                disabled={!formData.title || !formData.description}
-              >
-                {isUpdating ? (
-                  "Update Project"
-                ) : (
-                  <>
-                    <Plus /> Add Project
-                  </>
-                )}
-              </Button>
-            }
-          />
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+              <span className="flex flex-col gap-0.5">
+                <Eyebrow tone="foreground" family="mono">
+                  Featured
+                </Eyebrow>
+                <span className="text-xs leading-relaxed text-muted-foreground">
+                  Pin this project at the top of the grid.
+                </span>
+              </span>
+            </label>
+          </ModalSection>
+    </PortfolioModalFrame>
   );
 }

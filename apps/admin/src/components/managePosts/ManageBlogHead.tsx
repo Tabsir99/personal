@@ -26,7 +26,6 @@ const STATUS_OPTIONS: { value: BlogFilters["status"]; label: string }[] = [
   { value: "all", label: "All" },
   { value: BlogStatus.published, label: "Published" },
   { value: BlogStatus.unpublished, label: "Unpublished" },
-  { value: BlogStatus.draft, label: "Draft" },
   { value: BlogStatus.archived, label: "Archived" },
 ];
 
@@ -50,9 +49,9 @@ function FilterChip<T extends string>({
     <Select value={value} onValueChange={(v) => onChange(v as T)}>
       <SelectTrigger
         className={cn(
-          "w-auto capitalize h-9 px-3 gap-1.5 rounded-full border bg-card text-sm transition-colors hover:bg-accent/50",
+          "w-auto capitalize h-9 px-3 gap-1.5 rounded-md border bg-card text-sm transition-colors hover:bg-foreground/3",
           isActive
-            ? "border-primary/40 bg-primary/5 text-foreground hover:bg-primary/10"
+            ? "border-primary/30 bg-primary/5 text-foreground hover:bg-primary/8"
             : "border-border text-foreground",
         )}
       >
@@ -109,44 +108,45 @@ export default function ManagePostHead({
     filters.schemaType !== "all";
 
   return (
-    <div className="flex flex-wrap items-center gap-2 relative z-20">
-      <FilterChip
-        label="Status"
-        value={filters.status}
-        defaultValue="all"
-        onChange={(v) => onFilterChange("status", v)}
-        options={STATUS_OPTIONS}
+    <div className="flex flex-wrap items-center gap-6 relative z-20">
+      <SearchInput
+        searchTerm={searchTerm}
+        handleChange={(e) => setSearchTerm(e.target.value)}
       />
-      <FilterChip
-        label="Kind"
-        value={filters.kind}
-        defaultValue="all"
-        onChange={(v) => onFilterChange("kind", v)}
-        options={kindOptions}
-      />
-      <FilterChip
-        label="Schema"
-        value={filters.schemaType}
-        defaultValue="all"
-        onChange={(v) => onFilterChange("schemaType", v)}
-        options={schemaTypeOptions}
-      />
-      {anyActive && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClearFilters}
-          className="h-9 px-2.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <X className="h-3.5 w-3.5" />
-          Clear
-        </Button>
-      )}
-      <div className="ml-auto">
-        <SearchInput
-          searchTerm={searchTerm}
-          handleChange={(e) => setSearchTerm(e.target.value)}
+
+      <div className="flex flex-wrap items-center gap-3">
+        <FilterChip
+          label="Status"
+          value={filters.status}
+          defaultValue="all"
+          onChange={(v) => onFilterChange("status", v)}
+          options={STATUS_OPTIONS}
         />
+        <FilterChip
+          label="Kind"
+          value={filters.kind}
+          defaultValue="all"
+          onChange={(v) => onFilterChange("kind", v)}
+          options={kindOptions}
+        />
+        <FilterChip
+          label="Schema"
+          value={filters.schemaType}
+          defaultValue="all"
+          onChange={(v) => onFilterChange("schemaType", v)}
+          options={schemaTypeOptions}
+        />
+        {anyActive && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClearFilters}
+            className="h-9 px-2.5 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-3.5 w-3.5" />
+            Clear
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
+import { Toaster } from "sonner";
 
 import DashBoardSidebar from "@/components/dashboard/DashboardSidebar";
-import { Toaster } from "sonner";
 import { CreateBlogModal } from "@/components/ui/common/CreateBlogModal";
 import { AiDraftBlogModal } from "@/components/ui/common/AiDraftBlogModal";
 import ConfirmationModal from "@/components/ui/common/ConfirmationModal";
@@ -28,17 +28,11 @@ export default function DashBoardLayout({
       </main>
 
       <Toaster
-        richColors
         position="bottom-right"
         visibleToasts={3}
         swipeDirections={["left", "bottom"]}
+        richColors
         duration={5000}
-        toastOptions={{
-          classNames: {
-            title: "text-sm font-semibold",
-            icon: "mr-2!",
-          },
-        }}
       />
       <CreateBlogModal />
       <AiDraftBlogModal />

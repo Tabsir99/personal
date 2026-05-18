@@ -1,121 +1,126 @@
 "use client";
-import { Card } from "@/components/ui/card";
-import { Star } from "lucide-react";
-import { usePortfolioStore } from "@/stores/PortfolioStore";
+import { useState } from "react";
 import { useShallow } from "zustand/shallow";
+import { Star } from "lucide-react";
+
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { usePortfolioStore } from "@/stores/PortfolioStore";
 import TestimonialDialog from "@/components/portfolio/modals/Testimonial";
 import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
-import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 export default function Testimonials() {
   const testimonials = usePortfolioStore(
-    useShallow((state) => state.pageData.testimonials)
+    useShallow((state) => state.pageData.testimonials),
   );
-
   const testimonial = usePortfolioStore().testimonials;
-
-  // null = closed, number = editing that index, "new" = adding new
   const [editingIndex, setEditingIndex] = useState<number | "new" | null>(null);
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-3xl font-bold mb-2">Testimonials</h2>
-          <p className="text-muted-foreground">
-            Manage client testimonials and reviews
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <header className="space-y-1.5">
+        <h1 className="text-2xl leading-tight font-semibold tracking-tight">
+          Client testimonials
+        </h1>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Quotes and reviews displayed on the testimonials page.
+        </p>
+      </header>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {testimonials.map((testimonialItem, index) => (
-          <Card
-            key={testimonialItem.name}
-            className={`group relative overflow-hidden rounded-xl border-border/50 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-border hover:bg-card ${
-              testimonialItem.size === "large"
-                ? "md:col-span-2 lg:col-span-2"
-                : testimonialItem.size === "medium"
-                  ? "md:col-span-2 lg:col-span-1"
-                  : ""
-            }`}
+      <div className="stagger-cascade-tight grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {testimonials.map((t, index) => (
+          <div
+            key={t.name + index}
+            style={{ ["--stagger-index" as string]: index }}
+            className={cn(
+              t.size === "large" && "md:col-span-2 lg:col-span-2",
+              t.size === "medium" && "md:col-span-2 lg:col-span-1",
+            )}
           >
-            <ActionButtonGroup
-              buttons={[
-                {
-                  variant: "moveUp",
-                  onClick: () => testimonial.moveUp(index),
-                  disabled: index === 0,
-                },
-                {
-                  variant: "moveDown",
-                  onClick: () => testimonial.moveDown(index),
-                  disabled: index === testimonials.length - 1,
-                },
-                {
-                  variant: "toggle",
-                  onClick: () => testimonial.toggle(index, "isActive"),
-                  active: testimonialItem.isActive,
-                },
-                {
-                  variant: "edit",
-                  onClick: () => setEditingIndex(index),
-                },
-                {
-                  variant: "delete",
-                  onClick: () => testimonial.delete(index),
-                },
-              ]}
-              entityName="Testimonial"
-            />
+            <Card className="group/testimonial relative tactile-lift">
+              <ActionButtonGroup
+                buttons={[
+                  {
+                    variant: "moveUp",
+                    onClick: () => testimonial.moveUp(index),
+                    disabled: index === 0,
+                  },
+                  {
+                    variant: "moveDown",
+                    onClick: () => testimonial.moveDown(index),
+                    disabled: index === testimonials.length - 1,
+                  },
+                  {
+                    variant: "toggle",
+                    onClick: () => testimonial.toggle(index, "isActive"),
+                    active: t.isActive,
+                  },
+                  {
+                    variant: "edit",
+                    onClick: () => setEditingIndex(index),
+                  },
+                  {
+                    variant: "delete",
+                    onClick: () => testimonial.delete(index),
+                  },
+                ]}
+                entityName="Testimonial"
+              />
 
-            <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-            <div className="relative p-6">
-              <div className="mb-4 flex gap-1">
-                {[...Array(testimonialItem.rating)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="h-4 w-4 fill-primary text-primary transition-transform duration-300 group-hover:scale-110"
-                    style={{ transitionDelay: `${i * 50}ms` }}
-                  />
-                ))}
-              </div>
-
-              <p className="mb-6 text-base leading-relaxed text-foreground/80">
-                "{testimonialItem.text}"
-              </p>
-
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h4 className="font-semibold text-foreground">
-                    {testimonialItem.name}
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    {testimonialItem.role}, {testimonialItem.company}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {testimonialItem.location}
-                  </p>
+              <div className="relative flex flex-col gap-4 p-6">
+                <div className="flex items-center gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={cn(
+                        "h-3.5 w-3.5",
+                        i < t.rating
+                          ? "fill-star text-star"
+                          : "text-foreground/15",
+                      )}
+                    />
+                  ))}
                 </div>
 
-                <div className="shrink-0">
-                  <div className="rounded-lg border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary transition-all duration-300 group-hover:border-primary/30 group-hover:bg-primary/20">
-                    Upwork
+                <p className="text-sm leading-relaxed text-foreground/85">
+                  &ldquo;{t.text}&rdquo;
+                </p>
+
+                <div className="flex items-start justify-between gap-4 border-t border-foreground/6 pt-4">
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="truncate text-sm font-semibold tracking-tight text-foreground">
+                      {t.name}
+                    </span>
+                    <span className="truncate text-xs leading-relaxed text-muted-foreground">
+                      {t.role}
+                      {t.company ? `, ${t.company}` : null}
+                    </span>
+                    {t.location && (
+                      <Eyebrow tone="muted" family="mono">
+                        {t.location}
+                      </Eyebrow>
+                    )}
                   </div>
+                  {t.featured && (
+                    <Badge variant="accent">Featured</Badge>
+                  )}
                 </div>
-              </div>
 
-              <div className="mt-4 inline-block rounded-lg border border-border/60 bg-muted/60 px-3 py-1 text-xs text-muted-foreground">
-                Project: {testimonialItem.project}
+                {t.project && (
+                  <Eyebrow tone="muted" family="mono">
+                    Project · {t.project}
+                  </Eyebrow>
+                )}
               </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
         ))}
 
         <AddCard
-          title="Add Testimonial"
+          title="Add testimonial"
           description="Add a new client review"
           onClick={() => setEditingIndex("new")}
         />

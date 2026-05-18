@@ -1,18 +1,24 @@
 .
 ├── actions
+│   ├── aiActions.ts
 │   ├── authActions.ts
 │   ├── blogActions.ts
+│   ├── configActions.ts
+│   ├── generateBlogDraft.integration.test.ts
 │   └── mediaActions.ts
 ├── app
 │   ├── api
-│   │   ├── auth
-│   │   │   ├── callback
-│   │   │   │   └── linkedin
-│   │   │   │       └── route.ts
-│   │   │   └── signin
-│   │   │       └── linkedin
-│   │   │           └── route.ts
 │   │   ├── blogs
+│   │   │   ├── featured
+│   │   │   │   └── route.ts
+│   │   │   ├── route.ts
+│   │   │   └── [slug]
+│   │   │       ├── route.ts
+│   │   │       └── score
+│   │   │           └── route.ts
+│   │   ├── config
+│   │   │   ├── portfolio
+│   │   │   │   └── route.ts
 │   │   │   └── route.ts
 │   │   ├── dashboard
 │   │   │   ├── geo
@@ -25,11 +31,15 @@
 │   │   │       └── route.ts
 │   │   ├── event
 │   │   │   └── route.ts
-│   │   └── page-data
-│   │       ├── route.ts
-│   │       └── upload-urls
-│   │           └── route.ts
+│   │   ├── page-data
+│   │   │   ├── route.ts
+│   │   │   └── upload-urls
+│   │   │       └── route.ts
+│   │   └── site-config
+│   │       └── route.ts
 │   ├── dashboard
+│   │   ├── blog-site
+│   │   │   └── page.tsx
 │   │   ├── layout.tsx
 │   │   ├── manage-posts
 │   │   │   └── page.tsx
@@ -50,18 +60,28 @@
 │   │   │   │   └── page.tsx
 │   │   │   └── testimonials
 │   │   │       └── page.tsx
-│   │   ├── settings
-│   │   │   └── page.tsx
 │   │   └── write-blog
 │   │       ├── [blogId]
-│   │       │   ├── page.tsx
-│   │       │   └── preview
+│   │       │   └── page.tsx
 │   │       └── page.tsx
+│   ├── error.tsx
 │   ├── globals.css
 │   ├── layout.tsx
 │   └── page.tsx
 ├── components
+│   ├── blog-site
+│   │   ├── BlogLandingPanel.tsx
+│   │   ├── CurrentlyBuildingPanel.tsx
+│   │   ├── EditorChrome.tsx
+│   │   ├── Field.tsx
+│   │   ├── HeightTransition.tsx
+│   │   ├── NowReadingPanel.tsx
+│   │   ├── Panel.tsx
+│   │   ├── SaveBar.tsx
+│   │   └── SiteConfigEditor.tsx
 │   ├── dashboard
+│   │   ├── ChartCard.tsx
+│   │   ├── ChartTooltip.tsx
 │   │   ├── CountriesBar.tsx
 │   │   ├── DashboardSidebar.tsx
 │   │   ├── DateRangeSelector.tsx
@@ -86,22 +106,12 @@
 │   │   └── modals
 │   │       ├── Credential.tsx
 │   │       ├── ProjectModal.tsx
+│   │       ├── _shared.tsx
 │   │       ├── SkillCategory.tsx
 │   │       └── Testimonial.tsx
-│   ├── settings
-│   │   ├── ContentSettings.tsx
-│   │   ├── DisplaySettings.tsx
-│   │   ├── GeneralSettings.tsx
-│   │   ├── NotificationSettings.tsx
-│   │   ├── SettingsSection.tsx
-│   │   └── SocialIntegration.tsx
 │   ├── ui
-│   │   ├── accordion.tsx
 │   │   ├── actionButtonGroup.tsx
 │   │   ├── add-card.tsx
-│   │   ├── alert-dialog.tsx
-│   │   ├── alert.tsx
-│   │   ├── avatar.tsx
 │   │   ├── badge.tsx
 │   │   ├── Buttons
 │   │   │   ├── AnimatedLink.tsx
@@ -109,26 +119,32 @@
 │   │   ├── button.tsx
 │   │   ├── card.tsx
 │   │   ├── checkbox.tsx
+│   │   ├── command.tsx
 │   │   ├── common
+│   │   │   ├── AiDraftBlogModal.tsx
 │   │   │   ├── ConfirmationModal.tsx
 │   │   │   ├── CreateBlogModal.tsx
-│   │   │   ├── FloatingLabelInput.tsx
-│   │   │   ├── FloatingLabelTxtArea.tsx
-│   │   │   ├── LoadingAnimation.tsx
 │   │   │   ├── PageHeader.tsx
 │   │   │   └── SearchInput.tsx
+│   │   ├── configMultiSelect.tsx
 │   │   ├── CursorEffects
 │   │   │   └── index.tsx
 │   │   ├── dialog.tsx
 │   │   ├── dropdown-menu.tsx
+│   │   ├── Eyebrow.tsx
+│   │   ├── FormField.tsx
 │   │   ├── icons
 │   │   │   └── icon.tsx
 │   │   ├── image.tsx
+│   │   ├── input-group.tsx
 │   │   ├── input.tsx
+│   │   ├── Kbd.tsx
 │   │   ├── label.tsx
+│   │   ├── MetricNumber.tsx
+│   │   ├── NumericInput.tsx
 │   │   ├── popover.tsx
 │   │   ├── radio-group.tsx
-│   │   ├── scroll-area.tsx
+│   │   ├── SectionCard.tsx
 │   │   ├── select.tsx
 │   │   ├── separator.tsx
 │   │   ├── sheet.tsx
@@ -136,48 +152,65 @@
 │   │   │   └── BlogCardSkeleton.tsx
 │   │   ├── skeleton.tsx
 │   │   ├── slider.tsx
-│   │   ├── sonner.tsx
+│   │   ├── StatusDot.tsx
 │   │   ├── switch.tsx
 │   │   ├── table.tsx
 │   │   ├── tabs.tsx
 │   │   ├── textarea.tsx
-│   │   ├── toggle-group.tsx
-│   │   ├── toggle.tsx
 │   │   └── tooltip.tsx
 │   └── write-post
-│       └── writeMetadata.tsx
+│       ├── AppEditor.tsx
+│       ├── EditorHeader.tsx
+│       ├── Preview.tsx
+│       ├── PublishBlog.tsx
+│       └── writeMetadata
+│           ├── BasicInfoSection.tsx
+│           ├── ComparsionInput.tsx
+│           ├── ConfigSingleSelect.tsx
+│           ├── CoverImageSection.tsx
+│           ├── GenerateMetadataBtn.tsx
+│           ├── index.tsx
+│           ├── SectionHeader.tsx
+│           ├── SeoSocialSection.tsx
+│           ├── TagsSection.tsx
+│           └── TagSuggestion.tsx
 ├── config
+│   ├── anthropic.ts
 │   ├── cloudflareS3.ts
 │   ├── env.client.ts
 │   ├── env.server.ts
 │   └── firebaseAdmin.ts
-├── context
 ├── hooks
 │   ├── useCustomSwr.ts
+│   ├── useDashboardData.ts
 │   └── useInvalidateCache.ts
 ├── lib
+│   ├── agentLog.ts
 │   ├── appUtils.ts
 │   ├── blogQuery.ts
 │   ├── blogUtils.ts
 │   ├── commonQuery.ts
-│   ├── constants.tsx
-│   └── hooks
-│       └── useDashboardData.ts
+│   ├── finalizeAiDoc.ts
+│   ├── requireAuth.ts
+│   └── utils.ts
 ├── proxy.ts
+├── scripts
+│   ├── migrateBlogSchema.ts
+│   └── seed
+│       ├── blogContent.ts
+│       ├── flags.ts
+│       ├── helpers.ts
+│       ├── index.ts
+│       ├── seedAnalytics.ts
+│       ├── seedBlogs.ts
+│       ├── seedConfig.ts
+│       ├── seedSiteConfig.ts
+│       ├── seedValidLinks.ts
+│       ├── simulator.ts
+│       └── types.ts
 ├── stores
 │   ├── BlogEditorStore.ts
 │   ├── PortfolioStore.ts
-│   ├── SettingStore.ts
+│   ├── SiteConfigStore.ts
 │   └── UIStore.ts
-├── temp
-│   ├── seed.ts
-│   └── todo.md
-├── tree.txt
-└── types
-    ├── blogTypes.ts
-    ├── dashboardTypes.ts
-    ├── portfolioTypes.ts
-    ├── settingTypes.ts
-    └── userTypes.ts
-
-54 directories, 127 files
+└── tree.txt

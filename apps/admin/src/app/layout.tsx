@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Lato, Geist, JetBrains_Mono } from "next/font/google";
+import { Geist, JetBrains_Mono } from "next/font/google";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
@@ -10,16 +10,6 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500", "600"],
   variable: "--font-mono",
   display: "swap",
-});
-
-const LatoFont = Lato({
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal"],
-  variable: "--font-lato",
-  display: "swap",
-  preload: true,
-  fallback: ["sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -54,6 +44,7 @@ export default async function RootLayout({
       lang="en"
     >
       <head>
+        <meta name="color-scheme" content="dark light" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -69,9 +60,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className={"overflow-x-hidden " + LatoFont.className}>
-        {children}
-      </body>
+      <body className="overflow-x-hidden">{children}</body>
     </html>
   );
 }

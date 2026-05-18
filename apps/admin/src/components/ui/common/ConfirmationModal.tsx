@@ -1,6 +1,8 @@
 "use client";
 
 import { AlertTriangle } from "lucide-react";
+import { useShallow } from "zustand/shallow";
+
 import {
   Dialog,
   DialogClose,
@@ -12,61 +14,59 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import useUIStore from "@/stores/UIStore";
-import { useShallow } from "zustand/shallow";
-import { cn } from "@/lib/utils";
 
 const ConfirmationModal = () => {
   const { isOpen, data } = useUIStore(
     useShallow((state) => state.modals.confirmation),
   );
-
   const closeModal = useUIStore().closeAllModals;
+
+  const isDestructive =
+    (data?.confirmButtonVariant ?? "destructive") === "destructive";
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent>
-        {/* Header */}
-        <DialogHeader className="p-6 pb-0">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-destructive/20 bg-destructive/10">
-              <AlertTriangle className="h-6 w-6 text-destructive" />
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <div className="flex items-start gap-3">
+            <div
+              className={
+                isDestructive
+                  ? "flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-destructive/20 bg-destructive/8 text-destructive"
+                  : "flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-warning/20 bg-warning/8 text-warning"
+              }
+            >
+              <AlertTriangle className="h-4 w-4" />
             </div>
-            <div>
-              <DialogTitle className="text-xl font-semibold">
-                {data?.headerText || "Confirm Action"}
+            <div className="flex flex-col gap-1">
+              <DialogTitle className="text-base leading-snug font-semibold tracking-tight">
+                {data?.headerText || "Are you sure?"}
               </DialogTitle>
             </div>
           </div>
         </DialogHeader>
 
-        {/* Content */}
-        <div className="px-6 py-4">
-          <div className="rounded-lg border border-border bg-muted/30 p-4">
-            <DialogDescription className="m-0 text-base leading-relaxed text-foreground">
-              {data?.message}
-            </DialogDescription>
-          </div>
-        </div>
+        <DialogDescription className="text-sm leading-relaxed text-muted-foreground">
+          {data?.message}
+        </DialogDescription>
 
-        {/* Footer */}
         <DialogFooter>
           <DialogClose
             render={
               <Button
                 variant={data?.cancelButtonVariant || "outline"}
-                className="w-24"
+                className="min-w-24"
               >
                 {data?.cancelButtonText || "Cancel"}
               </Button>
             }
           />
-
           <DialogClose
             render={
               <Button
                 variant={data?.confirmButtonVariant || "destructive"}
                 onClick={data?.onConfirm}
-                className={cn("w-24")}
+                className="min-w-24"
               >
                 {data?.confirmButtonText || "Confirm"}
               </Button>
