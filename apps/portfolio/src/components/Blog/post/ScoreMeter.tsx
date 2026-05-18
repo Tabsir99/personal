@@ -5,6 +5,12 @@ import * as React from "react";
 const MAX_SCORE = 50;
 const FLUSH_MS = 800;
 
+const DIAL_BASE =
+  "group relative appearance-none w-[84px] h-[84px] p-0 border-none rounded-full cursor-pointer isolate [transition:transform_120ms_ease,filter_200ms_ease] enabled:hover:scale-[1.04] enabled:active:scale-[0.96] disabled:cursor-default focus-visible:outline-none focus-visible:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-accent)_30%,transparent)] before:content-[''] before:absolute before:inset-0 before:rounded-full before:shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-cream)_8%,transparent)] before:pointer-events-none";
+
+const CORE_BASE =
+  "absolute inset-[6px] rounded-full flex items-center justify-center z-[1] [transition:background-color_220ms_ease,color_220ms_ease]";
+
 export default function ScoreMeter({
   slug,
   initialScore = 0,
@@ -108,18 +114,33 @@ export default function ScoreMeter({
   const isMaxed = tapped >= MAX_SCORE;
 
   return (
-    <div className="score" data-maxed={isMaxed || undefined}>
-      <div className="score__head mono">// score</div>
+    <div
+      className="flex flex-col items-start gap-3.5 font-sans"
+      data-maxed={isMaxed || undefined}
+    >
+      <div className="font-mono text-[11px] text-muted tracking-[0.04em]">
+        // score
+      </div>
       <button
         type="button"
-        className="score__dial"
+        className={isMaxed ? `${DIAL_BASE} bg-accent` : `${DIAL_BASE} blog-dial`}
         onClick={tap}
         disabled={isMaxed}
         style={{ ["--fill" as string]: `${pct * 360}deg` }}
         aria-label={isMaxed ? "Score maxed out" : "Tap to add to score"}
       >
-        <span className="score__dial-pulse" key={pulseKey} aria-hidden="true" />
-        <span className="score__dial-core">
+        <span
+          className="absolute inset-0 rounded-full pointer-events-none z-0 animate-score-pulse"
+          key={pulseKey}
+          aria-hidden="true"
+        />
+        <span
+          className={
+            isMaxed
+              ? `${CORE_BASE} bg-cream text-accent`
+              : `${CORE_BASE} bg-cream text-ink group-hover:bg-ink group-hover:text-cream`
+          }
+        >
           {isMaxed ? (
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
               <path
@@ -132,18 +153,40 @@ export default function ScoreMeter({
               />
             </svg>
           ) : (
-            <span className="score__dial-plus" aria-hidden="true">+</span>
+            <span
+              className="font-sans font-black text-[38px] leading-none -translate-y-[2px]"
+              aria-hidden="true"
+            >
+              +
+            </span>
           )}
         </span>
-        <span className="score__bursts" aria-hidden="true">
+        <span
+          className="absolute left-1/2 -top-1.5 pointer-events-none z-[2]"
+          aria-hidden="true"
+        >
           {bursts.map((b) => (
-            <span key={b.id} className="score__burst">+1</span>
+            <span
+              key={b.id}
+              className="absolute left-0 font-mono text-xs font-bold text-accent -translate-x-1/2 animate-score-burst"
+            >
+              +1
+            </span>
           ))}
         </span>
       </button>
-      <div className="score__meta mono" aria-live="polite">
-        <span className="score__global">{score.toLocaleString()}</span>
-        <span className="score__global-label">global</span>
+      <div
+        className="font-mono inline-flex items-baseline gap-1.5 text-xs text-muted tracking-[0.04em] tabular-nums"
+        aria-live="polite"
+      >
+        <span
+          className={
+            isMaxed ? "text-accent font-bold text-sm" : "text-cream font-bold text-sm"
+          }
+        >
+          {score.toLocaleString()}
+        </span>
+        <span>global</span>
       </div>
     </div>
   );

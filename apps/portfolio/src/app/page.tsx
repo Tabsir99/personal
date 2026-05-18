@@ -1,4 +1,5 @@
-// import { Atmosphere } from "@/components/portfolio/atmosphere";
+import { Atmosphere } from "@/components/portfolio/atmosphere";
+import { CursorGlow } from "@/components/portfolio/cursor-glow";
 import { Rail } from "@/components/portfolio/rail";
 import { Hero } from "@/components/portfolio/hero";
 import { Endorsement } from "@/components/portfolio/endorsement";
@@ -13,7 +14,8 @@ import { Now } from "@/components/portfolio/now";
 export default function Home() {
   return (
     <>
-      {/* <Atmosphere /> */}
+      <Atmosphere />
+      <CursorGlow />
       <Rail />
       <Hero />
       <Endorsement />

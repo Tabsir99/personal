@@ -3,6 +3,11 @@
 import * as React from "react";
 import type { TocItem } from "@open-notion/serializers";
 
+const ITEM_ANCHOR_BASE =
+  "relative flex items-baseline gap-2.5 py-1.5 pr-0 pl-1.5 no-underline [transition:color_200ms_ease,transform_200ms_ease] rounded-[3px] hover:text-cream hover:translate-x-0.5";
+const BULLET_BASE =
+  "shrink-0 w-1.5 h-1.5 rounded-full -translate-y-px [transition:background-color_200ms_ease,box-shadow_200ms_ease,transform_200ms_ease]";
+
 function flattenTocIds(items: TocItem[]): string[] {
   const out: string[] = [];
   const walk = (xs: TocItem[]) => {
@@ -94,61 +99,89 @@ export default function Toc({ items }: { items: TocItem[] }) {
   };
 
   const renderItems = (xs: TocItem[]) =>
-    xs.map((it) => (
-      <li
-        key={it.id}
-        className={`toc__item toc__item--l${it.level} ${
-          active === it.id ? "is-active" : ""
-        }`}
-      >
-        <a href={`#${it.id}`} onClick={(e) => onJump(e, it.id)}>
-          <span className="toc__bullet" aria-hidden="true" />
-          <span className="toc__text">{it.text}</span>
-        </a>
-        {it.children.length > 0 && (
-          <ul className="toc__sublist">{renderItems(it.children)}</ul>
-        )}
-      </li>
-    ));
+    xs.map((it) => {
+      const isActive = active === it.id;
+      const anchorCls =
+        (isActive ? "text-cream font-bold " : "text-muted ") +
+        (it.level === 3 ? "text-[12.5px] " : "") +
+        ITEM_ANCHOR_BASE;
+      const bulletCls = isActive
+        ? `${BULLET_BASE} bg-accent shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-accent)_22%,transparent)] scale-[1.2]`
+        : `${BULLET_BASE} bg-cream/8`;
+      return (
+        <li key={it.id}>
+          <a href={`#${it.id}`} onClick={(e) => onJump(e, it.id)} className={anchorCls}>
+            <span className={bulletCls} aria-hidden="true" />
+            <span className="line-clamp-2">{it.text}</span>
+          </a>
+          {it.children.length > 0 && (
+            <ul className="list-none m-0 p-0 flex flex-col gap-1 mt-1 pl-3.5 max-[1100px]:pl-0">
+              {renderItems(it.children)}
+            </ul>
+          )}
+        </li>
+      );
+    });
+
+  const tocCls =
+    "relative text-[13px] leading-[1.45] pl-[18px] " +
+    "max-[1100px]:fixed max-[1100px]:left-0 max-[1100px]:top-0 max-[1100px]:bottom-0 max-[1100px]:w-[min(360px,88vw)] max-[1100px]:z-[80] max-[1100px]:bg-ink max-[1100px]:py-7 max-[1100px]:pr-7 max-[1100px]:pl-8 max-[1100px]:transition-transform max-[1100px]:duration-[320ms] max-[1100px]:ease-blog max-[1100px]:overflow-y-auto max-[1100px]:shadow-[24px_0_40px_-20px_rgba(0,0,0,0.6)] " +
+    (drawerOpen
+      ? "max-[1100px]:translate-x-0"
+      : "max-[1100px]:-translate-x-full");
+
+  const scrimCls =
+    "hidden fixed inset-0 bg-[color-mix(in_srgb,var(--color-ink)_50%,transparent)] backdrop-blur-[2px] z-[70] transition-opacity duration-200 ease-out max-[1100px]:block " +
+    (drawerOpen ? "opacity-100" : "opacity-0 pointer-events-none");
 
   return (
     <>
       <button
         type="button"
-        className="toc__launcher mono"
+        className="hidden w-full items-center gap-2.5 px-4 py-3 bg-ink-2 text-cream border border-line rounded-full font-mono text-xs tracking-[0.02em] cursor-pointer transition-[background-color] duration-200 hover:bg-ink-3 max-[1100px]:inline-flex"
         aria-expanded={drawerOpen}
         aria-controls="toc-panel"
         onClick={() => setDrawerOpen((v) => !v)}
       >
-        <span className="toc__launcher-pip" aria-hidden="true" />
+        <span
+          className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-accent)_22%,transparent)] mr-1"
+          aria-hidden="true"
+        />
         on this page
-        <span className="toc__launcher-count">({total})</span>
-        <span className="toc__launcher-arrow" aria-hidden="true">
+        <span className="text-muted">({total})</span>
+        <span className="ml-auto text-sm font-bold text-muted" aria-hidden="true">
           {drawerOpen ? "×" : "↓"}
         </span>
       </button>
 
       <div
-        className={`toc__scrim ${drawerOpen ? "is-open" : ""}`}
+        className={scrimCls}
         onClick={() => setDrawerOpen(false)}
         aria-hidden="true"
       />
 
-      <nav
-        id="toc-panel"
-        className={`toc ${drawerOpen ? "is-open" : ""}`}
-        aria-label="Table of contents"
-      >
-        <div className="toc__head">
-          <span className="toc__head-label mono">// on this page</span>
-          <span className="toc__head-pct mono" aria-live="polite">
+      <nav id="toc-panel" className={tocCls} aria-label="Table of contents">
+        <div className="flex items-baseline justify-between text-[11px] mb-4 text-muted tracking-[0.04em] max-[1100px]:pl-[18px]">
+          <span className="font-mono">// on this page</span>
+          <span
+            className="font-mono text-cream font-bold bg-ink-2 px-2 py-0.5 rounded-full border border-cream/8 tabular-nums"
+            aria-live="polite"
+          >
             {String(Math.round(pct * 100)).padStart(2, "0")}%
           </span>
         </div>
-        <div className="toc__rail" aria-hidden="true">
-          <span className="toc__rail-fill" style={{ height: `${pct * 100}%` }} />
+        <div
+          className="absolute left-0 top-8 bottom-0 w-0.5 bg-cream/8 rounded-[2px] max-[1100px]:left-8"
+          aria-hidden="true"
+        >
+          <span
+            className="absolute left-0 top-0 w-full bg-accent rounded-[2px] transition-[height] duration-[240ms] ease-blog shadow-[0_0_8px_color-mix(in_srgb,var(--color-accent)_50%,transparent)]"
+            style={{ height: `${pct * 100}%` }}
+          />
         </div>
-        <ul className="toc__list">{renderItems(items)}</ul>
+        <ul className="list-none m-0 p-0 flex flex-col gap-1 max-[1100px]:pl-0">
+          {renderItems(items)}
+        </ul>
       </nav>
     </>
   );

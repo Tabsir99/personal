@@ -3,7 +3,7 @@
 import * as React from "react";
 
 export default function ReadingProgress({
-  targetSelector = ".post__body",
+  targetSelector = "[data-post-body]",
   showBadge = true,
 }: {
   targetSelector?: string;
@@ -52,17 +52,23 @@ export default function ReadingProgress({
   return (
     <>
       <div
-        className="rprog"
+        className="fixed left-0 right-0 top-0 h-[3px] z-[60] bg-transparent pointer-events-none"
         role="progressbar"
         aria-valuenow={display}
         aria-valuemin={0}
         aria-valuemax={100}
       >
-        <div className="rprog__fill" style={{ transform: `scaleX(${pct})` }} />
+        <div
+          className="h-full bg-linear-to-r from-accent to-cream-2 origin-left transition-transform duration-[80ms] ease-linear shadow-[0_0_12px_color-mix(in_srgb,var(--color-accent)_60%,transparent)]"
+          style={{ transform: `scaleX(${pct})` }}
+        />
       </div>
       {showBadge && (
-        <div className="rprog__badge mono" aria-hidden="true">
-          <span className="rprog__badge-dot" />
+        <div
+          className="font-mono fixed right-6 bottom-6 z-50 inline-flex items-center gap-2 px-3 py-2 bg-cream text-ink rounded-full text-[11px] tracking-[0.04em] shadow-[0_8px_20px_-8px_color-mix(in_srgb,var(--color-ink)_40%,transparent)] pointer-events-none tabular-nums max-[640px]:right-3 max-[640px]:bottom-3 max-[640px]:px-2.5 max-[640px]:py-1.5"
+          aria-hidden="true"
+        >
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_0_2px_color-mix(in_srgb,var(--color-accent)_30%,transparent)]" />
           {String(display).padStart(2, "0")}%
         </div>
       )}

@@ -2,6 +2,10 @@
 
 import * as React from "react";
 
+const BTN_BASE =
+  "appearance-none inline-flex items-center gap-2.5 px-3.5 py-[9px] bg-transparent text-cream-2 border border-line rounded-full cursor-pointer text-xs tracking-[0.02em] no-underline [transition:background_200ms_ease,color_200ms_ease,border-color_200ms_ease,transform_120ms_ease] hover:bg-ink-2 hover:border-cream hover:text-cream hover:translate-x-0.5 active:translate-x-0.5 active:scale-[0.98]";
+const BTN_COPIED = "bg-accent! text-cream! border-accent!";
+
 export default function Share({ url, title }: { url: string; title: string }) {
   const [copied, setCopied] = React.useState(false);
   const intent = encodeURIComponent(`${title} — ${url}`);
@@ -31,12 +35,14 @@ export default function Share({ url, title }: { url: string; title: string }) {
   const bskyHref = `https://bsky.app/intent/compose?text=${intent}`;
 
   return (
-    <div className="share">
-      <div className="share__head mono">// share</div>
-      <div className="share__row">
+    <div className="flex flex-col gap-2.5">
+      <div className="font-mono text-[11px] text-muted tracking-[0.04em]">
+        // share
+      </div>
+      <div className="flex flex-col gap-2">
         <button
           type="button"
-          className={`share__btn ${copied ? "is-copied" : ""}`}
+          className={copied ? `${BTN_BASE} ${BTN_COPIED}` : BTN_BASE}
           onClick={onCopy}
           aria-label="Copy link"
           title="Copy link"
@@ -73,13 +79,13 @@ export default function Share({ url, title }: { url: string; title: string }) {
               </>
             )}
           </svg>
-          <span className="share__btn-label mono">
+          <span className="font-mono text-[11px]">
             {copied ? "copied" : "copy link"}
           </span>
         </button>
 
         <a
-          className="share__btn"
+          className={BTN_BASE}
           href={xHref}
           target="_blank"
           rel="noopener noreferrer"
@@ -92,11 +98,11 @@ export default function Share({ url, title }: { url: string; title: string }) {
               fill="currentColor"
             />
           </svg>
-          <span className="share__btn-label mono">post to x</span>
+          <span className="font-mono text-[11px]">post to x</span>
         </a>
 
         <a
-          className="share__btn"
+          className={BTN_BASE}
           href={bskyHref}
           target="_blank"
           rel="noopener noreferrer"
@@ -109,7 +115,7 @@ export default function Share({ url, title }: { url: string; title: string }) {
               fill="currentColor"
             />
           </svg>
-          <span className="share__btn-label mono">post to bluesky</span>
+          <span className="font-mono text-[11px]">post to bluesky</span>
         </a>
       </div>
     </div>

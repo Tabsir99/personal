@@ -9,6 +9,13 @@ const KIND_LABEL: Record<PostMeta["kind"], string> = {
   notes: "notes",
 };
 
+const KIND_BADGE: Record<PostMeta["kind"], string> = {
+  essay: "text-accent border-accent/40",
+  "deep-dive": "text-phosphor border-phosphor/40",
+  "war-story": "text-accent border-accent/40",
+  notes: "text-muted",
+};
+
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
     month: "short",
@@ -25,42 +32,62 @@ export default function PostRow({
   idx: number;
 }) {
   return (
-    <InViewArticle className="row" style={{ ["--row-i" as string]: idx }}>
-      <div className="row__num mono">{String(idx + 1).padStart(2, "0")}</div>
-      <div className="row__head">
-        <div className="row__date mono">{formatDate(post.date)}</div>
-        <div className="row__kind">
-          <span className={`kind kind--${post.kind}`}>
+    <InViewArticle
+      className="group relative grid grid-cols-[56px_1fr] grid-rows-[auto_auto_auto_auto] gap-x-6 pt-7 pb-8 border-b border-line transition-[padding] duration-[360ms] ease-blog first:pt-2 hover:pl-3 max-[640px]:grid-cols-1"
+      style={{ ["--row-i" as string]: idx }}
+    >
+      <div className="row-span-4 font-mono text-[13px] text-muted pt-1.5 tabular-nums max-[640px]:hidden">
+        {String(idx + 1).padStart(2, "0")}
+      </div>
+      <div className="flex items-center justify-between font-mono text-xs text-muted mb-2 max-[640px]:flex-col max-[640px]:items-start max-[640px]:gap-1.5">
+        <div className="tracking-[0.02em]">{formatDate(post.date)}</div>
+        <div>
+          <span
+            className={`inline-block px-2.5 py-[3px] rounded-full text-[11px] tracking-[0.04em] lowercase border border-line bg-ink-2 ${KIND_BADGE[post.kind]}`}
+          >
             {KIND_LABEL[post.kind]}
           </span>
         </div>
       </div>
-      <h3 className="row__title">
-        <Link href={`/blog/${post.slug}`} className="row__title-link">
-          <span className="row__title-text">{post.title}</span>
+      <h3 className="m-0 mb-2 text-[clamp(28px,3.5vw,46px)] font-black tracking-[-0.03em] leading-[1.04] relative pb-1">
+        <Link
+          href={`/blog/${post.slug}`}
+          className="inline-block cursor-pointer"
+        >
+          <span className="blog-marker group-hover:bg-[length:100%_100%]">
+            {post.title}
+          </span>
         </Link>
       </h3>
-      <p className="row__excerpt">{post.excerpt}</p>
-      <div className="row__foot">
-        <div className="row__tags">
+      <p className="text-[17px] text-cream-2 leading-[1.55] m-0 mb-[18px] max-w-[64ch]">
+        {post.excerpt}
+      </p>
+      <div className="flex items-center gap-6 flex-wrap">
+        <div className="flex gap-1.5 flex-wrap">
           {post.tags.map((t) => (
             <Link
               key={t}
               href={`/blog?tag=${encodeURIComponent(t)}`}
-              className="chip"
+              className="font-mono text-xs px-2.5 py-[3px] bg-ink-2 rounded-full text-cream-2 [transition:transform_200ms_ease,background-color_200ms_ease,color_200ms_ease] hover:-translate-y-px hover:bg-accent hover:text-cream"
               scroll={false}
             >
               #{t}
             </Link>
           ))}
         </div>
-        <div className="row__time mono">
-          <span className="row__time-bar">
-            <span style={{ width: `${Math.min(100, post.readTime * 4)}%` }} />
+        <div className="ml-auto flex items-center gap-2.5 text-xs text-muted font-mono">
+          <span className="inline-block w-[60px] h-[3px] rounded-[2px] bg-cream/8 overflow-hidden">
+            <span
+              className="block h-full bg-cream origin-left"
+              style={{ width: `${Math.min(100, post.readTime * 4)}%` }}
+            />
           </span>
           {post.readTime} min read
         </div>
-        <Link href={`/blog/${post.slug}`} className="row__cta">
+        <Link
+          href={`/blog/${post.slug}`}
+          className="inline-flex items-center gap-2 font-bold relative py-1 after:content-[''] after:absolute after:left-0 after:right-0 after:bottom-0 after:h-[1.5px] after:bg-cream after:scale-x-0 after:origin-right after:transition-transform after:duration-[280ms] after:ease-blog group-hover:after:scale-x-100 group-hover:after:origin-left [&_svg]:transition-transform [&_svg]:duration-[320ms] [&_svg]:ease-blog group-hover:[&_svg]:translate-x-1.5"
+        >
           read
           <svg viewBox="0 0 28 10" width="28" height="10" aria-hidden="true">
             <path

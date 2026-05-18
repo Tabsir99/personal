@@ -10,7 +10,6 @@ import FeaturedCard from "@/components/Blog/FeaturedCard";
 import PostRow from "@/components/Blog/PostRow";
 import Filters from "@/components/Blog/Filters";
 import Aside from "@/components/Blog/Aside";
-import "./blog.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteConfig();
@@ -59,19 +58,23 @@ export default async function BlogIndexPage({
     "Field notes from a software engineer.";
 
   return (
-    <div className="blog page">
+    <div className="bg-ink text-cream font-sans font-normal leading-[1.45] min-h-full w-full relative mx-auto pt-14 px-8 pb-20 max-[640px]:px-5 max-[640px]:pt-8 max-[640px]:pb-[60px]">
       <div className="max-w-6xl mx-auto">
         <PageTitle heading={heading} tagline={tagline} />
-        <main className="layout">
-          <section className="layout__main">
+        <main className="grid grid-cols-[minmax(0,1fr)_320px] gap-14 items-start max-[980px]:grid-cols-1">
+          <section>
             {featured && <FeaturedCard post={featured} />}
             <Filters tags={tags} active={activeTag} count={filtered.length} />
-            <div className="rows">
+            <div className="flex flex-col">
               {filtered.length === 0 ? (
-                <div className="empty">
-                  <div className="empty__big">∅</div>
+                <div className="py-20 text-center text-muted grid gap-4 place-items-center">
+                  <div className="text-[96px] leading-none text-cream/8 font-thin">
+                    ∅
+                  </div>
                   <div>
-                    nothing tagged <code>#{activeTag}</code> yet — try another?
+                    nothing tagged{" "}
+                    <code className="font-mono text-accent">#{activeTag}</code>{" "}
+                    yet — try another?
                   </div>
                 </div>
               ) : (

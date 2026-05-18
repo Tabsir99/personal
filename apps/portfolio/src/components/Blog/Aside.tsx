@@ -18,7 +18,14 @@ export default function Aside({
     !!currentlyBuilding.code || !!currentlyBuilding.body;
   if (!hasReading && !hasBuilding) return null;
 
-  return <AsideBody nowReading={nowReading} currentlyBuilding={currentlyBuilding} hasReading={hasReading} hasBuilding={hasBuilding} />;
+  return (
+    <AsideBody
+      nowReading={nowReading}
+      currentlyBuilding={currentlyBuilding}
+      hasReading={hasReading}
+      hasBuilding={hasBuilding}
+    />
+  );
 }
 
 function AsideBody({
@@ -68,49 +75,67 @@ function AsideBody({
   };
 
   return (
-    <aside className="aside">
+    <aside className="sticky top-[120px] flex flex-col gap-8 max-[980px]:static max-[980px]:flex-row max-[980px]:flex-wrap">
       {hasReading && (
         <div
-          className="sticker"
+          className="relative bg-[oklch(94%_0.04_90)] text-ink pt-7 px-6 pb-5 rounded-md shadow-[0_12px_30px_-12px_rgba(0,0,0,0.7)] select-none cursor-grab transition-[box-shadow] duration-200 border border-ink/6 active:cursor-grabbing active:shadow-[0_24px_40px_-10px_rgba(0,0,0,0.8)] max-[980px]:flex-1 max-[980px]:basis-[280px]"
           style={{
             transform: `translate(${drag.x}px, ${drag.y}px) rotate(${drag.rot}deg)`,
           }}
           onMouseDown={onDown}
         >
-          <div className="sticker__tape sticker__tape--l" />
-          <div className="sticker__tape sticker__tape--r" />
-          <div className="sticker__title mono">// now reading</div>
-          <ul className="sticker__list">
+          <div className="absolute w-20 h-6 bg-[oklch(85%_0.08_90/0.5)] backdrop-blur-[2px] border border-[oklch(80%_0.05_90/0.5)] -top-2.5 left-4 -rotate-[4deg]" />
+          <div className="absolute w-20 h-6 bg-[oklch(85%_0.08_90/0.5)] backdrop-blur-[2px] border border-[oklch(80%_0.05_90/0.5)] -top-2.5 right-4 rotate-[3deg]" />
+          <div className="font-mono text-[11px] text-muted mb-3.5">
+            // now reading
+          </div>
+          <ul className="list-none p-0 m-0 flex flex-col gap-3.5">
             {nowReading.map((b, i) => (
-              <li key={i}>
-                <span className="sticker__check" />
+              <li key={i} className="flex gap-2.5 items-start">
+                <span
+                  className={
+                    i === 0
+                      ? "shrink-0 w-4 h-4 border-[1.5px] rounded-[4px] mt-0.5 relative bg-accent border-accent after:content-[''] after:absolute after:left-1 after:top-px after:w-1 after:h-[9px] after:border-r-2 after:border-r-cream after:border-b-2 after:border-b-cream after:rotate-45"
+                      : "shrink-0 w-4 h-4 border-[1.5px] border-ink rounded-[4px] mt-0.5 relative"
+                  }
+                />
                 <div>
-                  <div className="sticker__book">{b.title}</div>
+                  <div className="font-bold text-sm leading-[1.25]">
+                    {b.title}
+                  </div>
                   {b.author && (
-                    <div className="sticker__author mono">{b.author}</div>
+                    <div className="font-mono text-[11px] text-muted mt-0.5">
+                      {b.author}
+                    </div>
                   )}
                 </div>
               </li>
             ))}
           </ul>
-          <div className="sticker__foot mono">drag me &lt;3</div>
+          <div className="font-mono text-[10px] text-muted mt-[18px] text-right">
+            drag me &lt;3
+          </div>
         </div>
       )}
 
       {hasBuilding && (
-        <div className="card-mini">
-          <div className="card-mini__title">currently building</div>
-          <div className="card-mini__body">
+        <div className="bg-ink-2 border border-line py-[22px] px-5 rounded-[10px] max-[980px]:flex-1 max-[980px]:basis-[280px]">
+          <div className="font-mono text-[11px] text-muted lowercase tracking-[0.04em] mb-3 before:content-['//_'] before:text-accent">
+            currently building
+          </div>
+          <div className="text-[15px] leading-[1.5] text-cream-2">
             {currentlyBuilding.code && (
               <>
-                <code className="mono">{currentlyBuilding.code}</code>{" "}
+                <code className="font-mono bg-ink-3 px-1.5 py-px rounded-[4px] text-[13px] text-accent">
+                  {currentlyBuilding.code}
+                </code>{" "}
               </>
             )}
             {currentlyBuilding.body}
           </div>
           {currentlyBuilding.linkHref && (
             <a
-              className="card-mini__link mono"
+              className="font-mono inline-block mt-3 text-xs text-cream border-b border-cream pb-px [transition:color_220ms,border-color_220ms] hover:text-accent hover:border-accent"
               href={currentlyBuilding.linkHref}
             >
               {currentlyBuilding.linkLabel || currentlyBuilding.linkHref}

@@ -4,8 +4,6 @@ import { type Metadata } from "next";
 import { Lato, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { Header } from "@/components/portfolio/header";
 import { Footer } from "@/components/portfolio/footer";
-import { Atmosphere } from "@/components/portfolio/atmosphere";
-import { CursorGlow } from "@/components/portfolio/cursor-glow";
 import { ScrollObserver } from "@/components/ui/ScrollObserver";
 import { ActiveSectionTracker } from "@/components/ui/active-section";
 
@@ -82,8 +80,6 @@ export default function RootLayout({
       )}
       <body>
         <Header />
-        <Atmosphere />
-        <CursorGlow />
         <ScrollObserver />
         <ActiveSectionTracker />
         <main>
