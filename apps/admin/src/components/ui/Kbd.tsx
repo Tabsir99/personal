@@ -8,8 +8,8 @@ const kbdVariants = cva(
   {
     variants: {
       size: {
-        sm: "h-[18px] min-w-[18px] rounded-sm px-1 text-eyebrow tracking-[-0.02em]",
-        md: "h-5 min-w-5 rounded-sm px-1.5 text-kbd tracking-[-0.02em]",
+        sm: "h-5 min-w-5 rounded-sm px-1 text-eyebrow tracking-tight",
+        md: "h-5 min-w-5 rounded-sm px-1.5 text-kbd tracking-tight",
       },
       tone: {
         default: "shadow-kbd-rest",
@@ -24,7 +24,8 @@ const kbdVariants = cva(
 );
 
 interface KbdProps
-  extends Omit<React.ComponentProps<"kbd">, "children">,
+  extends
+    Omit<React.ComponentProps<"kbd">, "children">,
     VariantProps<typeof kbdVariants> {
   children: React.ReactNode;
   pressed?: boolean;

@@ -33,17 +33,17 @@ export default function PostRow({
 }) {
   return (
     <InViewArticle
-      className="group relative grid grid-cols-[56px_1fr] grid-rows-[auto_auto_auto_auto] gap-x-6 pt-7 pb-8 border-b border-line transition-[padding] duration-360 ease-blog first:pt-2 hover:pl-3 max-[640px]:grid-cols-1"
+      className="group relative grid grid-cols-[56px_1fr] grid-rows-[auto_auto_auto_auto] gap-x-6 pt-7 pb-8 border-b border-line transition-[padding] duration-360 ease-blog first:pt-2 hover:pl-3 max-sm:grid-cols-1"
       style={{ ["--row-i" as string]: idx }}
     >
-      <div className="row-span-4 font-mono text-[13px] text-muted pt-1.5 tabular-nums max-[640px]:hidden">
+      <div className="row-span-4 font-mono text-sm text-muted pt-1.5 tabular-nums max-sm:hidden">
         {String(idx + 1).padStart(2, "0")}
       </div>
-      <div className="flex items-center justify-between font-mono text-xs text-muted mb-2 max-[640px]:flex-col max-[640px]:items-start max-[640px]:gap-1.5">
-        <div className="tracking-[0.02em]">{formatDate(post.date)}</div>
+      <div className="flex items-center justify-between font-mono text-xs text-muted mb-2 max-sm:flex-col max-sm:items-start max-sm:gap-1.5">
+        <div className="tracking-wide">{formatDate(post.date)}</div>
         <div>
           <span
-            className={`inline-block px-2.5 py-[3px] rounded-full text-[11px] tracking-[0.04em] lowercase border border-line bg-ink-2 ${KIND_BADGE[post.kind]}`}
+            className={`inline-block px-2.5 py-[3px] rounded-full text-xs tracking-wider lowercase border border-line bg-ink-2 ${KIND_BADGE[post.kind]}`}
           >
             {KIND_LABEL[post.kind]}
           </span>
@@ -59,9 +59,7 @@ export default function PostRow({
           </span>
         </Link>
       </h3>
-      <p className="text-[17px] text-cream-2 leading-[1.55] m-0 mb-[18px] max-w-[64ch]">
-        {post.excerpt}
-      </p>
+      <p className="text-cream-2 m-0 mb-[18px] max-w-[64ch]">{post.excerpt}</p>
       <div className="flex items-center gap-6 flex-wrap">
         <div className="flex gap-1.5 flex-wrap">
           {post.tags.map((t) => (
@@ -76,7 +74,7 @@ export default function PostRow({
           ))}
         </div>
         <div className="ml-auto flex items-center gap-2.5 text-xs text-muted font-mono">
-          <span className="inline-block w-[60px] h-[3px] rounded-[2px] bg-cream/8 overflow-hidden">
+          <span className="inline-block w-[60px] h-[3px] rounded-xs bg-cream/8 overflow-hidden">
             <span
               className="block h-full bg-cream origin-left"
               style={{ width: `${Math.min(100, post.readTime * 4)}%` }}

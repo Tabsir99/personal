@@ -47,7 +47,8 @@ export function Terminal({
       const tick = () => {
         if (cancelled) return;
         if (i <= line.command.length) {
-          if (typedRef.current) typedRef.current.textContent = line.command.slice(0, i);
+          if (typedRef.current)
+            typedRef.current.textContent = line.command.slice(0, i);
           i += 1;
           after(38 + Math.random() * 60, tick);
         } else {
@@ -57,7 +58,8 @@ export function Terminal({
           const respTick = () => {
             if (cancelled) return;
             if (j <= line.response.length) {
-              if (respRef.current) respRef.current.textContent = line.response.slice(0, j);
+              if (respRef.current)
+                respRef.current.textContent = line.response.slice(0, j);
               j += 1;
               after(8 + Math.random() * 14, respTick);
             } else {
@@ -98,14 +100,14 @@ export function Terminal({
           <span className="w-2 h-2 rounded-full bg-field-gray/40"></span>
           <span className="w-2 h-2 rounded-full bg-phosphor/85 animate-term-pulse-dot"></span>
         </div>
-        <div className="text-[10px] tracking-[0.22em] uppercase text-muted/75">
+        <div className="text-xxs tracking-[0.22em] uppercase text-muted/75">
           {title}
         </div>
-        <div className="text-[10px] tracking-[0.22em] text-muted/40">v0.4</div>
+        <div className="text-xxs tracking-[0.22em] text-muted/40">v0.4</div>
       </div>
 
       {/* Body */}
-      <div className="relative min-h-[232px] px-5 pt-4 pb-5 text-[12px] leading-[1.7]">
+      <div className="relative min-h-[232px] px-5 pt-4 pb-5 text-xs leading-[1.7]">
         <div className="relative z-1">
           <div className="text-muted/65">
             <span className="text-phosphor">tabsir</span>
@@ -120,7 +122,7 @@ export function Terminal({
 
           <pre
             ref={respRef}
-            className="mt-1.5 whitespace-pre-wrap text-cream/85 font-mono text-[12px] leading-[1.7] empty:hidden"
+            className="mt-1.5 whitespace-pre-wrap text-cream/85 font-mono text-xs leading-[1.7] empty:hidden"
           />
 
           {phase === "idle" && (

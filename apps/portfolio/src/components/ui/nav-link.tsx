@@ -13,18 +13,18 @@ type NavLinkProps = {
 
 // "#" -> placeholder (disabled). mailto/tel/sms or http(s) -> native <a>. Anything else -> next/link.
 const BASE =
-  "inline-flex items-center gap-2 font-mono text-[12px] text-cream leading-normal transition-colors duration-200 hover:text-accent [&.is-active]:text-accent";
+  "inline-flex items-center gap-2 font-mono text-xs text-cream leading-normal transition-colors duration-200 hover:text-accent [&.is-active]:text-accent";
 
 // Outer modifiers when `underline` is on; the inner span carries the actual underline so it shrinks to text width.
 const UL_OUTER =
-  "group gap-2.5 text-[11px] tracking-[0.14em] uppercase text-muted hover:text-accent duration-300";
+  "group gap-2.5 text-xs tracking-widest uppercase text-muted hover:text-accent duration-300";
 
 const UL_INNER =
   "relative inline-flex items-baseline gap-2.5 pb-1 after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-px after:w-full after:bg-muted after:origin-left after:scale-x-[0.4] after:transition-[scale,background-color] after:duration-300 group-hover:after:scale-x-100 group-hover:after:bg-accent";
 
 function Arrow({ external }: { external: boolean }) {
   return (
-    <span className="text-[13px] opacity-70 transition-[translate,opacity] duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:opacity-100">
+    <span className="text-sm opacity-70 transition-[translate,opacity] duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:opacity-100">
       {external ? "↗" : "↘"}
     </span>
   );

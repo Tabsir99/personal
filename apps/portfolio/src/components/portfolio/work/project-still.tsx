@@ -46,7 +46,7 @@ export function ProjectStill({
         aria-hidden="true"
       ></div>
       <div
-        className="display relative z-2 text-[clamp(64px,9vw,132px)] text-cream opacity-[0.08] tracking-[-0.02em] italic text-center select-none"
+        className="display relative z-2 text-[clamp(64px,9vw,132px)] text-cream opacity-[0.08] tracking-tight italic text-center select-none"
         aria-hidden="true"
       >
         {project.title}
@@ -61,7 +61,7 @@ export function ProjectStill({
         <div
           key={j}
           style={{ "--i": j } as React.CSSProperties}
-          className="work-still-meta absolute top-[18px] right-[50px] z-3 font-mono text-[9px] tracking-[0.16em] uppercase text-cream-2 flex gap-2 items-center"
+          className="work-still-meta absolute top-[18px] right-[50px] z-3 font-mono text-xxs tracking-widest uppercase text-cream-2 flex gap-2 items-center"
         >
           <span>{s.label}</span>
           <span className="text-accent opacity-60">·</span>
@@ -79,10 +79,10 @@ export function ProjectStill({
               className="work-still-play absolute inset-0 z-3 flex flex-col items-center justify-center gap-3 pointer-events-none"
             >
               <span className="absolute w-24 h-24 border border-accent rounded-full opacity-60 animate-ring-pulse"></span>
-              <span className="relative z-1 text-[28px] text-accent [text-shadow:0_0_24px_color-mix(in_oklab,var(--color-accent)_60%,transparent)]">
+              <span className="relative z-1 text-3xl text-accent [text-shadow:0_0_24px_color-mix(in_oklab,var(--color-accent)_60%,transparent)]">
                 ▶
               </span>
-              <span className="relative z-1 font-mono text-[9px] tracking-[0.24em] text-accent mt-9">
+              <span className="relative z-1 font-mono text-xxs tracking-[0.24em] text-accent mt-9">
                 PREVIEW
               </span>
             </div>

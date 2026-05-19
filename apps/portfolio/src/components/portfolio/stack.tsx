@@ -55,7 +55,6 @@ export function Stack() {
         "py-[180px]",
         "bg-[linear-gradient(180deg,transparent,color-mix(in_oklab,var(--color-accent)_2%,transparent),transparent)]",
       )}
-     
     >
       <span className="margin-note top-[260px]">
         stack-fluent,
@@ -66,12 +65,12 @@ export function Stack() {
         <div
           className={cn(
             "grid grid-cols-2 gap-20 mb-20 items-end",
-            "max-[1100px]:grid-cols-1",
+            "max-xl:grid-cols-1",
           )}
         >
           <h2
             className={cn(
-              "font-serif font-normal tracking-[-0.02em] font-features-['liga','kern']",
+              "font-serif font-normal tracking-tight font-features-['liga','kern']",
               "text-[clamp(40px,5.5vw,76px)] leading-[1.02]",
             )}
           >
@@ -81,9 +80,7 @@ export function Stack() {
             <em className="text-accent italic">most days.</em>
           </h2>
           <p
-            className={cn(
-              "text-base text-cream-2 max-w-[420px] leading-[1.6]",
-            )}
+            className={cn("text-base text-cream-2 max-w-[420px] leading-[1.6]")}
           >
             Stack-fluent rather than stack-religious. I use what fits the team,
             the deadline, and the problem. These are the ones I've shipped to
@@ -94,7 +91,7 @@ export function Stack() {
           data-reveal-stagger
           className={cn(
             "grid grid-cols-4 border-t border-l border-line",
-            "max-[1100px]:grid-cols-2",
+            "max-xl:grid-cols-2",
           )}
         >
           {STACK_CATEGORIES.map((cat, i) => (
@@ -111,7 +108,7 @@ export function Stack() {
               <h3
                 className={cn(
                   "flex items-center gap-2 mb-[22px] font-normal",
-                  "font-mono text-[10px] uppercase tracking-[0.16em] text-accent",
+                  "font-mono text-xxs uppercase tracking-widest text-accent",
                   "after:content-[''] after:flex-1 after:h-px after:bg-line",
                 )}
               >
@@ -123,7 +120,7 @@ export function Stack() {
                     key={j}
                     className={cn(
                       "flex items-center justify-between py-1",
-                      "font-mono text-[13px] text-cream-2",
+                      "font-mono text-sm text-cream-2",
                       "border-b border-dashed border-transparent",
                       "transition-[color,border-color] duration-200",
                       "hover:text-accent hover:border-line",

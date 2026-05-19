@@ -65,7 +65,7 @@ export default function ReadingProgress({
       </div>
       {showBadge && (
         <div
-          className="font-mono fixed right-6 bottom-6 z-50 inline-flex items-center gap-2 px-3 py-2 bg-cream text-ink rounded-full text-[11px] tracking-[0.04em] shadow-[0_8px_20px_-8px_color-mix(in_srgb,var(--color-ink)_40%,transparent)] pointer-events-none tabular-nums max-[640px]:right-3 max-[640px]:bottom-3 max-[640px]:px-2.5 max-[640px]:py-1.5"
+          className="font-mono fixed right-6 bottom-6 z-50 inline-flex items-center gap-2 px-3 py-2 bg-cream text-ink rounded-full text-xs tracking-wider shadow-[0_8px_20px_-8px_color-mix(in_srgb,var(--color-ink)_40%,transparent)] pointer-events-none tabular-nums max-sm:right-3 max-sm:bottom-3 max-sm:px-2.5 max-sm:py-1.5"
           aria-hidden="true"
         >
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_0_2px_color-mix(in_srgb,var(--color-accent)_30%,transparent)]" />

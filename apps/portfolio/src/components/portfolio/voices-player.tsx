@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 const DURATION_GUESS = 73;
 
 const BASE_CONTROL_BTN =
-  "font-mono tracking-[0.16em] uppercase text-cream-2 px-2.5 py-1.5 border border-line rounded-[2px] bg-transparent transition-all duration-250 inline-flex items-center justify-center hover:border-accent hover:text-accent";
+  "font-mono tracking-widest uppercase text-cream-2 px-2.5 py-1.5 border border-line rounded-xs bg-transparent transition-all duration-250 inline-flex items-center justify-center hover:border-accent hover:text-accent";
 
 function ControlButton({
   onClick,
@@ -125,7 +125,7 @@ export function VoicesPlayer({ src }: { src: string }) {
     <>
       <div
         className={cn(
-          "voices-frame relative w-full aspect-video bg-black border border-line rounded-[4px] overflow-hidden",
+          "voices-frame relative w-full aspect-video bg-black border border-line rounded-sm overflow-hidden",
           "origin-[center_60%] transition-[border-color] duration-500 will-change-transform hover:border-accent/45",
         )}
       >
@@ -160,9 +160,11 @@ export function VoicesPlayer({ src }: { src: string }) {
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center w-[clamp(72px,7vw,104px)] h-[clamp(72px,7vw,104px)] rounded-full bg-accent/95 text-ink transition-[scale,background] duration-300 ease-soft [box-shadow:0_0_0_1px_color-mix(in_oklab,var(--color-accent)_50%,transparent),0_16px_32px_-10px_color-mix(in_oklab,black_60%,transparent)] group-hover:scale-[1.06] group-hover:bg-accent"
               aria-hidden="true"
             >
-              <span className="text-[clamp(22px,2vw,30px)] leading-none ml-1">▶</span>
+              <span className="text-[clamp(22px,2vw,30px)] leading-none ml-1">
+                ▶
+              </span>
             </div>
-            <div className="absolute right-[clamp(20px,2.5vw,40px)] bottom-[clamp(22px,2.5vw,38px)] font-mono text-[12px] tracking-[0.16em] text-cream-2 [text-shadow:0_1px_12px_color-mix(in_oklab,black_50%,transparent)]">
+            <div className="absolute right-[clamp(20px,2.5vw,40px)] bottom-[clamp(22px,2.5vw,38px)] font-mono text-xs tracking-widest text-cream-2 [text-shadow:0_1px_12px_color-mix(in_oklab,black_50%,transparent)]">
               01:13
             </div>
           </button>
@@ -170,22 +172,22 @@ export function VoicesPlayer({ src }: { src: string }) {
       </div>
 
       {started && (
-        <div className="flex items-center gap-4 px-4 py-3 mt-3.5 border border-line bg-ink-2/60 rounded-[3px] opacity-0 animate-voices-fade max-[1100px]:flex-wrap max-[1100px]:gap-2.5 max-[1100px]:p-2.5">
+        <div className="flex items-center gap-4 px-4 py-3 mt-3.5 border border-line bg-ink-2/60 rounded-[3px] opacity-0 animate-voices-fade max-xl:flex-wrap max-xl:gap-2.5 max-xl:p-2.5">
           <ControlButton
             onClick={toggle}
             ariaLabel={playing ? "Pause" : "Play"}
-            className="text-[12px] min-w-9"
+            className="text-xs min-w-9"
           >
             {playing ? "❚❚" : "▶"}
           </ControlButton>
-          <div className="inline-flex items-baseline gap-1 font-mono text-[11px] tracking-[0.12em] text-cream min-w-24 whitespace-nowrap">
+          <div className="inline-flex items-baseline gap-1 font-mono text-xs tracking-[0.12em] text-cream min-w-24 whitespace-nowrap">
             <span>{fmtTime(time)}</span>
             <span className="text-line">/</span>
             <span className="text-muted">{fmtTime(duration)}</span>
           </div>
           <div
             ref={scrubRef}
-            className="group/scrub relative flex-1 h-[26px] cursor-pointer flex items-center max-[1100px]:-order-1 max-[1100px]:basis-full focus-visible:outline-2 focus-visible:outline-accent"
+            className="group/scrub relative flex-1 h-[26px] cursor-pointer flex items-center max-xl:-order-1 max-xl:basis-full focus-visible:outline-2 focus-visible:outline-accent"
             onClick={seekFromEvent}
             onKeyDown={onScrubKey}
             role="slider"
@@ -209,7 +211,7 @@ export function VoicesPlayer({ src }: { src: string }) {
           <ControlButton
             onClick={toggleMute}
             ariaLabel={muted ? "Unmute" : "Mute"}
-            className="text-[11px] min-w-16"
+            className="text-xs min-w-16"
           >
             {muted ? "MUTED" : "AUDIO"}
           </ControlButton>

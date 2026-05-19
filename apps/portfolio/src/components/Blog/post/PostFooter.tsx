@@ -6,7 +6,7 @@ const CARD_BASE =
 const CARD_EMPTY =
   "flex flex-col gap-2 px-6 py-[22px] border border-line border-dashed rounded-md bg-transparent cursor-default min-h-[116px]";
 const DIR_BASE =
-  "inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.06em] uppercase";
+  "inline-flex items-center gap-2 font-mono text-xs tracking-[0.06em] uppercase";
 
 export default function PostFooter({
   prev,
@@ -37,7 +37,7 @@ export default function PostFooter({
               </span>
               previous
             </span>
-            <span className="font-serif italic text-[clamp(20px,2.4vw,26px)] leading-[1.15] text-cream tracking-[-0.01em]">
+            <span className="font-serif italic text-[clamp(20px,2.4vw,26px)] leading-[1.15] text-cream tracking-tight">
               {prev.title}
             </span>
           </Link>
@@ -61,7 +61,7 @@ export default function PostFooter({
                 →
               </span>
             </span>
-            <span className="font-serif italic text-[clamp(20px,2.4vw,26px)] leading-[1.15] text-cream tracking-[-0.01em]">
+            <span className="font-serif italic text-[clamp(20px,2.4vw,26px)] leading-[1.15] text-cream tracking-tight">
               {next.title}
             </span>
           </Link>
@@ -78,7 +78,7 @@ export default function PostFooter({
       <div className="flex justify-center">
         <Link
           href="/blog"
-          className="font-mono inline-flex items-center gap-2 px-[18px] py-2.5 text-xs text-cream-2 no-underline rounded-full border border-transparent tracking-[0.04em] [transition:color_200ms_ease,border-color_200ms_ease,background-color_200ms_ease] hover:text-accent hover:border-accent hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
+          className="font-mono inline-flex items-center gap-2 px-[18px] py-2.5 text-xs text-cream-2 no-underline rounded-full border border-transparent tracking-wider [transition:color_200ms_ease,border-color_200ms_ease,background-color_200ms_ease] hover:text-accent hover:border-accent hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
         >
           <span aria-hidden="true">←</span> all writing
         </Link>

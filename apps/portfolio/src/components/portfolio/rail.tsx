@@ -17,8 +17,8 @@ export function Rail() {
       aria-hidden="true"
     >
       <div className="absolute inset-0 bg-line"></div>
-      <div className="absolute left-[-3px] top-[-3px] w-[7px] h-[7px] border border-muted-2 rounded-full bg-ink"></div>
-      <div className="absolute left-[-3px] bottom-[-3px] w-[7px] h-[7px] border border-muted-2 rounded-full bg-ink"></div>
+      <div className="absolute left-[-3px] top-[-3px] w-2 h-2 border border-muted-2 rounded-full bg-ink"></div>
+      <div className="absolute left-[-3px] bottom-[-3px] w-2 h-2 border border-muted-2 rounded-full bg-ink"></div>
       <div
         className={cn(
           "absolute top-0 left-0 w-px h-0 bg-accent",
@@ -48,7 +48,7 @@ export function Rail() {
           <span
             className={cn(
               "rail-tick-label",
-              "absolute left-[22px] font-mono text-[9px] tracking-[0.15em] uppercase",
+              "absolute left-[22px] font-mono text-xxs tracking-[0.15em] uppercase",
               "-translate-y-1/2 whitespace-nowrap",
             )}
           >
@@ -58,7 +58,7 @@ export function Rail() {
       ))}
       <div
         className={cn(
-          "absolute left-[-3px] w-[7px] h-[7px] bg-accent rounded-full",
+          "absolute left-[-3px] w-2 h-2 bg-accent rounded-full",
           "shadow-[0_0_14px_color-mix(in_oklab,var(--color-accent)_70%,transparent)]",
           "-translate-y-1/2 transition-[top] duration-60 ease-linear animate-rail-breath",
           "after:content-[''] after:absolute after:left-[12px] after:top-1/2",

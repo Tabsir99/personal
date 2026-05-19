@@ -164,14 +164,16 @@ const DashBoardSidebar = () => {
                 )}
                 <item.Icon
                   className={cn(
-                    "h-[18px] w-[18px] shrink-0 transition-colors",
+                    "h-5 w-5 shrink-0 transition-colors",
                     item.isActive
                       ? "text-primary"
                       : "text-muted-foreground/70 group-hover:text-foreground",
                   )}
                 />
                 {expanded && (
-                  <span className="min-w-0 flex-1 truncate">{item.menuName}</span>
+                  <span className="min-w-0 flex-1 truncate">
+                    {item.menuName}
+                  </span>
                 )}
               </Link>
             </li>
@@ -228,7 +230,9 @@ const DashBoardSidebar = () => {
         >
           <LogOut className="h-4 w-4 shrink-0" />
           {expanded && (
-            <span className="flex-1 text-left text-sm font-medium">Sign out</span>
+            <span className="flex-1 text-left text-sm font-medium">
+              Sign out
+            </span>
           )}
         </button>
 

@@ -70,9 +70,9 @@ export default async function PostPage({ params }: { params: RouteParams }) {
       <BlogPostJsonLd post={post} />
       <ReadingProgress />
 
-      <div className="max-w-[1280px] mx-auto pt-14 px-8 pb-24 grid grid-cols-[220px_minmax(0,1fr)_80px] gap-x-14 items-start max-[1100px]:grid-cols-[minmax(0,1fr)] max-[1100px]:gap-x-0 max-[1100px]:px-6 max-[1100px]:pt-8 max-[1100px]:pb-20 max-[640px]:px-[18px] max-[640px]:pt-6 max-[640px]:pb-16">
+      <div className="max-w-[1280px] mx-auto pt-14 px-8 pb-24 grid grid-cols-[220px_minmax(0,1fr)_80px] gap-x-14 items-start max-xl:grid-cols-[minmax(0,1fr)] max-xl:gap-x-0 max-xl:px-6 max-xl:pt-8 max-xl:pb-20 max-sm:px-[18px] max-sm:pt-6 max-sm:pb-16">
         <aside
-          className="sticky top-8 max-[1100px]:static max-[1100px]:pb-0"
+          className="sticky top-8 max-xl:static max-xl:pb-0"
           aria-label="Table of contents"
         >
           <Toc items={toc} />
@@ -89,7 +89,7 @@ export default async function PostPage({ params }: { params: RouteParams }) {
         </div>
 
         <aside className="sticky top-8" aria-label="Article actions">
-          <div className="sticky top-8 flex flex-col gap-7 pt-1 max-[1100px]:static max-[1100px]:flex-row max-[1100px]:flex-wrap max-[1100px]:gap-8 max-[1100px]:mt-8 max-[1100px]:pt-6 max-[1100px]:border-t max-[1100px]:border-line max-[1100px]:*:flex-1 max-[1100px]:*:basis-[240px]">
+          <div className="sticky top-8 flex flex-col gap-7 pt-1 max-xl:static max-xl:flex-row max-xl:flex-wrap max-xl:gap-8 max-xl:mt-8 max-xl:pt-6 max-xl:border-t max-xl:border-line max-xl:*:flex-1 max-xl:*:basis-[240px]">
             <ScoreMeter slug={post.slug} initialScore={initialScore} />
             <Share url={url} title={post.title} />
           </div>

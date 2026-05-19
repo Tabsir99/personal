@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const TAG_BASE =
-  "relative inline-flex items-center gap-1 px-4 py-[9px] border border-line rounded-full text-[13px] font-medium lowercase bg-ink-2 text-cream transition-[background-color,color,transform] duration-220 ease-blog z-1 hover:-translate-y-0.5 hover:rotate-[-1.5deg]";
+  "relative inline-flex items-center gap-1 px-4 py-[9px] border border-line rounded-full text-sm font-medium lowercase bg-ink-2 text-cream transition-[background-color,color,transform] duration-220 ease-blog z-1 hover:-translate-y-0.5 hover:rotate-[-1.5deg]";
 const TAG_ON = "bg-cream! text-ink! -rotate-1!";
 
 export default function Filters({
@@ -16,7 +16,7 @@ export default function Filters({
   return (
     <div className="sticky top-0 bg-ink z-10 pt-4 pb-[22px] mb-6 border-b border-line before:content-[''] before:absolute before:-left-8 before:-right-8 before:top-0 before:bottom-0 before:bg-ink before:-z-10">
       <div className="flex justify-between items-baseline mb-[18px]">
-        <h2 className="m-0 text-[28px] tracking-[-0.02em] font-black flex items-baseline gap-3.5">
+        <h2 className="m-0 text-3xl tracking-tight font-black flex items-baseline gap-3.5">
           <span className="tabular-nums font-mono text-lg text-accent bg-accent/8 px-2.5 py-1 rounded-md">
             {String(count).padStart(2, "0")}
           </span>

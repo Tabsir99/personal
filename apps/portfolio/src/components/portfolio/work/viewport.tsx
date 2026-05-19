@@ -12,10 +12,10 @@ export function WorkViewport() {
     <div className="flex flex-col gap-3.5">
       <div className="work-frame relative aspect-16/10 bg-ink-2 border border-line overflow-hidden rounded-[3px]">
         {/* Viewfinder corner brackets */}
-        <span className="absolute top-3 left-3 w-[18px] h-[18px] border-l border-t border-accent opacity-85 z-5"></span>
-        <span className="absolute top-3 right-3 w-[18px] h-[18px] border-r border-t border-accent opacity-85 z-5"></span>
-        <span className="absolute bottom-16 left-3 w-[18px] h-[18px] border-l border-b border-accent opacity-85 z-5 max-[1100px]:bottom-3"></span>
-        <span className="absolute bottom-16 right-3 w-[18px] h-[18px] border-r border-b border-accent opacity-85 z-5 max-[1100px]:bottom-3"></span>
+        <span className="absolute top-3 left-3 w-5 h-5 border-l border-t border-accent opacity-85 z-5"></span>
+        <span className="absolute top-3 right-3 w-5 h-5 border-r border-t border-accent opacity-85 z-5"></span>
+        <span className="absolute bottom-16 left-3 w-5 h-5 border-l border-b border-accent opacity-85 z-5 max-xl:bottom-3"></span>
+        <span className="absolute bottom-16 right-3 w-5 h-5 border-r border-b border-accent opacity-85 z-5 max-xl:bottom-3"></span>
 
         {PROJECTS.map((p, i) => (
           <ProjectStill key={i} project={p} idx={i} />
@@ -32,7 +32,7 @@ export function WorkViewport() {
           aria-hidden="true"
         ></div>
 
-        <div className="work-thumb-strip absolute bottom-3.5 left-3.5 right-3.5 z-5 flex items-center px-3 py-2 bg-ink/78 backdrop-blur-sm border border-line rounded-[2px] max-[1100px]:static max-[1100px]:-mt-0.5">
+        <div className="work-thumb-strip absolute bottom-3.5 left-3.5 right-3.5 z-5 flex items-center px-3 py-2 bg-ink/78 backdrop-blur-sm border border-line rounded-xs max-xl:static max-xl:-mt-0.5">
           {PROJECTS.map((p, i) => (
             <div
               key={i}
@@ -48,7 +48,7 @@ export function WorkViewport() {
                   style={{ "--i": j } as React.CSSProperties}
                   aria-label={s.label}
                   className={cn(
-                    "work-thumb relative flex-1 h-[30px] border font-mono text-[10px] tracking-widest cursor-pointer",
+                    "work-thumb relative flex-1 h-[30px] border font-mono text-xxs tracking-widest cursor-pointer",
                     "flex items-center justify-center gap-1",
                   )}
                 >

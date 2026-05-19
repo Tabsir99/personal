@@ -40,7 +40,7 @@ export function Hero() {
       id="hero"
       className={cn(
         "relative h-screen min-h-[720px] overflow-hidden p-0",
-        "max-[1100px]:h-auto max-[1100px]:min-h-screen",
+        "max-xl:h-auto max-xl:min-h-screen",
       )}
     >
       <div
@@ -60,14 +60,14 @@ export function Hero() {
         className={cn(
           "page-shell",
           "z-1 flex h-full flex-col justify-between pt-24 pb-9",
-          "max-[1100px]:pt-[110px] max-[1100px]:pb-14",
+          "max-xl:pt-[110px] max-xl:pb-14",
         )}
       >
         <div
           className={cn(
             "grid grid-cols-[1.15fr_0.95fr] items-center gap-[clamp(40px,6vw,96px)]",
             "min-h-0 flex-1",
-            "max-[1100px]:grid-cols-1 max-[1100px]:gap-12",
+            "max-xl:grid-cols-1 max-xl:gap-12",
           )}
         >
           {/* LEFT: title + dek + actions */}
@@ -80,12 +80,12 @@ export function Hero() {
               <span
                 className={cn(
                   "inline-flex items-baseline gap-1 font-mono font-medium",
-                  "text-[clamp(40px,6.4vw,96px)] leading-[1.04] tracking-[-0.01em]",
+                  "text-[clamp(40px,6.4vw,96px)] leading-[1.04] tracking-tight",
                   "text-accent uppercase",
                   "[font-variant-numeric:tabular-nums] whitespace-nowrap",
                   "translate-y-2 opacity-0",
                   "animate-hero-rise delay-300",
-                  "max-[1100px]:text-[clamp(36px,9vw,64px)]",
+                  "max-xl:text-[clamp(36px,9vw,64px)]",
                 )}
               >
                 <span className="text-accent-2 font-normal opacity-70">[</span>
@@ -106,7 +106,7 @@ export function Hero() {
                   "mt-1.5 flex flex-col font-serif",
                   "text-[clamp(56px,9vw,130px)] leading-[0.92] tracking-[-0.035em]",
                   "text-cream",
-                  "max-[1100px]:text-[clamp(48px,12vw,96px)]",
+                  "max-xl:text-[clamp(48px,12vw,96px)]",
                 )}
               >
                 <span
@@ -122,7 +122,7 @@ export function Hero() {
                     "block translate-y-[0.4em] opacity-0",
                     "pl-[clamp(28px,5vw,96px)]",
                     "animate-hero-rise animation-duration-[1s] delay-[600ms]",
-                    "max-[1100px]:pl-6",
+                    "max-xl:pl-6",
                     "[&_em]:text-accent [&_em]:italic",
                   )}
                 >
@@ -157,8 +157,8 @@ export function Hero() {
                 className={cn(
                   "group inline-flex items-center gap-3.5",
                   "px-6 py-4",
-                  "bg-accent text-ink border border-accent rounded-[2px]",
-                  "font-mono text-[11px] tracking-[0.16em] uppercase",
+                  "bg-accent text-ink border border-accent rounded-xs",
+                  "font-mono text-xs tracking-widest uppercase",
                   "transition-[background,color] duration-300",
                   "hover:bg-transparent hover:text-accent",
                 )}
@@ -182,8 +182,8 @@ export function Hero() {
           {/* RIGHT: terminal + Upwork credential beneath it */}
           <div
             className={cn(
-              "flex min-w-0 flex-col items-stretch gap-[18px]",
-              "max-[1100px]:max-w-[540px]",
+              "flex min-w-0 flex-col items-stretch gap-5",
+              "max-xl:max-w-[540px]",
             )}
           >
             <Terminal title={TERMINAL_TITLE} lines={TERMINAL_LINES} />
@@ -192,13 +192,13 @@ export function Hero() {
 
         <div
           className={cn(
-            "flex items-center gap-[18px]",
+            "flex items-center gap-5",
             "opacity-0 animate-hero-fade delay-[1250ms]",
           )}
         >
           <span
             className={cn(
-              "inline-block font-mono text-[11px] tracking-[0.18em] uppercase",
+              "inline-block font-mono text-xs tracking-widest uppercase",
               "text-cream",
               "animate-hero-foot-bob",
             )}
@@ -207,10 +207,7 @@ export function Hero() {
           </span>
           <span className="h-px w-7 bg-line"></span>
           <span
-            className={cn(
-              "font-serif italic text-[13px] tracking-[0.005em]",
-              "text-muted",
-            )}
+            className={cn("italic text-sm tracking-[0.005em]", "text-muted")}
           >
             Two years shipping. Seventeen projects merged.
           </span>

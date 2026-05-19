@@ -21,17 +21,17 @@ export function Header() {
     >
       <NavLink
         href="/#hero"
-        className="font-serif text-[15px] text-cream tracking-[-0.01em]"
+        className="font-serif text-[15px] text-cream tracking-tight"
       >
         <span className="italic">Tabsir</span>
-        <span className="text-[11px] text-muted-2">·</span>
-        <span className="font-mono text-[10px] tracking-[0.12em] text-muted">
+        <span className="text-xs text-muted-2">·</span>
+        <span className="font-mono text-xxs tracking-[0.12em] text-muted">
           CG
         </span>
       </NavLink>
       <nav
         aria-label="Sections"
-        className="flex gap-[18px] border-l border-line py-0 pr-1 pl-2 max-[1100px]:hidden"
+        className="flex gap-5 border-l border-line py-0 pr-1 pl-2 max-xl:hidden"
       >
         {navItems.map((it) => (
           <NavLink key={it.id} href={`#${it.id}`} data-nav={it.id}>
@@ -41,7 +41,7 @@ export function Header() {
       </nav>
       <NavLink
         href="#contact"
-        className="rounded-full border border-line px-3 py-[6px] uppercase tracking-[0.08em] text-[10px] hover:border-accent hover:bg-accent/8"
+        className="rounded-full border border-line px-3 py-[6px] uppercase tracking-[0.08em] text-xxs hover:border-accent hover:bg-accent/8"
       >
         <span className="h-[6px] w-[6px] animate-pulse-soft rounded-full bg-phosphor shadow-[0_0_8px_var(--color-phosphor)]"></span>
         Available

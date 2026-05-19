@@ -33,8 +33,10 @@ export default function ScoreMeter({
       const raw = localStorage.getItem(storageKey);
       if (!raw) return;
       const v = JSON.parse(raw) as { tapped?: number; lastFlushed?: number };
-      if (typeof v.tapped === "number") setTapped(Math.min(MAX_SCORE, v.tapped));
-      if (typeof v.lastFlushed === "number") lastFlushed.current = v.lastFlushed;
+      if (typeof v.tapped === "number")
+        setTapped(Math.min(MAX_SCORE, v.tapped));
+      if (typeof v.lastFlushed === "number")
+        lastFlushed.current = v.lastFlushed;
     } catch {}
   }, [storageKey]);
 
@@ -61,9 +63,9 @@ export default function ScoreMeter({
         keepalive: true,
       });
       if (res.ok) {
-        const data = (await res.json().catch(() => null)) as
-          | { score?: number }
-          | null;
+        const data = (await res.json().catch(() => null)) as {
+          score?: number;
+        } | null;
         if (data && typeof data.score === "number") setScore(data.score);
         else setScore((s) => s + delta);
         lastFlushed.current = tapped;
@@ -107,7 +109,10 @@ export default function ScoreMeter({
     }
     const id = burstId.current++;
     setBursts((b) => [...b, { id }]);
-    window.setTimeout(() => setBursts((b) => b.filter((x) => x.id !== id)), 700);
+    window.setTimeout(
+      () => setBursts((b) => b.filter((x) => x.id !== id)),
+      700,
+    );
   };
 
   const pct = tapped / MAX_SCORE;
@@ -118,12 +123,14 @@ export default function ScoreMeter({
       className="flex flex-col items-start gap-3.5 font-sans"
       data-maxed={isMaxed || undefined}
     >
-      <div className="font-mono text-[11px] text-muted tracking-[0.04em]">
+      <div className="font-mono text-xs text-muted tracking-wider">
         // score
       </div>
       <button
         type="button"
-        className={isMaxed ? `${DIAL_BASE} bg-accent` : `${DIAL_BASE} blog-dial`}
+        className={
+          isMaxed ? `${DIAL_BASE} bg-accent` : `${DIAL_BASE} blog-dial`
+        }
         onClick={tap}
         disabled={isMaxed}
         style={{ ["--fill" as string]: `${pct * 360}deg` }}
@@ -176,12 +183,14 @@ export default function ScoreMeter({
         </span>
       </button>
       <div
-        className="font-mono inline-flex items-baseline gap-1.5 text-xs text-muted tracking-[0.04em] tabular-nums"
+        className="font-mono inline-flex items-baseline gap-1.5 text-xs text-muted tracking-wider tabular-nums"
         aria-live="polite"
       >
         <span
           className={
-            isMaxed ? "text-accent font-bold text-sm" : "text-cream font-bold text-sm"
+            isMaxed
+              ? "text-accent font-bold text-sm"
+              : "text-cream font-bold text-sm"
           }
         >
           {score.toLocaleString()}

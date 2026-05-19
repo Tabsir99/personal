@@ -16,8 +16,8 @@ const eyebrowVariants = cva(
         destructive: "text-destructive",
       },
       size: {
-        xs: "text-eyebrow tracking-[0.16em]",
-        sm: "text-kbd tracking-[0.14em]",
+        xs: "text-eyebrow tracking-widest",
+        sm: "text-kbd tracking-widest",
       },
       family: {
         sans: "font-sans",
@@ -33,8 +33,7 @@ const eyebrowVariants = cva(
 );
 
 interface EyebrowProps
-  extends React.ComponentProps<"span">,
-    VariantProps<typeof eyebrowVariants> {}
+  extends React.ComponentProps<"span">, VariantProps<typeof eyebrowVariants> {}
 
 function Eyebrow({ className, tone, size, family, ...props }: EyebrowProps) {
   return (

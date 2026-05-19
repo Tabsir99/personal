@@ -21,13 +21,13 @@ export function About() {
         <div
           className={cn(
             "grid items-start gap-[120px]",
-            "grid-cols-[1fr_2fr] max-[1100px]:grid-cols-1 max-[1100px]:gap-10",
+            "grid-cols-[1fr_2fr] max-xl:grid-cols-1 max-xl:gap-10",
           )}
         >
           <div data-reveal>
             <div
               className={cn(
-                "inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted",
+                "inline-flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-muted",
                 "before:content-[''] before:w-6 before:h-px before:bg-muted",
               )}
             >
@@ -44,7 +44,7 @@ export function About() {
                   <span className="font-serif text-[48px] leading-none text-cream">
                     {s.value}
                   </span>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+                  <span className="font-mono text-xxs uppercase tracking-widest text-muted">
                     {s.label}
                   </span>
                 </div>
@@ -54,7 +54,7 @@ export function About() {
           <div
             data-reveal-words
             className={cn(
-              "font-serif text-[clamp(28px,3.2vw,42px)] leading-[1.22] tracking-[-0.015em] text-cream",
+              "font-serif text-[clamp(28px,3.2vw,42px)] leading-[1.22] tracking-tight text-cream",
             )}
           >
             {words.map((w, i) => {

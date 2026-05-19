@@ -35,6 +35,8 @@ html {
   --color-phosphor: #b8d89c;
   --color-field-gray: #a8a18b;
 
+  --text-xxs: 10px;
+
   /* ---------- Layout vars ----------
      Page-shell (`.page-shell`) reads --max-w/--gutter/--rail-gutter; the
      left rail and the rail-driven margin notes read --rail-x. Override
@@ -87,12 +89,9 @@ html {
   --animate-blog-spin: blog-spin 14s linear infinite;
   --animate-blog-bar: blog-bar 2.4s ease-in-out infinite;
   --animate-blog-shrink: blog-shrink 4s ease-in-out infinite;
-  --animate-post-bar-fill: post-bar-fill 1.2s 0.2s
-    var(--ease-blog) both;
-  --animate-score-pulse: score-pulse 0.52s var(--ease-blog)
-    forwards;
-  --animate-score-burst: score-burst 0.7s var(--ease-blog)
-    forwards;
+  --animate-post-bar-fill: post-bar-fill 1.2s 0.2s var(--ease-blog) both;
+  --animate-score-pulse: score-pulse 0.52s var(--ease-blog) forwards;
+  --animate-score-burst: score-burst 0.7s var(--ease-blog) forwards;
 
   /* Shared keyframe — used by header CTA, hero status, now status,
      and work in-progress dots. Lifted from base.css. */
@@ -207,7 +206,7 @@ html {
     font-family: var(--sans);
     font-weight: 300;
     line-height: 1.6;
-    font-size: 18px;
+    font-size: 16px;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }

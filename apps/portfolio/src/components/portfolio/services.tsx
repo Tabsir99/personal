@@ -68,21 +68,17 @@ const SERVICES = [
 export function Services() {
   return (
     <section id="services">
-      <div
-        className="relative h-[400vh]"
-        data-pin-steps="4"
-        data-pin-step="0"
-      >
+      <div className="relative h-[400vh]" data-pin-steps="4" data-pin-step="0">
         <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-          <div className="mx-auto grid w-full max-w-(--max-w) grid-cols-[0.85fr_1fr] items-center gap-16 pr-(--gutter) pl-(--rail-gutter) max-[1100px]:grid-cols-[1fr] max-[1100px]:gap-10">
+          <div className="mx-auto grid w-full max-w-(--max-w) grid-cols-[0.85fr_1fr] items-center gap-16 pr-(--gutter) pl-(--rail-gutter) max-xl:grid-cols-[1fr] max-xl:gap-10">
             <div data-reveal className="sticky top-0">
               {/* Index label stack */}
-              <div className="relative h-[18px] mb-6">
+              <div className="relative h-5 mb-6">
                 {SERVICES.map((s, i) => (
                   <div
                     key={i}
                     style={{ "--i": i } as React.CSSProperties}
-                    className="svc-label absolute inset-0 font-mono text-[11px] tracking-[0.16em] text-muted"
+                    className="svc-label absolute inset-0 font-mono text-xs tracking-widest text-muted"
                   >
                     <span className="text-accent">
                       {String(i + 1).padStart(2, "0")}
@@ -103,7 +99,7 @@ export function Services() {
                     style={{ "--i": i } as React.CSSProperties}
                     className={cn(
                       "svc-title absolute top-0 left-0 font-serif font-normal font-features-['liga','kern']",
-                      "text-[clamp(48px,6vw,88px)] leading-none tracking-[-0.02em] whitespace-pre-line",
+                      "text-[clamp(48px,6vw,88px)] leading-none tracking-tight whitespace-pre-line",
                     )}
                   >
                     {s.title}
@@ -117,7 +113,7 @@ export function Services() {
                   <p
                     key={i}
                     style={{ "--i": i } as React.CSSProperties}
-                    className="svc-desc absolute inset-0 max-w-[460px] text-[17px] leading-[1.55] text-cream-2"
+                    className="svc-desc absolute inset-0 max-w-[460px] text-cream-2"
                   >
                     {s.desc}
                   </p>
@@ -126,25 +122,25 @@ export function Services() {
             </div>
 
             {/* Frame stack */}
-            <div className="relative aspect-4/5 max-h-[70vh] overflow-hidden rounded-[4px] border border-line bg-ink-2 before:absolute before:inset-0 before:content-[''] before:opacity-40 before:bg-[linear-gradient(45deg,var(--color-ink-3)_25%,transparent_25%),linear-gradient(-45deg,var(--color-ink-3)_25%,transparent_25%)] before:bg-size-[12px_12px]">
+            <div className="relative aspect-4/5 max-h-[70vh] overflow-hidden rounded-sm border border-line bg-ink-2 before:absolute before:inset-0 before:content-[''] before:opacity-40 before:bg-[linear-gradient(45deg,var(--color-ink-3)_25%,transparent_25%),linear-gradient(-45deg,var(--color-ink-3)_25%,transparent_25%)] before:bg-size-[12px_12px]">
               {SERVICES.map((s, i) => (
                 <div
                   key={i}
                   style={{ "--i": i } as React.CSSProperties}
                   className="svc-frame absolute inset-0 flex flex-col justify-end p-7"
                 >
-                  <div className="absolute top-7 right-7 font-mono text-[11px] tracking-widest text-muted">
+                  <div className="absolute top-7 right-7 font-mono text-xs tracking-widest text-muted">
                     {s.frameNum}
                   </div>
                   <ServiceVisual idx={i} />
                   <div style={{ position: "relative", zIndex: 2 }}>
-                    <div className="mb-2.5 font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
+                    <div className="mb-2.5 font-mono text-xs uppercase tracking-widest text-accent">
                       {s.frameLabel}
                     </div>
-                    <h3 className="mb-3.5 font-serif text-[28px] font-normal leading-[1.1] tracking-[-0.01em]">
+                    <h3 className="mb-3.5 font-serif text-3xl font-normal leading-[1.1] tracking-tight">
                       {s.frameTitle}
                     </h3>
-                    <ul className="list-none font-mono text-[11px] tracking-[0.06em] text-cream-2">
+                    <ul className="list-none font-mono text-xs tracking-[0.06em] text-cream-2">
                       {s.items.map((it, j) => (
                         <li
                           key={j}

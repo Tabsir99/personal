@@ -6,9 +6,9 @@ export default function PageTitle({
   tagline: string;
 }) {
   return (
-    <header className="relative pt-2 pb-14 mb-2 after:content-[''] after:block after:h-px after:bg-line after:mt-14 max-[640px]:pb-8 max-[640px]:after:mt-8">
+    <header className="relative pt-2 pb-14 mb-2 after:content-[''] after:block after:h-px after:bg-line after:mt-14 max-sm:pb-8 max-sm:after:mt-8">
       <nav
-        className="font-mono inline-flex items-center gap-2.5 text-xs text-muted mb-7 tracking-[0.02em]"
+        className="font-mono inline-flex items-center gap-2.5 text-xs text-muted mb-7 tracking-wide"
         aria-label="Breadcrumb"
       >
         <a

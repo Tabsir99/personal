@@ -59,13 +59,15 @@ export function PagesTable() {
     }
   };
 
-  const sortedData: PageRow[] = [...((data as PageRow[]) || [])].sort((a, b) => {
-    const valA = a[sortKey];
-    const valB = b[sortKey];
-    if (valA < valB) return sortOrder === "asc" ? -1 : 1;
-    if (valA > valB) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
+  const sortedData: PageRow[] = [...((data as PageRow[]) || [])].sort(
+    (a, b) => {
+      const valA = a[sortKey];
+      const valB = b[sortKey];
+      if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    },
+  );
 
   const displayData = showAll ? sortedData : sortedData.slice(0, 5);
   const isEmpty = !error && !isLoading && displayData.length === 0;
@@ -143,7 +145,10 @@ export function PagesTable() {
             <TableBody>
               {isEmpty ? (
                 <TableRow>
-                  <TableCell colSpan={COLUMNS.length} className="h-20 text-center">
+                  <TableCell
+                    colSpan={COLUMNS.length}
+                    className="h-20 text-center"
+                  >
                     <Eyebrow tone="muted" family="mono">
                       No pages tracked yet
                     </Eyebrow>
@@ -179,7 +184,7 @@ export function PagesTable() {
             <button
               type="button"
               onClick={() => setShowAll(!showAll)}
-              className="mt-3 font-mono text-kbd tracking-[0.14em] uppercase text-muted-foreground transition-colors hover:text-foreground"
+              className="mt-3 font-mono text-kbd tracking-widest uppercase text-muted-foreground transition-colors hover:text-foreground"
             >
               {showAll ? "Show less" : `Show all ${sortedData.length}`}
             </button>

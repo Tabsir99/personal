@@ -13,7 +13,6 @@ export function Work() {
   return (
     <section
       id="work"
-     
       data-work-section=""
       data-work-active="0"
       data-work-still="0"
@@ -40,9 +39,9 @@ export function Work() {
       <div className="page-shell">
         <header
           data-reveal
-          className="grid grid-cols-[0.9fr_1fr] items-end gap-20 mb-[72px] max-[1100px]:grid-cols-1 max-[1100px]:gap-8"
+          className="grid grid-cols-[0.9fr_1fr] items-end gap-20 mb-[72px] max-xl:grid-cols-1 max-xl:gap-8"
         >
-          <h2 className="display font-serif text-[clamp(48px,6.4vw,96px)] leading-[0.98] tracking-[-0.02em] [&>em]:italic [&>em]:text-accent">
+          <h2 className="display font-serif text-[clamp(48px,6.4vw,96px)] leading-[0.98] tracking-tight [&>em]:italic [&>em]:text-accent">
             <em>Selected</em>
             <br />
             work.
@@ -55,7 +54,7 @@ export function Work() {
             </p>
             <a
               className={cn(
-                "inline-flex items-center gap-2.5 w-max font-mono text-[11px] tracking-[0.16em] uppercase text-muted-2 pb-1 border-b border-transparent",
+                "inline-flex items-center gap-2.5 w-max font-mono text-xs tracking-widest uppercase text-muted-2 pb-1 border-b border-transparent",
                 "transition-[color,gap,border-color] duration-250 ease-out",
                 "hover:text-accent hover:gap-3.5 hover:border-b-accent/40",
                 "[&_.arrow]:opacity-70",
@@ -67,7 +66,7 @@ export function Work() {
           </div>
         </header>
 
-        <div className="grid grid-cols-[0.78fr_1.22fr] gap-14 items-stretch max-[1100px]:grid-cols-1 max-[1100px]:gap-10">
+        <div className="grid grid-cols-[0.78fr_1.22fr] gap-14 items-stretch max-xl:grid-cols-1 max-xl:gap-10">
           <WorkList />
           <WorkViewport />
         </div>
