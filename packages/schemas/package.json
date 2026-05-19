@@ -17,7 +17,7 @@
     "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "@open-notion/editor": "^1.4.1"
+    "@open-notion/editor": "catalog:"
   },
   "devDependencies": {
     "@types/node": "^24.12.3"

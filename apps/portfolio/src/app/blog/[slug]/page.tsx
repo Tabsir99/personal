@@ -1,7 +1,9 @@
+import "@open-notion/assets/doc.css";
+import "@open-notion/assets/hydration.js";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DocRenderer } from "@open-notion/serializers/react";
-import { docToToc } from "@open-notion/serializers";
+import { docToToc } from "@open-notion/serializers/toc";
 import { getAllBlogs, getPost, getPostScore } from "@/lib/posts";
 import PostHeader from "@/components/Blog/post/PostHeader";
 import PostFooter from "@/components/Blog/post/PostFooter";
@@ -58,7 +60,7 @@ export default async function PostPage({ params }: { params: RouteParams }) {
   const initialScore = await getPostScore(post.slug);
 
   return (
-    <article className="bg-ink text-cream font-sans min-h-full w-full block">
+    <article className="bg-ink text-cream min-h-full w-full pt-20">
       <BlogPostJsonLd post={post} />
       <ReadingProgress />
 

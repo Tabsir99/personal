@@ -67,7 +67,7 @@ export default function RootLayout({
   } as React.CSSProperties;
 
   return (
-    <html lang="en" style={fontVars}>
+    <html lang="en" style={fontVars} className="dark">
       {process.env.NODE_ENV === "development" && (
         <head>
           <script

@@ -1,6 +1,8 @@
 packages:
   - "apps/*"
   - "packages/*"
+catalog:
+  "@open-notion/editor": ^1.8.3
 allowBuilds:
   msw: true
   protobufjs: true

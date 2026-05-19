@@ -1,44 +1,19 @@
 "use client";
 
 import * as React from "react";
-import type {
-  CurrentlyBuilding,
-  NowReadingItem,
-} from "@tabsircg/schemas/site";
+import type { CurrentlyBuilding, NowReadingItem } from "@tabsircg/schemas/site";
 
 export default function Aside({
   nowReading,
   currentlyBuilding,
 }: {
   nowReading: NowReadingItem[];
-  currentlyBuilding: CurrentlyBuilding;
+  currentlyBuilding?: CurrentlyBuilding;
 }) {
   const hasReading = nowReading.length > 0;
-  const hasBuilding =
-    !!currentlyBuilding.code || !!currentlyBuilding.body;
+  const hasBuilding = !!currentlyBuilding?.code || !!currentlyBuilding?.body;
   if (!hasReading && !hasBuilding) return null;
 
-  return (
-    <AsideBody
-      nowReading={nowReading}
-      currentlyBuilding={currentlyBuilding}
-      hasReading={hasReading}
-      hasBuilding={hasBuilding}
-    />
-  );
-}
-
-function AsideBody({
-  nowReading,
-  currentlyBuilding,
-  hasReading,
-  hasBuilding,
-}: {
-  nowReading: NowReadingItem[];
-  currentlyBuilding: CurrentlyBuilding;
-  hasReading: boolean;
-  hasBuilding: boolean;
-}) {
   const [drag, setDrag] = React.useState({ x: 0, y: 0, rot: -7 });
   const dragging = React.useRef<{
     sx: number;
@@ -75,7 +50,7 @@ function AsideBody({
   };
 
   return (
-    <aside className="sticky top-[120px] flex flex-col gap-8 max-[980px]:static max-[980px]:flex-row max-[980px]:flex-wrap">
+    <aside className="sticky top-[120px] min-w-80 flex flex-col gap-8 max-[980px]:static max-[980px]:flex-row max-[980px]:flex-wrap">
       {hasReading && (
         <div
           className="relative bg-[oklch(94%_0.04_90)] text-ink pt-7 px-6 pb-5 rounded-md shadow-[0_12px_30px_-12px_rgba(0,0,0,0.7)] select-none cursor-grab transition-[box-shadow] duration-200 border border-ink/6 active:cursor-grabbing active:shadow-[0_24px_40px_-10px_rgba(0,0,0,0.8)] max-[980px]:flex-1 max-[980px]:basis-[280px]"

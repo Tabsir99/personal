@@ -96,7 +96,9 @@ export default function About() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="mb-2 text-2xl font-semibold tracking-tight">About Sections</h2>
+        <h2 className="mb-2 text-2xl font-semibold tracking-tight">
+          About Sections
+        </h2>
         <p className="text-muted-foreground">
           Manage your about page content cards
         </p>
@@ -107,7 +109,7 @@ export default function About() {
           {about.map((card, index) => (
             <Card
               key={index}
-              className="group relative tactile-lift border-border/50 bg-card/60 backdrop-blur-sm"
+              className="group relative tactile-lift border-border/50 bg-card/60 backdrop-blur-sm max-h-96"
             >
               {/* Action Buttons - Only show in view mode */}
               {editingIndex !== index && (
@@ -143,7 +145,7 @@ export default function About() {
                 />
               )}
 
-              <CardContent className="p-6 border-none overflow-hidden">
+              <CardContent className="p-6 border-none overflow-hidden ">
                 {/* View Mode */}
                 <div
                   className="grid transition-[grid-template-rows] duration-300 ease-in-out"
@@ -160,7 +162,7 @@ export default function About() {
                 </div>
 
                 <div
-                  className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+                  className="grid transition-[grid-template-rows] duration-300 ease-in-out "
                   style={{
                     gridTemplateRows: editingIndex === index ? "1fr" : "0fr",
                   }}
@@ -184,7 +186,7 @@ export default function About() {
                     </div>
                     <OpenNotionView
                       editor={editingIndex === index ? editor : null}
-                      className="no-scrollbar h-64 max-w-full overflow-y-auto p-4 text-foreground focus:outline-none"
+                      className="no-scrollbar h-64 max-w-full overflow-y-auto p-4 text-foreground focus:outline-none pl-20 text-base"
                     />
                   </div>
                 </div>
@@ -232,7 +234,9 @@ export default function About() {
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-foreground/60 via-transparent to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h4 className="text-2xl font-semibold text-background">Tabsir</h4>
+                  <h4 className="text-2xl font-semibold text-background">
+                    Tabsir
+                  </h4>
                   <p className="text-background/80">Full Stack Developer</p>
                 </div>
               </div>

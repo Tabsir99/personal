@@ -1,4 +1,4 @@
-import type { DocContent } from "@open-notion/editor";
+import type { DocContent } from "@open-notion/serializers";
 import type { ApiResponse, CursorPage } from "@tabsircg/schemas/api";
 import type { PublishedBlogDB } from "@tabsircg/schemas/blog";
 import type { SiteConfig } from "@tabsircg/schemas/site";
