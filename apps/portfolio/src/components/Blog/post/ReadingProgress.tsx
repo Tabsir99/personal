@@ -52,14 +52,14 @@ export default function ReadingProgress({
   return (
     <>
       <div
-        className="fixed left-0 right-0 top-0 h-[3px] z-[60] bg-transparent pointer-events-none"
+        className="fixed left-0 right-0 top-0 h-[3px] z-60 bg-transparent pointer-events-none"
         role="progressbar"
         aria-valuenow={display}
         aria-valuemin={0}
         aria-valuemax={100}
       >
         <div
-          className="h-full bg-linear-to-r from-accent to-cream-2 origin-left transition-transform duration-[80ms] ease-linear shadow-[0_0_12px_color-mix(in_srgb,var(--color-accent)_60%,transparent)]"
+          className="h-full bg-linear-to-r from-accent to-cream-2 origin-left transition-transform duration-80 ease-linear shadow-[0_0_12px_color-mix(in_srgb,var(--color-accent)_60%,transparent)]"
           style={{ transform: `scaleX(${pct})` }}
         />
       </div>

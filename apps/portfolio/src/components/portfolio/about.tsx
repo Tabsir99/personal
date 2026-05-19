@@ -1,5 +1,12 @@
 import { cn } from "@/lib/utils";
 
+const STATS = [
+  { value: "∼2", label: "Years shipping" },
+  { value: "17", label: "Projects merged" },
+  { value: "4", label: "Stacks daily" },
+  { value: "0", label: "Frameworks worshipped" },
+];
+
 /* ===== About ===== */
 export function About() {
   const text =
@@ -7,10 +14,10 @@ export function About() {
   const words = text.split(" ");
 
   return (
-    <section id="about" className="py-[200px]" data-screen-label="02 About">
+    <section id="about" className="py-[200px]">
       <span className="margin-note top-[220px]">no frameworks worshipped.</span>
 
-      <div className={"container"}>
+      <div className="page-shell">
         <div
           className={cn(
             "grid items-start gap-[120px]",
@@ -32,38 +39,16 @@ export function About() {
                 "mt-16 pt-10 border-t border-line",
               )}
             >
-              <div className="flex flex-col gap-1.5">
-                <span className="font-serif text-[48px] leading-none text-cream">
-                  ∼2
-                </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-                  Years shipping
-                </span>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <span className="font-serif text-[48px] leading-none text-cream">
-                  17
-                </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-                  Projects merged
-                </span>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <span className="font-serif text-[48px] leading-none text-cream">
-                  4
-                </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-                  Stacks daily
-                </span>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <span className="font-serif text-[48px] leading-none text-cream">
-                  0
-                </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-                  Frameworks worshipped
-                </span>
-              </div>
+              {STATS.map((s) => (
+                <div key={s.label} className="flex flex-col gap-1.5">
+                  <span className="font-serif text-[48px] leading-none text-cream">
+                    {s.value}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+                    {s.label}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
           <div

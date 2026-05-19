@@ -51,8 +51,7 @@ export function CoordOverlay() {
                 <text
                   x={x + 1.2}
                   y={y + 0.3}
-                  /* Warm field-gray (#a8a18b) — no token */
-                  fill="rgba(168, 161, 139, 0.35)"
+                  className="fill-field-gray/35"
                   fontFamily="JetBrains Mono, monospace"
                   fontSize="0.65"
                   letterSpacing="0.05"
@@ -82,8 +81,7 @@ export function CoordOverlay() {
             y1={y}
             x2={x + 0.5}
             y2={y}
-            /* Warm field-gray (#a8a18b) — no token */
-            stroke="rgba(168, 161, 139, 0.25)"
+            className="stroke-field-gray/25"
             strokeWidth="0.06"
           />
         );

@@ -30,7 +30,7 @@ export default function PostFooter({
           >
             <span className={`${DIR_BASE} text-muted`}>
               <span
-                className="text-sm text-accent transition-transform duration-[220ms] ease-blog group-hover:-translate-x-1"
+                className="text-sm text-accent transition-transform duration-220 ease-blog group-hover:-translate-x-1"
                 aria-hidden="true"
               >
                 ←
@@ -55,7 +55,7 @@ export default function PostFooter({
             <span className={`${DIR_BASE} text-muted`}>
               next
               <span
-                className="text-sm text-accent transition-transform duration-[220ms] ease-blog group-hover:translate-x-1"
+                className="text-sm text-accent transition-transform duration-220 ease-blog group-hover:translate-x-1"
                 aria-hidden="true"
               >
                 →

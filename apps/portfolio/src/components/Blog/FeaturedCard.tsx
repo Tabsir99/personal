@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { PostMeta } from "@/lib/posts";
 import InViewArticle from "./InViewArticle";
@@ -25,10 +26,12 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
         aria-hidden="true"
       >
         {post.coverImageUrl ? (
-          <img
+          <Image
             src={post.coverImageUrl}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover block"
+            fill
+            sizes="(max-width: 980px) 100vw, 50vw"
+            className="object-cover"
           />
         ) : (
           <>
@@ -36,7 +39,7 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
               {Array.from({ length: 60 }).map((_, i) => (
                 <span
                   key={i}
-                  className="block h-3.5 rounded-[2px] bg-[color-mix(in_srgb,var(--color-accent)_30%,transparent)] odd:bg-[color-mix(in_srgb,oklch(72%_0.13_60)_40%,transparent)] [&:nth-child(7n)]:bg-[color-mix(in_srgb,var(--color-phosphor)_50%,transparent)] animate-blog-bar"
+                  className="block h-3.5 rounded-[2px] bg-[color-mix(in_srgb,var(--color-accent)_30%,transparent)] odd:bg-[color-mix(in_srgb,oklch(72%_0.13_60)_40%,transparent)] nth-[7n]:bg-[color-mix(in_srgb,var(--color-phosphor)_50%,transparent)] animate-blog-bar"
                   style={{ animationDelay: `${(i % 12) * 80}ms` }}
                 />
               ))}
@@ -49,7 +52,7 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
             </div>
             <div className="relative mt-3 h-1 rounded-[2px] bg-[oklch(20%_0.02_60)] overflow-visible">
               <div className="absolute left-0 top-0 bottom-0 w-[12%] bg-accent rounded-[2px] animate-blog-shrink shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-accent)_15%,transparent)]" />
-              <span className="absolute right-0 -top-[22px] text-[11px] text-[oklch(72%_0.13_60)] font-mono">
+              <span className="absolute right-0 top-[-22px] text-[11px] text-[oklch(72%_0.13_60)] font-mono">
                 ↓ 40s → 412ms
               </span>
             </div>
@@ -65,10 +68,10 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
             {formatDate(post.date)}
           </span>
         </div>
-        <h2 className="text-[clamp(28px,3vw,40px)] font-black tracking-[-0.025em] leading-[1.05] mt-1.5 mx-0 mb-0">
+        <h2 className="text-[clamp(28px,3vw,40px)] font-black tracking-tight leading-[1.05] mt-1.5 mx-0 mb-0">
           {post.title}
         </h2>
-        <p className="text-cream-2 text-[16.5px] leading-[1.55] m-0 max-w-[50ch]">
+        <p className="text-cream-2 text-[16px] leading-[1.55] m-0 max-w-[50ch]">
           {post.excerpt}
         </p>
         <div className="flex flex-wrap gap-2 mt-auto">
@@ -86,7 +89,7 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
           href={`/blog/${post.slug}`}
         >
           <span>read the post</span>
-          <span className="flex transition-transform duration-[320ms] ease-blog group-hover:translate-x-1.5">
+          <span className="flex transition-transform duration-320 ease-blog group-hover:translate-x-1.5">
             <svg viewBox="0 0 40 14" width="40" height="14" aria-hidden="true">
               <path
                 d="M0 7 H36 M30 1 L36 7 L30 13"

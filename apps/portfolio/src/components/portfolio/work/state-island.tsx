@@ -54,6 +54,15 @@ export function WorkStateIsland() {
       if (thumb)
         setStill(Number(thumb.getAttribute("data-work-thumb-idx")));
     }
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const t = e.target as HTMLElement;
+      const row = t.closest<HTMLElement>("[data-work-row-idx]");
+      if (row) {
+        e.preventDefault();
+        setActive(Number(row.getAttribute("data-work-row-idx")));
+      }
+    }
 
     projects.forEach((el, j) => {
       el.inert = j !== 0;
@@ -61,10 +70,12 @@ export function WorkStateIsland() {
     section.addEventListener("mouseover", onPoint);
     section.addEventListener("focusin", onPoint);
     section.addEventListener("click", onPoint);
+    section.addEventListener("keydown", onKey);
     return () => {
       section.removeEventListener("mouseover", onPoint);
       section.removeEventListener("focusin", onPoint);
       section.removeEventListener("click", onPoint);
+      section.removeEventListener("keydown", onKey);
       if (transitTimer) clearTimeout(transitTimer);
     };
   }, []);

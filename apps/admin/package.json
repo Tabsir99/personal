@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.138",
-    "@aws-sdk/client-s3": "^3.1040.0",
-    "@aws-sdk/s3-request-presigner": "^3.1040.0",
+    "@aws-sdk/client-s3": "^3.1048.0",
+    "@aws-sdk/s3-request-presigner": "^3.1048.0",
     "@base-ui/react": "^1.4.1",
     "@devicon/react": "^0.0.3",
     "@floating-ui/dom": "^1.7.6",

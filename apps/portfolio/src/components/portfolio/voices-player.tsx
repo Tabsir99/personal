@@ -10,6 +10,31 @@ import { cn } from "@/lib/utils";
 
 const DURATION_GUESS = 73;
 
+const BASE_CONTROL_BTN =
+  "font-mono tracking-[0.16em] uppercase text-cream-2 px-2.5 py-1.5 border border-line rounded-[2px] bg-transparent transition-all duration-250 inline-flex items-center justify-center hover:border-accent hover:text-accent";
+
+function ControlButton({
+  onClick,
+  ariaLabel,
+  className,
+  children,
+}: {
+  onClick: () => void;
+  ariaLabel: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      className={cn(BASE_CONTROL_BTN, className)}
+      onClick={onClick}
+      aria-label={ariaLabel}
+    >
+      {children}
+    </button>
+  );
+}
+
 function fmtTime(s: number) {
   if (!isFinite(s) || s < 0) s = 0;
   const m = Math.floor(s / 60);
@@ -59,6 +84,35 @@ export function VoicesPlayer({ src }: { src: string }) {
     v.currentTime = p * duration;
     setTime(v.currentTime);
   }
+  function seekBy(deltaSec: number) {
+    const v = videoRef.current;
+    if (!v || !duration) return;
+    v.currentTime = Math.min(duration, Math.max(0, v.currentTime + deltaSec));
+    setTime(v.currentTime);
+  }
+  function onScrubKey(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      seekBy(-5);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      seekBy(5);
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      const v = videoRef.current;
+      if (v) {
+        v.currentTime = 0;
+        setTime(0);
+      }
+    } else if (e.key === "End") {
+      e.preventDefault();
+      const v = videoRef.current;
+      if (v && duration) {
+        v.currentTime = duration;
+        setTime(duration);
+      }
+    }
+  }
   function onLoaded(e: React.SyntheticEvent<HTMLVideoElement>) {
     const v = e.currentTarget;
     setDuration(v.duration || DURATION_GUESS);
@@ -72,7 +126,7 @@ export function VoicesPlayer({ src }: { src: string }) {
       <div
         className={cn(
           "voices-frame relative w-full aspect-video bg-black border border-line rounded-[4px] overflow-hidden",
-          "origin-[center_60%] transition-[border-color] duration-500 ease-[ease] will-change-transform hover:border-accent/45",
+          "origin-[center_60%] transition-[border-color] duration-500 will-change-transform hover:border-accent/45",
         )}
       >
         <video
@@ -117,13 +171,13 @@ export function VoicesPlayer({ src }: { src: string }) {
 
       {started && (
         <div className="flex items-center gap-4 px-4 py-3 mt-3.5 border border-line bg-ink-2/60 rounded-[3px] opacity-0 animate-voices-fade max-[1100px]:flex-wrap max-[1100px]:gap-2.5 max-[1100px]:p-2.5">
-          <button
-            className="font-mono text-[12px] tracking-[0.16em] uppercase text-cream-2 px-2.5 py-1.5 border border-line rounded-[2px] bg-transparent transition-all duration-250 ease-[ease] inline-flex items-center justify-center min-w-9 hover:border-accent hover:text-accent"
+          <ControlButton
             onClick={toggle}
-            aria-label={playing ? "Pause" : "Play"}
+            ariaLabel={playing ? "Pause" : "Play"}
+            className="text-[12px] min-w-9"
           >
             {playing ? "❚❚" : "▶"}
-          </button>
+          </ControlButton>
           <div className="inline-flex items-baseline gap-1 font-mono text-[11px] tracking-[0.12em] text-cream min-w-24 whitespace-nowrap">
             <span>{fmtTime(time)}</span>
             <span className="text-line">/</span>
@@ -131,12 +185,16 @@ export function VoicesPlayer({ src }: { src: string }) {
           </div>
           <div
             ref={scrubRef}
-            className="group/scrub relative flex-1 h-[26px] cursor-pointer flex items-center max-[1100px]:-order-1 max-[1100px]:basis-full"
+            className="group/scrub relative flex-1 h-[26px] cursor-pointer flex items-center max-[1100px]:-order-1 max-[1100px]:basis-full focus-visible:outline-2 focus-visible:outline-accent"
             onClick={seekFromEvent}
+            onKeyDown={onScrubKey}
             role="slider"
+            tabIndex={0}
+            aria-label="Seek video"
             aria-valuemin={0}
             aria-valuemax={duration}
             aria-valuenow={time}
+            aria-valuetext={fmtTime(time)}
           >
             <div className="w-full h-0.5 bg-line rounded-[1px]"></div>
             <div
@@ -144,17 +202,17 @@ export function VoicesPlayer({ src }: { src: string }) {
               style={{ width: `${pct}%` }}
             ></div>
             <div
-              className="absolute top-1/2 w-2.5 h-2.5 rounded-full bg-phosphor -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-150 ease-[ease] group-hover/scrub:scale-[1.3]"
+              className="absolute top-1/2 w-2.5 h-2.5 rounded-full bg-phosphor -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-150 group-hover/scrub:scale-[1.3]"
               style={{ left: `${pct}%` }}
             ></div>
           </div>
-          <button
-            className="font-mono text-[11px] tracking-[0.16em] uppercase text-cream-2 px-2.5 py-1.5 border border-line rounded-[2px] bg-transparent transition-all duration-250 ease-[ease] inline-flex items-center justify-center min-w-16 hover:border-accent hover:text-accent"
+          <ControlButton
             onClick={toggleMute}
-            aria-label={muted ? "Unmute" : "Mute"}
+            ariaLabel={muted ? "Unmute" : "Mute"}
+            className="text-[11px] min-w-16"
           >
             {muted ? "MUTED" : "AUDIO"}
-          </button>
+          </ControlButton>
         </div>
       )}
     </>

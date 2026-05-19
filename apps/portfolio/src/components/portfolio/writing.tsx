@@ -37,8 +37,8 @@ const ARTICLES = [
 
 export function Writing() {
   return (
-    <section id="writing" data-screen-label="06 Writing">
-      <div className={"container"}>
+    <section id="writing" className="section-pad">
+      <div className="page-shell">
         <div
           className={cn(
             "flex justify-between items-end mb-14",
@@ -73,14 +73,13 @@ export function Writing() {
               style={{ "--i": i } as React.CSSProperties}
               className={cn(
                 "group grid grid-cols-[80px_100px_1fr_140px_100px] gap-10 items-center",
-                "py-7 border-b border-line cursor-pointer",
+                "py-7 border-b border-line",
                 "transition-colors duration-300 hover:bg-accent/2",
               )}
-              href="#"
             >
               <div className="font-mono text-[11px] text-muted-2">{a.num}</div>
               <div className="font-mono text-[11px] text-muted">{a.date}</div>
-              <div
+              <h3
                 className={cn(
                   "font-serif font-normal tracking-[-0.01em] font-features-['liga','kern']",
                   "text-[26px] leading-[1.2]",
@@ -88,7 +87,7 @@ export function Writing() {
                 )}
               >
                 {a.title}
-              </div>
+              </h3>
               <div className="font-mono text-[11px] text-muted tracking-wider">
                 {a.meta}
               </div>

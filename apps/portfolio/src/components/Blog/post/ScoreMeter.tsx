@@ -9,7 +9,7 @@ const DIAL_BASE =
   "group relative appearance-none w-[84px] h-[84px] p-0 border-none rounded-full cursor-pointer isolate [transition:transform_120ms_ease,filter_200ms_ease] enabled:hover:scale-[1.04] enabled:active:scale-[0.96] disabled:cursor-default focus-visible:outline-none focus-visible:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-accent)_30%,transparent)] before:content-[''] before:absolute before:inset-0 before:rounded-full before:shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-cream)_8%,transparent)] before:pointer-events-none";
 
 const CORE_BASE =
-  "absolute inset-[6px] rounded-full flex items-center justify-center z-[1] [transition:background-color_220ms_ease,color_220ms_ease]";
+  "absolute inset-[6px] rounded-full flex items-center justify-center z-1 [transition:background-color_220ms_ease,color_220ms_ease]";
 
 export default function ScoreMeter({
   slug,
@@ -154,7 +154,7 @@ export default function ScoreMeter({
             </svg>
           ) : (
             <span
-              className="font-sans font-black text-[38px] leading-none -translate-y-[2px]"
+              className="font-sans font-black text-[38px] leading-none translate-y-[-2px]"
               aria-hidden="true"
             >
               +
@@ -162,7 +162,7 @@ export default function ScoreMeter({
           )}
         </span>
         <span
-          className="absolute left-1/2 -top-1.5 pointer-events-none z-[2]"
+          className="absolute left-1/2 -top-1.5 pointer-events-none z-2"
           aria-hidden="true"
         >
           {bursts.map((b) => (

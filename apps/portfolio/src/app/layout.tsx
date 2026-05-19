@@ -67,7 +67,7 @@ export default function RootLayout({
   } as React.CSSProperties;
 
   return (
-    <html lang="en" style={fontVars} className="dark">
+    <html lang="en" style={fontVars}>
       {process.env.NODE_ENV === "development" && (
         <head>
           <script
@@ -82,10 +82,8 @@ export default function RootLayout({
         <Header />
         <ScrollObserver />
         <ActiveSectionTracker />
-        <main>
-          {children}
-          <Footer />
-        </main>
+        <main>{children}</main>
+        <Footer />
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 import { Terminal, type TerminalLine } from "./terminal";
 import { ScrambleWord } from "./scramble-word";
 import { cn } from "@/lib/utils";
+import { NavLink } from "../ui/nav-link";
 
 const TERMINAL_TITLE = "tabsir@field-station";
 const TERMINAL_LINES: TerminalLine[] = [
@@ -37,7 +38,6 @@ export function Hero() {
   return (
     <section
       id="hero"
-      data-screen-label="01 Hero"
       className={cn(
         "relative h-screen min-h-[720px] overflow-hidden p-0",
         "max-[1100px]:h-auto max-[1100px]:min-h-screen",
@@ -52,14 +52,13 @@ export function Hero() {
             "absolute inset-0",
             "bg-[linear-gradient(to_right,color-mix(in_oklab,var(--color-cream)_4%,transparent)_1px,transparent_1px)] bg-size-[12.5%_100%]",
             "mask-[radial-gradient(ellipse_at_60%_50%,black_30%,transparent_75%)]",
-            "[-webkit-mask-image:radial-gradient(ellipse_at_60%_50%,black_30%,transparent_75%)]",
           )}
         ></div>
       </div>
 
       <div
         className={cn(
-          "container",
+          "page-shell",
           "z-1 flex h-full flex-col justify-between pt-24 pb-9",
           "max-[1100px]:pt-[110px] max-[1100px]:pb-14",
         )}
@@ -85,7 +84,7 @@ export function Hero() {
                   "text-accent uppercase",
                   "[font-variant-numeric:tabular-nums] whitespace-nowrap",
                   "translate-y-2 opacity-0",
-                  "animate-[hero-rise_0.9s_var(--ease-soft)_forwards_0.3s]",
+                  "animate-hero-rise delay-300",
                   "max-[1100px]:text-[clamp(36px,9vw,64px)]",
                 )}
               >
@@ -113,7 +112,7 @@ export function Hero() {
                 <span
                   className={cn(
                     "block translate-y-[0.4em] opacity-0",
-                    "animate-[hero-rise_1s_var(--ease-soft)_forwards_0.45s]",
+                    "animate-hero-rise animation-duration-[1s] delay-[450ms]",
                   )}
                 >
                   is not
@@ -122,7 +121,7 @@ export function Hero() {
                   className={cn(
                     "block translate-y-[0.4em] opacity-0",
                     "pl-[clamp(28px,5vw,96px)]",
-                    "animate-[hero-rise_1s_var(--ease-soft)_forwards_0.6s]",
+                    "animate-hero-rise animation-duration-[1s] delay-[600ms]",
                     "max-[1100px]:pl-6",
                     "[&_em]:text-accent [&_em]:italic",
                   )}
@@ -138,9 +137,8 @@ export function Hero() {
                 "text-[clamp(17px,1.55vw,22px)] leading-[1.45] tracking-normal",
                 "text-cream-2",
                 "mx-0 mt-9 mb-11 max-w-[52ch]",
-                "opacity-0 animate-[hero-fade_0.9s_ease_forwards_0.9s]",
-                "[&_em]:italic [&_em]:text-accent [&_em]:px-0.5",
-                "[&_em]:bg-[linear-gradient(transparent_78%,color-mix(in_oklab,var(--color-accent)_18%,transparent)_78%,color-mix(in_oklab,var(--color-accent)_18%,transparent)_100%)]",
+                "opacity-0 animate-hero-fade delay-[900ms]",
+                "[&_em]:italic [&_em]:text-accent [&_em]:px-0.5 [&_em]:text-highlight",
               )}
             >
               Full-stack web work for teams who&rsquo;d rather{" "}
@@ -151,7 +149,7 @@ export function Hero() {
             <div
               className={cn(
                 "flex flex-wrap items-center gap-7",
-                "opacity-0 animate-[hero-fade_0.9s_ease_forwards_1.05s]",
+                "opacity-0 animate-hero-fade delay-[1050ms]",
               )}
             >
               <a
@@ -161,46 +159,23 @@ export function Hero() {
                   "px-6 py-4",
                   "bg-accent text-ink border border-accent rounded-[2px]",
                   "font-mono text-[11px] tracking-[0.16em] uppercase",
-                  "transition-[background,color] duration-300 ease-[ease]",
+                  "transition-[background,color] duration-300",
                   "hover:bg-transparent hover:text-accent",
                 )}
               >
                 <span>Start a project</span>
                 <span
                   className={cn(
-                    "inline-block transition-transform duration-300 ease-[ease]",
+                    "inline-block transition-transform duration-300",
                     "group-hover:translate-x-1",
                   )}
                 >
                   →
                 </span>
               </a>
-              <a
-                href="#services"
-                className={cn(
-                  "group relative inline-flex items-center gap-2.5",
-                  "pb-1",
-                  "font-mono text-[11px] tracking-[0.14em] uppercase",
-                  "text-muted transition-colors duration-300 ease-[ease]",
-                  "hover:text-cream",
-                  "after:content-[''] after:absolute after:left-0 after:bottom-0",
-                  "after:h-px after:w-full after:bg-muted",
-                  "after:origin-left after:scale-x-[0.4]",
-                  "after:transition-[scale,background] after:duration-300 after:ease-[ease]",
-                  "hover:after:scale-x-100 hover:after:bg-cream",
-                )}
-              >
-                <span>How I work</span>
-                <span
-                  className={cn(
-                    "text-[13px] opacity-70",
-                    "transition-[translate,opacity] duration-300 ease-[ease]",
-                    "group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:opacity-100",
-                  )}
-                >
-                  ↘
-                </span>
-              </a>
+              <NavLink href="#services" underline>
+                How I work
+              </NavLink>
             </div>
           </div>
 
@@ -218,12 +193,12 @@ export function Hero() {
         <div
           className={cn(
             "flex items-center gap-[18px]",
-            "opacity-0 animate-[hero-fade_0.9s_ease_forwards_1.25s]",
+            "opacity-0 animate-hero-fade delay-[1250ms]",
           )}
         >
           <span
             className={cn(
-              "inline-block font-mono text-[10.5px] tracking-[0.18em] uppercase",
+              "inline-block font-mono text-[11px] tracking-[0.18em] uppercase",
               "text-cream",
               "animate-hero-foot-bob",
             )}

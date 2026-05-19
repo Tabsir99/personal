@@ -33,8 +33,8 @@ export function Rail() {
           data-rail-tick
           data-nav={s.id}
           className={cn(
-            "absolute left-[-4px] w-[9px] h-px transition-colors duration-400 ease-[ease]",
-            "[&_.rail-tick-label]:transition-colors [&_.rail-tick-label]:duration-300 [&_.rail-tick-label]:ease-[ease]",
+            "absolute left-[-4px] w-[9px] h-px transition-colors duration-400",
+            "[&_.rail-tick-label]:transition-colors [&_.rail-tick-label]:duration-300",
             // Future (default)
             "bg-muted-2 [&_.rail-tick-label]:text-muted-2",
             // Current
@@ -52,7 +52,7 @@ export function Rail() {
               "-translate-y-1/2 whitespace-nowrap",
             )}
           >
-            {s.label}
+            {s.num} — {s.label}
           </span>
         </div>
       ))}

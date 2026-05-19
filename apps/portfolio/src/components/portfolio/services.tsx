@@ -67,7 +67,7 @@ const SERVICES = [
 
 export function Services() {
   return (
-    <section id="services" data-screen-label="03 Services" style={{ padding: 0 }}>
+    <section id="services">
       <div
         className="relative h-[400vh]"
         data-pin-steps="4"
@@ -141,9 +141,9 @@ export function Services() {
                     <div className="mb-2.5 font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
                       {s.frameLabel}
                     </div>
-                    <h4 className="mb-3.5 font-serif text-[28px] font-normal leading-[1.1] tracking-[-0.01em]">
+                    <h3 className="mb-3.5 font-serif text-[28px] font-normal leading-[1.1] tracking-[-0.01em]">
                       {s.frameTitle}
-                    </h4>
+                    </h3>
                     <ul className="list-none font-mono text-[11px] tracking-[0.06em] text-cream-2">
                       {s.items.map((it, j) => (
                         <li

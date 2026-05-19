@@ -12,24 +12,19 @@ export function Voices() {
     <section
       id="voices"
       className="relative pt-[180px] pb-[160px] max-[1100px]:pt-[130px] max-[1100px]:pb-[120px]"
-      data-screen-label="06 Voices"
+     
     >
-      <span
-        className={cn(
-          "pointer-events-none absolute right-8 z-5 top-[260px] max-w-[160px] text-right font-serif italic text-[13px] tracking-[0.005em] leading-[1.35] text-accent opacity-60 max-[1100px]:hidden",
-          "before:content-[''] before:block before:w-3.5 before:h-px before:bg-accent before:opacity-45 before:mb-2 before:ml-auto",
-        )}
-      >
+      <span className="margin-note top-[260px]">
         one minute,
         <br />
         one client.
       </span>
 
-      <div className="container">
+      <div className="page-shell">
         <header className="grid grid-cols-[0.9fr_1fr] items-end gap-20 mb-16 max-[1100px]:grid-cols-1 max-[1100px]:gap-7">
           <h2
             className={cn(
-              "font-serif font-normal leading-[0.96] tracking-[-0.02em] font-features-['liga','kern']",
+              "font-serif font-normal tracking-[-0.02em] font-features-['liga','kern']",
               "text-[clamp(48px,6.4vw,96px)] leading-[0.98]",
               "[&_em]:italic [&_em]:text-accent",
             )}
@@ -58,7 +53,7 @@ export function Voices() {
             aria-hidden="true"
           ></span>
           <a
-            className="inline-flex items-center gap-1.5 text-accent pb-0.5 border-b border-b-transparent transition-[gap,border-color,color] duration-250 ease-[ease] hover:gap-2.5 hover:border-b-accent/50 hover:text-cream"
+            className="inline-flex items-center gap-1.5 text-accent pb-0.5 border-b border-b-transparent transition-[gap,border-color,color] duration-250 hover:gap-2.5 hover:border-b-accent/50 hover:text-cream"
             href="#work"
           >
             See the project<span> ↗</span>

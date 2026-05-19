@@ -55,22 +55,14 @@ export function Stack() {
         "py-[180px]",
         "bg-[linear-gradient(180deg,transparent,color-mix(in_oklab,var(--color-accent)_2%,transparent),transparent)]",
       )}
-      data-screen-label="05 Stack"
+     
     >
-      <span
-        className={cn(
-          "pointer-events-none absolute right-8 z-5 max-w-[160px] text-right",
-          "font-serif italic text-[13px] tracking-[0.005em] leading-[1.35]",
-          "text-accent opacity-60 max-[1100px]:hidden",
-          "before:content-[''] before:block before:w-3.5 before:h-px before:bg-accent before:opacity-45 before:mb-2 before:ml-auto",
-          "top-[260px]",
-        )}
-      >
+      <span className="margin-note top-[260px]">
         stack-fluent,
         <br />
         not stack-religious.
       </span>
-      <div className={"container"}>
+      <div className="page-shell">
         <div
           className={cn(
             "grid grid-cols-2 gap-20 mb-20 items-end",
@@ -116,15 +108,15 @@ export function Stack() {
                 "hover:bg-accent/3",
               )}
             >
-              <div
+              <h3
                 className={cn(
-                  "flex items-center gap-2 mb-[22px]",
+                  "flex items-center gap-2 mb-[22px] font-normal",
                   "font-mono text-[10px] uppercase tracking-[0.16em] text-accent",
                   "after:content-[''] after:flex-1 after:h-px after:bg-line",
                 )}
               >
                 {String(i + 1).padStart(2, "0")} · {cat.label}
-              </div>
+              </h3>
               <div className="flex flex-col gap-2.5">
                 {cat.items.map(([name, lvl], j) => (
                   <div

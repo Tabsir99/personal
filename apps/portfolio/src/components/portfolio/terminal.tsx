@@ -95,8 +95,7 @@ export function Terminal({
       <div className="flex items-center justify-between px-[14px] py-[10px] border-b border-phosphor/15 bg-black/20">
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-accent/80"></span>
-          {/* Warm field-gray (#a8a18b) — no token, matches the temp prototype's literal */}
-          <span className="w-2 h-2 rounded-full bg-[rgba(168,161,139,0.40)]"></span>
+          <span className="w-2 h-2 rounded-full bg-field-gray/40"></span>
           <span className="w-2 h-2 rounded-full bg-phosphor/85 animate-term-pulse-dot"></span>
         </div>
         <div className="text-[10px] tracking-[0.22em] uppercase text-muted/75">
@@ -106,7 +105,7 @@ export function Terminal({
       </div>
 
       {/* Body */}
-      <div className="relative min-h-[232px] px-5 pt-4 pb-5 text-[12.5px] leading-[1.7]">
+      <div className="relative min-h-[232px] px-5 pt-4 pb-5 text-[12px] leading-[1.7]">
         <div className="relative z-1">
           <div className="text-muted/65">
             <span className="text-phosphor">tabsir</span>
@@ -121,7 +120,7 @@ export function Terminal({
 
           <pre
             ref={respRef}
-            className="mt-1.5 whitespace-pre-wrap text-cream/85 font-mono text-[12.5px] leading-[1.7] empty:hidden"
+            className="mt-1.5 whitespace-pre-wrap text-cream/85 font-mono text-[12px] leading-[1.7] empty:hidden"
           />
 
           {phase === "idle" && (

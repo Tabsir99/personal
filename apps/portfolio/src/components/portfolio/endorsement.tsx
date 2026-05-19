@@ -19,10 +19,10 @@ export function Endorsement() {
         "before:content-[''] before:absolute before:top-0 before:left-(--rail-gutter) before:right-(--gutter) before:h-px before:bg-line",
         "after:content-[''] after:absolute after:bottom-0 after:left-(--rail-gutter) after:right-(--gutter) after:h-px after:bg-line",
       )}
-      data-screen-label="01a Endorsement"
+     
       aria-label="Client testimonial from Zohaib at DataZoro, verified on Upwork"
     >
-      <div className={"container"}>
+      <div className="page-shell">
         <div
           className={cn(
             "grid items-start grid-cols-[0.85fr_2fr] gap-[clamp(48px,7vw,96px)]",
@@ -72,7 +72,7 @@ export function Endorsement() {
 
             <a
               className={cn(
-                "group inline-flex items-center gap-2.5 w-max font-mono text-[10.5px] tracking-[0.18em] uppercase text-muted",
+                "group inline-flex items-center gap-2.5 w-max font-mono text-[11px] tracking-[0.18em] uppercase text-muted",
                 "[transition:color_300ms_ease,gap_300ms_ease]",
                 "hover:text-cream hover:gap-3",
               )}
@@ -130,8 +130,8 @@ export function Endorsement() {
               excellent{" "}
               <em
                 className={cn(
-                  "italic text-accent px-0.5",
-                  "bg-[linear-gradient(transparent_78%,color-mix(in_oklab,var(--color-accent)_15%,transparent)_78%,color-mix(in_oklab,var(--color-accent)_15%,transparent)_100%)]",
+                  "italic text-accent px-0.5 text-highlight",
+                  "[--text-highlight-color:color-mix(in_oklab,var(--color-accent)_15%,transparent)]",
                 )}
               >
                 communication

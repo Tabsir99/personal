@@ -13,7 +13,7 @@ export function Work() {
   return (
     <section
       id="work"
-      data-screen-label="04 Work"
+     
       data-work-section=""
       data-work-active="0"
       data-work-still="0"
@@ -31,18 +31,18 @@ export function Work() {
     >
       <WorkStateIsland />
 
-      <span className="margin-note pointer-events-none absolute right-8 z-5 top-[260px] max-w-[160px] text-right font-serif italic text-[13px] tracking-[0.005em] leading-[1.35] text-accent opacity-60 before:content-[''] before:block before:w-3.5 before:h-px before:bg-accent before:opacity-45 before:mb-2 before:ml-auto max-[1100px]:hidden">
+      <span className="margin-note top-[260px]">
         five recent,
         <br />
         seventeen total.
       </span>
 
-      <div className="container">
+      <div className="page-shell">
         <header
           data-reveal
           className="grid grid-cols-[0.9fr_1fr] items-end gap-20 mb-[72px] max-[1100px]:grid-cols-1 max-[1100px]:gap-8"
         >
-          <h2 className="display font-serif text-[clamp(48px,6.4vw,96px)] leading-[0.98] tracking-[-0.02em] [&>em]:not-italic [&>em]:italic [&>em]:text-accent">
+          <h2 className="display font-serif text-[clamp(48px,6.4vw,96px)] leading-[0.98] tracking-[-0.02em] [&>em]:italic [&>em]:text-accent">
             <em>Selected</em>
             <br />
             work.
@@ -60,7 +60,6 @@ export function Work() {
                 "hover:text-accent hover:gap-3.5 hover:border-b-accent/40",
                 "[&_.arrow]:opacity-70",
               )}
-              href="#"
             >
               <span>All 17 projects · the full archive</span>
               <span className="arrow">↗</span>

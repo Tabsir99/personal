@@ -81,8 +81,7 @@ export function ContourSVG() {
         ))}
       </g>
       {/* a few stray triangulation lines connecting peaks */}
-      {/* Warm field-gray (#a8a18b) — no token, matches the temp prototype */}
-      <g stroke="rgba(168, 161, 139, 0.06)" strokeWidth="0.5" strokeDasharray="2 6">
+      <g className="stroke-field-gray/6" strokeWidth="0.5" strokeDasharray="2 6">
         <line x1="420" y1="780" x2="1240" y2="1780" />
         <line x1="420" y1="780" x2="1380" y2="380" />
         <line x1="1240" y1="1780" x2="1380" y2="380" />

@@ -10,10 +10,6 @@ export default function Aside({
   nowReading: NowReadingItem[];
   currentlyBuilding?: CurrentlyBuilding;
 }) {
-  const hasReading = nowReading.length > 0;
-  const hasBuilding = !!currentlyBuilding?.code || !!currentlyBuilding?.body;
-  if (!hasReading && !hasBuilding) return null;
-
   const [drag, setDrag] = React.useState({ x: 0, y: 0, rot: -7 });
   const dragging = React.useRef<{
     sx: number;
@@ -44,6 +40,11 @@ export default function Aside({
     };
   }, []);
 
+  const hasReading = nowReading.length > 0;
+  const hasBuilding = !!currentlyBuilding?.code || !!currentlyBuilding?.body;
+
+  if (!hasReading && !hasBuilding) return null;
+
   const onDown = (e: React.MouseEvent) => {
     e.preventDefault();
     dragging.current = { sx: e.clientX, sy: e.clientY, ox: drag.x, oy: drag.y };
@@ -53,14 +54,14 @@ export default function Aside({
     <aside className="sticky top-[120px] min-w-80 flex flex-col gap-8 max-[980px]:static max-[980px]:flex-row max-[980px]:flex-wrap">
       {hasReading && (
         <div
-          className="relative bg-[oklch(94%_0.04_90)] text-ink pt-7 px-6 pb-5 rounded-md shadow-[0_12px_30px_-12px_rgba(0,0,0,0.7)] select-none cursor-grab transition-[box-shadow] duration-200 border border-ink/6 active:cursor-grabbing active:shadow-[0_24px_40px_-10px_rgba(0,0,0,0.8)] max-[980px]:flex-1 max-[980px]:basis-[280px]"
+          className="relative bg-[oklch(94%_0.04_90)] text-ink pt-7 px-6 pb-5 rounded-md shadow-[0_12px_30px_-12px_rgba(0,0,0,0.7)] select-none cursor-grab transition-shadow duration-200 border border-ink/6 active:cursor-grabbing active:shadow-[0_24px_40px_-10px_rgba(0,0,0,0.8)] max-[980px]:flex-1 max-[980px]:basis-[280px]"
           style={{
             transform: `translate(${drag.x}px, ${drag.y}px) rotate(${drag.rot}deg)`,
           }}
           onMouseDown={onDown}
         >
-          <div className="absolute w-20 h-6 bg-[oklch(85%_0.08_90/0.5)] backdrop-blur-[2px] border border-[oklch(80%_0.05_90/0.5)] -top-2.5 left-4 -rotate-[4deg]" />
-          <div className="absolute w-20 h-6 bg-[oklch(85%_0.08_90/0.5)] backdrop-blur-[2px] border border-[oklch(80%_0.05_90/0.5)] -top-2.5 right-4 rotate-[3deg]" />
+          <div className="absolute w-20 h-6 bg-[oklch(85%_0.08_90/0.5)] backdrop-blur-[2px] border border-[oklch(80%_0.05_90/0.5)] -top-2.5 left-4 rotate-[-4deg]" />
+          <div className="absolute w-20 h-6 bg-[oklch(85%_0.08_90/0.5)] backdrop-blur-[2px] border border-[oklch(80%_0.05_90/0.5)] -top-2.5 right-4 rotate-3" />
           <div className="font-mono text-[11px] text-muted mb-3.5">
             // now reading
           </div>
@@ -75,7 +76,7 @@ export default function Aside({
                   }
                 />
                 <div>
-                  <div className="font-bold text-sm leading-[1.25]">
+                  <div className="font-bold text-sm leading-tight">
                     {b.title}
                   </div>
                   {b.author && (
@@ -98,7 +99,7 @@ export default function Aside({
           <div className="font-mono text-[11px] text-muted lowercase tracking-[0.04em] mb-3 before:content-['//_'] before:text-accent">
             currently building
           </div>
-          <div className="text-[15px] leading-[1.5] text-cream-2">
+          <div className="text-[15px] leading-normal text-cream-2">
             {currentlyBuilding.code && (
               <>
                 <code className="font-mono bg-ink-3 px-1.5 py-px rounded-[4px] text-[13px] text-accent">

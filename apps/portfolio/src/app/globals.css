@@ -33,11 +33,21 @@ html {
   --color-accent: #e89455;
   --color-accent-2: #c5532e;
   --color-phosphor: #b8d89c;
+  --color-field-gray: #a8a18b;
+
+  /* ---------- Layout vars ----------
+     Page-shell (`.page-shell`) reads --max-w/--gutter/--rail-gutter; the
+     left rail and the rail-driven margin notes read --rail-x. Override
+     for narrow viewports in the @media block at the bottom of this file. */
+  --rail-x: 56px;
+  --rail-gutter: 180px;
+  --gutter: 96px;
+  --max-w: 1440px;
 
   /* ---------- Easing ----------
      Shared "soft" curve used by most enter/rise animations.
      `blog` curve is the blog/post sections' standard ease (was inline
-     cubic-bezier(0.2, 0.8, 0.2, 1) in blog.css/blog-post.css). */
+     var(--ease-blog) in blog.css/blog-post.css). */
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-blog: cubic-bezier(0.2, 0.8, 0.2, 1);
 
@@ -71,17 +81,17 @@ html {
   --animate-voices-fade: voices-fade 0.4s ease forwards;
 
   /* ---------- Blog / post animations ---------- */
-  --animate-blog-rise: blog-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  --animate-blog-rise: blog-rise 0.9s var(--ease-blog) forwards;
   --animate-blog-dot-bounce: blog-dot-bounce 2.4s 1.4s
     cubic-bezier(0.5, 1.6, 0.4, 1) infinite;
   --animate-blog-spin: blog-spin 14s linear infinite;
   --animate-blog-bar: blog-bar 2.4s ease-in-out infinite;
   --animate-blog-shrink: blog-shrink 4s ease-in-out infinite;
   --animate-post-bar-fill: post-bar-fill 1.2s 0.2s
-    cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  --animate-score-pulse: score-pulse 0.52s cubic-bezier(0.2, 0.8, 0.2, 1)
+    var(--ease-blog) both;
+  --animate-score-pulse: score-pulse 0.52s var(--ease-blog)
     forwards;
-  --animate-score-burst: score-burst 0.7s cubic-bezier(0.2, 0.8, 0.2, 1)
+  --animate-score-burst: score-burst 0.7s var(--ease-blog)
     forwards;
 
   /* Shared keyframe — used by header CTA, hero status, now status,
@@ -189,13 +199,6 @@ html {
   --font-mono: var(--mono);
 }
 
-:root {
-  --rail-x: 56px;
-  --rail-gutter: 180px;
-  --gutter: 96px;
-  --max-w: 1440px;
-}
-
 @layer base {
   html,
   body {
@@ -214,7 +217,8 @@ html {
     position: relative;
   }
 
-  main {
+  main,
+  body > footer {
     position: relative;
     z-index: 1;
   }
@@ -239,18 +243,21 @@ html {
 
   section {
     position: relative;
-    padding: 140px 0;
   }
 }
 
-@layer components {
-  .container {
-    max-width: var(--max-w);
-    margin: 0 auto;
-    padding: 0 var(--gutter) 0 var(--rail-gutter);
-    position: relative;
-  }
+@utility section-pad {
+  padding: 140px 0;
+}
 
+@utility page-shell {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--gutter) 0 var(--rail-gutter);
+  position: relative;
+}
+
+@layer components {
   .display {
     font-family: var(--serif);
     font-weight: 400;
@@ -291,23 +298,27 @@ html {
        one of the three data attrs.
        Uses `animation` (not `transition`) because Tailwind's
        `transition-*` utilities (in @layer utilities) would otherwise
-       replace our transition slot on children like Stack cards. */
+       replace our transition slot on children like Stack cards.
+       Uses `transform` (not the CSS `translate` longhand) so that hover
+       utilities like `hover:translate-x-1` (which emit to `translate:`)
+       are not silently overridden by the animation's forwards-locked
+       final value. */
   @keyframes reveal-in {
     from {
       opacity: 0;
-      translate: 0 24px;
+      transform: translateY(24px);
     }
     to {
       opacity: 1;
-      translate: 0 0;
+      transform: translateY(0);
     }
   }
   [data-reveal] {
     opacity: 0;
-    translate: 0 24px;
+    transform: translateY(24px);
   }
   [data-reveal].is-in {
-    animation: reveal-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: reveal-in 0.9s var(--ease-soft) forwards;
   }
 
   /* Stagger — each child carries inline style="--i: N" which drives the
@@ -316,19 +327,19 @@ html {
   @keyframes reveal-stagger-in {
     from {
       opacity: 0;
-      translate: 0 20px;
+      transform: translateY(20px);
     }
     to {
       opacity: 1;
-      translate: 0 0;
+      transform: translateY(0);
     }
   }
   [data-reveal-stagger] > * {
     opacity: 0;
-    translate: 0 20px;
+    transform: translateY(20px);
   }
   [data-reveal-stagger].is-in > * {
-    animation: reveal-stagger-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: reveal-stagger-in 0.7s var(--ease-soft) forwards;
     animation-delay: calc(var(--i, 0) * 70ms);
   }
 
@@ -359,7 +370,7 @@ html {
     [data-reveal-words] .word {
       animation: none;
       opacity: 1;
-      translate: none;
+      transform: none;
     }
   }
 }
@@ -389,6 +400,25 @@ html {
   }
 }
 
+/* Static text-marker highlight (no reveal animation). Opacity defaults
+   to 18% accent; override per-instance via --text-highlight-color, e.g.
+   `text-highlight [--text-highlight-color:color-mix(in_oklab,var(--color-accent)_15%,transparent)]`. */
+@utility text-highlight {
+  background-image: linear-gradient(
+    transparent 78%,
+    var(
+        --text-highlight-color,
+        color-mix(in oklab, var(--color-accent) 18%, transparent)
+      )
+      78%,
+    var(
+        --text-highlight-color,
+        color-mix(in oklab, var(--color-accent) 18%, transparent)
+      )
+      100%
+  );
+}
+
 /* Blog row-title marker-pen highlighter. Color via --marker-color
    (default = accent). Toggle the highlight with bg-[length:100%_100%]
    under group-hover. */
@@ -401,7 +431,7 @@ html {
   );
   background-repeat: no-repeat;
   background-size: 0% 100%;
-  transition: background-size 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: background-size 600ms var(--ease-blog);
 }
 
 /* Score meter conic-gradient ring. Reads --fill (deg) from the inline

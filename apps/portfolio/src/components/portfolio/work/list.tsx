@@ -17,9 +17,11 @@ export function WorkList() {
           key={i}
           data-work-row-idx={i}
           tabIndex={0}
+          role="button"
+          aria-label={`Show ${p.title} (${p.type}, ${p.year}, ${p.status})`}
           style={{ "--i": i } as React.CSSProperties}
           className={cn(
-            "work-row group/row relative grid grid-cols-[auto_auto_1fr_auto] items-center gap-[18px] py-[22px] pr-1.5 border-b border-line cursor-pointer outline-none",
+            "work-row group/row relative grid grid-cols-[auto_auto_1fr_auto] items-center gap-[18px] py-[22px] pr-1.5 border-b border-line cursor-pointer outline-hidden focus-visible:outline-2 focus-visible:outline-accent",
             "max-[1100px]:grid-cols-[auto_1fr_auto]",
           )}
         >

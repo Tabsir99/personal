@@ -75,8 +75,13 @@ export default function Toc({ items }: { items: TocItem[] }) {
     if (!drawerOpen) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDrawerOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
     };
   }, [drawerOpen]);
 
@@ -103,7 +108,7 @@ export default function Toc({ items }: { items: TocItem[] }) {
       const isActive = active === it.id;
       const anchorCls =
         (isActive ? "text-cream font-bold " : "text-muted ") +
-        (it.level === 3 ? "text-[12.5px] " : "") +
+        (it.level === 3 ? "text-[12px] " : "") +
         ITEM_ANCHOR_BASE;
       const bulletCls = isActive
         ? `${BULLET_BASE} bg-accent shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-accent)_22%,transparent)] scale-[1.2]`
@@ -125,13 +130,13 @@ export default function Toc({ items }: { items: TocItem[] }) {
 
   const tocCls =
     "relative text-[13px] leading-[1.45] pl-[18px] " +
-    "max-[1100px]:fixed max-[1100px]:left-0 max-[1100px]:top-0 max-[1100px]:bottom-0 max-[1100px]:w-[min(360px,88vw)] max-[1100px]:z-[80] max-[1100px]:bg-ink max-[1100px]:py-7 max-[1100px]:pr-7 max-[1100px]:pl-8 max-[1100px]:transition-transform max-[1100px]:duration-[320ms] max-[1100px]:ease-blog max-[1100px]:overflow-y-auto max-[1100px]:shadow-[24px_0_40px_-20px_rgba(0,0,0,0.6)] " +
+    "max-[1100px]:fixed max-[1100px]:left-0 max-[1100px]:top-0 max-[1100px]:bottom-0 max-[1100px]:w-[min(360px,88vw)] max-[1100px]:z-80 max-[1100px]:bg-ink max-[1100px]:py-7 max-[1100px]:pr-7 max-[1100px]:pl-8 max-[1100px]:transition-transform max-[1100px]:duration-320 max-[1100px]:ease-blog max-[1100px]:overflow-y-auto max-[1100px]:shadow-[24px_0_40px_-20px_rgba(0,0,0,0.6)] " +
     (drawerOpen
       ? "max-[1100px]:translate-x-0"
       : "max-[1100px]:-translate-x-full");
 
   const scrimCls =
-    "hidden fixed inset-0 bg-[color-mix(in_srgb,var(--color-ink)_50%,transparent)] backdrop-blur-[2px] z-[70] transition-opacity duration-200 ease-out max-[1100px]:block " +
+    "hidden fixed inset-0 bg-[color-mix(in_srgb,var(--color-ink)_50%,transparent)] backdrop-blur-[2px] z-70 transition-opacity duration-200 ease-out max-[1100px]:block " +
     (drawerOpen ? "opacity-100" : "opacity-0 pointer-events-none");
 
   return (
@@ -175,7 +180,7 @@ export default function Toc({ items }: { items: TocItem[] }) {
           aria-hidden="true"
         >
           <span
-            className="absolute left-0 top-0 w-full bg-accent rounded-[2px] transition-[height] duration-[240ms] ease-blog shadow-[0_0_8px_color-mix(in_srgb,var(--color-accent)_50%,transparent)]"
+            className="absolute left-0 top-0 w-full bg-accent rounded-[2px] transition-[height] duration-240 ease-blog shadow-[0_0_8px_color-mix(in_srgb,var(--color-accent)_50%,transparent)]"
             style={{ height: `${pct * 100}%` }}
           />
         </div>

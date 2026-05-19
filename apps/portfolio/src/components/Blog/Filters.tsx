@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const TAG_BASE =
-  "relative inline-flex items-center gap-1 px-4 py-[9px] border border-line rounded-full text-[13.5px] font-medium lowercase bg-ink-2 text-cream transition-[background-color,color,transform] duration-[220ms] ease-blog z-[1] hover:-translate-y-0.5 hover:-rotate-[1.5deg]";
+  "relative inline-flex items-center gap-1 px-4 py-[9px] border border-line rounded-full text-[13px] font-medium lowercase bg-ink-2 text-cream transition-[background-color,color,transform] duration-220 ease-blog z-1 hover:-translate-y-0.5 hover:rotate-[-1.5deg]";
 const TAG_ON = "bg-cream! text-ink! -rotate-1!";
 
 export default function Filters({
@@ -23,11 +23,7 @@ export default function Filters({
           <span>posts in the archive</span>
         </h2>
       </div>
-      <div
-        className="flex flex-wrap gap-2"
-        role="tablist"
-        aria-label="Filter by tag"
-      >
+      <nav className="flex flex-wrap gap-2" aria-label="Filter by tag">
         {tags.map((t) => {
           const isOn = active === t;
           const href =
@@ -36,16 +32,15 @@ export default function Filters({
             <Link
               key={t}
               href={href}
-              role="tab"
-              aria-selected={isOn}
+              aria-current={isOn ? "page" : undefined}
               className={isOn ? `${TAG_BASE} ${TAG_ON}` : TAG_BASE}
               scroll={false}
             >
               <span
                 className={
                   isOn
-                    ? "text-cream-2 transition-colors duration-[220ms]"
-                    : "text-muted transition-colors duration-[220ms]"
+                    ? "text-cream-2 transition-colors duration-220"
+                    : "text-muted transition-colors duration-220"
                 }
               >
                 #
@@ -53,14 +48,14 @@ export default function Filters({
               {t}
               {isOn && (
                 <span
-                  className="absolute -right-[3px] -top-[3px] w-2.5 h-2.5 rounded-full bg-accent shadow-[0_0_0_2px_var(--color-ink)]"
+                  className="absolute right-[-3px] top-[-3px] w-2.5 h-2.5 rounded-full bg-accent shadow-[0_0_0_2px_var(--color-ink)]"
                   aria-hidden="true"
                 />
               )}
             </Link>
           );
         })}
-      </div>
+      </nav>
     </div>
   );
 }

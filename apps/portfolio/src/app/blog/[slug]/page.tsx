@@ -1,5 +1,4 @@
 import "@open-notion/assets/doc.css";
-import "@open-notion/assets/hydration.js";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DocRenderer } from "@open-notion/serializers/react";
@@ -12,6 +11,7 @@ import ReadingProgress from "@/components/Blog/post/ReadingProgress";
 import ScoreMeter from "@/components/Blog/post/ScoreMeter";
 import Share from "@/components/Blog/post/Share";
 import BlogPostJsonLd from "@/components/Blog/post/BlogPostJsonLd";
+import Script from "next/script";
 
 type RouteParams = Promise<{ slug: string }>;
 
@@ -60,7 +60,13 @@ export default async function PostPage({ params }: { params: RouteParams }) {
   const initialScore = await getPostScore(post.slug);
 
   return (
-    <article className="bg-ink text-cream min-h-full w-full pt-20">
+    <article className="bg-ink text-cream min-h-full w-full pt-20 ">
+      <Script
+        src="https://cdn.jsdelivr.net/npm/@open-notion/assets@latest/hydration.js/+esm"
+        type="module"
+        strategy="afterInteractive"
+      />
+
       <BlogPostJsonLd post={post} />
       <ReadingProgress />
 
@@ -74,14 +80,16 @@ export default async function PostPage({ params }: { params: RouteParams }) {
 
         <div className="min-w-0 max-w-[720px] justify-self-center w-full">
           <PostHeader post={post} />
-          <div className="pb-14" data-post-body>
+
+          {/* Dark is needed for the Editor */}
+          <div className="dark pb-14" data-post-body>
             <DocRenderer doc={post.body} />
           </div>
           <PostFooter prev={post.prev ?? null} next={post.next ?? null} />
         </div>
 
         <aside className="sticky top-8" aria-label="Article actions">
-          <div className="sticky top-8 flex flex-col gap-7 pt-1 max-[1100px]:static max-[1100px]:flex-row max-[1100px]:flex-wrap max-[1100px]:gap-8 max-[1100px]:mt-8 max-[1100px]:pt-6 max-[1100px]:border-t max-[1100px]:border-line max-[1100px]:[&>*]:flex-1 max-[1100px]:[&>*]:basis-[240px]">
+          <div className="sticky top-8 flex flex-col gap-7 pt-1 max-[1100px]:static max-[1100px]:flex-row max-[1100px]:flex-wrap max-[1100px]:gap-8 max-[1100px]:mt-8 max-[1100px]:pt-6 max-[1100px]:border-t max-[1100px]:border-line max-[1100px]:*:flex-1 max-[1100px]:*:basis-[240px]">
             <ScoreMeter slug={post.slug} initialScore={initialScore} />
             <Share url={url} title={post.title} />
           </div>
