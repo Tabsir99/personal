@@ -265,6 +265,44 @@ html {
     font-feature-settings: "liga", "kern";
   }
 
+  /* Section heading — serif, normal weight, tight tracking, with ligatures.
+     Replaces the inline `font-serif font-normal tracking-tight
+     font-features-['liga','kern']` chain that lived on every section title. */
+  .h-serif {
+    font-family: var(--serif);
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    font-feature-settings: "liga", "kern";
+  }
+
+  /* Small eyebrow label with a leading hairline.
+     Replaces the inline mono-uppercase + before:bar chain used by section
+     intros (about, footer, now, endorsement). */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-muted);
+  }
+  .eyebrow::before {
+    content: "";
+    width: 1.5rem;
+    height: 1px;
+    background: var(--color-muted);
+  }
+
+  /* Inline `<em>` → italic accent — repeated across hero, voices, writing.
+     Apply on a wrapper to scope the rule to descendant `<em>` elements. */
+  .em-accent em {
+    font-style: italic;
+    color: var(--color-accent);
+  }
+
   /* ===== Marginalia =====
        Small italic gutter notes — live in the RIGHT margin only,
        so they never collide with the left rail labels. */

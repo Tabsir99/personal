@@ -15,14 +15,12 @@ export default function Filters({
 }) {
   return (
     <div className="sticky top-0 bg-ink z-10 pt-4 pb-[22px] mb-6 border-b border-line before:content-[''] before:absolute before:-left-8 before:-right-8 before:top-0 before:bottom-0 before:bg-ink before:-z-10">
-      <div className="flex justify-between items-baseline mb-[18px]">
-        <h2 className="m-0 text-3xl tracking-tight font-black flex items-baseline gap-3.5">
-          <span className="tabular-nums font-mono text-lg text-accent bg-accent/8 px-2.5 py-1 rounded-md">
-            {String(count).padStart(2, "0")}
-          </span>
-          <span>posts in the archive</span>
-        </h2>
-      </div>
+      <h2 className="m-0 mb-[18px] text-3xl tracking-tight font-black flex items-baseline gap-3.5">
+        <span className="tabular-nums font-mono text-lg text-accent bg-accent/8 px-2.5 py-1 rounded-md">
+          {String(count).padStart(2, "0")}
+        </span>
+        <span>posts in the archive</span>
+      </h2>
       <nav className="flex flex-wrap gap-2" aria-label="Filter by tag">
         {tags.map((t) => {
           const isOn = active === t;
@@ -37,18 +35,14 @@ export default function Filters({
               scroll={false}
             >
               <span
-                className={
-                  isOn
-                    ? "text-cream-2 transition-colors duration-220"
-                    : "text-muted transition-colors duration-220"
-                }
+                className={`transition-colors duration-220 ${isOn ? "text-cream-2" : "text-muted"}`}
               >
                 #
               </span>
               {t}
               {isOn && (
                 <span
-                  className="absolute right-[-3px] top-[-3px] w-2.5 h-2.5 rounded-full bg-accent shadow-[0_0_0_2px_var(--color-ink)]"
+                  className="absolute right-[-3px] top-[-3px] size-2.5 rounded-full bg-accent shadow-[0_0_0_2px_var(--color-ink)]"
                   aria-hidden="true"
                 />
               )}

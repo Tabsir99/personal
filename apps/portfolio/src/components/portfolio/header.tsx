@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { NavLink } from "@/components/ui/nav-link";
 import { SECTIONS } from "./sections-data";
 
@@ -6,15 +5,7 @@ export function Header() {
   const navItems = SECTIONS.filter((s) => s.inNav);
 
   return (
-    <header
-      className={cn(
-        "fixed top-[20px] left-1/2 z-100 inline-flex -translate-x-1/2 -translate-y-2 items-center gap-5 rounded-full border py-[6px] pr-[8px] pl-[14px] whitespace-nowrap opacity-0 shadow-[0_10px_40px_color-mix(in_oklab,black_45%,transparent),inset_0_1px_0_color-mix(in_oklab,white_3%,transparent)] backdrop-blur-[20px] backdrop-saturate-180",
-        "bg-ink/78 transition-[border-color,background] duration-300 ease-linear",
-        "animate-header-in",
-        "border-line",
-        "[html[data-scrolled]_&]:border-accent/18",
-      )}
-    >
+    <header className="fixed top-[20px] left-1/2 z-100 inline-flex -translate-x-1/2 -translate-y-2 items-center gap-5 rounded-full border border-line py-[6px] pr-[8px] pl-[14px] whitespace-nowrap opacity-0 shadow-[0_10px_40px_color-mix(in_oklab,black_45%,transparent),inset_0_1px_0_color-mix(in_oklab,white_3%,transparent)] backdrop-blur-[20px] backdrop-saturate-180 bg-ink/78 transition-[border-color,background] duration-300 ease-linear animate-header-in [html[data-scrolled]_&]:border-accent/18">
       <NavLink
         href="/#hero"
         className="font-serif text-[15px] text-cream tracking-tight"
@@ -27,7 +18,7 @@ export function Header() {
       </NavLink>
       <nav
         aria-label="Sections"
-        className="flex gap-5 border-l border-line py-0 pr-1 pl-2 max-xl:hidden"
+        className="flex gap-5 border-l border-line pr-1 pl-2 max-xl:hidden"
       >
         {navItems.map((it) => (
           <NavLink key={it.id} href={`#${it.id}`} data-nav={it.id}>
@@ -39,7 +30,7 @@ export function Header() {
         href="#contact"
         className="rounded-full border border-line px-3 py-[6px] uppercase tracking-[0.08em] text-xxs hover:border-accent hover:bg-accent/8"
       >
-        <span className="h-[6px] w-[6px] animate-pulse-soft rounded-full bg-phosphor shadow-[0_0_8px_var(--color-phosphor)]"></span>
+        <span className="size-1.5 animate-pulse-soft rounded-full bg-phosphor shadow-[0_0_8px_var(--color-phosphor)]"></span>
         Available
       </NavLink>
     </header>

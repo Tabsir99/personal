@@ -62,26 +62,14 @@ export function Stack() {
         not stack-religious.
       </span>
       <div className="page-shell">
-        <div
-          className={cn(
-            "grid grid-cols-2 gap-20 mb-20 items-end",
-            "max-xl:grid-cols-1",
-          )}
-        >
-          <h2
-            className={cn(
-              "font-serif font-normal tracking-tight font-features-['liga','kern']",
-              "text-[clamp(40px,5.5vw,76px)] leading-[1.02]",
-            )}
-          >
+        <div className="grid grid-cols-2 gap-20 mb-20 items-end max-xl:grid-cols-1">
+          <h2 className="h-serif text-[clamp(40px,5.5vw,76px)] leading-[1.02]">
             The tools
             <br />I lean on
             <br />
             <em className="text-accent italic">most days.</em>
           </h2>
-          <p
-            className={cn("text-base text-cream-2 max-w-[420px] leading-[1.6]")}
-          >
+          <p className="text-base text-cream-2 max-w-[420px] leading-[1.6]">
             Stack-fluent rather than stack-religious. I use what fits the team,
             the deadline, and the problem. These are the ones I've shipped to
             production this year.
@@ -89,42 +77,22 @@ export function Stack() {
         </div>
         <div
           data-reveal-stagger
-          className={cn(
-            "grid grid-cols-4 border-t border-l border-line",
-            "max-xl:grid-cols-2",
-          )}
+          className="grid grid-cols-4 border-t border-l border-line max-xl:grid-cols-2"
         >
           {STACK_CATEGORIES.map((cat, i) => (
             <div
               key={i}
               style={{ "--i": i } as React.CSSProperties}
-              className={cn(
-                "border-r border-b border-line",
-                "px-6 py-7 min-h-[220px]",
-                "transition-[background] duration-300",
-                "hover:bg-accent/3",
-              )}
+              className="border-r border-b border-line px-6 py-7 min-h-[220px] transition-[background] duration-300 hover:bg-accent/3"
             >
-              <h3
-                className={cn(
-                  "flex items-center gap-2 mb-[22px] font-normal",
-                  "font-mono text-xxs uppercase tracking-widest text-accent",
-                  "after:content-[''] after:flex-1 after:h-px after:bg-line",
-                )}
-              >
+              <h3 className="flex items-center gap-2 mb-[22px] font-normal font-mono text-xxs uppercase tracking-widest text-accent after:content-[''] after:flex-1 after:h-px after:bg-line">
                 {String(i + 1).padStart(2, "0")} · {cat.label}
               </h3>
               <div className="flex flex-col gap-2.5">
                 {cat.items.map(([name, lvl], j) => (
                   <div
                     key={j}
-                    className={cn(
-                      "flex items-center justify-between py-1",
-                      "font-mono text-sm text-cream-2",
-                      "border-b border-dashed border-transparent",
-                      "transition-[color,border-color] duration-200",
-                      "hover:text-accent hover:border-line",
-                    )}
+                    className="flex items-center justify-between py-1 font-mono text-sm text-cream-2 border-b border-dashed border-transparent transition-[color,border-color] duration-200 hover:text-accent hover:border-line"
                   >
                     <span>{name}</span>
                     <span className="flex gap-0.5">
@@ -132,7 +100,7 @@ export function Stack() {
                         <span
                           key={k}
                           className={cn(
-                            "w-1 h-1 rounded-full",
+                            "size-1 rounded-full",
                             k < lvl ? "bg-accent" : "bg-line",
                           )}
                         />

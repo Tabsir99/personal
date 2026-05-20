@@ -38,31 +38,14 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className={cn(
-        "relative h-screen min-h-[720px] overflow-hidden p-0 z-50",
-        "max-xl:h-auto max-xl:min-h-screen",
-      )}
+      className="relative h-screen min-h-[720px] overflow-hidden z-50 max-xl:h-auto max-xl:min-h-screen"
     >
       <div
-        className="pointer-events-none absolute inset-0 z-0"
         aria-hidden="true"
-      >
-        <div
-          className={cn(
-            "absolute inset-0",
-            "bg-[linear-gradient(to_right,color-mix(in_oklab,var(--color-cream)_4%,transparent)_1px,transparent_1px)] bg-size-[12.5%_100%]",
-            "mask-[radial-gradient(ellipse_at_60%_50%,black_30%,transparent_75%)]",
-          )}
-        ></div>
-      </div>
+        className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(to_right,color-mix(in_oklab,var(--color-cream)_4%,transparent)_1px,transparent_1px)] bg-size-[12.5%_100%] mask-[radial-gradient(ellipse_at_60%_50%,black_30%,transparent_75%)]"
+      ></div>
 
-      <div
-        className={cn(
-          "page-shell",
-          "z-1 flex h-full flex-col justify-between pt-24 pb-9",
-          "max-xl:pt-[110px] max-xl:pb-14",
-        )}
-      >
+      <div className="page-shell z-1 flex h-full flex-col justify-between pt-24 pb-9 max-xl:pt-[110px] max-xl:pb-14">
         <div
           className={cn(
             "grid grid-cols-[1.15fr_0.95fr] items-center gap-[clamp(40px,6vw,96px)]",
@@ -72,11 +55,7 @@ export function Hero() {
         >
           {/* LEFT: title + dek + actions */}
           <div className="min-w-0">
-            <h1
-              className={cn(
-                "m-0 mb-7 flex flex-col gap-0 font-normal text-balance",
-              )}
-            >
+            <h1 className="m-0 mb-7 flex flex-col font-normal text-balance">
               <span
                 className={cn(
                   "inline-flex items-baseline gap-1 font-mono font-medium",
@@ -109,21 +88,14 @@ export function Hero() {
                   "max-xl:text-[clamp(48px,12vw,96px)]",
                 )}
               >
-                <span
-                  className={cn(
-                    "block translate-y-[0.4em] opacity-0",
-                    "animate-hero-rise animation-duration-[1s] delay-[450ms]",
-                  )}
-                >
+                <span className="block translate-y-[0.4em] opacity-0 animate-hero-rise animation-duration-[1s] delay-[450ms]">
                   is not
                 </span>
                 <span
                   className={cn(
-                    "block translate-y-[0.4em] opacity-0",
-                    "pl-[clamp(28px,5vw,96px)]",
+                    "em-accent block translate-y-[0.4em] opacity-0",
+                    "pl-[clamp(28px,5vw,96px)] max-xl:pl-6",
                     "animate-hero-rise animation-duration-[1s] delay-[600ms]",
-                    "max-xl:pl-6",
-                    "[&_em]:text-accent [&_em]:italic",
                   )}
                 >
                   a <em>feature.</em>
@@ -133,12 +105,11 @@ export function Hero() {
 
             <p
               className={cn(
-                "font-sans font-light",
-                "text-[clamp(17px,1.55vw,22px)] leading-[1.45] tracking-normal",
-                "text-cream-2",
-                "mx-0 mt-9 mb-11 max-w-[52ch]",
+                "em-accent font-sans font-light",
+                "text-[clamp(17px,1.55vw,22px)] leading-[1.45]",
+                "text-cream-2 mt-9 mb-11 max-w-[52ch]",
                 "opacity-0 animate-hero-fade delay-[900ms]",
-                "[&_em]:italic [&_em]:text-accent [&_em]:px-0.5 [&_em]:text-highlight",
+                "[&_em]:px-0.5 [&_em]:text-highlight",
               )}
             >
               Full-stack web work for teams who&rsquo;d rather{" "}
@@ -146,17 +117,11 @@ export function Hero() {
               them — built so they don&rsquo;t show.
             </p>
 
-            <div
-              className={cn(
-                "flex flex-wrap items-center gap-7",
-                "opacity-0 animate-hero-fade delay-[1050ms]",
-              )}
-            >
+            <div className="flex flex-wrap items-center gap-7 opacity-0 animate-hero-fade delay-[1050ms]">
               <a
                 href="#contact"
                 className={cn(
-                  "group inline-flex items-center gap-3.5",
-                  "px-6 py-4",
+                  "group inline-flex items-center gap-3.5 px-6 py-4",
                   "bg-accent text-ink border border-accent rounded-xs",
                   "font-mono text-xs tracking-widest uppercase",
                   "transition-[background,color] duration-300",
@@ -164,12 +129,7 @@ export function Hero() {
                 )}
               >
                 <span>Start a project</span>
-                <span
-                  className={cn(
-                    "inline-block transition-transform duration-300",
-                    "group-hover:translate-x-1",
-                  )}
-                >
+                <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
                   →
                 </span>
               </a>
@@ -180,35 +140,17 @@ export function Hero() {
           </div>
 
           {/* RIGHT: terminal + Upwork credential beneath it */}
-          <div
-            className={cn(
-              "flex min-w-0 flex-col items-stretch gap-5",
-              "max-xl:max-w-[540px]",
-            )}
-          >
+          <div className="flex min-w-0 flex-col gap-5 max-xl:max-w-[540px]">
             <Terminal title={TERMINAL_TITLE} lines={TERMINAL_LINES} />
           </div>
         </div>
 
-        <div
-          className={cn(
-            "flex items-center gap-5",
-            "opacity-0 animate-hero-fade delay-[1250ms]",
-          )}
-        >
-          <span
-            className={cn(
-              "inline-block font-mono text-xs tracking-widest uppercase",
-              "text-cream",
-              "animate-hero-foot-bob",
-            )}
-          >
+        <div className="flex items-center gap-5 opacity-0 animate-hero-fade delay-[1250ms]">
+          <span className="inline-block font-mono text-xs tracking-widest uppercase text-cream animate-hero-foot-bob">
             ↓ Scroll
           </span>
           <span className="h-px w-7 bg-line"></span>
-          <span
-            className={cn("italic text-sm tracking-[0.005em]", "text-muted")}
-          >
+          <span className="italic text-sm tracking-[0.005em] text-muted">
             Two years shipping. Seventeen projects merged.
           </span>
         </div>

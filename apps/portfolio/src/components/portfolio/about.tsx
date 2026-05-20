@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils";
-
 const STATS = [
   { value: "∼2", label: "Years shipping" },
   { value: "17", label: "Projects merged" },
@@ -14,65 +12,45 @@ export function About() {
   const words = text.split(" ");
 
   return (
-    <section id="about" className="py-[200px]">
+    <section
+      id="about"
+      className="page-shell grid grid-cols-[1fr_1.6fr] gap-10 max-xl:grid-cols-1 items-start"
+    >
       <span className="margin-note top-[220px]">no frameworks worshipped.</span>
 
-      <div className="page-shell">
-        <div
-          className={cn(
-            "grid items-start gap-[120px]",
-            "grid-cols-[1fr_2fr] max-xl:grid-cols-1 max-xl:gap-10",
-          )}
-        >
-          <div data-reveal>
-            <div
-              className={cn(
-                "inline-flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-muted",
-                "before:content-[''] before:w-6 before:h-px before:bg-muted",
-              )}
-            >
-              A short note
-            </div>
-            <div
-              className={cn(
-                "grid grid-cols-2 gap-x-10 gap-y-7",
-                "mt-16 pt-10 border-t border-line",
-              )}
-            >
-              {STATS.map((s) => (
-                <div key={s.label} className="flex flex-col gap-1.5">
-                  <span className="font-serif text-[48px] leading-none text-cream">
-                    {s.value}
-                  </span>
-                  <span className="font-mono text-xxs uppercase tracking-widest text-muted">
-                    {s.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div
-            data-reveal-words
-            className={cn(
-              "font-serif text-[clamp(28px,3.2vw,42px)] leading-[1.22] tracking-tight text-cream",
-            )}
-          >
-            {words.map((w, i) => {
-              const isAccent = ["quiet", "craft", "reality.", "middle"].some(
-                (t) => w.toLowerCase().includes(t),
-              );
-              return (
-                <span
-                  key={i}
-                  className="word"
-                  style={{ "--word-i": i } as React.CSSProperties}
-                >
-                  {isAccent ? <em className="text-accent italic">{w}</em> : w}
-                </span>
-              );
-            })}
-          </div>
+      <div data-reveal className="grid grid-cols-2 gap-x-10 gap-y-7 pt-10 ">
+        <div className="eyebrow col-span-2 border-b border-line pb-10">
+          A short note
         </div>
+        {STATS.map((s) => (
+          <div key={s.label} className="flex flex-col gap-1.5">
+            <span className="font-serif text-[48px] leading-none">
+              {s.value}
+            </span>
+            <span className="font-mono text-xxs uppercase tracking-widest text-muted">
+              {s.label}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div
+        data-reveal-words
+        className="font-serif text-[clamp(28px,3.2vw,42px)] leading-[1.22] tracking-tight"
+      >
+        {words.map((w, i) => {
+          const isAccent = ["quiet", "craft", "reality.", "middle"].some((t) =>
+            w.toLowerCase().includes(t),
+          );
+          return (
+            <span
+              key={i}
+              className="word"
+              style={{ "--word-i": i } as React.CSSProperties}
+            >
+              {isAccent ? <em className="text-accent italic">{w}</em> : w}
+            </span>
+          );
+        })}
       </div>
     </section>
   );

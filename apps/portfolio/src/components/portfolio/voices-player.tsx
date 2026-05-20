@@ -123,15 +123,10 @@ export function VoicesPlayer({ src }: { src: string }) {
 
   return (
     <>
-      <div
-        className={cn(
-          "voices-frame relative w-full aspect-video bg-black border border-line rounded-sm overflow-hidden",
-          "origin-[center_60%] transition-[border-color] duration-500 will-change-transform hover:border-accent/45",
-        )}
-      >
+      <div className="voices-frame relative w-full aspect-video bg-black border border-line rounded-sm overflow-hidden origin-[center_60%] transition-[border-color] duration-500 will-change-transform hover:border-accent/45">
         <video
           ref={videoRef}
-          className="absolute inset-0 w-full h-full block object-cover bg-black cursor-pointer"
+          className="absolute inset-0 w-full h-full object-cover bg-black cursor-pointer"
           src={src}
           playsInline
           preload="metadata"

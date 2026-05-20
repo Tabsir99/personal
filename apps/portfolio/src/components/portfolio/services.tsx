@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { ServiceVisual } from "./service-visual";
 
 /* Services — pinned scroll experience. The wrap is 400vh tall and
@@ -83,9 +82,9 @@ export function Services() {
                     <span className="text-accent">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span style={{ margin: "0 6px" }}>/</span>
+                    <span className="mx-1.5">/</span>
                     <span>{String(SERVICES.length).padStart(2, "0")}</span>
-                    <span style={{ margin: "0 10px" }}>—</span>
+                    <span className="mx-2.5">—</span>
                     <span>{s.label}</span>
                   </div>
                 ))}
@@ -97,10 +96,7 @@ export function Services() {
                   <h2
                     key={i}
                     style={{ "--i": i } as React.CSSProperties}
-                    className={cn(
-                      "svc-title absolute top-0 left-0 font-serif font-normal font-features-['liga','kern']",
-                      "text-[clamp(48px,6vw,88px)] leading-none tracking-tight whitespace-pre-line",
-                    )}
+                    className="svc-title h-serif absolute top-0 left-0 text-[clamp(48px,6vw,88px)] leading-none whitespace-pre-line"
                   >
                     {s.title}
                   </h2>
@@ -133,7 +129,7 @@ export function Services() {
                     {s.frameNum}
                   </div>
                   <ServiceVisual idx={i} />
-                  <div style={{ position: "relative", zIndex: 2 }}>
+                  <div className="relative z-2">
                     <div className="mb-2.5 font-mono text-xs uppercase tracking-widest text-accent">
                       {s.frameLabel}
                     </div>

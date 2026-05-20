@@ -20,10 +20,7 @@ export function WorkList() {
           role="button"
           aria-label={`Show ${p.title} (${p.type}, ${p.year}, ${p.status})`}
           style={{ "--i": i } as React.CSSProperties}
-          className={cn(
-            "work-row group/row relative grid grid-cols-[auto_auto_1fr_auto] items-center gap-5 py-[22px] pr-1.5 border-b border-line cursor-pointer outline-hidden focus-visible:outline-2 focus-visible:outline-accent",
-            "max-xl:grid-cols-[auto_1fr_auto]",
-          )}
+          className="work-row group/row relative grid grid-cols-[auto_auto_1fr_auto] items-center gap-5 py-[22px] pr-1.5 border-b border-line cursor-pointer outline-hidden focus-visible:outline-2 focus-visible:outline-accent max-xl:grid-cols-[auto_1fr_auto]"
         >
           <span
             className="row-glyph font-mono text-[14px] w-5 text-center max-xl:hidden"
@@ -31,12 +28,7 @@ export function WorkList() {
           >
             {p.glyph}
           </span>
-          <span
-            className={cn(
-              "row-title display font-serif text-[clamp(28px,3.2vw,44px)] leading-none tracking-tight text-cream whitespace-nowrap overflow-hidden text-ellipsis",
-              "max-xl:text-3xl",
-            )}
-          >
+          <span className="row-title display font-serif text-[clamp(28px,3.2vw,44px)] leading-none tracking-tight text-cream whitespace-nowrap overflow-hidden text-ellipsis max-xl:text-3xl">
             {p.title}
           </span>
           <span className="row-meta inline-flex items-center gap-1.5 font-mono text-xxs tracking-widest uppercase text-muted-2 whitespace-nowrap">

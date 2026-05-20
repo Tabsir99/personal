@@ -59,7 +59,7 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
           </>
         )}
       </div>
-      <div className="p-10 px-11 flex flex-col gap-5 max-lg:p-7">
+      <div className="py-10 px-11 flex flex-col gap-5 max-lg:p-7">
         <div className="flex justify-between items-center pb-3.5 border-b border-dashed border-cream/8">
           <span className="inline-block bg-accent text-cream px-3 py-[5px] rounded-full font-mono text-xs lowercase tracking-wider">
             featured · {KIND_LABEL[post.kind]}
@@ -68,7 +68,7 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
             {formatDate(post.date)}
           </span>
         </div>
-        <h2 className="text-[clamp(28px,3vw,40px)] font-black tracking-tight leading-[1.05] mt-1.5 mx-0 mb-0">
+        <h2 className="text-[clamp(28px,3vw,40px)] font-black tracking-tight leading-[1.05] mt-1.5 mb-0">
           {post.title}
         </h2>
         <p className="text-cream-2 m-0 max-w-[50ch]">{post.excerpt}</p>

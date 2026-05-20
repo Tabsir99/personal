@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
 
 /* Page-wide cursor-following accent glow. Sits at z-0 (above Atmosphere,
    below <main>'s z-1) so it stays behind all content. */
@@ -46,10 +45,7 @@ export function CursorGlow() {
     <div
       ref={glowRef}
       aria-hidden="true"
-      className={cn(
-        "fixed inset-0 z-0 pointer-events-none opacity-50 transition-opacity duration-400",
-        "bg-[radial-gradient(520px_circle_at_var(--gx,50%)_var(--gy,40%),color-mix(in_oklab,var(--color-accent)_14%,transparent),color-mix(in_oklab,var(--color-accent)_4%,transparent)_40%,transparent_70%)]",
-      )}
+      className="fixed inset-0 z-0 pointer-events-none opacity-50 transition-opacity duration-400 bg-[radial-gradient(520px_circle_at_var(--gx,50%)_var(--gy,40%),color-mix(in_oklab,var(--color-accent)_14%,transparent),color-mix(in_oklab,var(--color-accent)_4%,transparent)_40%,transparent_70%)]"
     />
   );
 }

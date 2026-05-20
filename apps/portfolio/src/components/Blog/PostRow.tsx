@@ -41,13 +41,11 @@ export default function PostRow({
       </div>
       <div className="flex items-center justify-between font-mono text-xs text-muted mb-2 max-sm:flex-col max-sm:items-start max-sm:gap-1.5">
         <div className="tracking-wide">{formatDate(post.date)}</div>
-        <div>
-          <span
-            className={`inline-block px-2.5 py-[3px] rounded-full text-xs tracking-wider lowercase border border-line bg-ink-2 ${KIND_BADGE[post.kind]}`}
-          >
-            {KIND_LABEL[post.kind]}
-          </span>
-        </div>
+        <span
+          className={`inline-block px-2.5 py-[3px] rounded-full text-xs tracking-wider lowercase border border-line bg-ink-2 ${KIND_BADGE[post.kind]}`}
+        >
+          {KIND_LABEL[post.kind]}
+        </span>
       </div>
       <h3 className="m-0 mb-2 text-[clamp(28px,3.5vw,46px)] font-black tracking-[-0.03em] leading-[1.04] relative pb-1">
         <Link

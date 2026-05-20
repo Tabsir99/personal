@@ -1,5 +1,5 @@
 /* Uses `translate` (not `transform: translateY(…)`) to compose with
-   Tailwind v4 translate utilities on .term-card. */
+   the Tailwind v4 translate utility on the terminal wrapper. */
 @keyframes fade-up {
   to {
     opacity: 1;

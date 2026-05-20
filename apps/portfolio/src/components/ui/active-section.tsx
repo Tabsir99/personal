@@ -26,7 +26,6 @@ export function ActiveSectionTracker() {
     let current = "";
     const io = new IntersectionObserver(
       (entries) => {
-        console.log(entries.filter((e) => e.isIntersecting));
         for (const e of entries) {
           if (!e.isIntersecting) continue;
           const id = e.target.id;

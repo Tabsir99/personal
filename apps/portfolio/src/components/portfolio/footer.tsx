@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { NavLink } from "@/components/ui/nav-link";
 
 export function Footer() {
@@ -8,21 +7,12 @@ export function Footer() {
       className="relative pt-[180px] pb-[60px] border-t border-line bg-[linear-gradient(180deg,transparent,color-mix(in_oklab,black_40%,transparent))]"
     >
       <div className="page-shell">
-        <div
-          data-reveal
-          className={cn(
-            "inline-flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-muted before:content-[''] before:w-6 before:h-px before:bg-muted",
-            "mb-10",
-          )}
-        >
+        <div data-reveal className="eyebrow mb-10">
           Currently taking projects · Q3 2026
         </div>
         <h2
           data-reveal
-          className={cn(
-            "font-serif font-normal font-features-['liga','kern']",
-            "text-[clamp(72px,13vw,220px)] leading-[0.88] tracking-[-0.03em] mb-20",
-          )}
+          className="h-serif text-[clamp(72px,13vw,220px)] leading-[0.88] tracking-[-0.03em] mb-20"
         >
           <span className="[-webkit-text-stroke:1px_var(--color-cream)] text-transparent">
             Let&apos;s build

@@ -3,6 +3,9 @@
 import * as React from "react";
 import type { CurrentlyBuilding, NowReadingItem } from "@tabsircg/schemas/site";
 
+const TAPE =
+  "absolute w-20 h-6 -top-2.5 bg-[oklch(85%_0.08_90/0.5)] backdrop-blur-[2px] border border-[oklch(80%_0.05_90/0.5)]";
+
 export default function Aside({
   nowReading,
   currentlyBuilding,
@@ -60,8 +63,8 @@ export default function Aside({
           }}
           onMouseDown={onDown}
         >
-          <div className="absolute w-20 h-6 bg-[oklch(85%_0.08_90/0.5)] backdrop-blur-[2px] border border-[oklch(80%_0.05_90/0.5)] -top-2.5 left-4 rotate-[-4deg]" />
-          <div className="absolute w-20 h-6 bg-[oklch(85%_0.08_90/0.5)] backdrop-blur-[2px] border border-[oklch(80%_0.05_90/0.5)] -top-2.5 right-4 rotate-3" />
+          <div className={`${TAPE} left-4 rotate-[-4deg]`} />
+          <div className={`${TAPE} right-4 rotate-3`} />
           <div className="font-mono text-xs text-muted mb-3.5">
             // now reading
           </div>
@@ -71,8 +74,8 @@ export default function Aside({
                 <span
                   className={
                     i === 0
-                      ? "shrink-0 w-4 h-4 border-[1.5px] rounded-sm mt-0.5 relative bg-accent border-accent after:content-[''] after:absolute after:left-1 after:top-px after:w-1 after:h-[9px] after:border-r-2 after:border-r-cream after:border-b-2 after:border-b-cream after:rotate-45"
-                      : "shrink-0 w-4 h-4 border-[1.5px] border-ink rounded-sm mt-0.5 relative"
+                      ? "shrink-0 size-4 border-[1.5px] rounded-sm mt-0.5 relative bg-accent border-accent after:content-[''] after:absolute after:left-1 after:top-px after:w-1 after:h-[9px] after:border-r-2 after:border-r-cream after:border-b-2 after:border-b-cream after:rotate-45"
+                      : "shrink-0 size-4 border-[1.5px] border-ink rounded-sm mt-0.5 relative"
                   }
                 />
                 <div>

@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { WorkList } from "./list";
 import { WorkViewport } from "./viewport";
 import { WorkMeta } from "./meta";
@@ -23,10 +22,7 @@ export function Work() {
           "--work-still": 0,
         } as React.CSSProperties
       }
-      className={cn(
-        "relative pt-[200px] pb-[180px]",
-        "bg-[radial-gradient(900px_600px_at_80%_0%,color-mix(in_oklab,var(--color-accent)_3.5%,transparent),transparent_60%),linear-gradient(180deg,transparent,color-mix(in_oklab,var(--color-phosphor)_1.5%,transparent)_70%,transparent)]",
-      )}
+      className="relative pt-[200px] pb-[180px] bg-[radial-gradient(900px_600px_at_80%_0%,color-mix(in_oklab,var(--color-accent)_3.5%,transparent),transparent_60%),linear-gradient(180deg,transparent,color-mix(in_oklab,var(--color-phosphor)_1.5%,transparent)_70%,transparent)]"
     >
       <WorkStateIsland />
 
@@ -52,21 +48,14 @@ export function Work() {
               and a couple of weekends that quietly turned into demos. Hover the
               index to wander.
             </p>
-            <a
-              className={cn(
-                "inline-flex items-center gap-2.5 w-max font-mono text-xs tracking-widest uppercase text-muted-2 pb-1 border-b border-transparent",
-                "transition-[color,gap,border-color] duration-250 ease-out",
-                "hover:text-accent hover:gap-3.5 hover:border-b-accent/40",
-                "[&_.arrow]:opacity-70",
-              )}
-            >
+            <a className="inline-flex items-center gap-2.5 w-max font-mono text-xs tracking-widest uppercase text-muted-2 pb-1 border-b border-transparent transition-[color,gap,border-color] duration-250 ease-out hover:text-accent hover:gap-3.5 hover:border-b-accent/40 [&_.arrow]:opacity-70">
               <span>All 17 projects · the full archive</span>
               <span className="arrow">↗</span>
             </a>
           </div>
         </header>
 
-        <div className="grid grid-cols-[0.78fr_1.22fr] gap-14 items-stretch max-xl:grid-cols-1 max-xl:gap-10">
+        <div className="grid grid-cols-[0.78fr_1.22fr] gap-14 max-xl:grid-cols-1 max-xl:gap-10">
           <WorkList />
           <WorkViewport />
         </div>

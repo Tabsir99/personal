@@ -13,7 +13,7 @@ type NavLinkProps = {
 
 // "#" -> placeholder (disabled). mailto/tel/sms or http(s) -> native <a>. Anything else -> next/link.
 const BASE =
-  "inline-flex items-center gap-2 font-mono text-xs text-cream leading-normal transition-colors duration-200 hover:text-accent [&.is-active]:text-accent";
+  "inline-flex items-center gap-2 font-mono text-xs transition-colors duration-200 hover:text-accent [&.is-active]:text-accent";
 
 // Outer modifiers when `underline` is on; the inner span carries the actual underline so it shrinks to text width.
 const UL_OUTER =
