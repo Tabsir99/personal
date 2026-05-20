@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Neighbour } from "@/lib/posts";
 
 const CARD_BASE =
-  "group flex flex-col gap-2 px-6 py-[22px] border border-line rounded-md bg-transparent no-underline text-cream [transition:background-color_220ms_ease,border-color_220ms_ease,transform_220ms_var(--ease-blog)] min-h-[116px] hover:bg-ink-2 hover:border-cream";
+  "group flex flex-col gap-2 px-6 py-[22px] border border-line rounded-md bg-transparent no-underline text-cream [transition:background-color_220ms_ease,border-color_220ms_ease,transform_220ms_var(--ease-soft)] min-h-[116px] hover:bg-ink-2 hover:border-cream";
 const CARD_EMPTY =
   "flex flex-col gap-2 px-6 py-[22px] border border-line border-dashed rounded-md bg-transparent cursor-default min-h-[116px]";
 const DIR_BASE =
@@ -30,7 +30,7 @@ export default function PostFooter({
           >
             <span className={`${DIR_BASE} text-muted`}>
               <span
-                className="text-sm text-accent transition-transform duration-220 ease-blog group-hover:-translate-x-1"
+                className="text-sm text-accent transition-transform duration-220 ease-soft group-hover:-translate-x-1"
                 aria-hidden="true"
               >
                 ←
@@ -55,7 +55,7 @@ export default function PostFooter({
             <span className={`${DIR_BASE} text-muted`}>
               next
               <span
-                className="text-sm text-accent transition-transform duration-220 ease-blog group-hover:translate-x-1"
+                className="text-sm text-accent transition-transform duration-220 ease-soft group-hover:translate-x-1"
                 aria-hidden="true"
               >
                 →

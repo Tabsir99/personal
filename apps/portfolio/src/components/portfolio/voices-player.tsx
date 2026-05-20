@@ -167,7 +167,7 @@ export function VoicesPlayer({ src }: { src: string }) {
       </div>
 
       {started && (
-        <div className="flex items-center gap-4 px-4 py-3 mt-3.5 border border-line bg-ink-2/60 rounded-[3px] opacity-0 animate-voices-fade max-xl:flex-wrap max-xl:gap-2.5 max-xl:p-2.5">
+        <div className="flex items-center gap-4 px-4 py-3 mt-3.5 border border-line bg-ink-2/60 rounded-[3px] opacity-0 animate-fade-in animation-duration-[400ms] max-xl:flex-wrap max-xl:gap-2.5 max-xl:p-2.5">
           <ControlButton
             onClick={toggle}
             ariaLabel={playing ? "Pause" : "Play"}

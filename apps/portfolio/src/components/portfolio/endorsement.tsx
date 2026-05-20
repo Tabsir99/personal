@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { NavLink } from "../ui/nav-link";
 import { Check } from "lucide-react";
+import { BlockQuote } from "../ui/BlockQuote";
 
 /* ===== Endorsement =====
    Sits between the Hero and the About section as an early-page hook —
@@ -15,7 +16,7 @@ export function Endorsement() {
       id="endorsement"
       data-reveal
       className={cn(
-        "page-shell grid grid-cols-[1fr_2fr] gap-10 max-xl:grid-cols-1",
+        "page-shell grid grid-cols-[1fr_2fr] gap-10 max-xl:grid-cols-1 border-y border-line",
       )}
       aria-label="Client testimonial from Zohaib at DataZoro, verified on Upwork"
     >
@@ -48,37 +49,18 @@ export function Endorsement() {
       </aside>
 
       {/* Right column — the actual quote + signature */}
-      <blockquote className="relative pl-[clamp(24px,3vw,48px)] border-l border-line max-xl:pl-5">
-        <p className="font-serif italic text-cream text-[clamp(26px,2.8vw,40px)] leading-[1.22] tracking-tight text-balance">
-          <span
-            className="absolute font-serif text-accent leading-none pointer-events-none left-[clamp(24px,3vw,48px)] ml-[-0.55em] mt-[-0.15em] text-[1.6em] opacity-50 max-xl:left-5"
-            aria-hidden="true"
-          >
-            &ldquo;
-          </span>
-          Quick response and attention to detail. Clean, efficient code and
-          <em className="px-1 text-accent underline underline-offset-4">
-            communication
-          </em>
-          .
-        </p>
-        <footer className="flex items-center flex-wrap gap-3.5 mt-[clamp(28px,3vw,40px)] font-mono text-xs tracking-widest uppercase text-muted">
-          <span className="text-cream font-medium">Zohaib</span>
-          <span> · DataZoro</span>
-          <span
-            className="inline-block w-5 h-px bg-line"
-            aria-hidden="true"
-          ></span>
-          <span>Mar — Jul 2025</span>
-          <span
-            className="inline-block w-5 h-px bg-line"
-            aria-hidden="true"
-          ></span>
-          <span className="inline-flex items-center p-2 border border-line rounded-xs text-accent text-xxs tracking-widest">
-            Repeat hire
-          </span>
-        </footer>
-      </blockquote>
+      <BlockQuote
+        author="Zohaib"
+        company="DataZoro"
+        period="Mar — Jul 2025"
+        badge="Repeat hire"
+      >
+        Quick response and attention to detail. Clean, efficient code and
+        <em className="px-1 text-accent underline underline-offset-4">
+          communication
+        </em>
+        .
+      </BlockQuote>
     </section>
   );
 }

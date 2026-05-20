@@ -84,14 +84,14 @@ export function Terminal({
   return (
     <div
       aria-hidden="true"
-      className="relative overflow-hidden rounded-lg border border-phosphor/20 font-mono bg-[linear-gradient(180deg,color-mix(in_oklab,var(--color-ink-3)_45%,transparent),color-mix(in_oklab,var(--color-ink)_55%,transparent))] [backdrop-filter:blur(14px)_saturate(140%)] [-webkit-backdrop-filter:blur(14px)_saturate(140%)] shadow-[0_0_60px_color-mix(in_oklab,var(--color-phosphor)_5%,transparent),0_30px_80px_color-mix(in_oklab,black_45%,transparent),inset_0_1px_0_color-mix(in_oklab,white_3%,transparent)] opacity-0 translate-y-4 animate-term-fade-up"
+      className="relative overflow-hidden rounded-lg border border-phosphor/20 font-mono bg-[linear-gradient(180deg,color-mix(in_oklab,var(--color-ink-3)_45%,transparent),color-mix(in_oklab,var(--color-ink)_55%,transparent))] [backdrop-filter:blur(14px)_saturate(140%)] [-webkit-backdrop-filter:blur(14px)_saturate(140%)] shadow-[0_0_60px_color-mix(in_oklab,var(--color-phosphor)_5%,transparent),0_30px_80px_color-mix(in_oklab,black_45%,transparent),inset_0_1px_0_color-mix(in_oklab,white_3%,transparent)] opacity-0 translate-y-4 animate-rise-in delay-[850ms]"
     >
       {/* Chrome */}
       <div className="flex items-center justify-between px-[14px] py-[10px] border-b border-phosphor/15 bg-black/20">
         <div className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-accent/80"></span>
           <span className="size-2 rounded-full bg-field-gray/40"></span>
-          <span className="size-2 rounded-full bg-phosphor/85 animate-term-pulse-dot"></span>
+          <span className="size-2 rounded-full bg-phosphor/85 animate-pulse"></span>
         </div>
         <div className="text-xxs tracking-[0.22em] uppercase text-muted/75">
           {title}
@@ -109,7 +109,7 @@ export function Terminal({
             <span className="opacity-55">:~$ </span>
             <span ref={typedRef} className="text-cream"></span>
             {phase === "cmd" && (
-              <span className="inline-block align-text-bottom ml-0.5 mb-px w-1.5 h-3.5 bg-phosphor animate-term-cursor-blink"></span>
+              <span className="inline-block align-text-bottom ml-0.5 mb-px w-1.5 h-3.5 bg-phosphor animate-blink"></span>
             )}
           </div>
 
@@ -124,7 +124,7 @@ export function Terminal({
               <span className="opacity-55">@</span>
               <span className="text-accent">field</span>
               <span className="opacity-55">:~$ </span>
-              <span className="inline-block align-text-bottom ml-0.5 mb-px w-1.5 h-3.5 bg-phosphor animate-term-cursor-blink"></span>
+              <span className="inline-block align-text-bottom ml-0.5 mb-px w-1.5 h-3.5 bg-phosphor animate-blink"></span>
             </div>
           )}
         </div>
@@ -134,7 +134,7 @@ export function Terminal({
           className="absolute inset-0 pointer-events-none opacity-[0.07] overflow-hidden"
           aria-hidden="true"
         >
-          <div className="absolute left-0 right-0 h-px bg-[linear-gradient(90deg,transparent,var(--color-phosphor),transparent)] animate-term-scan"></div>
+          <div className="absolute left-0 right-0 h-px bg-[linear-gradient(90deg,transparent,var(--color-phosphor),transparent)] animate-scan"></div>
         </div>
       </div>
     </div>

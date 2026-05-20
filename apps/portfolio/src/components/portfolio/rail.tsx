@@ -14,7 +14,7 @@ export function Rail() {
   return (
     <div
       aria-hidden="true"
-      className="fixed top-24 bottom-14 left-(--rail-x) w-px z-50 pointer-events-none opacity-0 animate-rail-in"
+      className="fixed top-24 bottom-14 left-(--rail-x) w-px z-50 pointer-events-none opacity-0 animate-fade-in delay-100"
     >
       <div className="absolute inset-0 bg-line"></div>
       <div className="absolute left-[-3px] top-[-3px] size-2 border border-muted-2 rounded-full bg-ink"></div>
@@ -37,7 +37,7 @@ export function Rail() {
         </div>
       ))}
       <div
-        className="absolute left-[-3px] size-2 bg-accent rounded-full shadow-[0_0_14px_color-mix(in_oklab,var(--color-accent)_70%,transparent)] -translate-y-1/2 transition-[top] duration-60 ease-linear animate-rail-breath after:content-[''] after:absolute after:left-[12px] after:top-1/2 after:w-[22px] after:h-px after:bg-accent after:-translate-y-1/2 after:opacity-50"
+        className="absolute left-[-3px] size-2 bg-accent rounded-full shadow-[0_0_14px_color-mix(in_oklab,var(--color-accent)_70%,transparent)] -translate-y-1/2 transition-[top] duration-60 ease-linear animate-pulse after:content-[''] after:absolute after:left-[12px] after:top-1/2 after:w-[22px] after:h-px after:bg-accent after:-translate-y-1/2 after:opacity-50"
         style={{ top: "calc(var(--scroll-progress, 0) * 1%)" }}
       ></div>
     </div>

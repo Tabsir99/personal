@@ -82,7 +82,7 @@ export default function RootLayout({
         <Header />
         <ScrollObserver />
         <ActiveSectionTracker />
-        <main>{children}</main>
+        <main className=" py-10">{children}</main>
         <Footer />
       </body>
     </html>

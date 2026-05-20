@@ -24,17 +24,17 @@ export default function PageTitle({
       </nav>
       <h1 className="m-0 font-serif italic text-cream leading-[0.85] tracking-[-0.055em] text-[clamp(80px,12vw,200px)]">
         <span
-          className="inline-block opacity-0 translate-y-10 animate-blog-rise"
+          className="inline-block opacity-0 translate-y-10 animate-rise-in"
           style={{ animationDelay: "80ms" }}
         >
           {heading}
-          <span className="not-italic text-accent inline-block animate-blog-dot-bounce origin-bottom">
+          <span className="not-italic text-accent inline-block animate-bounce origin-bottom">
             .
           </span>
         </span>
       </h1>
       <p
-        className="text-[clamp(18px,1.6vw,22px)] leading-[1.45] text-cream-2 max-w-[56ch] mt-7 mb-0 font-light opacity-0 translate-y-5 animate-blog-rise"
+        className="text-[clamp(18px,1.6vw,22px)] leading-[1.45] text-cream-2 max-w-[56ch] mt-7 mb-0 font-light opacity-0 translate-y-5 animate-rise-in"
         style={{ animationDelay: "320ms" }}
       >
         {tagline}

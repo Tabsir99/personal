@@ -78,7 +78,7 @@ export function ProjectStill({
               style={{ "--i": j } as React.CSSProperties}
               className="work-still-play absolute inset-0 z-3 flex flex-col items-center justify-center gap-3 pointer-events-none"
             >
-              <span className="absolute w-24 h-24 border border-accent rounded-full opacity-60 animate-ring-pulse"></span>
+              <span className="absolute w-24 h-24 border border-accent rounded-full opacity-60 animate-expand-pulse"></span>
               <span className="relative z-1 text-3xl text-accent [text-shadow:0_0_24px_color-mix(in_oklab,var(--color-accent)_60%,transparent)]">
                 ▶
               </span>

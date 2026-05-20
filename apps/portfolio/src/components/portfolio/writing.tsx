@@ -1,5 +1,7 @@
 /* ===== Writing ===== */
 
+import { H2 } from "../ui/H2";
+
 const ARTICLES = [
   {
     num: "01",
@@ -35,40 +37,33 @@ const ARTICLES = [
 
 export function Writing() {
   return (
-    <section id="writing" className="section-pad">
-      <div className="page-shell">
-        <div className="em-accent flex justify-between items-end mb-14 max-xl:flex-col max-xl:items-start max-xl:gap-4">
-          <h2 className="h-serif text-[clamp(52px,7vw,96px)] leading-none">
-            <em>Notes</em>
-            <br />
-            from the keyboard.
-          </h2>
-          <div className="font-mono text-xs tracking-widest text-muted text-right max-xl:text-left">
-            <div>{ARTICLES.length} posts</div>
-            <div className="mt-1.5 text-muted-2">read more →</div>
-          </div>
-        </div>
-        <div data-reveal-stagger className="border-t border-line">
-          {ARTICLES.map((a, i) => (
-            <a
-              key={a.num}
-              style={{ "--i": i } as React.CSSProperties}
-              className="group grid grid-cols-[80px_100px_1fr_140px_100px] gap-10 items-center py-7 border-b border-line transition-colors duration-300 hover:bg-accent/2"
-            >
-              <div className="font-mono text-xs text-muted-2">{a.num}</div>
-              <div className="font-mono text-xs text-muted">{a.date}</div>
-              <h3 className="h-serif text-[26px] leading-[1.2] transition-colors duration-300 group-hover:text-accent">
-                {a.title}
-              </h3>
-              <div className="font-mono text-xs text-muted tracking-wider">
-                {a.meta}
-              </div>
-              <div className="justify-self-end font-mono text-xs text-muted">
-                Read ↗
-              </div>
-            </a>
-          ))}
-        </div>
+    <section id="writing" className="page-shell flex flex-col gap-10">
+      <H2 className="em-accent">
+        <em>Notes</em>
+        <br />
+        from the keyboard.
+      </H2>
+
+      <div data-reveal-stagger className="border-t border-line">
+        {ARTICLES.map((a, i) => (
+          <a
+            key={a.num}
+            style={{ "--i": i } as React.CSSProperties}
+            className="group grid grid-cols-[80px_100px_1fr_140px_100px] gap-10 items-center py-7 border-b border-line transition-colors duration-300 hover:bg-accent/2"
+          >
+            <div className="font-mono text-xs text-muted">{a.num}</div>
+            <div className="font-mono text-xs text-muted">{a.date}</div>
+            <h3 className="h-serif text-[26px] leading-[1.2] transition-colors duration-300 group-hover:text-accent">
+              {a.title}
+            </h3>
+            <div className="font-mono text-xs text-muted tracking-wider">
+              {a.meta}
+            </div>
+            <div className="justify-self-end font-mono text-xs text-muted">
+              Read ↗
+            </div>
+          </a>
+        ))}
       </div>
     </section>
   );

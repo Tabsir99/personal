@@ -8,11 +8,26 @@ export const H2 = ({ className, children, ...props }: H2Props) => {
     <h2
       {...props}
       className={cn(
-        "h-serif text-[clamp(48px,6.4vw,96px)] leading-[0.98]",
+        "h-serif text-[clamp(2.5rem,7vw,5rem)] leading-[0.88] tracking-tight",
         className,
       )}
     >
       {children}
     </h2>
+  );
+};
+
+interface H3Props extends HTMLAttributes<HTMLElement> {}
+export const H3 = ({ className, children, ...props }: H3Props) => {
+  return (
+    <h3
+      {...props}
+      className={cn(
+        "font-mono text-xs tracking-widest uppercase text-muted mb-2",
+        className,
+      )}
+    >
+      {children}
+    </h3>
   );
 };

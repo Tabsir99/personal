@@ -3,11 +3,8 @@
 
 /* Persistent UI (sit above content via z-index) -------------------- */
 @import "../components/portfolio/styles/atmosphere.css";
-@import "../components/portfolio/styles/rail.css";
-@import "../components/portfolio/styles/header.css";
 
 /* Sections, in document order -------------------------------------- */
-@import "../components/portfolio/styles/hero.css";
 @import "../components/portfolio/styles/terminal.css";
 @import "../components/portfolio/styles/services.css";
 @import "../components/portfolio/styles/work.css";
@@ -44,148 +41,104 @@ html {
   --rail-x: 56px;
   --rail-gutter: 180px;
   --gutter: 96px;
-  --max-w: 1440px;
+  --max-w: 1600px;
 
   /* ---------- Easing ----------
-     Shared "soft" curve used by most enter/rise animations.
-     `blog` curve is the blog/post sections' standard ease (was inline
-     var(--ease-blog) in blog.css/blog-post.css). */
+     Single shared ease curve for every animation alias and every
+     transition that previously used --ease-blog. */
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-blog: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-  /* ---------- Animation shorthands ----------
-     Each --animate-{name} pairs with a @keyframes {name} rule —
-     `pulse` lives here, the rest live in their section CSS files
-     (header.css, rail.css, hero.css, terminal.css, atmosphere.css,
-     work.css, voices.css). All @keyframes are globally scoped once
-     loaded, so the aliases here resolve regardless of where the
-     rule body lives. Phase-2 agents may relocate keyframes into
-     this @theme block as they convert each section. */
-  --animate-pulse-soft: pulse 1.5s ease-in-out infinite;
-  --animate-pulse-slow: pulse 1.6s ease-in-out infinite;
-  --animate-header-in: header-in 0.7s var(--ease-soft) forwards 0.05s;
-  --animate-rail-in: rail-in 0.9s var(--ease-soft) forwards 0.1s;
-  --animate-rail-breath: rail-breath 2.4s ease-in-out infinite;
-  --animate-hero-rise: hero-rise 0.9s var(--ease-soft) forwards;
-  --animate-hero-fade: hero-fade 0.9s ease forwards;
-  --animate-hero-foot-bob: hero-foot-bob 2.4s ease-in-out infinite;
-  --animate-term-fade-up: fade-up 0.9s var(--ease-soft) forwards 0.85s;
-  --animate-term-pulse-dot: term-pulse-dot 2s ease-in-out infinite;
-  --animate-term-cursor-blink: term-cursor-blink 1s steps(2) infinite;
-  --animate-term-scan: term-scan 4.4s linear infinite;
-  --animate-atm-far-breathe: atm-far-breathe 22s ease-in-out infinite;
-  --animate-atm-orb-drift-a: atm-orb-drift-a 28s ease-in-out infinite;
-  --animate-atm-orb-drift-b: atm-orb-drift-b 34s ease-in-out infinite;
-  --animate-atm-orb-drift-c: atm-orb-drift-c 40s ease-in-out infinite;
-  --animate-vp-wipe: vp-wipe 620ms var(--ease-soft);
-  --animate-ring-pulse: ring-pulse 2.4s ease-in-out infinite;
-  --animate-ken-burns: ken-burns 14s ease-in-out infinite alternate;
-  --animate-voices-fade: voices-fade 0.4s ease forwards;
+  /* ---------- Animation tokens ----------
+     Names describe the effect, not the section. One alias per effect;
+     consumers override duration/delay/direction via `animation-duration-[…]`,
+     `delay-*`, `[animation-direction:reverse]`, or per-element CSS vars
+     (see `--rise-x/--rise-y` on rise-in, `--drift-x/--drift-y/--drift-s`
+     on drift). Bounce keeps an overshoot cubic-bezier — the curve IS
+     the effect. */
+  --animate-pulse: pulse 1.5s var(--ease-soft) infinite;
+  --animate-fade-in: fade-in 0.9s var(--ease-soft) forwards;
+  --animate-rise-in: rise-in 0.9s var(--ease-soft) forwards;
+  --animate-blink: blink 1s steps(2) infinite;
+  --animate-scan: scan 4.4s linear infinite;
+  --animate-breathe: breathe 22s var(--ease-soft) infinite;
+  --animate-drift: drift 28s var(--ease-soft) infinite;
+  --animate-expand-pulse: expand-pulse 2.4s var(--ease-soft) infinite;
+  --animate-ken-burns: ken-burns 14s var(--ease-soft) infinite alternate;
+  --animate-wipe: wipe 620ms var(--ease-soft);
+  --animate-bounce: bounce 2.4s 1.4s cubic-bezier(0.5, 1.6, 0.4, 1) infinite;
+  --animate-bar-pulse: bar-pulse 2.4s var(--ease-soft) infinite;
+  --animate-shrink: shrink 4s var(--ease-soft) infinite;
+  --animate-fill: fill 1.2s 0.2s var(--ease-soft) both;
+  --animate-ring-burst: ring-burst 0.52s var(--ease-soft) forwards;
+  --animate-count-burst: count-burst 0.7s var(--ease-soft) forwards;
 
-  /* ---------- Blog / post animations ---------- */
-  --animate-blog-rise: blog-rise 0.9s var(--ease-blog) forwards;
-  --animate-blog-dot-bounce: blog-dot-bounce 2.4s 1.4s
-    cubic-bezier(0.5, 1.6, 0.4, 1) infinite;
-  --animate-blog-spin: blog-spin 14s linear infinite;
-  --animate-blog-bar: blog-bar 2.4s ease-in-out infinite;
-  --animate-blog-shrink: blog-shrink 4s ease-in-out infinite;
-  --animate-post-bar-fill: post-bar-fill 1.2s 0.2s var(--ease-blog) both;
-  --animate-score-pulse: score-pulse 0.52s var(--ease-blog) forwards;
-  --animate-score-burst: score-burst 0.7s var(--ease-blog) forwards;
-
-  /* Shared keyframe — used by header CTA, hero status, now status,
-     and work in-progress dots. Lifted from base.css. */
+  /* Opacity pulse loop. Trough at 0.3; consumers that want a shallower
+     dim can set `--pulse-min` (none currently do, but the var is there). */
   @keyframes pulse {
-    0%,
-    100% {
+    0%, 100% { opacity: 1; }
+    50% { opacity: var(--pulse-min, 0.3); }
+  }
+
+  /* Opacity fade once to 1. */
+  @keyframes fade-in {
+    to { opacity: 1; }
+  }
+
+  /* Translate to (--rise-x, --rise-y) while fading in. Targets set their
+     initial offset via Tailwind `translate-y-*` / `translate-x-*` utilities;
+     this animates the `translate:` longhand so it composes with those
+     utilities (Tailwind v4 emits to `translate:`, not `transform:`).
+     Default end is (0, 0); the header element sets `--rise-x: -50%` so
+     its `-translate-x-1/2` centering is preserved. */
+  @keyframes rise-in {
+    to {
       opacity: 1;
-    }
-    50% {
-      opacity: 0.3;
+      translate: var(--rise-x, 0) var(--rise-y, 0);
     }
   }
 
-  @keyframes blog-rise {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  /* Multi-stop bounce — used on the blog title's full-stop. The overshoot
+     character is in the stop-shape, paired with the bouncy cubic-bezier
+     on the alias. */
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0) scale(1); }
+    70% { transform: translateY(-0.12em) scale(1.1); }
+    82% { transform: translateY(0) scale(1); }
+    88% { transform: translateY(-0.04em) scale(1.02); }
+    94% { transform: translateY(0) scale(1); }
   }
-  @keyframes blog-dot-bounce {
-    0%,
-    60%,
-    100% {
-      transform: translateY(0) scale(1);
-    }
-    70% {
-      transform: translateY(-0.12em) scale(1.1);
-    }
-    82% {
-      transform: translateY(0) scale(1);
-    }
-    88% {
-      transform: translateY(-0.04em) scale(1.02);
-    }
-    94% {
-      transform: translateY(0) scale(1);
-    }
+
+  /* Vertical bar pulse — scaleY loop, used on the featured-card EXPLAIN
+     ANALYZE bars. */
+  @keyframes bar-pulse {
+    0%, 100% { transform: scaleY(0.4); opacity: 0.6; }
+    50% { transform: scaleY(1); opacity: 1; }
   }
-  @keyframes blog-spin {
-    to {
-      transform: rotate(360deg);
-    }
+
+  /* Width oscillation — drives the "↓ 40s → 412ms" benchmark bar on the
+     featured card. */
+  @keyframes shrink {
+    0%, 10% { width: 95%; }
+    60%, 100% { width: 12%; }
   }
-  @keyframes blog-bar {
-    0%,
-    100% {
-      transform: scaleY(0.4);
-      opacity: 0.6;
-    }
-    50% {
-      transform: scaleY(1);
-      opacity: 1;
-    }
+
+  /* One-shot scaleX fill from 0 to 1 — drives the post header read-time bar. */
+  @keyframes fill {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
   }
-  @keyframes blog-shrink {
-    0%,
-    10% {
-      width: 95%;
-    }
-    60%,
-    100% {
-      width: 12%;
-    }
+
+  /* Expanding box-shadow ring that fades out — drives the score-meter tap. */
+  @keyframes ring-burst {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 55%, transparent); }
+    100% { box-shadow: 0 0 0 18px color-mix(in srgb, var(--color-accent) 0%, transparent); }
   }
-  @keyframes post-bar-fill {
-    from {
-      transform: scaleX(0);
-    }
-    to {
-      transform: scaleX(1);
-    }
-  }
-  @keyframes score-pulse {
-    0% {
-      box-shadow: 0 0 0 0
-        color-mix(in srgb, var(--color-accent) 55%, transparent);
-    }
-    100% {
-      box-shadow: 0 0 0 18px
-        color-mix(in srgb, var(--color-accent) 0%, transparent);
-    }
-  }
-  @keyframes score-burst {
-    0% {
-      opacity: 0;
-      transform: translate(-50%, 6px) scale(0.8);
-    }
-    20% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-      transform: translate(-50%, -28px) scale(1);
-    }
+
+  /* "+1" counter that floats up and fades — drives the score-meter burst. */
+  @keyframes count-burst {
+    0% { opacity: 0; transform: translate(-50%, 6px) scale(0.8); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -28px) scale(1); }
   }
 }
 
@@ -245,14 +198,10 @@ html {
   }
 }
 
-@utility section-pad {
-  padding: 140px 0;
-}
-
 @utility page-shell {
   max-width: var(--max-w);
-  margin: 0 auto;
-  padding: 0 var(--gutter) 0 var(--rail-gutter);
+  margin: 0 auto 5rem auto;
+  padding: 5rem var(--gutter) 5rem var(--rail-gutter);
   position: relative;
 }
 
@@ -341,10 +290,6 @@ html {
        are not silently overridden by the animation's forwards-locked
        final value. */
   @keyframes reveal-in {
-    from {
-      opacity: 0;
-      transform: translateY(24px);
-    }
     to {
       opacity: 1;
       transform: translateY(0);
@@ -360,23 +305,15 @@ html {
 
   /* Stagger — each child carries inline style="--i: N" which drives the
        per-child animation-delay. All children flip simultaneously when
-       the parent gets `is-in`; the delay is what cascades them. */
-  @keyframes reveal-stagger-in {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+       the parent gets `is-in`; the delay is what cascades them.
+       Shares `reveal-in` keyframe with [data-reveal]; the per-child initial
+       offset (20px vs 24px) lives on the selector rule below. */
   [data-reveal-stagger] > * {
     opacity: 0;
     transform: translateY(20px);
   }
   [data-reveal-stagger].is-in > * {
-    animation: reveal-stagger-in 0.7s var(--ease-soft) forwards;
+    animation: reveal-in 0.7s var(--ease-soft) forwards;
     animation-delay: calc(var(--i, 0) * 70ms);
   }
 
@@ -411,11 +348,6 @@ html {
     }
   }
 }
-
-/* Shared `pulse` keyframe moved to app/globals.css @theme; the
-     --animate-pulse-soft / --animate-pulse-slow aliases there give
-     JSX-side utilities. Section CSS files still reference the keyframe
-     by name (`animation: pulse 1.5s …`) — it's globally scoped. */
 
 /* ===== Responsive: global var overrides + helper-class adjustments =====
      :root var overrides stay unlayered (vars aren't cascade-layered).
@@ -468,7 +400,7 @@ html {
   );
   background-repeat: no-repeat;
   background-size: 0% 100%;
-  transition: background-size 600ms var(--ease-blog);
+  transition: background-size 600ms var(--ease-soft);
 }
 
 /* Score meter conic-gradient ring. Reads --fill (deg) from the inline
@@ -481,3 +413,4 @@ html {
     color-mix(in srgb, var(--color-cream) 8%, transparent) 0
   );
 }
+

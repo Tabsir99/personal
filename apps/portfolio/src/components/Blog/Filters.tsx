@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const TAG_BASE =
-  "relative inline-flex items-center gap-1 px-4 py-[9px] border border-line rounded-full text-sm font-medium lowercase bg-ink-2 text-cream transition-[background-color,color,transform] duration-220 ease-blog z-1 hover:-translate-y-0.5 hover:rotate-[-1.5deg]";
+  "relative inline-flex items-center gap-1 px-4 py-[9px] border border-line rounded-full text-sm font-medium lowercase bg-ink-2 text-cream transition-[background-color,color,transform] duration-220 ease-soft z-1 hover:-translate-y-0.5 hover:rotate-[-1.5deg]";
 const TAG_ON = "bg-cream! text-ink! -rotate-1!";
 
 export default function Filters({

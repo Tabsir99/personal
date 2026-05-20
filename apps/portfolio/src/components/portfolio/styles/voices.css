@@ -1,9 +1,3 @@
-@keyframes voices-fade {
-  to {
-    opacity: 1;
-  }
-}
-
 @layer components {
   /* Frame scales 0.72 → 1.0 as the section's top crosses the viewport.
      Driven by --scroll-y + --section-voices-top from the active-section

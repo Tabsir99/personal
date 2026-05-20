@@ -33,7 +33,7 @@ export default function PostRow({
 }) {
   return (
     <InViewArticle
-      className="group relative grid grid-cols-[56px_1fr] grid-rows-[auto_auto_auto_auto] gap-x-6 pt-7 pb-8 border-b border-line transition-[padding] duration-360 ease-blog first:pt-2 hover:pl-3 max-sm:grid-cols-1"
+      className="group relative grid grid-cols-[56px_1fr] grid-rows-[auto_auto_auto_auto] gap-x-6 pt-7 pb-8 border-b border-line transition-[padding] duration-360 ease-soft first:pt-2 hover:pl-3 max-sm:grid-cols-1"
       style={{ ["--row-i" as string]: idx }}
     >
       <div className="row-span-4 font-mono text-sm text-muted pt-1.5 tabular-nums max-sm:hidden">
@@ -82,7 +82,7 @@ export default function PostRow({
         </div>
         <Link
           href={`/blog/${post.slug}`}
-          className="inline-flex items-center gap-2 font-bold relative py-1 after:content-[''] after:absolute after:left-0 after:right-0 after:bottom-0 after:h-[1.5px] after:bg-cream after:scale-x-0 after:origin-right after:transition-transform after:duration-280 after:ease-blog group-hover:after:scale-x-100 group-hover:after:origin-left [&_svg]:transition-transform [&_svg]:duration-320 [&_svg]:ease-blog group-hover:[&_svg]:translate-x-1.5"
+          className="inline-flex items-center gap-2 font-bold relative py-1 after:content-[''] after:absolute after:left-0 after:right-0 after:bottom-0 after:h-[1.5px] after:bg-cream after:scale-x-0 after:origin-right after:transition-transform after:duration-280 after:ease-soft group-hover:after:scale-x-100 group-hover:after:origin-left [&_svg]:transition-transform [&_svg]:duration-320 [&_svg]:ease-soft group-hover:[&_svg]:translate-x-1.5"
         >
           read
           <svg viewBox="0 0 28 10" width="28" height="10" aria-hidden="true">

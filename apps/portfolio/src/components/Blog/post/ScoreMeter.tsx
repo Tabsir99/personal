@@ -137,7 +137,7 @@ export default function ScoreMeter({
         aria-label={isMaxed ? "Score maxed out" : "Tap to add to score"}
       >
         <span
-          className="absolute inset-0 rounded-full pointer-events-none z-0 animate-score-pulse"
+          className="absolute inset-0 rounded-full pointer-events-none z-0 animate-ring-burst"
           key={pulseKey}
           aria-hidden="true"
         />
@@ -175,7 +175,7 @@ export default function ScoreMeter({
           {bursts.map((b) => (
             <span
               key={b.id}
-              className="absolute left-0 font-mono text-xs font-bold text-accent -translate-x-1/2 animate-score-burst"
+              className="absolute left-0 font-mono text-xs font-bold text-accent -translate-x-1/2 animate-count-burst"
             >
               +1
             </span>

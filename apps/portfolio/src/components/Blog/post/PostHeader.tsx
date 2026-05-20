@@ -85,7 +85,7 @@ export default function PostHeader({ post }: { post: PostMeta }) {
               aria-hidden="true"
             >
               <span
-                className="block h-full bg-cream origin-left animate-post-bar-fill"
+                className="block h-full bg-cream origin-left animate-fill"
                 style={{ width: `${Math.min(100, post.readTime * 4)}%` }}
               />
             </span>
