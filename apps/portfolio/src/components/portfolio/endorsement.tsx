@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { NavLink } from "../ui/nav-link";
 import { Check } from "lucide-react";
 import { BlockQuote } from "../ui/BlockQuote";
@@ -15,9 +14,7 @@ export function Endorsement() {
     <section
       id="endorsement"
       data-reveal
-      className={cn(
-        "page-shell grid grid-cols-[1fr_2fr] gap-10 max-xl:grid-cols-1 border-y border-line",
-      )}
+      className="page-shell grid grid-cols-[1fr_2fr] gap-10 max-xl:grid-cols-1 border-y border-line"
       aria-label="Client testimonial from Zohaib at DataZoro, verified on Upwork"
     >
       <aside className="flex flex-col gap-7 pt-2">

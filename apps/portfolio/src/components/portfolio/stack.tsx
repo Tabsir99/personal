@@ -50,7 +50,7 @@ const STACK_CATEGORIES: { label: string; items: [string, number][] }[] = [
 
 export function Stack() {
   return (
-    <section id="stack" className={cn("page-shell")}>
+    <section id="stack" className="page-shell">
       <span className="margin-note top-[260px]">
         stack-fluent,
         <br />

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type SVGProps } from "react";
 
 /* Abstract visual per service. Was a pure-render component driven by
    `sub` prop; now the parent <Services> is server-rendered, so each
@@ -16,6 +16,20 @@ const visStyle: React.CSSProperties = {
   width: "100%",
   height: "100%",
 };
+
+// idx=1 — wireframe of a UI card. All rects laid out as data; rendered
+// via spread. The lone circle + animated line stay inline below since
+// each is a one-off shape.
+const FRAME1_RECTS: SVGProps<SVGRectElement>[] = [
+  { x: 40, y: 60, width: 320, height: 380, fill: "none", style: { stroke: "var(--color-line)" } },
+  { x: 40, y: 60, width: 320, height: 32, style: { fill: "var(--color-ink-2)" } },
+  { x: 60, y: 120, width: 160, height: 14, style: { fill: "var(--color-accent)" }, opacity: 0.6, "data-anim": "main" },
+  { x: 60, y: 142, width: 240, height: 6, style: { fill: "var(--color-muted)" }, opacity: 0.5 },
+  { x: 60, y: 154, width: 220, height: 6, style: { fill: "var(--color-muted)" }, opacity: 0.5 },
+  { x: 60, y: 190, width: 100, height: 100, fill: "none", style: { stroke: "var(--color-line)" } },
+  { x: 170, y: 190, width: 100, height: 100, fill: "none", style: { stroke: "var(--color-line)" } },
+  { x: 280, y: 190, width: 60, height: 100, fill: "none", style: { stroke: "var(--color-accent)" }, strokeOpacity: 1 },
+];
 
 export function ServiceVisual({ idx }: { idx: number }) {
   const ref = useRef<SVGSVGElement>(null);
@@ -134,72 +148,10 @@ export function ServiceVisual({ idx }: { idx: number }) {
   if (idx === 1) {
     return (
       <svg ref={ref} viewBox="0 0 400 500" style={visStyle}>
-        <rect
-          x="40"
-          y="60"
-          width="320"
-          height="380"
-          fill="none"
-          style={{ stroke: "var(--color-line)" }}
-        />
-        <rect
-          x="40"
-          y="60"
-          width="320"
-          height="32"
-          style={{ fill: "var(--color-ink-2)" }}
-        />
+        {FRAME1_RECTS.map((r, i) => (
+          <rect key={i} {...r} />
+        ))}
         <circle cx="56" cy="76" r="4" style={{ fill: "var(--color-accent)" }} />
-        <rect
-          data-anim="main"
-          x="60"
-          y="120"
-          width="160"
-          height="14"
-          style={{ fill: "var(--color-accent)" }}
-          opacity={0.6}
-        />
-        <rect
-          x="60"
-          y="142"
-          width="240"
-          height="6"
-          style={{ fill: "var(--color-muted)" }}
-          opacity="0.5"
-        />
-        <rect
-          x="60"
-          y="154"
-          width="220"
-          height="6"
-          style={{ fill: "var(--color-muted)" }}
-          opacity="0.5"
-        />
-        <rect
-          x="60"
-          y="190"
-          width="100"
-          height="100"
-          fill="none"
-          style={{ stroke: "var(--color-line)" }}
-        />
-        <rect
-          x="170"
-          y="190"
-          width="100"
-          height="100"
-          fill="none"
-          style={{ stroke: "var(--color-line)" }}
-        />
-        <rect
-          x="280"
-          y="190"
-          width="60"
-          height="100"
-          fill="none"
-          style={{ stroke: "var(--color-accent)" }}
-          strokeOpacity={1}
-        />
         <line
           data-anim="line"
           x1="280"

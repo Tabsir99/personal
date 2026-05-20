@@ -46,7 +46,7 @@ export function ProjectStill({
         aria-hidden="true"
       ></div>
       <div
-        className="display relative z-2 text-[clamp(64px,9vw,132px)] text-cream opacity-[0.08] tracking-tight italic text-center select-none"
+        className="h-serif relative z-2 text-[clamp(64px,9vw,132px)] text-cream opacity-[0.08] tracking-tight italic text-center select-none"
         aria-hidden="true"
       >
         {project.title}

@@ -12,6 +12,19 @@ export type TerminalLine = {
   delayBefore: number;
 };
 
+const PROMPT_PREFIX = (
+  <>
+    <span className="text-phosphor">tabsir</span>
+    <span className="opacity-55">@</span>
+    <span className="text-accent">field</span>
+    <span className="opacity-55">:~$ </span>
+  </>
+);
+
+const BLINK_CURSOR = (
+  <span className="inline-block align-text-bottom ml-0.5 mb-px w-1.5 h-3.5 bg-phosphor animate-blink"></span>
+);
+
 export function Terminal({
   title,
   lines,
@@ -103,14 +116,9 @@ export function Terminal({
       <div className="relative min-h-[232px] px-5 pt-4 pb-5 text-xs leading-[1.7]">
         <div className="relative z-1">
           <div className="text-muted/65">
-            <span className="text-phosphor">tabsir</span>
-            <span className="opacity-55">@</span>
-            <span className="text-accent">field</span>
-            <span className="opacity-55">:~$ </span>
+            {PROMPT_PREFIX}
             <span ref={typedRef} className="text-cream"></span>
-            {phase === "cmd" && (
-              <span className="inline-block align-text-bottom ml-0.5 mb-px w-1.5 h-3.5 bg-phosphor animate-blink"></span>
-            )}
+            {phase === "cmd" && BLINK_CURSOR}
           </div>
 
           <pre
@@ -120,11 +128,8 @@ export function Terminal({
 
           {phase === "idle" && (
             <div className="text-muted/65 mt-1">
-              <span className="text-phosphor">tabsir</span>
-              <span className="opacity-55">@</span>
-              <span className="text-accent">field</span>
-              <span className="opacity-55">:~$ </span>
-              <span className="inline-block align-text-bottom ml-0.5 mb-px w-1.5 h-3.5 bg-phosphor animate-blink"></span>
+              {PROMPT_PREFIX}
+              {BLINK_CURSOR}
             </div>
           )}
         </div>

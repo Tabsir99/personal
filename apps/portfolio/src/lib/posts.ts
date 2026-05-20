@@ -56,6 +56,21 @@ export type Post = PostMeta & {
   next: Neighbour | null;
 };
 
+export const KIND_LABEL: Record<PostMeta["kind"], string> = {
+  essay: "essay",
+  "deep-dive": "deep-dive",
+  "war-story": "war story",
+  notes: "notes",
+};
+
+export function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 const ADMIN_HEADERS = { serverToken: env.SERVER_TOKEN } as const;
 
 async function fetchJson<T>(path: string): Promise<T | null> {

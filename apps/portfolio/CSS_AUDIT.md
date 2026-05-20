@@ -16,6 +16,19 @@ clusters that can collapse to 2.
 
 ---
 
+> **STATUS (May 2026 — post-migration).** The cuts in §8 and the merges
+> in §9 (steps 1–3 + the §6.F drift parameterization) have landed. JSX
+> call-sites are also fully migrated to the new alias names (the §1
+> "old name → new alias" mapping is no longer relevant — every JSX file
+> uses the new names). Sections 1–9 below are kept as historical
+> reference. Newer content is at the bottom:
+>
+> - **§10** — accurate post-migration accounting (renames + deletions)
+> - **§11** — two items from §9 deliberately held back (visual-review-needed)
+> - **§12** — JSX-side dedup audit (new — broader scan beyond the original CSS plan)
+
+---
+
 ## 1. `globals.css` — `@theme` animation aliases (lines 64–94)
 
 Each `--animate-{name}` line is just a JSX-side alias — it lets a
@@ -429,3 +442,495 @@ If you want to go further, in order of safety:
 
 After steps 1–3, total `@keyframes` count drops from **24 → 17** with
 no observable rendering change.
+
+---
+
+## 10. Post-migration accounting
+
+This is what actually landed. Use this section, not §1–§9, if you want
+to know the *current* state.
+
+### 10.A — Renames
+
+All `@theme` animation aliases were renamed to generic effect-named
+forms. Old → new:
+
+| Old | New |
+| --- | --- |
+| `--animate-pulse-soft` | `--animate-pulse` (also absorbs `pulse-slow`'s niche) |
+| `--animate-hero-rise`, `--animate-term-fade-up`, `--animate-blog-rise` | `--animate-rise-in` |
+| `--animate-hero-fade`, `--animate-voices-fade`, `--animate-rail-in` | `--animate-fade-in` |
+| `--animate-term-cursor-blink` | `--animate-blink` |
+| `--animate-term-scan` | `--animate-scan` |
+| `--animate-atm-far-breathe` | `--animate-breathe` |
+| `--animate-atm-orb-drift-{a,b,c}` | `--animate-drift` (one keyframe, parameterized via `--drift-x/--drift-y/--drift-s`) |
+| `--animate-ring-pulse` | `--animate-expand-pulse` |
+| `--animate-vp-wipe` | `--animate-wipe` |
+| `--animate-blog-bar` | `--animate-bar-pulse` |
+| `--animate-blog-shrink` | `--animate-shrink` |
+| `--animate-blog-dot-bounce` | `--animate-bounce` (shadows Tailwind default — no consumer of the default exists) |
+| `--animate-post-bar-fill` | `--animate-fill` |
+| `--animate-score-pulse` | `--animate-ring-burst` |
+| `--animate-score-burst` | `--animate-count-burst` |
+| `--ease-blog` | `--ease-soft` (one shared curve, was identical-in-practice anyway) |
+
+Every JSX call site has been updated.
+
+### 10.B — Deletions
+
+- All §1 dead aliases.
+- `@keyframes blog-spin`, `@keyframes hero-foot-bob`.
+- Utilities `.section-pad` and `.box`.
+- Three CSS files dropped entirely: `header.css`, `hero.css`, `rail.css`.
+  Their keyframes folded into globals.css's `@theme`; the section-specific
+  consumers now use the shared aliases.
+
+### 10.C — Structural changes worth knowing
+
+- **`rise-in` uses `translate:` longhand, not `transform`.** This means
+  Tailwind `translate-y-*` utilities on the target element compose
+  correctly with the animation instead of being clobbered. Header keeps
+  its centered position via `[--rise-x:-50%]` on the element.
+- **`pulse` accepts a `--pulse-min` var** at 50% (default 0.3). No
+  consumer overrides it today, but the override mechanism is there if
+  the rail/terminal dots ever need a shallower trough.
+- **`drift` reads `--drift-x/--drift-y/--drift-s`** with sensible
+  defaults; each orb sets its own values inline. `atmosphere.tsx` also
+  drives duration + direction via inline style.
+- **`reveal-in` and `reveal-stagger-in` are still one keyframe** —
+  `reveal-in` — driven by `[data-reveal]` and `[data-reveal-stagger]`
+  selectors in `@layer components`. Kept separate from `rise-in` because
+  it animates `transform: translateY()` (not `translate:`) so that
+  hover utilities like `hover:translate-x-1` on Stack cards don't get
+  silently overridden by the animation's forwards-locked final value.
+  This is intentional, not an oversight.
+
+### 10.D — Net keyframe count
+
+Pre-migration: 30 keyframes across all CSS files (including the two
+dead ones, `hero-foot-bob` and `blog-spin`).
+
+Post-migration: **18** keyframes.
+
+| Location | Count | Names |
+| --- | ---: | --- |
+| `globals.css` @theme | 9 | `pulse`, `fade-in`, `rise-in`, `bounce`, `bar-pulse`, `shrink`, `fill`, `ring-burst`, `count-burst` |
+| `globals.css` @layer components | 2 | `reveal-in`, `word-on` |
+| `atmosphere.css` | 2 | `breathe`, `drift` |
+| `terminal.css` | 2 | `blink`, `scan` |
+| `work.css` | 3 | `wipe`, `expand-pulse`, `ken-burns` |
+
+40% reduction. If §11.A and §11.B both also land, `expand-pulse`
+would go and the count would drop to 17.
+
+---
+
+## 11. Held back from §9 (visual-review-needed)
+
+Both items below were flagged in the original audit as needing a
+real-browser pass before landing. They're the last loose ends from
+the CSS-side plan.
+
+### 11.A — `.display` vs `.h-serif` (was §6.D)
+
+**Files & current definitions:**
+- `globals.css:209` — `.display` adds `line-height: 0.96` + `letter-spacing: -0.02em` to the serif face
+- `globals.css:220` — `.h-serif` uses `letter-spacing: -0.025em`, no line-height
+
+**Consumers:**
+- `.display`: `work/list.tsx:31` (project row title), `work/project-still.tsx:49` (ghosted serif word inside the viewing frame)
+- `.h-serif`: `ui/H2.tsx:11` (the shared H2 abstraction — used by stack, voices, work/index, writing, footer, now), `services.tsx:99` (svc-title), `writing.tsx:56` (article row title)
+
+**Path to merge:**
+Add `line-height: 0.96` to `.h-serif` and delete `.display`. The H2
+consumers all already set their own `leading-*` per-call (e.g.,
+`H2.tsx:11` declares `leading-[0.88]`), so the inherited `0.96`
+won't override them. The 0.005em tracking shift on the two display
+consumers is the one thing to eyeball.
+
+**Risk:** low. One-line CSS change, one class rename across 2 files.
+
+### 11.B — `expand-pulse` vs `ring-burst` (was §6.E)
+
+**Files & current definitions:**
+- `work.css:10` — `@keyframes expand-pulse` (transform: scale + opacity)
+  applied to a `<span>` with `border-accent rounded-full` in
+  `work/project-still.tsx:81` (the play-preview ring)
+- `globals.css:132` — `@keyframes ring-burst` (box-shadow expansion)
+  applied to a button in `Blog/post/ScoreMeter.tsx:140`
+
+**Why not done:** they animate different CSS properties, so this isn't
+a keyframe rename. To merge, you have to rewrite project-still's ring
+as a box-shadow on a sized empty span (instead of a span with an
+explicit `border`). Then `expand-pulse` becomes deletable.
+
+**Risk:** medium. Visual diff possible at the very edge of the ring
+(border antialiasing vs shadow rendering differ subtly). Skip unless
+you're already touching `project-still.tsx` for other reasons.
+
+---
+
+## 12. JSX deduplication audit
+
+A static-only sweep across `src/**/*.tsx` (excluding `src/temp/`,
+which is reference material). Ordered by confidence. Aggressive
+suggestions at the end — all clearly marked.
+
+### 12.A — `KIND_LABEL` duplicated 3× (HIGH CONFIDENCE — no risk)
+
+Identical declaration in three Blog files:
+
+| File | Lines |
+| --- | --- |
+| `Blog/post/PostHeader.tsx` | 4–9 |
+| `Blog/PostRow.tsx` | 5–10 |
+| `Blog/FeaturedCard.tsx` | 6–11 |
+
+```ts
+const KIND_LABEL: Record<PostMeta["kind"], string> = {
+  essay: "essay",
+  "deep-dive": "deep-dive",
+  "war-story": "war story",
+  notes: "notes",
+};
+```
+
+**Action:** export from `src/lib/posts.ts` (where `PostMeta` is
+defined). Import the three files. Pure data constant — no Tailwind
+implications.
+
+**Saves:** ~21 lines net.
+
+### 12.B — `formatDate()` duplicated 3× (HIGH CONFIDENCE — no risk)
+
+Identical implementation in the same three files:
+
+```ts
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short", day: "numeric", year: "numeric",
+  });
+}
+```
+
+**Action:** export from `src/lib/posts.ts` as a named export.
+
+**Saves:** ~18 lines net.
+
+### 12.C — Breadcrumb nav (MEDIUM CONFIDENCE)
+
+**Files:**
+- `Blog/PageTitle.tsx:10–24` — 2 crumbs (`tabsircg.com / blog`), uses `<a>`
+- `Blog/post/PostHeader.tsx:29–52` — 3 crumbs (adds `slug`), uses Next `<Link>`
+
+Both share the chrome classes byte-for-byte: outer nav
+(`font-mono inline-flex items-center gap-2.5 text-xs text-muted mb-7 tracking-wide`),
+divider (`text-cream/8`), link hover
+(`transition-colors duration-200 hover:text-cream`).
+
+**Action:** extract `<Breadcrumb crumbs={[{label, href?}, …]} className?>` to `Blog/Breadcrumb.tsx`. Use Next
+`<Link>` everywhere (it handles `/` fine).
+
+**Saves:** ~25 lines net (after the component file).
+**Risk:** low. Bottom margin differs (`mb-7` vs `mb-8`) — pass via
+the `className` prop.
+
+### 12.D — TagPill (MEDIUM CONFIDENCE)
+
+**Files:**
+- `Blog/post/PostHeader.tsx:100–108` — `<Link>` filled-pill
+- `Blog/PostRow.tsx:63–72` — `<Link>` filled-pill
+- `Blog/FeaturedCard.tsx:76–83` — `<span>` outlined-pill
+
+Filled-pill className is **byte-identical** between PostHeader and
+PostRow:
+
+```
+font-mono text-xs px-2.5 py-[3px] bg-ink-2 text-cream-2 rounded-full
+no-underline [transition:transform_200ms_ease,background-color_200ms_ease,color_200ms_ease]
+hover:bg-accent hover:text-cream hover:-translate-y-px
+```
+
+Outlined variant in FeaturedCard differs only in border/background.
+
+**Action:** `<TagPill tag variant?="filled"|"outlined" asLink?=true>`
+in `Blog/TagPill.tsx`. Tailwind v4 JIT will pick up the literal
+classnames in the new file.
+
+**Saves:** ~24 lines net + visual consistency.
+**Risk:** low.
+
+### 12.E — `NeighbourCard` local (LOW CONFIDENCE — same-file dedup)
+
+**File:** `Blog/post/PostFooter.tsx:25–75`
+
+Two cards (prev + next) with near-identical structure:
+- Both wrap with `CARD_BASE` + a direction-specific suffix
+  (`hover:-translate-x-1` vs `hover:translate-x-1`).
+- Both have a "DIR_BASE" row, both have a title row, both have an
+  arrow character (← vs →).
+
+**Action:** local `<NeighbourCard direction="prev"|"next" neighbour>`
+function within the file. Use `direction` to pick alignment, arrow
+position, and translate sign.
+
+**Saves:** ~15 lines.
+**Risk:** none — local refactor.
+
+### 12.F — `MetadataRow` local (LOW CONFIDENCE — same-file dedup)
+
+**File:** `Blog/post/PostHeader.tsx:78–94` and `95–110`
+
+Same `<div className="flex items-center gap-3 m-0"><dt …>…</dt><dd …>…</dd></div>` structure twice in the same file.
+
+**Action:** local function within the file.
+
+**Saves:** ~8 lines.
+**Risk:** none.
+
+### 12.G — Terminal prompt prefix local (LOW CONFIDENCE — same-file dedup)
+
+**File:** `portfolio/terminal.tsx:105–114` and `122–128`
+
+The 4-span chunk:
+```jsx
+<span className="text-phosphor">tabsir</span>
+<span className="opacity-55">@</span>
+<span className="text-accent">field</span>
+<span className="opacity-55">:~$ </span>
+```
+…is byte-identical between the active-prompt block and the idle-prompt
+block. The only differences are the typed-command body and which
+cursor renders.
+
+**Action:** factor a local `PROMPT_PREFIX` JSX const or a local
+`<Prompt>` component within `terminal.tsx`.
+
+**Saves:** ~10 lines.
+**Risk:** none.
+
+### 12.H — `service-visual.tsx` idx=1 data-drive (MEDIUM CONFIDENCE — bigger win)
+
+**File:** `portfolio/service-visual.tsx:134–211`
+
+The other three SVG branches (idx=0, 2, 3) render their elements via
+`.map()` over data tuples. idx=1 alone is ~75 lines of literal
+`<rect>` / `<circle>` / `<line>` elements with hardcoded
+`x/y/width/height/style`.
+
+**Action:** define a `frame1Shapes` tuple array, map to `<rect>` /
+`<line>` / `<circle>`. Same approach as the other branches.
+
+**Saves:** ~40 lines.
+**Risk:** low (pure refactor — output unchanged). Effort: medium —
+each element has to be translated carefully.
+
+### 12.I — `services.tsx` `.page-shell` swap (MEDIUM CONFIDENCE — call-back from CSS_PURGE)
+
+**File:** `portfolio/services.tsx:72` —
+
+```
+mx-auto grid w-full max-w-(--max-w) grid-cols-[0.85fr_1fr]
+items-center gap-16 pr-(--gutter) pl-(--rail-gutter)
+```
+
+The bolded utilities `mx-auto w-full max-w-(--max-w) pr-(--gutter) pl-(--rail-gutter)`
+replicate `.page-shell`. CSS_PURGE.md left this alone for visual safety.
+
+**Action:** apply `.page-shell` to a wrapper and remove the duplicated
+utilities. The sticky positioning lives on the parent at `:71`, so
+adding `.page-shell` here shouldn't change scroll behavior. **But
+this is the pinned-scroll choreography section, so visually verify.**
+
+**Saves:** ~5 chars + semantic clarity.
+**Risk:** medium — high-visibility section.
+
+### 12.J — Stale `cn("single-string")` calls (TRIVIAL)
+
+A handful of `cn()` calls take a single static string with no
+conditional — they reduce to identity.
+
+Known sites:
+- `stack.tsx:53` — `className={cn("page-shell")}`
+- `endorsement.tsx:18–20` — `cn(...)` wrapping one multi-line static string
+
+**Action:** drop `cn(...)`, use the string directly. Remove `cn`
+import if no longer needed.
+
+**Saves:** ~3–5 lines + a couple of imports.
+
+### 12.K — Long inline gradients (NOT RECOMMENDED — listed for completeness)
+
+Long `bg-[radial-gradient(...)]` / `bg-[linear-gradient(...)]` chains:
+
+- `project-still.tsx:41` (stripe pattern) — only used here
+- `project-still.tsx:45` (dot pattern) — only used here
+- `voices-player.tsx:148` (poster overlay) — only used here
+- `services.tsx:121` (checker pattern) — only used here
+- `terminal.tsx:87` (terminal body fill) — only used here
+- `FeaturedCard.tsx:25/26` (cover wash + glow) — only used here
+
+Each gradient is unique. Extracting to CSS component classes saves
+roughly zero chars (`@layer components { .x { background: … } }` is
+the same length as the inline form). Skip — extraction adds an
+indirection without payoff.
+
+### 12.L — Things NOT worth doing (call-outs)
+
+Listed so future-you doesn't re-discover and re-litigate them:
+
+1. **Inlining single-use components** (`Aside`, `VoicesPlayer`,
+   `Terminal`, `ScrambleWord`, `BlockQuote`, all Blog post components)
+   — modularity > raw line count.
+2. **Component-local constants** (`BTN_BASE`, `CARD_BASE`, `DIR_BASE`,
+   `BASE_CONTROL_BTN`, `TAG_BASE`, `TICK_BASE`, `CORNER`, `TAPE`,
+   `PLANE`, `ORB`) — each scoped to one file, each distinct.
+3. **`NavLink` internal `BASE` / `UL_OUTER` / `UL_INNER` constants** —
+   already an extraction.
+4. **The arrow SVG in `Share.tsx:50–81`** (copy/check icon) — single
+   site, stateful variants.
+5. **Repeated `transition-colors duration-200`** etc. — Tailwind v4
+   emits one rule per unique utility, so duplication has zero
+   CSS-output cost. Extracting just adds an indirection.
+6. **The "`<H2>` + max-w prose" pattern across portfolio sections** —
+   each `max-w` differs, each section adds its own layout chrome. The
+   shared part is already captured by `H2.tsx`.
+7. **Arrow SVG dedup between `PostRow.tsx:88–97` and `FeaturedCard.tsx:91–100`**
+   — same icon at different sizes, same stroke props. Tempting, but:
+   the rest of the codebase uses unicode arrows (`↗`, `↘`, `→`, `↑`,
+   `←`) for the same job, and unifying just these two SVGs while
+   leaving the unicode arrows alone is shallow. Either commit to a
+   `<Arrow>` system covering both, or skip. Probably not worth the
+   churn.
+
+### 12.M — Aggressive suggestions (USER ASKED FOR THESE — risk flagged)
+
+Per the "aggressive deduplication, broad range" brief, here are the
+ones I'd normally hold back on. All carry real risk; UI review
+required.
+
+#### 12.M.1 — `<Section>` wrapper for portfolio sections
+
+`about.tsx`, `endorsement.tsx`, `voices.tsx`, `stack.tsx`,
+`writing.tsx`, `now.tsx`, `work/index.tsx`, `footer.tsx` all start
+with the same `<section id="..." className="page-shell ...">`
+pattern, most with `data-reveal`, many with a `.margin-note` and a
+`<H2>` heading.
+
+**Speculative shape:**
+```tsx
+<Section id="now" reveal grid="page-cols-15" marginNote="…">
+  <H2>…</H2>
+  …
+</Section>
+```
+
+**Why I'd hold back:** the grid columns differ per-section
+(`grid-cols-[1fr_1.6fr]`, `grid-cols-[1fr_2fr]`,
+`grid-cols-[1fr_1.5fr]`, `grid-cols-2`, etc.). Encoding that as a
+prop turns into a switch statement OR you pass `grid="…"` as a
+freeform string and you've just renamed `className`. Net win:
+maybe 20 lines of `<section id="...">` chrome. Net cost: an
+abstraction that lies about how customizable it is.
+
+**Risk:** medium-high. Likely net-negative for readability. Worth
+trying only if you also want to consolidate the margin-note
+top-offsets, which are all over the map (`top-[220px]`,
+`top-[260px]`, etc.).
+
+#### 12.M.2 — Split `service-visual.tsx` into 4 files
+
+At 329 lines it's the largest file in the codebase, and each idx
+branch is ~70 lines of unrelated SVG. Split into
+`service-visual-{0,1,2,3}.tsx` (or a co-located `frames/` folder)
+and have the parent index dispatch. Removes the `idx === N` ladder.
+
+**Risk:** low (pure restructure). Cost: 4 new files instead of 1.
+**Net benefit:** depends on whether you'd ever edit one frame
+without thinking about the others. If yes, split. If they always
+move together, keep.
+
+#### 12.M.3 — Extract `<NavLinkColumn>` for footer.tsx
+
+`footer.tsx:30–65` has four `<div className="flex flex-col gap-X">`
+columns, each with an `<H3>` plus a flat list of `<NavLink>`s.
+
+Could collapse to a `COLUMNS` tuple array + a map. Saves ~25 lines.
+
+**Risk:** none. Cost: a tiny indirection layer. Worth doing.
+
+#### 12.M.4 — Inline `InViewArticle.tsx` (20 lines)
+
+It's a 7-line component that adds `data-reveal` to an `<article>` element. Both consumers (`PostRow.tsx`, `FeaturedCard.tsx`) could
+directly set `data-reveal` on their own root.
+
+**Risk:** none. The named-component abstraction is purely cosmetic
+here. Saves the import + the file.
+
+#### 12.M.5 — Unicode arrow unification
+
+Across `hero.tsx`, `footer.tsx`, `endorsement.tsx`, `writing.tsx`,
+`PostFooter.tsx`, `nav-link.tsx`, the cards/buttons use
+`↗`/`↘`/`↑`/`↓`/`→`/`←` text characters with handcrafted
+`transition-transform` + `group-hover:translate-*` chains. Each
+site repeats the pattern.
+
+A `<TextArrow direction="up-right" />` (~6 directions) wrapping the
+character and the standard hover transform could replace ~6 sites
+with consistent behavior.
+
+**Risk:** low. Cost: a new file. Probably worth it if you also
+unify the polish (some sites use `group-hover:translate-x-1`, others
+use `0.5`; some have opacity ramp, others don't — picking one canonical version is a UI choice, not a refactor).
+
+### 12.N — Estimated savings if 12.A–12.J + 12.M.3 + 12.M.4 land
+
+| Item | Lines | Risk |
+| --- | ---: | --- |
+| 12.A KIND_LABEL → lib | -21 | none |
+| 12.B formatDate → lib | -18 | none |
+| 12.C Breadcrumb component | -25 | low |
+| 12.D TagPill component | -24 | low |
+| 12.E NeighbourCard local | -15 | none |
+| 12.F MetadataRow local | -8 | none |
+| 12.G Terminal prompt local | -10 | none |
+| 12.H service-visual idx=1 data-drive | -40 | low |
+| 12.I services.tsx page-shell swap | -3 | medium |
+| 12.J cn() cleanup | -5 | none |
+| 12.M.3 footer columns | -25 | none |
+| 12.M.4 InViewArticle inline | -15 | none |
+| **TOTAL** | **~-209** | |
+
+About 4% of the `.tsx`/`.ts` surface. Smaller than the original
+CSS_PURGE pass (-7.1%) because the obvious wins were already taken
+in that round; what's left is genuine semantic dedup, not
+boilerplate removal.
+
+---
+
+## 13. Suggested order of operations
+
+If you want a low-risk merge order:
+
+1. **12.A + 12.B** — pure data-layer extractions, no UI impact. Do
+   first. (No visual review needed.)
+2. **12.E + 12.F + 12.G + 12.J + 12.M.4** — same-file dedups. No
+   imports change, no shared components added. (No visual review
+   needed.)
+3. **12.M.3** — footer columns. Self-contained file.
+4. **12.D** — TagPill. The biggest cross-file extraction; needs JIT
+   sanity check (visual review of one blog index page + one post page
+   covers it).
+5. **12.C** — Breadcrumb. Two consumers; visual review of
+   `/blog` and `/blog/[slug]` covers it.
+6. **12.H** — service-visual idx=1 rewrite. Standalone refactor of
+   one SVG branch.
+7. **11.A** — `.display` / `.h-serif` merge. Quick visual check on
+   work/list, work/project-still, plus any H2 consumer.
+8. **12.I** — services.tsx page-shell swap. **High-visibility, save
+   for last** so it doesn't block other work.
+9. **11.B** — `expand-pulse` / `ring-burst`. Only if you're
+   already touching `project-still.tsx`. Genuinely optional.
+10. **12.M.1, 12.M.2, 12.M.5** — speculative; do only if you're
+    bored or want to chase the "<H2> + tagline" / arrow-unification
+    polish.

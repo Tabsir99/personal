@@ -69,7 +69,7 @@ export function Services() {
     <section id="services">
       <div className="relative h-[400vh]" data-pin-steps="4" data-pin-step="0">
         <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-          <div className="mx-auto grid w-full max-w-(--max-w) grid-cols-[0.85fr_1fr] items-center gap-16 pr-(--gutter) pl-(--rail-gutter) max-xl:grid-cols-[1fr] max-xl:gap-10">
+          <div className="page-shell w-full grid grid-cols-[0.85fr_1fr] items-center gap-16 max-xl:grid-cols-[1fr] max-xl:gap-10">
             <div data-reveal className="sticky top-0">
               {/* Index label stack */}
               <div className="relative h-5 mb-6">

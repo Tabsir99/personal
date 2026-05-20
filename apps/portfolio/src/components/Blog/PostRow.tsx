@@ -1,13 +1,6 @@
 import Link from "next/link";
-import type { PostMeta } from "@/lib/posts";
-import InViewArticle from "./InViewArticle";
-
-const KIND_LABEL: Record<PostMeta["kind"], string> = {
-  essay: "essay",
-  "deep-dive": "deep-dive",
-  "war-story": "war story",
-  notes: "notes",
-};
+import { KIND_LABEL, formatDate, type PostMeta } from "@/lib/posts";
+import { TagPill } from "./TagPill";
 
 const KIND_BADGE: Record<PostMeta["kind"], string> = {
   essay: "text-accent border-accent/40",
@@ -15,14 +8,6 @@ const KIND_BADGE: Record<PostMeta["kind"], string> = {
   "war-story": "text-accent border-accent/40",
   notes: "text-muted",
 };
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
 export default function PostRow({
   post,
@@ -32,7 +17,8 @@ export default function PostRow({
   idx: number;
 }) {
   return (
-    <InViewArticle
+    <article
+      data-reveal
       className="group relative grid grid-cols-[56px_1fr] grid-rows-[auto_auto_auto_auto] gap-x-6 pt-7 pb-8 border-b border-line transition-[padding] duration-360 ease-soft first:pt-2 hover:pl-3 max-sm:grid-cols-1"
       style={{ ["--row-i" as string]: idx }}
     >
@@ -61,14 +47,7 @@ export default function PostRow({
       <div className="flex items-center gap-6 flex-wrap">
         <div className="flex gap-1.5 flex-wrap">
           {post.tags.map((t) => (
-            <Link
-              key={t}
-              href={`/blog?tag=${encodeURIComponent(t)}`}
-              className="font-mono text-xs px-2.5 py-[3px] bg-ink-2 rounded-full text-cream-2 [transition:transform_200ms_ease,background-color_200ms_ease,color_200ms_ease] hover:-translate-y-px hover:bg-accent hover:text-cream"
-              scroll={false}
-            >
-              #{t}
-            </Link>
+            <TagPill key={t} tag={t} scroll={false} />
           ))}
         </div>
         <div className="ml-auto flex items-center gap-2.5 text-xs text-muted font-mono">
@@ -97,6 +76,6 @@ export default function PostRow({
           </svg>
         </Link>
       </div>
-    </InViewArticle>
+    </article>
   );
 }

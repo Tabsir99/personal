@@ -206,20 +206,14 @@ html {
 }
 
 @layer components {
-  .display {
-    font-family: var(--serif);
-    font-weight: 400;
-    line-height: 0.96;
-    letter-spacing: -0.02em;
-    font-feature-settings: "liga", "kern";
-  }
-
-  /* Section heading — serif, normal weight, tight tracking, with ligatures.
-     Replaces the inline `font-serif font-normal tracking-tight
-     font-features-['liga','kern']` chain that lived on every section title. */
+  /* Serif display face — used for all big serif text. Default line-height
+     of 0.96 is what big display type wants; consumers override per-use
+     with leading-* utilities (H2 sets leading-[0.88]; list/services set
+     leading-none; writing sets leading-[1.2]). */
   .h-serif {
     font-family: var(--serif);
     font-weight: 400;
+    line-height: 0.96;
     letter-spacing: -0.025em;
     font-feature-settings: "liga", "kern";
   }

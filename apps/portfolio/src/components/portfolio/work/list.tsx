@@ -28,7 +28,7 @@ export function WorkList() {
           >
             {p.glyph}
           </span>
-          <span className="row-title display font-serif text-[clamp(28px,3.2vw,44px)] leading-none tracking-tight text-cream whitespace-nowrap overflow-hidden text-ellipsis max-xl:text-3xl">
+          <span className="row-title h-serif text-[clamp(28px,3.2vw,44px)] leading-none tracking-tight text-cream whitespace-nowrap overflow-hidden text-ellipsis max-xl:text-3xl">
             {p.title}
           </span>
           <span className="row-meta inline-flex items-center gap-1.5 font-mono text-xxs tracking-widest uppercase text-muted-2 whitespace-nowrap">

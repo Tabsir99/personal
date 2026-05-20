@@ -1,6 +1,31 @@
 import { NavLink } from "@/components/ui/nav-link";
 import { H2, H3 } from "../ui/H2";
 
+function Column({
+  title,
+  gap = "gap-3",
+  children,
+}: {
+  title: string;
+  gap?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`flex flex-col ${gap}`}>
+      <H3>{title}</H3>
+      {children}
+    </div>
+  );
+}
+
+const ELSEWHERE = ["GitHub", "Read.cv", "Bluesky", "LinkedIn"];
+const SERVICES_OFFERED = [
+  "Full project (~6 wks +)",
+  "Sprint engagement (1–2 wks)",
+  "Advisory retainer",
+  "Code-review on call",
+];
+
 export function Footer() {
   return (
     <footer id="contact" className="page-shell flex flex-col gap-20">
@@ -28,8 +53,7 @@ export function Footer() {
         </span>
       </NavLink>
       <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-10 pt-10 border-t border-line">
-        <div className="flex flex-col gap-2">
-          <H3>Studio</H3>
+        <Column title="Studio" gap="gap-2">
           <p className="text-sm text-cream mb-2 leading-normal">
             Tabsir CG · Independent practice
           </p>
@@ -38,30 +62,25 @@ export function Footer() {
             <br />
             Dhaka 1213, Bangladesh
           </p>
-        </div>
-        <div className="flex flex-col gap-3">
-          <H3>Direct</H3>
+        </Column>
+        <Column title="Direct">
           <NavLink href="mailto:hello@tabsircg.com">hello@tabsircg.com</NavLink>
           <NavLink>
             +880 17 ████ ████{" "}
             <span className="text-muted-2 text-xxs">(on request)</span>
           </NavLink>
           <NavLink>Cal.com / tabsir</NavLink>
-        </div>
-        <div className="flex flex-col gap-3">
-          <H3>Elsewhere</H3>
-          <NavLink>GitHub</NavLink>
-          <NavLink>Read.cv</NavLink>
-          <NavLink>Bluesky</NavLink>
-          <NavLink>LinkedIn</NavLink>
-        </div>
-        <div className="flex flex-col gap-3">
-          <H3>Work with me</H3>
-          <NavLink>Full project (~6 wks +)</NavLink>
-          <NavLink>Sprint engagement (1–2 wks)</NavLink>
-          <NavLink>Advisory retainer</NavLink>
-          <NavLink>Code-review on call</NavLink>
-        </div>
+        </Column>
+        <Column title="Elsewhere">
+          {ELSEWHERE.map((s) => (
+            <NavLink key={s}>{s}</NavLink>
+          ))}
+        </Column>
+        <Column title="Work with me">
+          {SERVICES_OFFERED.map((s) => (
+            <NavLink key={s}>{s}</NavLink>
+          ))}
+        </Column>
       </div>
       <div className="py-8 border-t border-line flex justify-between items-center">
         <span className="font-mono text-xxs tracking-widest text-muted-2">

@@ -1,12 +1,6 @@
-import Link from "next/link";
-import type { PostMeta } from "@/lib/posts";
-
-const KIND_LABEL: Record<PostMeta["kind"], string> = {
-  essay: "essay",
-  "deep-dive": "deep-dive",
-  "war-story": "war story",
-  notes: "notes",
-};
+import { KIND_LABEL, formatDate, type PostMeta } from "@/lib/posts";
+import { Breadcrumb } from "../Breadcrumb";
+import { TagPill } from "../TagPill";
 
 const KIND_KICKER: Record<PostMeta["kind"], string> = {
   essay: "bg-cream text-ink",
@@ -15,41 +9,40 @@ const KIND_KICKER: Record<PostMeta["kind"], string> = {
   notes: "bg-ink-2 text-cream-2",
 };
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+function MetadataRow({
+  label,
+  ddExtra = "",
+  children,
+}: {
+  label: string;
+  ddExtra?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-3 m-0">
+      <dt className="uppercase tracking-[0.08em] text-xxs after:content-['_›'] after:opacity-50">
+        {label}
+      </dt>
+      <dd
+        className={`m-0 flex items-center gap-2.5 text-cream ${ddExtra}`.trim()}
+      >
+        {children}
+      </dd>
+    </div>
+  );
 }
 
 export default function PostHeader({ post }: { post: PostMeta }) {
   return (
     <header className="pb-10 border-b border-line mb-12 max-sm:pb-7 max-sm:mb-8">
-      <nav
-        className="font-mono inline-flex items-center gap-2.5 text-xs text-muted mb-8 tracking-wide max-sm:mb-5"
-        aria-label="Breadcrumb"
-      >
-        <Link
-          href="/"
-          className="transition-colors duration-200 hover:text-cream"
-        >
-          tabsircg.com
-        </Link>
-        <span aria-hidden="true" className="text-cream/8">
-          /
-        </span>
-        <Link
-          href="/blog"
-          className="transition-colors duration-200 hover:text-cream"
-        >
-          blog
-        </Link>
-        <span aria-hidden="true" className="text-cream/8">
-          /
-        </span>
-        <span className="text-cream font-bold">{post.slug}</span>
-      </nav>
+      <Breadcrumb
+        className="mb-8 max-sm:mb-5"
+        crumbs={[
+          { label: "tabsircg.com", href: "/" },
+          { label: "blog", href: "/blog" },
+          { label: post.slug },
+        ]}
+      />
 
       <div className="flex items-center gap-3.5 mb-7">
         <span
@@ -75,39 +68,23 @@ export default function PostHeader({ post }: { post: PostMeta }) {
       </p>
 
       <dl className="font-mono flex flex-wrap gap-7 m-0 text-xs text-muted max-sm:gap-4">
-        <div className="flex items-center gap-3 m-0">
-          <dt className="uppercase tracking-[0.08em] text-xxs after:content-['_›'] after:opacity-50">
-            read
-          </dt>
-          <dd className="m-0 flex items-center gap-2.5 text-cream">
+        <MetadataRow label="read">
+          <span
+            className="inline-block w-[60px] h-[3px] rounded-xs bg-cream/8 overflow-hidden"
+            aria-hidden="true"
+          >
             <span
-              className="inline-block w-[60px] h-[3px] rounded-xs bg-cream/8 overflow-hidden"
-              aria-hidden="true"
-            >
-              <span
-                className="block h-full bg-cream origin-left animate-fill"
-                style={{ width: `${Math.min(100, post.readTime * 4)}%` }}
-              />
-            </span>
-            {post.readTime} min
-          </dd>
-        </div>
-        <div className="flex items-center gap-3 m-0">
-          <dt className="uppercase tracking-[0.08em] text-xxs after:content-['_›'] after:opacity-50">
-            tags
-          </dt>
-          <dd className="m-0 flex items-center gap-2.5 text-cream inline-flex flex-wrap">
-            {post.tags.map((t) => (
-              <Link
-                key={t}
-                href={`/blog?tag=${encodeURIComponent(t)}`}
-                className="font-mono text-xs px-2.5 py-[3px] bg-ink-2 text-cream-2 rounded-full no-underline [transition:transform_200ms_ease,background-color_200ms_ease,color_200ms_ease] hover:bg-accent hover:text-cream hover:-translate-y-px"
-              >
-                #{t}
-              </Link>
-            ))}
-          </dd>
-        </div>
+              className="block h-full bg-cream origin-left animate-fill"
+              style={{ width: `${Math.min(100, post.readTime * 4)}%` }}
+            />
+          </span>
+          {post.readTime} min
+        </MetadataRow>
+        <MetadataRow label="tags" ddExtra="inline-flex flex-wrap">
+          {post.tags.map((t) => (
+            <TagPill key={t} tag={t} />
+          ))}
+        </MetadataRow>
       </dl>
     </header>
   );
