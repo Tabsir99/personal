@@ -7,7 +7,6 @@ import { getAllBlogs, getPost, getPostScore } from "@/lib/posts";
 import PostHeader from "@/components/Blog/post/PostHeader";
 import PostFooter from "@/components/Blog/post/PostFooter";
 import Toc from "@/components/Blog/post/Toc";
-import ReadingProgress from "@/components/Blog/post/ReadingProgress";
 import ScoreMeter from "@/components/Blog/post/ScoreMeter";
 import Share from "@/components/Blog/post/Share";
 import BlogPostJsonLd from "@/components/Blog/post/BlogPostJsonLd";
@@ -68,7 +67,6 @@ export default async function PostPage({ params }: { params: RouteParams }) {
       />
 
       <BlogPostJsonLd post={post} />
-      <ReadingProgress />
 
       <div className="max-w-[1280px] mx-auto pt-14 px-8 pb-24 grid grid-cols-[220px_minmax(0,1fr)_80px] gap-x-14 items-start max-xl:grid-cols-[minmax(0,1fr)] max-xl:gap-x-0 max-xl:px-6 max-xl:pt-8 max-xl:pb-20 max-sm:px-[18px] max-sm:pt-6 max-sm:pb-16">
         <aside
@@ -82,7 +80,7 @@ export default async function PostPage({ params }: { params: RouteParams }) {
           <PostHeader post={post} />
 
           {/* Dark is needed for the Editor */}
-          <div className="dark pb-14" data-post-body>
+          <div className="dark pb-14">
             <DocRenderer doc={post.body} />
           </div>
           <PostFooter prev={post.prev ?? null} next={post.next ?? null} />

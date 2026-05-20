@@ -2,10 +2,6 @@ import { cn } from "@/lib/utils";
 import { NavLink } from "@/components/ui/nav-link";
 import { SECTIONS } from "./sections-data";
 
-/* ===== Header — server-rendered =====
-   All scroll-driven state comes from [components/ui/active-section.tsx]:
-   `.is-active` on the matching `[data-nav]` link, plus `data-scrolled`
-   on `<html>` (read by the border-color variant below). */
 export function Header() {
   const navItems = SECTIONS.filter((s) => s.inNav);
 

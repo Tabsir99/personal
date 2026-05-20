@@ -39,7 +39,7 @@ export function Hero() {
     <section
       id="hero"
       className={cn(
-        "relative h-screen min-h-[720px] overflow-hidden p-0",
+        "relative h-screen min-h-[720px] overflow-hidden p-0 z-50",
         "max-xl:h-auto max-xl:min-h-screen",
       )}
     >

@@ -1,12 +1,6 @@
 import { cn } from "@/lib/utils";
 import { SECTIONS } from "./sections-data";
 
-/* ===== Persistent left rail — server-rendered =====
-   All scroll-driven state comes from [components/ui/active-section.tsx]:
-   - Tick position: `--rail-pos-<id>` per section (one-time + resize)
-   - Active tick: `.is-active` toggled on `[data-nav={id}]` matches
-   - Scroll fill bar / breath dot: `--scroll-progress` (0-100)
-   - Past tick coloring: CSS `:has(~ [data-rail-tick].is-active)` */
 export function Rail() {
   return (
     <div
