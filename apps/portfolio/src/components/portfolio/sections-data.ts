@@ -8,9 +8,15 @@ export const SECTIONS = [
   { id: "stack", label: "Stack", inNav: true },
   { id: "services", label: "Services", inNav: false },
   { id: "work", label: "Work", inNav: true },
+  { id: "voices", label: "Voices", inNav: true },
   { id: "writing", label: "Writing", inNav: true },
   { id: "now", label: "Now", inNav: true },
   { id: "contact", label: "Contact", inNav: false },
 ] as const;
 
 export type SectionId = (typeof SECTIONS)[number]["id"];
+
+export const BACKGROUND_PLANES = {
+  "atm-far": -0.025,
+  "atm-mid": -0.1,
+} as const;

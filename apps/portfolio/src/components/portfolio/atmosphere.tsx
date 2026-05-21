@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { ContourSVG } from "./contour-svg";
 import { CoordOverlay } from "./coord-overlay";
+import { BACKGROUND_PLANES } from "./sections-data";
 
 /* Shared plane class group — taller than viewport so parallax never reveals
    an empty edge. The parallax transform is written imperatively to each
@@ -113,7 +114,7 @@ export function Atmosphere() {
       <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_110%,color-mix(in_oklab,var(--color-accent)_4.5%,transparent),transparent_55%),radial-gradient(90%_70%_at_50%_-10%,color-mix(in_oklab,var(--color-ink-3)_55%,transparent),transparent_65%),linear-gradient(180deg,#0c0b0a_0%,#100e0c_50%,#14110e_100%)]"></div>
 
       {/* Far: topographic contours — deepest plane */}
-      <div className={cn(PLANE, "atm-far opacity-85")}>
+      <div id="atm-far" className={cn(PLANE, "opacity-85")}>
         <ContourSVG />
       </div>
 
@@ -121,7 +122,7 @@ export function Atmosphere() {
       <div className="atm-tint absolute inset-0"></div>
 
       {/* Mid: drifting signal-fire orbs */}
-      <div className={cn(PLANE, "atm-mid")}>
+      <div id="atm-mid" className={PLANE}>
         {ORBS.map(([size, pos, hue, outer, inner, dx, dy, ds, dur, rev], i) => (
           <div
             key={i}
@@ -129,11 +130,6 @@ export function Atmosphere() {
             className={cn(ORB, pos, "animate-drift")}
           ></div>
         ))}
-      </div>
-
-      {/* Near: coordinate waypoints */}
-      <div className={cn(PLANE, "atm-near opacity-85")}>
-        <CoordOverlay />
       </div>
 
       {/* Optics layer (fixed): grain + vignette */}
