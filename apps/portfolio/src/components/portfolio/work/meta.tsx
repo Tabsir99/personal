@@ -5,11 +5,11 @@ import { LINK_BG, LINK_ICONS, PROJECTS } from "./data";
 /* Meta block under the stage — dek + role/stack/metrics + project links.
    Server component. All 5 projects' blocks render stacked in one grid
    cell (grid-area 1/1 in work.css); only the active one has opacity 1. */
-export function WorkMeta() {
+export function WorkMeta({ className }: { className?: string }) {
   return (
     <div
       data-reveal
-      className="work-meta-stack mt-14"
+      className={cn("grid", className)}
       style={{ animationDelay: "100ms" }}
     >
       {PROJECTS.map((project, i) => (
@@ -51,7 +51,7 @@ export function WorkMeta() {
             )}
           </dl>
 
-          <div className="col-start-1 flex flex-wrap gap-2.5 mt-[22px] pl-6 max-xl:pl-0">
+          <div className="col-start-1 flex flex-wrap gap-2.5 pl-6 max-xl:pl-0">
             {project.links.map((l, j) => {
               const isReal = !!l.url && l.url !== "#";
               const className = cn(

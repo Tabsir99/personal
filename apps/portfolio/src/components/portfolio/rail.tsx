@@ -14,7 +14,7 @@ export function Rail() {
   return (
     <div
       aria-hidden="true"
-      className="fixed top-24 bottom-14 left-(--rail-x) w-px z-50 pointer-events-none opacity-0 animate-fade-in delay-100"
+      className="fixed top-24 bottom-14 left-(--rail-x) w-px z-50 pointer-events-none opacity-0 animate-fade-in duration-1000 delay-500"
     >
       <div className="absolute inset-0 bg-line"></div>
       <div className="absolute left-[-3px] top-[-3px] size-2 border border-muted-2 rounded-full bg-ink"></div>
@@ -23,7 +23,7 @@ export function Rail() {
         className="absolute top-0 left-0 w-px h-0 bg-accent shadow-[0_0_8px_color-mix(in_oklab,var(--color-accent)_35%,transparent)] transition-[height] duration-60 ease-linear"
         style={{ height: "calc(var(--scroll-progress, 0) * 1%)" }}
       ></div>
-      {SECTIONS.map((s) => (
+      {SECTIONS.map((s, index) => (
         <div
           key={s.id}
           data-rail-tick
@@ -32,7 +32,7 @@ export function Rail() {
           style={{ top: `var(--rail-pos-${s.id}, 0%)` }}
         >
           <span className="rail-tick-label absolute left-[22px] font-mono text-xxs tracking-widest uppercase -translate-y-1/2 whitespace-nowrap">
-            {s.num} — {s.label}
+            0{index} — {s.label}
           </span>
         </div>
       ))}

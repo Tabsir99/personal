@@ -17,6 +17,7 @@ export default function Home() {
       <Atmosphere />
       <CursorGlow />
       <Rail />
+
       <Hero />
       <Endorsement />
       <About />

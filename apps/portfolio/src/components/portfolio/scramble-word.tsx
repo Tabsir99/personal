@@ -112,7 +112,11 @@ export const ScrambleWord = memo(
       };
     }, [words, hold, duration, shuffleRate, stagger, chars]);
 
-    return <span ref={ref} className={className} />;
+    return (
+      <span ref={ref} className={className}>
+        {words[0]}
+      </span>
+    );
   },
   (p, n) => {
     return (

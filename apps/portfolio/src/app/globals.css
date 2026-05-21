@@ -8,7 +8,6 @@
 @import "../components/portfolio/styles/terminal.css";
 @import "../components/portfolio/styles/services.css";
 @import "../components/portfolio/styles/work.css";
-@import "../components/portfolio/styles/voices.css";
 
 html {
   scroll-behavior: smooth;
@@ -75,13 +74,20 @@ html {
   /* Opacity pulse loop. Trough at 0.3; consumers that want a shallower
      dim can set `--pulse-min` (none currently do, but the var is there). */
   @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: var(--pulse-min, 0.3); }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: var(--pulse-min, 0.3);
+    }
   }
 
   /* Opacity fade once to 1. */
   @keyframes fade-in {
-    to { opacity: 1; }
+    to {
+      opacity: 1;
+    }
   }
 
   /* Translate to (--rise-x, --rise-y) while fading in. Targets set their
@@ -101,44 +107,87 @@ html {
      character is in the stop-shape, paired with the bouncy cubic-bezier
      on the alias. */
   @keyframes bounce {
-    0%, 60%, 100% { transform: translateY(0) scale(1); }
-    70% { transform: translateY(-0.12em) scale(1.1); }
-    82% { transform: translateY(0) scale(1); }
-    88% { transform: translateY(-0.04em) scale(1.02); }
-    94% { transform: translateY(0) scale(1); }
+    0%,
+    60%,
+    100% {
+      transform: translateY(0) scale(1);
+    }
+    70% {
+      transform: translateY(-0.12em) scale(1.1);
+    }
+    82% {
+      transform: translateY(0) scale(1);
+    }
+    88% {
+      transform: translateY(-0.04em) scale(1.02);
+    }
+    94% {
+      transform: translateY(0) scale(1);
+    }
   }
 
   /* Vertical bar pulse — scaleY loop, used on the featured-card EXPLAIN
      ANALYZE bars. */
   @keyframes bar-pulse {
-    0%, 100% { transform: scaleY(0.4); opacity: 0.6; }
-    50% { transform: scaleY(1); opacity: 1; }
+    0%,
+    100% {
+      transform: scaleY(0.4);
+      opacity: 0.6;
+    }
+    50% {
+      transform: scaleY(1);
+      opacity: 1;
+    }
   }
 
   /* Width oscillation — drives the "↓ 40s → 412ms" benchmark bar on the
      featured card. */
   @keyframes shrink {
-    0%, 10% { width: 95%; }
-    60%, 100% { width: 12%; }
+    0%,
+    10% {
+      width: 95%;
+    }
+    60%,
+    100% {
+      width: 12%;
+    }
   }
 
   /* One-shot scaleX fill from 0 to 1 — drives the post header read-time bar. */
   @keyframes fill {
-    from { transform: scaleX(0); }
-    to { transform: scaleX(1); }
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
   }
 
   /* Expanding box-shadow ring that fades out — drives the score-meter tap. */
   @keyframes ring-burst {
-    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 55%, transparent); }
-    100% { box-shadow: 0 0 0 18px color-mix(in srgb, var(--color-accent) 0%, transparent); }
+    0% {
+      box-shadow: 0 0 0 0
+        color-mix(in srgb, var(--color-accent) 55%, transparent);
+    }
+    100% {
+      box-shadow: 0 0 0 18px
+        color-mix(in srgb, var(--color-accent) 0%, transparent);
+    }
   }
 
   /* "+1" counter that floats up and fades — drives the score-meter burst. */
   @keyframes count-burst {
-    0% { opacity: 0; transform: translate(-50%, 6px) scale(0.8); }
-    20% { opacity: 1; }
-    100% { opacity: 0; transform: translate(-50%, -28px) scale(1); }
+    0% {
+      opacity: 0;
+      transform: translate(-50%, 6px) scale(0.8);
+    }
+    20% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -28px) scale(1);
+    }
   }
 }
 
@@ -151,6 +200,38 @@ html {
   --font-mono: var(--mono);
 }
 
+/* Register the scroll-driven custom properties as typed CSS props.
+
+   Without @property, writing one of these on <html> forces Chrome to
+   restyle every descendant (it can't prove which elements depend on the
+   var). Registering gives the engine typed values + proper per-property
+   dependency tracking, so only elements whose computed style actually
+   uses the var get invalidated.
+
+   Consumers: --scroll-y is read by .atm-far/.atm-mid/.atm-near and
+   .voices-frame; --scroll-progress by the rail bar + dot; --pin-step
+   and --pin-sub by .svc-* (services section) and the work island. */
+@property --scroll-y {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --scroll-progress {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --pin-step {
+  syntax: "<integer>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --pin-sub {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
 @layer base {
   html,
   body {
@@ -160,8 +241,7 @@ html {
     font-weight: 300;
     line-height: 1.6;
     font-size: 16px;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+    text-rendering: optimizeSpeed;
   }
 
   body {
@@ -192,10 +272,6 @@ html {
     border: none;
     cursor: pointer;
   }
-
-  section {
-    position: relative;
-  }
 }
 
 @utility page-shell {
@@ -216,6 +292,7 @@ html {
     line-height: 0.96;
     letter-spacing: -0.025em;
     font-feature-settings: "liga", "kern";
+    text-rendering: optimizeLegibility;
   }
 
   /* Small eyebrow label with a leading hairline.
@@ -407,4 +484,3 @@ html {
     color-mix(in srgb, var(--color-cream) 8%, transparent) 0
   );
 }
-

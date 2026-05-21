@@ -24,7 +24,7 @@ export function Work() {
           "--work-still": 0,
         } as React.CSSProperties
       }
-      className="page-shell"
+      className="page-shell grid grid-cols-[0.75fr_1.25fr] gap-16 max-xl:grid-cols-1"
     >
       <WorkStateIsland />
 
@@ -34,7 +34,7 @@ export function Work() {
         seventeen total.
       </span>
 
-      <header data-reveal className="flex justify-between">
+      <header data-reveal className="flex justify-between col-span-2">
         <H2>
           <em>Selected</em>
           <br />
@@ -52,12 +52,10 @@ export function Work() {
         </div>
       </header>
 
-      <div className="grid grid-cols-[0.78fr_1.22fr] gap-14 max-xl:grid-cols-1 max-xl:gap-10">
-        <WorkList />
-        <WorkViewport />
-      </div>
+      <WorkList />
+      <WorkViewport />
 
-      <WorkMeta />
+      <WorkMeta className="col-span-2 -mt-20" />
     </section>
   );
 }

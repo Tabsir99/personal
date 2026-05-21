@@ -49,9 +49,12 @@ export function ActiveSectionTracker() {
 
     let raf = 0;
     let lastScrolled = false;
+    let lastY = -1;
     function compute() {
       raf = 0;
       const y = window.scrollY;
+      if (y === lastY) return;
+      lastY = y;
       const vh = window.innerHeight;
       const docH = document.documentElement.scrollHeight - vh;
       const root = document.documentElement.style;
@@ -84,7 +87,7 @@ export function ActiveSectionTracker() {
     }
     function onScroll() {
       if (raf) return;
-      raf = requestAnimationFrame(compute);
+      // raf = requestAnimationFrame(compute);
     }
     compute();
     window.addEventListener("scroll", onScroll, { passive: true });

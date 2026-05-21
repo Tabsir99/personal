@@ -1,62 +1,144 @@
 /* Vertical wipe — once-shot translate from above to below with fade. */
 @keyframes wipe {
-  0% { transform: translateY(-100%); opacity: 0; }
-  15%, 85% { opacity: 1; }
-  100% { transform: translateY(100%); opacity: 0; }
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
 }
 
 /* Scaling ring that fades — different idiom than `pulse` (which only
    touches opacity) and `ring-burst` (which uses box-shadow). */
 @keyframes expand-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.18); opacity: 0.15; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.15;
+  }
 }
 
 /* Cinematography zoom — slow alternate-direction scale + drift. */
 @keyframes ken-burns {
-  to { transform: scale(1.06) translate(-1%, 1%); }
+  to {
+    transform: scale(1.06) translate(-1%, 1%);
+  }
 }
 
 @layer components {
   /* --active: 1 when --i matches --ref, else 0. --ref is the axis the
      element tracks (project index or still index). --past is row-only. */
-  .work-row, .work-still, .work-meta, .work-thumb-pack,
-  .work-still-meta, .work-still-play, .work-thumb {
-    --active: clamp(0, calc(1 - max(calc(var(--i, 0) - var(--ref, 0)), calc(var(--ref, 0) - var(--i, 0)))), 1);
+  .work-row,
+  .work-still,
+  .work-meta,
+  .work-thumb-pack,
+  .work-still-meta,
+  .work-still-play,
+  .work-thumb {
+    --active: clamp(
+      0,
+      calc(
+        1 -
+          max(
+            calc(var(--i, 0) - var(--ref, 0)),
+            calc(var(--ref, 0) - var(--i, 0))
+          )
+      ),
+      1
+    );
   }
-  .work-row, .work-still, .work-meta, .work-thumb-pack { --ref: var(--work-active, 0); }
-  .work-still-meta, .work-still-play, .work-thumb { --ref: var(--work-still, 0); }
-  .work-row { --past: clamp(0, calc(var(--work-active, 0) - var(--i, 0)), 1); }
+  .work-row,
+  .work-still,
+  .work-meta,
+  .work-thumb-pack {
+    --ref: var(--work-active, 0);
+  }
+  .work-still-meta,
+  .work-still-play,
+  .work-thumb {
+    --ref: var(--work-still, 0);
+  }
+  .work-row {
+    --past: clamp(0, calc(var(--work-active, 0) - var(--i, 0)), 1);
+  }
 
   /* Row */
   .work-row {
     padding-left: calc(14px + 8px * var(--active));
-    background-image: linear-gradient(90deg, color-mix(in oklab, var(--color-accent) calc(4% * var(--active)), transparent), transparent 70%);
-    transition: background-color 500ms ease, padding-left 500ms ease;
+    background-image: linear-gradient(
+      90deg,
+      color-mix(
+        in oklab,
+        var(--color-accent) calc(4% * var(--active)),
+        transparent
+      ),
+      transparent 70%
+    );
+    transition:
+      background-color 500ms ease,
+      padding-left 500ms ease;
   }
-  .work-row:focus-visible { background-color: color-mix(in oklab, var(--color-accent) calc(4% * (1 - var(--active))), transparent); }
+  .work-row:focus-visible {
+    background-color: color-mix(
+      in oklab,
+      var(--color-accent) calc(4% * (1 - var(--active))),
+      transparent
+    );
+  }
   .work-row::before {
-    content: ""; position: absolute; inset: 50% auto auto 0; width: 3px;
+    content: "";
+    position: absolute;
+    inset: 50% auto auto 0;
+    width: 3px;
     height: calc(64% * var(--active));
-    background: var(--color-accent); translate: 0 -50%;
+    background: var(--color-accent);
+    translate: 0 -50%;
     transition: height 400ms var(--ease-soft);
   }
   .row-glyph {
-    color: color-mix(in oklab, var(--color-muted-2), var(--color-accent) calc(100% * var(--active)));
+    color: color-mix(
+      in oklab,
+      var(--color-muted-2),
+      var(--color-accent) calc(100% * var(--active))
+    );
     rotate: calc(45deg * var(--active));
-    transition: color 400ms ease, rotate 600ms var(--ease-soft);
+    transition:
+      color 400ms ease,
+      rotate 600ms var(--ease-soft);
   }
   .row-title {
-    opacity: calc(0.32 + 0.68 * var(--active) - 0.10 * var(--past));
-    transition: opacity 500ms ease, font-style 500ms ease;
+    opacity: calc(0.32 + 0.68 * var(--active) - 0.1 * var(--past));
+    transition:
+      opacity 500ms ease,
+      font-style 500ms ease;
   }
-  .work-row:hover .row-title { opacity: max(calc(0.32 + 0.68 * var(--active) - 0.10 * var(--past)), calc(0.78 - 0.78 * var(--active))); }
+  .work-row:hover .row-title {
+    opacity: max(
+      calc(0.32 + 0.68 * var(--active) - 0.1 * var(--past)),
+      calc(0.78 - 0.78 * var(--active))
+    );
+  }
   .row-meta {
     opacity: var(--active);
     translate: calc(8px * (1 - var(--active))) 0;
-    transition: opacity 400ms ease 50ms, translate 400ms ease 50ms;
+    transition:
+      opacity 400ms ease 50ms,
+      translate 400ms ease 50ms;
   }
-  .row-rule { width: calc(100% * var(--active)); transition: width 500ms var(--ease-soft); }
+  .row-rule {
+    width: calc(100% * var(--active));
+    transition: width 500ms var(--ease-soft);
+  }
 
   /* Italic on the active row's title — font-style can't be calc'd, and
      synthesized oblique looks wrong on serif italic glyphs. */
@@ -64,41 +146,100 @@
   [data-work-active="1"] .work-row[data-work-row-idx="1"] .row-title,
   [data-work-active="2"] .work-row[data-work-row-idx="2"] .row-title,
   [data-work-active="3"] .work-row[data-work-row-idx="3"] .row-title,
-  [data-work-active="4"] .work-row[data-work-row-idx="4"] .row-title { font-style: italic; }
+  [data-work-active="4"] .work-row[data-work-row-idx="4"] .row-title {
+    font-style: italic;
+  }
 
   /* Project still — z-index calc puts the active project on top; ken-burns
      runs on all stills but inactive ones inherit opacity:0 from the parent. */
-  .work-still { opacity: var(--active); z-index: calc(1 + var(--active)); transition: opacity 550ms ease-out; }
+  .work-still {
+    opacity: var(--active);
+    z-index: calc(1 + var(--active));
+    transition: opacity 550ms ease-out;
+  }
   .work-still::before {
-    content: ""; position: absolute; inset: 0;
+    content: "";
+    position: absolute;
+    inset: 0;
     background: linear-gradient(135deg, var(--p-tint) 0%, var(--p-tint-2) 100%);
     animation: var(--animate-ken-burns);
   }
-  .work-still-meta { opacity: calc(0.7 * var(--active)); transition: opacity 250ms ease-out; }
-  .work-still-play { opacity: var(--active); transition: opacity 250ms ease-out; }
+  .work-still-meta {
+    opacity: calc(0.7 * var(--active));
+    transition: opacity 250ms ease-out;
+  }
+  .work-still-play {
+    opacity: var(--active);
+    transition: opacity 250ms ease-out;
+  }
 
   /* Thumb strip — inactive packs collapse to zero width via flex-grow=--active. */
-  .work-thumb-pack { display: flex; gap: 0.375rem; flex: var(--active) 1 0; min-width: 0; overflow: hidden; }
+  .work-thumb-pack {
+    display: flex;
+    gap: 0.375rem;
+    flex: var(--active) 1 0;
+    min-width: 0;
+    overflow: hidden;
+  }
   .work-thumb {
-    background-color: color-mix(in oklab, var(--color-ink-3), var(--color-accent) calc(100% * var(--active)));
-    border-color: color-mix(in oklab, var(--color-line), var(--color-accent) calc(100% * var(--active)));
-    color: color-mix(in oklab, var(--color-muted), var(--color-ink) calc(100% * var(--active)));
-    transition: background-color 250ms ease-out, border-color 250ms ease-out, color 250ms ease-out;
+    background-color: color-mix(
+      in oklab,
+      var(--color-ink-3),
+      var(--color-accent) calc(100% * var(--active))
+    );
+    border-color: color-mix(
+      in oklab,
+      var(--color-line),
+      var(--color-accent) calc(100% * var(--active))
+    );
+    color: color-mix(
+      in oklab,
+      var(--color-muted),
+      var(--color-ink) calc(100% * var(--active))
+    );
+    transition:
+      background-color 250ms ease-out,
+      border-color 250ms ease-out,
+      color 250ms ease-out;
   }
   .work-thumb:hover {
     border-color: var(--color-accent);
-    color: color-mix(in oklab, var(--color-cream), var(--color-ink) calc(100% * var(--active)));
+    color: color-mix(
+      in oklab,
+      var(--color-cream),
+      var(--color-ink) calc(100% * var(--active))
+    );
   }
-  .work-thumb .thumb-play { color: color-mix(in oklab, var(--color-accent), var(--color-ink) calc(100% * var(--active))); }
+  .work-thumb .thumb-play {
+    color: color-mix(
+      in oklab,
+      var(--color-accent),
+      var(--color-ink) calc(100% * var(--active))
+    );
+  }
 
-  /* Meta cross-fade — active meta gets z-index 1 so it captures clicks. */
-  .work-meta-stack { display: grid; }
-  .work-meta { grid-area: 1 / 1; opacity: var(--active); z-index: var(--active); transition: opacity 500ms ease-out; }
+  .work-meta {
+    grid-area: 1 / 1;
+    opacity: var(--active);
+    z-index: var(--active);
+    transition: opacity 500ms ease-out;
+  }
 
   /* Scan-wipe transit */
   [data-work-transit="1"] .work-frame::after {
-    content: ""; position: absolute; inset: 0; z-index: 6; pointer-events: none;
-    background: linear-gradient(to bottom, transparent 0%, color-mix(in oklab, var(--color-accent) 18%, transparent) 48%, color-mix(in oklab, var(--color-accent) 42%, transparent) 50%, color-mix(in oklab, var(--color-accent) 18%, transparent) 52%, transparent 100%);
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      color-mix(in oklab, var(--color-accent) 18%, transparent) 48%,
+      color-mix(in oklab, var(--color-accent) 42%, transparent) 50%,
+      color-mix(in oklab, var(--color-accent) 18%, transparent) 52%,
+      transparent 100%
+    );
     animation: var(--animate-wipe);
   }
 }
