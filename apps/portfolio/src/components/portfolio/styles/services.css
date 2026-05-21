@@ -63,4 +63,41 @@
     transform-origin: left;
     transition: transform 100ms linear;
   }
+
+  /* ---- ServiceVisual animations ----
+     Was a per-instance rAF reading getComputedStyle and mutating SVG
+     attributes. Now pure CSS, ALL scroll-linked to --pin-sub. The original
+     JS used `Math.sin(sub*2π + i)` for idx 0 and `Math.sin(sub*4π + i)`
+     for idx 2; CSS trig (Chrome 111+, FF 108+, Safari 15.4+) expresses
+     the same math without an animation timeline, so motion stays bound
+     to scroll position (forward + reverse) instead of running freely.
+
+     Angle conversions used below:
+       sub * 2π  →  var(--pin-sub) * 1turn
+       sub * 4π  →  var(--pin-sub) * 2turn
+       phase i   →  var(--i) * 1rad */
+
+  /* idx 0 — 4 rows wobble horizontally, scroll-linked sine wave. */
+  .svc-vis-0-row {
+    transform: translateX(
+      calc(sin(var(--pin-sub, 0) * 1turn + var(--i, 0) * 1rad) * 8px)
+    );
+  }
+
+  /* idx 1 — main bar opacity + accent line y track pin-sub linearly.
+     `transform: translateY` instead of `y1`/`y2` — those CSS props on
+     <line> have inconsistent browser support; transform is universal. */
+  .svc-vis-1-main { opacity: calc(0.6 + var(--pin-sub, 0) * 0.4); }
+  .svc-vis-1-line {
+    transform: translateY(calc(var(--pin-sub, 0) * 100px));
+  }
+
+  /* idx 2 — six node circles pulse, scroll-linked sine wave (2 cycles
+     over sub=0..1 to match the original 4π frequency). */
+  .svc-vis-2-c {
+    r: calc(4px + sin(var(--pin-sub, 0) * 2turn + var(--i, 0) * 1rad) * 2px);
+  }
+
+  /* idx 3 — concentric rings grow linearly with pin-sub. */
+  .svc-vis-3-c { r: calc(var(--base, 0px) + var(--pin-sub, 0) * 8px); }
 }

@@ -35,7 +35,7 @@ export function ContourSVG() {
 
   return (
     <svg
-      className="absolute inset-0 w-full h-full animate-breathe motion-reduce:animate-none"
+      className="absolute inset-0 w-full h-full animate-breathe will-change-transform motion-reduce:animate-none"
       viewBox="0 0 1600 2400"
       preserveAspectRatio="xMidYMid slice"
       xmlns="http://www.w3.org/2000/svg"

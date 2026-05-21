@@ -2,7 +2,7 @@ import { H2, H3 } from "@/components/ui/H2";
 import { ServiceVisual } from "./service-visual";
 
 /* Services — pinned scroll experience. The wrap is 400vh tall and
-   declares data-pin-steps="4"; the active-section island writes
+   declares data-pin-steps="4"; the scroll island writes
    data-pin-step + --pin-sub. Cross-fades, frame visibility, and the
    bottom progress bars all read those signals via services.css. */
 

@@ -4,8 +4,7 @@ import { type Metadata } from "next";
 import { Lato, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { Header } from "@/components/portfolio/header";
 import { Footer } from "@/components/portfolio/footer";
-import { ScrollObserver } from "@/components/ui/ScrollObserver";
-import { ActiveSectionTracker } from "@/components/ui/active-section";
+import { ScrollIsland } from "@/components/ui/scroll-island";
 
 const latoFont = Lato({
   weight: ["300", "400", "700"],
@@ -80,8 +79,7 @@ export default function RootLayout({
       )}
       <body>
         <Header />
-        <ScrollObserver />
-        <ActiveSectionTracker />
+        <ScrollIsland />
         <main className=" py-10">{children}</main>
         <Footer />
       </body>

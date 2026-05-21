@@ -22,9 +22,13 @@ export function WorkViewport() {
         <ProjectStill key={i} project={p} idx={i} />
       ))}
 
-      {/* Scan-line overlay */}
+      {/* Scan-line overlay. Was `mix-blend-multiply opacity-50` — mix-blend
+          forces an extra paint pass + isolated stacking context. Switched
+          to a plain overlay with the line color tuned darker (black/28 vs
+          the previous black/16 multiplied at 50%) so the visual matches
+          without the blend mode. */}
       <div
-        className="absolute inset-0 pointer-events-none z-4 mix-blend-multiply opacity-50 bg-[repeating-linear-gradient(to_bottom,transparent_0px,transparent_2px,color-mix(in_oklab,black_16%,transparent)_3px,transparent_4px)]"
+        className="absolute inset-0 pointer-events-none z-4 bg-[repeating-linear-gradient(to_bottom,transparent_0px,transparent_2px,color-mix(in_oklab,black_28%,transparent)_3px,transparent_4px)]"
         aria-hidden="true"
       ></div>
       {/* Vignette */}
@@ -33,7 +37,7 @@ export function WorkViewport() {
         aria-hidden="true"
       ></div>
 
-      <div className="work-thumb-strip absolute bottom-3.5 left-3.5 right-3.5 z-5 flex items-center px-3 py-2 bg-ink/78 backdrop-blur-sm border border-line rounded-xs max-xl:static max-xl:-mt-0.5">
+      <div className="work-thumb-strip absolute bottom-3.5 left-3.5 right-3.5 z-5 flex items-center px-3 py-2 bg-ink/92 border border-line rounded-xs max-xl:static max-xl:-mt-0.5">
         {PROJECTS.map((p, i) => (
           <div
             key={i}

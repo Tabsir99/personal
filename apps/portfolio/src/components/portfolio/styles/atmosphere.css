@@ -13,12 +13,10 @@
 }
 
 @layer components {
-  /* Parallax planes — scroll-y is published by the active-section island
-     as a unitless number on <html>. Per-plane factor + px unit happen
-     in the calc(). Lower factor = slower drift = deeper feel. */
-  .atm-far  { transform: translate3d(0, calc(var(--scroll-y, 0) * -0.025px), 0); }
-  .atm-mid  { transform: translate3d(0, calc(var(--scroll-y, 0) * -0.10px), 0); }
-  .atm-near { transform: translate3d(0, calc(var(--scroll-y, 0) * -0.20px), 0); }
+  /* Parallax: active-section.tsx writes inline transform directly onto
+     .atm-far / .atm-mid / .atm-near on every scroll frame. Each plane has
+     will-change:transform so it's a composited layer; the inline-style
+     write invalidates only the plane itself, not any descendant. */
 
   /* Section-driven tint. CSS transition handles the cross-section smoothing
      that the old per-frame RGB lerp used to do. All alphas < 0.05. */

@@ -3,8 +3,8 @@ import { ContourSVG } from "./contour-svg";
 import { CoordOverlay } from "./coord-overlay";
 
 /* Shared plane class group — taller than viewport so parallax never reveals
-   an empty edge. Parallax transform lives in atmosphere.css and reads
-   --scroll-y from the active-section island. */
+   an empty edge. The parallax transform is written imperatively to each
+   plane by scroll-island.tsx (queried via .atm-far / .atm-mid / .atm-near). */
 const PLANE = "absolute inset-x-0 top-[-20vh] h-[240vh] will-change-transform";
 const ORB =
   "absolute rounded-full will-change-transform motion-reduce:animate-none";
@@ -97,8 +97,9 @@ const orbStyle = (
    Sits at z-index 0; <main> is z-index 1. Pointer-events: none so
    nothing here ever steals interactivity.
 
-   No JS: parallax + tint are pure CSS driven by --scroll-y +
-   [data-active-section] signals from active-section.tsx.
+   Parallax planes get their translate written imperatively by
+   scroll-island.tsx; section-driven tint is pure CSS off the
+   [data-active-section] attribute on <html>.
    ===================================================================== */
 
 export function Atmosphere() {

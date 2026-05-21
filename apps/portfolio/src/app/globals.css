@@ -200,27 +200,9 @@ html {
   --font-mono: var(--mono);
 }
 
-/* Register the scroll-driven custom properties as typed CSS props.
-
-   Without @property, writing one of these on <html> forces Chrome to
-   restyle every descendant (it can't prove which elements depend on the
-   var). Registering gives the engine typed values + proper per-property
-   dependency tracking, so only elements whose computed style actually
-   uses the var get invalidated.
-
-   Consumers: --scroll-y is read by .atm-far/.atm-mid/.atm-near and
-   .voices-frame; --scroll-progress by the rail bar + dot; --pin-step
-   and --pin-sub by .svc-* (services section) and the work island. */
-@property --scroll-y {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 0;
-}
-@property --scroll-progress {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 0;
-}
+/* Pin choreography vars — written by active-section.tsx onto the services
+   wrap element (NOT <html>). Registering gives them typed values so calc()
+   over them is cheap and predictable. They drive the services subtree only. */
 @property --pin-step {
   syntax: "<integer>";
   inherits: true;
@@ -272,6 +254,30 @@ html {
     border: none;
     cursor: pointer;
   }
+
+  /* Isolate each home-page section so style/layout/paint changes inside one
+     can't cascade across siblings. `contain: content` = layout + paint +
+     style. Skipped on #services (sticky pin choreography spans its full
+     400vh wrap) and #now (sticky left column tracks the page scroll). */
+  #hero,
+  #endorsement,
+  #about,
+  #stack,
+  #voices,
+  #work,
+  #writing,
+  #contact,
+  #now,
+  #services {
+    content-visibility: auto;
+    contain-intrinsic-size: 100dvh;
+  }
+}
+#about {
+  contain-intrinsic-size: 24rem;
+}
+#services {
+  contain-intrinsic-size: 400dvh;
 }
 
 @utility page-shell {

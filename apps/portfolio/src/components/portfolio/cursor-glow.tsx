@@ -16,28 +16,44 @@ export function CursorGlow() {
       cy = 0.4;
     let inside = false;
 
+    /* The lerp asymptotes to tx/ty but never equals it — without an idle
+       check the rAF runs forever, repainting the fullscreen radial-gradient
+       on every frame. We stop when |delta| is below ~0.05% of viewport
+       (sub-pixel on any realistic screen) and restart on next mousemove. */
+    const IDLE_EPSILON = 0.005;
+
+    function schedule() {
+      if (!raf) raf = requestAnimationFrame(tick);
+    }
+
     function onMove(e: MouseEvent) {
       tx = e.clientX / window.innerWidth;
       ty = e.clientY / window.innerHeight;
       inside = true;
+      schedule();
     }
 
     function tick() {
-      cx += (tx - cx) * 0.05;
-      cy += (ty - cy) * 0.05;
+      raf = 0;
+      const dx = tx - cx;
+      const dy = ty - cy;
+      cx += dx * 0.05;
+      cy += dy * 0.05;
       const el = glowRef.current;
       if (el) {
         el.style.setProperty("--gx", `${cx * 100}%`);
         el.style.setProperty("--gy", `${cy * 100}%`);
         el.style.opacity = inside ? "1" : "0.5";
       }
-      raf = requestAnimationFrame(tick);
+      if (Math.abs(dx) > IDLE_EPSILON || Math.abs(dy) > IDLE_EPSILON) {
+        raf = requestAnimationFrame(tick);
+      }
     }
     window.addEventListener("mousemove", onMove);
-    raf = requestAnimationFrame(tick);
+    schedule();
     return () => {
       window.removeEventListener("mousemove", onMove);
-      cancelAnimationFrame(raf);
+      if (raf) cancelAnimationFrame(raf);
     };
   }, []);
 
