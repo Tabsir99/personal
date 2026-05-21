@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { H3 } from "@/components/ui/H2";
 
 const BTN_BASE =
   "appearance-none inline-flex items-center gap-2.5 px-3.5 py-[9px] bg-transparent text-cream-2 border border-line rounded-full cursor-pointer text-xs tracking-wide no-underline [transition:background_200ms_ease,color_200ms_ease,border-color_200ms_ease,transform_120ms_ease] hover:bg-ink-2 hover:border-cream hover:text-cream hover:translate-x-0.5 active:translate-x-0.5 active:scale-[0.98]";
@@ -36,9 +37,7 @@ export default function Share({ url, title }: { url: string; title: string }) {
 
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="font-mono text-xs text-muted tracking-wider">
-        // share
-      </div>
+      <H3 variant="widget">// share</H3>
       <div className="flex flex-col gap-2">
         <button
           type="button"

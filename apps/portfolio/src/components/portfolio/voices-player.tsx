@@ -175,7 +175,7 @@ export function VoicesPlayer({ src }: { src: string }) {
           >
             {playing ? "❚❚" : "▶"}
           </ControlButton>
-          <div className="inline-flex items-baseline gap-1 font-mono text-xs tracking-[0.12em] text-cream min-w-24 whitespace-nowrap">
+          <div className="inline-flex items-baseline gap-1 font-mono text-xs tracking-widest text-cream min-w-24 whitespace-nowrap">
             <span>{fmtTime(time)}</span>
             <span className="text-line">/</span>
             <span className="text-muted">{fmtTime(duration)}</span>

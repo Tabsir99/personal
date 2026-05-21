@@ -6,7 +6,7 @@ const CARD_BASE =
 const CARD_EMPTY =
   "flex flex-col gap-2 px-6 py-[22px] border border-line border-dashed rounded-md bg-transparent cursor-default min-h-[116px]";
 const DIR_BASE =
-  "inline-flex items-center gap-2 font-mono text-xs tracking-[0.06em] uppercase";
+  "inline-flex items-center gap-2 font-mono text-xs tracking-wider uppercase";
 const TITLE_CLASS =
   "font-serif italic text-[clamp(20px,2.4vw,26px)] leading-[1.15] text-cream tracking-tight";
 

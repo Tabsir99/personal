@@ -1,6 +1,6 @@
 /* ===== Writing ===== */
 
-import { H2 } from "../ui/H2";
+import { H2, H3 } from "../ui/H2";
 
 const ARTICLES = [
   {
@@ -38,7 +38,7 @@ const ARTICLES = [
 export function Writing() {
   return (
     <section id="writing" className="page-shell flex flex-col gap-10">
-      <H2 className="em-accent">
+      <H2>
         <em>Notes</em>
         <br />
         from the keyboard.
@@ -53,9 +53,12 @@ export function Writing() {
           >
             <div className="font-mono text-xs text-muted">{a.num}</div>
             <div className="font-mono text-xs text-muted">{a.date}</div>
-            <h3 className="h-serif text-[26px] leading-[1.2] transition-colors duration-300 group-hover:text-accent">
+            <H3
+              variant="serif"
+              className="text-[26px] leading-[1.2] transition-colors duration-300 group-hover:text-accent"
+            >
               {a.title}
-            </h3>
+            </H3>
             <div className="font-mono text-xs text-muted tracking-wider">
               {a.meta}
             </div>

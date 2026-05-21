@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { KIND_LABEL, formatDate, type PostMeta } from "@/lib/posts";
+import { H3 } from "@/components/ui/H2";
 import { TagPill } from "./TagPill";
 
 const KIND_BADGE: Record<PostMeta["kind"], string> = {
@@ -33,7 +34,7 @@ export default function PostRow({
           {KIND_LABEL[post.kind]}
         </span>
       </div>
-      <h3 className="m-0 mb-2 text-[clamp(28px,3.5vw,46px)] font-black tracking-[-0.03em] leading-[1.04] relative pb-1">
+      <H3 variant="editorial" className="mb-2 relative pb-1">
         <Link
           href={`/blog/${post.slug}`}
           className="inline-block cursor-pointer"
@@ -42,7 +43,7 @@ export default function PostRow({
             {post.title}
           </span>
         </Link>
-      </h3>
+      </H3>
       <p className="text-cream-2 m-0 mb-[18px] max-w-[64ch]">{post.excerpt}</p>
       <div className="flex items-center gap-6 flex-wrap">
         <div className="flex gap-1.5 flex-wrap">

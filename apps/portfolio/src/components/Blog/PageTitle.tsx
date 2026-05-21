@@ -1,3 +1,4 @@
+import { H1 } from "@/components/ui/H2";
 import { Breadcrumb } from "./Breadcrumb";
 
 export default function PageTitle({
@@ -16,7 +17,7 @@ export default function PageTitle({
           { label: "blog" },
         ]}
       />
-      <h1 className="m-0 font-serif italic text-cream leading-[0.85] tracking-[-0.055em] text-[clamp(80px,12vw,200px)]">
+      <H1 size="page">
         <span
           className="inline-block opacity-0 translate-y-10 animate-rise-in"
           style={{ animationDelay: "80ms" }}
@@ -26,7 +27,7 @@ export default function PageTitle({
             .
           </span>
         </span>
-      </h1>
+      </H1>
       <p
         className="text-[clamp(18px,1.6vw,22px)] leading-[1.45] text-cream-2 max-w-[56ch] mt-7 mb-0 font-light opacity-0 translate-y-5 animate-rise-in"
         style={{ animationDelay: "320ms" }}

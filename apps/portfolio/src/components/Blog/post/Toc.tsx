@@ -1,4 +1,5 @@
 import type { TocItem } from "@open-notion/serializers";
+import { H3 } from "@/components/ui/H2";
 
 const ITEM_ANCHOR =
   "relative flex items-baseline gap-2.5 py-1.5 pl-1.5 pr-0 no-underline rounded-[3px] text-muted transition-colors hover:text-cream [&.is-active]:text-cream [&.is-active]:font-bold";
@@ -52,9 +53,7 @@ export default function Toc({ items }: { items: TocItem[] }) {
       </details>
 
       <nav className="relative text-sm leading-[1.45] pl-[18px] max-xl:hidden">
-        <div className="font-mono text-xs mb-4 text-muted tracking-wider">
-          // on this page
-        </div>
+        <H3 variant="widget" className="mb-4">// on this page</H3>
         <div
           className="absolute left-0 top-8 bottom-0 w-0.5 bg-cream/8 rounded-xs overflow-hidden"
           aria-hidden="true"

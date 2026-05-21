@@ -31,7 +31,7 @@ export function Rail() {
           className={TICK_BASE}
           style={{ top: `var(--rail-pos-${s.id}, 0%)` }}
         >
-          <span className="rail-tick-label absolute left-[22px] font-mono text-xxs tracking-[0.15em] uppercase -translate-y-1/2 whitespace-nowrap">
+          <span className="rail-tick-label absolute left-[22px] font-mono text-xxs tracking-widest uppercase -translate-y-1/2 whitespace-nowrap">
             {s.num} — {s.label}
           </span>
         </div>

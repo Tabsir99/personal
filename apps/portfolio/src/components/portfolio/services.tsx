@@ -1,3 +1,4 @@
+import { H2, H3 } from "@/components/ui/H2";
 import { ServiceVisual } from "./service-visual";
 
 /* Services — pinned scroll experience. The wrap is 400vh tall and
@@ -93,13 +94,13 @@ export function Services() {
               {/* Title stack */}
               <div className="relative mb-1 min-h-[clamp(130px,14vw,200px)]">
                 {SERVICES.map((s, i) => (
-                  <h2
+                  <H2
                     key={i}
                     style={{ "--i": i } as React.CSSProperties}
-                    className="svc-title h-serif absolute top-0 left-0 text-[clamp(48px,6vw,88px)] leading-none whitespace-pre-line"
+                    className="svc-title absolute top-0 left-0 text-[clamp(48px,6vw,88px)] leading-none whitespace-pre-line"
                   >
                     {s.title}
-                  </h2>
+                  </H2>
                 ))}
               </div>
 
@@ -133,10 +134,10 @@ export function Services() {
                     <div className="mb-2.5 font-mono text-xs uppercase tracking-widest text-accent">
                       {s.frameLabel}
                     </div>
-                    <h3 className="mb-3.5 font-serif text-3xl font-normal leading-[1.1] tracking-tight">
+                    <H3 variant="serif" className="mb-3.5">
                       {s.frameTitle}
-                    </h3>
-                    <ul className="list-none font-mono text-xs tracking-[0.06em] text-cream-2">
+                    </H3>
+                    <ul className="list-none font-mono text-xs tracking-wider text-cream-2">
                       {s.items.map((it, j) => (
                         <li
                           key={j}

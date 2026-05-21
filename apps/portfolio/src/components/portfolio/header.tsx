@@ -12,7 +12,7 @@ export function Header() {
       >
         <span className="italic">Tabsir</span>
         <span className="text-xs text-muted-2">·</span>
-        <span className="font-mono text-xxs tracking-[0.12em] text-muted">
+        <span className="font-mono text-xxs tracking-widest text-muted">
           CG
         </span>
       </NavLink>
@@ -28,7 +28,7 @@ export function Header() {
       </nav>
       <NavLink
         href="#contact"
-        className="rounded-full border border-line px-3 py-[6px] uppercase tracking-[0.08em] text-xxs hover:border-accent hover:bg-accent/8"
+        className="rounded-full border border-line px-3 py-[6px] uppercase tracking-widest text-xxs hover:border-accent hover:bg-accent/8"
       >
         <span className="size-1.5 animate-pulse rounded-full bg-phosphor shadow-[0_0_8px_var(--color-phosphor)]"></span>
         Available

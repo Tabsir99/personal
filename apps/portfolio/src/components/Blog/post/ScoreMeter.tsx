@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { H3 } from "@/components/ui/H2";
 
 const MAX_SCORE = 50;
 const FLUSH_MS = 800;
@@ -123,9 +124,7 @@ export default function ScoreMeter({
       className="flex flex-col items-start gap-3.5 font-sans"
       data-maxed={isMaxed || undefined}
     >
-      <div className="font-mono text-xs text-muted tracking-wider">
-        // score
-      </div>
+      <H3 variant="widget">// score</H3>
       <button
         type="button"
         className={

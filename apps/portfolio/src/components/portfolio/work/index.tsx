@@ -35,7 +35,7 @@ export function Work() {
       </span>
 
       <header data-reveal className="flex justify-between">
-        <H2 className="em-accent">
+        <H2>
           <em>Selected</em>
           <br />
           work.

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { KIND_LABEL, formatDate, type PostMeta } from "@/lib/posts";
+import { H2 } from "@/components/ui/H2";
 import { TagPill } from "./TagPill";
 
 export default function FeaturedCard({ post }: { post: PostMeta }) {
@@ -56,9 +57,7 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
             {formatDate(post.date)}
           </span>
         </div>
-        <h2 className="text-[clamp(28px,3vw,40px)] font-black tracking-tight leading-[1.05] mt-1.5 mb-0">
-          {post.title}
-        </h2>
+        <H2 variant="editorial" className="mt-1.5">{post.title}</H2>
         <p className="text-cream-2 m-0 max-w-[50ch]">{post.excerpt}</p>
         <div className="flex flex-wrap gap-2 mt-auto">
           {post.tags.map((t) => (

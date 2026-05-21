@@ -1,4 +1,5 @@
 import { KIND_LABEL, formatDate, type PostMeta } from "@/lib/posts";
+import { H1 } from "@/components/ui/H2";
 import { Breadcrumb } from "../Breadcrumb";
 import { TagPill } from "../TagPill";
 
@@ -20,7 +21,7 @@ function MetadataRow({
 }) {
   return (
     <div className="flex items-center gap-3 m-0">
-      <dt className="uppercase tracking-[0.08em] text-xxs after:content-['_›'] after:opacity-50">
+      <dt className="uppercase tracking-widest text-xxs after:content-['_›'] after:opacity-50">
         {label}
       </dt>
       <dd
@@ -59,9 +60,7 @@ export default function PostHeader({ post }: { post: PostMeta }) {
         </time>
       </div>
 
-      <h1 className="font-serif italic text-[clamp(40px,6vw,80px)] leading-[0.95] tracking-[-0.035em] m-0 mb-6 text-cream text-balance max-sm:mb-[18px]">
-        {post.title}
-      </h1>
+      <H1 className="mb-6 max-sm:mb-[18px]">{post.title}</H1>
 
       <p className="text-[clamp(18px,1.6vw,22px)] leading-[1.45] text-cream-2 max-w-[56ch] m-0 mb-9 font-light text-pretty max-sm:mb-6">
         {post.dek}

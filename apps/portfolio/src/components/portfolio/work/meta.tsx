@@ -55,7 +55,7 @@ export function WorkMeta() {
             {project.links.map((l, j) => {
               const isReal = !!l.url && l.url !== "#";
               const className = cn(
-                "group/link inline-flex items-center gap-2.5 px-4 py-2.5 border border-line rounded-xs font-mono text-xs tracking-[0.12em] uppercase text-cream-2 bg-transparent transition-all duration-250 ease-out hover:border-accent hover:text-accent hover:-translate-y-px",
+                "group/link inline-flex items-center gap-2.5 px-4 py-2.5 border border-line rounded-xs font-mono text-xs tracking-widest uppercase text-cream-2 bg-transparent transition-all duration-250 ease-out hover:border-accent hover:text-accent hover:-translate-y-px",
                 LINK_BG[l.type],
               );
               const inner = (

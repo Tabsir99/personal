@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import type { CurrentlyBuilding, NowReadingItem } from "@tabsircg/schemas/site";
+import { H3 } from "@/components/ui/H2";
 
 const TAPE =
   "absolute w-20 h-6 -top-2.5 bg-[oklch(85%_0.08_90/0.5)] backdrop-blur-[2px] border border-[oklch(80%_0.05_90/0.5)]";
@@ -65,9 +66,7 @@ export default function Aside({
         >
           <div className={`${TAPE} left-4 rotate-[-4deg]`} />
           <div className={`${TAPE} right-4 rotate-3`} />
-          <div className="font-mono text-xs text-muted mb-3.5">
-            // now reading
-          </div>
+          <H3 variant="widget" className="mb-3.5">// now reading</H3>
           <ul className="list-none p-0 m-0 flex flex-col gap-3.5">
             {nowReading.map((b, i) => (
               <li key={i} className="flex gap-2.5 items-start">
@@ -79,7 +78,7 @@ export default function Aside({
                   }
                 />
                 <div>
-                  <div className="font-bold text-sm leading-tight">
+                  <div className="font-serif italic text-base leading-tight">
                     {b.title}
                   </div>
                   {b.author && (
@@ -99,10 +98,13 @@ export default function Aside({
 
       {hasBuilding && (
         <div className="bg-ink-2 border border-line py-[22px] px-5 rounded-[10px] max-lg:flex-1 max-lg:basis-[280px]">
-          <div className="font-mono text-xs text-muted lowercase tracking-wider mb-3 before:content-['//_'] before:text-accent">
+          <H3
+            variant="widget"
+            className="lowercase mb-3 before:content-['//_'] before:text-accent"
+          >
             currently building
-          </div>
-          <div className="text-[15px] leading-normal text-cream-2">
+          </H3>
+          <div className="text-sm leading-normal text-cream-2">
             {currentlyBuilding.code && (
               <>
                 <code className="font-mono bg-ink-3 px-1.5 py-px rounded-sm text-sm text-accent">

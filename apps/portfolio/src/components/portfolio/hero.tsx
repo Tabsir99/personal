@@ -45,19 +45,19 @@ export function Hero() {
       )}
     >
       <div className="min-w-0">
-        <h1 className="m-0 mb-7 flex flex-col font-normal text-balance">
+        <h1 className="m-0 mb-7 flex flex-col text-balance font-serif">
           <span
             className={cn(
               "inline-flex items-baseline gap-1 font-mono font-medium",
               "text-[clamp(40px,6.4vw,96px)] leading-[1.04] tracking-tight",
               "text-accent uppercase",
-              "[font-variant-numeric:tabular-nums] whitespace-nowrap",
+              "whitespace-nowrap",
               "translate-y-2 opacity-0",
               "animate-rise-in delay-300",
               "max-xl:text-[clamp(36px,9vw,64px)]",
             )}
           >
-            <span className="text-accent-2 font-normal opacity-70">[</span>
+            <span className="text-accent-2 opacity-70">[</span>
             <ScrambleWord
               words={[
                 "FRICTION",
@@ -68,11 +68,12 @@ export function Hero() {
               ]}
             />
 
-            <span className="text-accent-2 font-normal opacity-70">]</span>
+            <span className="text-accent-2 opacity-70">]</span>
           </span>
+
           <span
             className={cn(
-              "mt-1.5 flex flex-col font-serif",
+              "mt-1.5 flex flex-col",
               "text-[clamp(56px,9vw,130px)] leading-[0.92] tracking-[-0.035em]",
               "text-cream",
               "max-xl:text-[clamp(48px,12vw,96px)]",
@@ -95,16 +96,16 @@ export function Hero() {
 
         <p
           className={cn(
-            "em-accent font-sans font-light",
+            "em-accent",
             "text-[clamp(17px,1.55vw,22px)] leading-[1.45]",
             "text-cream-2 mt-9 mb-11 max-w-[52ch]",
             "opacity-0 animate-fade-in delay-800",
-            "[&_em]:px-0.5 [&_em]:text-highlight",
           )}
         >
           Full-stack web work for teams who&rsquo;d rather{" "}
-          <em>move than rewrite</em>. APIs, dashboards, the seams between them —
-          built so they don&rsquo;t show.
+          <em className="underline underline-offset-2">move than rewrite</em>.
+          APIs, dashboards, the seams between them — built so they don&rsquo;t
+          show.
         </p>
 
         <div className="flex flex-wrap items-center gap-7 opacity-0 animate-fade-in delay-1000">
@@ -135,7 +136,7 @@ export function Hero() {
 
       <div className="flex items-center gap-5 text-sm  self-end">
         <span className="inline-block font-mono uppercase">↓ Scroll</span>
-        <span className="italic text-muted">
+        <span className="font-serif italic text-muted">
           Two years shipping. Seventeen projects merged.
         </span>
       </div>

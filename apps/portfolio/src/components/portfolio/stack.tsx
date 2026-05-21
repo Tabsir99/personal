@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { H2 } from "../ui/H2";
+import { H2, H3 } from "../ui/H2";
 
 /* =====================================================================
    Tech stack — categories of tools, with proficiency dots.
@@ -79,9 +79,9 @@ export function Stack() {
             style={{ "--i": i } as React.CSSProperties}
             className="border-r border-b border-line p-7 min-h-60 transition-[background] hover:bg-accent/3"
           >
-            <h3 className="flex items-center gap-3 mb-5 font-mono text-xs uppercase tracking-widest text-accent after:content-[''] after:flex-1 after:h-px after:bg-line">
+            <H3 className="flex items-center gap-3 mb-5 text-accent after:content-[''] after:flex-1 after:h-px after:bg-line">
               {String(i + 1).padStart(2, "0")} · {cat.label}
-            </h3>
+            </H3>
             <div className="flex flex-col gap-4">
               {cat.items.map(([name, lvl], j) => (
                 <div

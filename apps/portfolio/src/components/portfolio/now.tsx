@@ -31,11 +31,11 @@ const NOW_ITEMS: { label: string; body: React.ReactNode }[] = [
     label: "Reading",
     body: (
       <>
-        <em className="font-serif text-[19px]">
+        <em className="font-serif text-lg">
           Designing Data-Intensive Applications
         </em>
         <span className="muted"> — on round two. </span>
-        <em className="font-serif text-[19px]">The Pragmatic Engineer</em>
+        <em className="font-serif text-lg">The Pragmatic Engineer</em>
         <span className="muted"> newsletter, faithfully.</span>
       </>
     ),
