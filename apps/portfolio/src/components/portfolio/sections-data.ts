@@ -1,7 +1,4 @@
-// Canonical section list — single source of truth.
-// `id` matches the rendered `<section id>`. `num`/`label` drive both the
-// left rail (which prints "00 — Index") and the header pill (which filters
-// by `inNav` and shows `num` next to `label`).
+// `id` matches the rendered `<section id>`. `inNav` filters the header pill.
 export const SECTIONS = [
   { id: "hero", label: "Index", inNav: false },
   { id: "about", label: "About", inNav: true },

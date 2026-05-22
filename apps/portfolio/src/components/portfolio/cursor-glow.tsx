@@ -2,8 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-/* Page-wide cursor-following accent glow. Sits at z-0 (above Atmosphere,
-   below <main>'s z-1) so it stays behind all content. */
+/* z-0 — above Atmosphere, below <main>'s z-1. */
 export function CursorGlow() {
   const glowRef = useRef<HTMLDivElement>(null);
 
@@ -16,10 +15,8 @@ export function CursorGlow() {
       cy = 0.4;
     let inside = false;
 
-    /* The lerp asymptotes to tx/ty but never equals it — without an idle
-       check the rAF runs forever, repainting the fullscreen radial-gradient
-       on every frame. We stop when |delta| is below ~0.05% of viewport
-       (sub-pixel on any realistic screen) and restart on next mousemove. */
+    /* Lerp asymptotes — without this idle check rAF would run forever,
+       repainting the fullscreen radial-gradient every frame. */
     const IDLE_EPSILON = 0.005;
 
     function schedule() {

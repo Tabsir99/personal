@@ -2,9 +2,6 @@ import { BlockQuote } from "../ui/BlockQuote";
 import { H2 } from "../ui/H2";
 import { VoicesPlayer } from "./voices-player";
 
-/* Voices — video testimonial section. Server-rendered shell; the
-   interactive player (video + controls) lives in voices-player.tsx. */
-
 const VIDEO_URL =
   "https://media.tabsircg.com/portfolio/testimonials/client-testimonial-ERIC-Postchart.mov";
 

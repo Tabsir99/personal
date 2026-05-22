@@ -1,11 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 
-/* ===== Animated Terminal =====
-   Translucent right-column companion to the hero headline.
-   Cycles through a short fake shell session: type command, reveal response, idle, next.
-*/
-
 export type TerminalLine = {
   command: string;
   response: string;
@@ -32,10 +27,8 @@ export function Terminal({
 }: {
   title: string;
   lines: TerminalLine[];
-  /* Ms to wait before the very first command types. Set to the same
-     value as the rise-in `delay-*` so the typing doesn't progress
-     while the terminal is still invisible behind the intro overlay.
-     Only applies to step 0; subsequent steps use line.delayBefore. */
+  /* Step-0 only. Keep in sync with rise-in `delay-*` so typing doesn't
+     advance while the terminal is hidden behind the intro overlay. */
   startDelay?: number;
 }) {
   const [step, setStep] = useState(0);
@@ -61,7 +54,6 @@ export function Terminal({
       if (respRef.current) respRef.current.textContent = "";
       setPhase("cmd");
 
-      // Type the command character by character.
       let i = 0;
       const tick = () => {
         if (cancelled) return;
@@ -72,7 +64,6 @@ export function Terminal({
           after(38 + Math.random() * 60, tick);
         } else {
           setPhase("resp");
-          // Reveal response gradually.
           let j = 0;
           const respTick = () => {
             if (cancelled) return;
@@ -108,7 +99,6 @@ export function Terminal({
       opacity-0 translate-y-4 animate-rise-in delay-6300
       shadow-md shadow-phosphor/10"
     >
-      {/* Chrome */}
       <div className="flex items-center justify-between px-[14px] py-[10px] border-b border-phosphor/15 bg-black/20">
         <div className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-accent/80"></span>
@@ -121,7 +111,6 @@ export function Terminal({
         <div className="text-xxs tracking-[0.22em] text-muted/40">v0.4</div>
       </div>
 
-      {/* Body */}
       <div className="relative min-h-[232px] px-5 pt-4 pb-5 text-xs leading-[1.7]">
         <div className="relative z-1">
           <div className="text-muted/65">
@@ -143,7 +132,6 @@ export function Terminal({
           )}
         </div>
 
-        {/* Decorative scanline */}
         <div
           className="absolute inset-0 pointer-events-none opacity-[0.07] overflow-hidden"
           aria-hidden="true"

@@ -1,11 +1,5 @@
 import type { Project } from "./data";
 
-/* Placeholder "still" for the viewing window. Renders a viewfinder-style
-   frame for one project: tinted bg (the .work-still::before in work.css
-   runs the ken-burns when its project is active), stripe + dot overlays,
-   ghosted serif word, top glyph, and per-still label/spec lines that fade
-   in based on `--work-still`. One unique tint per project glyph. */
-
 const GLYPH_TINTS: Record<string, { tint: string; tint2: string }> = {
   "◢": { tint: "oklch(0.34 0.06 38)", tint2: "oklch(0.22 0.02 38)" },
   "◇": { tint: "oklch(0.32 0.04 80)", tint2: "oklch(0.20 0.015 80)" },

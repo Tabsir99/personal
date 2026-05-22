@@ -1,10 +1,6 @@
 import { cn } from "@/lib/utils";
 import { H2, H3 } from "../ui/H2";
 
-/* =====================================================================
-   Tech stack — categories of tools, with proficiency dots.
-   ===================================================================== */
-
 const STACK_CATEGORIES: { label: string; items: [string, number][] }[] = [
   {
     label: "Front-end",

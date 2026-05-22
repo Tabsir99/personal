@@ -2,9 +2,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { LINK_BG, LINK_ICONS, PROJECTS } from "./data";
 
-/* Meta block under the stage — dek + role/stack/metrics + project links.
-   Server component. All 5 projects' blocks render stacked in one grid
-   cell (grid-area 1/1 in work.css); only the active one has opacity 1. */
+/* All 5 stack in one grid cell; only the active one has opacity 1. */
 export function WorkMeta({ className }: { className?: string }) {
   return (
     <div

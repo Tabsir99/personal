@@ -29,8 +29,7 @@ const jetbrainsMonoFont = JetBrains_Mono({
   subsets: ["latin"],
 });
 
-// TODO: re-wire CMS via getPageData() once the redesigned portfolio
-// is mapped onto the admin schema.
+// TODO: re-wire CMS via getPageData() once the portfolio maps to the admin schema.
 export const metadata: Metadata = {
   metadataBase: new URL("https://tabsircg.com"),
   title: "Tabsir CG — Full-stack developer",
@@ -58,8 +57,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Override the temp CSS's --sans/--serif/--mono vars with next/font's
-  // optimized fonts so base.css's `font-family: var(--sans)` etc. resolve.
+  // Wires next/font's optimized fonts into base.css's --sans/--serif/--mono vars.
   const fontVars = {
     "--sans": `${latoFont.style.fontFamily}, -apple-system, BlinkMacSystemFont, sans-serif`,
     "--serif": `${instrumentSerifFont.style.fontFamily}, "Cormorant Garamond", Georgia, serif`,

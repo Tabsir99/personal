@@ -1,11 +1,8 @@
 "use client";
 import { useEffect, useRef } from "react";
 
-/* Tiny client island for the Work section. Owns active project + still and
-   the 620ms scan-wipe transit purely in DOM state — writes data-* attrs +
-   --work-active / --work-still numeric CSS vars on the section, never
-   re-renders. List, viewport, project-still and meta are server components
-   that react via CSS selectors. */
+/* Writes data-* + --work-active / --work-still on the section.
+   Never re-renders — siblings react via CSS selectors. */
 export function WorkStateIsland() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {

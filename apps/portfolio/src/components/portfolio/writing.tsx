@@ -1,5 +1,3 @@
-/* ===== Writing ===== */
-
 import { H2, H3 } from "../ui/H2";
 
 const ARTICLES = [

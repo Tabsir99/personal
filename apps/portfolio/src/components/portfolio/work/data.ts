@@ -136,7 +136,6 @@ export const LINK_ICONS: Record<string, string> = {
   other: "→",
 };
 
-/* Row status pill — color + border per status. */
 export const ROW_STATUS_STYLES: Record<string, string> = {
   shipped: "text-phosphor border-phosphor/35",
   "in-progress": "text-accent border-accent/40",
@@ -144,7 +143,6 @@ export const ROW_STATUS_STYLES: Record<string, string> = {
   discontinued: "text-muted-2 opacity-60",
 };
 
-/* Meta-link variant tint: only `live` gets the warm tint background. */
 export const LINK_BG: Record<string, string> = {
   live: "bg-accent/6",
 };

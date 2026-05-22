@@ -4,7 +4,6 @@ import type { PublishedBlogDB } from "@tabsircg/schemas/blog";
 import type { SiteConfig } from "@tabsircg/schemas/site";
 import { env } from "@/config/env";
 
-// The /api/blogs list endpoint returns these fields per item.
 // Mirrors `fieldsToRead` in apps/admin/src/app/api/blogs/route.ts.
 type BlogListItem = Pick<
   PublishedBlogDB,
@@ -28,7 +27,6 @@ type BlogListItem = Pick<
   | "schemaType"
 >;
 
-// UI view-types — derived from wire shapes.
 export interface Neighbour {
   slug: string;
   title: string;
@@ -107,14 +105,12 @@ const toPostMeta = (b: BlogListItem): PostMeta => ({
 
 const toNeighbour = ({ slug, title }: PostMeta): Neighbour => ({ slug, title });
 
-// Single-document fetch — used by the /blog index for the featured slot.
 export async function getFeaturedBlog(): Promise<PostMeta | null> {
   const blog = await fetchJson<PublishedBlogDB | null>("/api/blogs/featured");
   if (!blog) return null;
   return toPostMeta(blog);
 }
 
-// Single page — used by the /blog index for the regular list.
 export async function getRecentBlogs(
   limit: number = 30,
   cursor?: string,
@@ -131,12 +127,10 @@ export async function getRecentBlogs(
   return { items: page.items.map(toPostMeta), nextCursor: page.nextCursor };
 }
 
-// Walks all pages — used by sitemap and getPost (prev/next neighbours).
-// Acceptable up to ~100 published blogs; past that, swap in a navigation index.
+// Acceptable up to ~100 published blogs; past that, swap in a nav index.
 export async function getAllBlogs(): Promise<PostMeta[]> {
   const all: PostMeta[] = [];
   let cursor: string | undefined = undefined;
-  // Hard cap to avoid runaway loops on a misbehaving server.
   for (let safety = 0; safety < 50; safety++) {
     const page = await getRecentBlogs(50, cursor);
     all.push(...page.items);

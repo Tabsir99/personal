@@ -1,10 +1,8 @@
 import { H2, H3 } from "@/components/ui/H2";
 import { ServiceVisual } from "./service-visual";
 
-/* Services — pinned scroll experience. The wrap is 400vh tall and
-   declares data-pin-steps="4"; the scroll island writes
-   data-pin-step + --pin-sub. Cross-fades, frame visibility, and the
-   bottom progress bars all read those signals via services.css. */
+/* 400vh wrap with data-pin-steps="4"; scroll-island writes --pin-sub.
+   All cross-fades read those signals via services.css. */
 
 const SERVICES = [
   {
@@ -72,7 +70,6 @@ export function Services() {
         <div className="sticky top-0 flex h-screen items-center overflow-hidden">
           <div className="page-shell w-full grid grid-cols-[0.85fr_1fr] items-center gap-16 max-xl:grid-cols-[1fr] max-xl:gap-10">
             <div data-reveal className="sticky top-0">
-              {/* Index label stack */}
               <div className="relative h-5 mb-6">
                 {SERVICES.map((s, i) => (
                   <div
@@ -91,7 +88,6 @@ export function Services() {
                 ))}
               </div>
 
-              {/* Title stack */}
               <div className="relative mb-1 min-h-[clamp(130px,14vw,200px)]">
                 {SERVICES.map((s, i) => (
                   <H2
@@ -104,7 +100,6 @@ export function Services() {
                 ))}
               </div>
 
-              {/* Desc stack */}
               <div className="relative mt-5 min-h-[120px]">
                 {SERVICES.map((s, i) => (
                   <p
@@ -118,7 +113,6 @@ export function Services() {
               </div>
             </div>
 
-            {/* Frame stack */}
             <div className="relative aspect-4/5 max-h-[70vh] overflow-hidden rounded-sm border border-line bg-ink-2 before:absolute before:inset-0 before:content-[''] before:opacity-40 before:bg-[linear-gradient(45deg,var(--color-ink-3)_25%,transparent_25%),linear-gradient(-45deg,var(--color-ink-3)_25%,transparent_25%)] before:bg-size-[12px_12px]">
               {SERVICES.map((s, i) => (
                 <div
@@ -153,7 +147,6 @@ export function Services() {
             </div>
           </div>
 
-          {/* Bottom progress bars */}
           <div className="absolute right-(--gutter) bottom-10 left-(--rail-gutter) mx-auto flex max-w-(--max-w) gap-2">
             {SERVICES.map((_, i) => (
               <div

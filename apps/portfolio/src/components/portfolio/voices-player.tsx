@@ -2,11 +2,7 @@
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-/* Inline video player for the Voices testimonial.
-   Owns the frame (scale-on-scroll via .voices-frame CSS), the video,
-   the poster overlay, and the custom controls. Video mounts with
-   preload="metadata" so the browser fetches a real frame for the
-   thumbnail; we seek 1.8s in to skip a black opening. */
+/* preload="metadata" + seek 1.8s in skips a black opening for the thumbnail. */
 
 const DURATION_GUESS = 73;
 

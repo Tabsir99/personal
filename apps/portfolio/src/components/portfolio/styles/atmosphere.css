@@ -1,25 +1,15 @@
-/* Slow background breathe — scale + translate + opacity wobble. */
 @keyframes breathe {
   0%, 100% { transform: scale(1) translateY(0); opacity: 0.85; }
   50%      { transform: scale(1.015) translateY(-8px); opacity: 1; }
 }
 
-/* Parameterized orb drift. Each orb sets its own --drift-x / --drift-y /
-   --drift-s (and overrides duration / direction via Tailwind arbitrary
-   utilities). One keyframe, four orbs, four different motions. */
+/* Each orb sets its own --drift-x / --drift-y / --drift-s. */
 @keyframes drift {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50%      { transform: translate(var(--drift-x, 0), var(--drift-y, 0)) scale(var(--drift-s, 1)); }
 }
 
 @layer components {
-  /* Parallax: active-section.tsx writes inline transform directly onto
-     .atm-far / .atm-mid / .atm-near on every scroll frame. Each plane has
-     will-change:transform so it's a composited layer; the inline-style
-     write invalidates only the plane itself, not any descendant. */
-
-  /* Section-driven tint. CSS transition handles the cross-section smoothing
-     that the old per-frame RGB lerp used to do. All alphas < 0.05. */
   .atm-tint {
     background-color: transparent;
     transition: background-color 600ms ease;
@@ -31,8 +21,7 @@
   html[data-active-section="now"]      .atm-tint { background-color: rgba(140, 175, 200, 0.024); }
   html[data-active-section="contact"]  .atm-tint { background-color: rgba(232, 148, 85, 0.048); }
 
-  /* Grain overlay — the SVG noise data-URI is too long to inline as a
-     Tailwind arbitrary value, so the rule stays here. */
+  /* SVG noise data-URI is too long to inline as a Tailwind arbitrary value. */
   .atm-grain {
     position: absolute;
     inset: 0;

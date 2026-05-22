@@ -29,8 +29,7 @@ const TERMINAL_LINES: TerminalLine[] = [
   },
 ];
 
-/* Hero — pain-point first. The hook word ([FRICTION]) scrambles through
-   related nouns; ScrambleWord's `delay` keeps it static until the intro ends. */
+/* ScrambleWord's `delay` keeps the hook word static until the intro ends. */
 export function Hero() {
   return (
     <section

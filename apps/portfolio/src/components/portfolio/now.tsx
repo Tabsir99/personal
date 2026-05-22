@@ -1,5 +1,3 @@
-/* ===== Now ===== */
-
 import { H2 } from "../ui/H2";
 
 const NOW_ITEMS: { label: string; body: React.ReactNode }[] = [

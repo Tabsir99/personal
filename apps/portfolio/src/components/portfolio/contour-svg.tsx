@@ -1,10 +1,4 @@
-/* --------- Distant topographic contours (far plane) ----------
-   Two "summits": one in upper-left, one in lower-right. Each is a stack
-   of concentric, slightly-rotated ellipses — reads like a topo map at low
-   contrast. We don't draw a literal mountain; the abstraction is what makes
-   it sit quietly in the background. */
 export function ContourSVG() {
-  // pre-built ring arrays so the JSX stays readable
   const summitA: { rx: number; ry: number; rot: number; opacity: number }[] = [];
   for (let i = 0; i < 16; i++) {
     summitA.push({
@@ -80,7 +74,6 @@ export function ContourSVG() {
           />
         ))}
       </g>
-      {/* a few stray triangulation lines connecting peaks */}
       <g className="stroke-field-gray/6" strokeWidth="0.5" strokeDasharray="2 6">
         <line x1="420" y1="780" x2="1240" y2="1780" />
         <line x1="420" y1="780" x2="1380" y2="380" />

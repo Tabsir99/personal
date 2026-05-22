@@ -3,10 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { ScrambleWord } from "./scramble-word";
 
-/* Intro — page-entry overlay. Builds the central motif on a black void
-   (scan sweep, topographic rings, bracketed scramble word), then FLIP-morphs
-   the word onto the live hero's [FRICTION] headline before fading. */
-
 type Stage =
   | "void"
   | "rings"
@@ -16,8 +12,7 @@ type Stage =
   | "reveal"
   | "done";
 
-/* Mirrors ContourSVG's Summit A so the rings sit at the exact same screen
-   position as Atmosphere; on fade, Atmosphere's faint Summit A is revealed. */
+/* Mirrors ContourSVG's Summit A so rings align with Atmosphere on fade. */
 function IntroRings() {
   const summit = Array.from({ length: 16 }, (_, i) => ({
     rx: 70 + i * 58,
@@ -55,15 +50,12 @@ function IntroRings() {
 
 const SCRAMBLE_WORDS = ["TABSIR · CG", "FRICTION"] as const;
 
-/* Lead-in pause before the choreography starts, so the overlay doesn't
-   slam in the moment the page paints. Offsets `.intro-scan`'s CSS
-   animation-delay and the hero/terminal `delay-*` utilities — keep
-   them in sync. */
+/* Must stay in sync with .intro-scan's animation-delay and hero/terminal
+   `delay-*` utilities so the overlay doesn't slam in on paint. */
 const INTRO_DELAY = 1000;
 
-/* Stage timeline (ms), measured from page load. `done` must fire before
-   ScrambleWord's auto-loop would trigger its second scramble (~100ms
-   after `done`). Each stage = INTRO_DELAY + relative offset. */
+/* `done` must fire before ScrambleWord's auto-loop triggers its second
+   scramble (~100ms later). */
 const TIMINGS = {
   rings: INTRO_DELAY + 900,
   brackets: INTRO_DELAY + 1500,
@@ -78,8 +70,7 @@ function IntroInner({ onDone }: { onDone: () => void }) {
   const [morphTransform, setMorphTransform] = useState<string | null>(null);
   const wordWrapRef = useRef<HTMLDivElement>(null);
 
-  /* FLIP: measure bracket-L-left → bracket-R-right on the live hero and
-     compute translate+scale that maps the intro word onto it. */
+  /* FLIP: measure hero brackets, compute translate+scale onto them. */
   const computeMorph = useCallback(() => {
     const heroWord = document.querySelector<HTMLElement>("[data-hero-word]");
     const heroL = heroWord?.querySelector<HTMLElement>(
@@ -212,9 +203,7 @@ function IntroInner({ onDone }: { onDone: () => void }) {
   );
 }
 
-/* Mount gate — once IntroInner reports `done`, drop it from the React
-   tree so its state, timers, and resize listener are torn down rather
-   than left alive rendering null. */
+/* Unmount once `done` so timers and listeners are torn down. */
 export function Intro() {
   const [mounted, setMounted] = useState(true);
   const handleDone = useCallback(() => setMounted(false), []);

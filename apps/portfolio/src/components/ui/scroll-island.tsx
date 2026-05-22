@@ -13,7 +13,15 @@ interface AppVisualState {
   pinSteps: number;
   cur: string;
   raf: number;
+  targetY: number;
+  currentY: number;
+  smoothing: boolean;
 }
+
+// Lerp factor — lower = slower/silkier.
+const LERP = 0.025;
+// Below this pixel delta we snap the animation closed (higher = shorter trail).
+const SNAP = 1;
 
 export function ScrollIsland() {
   const path = usePathname();
@@ -24,6 +32,8 @@ export function ScrollIsland() {
     const dot = document.getElementById("rail-dot");
     const pin = document.querySelector<HTMLElement>("[data-pin-steps]");
 
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     const state: AppVisualState = {
       vh: innerHeight,
       docH: 0,
@@ -31,6 +41,9 @@ export function ScrollIsland() {
       pinSteps: parseInt(pin?.dataset.pinSteps ?? "4"),
       cur: "",
       raf: 0,
+      targetY: scrollY,
+      currentY: scrollY,
+      smoothing: false,
     };
 
     const ioActive = new IntersectionObserver(
@@ -81,7 +94,23 @@ export function ScrollIsland() {
 
     function tick() {
       state.raf = 0;
-      const y = scrollY;
+
+      // Lenis-style smooth-scroll step. Bypass CSS `scroll-behavior: smooth`
+      // by passing `behavior: "instant"` so the browser doesn't double-animate.
+      if (state.smoothing) {
+        const diff = state.targetY - state.currentY;
+        if (Math.abs(diff) < SNAP) {
+          state.currentY = state.targetY;
+          state.smoothing = false;
+          window.scrollTo({ top: state.currentY, behavior: "instant" });
+        } else {
+          state.currentY += diff * LERP;
+          state.raf = requestAnimationFrame(tick);
+          window.scrollTo({ top: state.currentY, behavior: "instant" });
+        }
+      }
+
+      const y = state.smoothing ? state.currentY : scrollY;
 
       Object.entries(BACKGROUND_PLANES).forEach(
         ([plane, factor]) =>
@@ -107,15 +136,39 @@ export function ScrollIsland() {
       }
     }
 
-    const onScroll = () => (state.raf ||= requestAnimationFrame(tick));
+    function onWheel(e: WheelEvent) {
+      if (reduceMotion || e.ctrlKey) return; // leave pinch-zoom / a11y alone
+      e.preventDefault();
+      const px =
+        e.deltaMode === 1
+          ? e.deltaY * 40
+          : e.deltaMode === 2
+            ? e.deltaY * state.vh
+            : e.deltaY;
+      state.targetY = Math.max(0, Math.min(state.docH, state.targetY + px));
+      state.smoothing = true;
+      if (!state.raf) state.raf = requestAnimationFrame(tick);
+    }
+
+    const onScroll = () => {
+      // Anything not driven by our smoother (scrollbar drag, keyboard,
+      // anchor jump) resets the target so we don't fight the user.
+      if (!state.smoothing) {
+        state.targetY = scrollY;
+        state.currentY = scrollY;
+      }
+      state.raf ||= requestAnimationFrame(tick);
+    };
 
     tick();
 
+    addEventListener("wheel", onWheel, { passive: false });
     addEventListener("scroll", onScroll, { passive: true });
     return () => {
       ioActive.disconnect();
       ioReveal.disconnect();
       ro.disconnect();
+      removeEventListener("wheel", onWheel);
       removeEventListener("scroll", onScroll);
       if (state.raf) cancelAnimationFrame(state.raf);
     };

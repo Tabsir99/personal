@@ -2,13 +2,6 @@ import { NavLink } from "../ui/nav-link";
 import { Check } from "lucide-react";
 import { BlockQuote } from "../ui/BlockQuote";
 
-/* ===== Endorsement =====
-   Sits between the Hero and the About section as an early-page hook —
-   a pulled-quote testimonial with prominent stars and a verified-on-Upwork
-   line. Editorial layout: meta column left, big italic quote right,
-   generous breathing room. No card chrome, no rotation, no tape — just
-   typography on the page so it reads as a real pull quote.    
-   --------------------------------------------------------------------- */
 export function Endorsement() {
   return (
     <section
@@ -45,7 +38,6 @@ export function Endorsement() {
         </NavLink>
       </aside>
 
-      {/* Right column — the actual quote + signature */}
       <BlockQuote
         author="Zohaib"
         company="DataZoro"

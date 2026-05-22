@@ -5,7 +5,6 @@ const STATS = [
   { value: "0", label: "Frameworks worshipped" },
 ];
 
-/* ===== About ===== */
 export function About() {
   const text =
     "I write code for the messy middle — where product specs collide with reality. I care about response budgets, accessible focus rings, sensible primary keys, and shipping things small enough to fix on a Friday. Two years in, mostly across SaaS dashboards, marketplaces, and a handful of internal tools nobody ever sees but everyone depends on.";

@@ -1,15 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Persistent UI (sit above content via z-index) -------------------- */
 @import "../components/portfolio/styles/atmosphere.css";
 
-/* Sections, in document order -------------------------------------- */
 @import "../components/portfolio/styles/terminal.css";
 @import "../components/portfolio/styles/services.css";
 @import "../components/portfolio/styles/work.css";
 
-/* Page-entry overlay (loads last so its stage-driven rules win) ----- */
+/* Loads last so stage-driven rules win. */
 @import "../components/portfolio/styles/intro.css";
 
 html {
@@ -18,9 +16,7 @@ html {
 }
 
 @theme {
-  /* ---------- Colors ----------
-     Tokens lifted from base.css :root. Each --color-* auto-generates
-     bg-*, text-*, border-*, ring-*, fill-*, stroke-*, divide-*, etc. */
+  /* Each --color-* auto-generates bg-*, text-*, border-*, ring-*, etc. */
   --color-ink: #0f0e0c;
   --color-ink-2: #1a1816;
   --color-ink-3: #26221e;
@@ -36,27 +32,13 @@ html {
 
   --text-xxs: 10px;
 
-  /* ---------- Layout vars ----------
-     Page-shell (`.page-shell`) reads --max-w/--gutter/--rail-gutter; the
-     left rail and the rail-driven margin notes read --rail-x. Override
-     for narrow viewports in the @media block at the bottom of this file. */
   --rail-x: 56px;
   --rail-gutter: 180px;
   --gutter: 96px;
   --max-w: 1600px;
 
-  /* ---------- Easing ----------
-     Single shared ease curve for every animation alias and every
-     transition that previously used --ease-blog. */
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* ---------- Animation tokens ----------
-     Names describe the effect, not the section. One alias per effect;
-     consumers override duration/delay/direction via `animation-duration-[…]`,
-     `delay-*`, `[animation-direction:reverse]`, or per-element CSS vars
-     (see `--rise-x/--rise-y` on rise-in, `--drift-x/--drift-y/--drift-s`
-     on drift). Bounce keeps an overshoot cubic-bezier — the curve IS
-     the effect. */
   --animate-pulse: pulse 1.5s var(--ease-soft) infinite;
   --animate-fade-in: fade-in 0.9s var(--ease-soft) forwards;
   --animate-rise-in: rise-in 0.9s var(--ease-soft) forwards;
@@ -74,8 +56,7 @@ html {
   --animate-ring-burst: ring-burst 0.52s var(--ease-soft) forwards;
   --animate-count-burst: count-burst 0.7s var(--ease-soft) forwards;
 
-  /* Opacity pulse loop. Trough at 0.3; consumers that want a shallower
-     dim can set `--pulse-min` (none currently do, but the var is there). */
+  /* Trough at 0.3; override via --pulse-min. */
   @keyframes pulse {
     0%,
     100% {
@@ -86,19 +67,14 @@ html {
     }
   }
 
-  /* Opacity fade once to 1. */
   @keyframes fade-in {
     to {
       opacity: 1;
     }
   }
 
-  /* Translate to (--rise-x, --rise-y) while fading in. Targets set their
-     initial offset via Tailwind `translate-y-*` / `translate-x-*` utilities;
-     this animates the `translate:` longhand so it composes with those
-     utilities (Tailwind v4 emits to `translate:`, not `transform:`).
-     Default end is (0, 0); the header element sets `--rise-x: -50%` so
-     its `-translate-x-1/2` centering is preserved. */
+  /* Animates the `translate:` longhand (not `transform:`) so it composes
+     with Tailwind's translate-* utilities, which v4 emits to `translate:`. */
   @keyframes rise-in {
     to {
       opacity: 1;
@@ -106,9 +82,6 @@ html {
     }
   }
 
-  /* Multi-stop bounce — used on the blog title's full-stop. The overshoot
-     character is in the stop-shape, paired with the bouncy cubic-bezier
-     on the alias. */
   @keyframes bounce {
     0%,
     60%,
@@ -129,8 +102,6 @@ html {
     }
   }
 
-  /* Vertical bar pulse — scaleY loop, used on the featured-card EXPLAIN
-     ANALYZE bars. */
   @keyframes bar-pulse {
     0%,
     100% {
@@ -143,8 +114,6 @@ html {
     }
   }
 
-  /* Width oscillation — drives the "↓ 40s → 412ms" benchmark bar on the
-     featured card. */
   @keyframes shrink {
     0%,
     10% {
@@ -156,7 +125,6 @@ html {
     }
   }
 
-  /* One-shot scaleX fill from 0 to 1 — drives the post header read-time bar. */
   @keyframes fill {
     from {
       transform: scaleX(0);
@@ -166,7 +134,6 @@ html {
     }
   }
 
-  /* Expanding box-shadow ring that fades out — drives the score-meter tap. */
   @keyframes ring-burst {
     0% {
       box-shadow: 0 0 0 0
@@ -178,7 +145,6 @@ html {
     }
   }
 
-  /* "+1" counter that floats up and fades — drives the score-meter burst. */
   @keyframes count-burst {
     0% {
       opacity: 0;
@@ -195,17 +161,15 @@ html {
 }
 
 @theme inline {
-  /* Fonts — pointed at the CSS vars that layout.tsx sets per request
-     via next/font (`style={fontVars}` on <html>). Inline mode resolves
-     at the use site, so the per-request font swap works. */
+  /* Inline mode resolves at the use site, so per-request font swap from
+     layout.tsx (next/font on <html>) takes effect. */
   --font-sans: var(--sans);
   --font-serif: var(--serif);
   --font-mono: var(--mono);
 }
 
-/* Pin choreography vars — written by active-section.tsx onto the services
-   wrap element (NOT <html>). Registering gives them typed values so calc()
-   over them is cheap and predictable. They drive the services subtree only. */
+/* @property gives these vars typed values so calc() over them is cheap.
+   Written onto the services wrap element by scroll-island.tsx. */
 @property --pin-step {
   syntax: "<integer>";
   inherits: true;
@@ -258,10 +222,8 @@ html {
     cursor: pointer;
   }
 
-  /* Isolate each home-page section so style/layout/paint changes inside one
-     can't cascade across siblings. `contain: content` = layout + paint +
-     style. Skipped on #services (sticky pin choreography spans its full
-     400vh wrap) and #now (sticky left column tracks the page scroll). */
+  /* #services and #now opt out because their sticky children must paint
+     across the full wrap, which `content-visibility: auto` would clip. */
   #hero,
   #endorsement,
   #about,
@@ -291,10 +253,6 @@ html {
 }
 
 @layer components {
-  /* Serif display face — used for all big serif text. Default line-height
-     of 0.96 is what big display type wants; consumers override per-use
-     with leading-* utilities (H2 sets leading-[0.88]; list/services set
-     leading-none; writing sets leading-[1.2]). */
   .h-serif {
     font-family: var(--serif);
     font-weight: 400;
@@ -304,9 +262,6 @@ html {
     text-rendering: optimizeLegibility;
   }
 
-  /* Small eyebrow label with a leading hairline.
-     Replaces the inline mono-uppercase + before:bar chain used by section
-     intros (about, footer, now, endorsement). */
   .eyebrow {
     display: inline-flex;
     align-items: center;
@@ -325,16 +280,12 @@ html {
     background: var(--color-muted);
   }
 
-  /* Inline `<em>` → italic accent — repeated across hero, voices, writing.
-     Apply on a wrapper to scope the rule to descendant `<em>` elements. */
   .em-accent em {
     font-style: italic;
     color: var(--color-accent);
   }
 
-  /* ===== Marginalia =====
-       Small italic gutter notes — live in the RIGHT margin only,
-       so they never collide with the left rail labels. */
+  /* Right margin only — left would collide with the rail labels. */
   .margin-note {
     position: absolute;
     font-family: var(--serif);
@@ -360,15 +311,8 @@ html {
     margin: 0 0 8px auto;
   }
 
-  /* Reveal helpers — ScrollObserver adds `is-in` to any element with
-       one of the three data attrs.
-       Uses `animation` (not `transition`) because Tailwind's
-       `transition-*` utilities (in @layer utilities) would otherwise
-       replace our transition slot on children like Stack cards.
-       Uses `transform` (not the CSS `translate` longhand) so that hover
-       utilities like `hover:translate-x-1` (which emit to `translate:`)
-       are not silently overridden by the animation's forwards-locked
-       final value. */
+  /* Uses `animation` (not transition) and `transform` (not `translate`)
+     so Tailwind utility hovers on children aren't silently overridden. */
   @keyframes reveal-in {
     to {
       opacity: 1;
@@ -383,11 +327,8 @@ html {
     animation: reveal-in 0.9s var(--ease-soft) forwards;
   }
 
-  /* Stagger — each child carries inline style="--i: N" which drives the
-       per-child animation-delay. All children flip simultaneously when
-       the parent gets `is-in`; the delay is what cascades them.
-       Shares `reveal-in` keyframe with [data-reveal]; the per-child initial
-       offset (20px vs 24px) lives on the selector rule below. */
+  /* Each child carries inline style="--i: N" — flip is simultaneous;
+     animation-delay cascades them. */
   [data-reveal-stagger] > * {
     opacity: 0;
     transform: translateY(20px);
@@ -397,9 +338,7 @@ html {
     animation-delay: calc(var(--i, 0) * 70ms);
   }
 
-  /* Word-by-word — each .word carries inline style="--word-i: N".
-       Delay formula mirrors the original useReveal pattern:
-       `${0.3 + i * 0.025}s`. */
+  /* Each .word carries inline style="--word-i: N" for cascaded delay. */
   @keyframes word-on {
     from {
       opacity: 0.15;
@@ -429,10 +368,7 @@ html {
   }
 }
 
-/* ===== Responsive: global var overrides + helper-class adjustments =====
-     :root var overrides stay unlayered (vars aren't cascade-layered).
-     .margin-note display override goes in @layer components alongside its
-     base rule. */
+/* :root var overrides stay unlayered (vars aren't cascade-layered). */
 @media (max-width: 1100px) {
   :root {
     --gutter: 56px;
@@ -449,9 +385,7 @@ html {
   }
 }
 
-/* Static text-marker highlight (no reveal animation). Opacity defaults
-   to 18% accent; override per-instance via --text-highlight-color, e.g.
-   `text-highlight [--text-highlight-color:color-mix(in_oklab,var(--color-accent)_15%,transparent)]`. */
+/* Override per-instance via --text-highlight-color. */
 @utility text-highlight {
   background-image: linear-gradient(
     transparent 78%,
@@ -468,9 +402,7 @@ html {
   );
 }
 
-/* Blog row-title marker-pen highlighter. Color via --marker-color
-   (default = accent). Toggle the highlight with bg-[length:100%_100%]
-   under group-hover. */
+/* Color via --marker-color. Toggle via bg-[length:100%_100%] on hover. */
 @utility blog-marker {
   background-image: linear-gradient(
     transparent 65%,
@@ -483,10 +415,7 @@ html {
   transition: background-size 600ms var(--ease-soft);
 }
 
-/* Score meter conic-gradient ring. Reads --fill (deg) from the inline
-   style the React component sets each render. The empty side uses
-   cream at 8% alpha — the dark-theme analog of the blog's --paper-edge
-   (ink at 8% alpha on the original cream page). */
+/* Reads --fill (deg) from the inline style set per render. */
 @utility blog-dial {
   background: conic-gradient(
     var(--color-accent) var(--fill, 0deg),

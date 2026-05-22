@@ -2,11 +2,7 @@ import { cn } from "@/lib/utils";
 import { PROJECTS, ROW_STATUS_STYLES } from "./data";
 import { H3 } from "@/components/ui/H2";
 
-/* Project index — the numbered row list on the left of the stage. Server
-   component. Per-row styles (active gradient, ::before bar height, glyph
-   rotation, title opacity, meta visibility, bottom rule) all derive from
-   `--i` vs `--work-active` in work.css. Hover/focus is captured by the
-   state island via [data-work-row-idx]. */
+/* Per-row styles derive from `--i` vs `--work-active` in work.css. */
 export function WorkList() {
   return (
     <ol

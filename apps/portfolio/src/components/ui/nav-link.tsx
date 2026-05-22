@@ -3,19 +3,16 @@ import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 type NavLinkProps = {
-  /** Defaults to "#" (placeholder). Routing + arrow direction derived from the URL. */
   href?: string;
-  /** Mark as current. Forwards `aria-current="page"`. */
   current?: boolean;
-  /** Adds the hero-style underline animation + trailing arrow. */
   underline?: boolean;
 } & Omit<ComponentProps<"a">, "href" | "ref" | "aria-current">;
 
-// "#" -> placeholder (disabled). mailto/tel/sms or http(s) -> native <a>. Anything else -> next/link.
+// "#" -> placeholder. mailto/tel/sms or http(s) -> <a>. Else -> next/link.
 const BASE =
   "inline-flex items-center gap-2 font-mono text-xs transition-colors duration-200 hover:text-accent [&.is-active]:text-accent";
 
-// Outer modifiers when `underline` is on; the inner span carries the actual underline so it shrinks to text width.
+// Inner span carries the actual underline so it shrinks to text width.
 const UL_OUTER =
   "group gap-2.5 text-xs tracking-widest uppercase text-muted hover:text-accent duration-300";
 

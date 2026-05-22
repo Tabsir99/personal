@@ -1,5 +1,4 @@
-/* intro.css — page-entry overlay state machine, unlayered so stage-driven
-   opacity beats utility-layer `opacity-0`. */
+/* Unlayered so stage-driven opacity beats utility-layer `opacity-0`. */
 
 @keyframes intro-scan-sweep {
   0% {
@@ -47,14 +46,11 @@ html.intro-active body {
     rgba(232, 148, 85, 0)
   );
   box-shadow: 0 0 24px rgba(232, 148, 85, 0.35);
-  /* `both` holds the 0% keyframe (opacity 0) during the lead-in delay
-     so the bar isn't visible before the sweep starts. Delay matches
-     INTRO_DELAY in intro.tsx. */
+  /* `both` keeps opacity:0 during the lead-in. Delay matches INTRO_DELAY. */
   animation: intro-scan-sweep 1.6s cubic-bezier(0.22, 1, 0.36, 1) 1000ms both;
 }
 
-/* Rings — mirror Atmosphere's Summit A geometry; opacity-only transitions
-   so the position never moves. */
+/* Mirrors Atmosphere's Summit A geometry; opacity-only so position is stable. */
 .intro-rings {
   transition: opacity 0.8s ease;
 }
@@ -88,8 +84,7 @@ html.intro-active body {
   transition: opacity 0.85s ease;
 }
 
-/* Bracketed word — morph target. Letter-spacing matches hero's `tracking-tight`
-   so chars align character-precise after the FLIP transform. */
+/* Letter-spacing matches hero's `tracking-tight` so chars align after FLIP. */
 .intro-word {
   transform: translate(-50%, -50%) scale(1);
   font-size: clamp(48px, 11vw, 160px);

@@ -5,11 +5,8 @@ import { WorkStateIsland } from "./state-island";
 import { H2 } from "@/components/ui/H2";
 import { NavLink } from "@/components/ui/nav-link";
 
-/* Selected work — "The Reel".
-   Two-column showcase: project index on the left, viewing window on the
-   right. List, viewport and meta are all server-rendered; a tiny client
-   island owns active/still as data-* attrs + CSS vars on the section, and
-   CSS does the cross-fade + scan-wipe choreography. */
+/* List/viewport/meta are server-rendered; state-island writes data-*
+   + CSS vars on the section, CSS does the cross-fade choreography. */
 export function Work() {
   return (
     <section

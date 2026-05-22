@@ -3,18 +3,12 @@ import { ContourSVG } from "./contour-svg";
 import { CoordOverlay } from "./coord-overlay";
 import { BACKGROUND_PLANES } from "./sections-data";
 
-/* Shared plane class group — taller than viewport so parallax never reveals
-   an empty edge. The parallax transform is written imperatively to each
-   plane by scroll-island.tsx (queried via .atm-far / .atm-mid / .atm-near). */
+/* Taller than viewport so parallax never reveals an empty edge. */
 const PLANE = "absolute inset-x-0 top-[-20vh] h-[240vh] will-change-transform";
 const ORB =
   "absolute rounded-full will-change-transform motion-reduce:animate-none";
 
-// One row per orb: size, position utilities, hue var, outer%, inner%,
-// drift-x (px), drift-y (px), drift-scale, duration (s), reverse?. All orbs
-// share the `drift` keyframe in atmosphere.css; per-orb motion is
-// parameterized via CSS vars, and duration / direction live in inline style
-// (Tailwind's JIT can't follow dynamic class strings).
+// size, position, hue, outer%, inner%, dx, dy, ds, duration(s), reverse?
 const ORBS = [
   [
     720,
@@ -88,40 +82,22 @@ const orbStyle = (
     animationDirection: reverse ? "reverse" : undefined,
   }) as React.CSSProperties;
 
-/* =====================================================================
-   Atmosphere — parallax background story.
-
-   Three parallax planes are translated in the SAME direction as scroll
-   but at fractional speeds, so the world reads as DEEPER than content.
-   A grain pass and edge vignette sit fixed in the optics.
-
-   Sits at z-index 0; <main> is z-index 1. Pointer-events: none so
-   nothing here ever steals interactivity.
-
-   Parallax planes get their translate written imperatively by
-   scroll-island.tsx; section-driven tint is pure CSS off the
-   [data-active-section] attribute on <html>.
-   ===================================================================== */
-
+/* Parallax planes get their translate written by scroll-island.tsx;
+   section tint is pure CSS off [data-active-section] on <html>. */
 export function Atmosphere() {
   return (
     <div
       className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-ink"
       aria-hidden="true"
     >
-      {/* Base wash — top-to-bottom luminance shift; bottom is fractionally
-          warmer/lighter than top so content sits ON the page. */}
       <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_110%,color-mix(in_oklab,var(--color-accent)_4.5%,transparent),transparent_55%),radial-gradient(90%_70%_at_50%_-10%,color-mix(in_oklab,var(--color-ink-3)_55%,transparent),transparent_65%),linear-gradient(180deg,#0c0b0a_0%,#100e0c_50%,#14110e_100%)]"></div>
 
-      {/* Far: topographic contours — deepest plane */}
       <div id="atm-far" className={cn(PLANE)}>
         <ContourSVG />
       </div>
 
-      {/* Subtle section-driven tint (background set via CSS attribute selectors) */}
       <div className="atm-tint absolute inset-0"></div>
 
-      {/* Mid: drifting signal-fire orbs */}
       <div id="atm-mid" className={PLANE}>
         {ORBS.map(([size, pos, hue, outer, inner, dx, dy, ds, dur, rev], i) => (
           <div
@@ -132,7 +108,6 @@ export function Atmosphere() {
         ))}
       </div>
 
-      {/* Optics layer (fixed): grain + vignette */}
       <div className="atm-grain"></div>
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_55%,color-mix(in_oklab,black_35%,transparent)_100%),radial-gradient(ellipse_at_top,transparent_70%,color-mix(in_oklab,black_25%,transparent)_100%)]"></div>
     </div>

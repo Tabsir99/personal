@@ -1,12 +1,7 @@
-/* --------- Coordinate waypoints (near plane) ----------
-   Sparse field-survey marks. A few crosshairs, a few small filled
-   circles, a couple of tiny serif coordinate labels. Placed at
-   hand-chosen positions so the eye finds three or four per viewport;
-   anything denser would compete with content. */
 type Waypoint = [number, number, "cross" | "dot" | "tick", string?];
 
+// [x%, y%, kind, label?]
 const WAYPOINTS: Waypoint[] = [
-  // [x%, y%, kind, label?]
   [8, 12, "cross"],
   [92, 18, "dot"],
   [22, 34, "cross", "23° 14′"],
@@ -19,7 +14,7 @@ const WAYPOINTS: Waypoint[] = [
   [58, 72, "dot"],
   [4, 92, "cross"],
   [96, 38, "tick"],
-  // a second tier of waypoints lower down (since the layer is 220vh tall)
+  // Second tier — the layer is 220vh tall.
   [12, 112, "cross", "47° N"],
   [82, 128, "dot"],
   [28, 146, "tick"],

@@ -1,14 +1,7 @@
-/* Services — pinned scroll choreography.
-
-   The wrap carries data-pin-steps="4". The active-section island writes
-   --pin-step (numeric, 0..3) + --pin-sub (0..1). Each animated child
-   declares its own --i. Every cross-fade and bar fill is then pure CSS
-   math against those three vars, so the React subtree never re-renders
-   on scroll. */
+/* scroll-island writes --pin-step (0..3) and --pin-sub (0..1) on the wrap;
+   each child declares --i. All cross-fades are pure CSS off those vars. */
 
 @layer components {
-  /* Shared state computation: derive "is this child past / active / future
-     of the active step" from numeric vars. No nth-of-type matrices. */
   .svc-label,
   .svc-title,
   .svc-desc,
@@ -16,20 +9,16 @@
   .svc-bar-fill {
     --delta: calc(var(--i, 0) - var(--pin-step, 0));
     --abs: max(var(--delta), calc(-1 * var(--delta)));
-    /* 1 when delta = 0, 0 when |delta| ≥ 1 */
     --active: clamp(0, calc(1 - var(--abs)), 1);
-    /* 1 when delta ≤ -1 (past), 0 otherwise */
     --past: clamp(0, calc(-1 * var(--delta)), 1);
   }
 
-  /* Index label ("01 / 04 — Build"). Only the active one visible. */
   .svc-label {
     opacity: var(--active);
     transition: opacity 220ms ease;
   }
 
-  /* Title + desc cross-fade. Past = translated up 8px, future = down 14px,
-     active = at rest. Single calc covers all three states. */
+  /* Past = translated up 8px, future = down 14px, active = at rest. */
   .svc-title,
   .svc-desc {
     opacity: var(--active);
@@ -49,55 +38,39 @@
     transition-delay: 220ms;
   }
 
-  /* Frame cross-fade — only the active frame is visible. */
   .svc-frame {
     opacity: var(--active);
     pointer-events: none;
     transition: opacity 600ms ease;
   }
 
-  /* Bottom progress bars. Past bars filled, active bar = --pin-sub,
-     future bars at 0. */
+  /* Past bars filled, active bar = --pin-sub, future bars at 0. */
   .svc-bar-fill {
     transform: scaleX(calc(var(--past) + var(--active) * var(--pin-sub, 0)));
     transform-origin: left;
     transition: transform 100ms linear;
   }
 
-  /* ---- ServiceVisual animations ----
-     Was a per-instance rAF reading getComputedStyle and mutating SVG
-     attributes. Now pure CSS, ALL scroll-linked to --pin-sub. The original
-     JS used `Math.sin(sub*2π + i)` for idx 0 and `Math.sin(sub*4π + i)`
-     for idx 2; CSS trig (Chrome 111+, FF 108+, Safari 15.4+) expresses
-     the same math without an animation timeline, so motion stays bound
-     to scroll position (forward + reverse) instead of running freely.
+  /* CSS trig keeps motion scroll-linked to --pin-sub.
+     Conversions: sub*2π → sub*1turn, sub*4π → sub*2turn, phase i → i*1rad. */
 
-     Angle conversions used below:
-       sub * 2π  →  var(--pin-sub) * 1turn
-       sub * 4π  →  var(--pin-sub) * 2turn
-       phase i   →  var(--i) * 1rad */
-
-  /* idx 0 — 4 rows wobble horizontally, scroll-linked sine wave. */
   .svc-vis-0-row {
     transform: translateX(
       calc(sin(var(--pin-sub, 0) * 1turn + var(--i, 0) * 1rad) * 8px)
     );
   }
 
-  /* idx 1 — main bar opacity + accent line y track pin-sub linearly.
-     `transform: translateY` instead of `y1`/`y2` — those CSS props on
+  /* `transform: translateY` instead of `y1`/`y2` — those CSS props on
      <line> have inconsistent browser support; transform is universal. */
   .svc-vis-1-main { opacity: calc(0.6 + var(--pin-sub, 0) * 0.4); }
   .svc-vis-1-line {
     transform: translateY(calc(var(--pin-sub, 0) * 100px));
   }
 
-  /* idx 2 — six node circles pulse, scroll-linked sine wave (2 cycles
-     over sub=0..1 to match the original 4π frequency). */
+  /* 2 cycles over sub=0..1 to match the original 4π frequency. */
   .svc-vis-2-c {
     r: calc(4px + sin(var(--pin-sub, 0) * 2turn + var(--i, 0) * 1rad) * 2px);
   }
 
-  /* idx 3 — concentric rings grow linearly with pin-sub. */
   .svc-vis-3-c { r: calc(var(--base, 0px) + var(--pin-sub, 0) * 8px); }
 }

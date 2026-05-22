@@ -1,15 +1,6 @@
 import type { SVGProps } from "react";
 
-/* Abstract visual per service. Pure server component — animations live in
-   services.css.
-
-   idx 0 + idx 2 are periodic (sin-driven), so they run as plain CSS
-   @keyframes scoped to [data-pin-step="N"] on the pin wrap — only the
-   active step's animation is even scheduled.
-
-   idx 1 + idx 3 are monotonic in --pin-sub. They use CSS-styleable SVG
-   geometry properties (`opacity`, `y1`, `y2`, `r`) with `calc()` over
-   var(--pin-sub), so the value tracks the publisher without any JS. */
+/* Server component — all motion lives in services.css. */
 
 const visStyle: React.CSSProperties = {
   position: "absolute",
@@ -18,7 +9,6 @@ const visStyle: React.CSSProperties = {
   height: "100%",
 };
 
-// idx=1 — wireframe of a UI card.
 const FRAME1_RECTS: SVGProps<SVGRectElement>[] = [
   { x: 40, y: 60, width: 320, height: 380, fill: "none", style: { stroke: "var(--color-line)" } },
   { x: 40, y: 60, width: 320, height: 32, style: { fill: "var(--color-ink-2)" } },
@@ -128,7 +118,6 @@ export function ServiceVisual({ idx }: { idx: number }) {
       </svg>
     );
   }
-  // idx 3 — concentric rings
   return (
     <svg viewBox="0 0 400 500" style={visStyle}>
       {FRAME3_RING_BASES.map((r, i) => (
