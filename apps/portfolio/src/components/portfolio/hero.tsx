@@ -29,11 +29,8 @@ const TERMINAL_LINES: TerminalLine[] = [
   },
 ];
 
-/* ===== Hero =====
-   Pain-point first. The hook word ([FRICTION]) scrambles through related
-   nouns — friction → fragility → frustration → re-writes → slow ships.
-   Title left, translucent terminal right. The whole composition is locked
-   to a single viewport, no scroll needed to "get" it. */
+/* Hero — pain-point first. The hook word ([FRICTION]) scrambles through
+   related nouns; ScrambleWord's `delay` keeps it static until the intro ends. */
 export function Hero() {
   return (
     <section
@@ -47,28 +44,36 @@ export function Hero() {
       <div className="min-w-0">
         <h1 className="m-0 mb-7 flex flex-col text-balance font-serif">
           <span
+            data-hero-word
             className={cn(
-              "inline-flex items-baseline gap-1 font-mono font-medium",
+              "inline-flex items-baseline gap-[0.04em] font-mono font-medium",
               "text-[clamp(40px,6.4vw,96px)] leading-[1.04] tracking-tight",
               "text-accent uppercase",
               "whitespace-nowrap",
               "translate-y-2 opacity-0",
-              "animate-rise-in delay-300",
+              "animate-rise-in delay-6300",
               "max-xl:text-[clamp(36px,9vw,64px)]",
             )}
           >
-            <span className="text-accent-2 opacity-70">[</span>
-            <ScrambleWord
-              words={[
-                "FRICTION",
-                "FRAGILITY",
-                "FRUSTRATION",
-                "RE-WRITES",
-                "SLOW SHIPS",
-              ]}
-            />
+            <span data-hero-bracket="l" className="text-accent-2 opacity-70">
+              [
+            </span>
+            <span className="inline-block min-w-[11ch] text-center">
+              <ScrambleWord
+                words={[
+                  "FRICTION",
+                  "FRAGILITY",
+                  "FRUSTRATION",
+                  "RE-WRITES",
+                  "SLOW SHIPS",
+                ]}
+                delay={6300}
+              />
+            </span>
 
-            <span className="text-accent-2 opacity-70">]</span>
+            <span data-hero-bracket="r" className="text-accent-2 opacity-70">
+              ]
+            </span>
           </span>
 
           <span
@@ -79,14 +84,14 @@ export function Hero() {
               "max-xl:text-[clamp(48px,12vw,96px)]",
             )}
           >
-            <span className="block translate-y-[0.4em] opacity-0 animate-rise-in animation-duration-[1s] delay-500">
+            <span className="block translate-y-[0.4em] opacity-0 animate-rise-in animation-duration-[1s] delay-6400">
               is not
             </span>
             <span
               className={cn(
                 "em-accent block translate-y-[0.4em] opacity-0",
                 "pl-[clamp(28px,5vw,96px)] max-xl:pl-6",
-                "animate-rise-in animation-duration-[1s] delay-600",
+                "animate-rise-in animation-duration-[1s] delay-6500",
               )}
             >
               a <em>feature.</em>
@@ -99,7 +104,7 @@ export function Hero() {
             "em-accent",
             "text-[clamp(17px,1.55vw,22px)] leading-[1.45]",
             "text-cream-2 mt-9 mb-11 max-w-[52ch]",
-            "opacity-0 animate-fade-in delay-800",
+            "opacity-0 animate-fade-in delay-6600",
           )}
         >
           Full-stack web work for teams who&rsquo;d rather{" "}
@@ -108,7 +113,7 @@ export function Hero() {
           show.
         </p>
 
-        <div className="flex flex-wrap items-center gap-7 opacity-0 animate-fade-in delay-1000">
+        <div className="flex flex-wrap items-center  gap-7 opacity-0 animate-fade-in delay-6700">
           <a
             href="#contact"
             className={cn(
@@ -131,7 +136,11 @@ export function Hero() {
       </div>
 
       <div className="flex min-w-0 flex-col gap-5 max-xl:max-w-[540px]">
-        <Terminal title={TERMINAL_TITLE} lines={TERMINAL_LINES} />
+        <Terminal
+          title={TERMINAL_TITLE}
+          lines={TERMINAL_LINES}
+          startDelay={6500}
+        />
       </div>
 
       <div className="flex items-center gap-5 text-sm  self-end">

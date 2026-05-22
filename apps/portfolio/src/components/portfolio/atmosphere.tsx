@@ -114,7 +114,7 @@ export function Atmosphere() {
       <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_110%,color-mix(in_oklab,var(--color-accent)_4.5%,transparent),transparent_55%),radial-gradient(90%_70%_at_50%_-10%,color-mix(in_oklab,var(--color-ink-3)_55%,transparent),transparent_65%),linear-gradient(180deg,#0c0b0a_0%,#100e0c_50%,#14110e_100%)]"></div>
 
       {/* Far: topographic contours — deepest plane */}
-      <div id="atm-far" className={cn(PLANE, "opacity-85")}>
+      <div id="atm-far" className={cn(PLANE)}>
         <ContourSVG />
       </div>
 

@@ -28,9 +28,15 @@ const BLINK_CURSOR = (
 export function Terminal({
   title,
   lines,
+  startDelay = 0,
 }: {
   title: string;
   lines: TerminalLine[];
+  /* Ms to wait before the very first command types. Set to the same
+     value as the rise-in `delay-*` so the typing doesn't progress
+     while the terminal is still invisible behind the intro overlay.
+     Only applies to step 0; subsequent steps use line.delayBefore. */
+  startDelay?: number;
 }) {
   const [step, setStep] = useState(0);
   const [phase, setPhase] = useState<"cmd" | "resp" | "idle">("cmd");
@@ -48,7 +54,8 @@ export function Terminal({
       return t;
     };
 
-    after(line.delayBefore || 300, () => {
+    const initialWait = step === 0 ? startDelay : line.delayBefore || 300;
+    after(initialWait, () => {
       if (cancelled) return;
       if (typedRef.current) typedRef.current.textContent = "";
       if (respRef.current) respRef.current.textContent = "";
@@ -92,13 +99,13 @@ export function Terminal({
       cancelled = true;
       timers.forEach(clearTimeout);
     };
-  }, [step, lines]);
+  }, [step, lines, startDelay]);
 
   return (
     <div
       aria-hidden="true"
-      className="relative overflow-hidden rounded-lg border border-phosphor/10 font-mono 
-      opacity-0 translate-y-4 animate-rise-in delay-800
+      className="relative overflow-hidden rounded-lg border border-phosphor/10 font-mono
+      opacity-0 translate-y-4 animate-rise-in delay-6300
       shadow-md shadow-phosphor/10"
     >
       {/* Chrome */}

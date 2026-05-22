@@ -1,0 +1,157 @@
+/* intro.css — page-entry overlay state machine, unlayered so stage-driven
+   opacity beats utility-layer `opacity-0`. */
+
+@keyframes intro-scan-sweep {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  85% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+@keyframes intro-ring-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+html.intro-active,
+html.intro-active body {
+  overflow: hidden;
+}
+
+.intro-overlay {
+  z-index: 9999;
+}
+
+.intro-bg {
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.intro-overlay:is([data-stage="morph"], [data-stage="reveal"]) .intro-bg {
+  opacity: 0;
+}
+
+.intro-scan {
+  background: linear-gradient(
+    to bottom,
+    rgba(232, 148, 85, 0),
+    rgba(232, 148, 85, 0.55),
+    rgba(232, 148, 85, 0)
+  );
+  box-shadow: 0 0 24px rgba(232, 148, 85, 0.35);
+  /* `both` holds the 0% keyframe (opacity 0) during the lead-in delay
+     so the bar isn't visible before the sweep starts. Delay matches
+     INTRO_DELAY in intro.tsx. */
+  animation: intro-scan-sweep 1.6s cubic-bezier(0.22, 1, 0.36, 1) 1000ms both;
+}
+
+/* Rings — mirror Atmosphere's Summit A geometry; opacity-only transitions
+   so the position never moves. */
+.intro-rings {
+  transition: opacity 0.8s ease;
+}
+.intro-rings ellipse {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: intro-ring-draw 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-play-state: paused;
+}
+.intro-overlay:is(
+    [data-stage="rings"],
+    [data-stage="brackets"],
+    [data-stage="scramble"]
+  )
+  .intro-rings {
+  opacity: 1;
+}
+.intro-overlay:is(
+    [data-stage="rings"],
+    [data-stage="brackets"],
+    [data-stage="scramble"],
+    [data-stage="morph"],
+    [data-stage="reveal"]
+  )
+  .intro-rings
+  ellipse {
+  animation-play-state: running;
+}
+.intro-overlay:is([data-stage="morph"], [data-stage="reveal"]) .intro-rings {
+  opacity: 0;
+  transition: opacity 0.85s ease;
+}
+
+/* Bracketed word — morph target. Letter-spacing matches hero's `tracking-tight`
+   so chars align character-precise after the FLIP transform. */
+.intro-word {
+  transform: translate(-50%, -50%) scale(1);
+  font-size: clamp(48px, 11vw, 160px);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  text-shadow: 0 0 40px rgba(232, 148, 85, 0.35);
+  transition:
+    transform 0.65s cubic-bezier(0.7, 0, 0.2, 1),
+    opacity 0.5s ease;
+}
+.intro-bracket {
+  transition:
+    opacity 0.55s ease 0.1s,
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.intro-bracket--l {
+  transform: translateX(-0.55em);
+}
+.intro-bracket--r {
+  transform: translateX(0.55em);
+}
+.intro-overlay:is(
+    [data-stage="brackets"],
+    [data-stage="scramble"],
+    [data-stage="morph"],
+    [data-stage="reveal"]
+  )
+  .intro-bracket {
+  opacity: 0.7;
+  transform: translateX(0);
+}
+.intro-word-inner {
+  min-width: 11ch;
+  transition: opacity 0.4s ease;
+}
+.intro-overlay:is(
+    [data-stage="scramble"],
+    [data-stage="morph"],
+    [data-stage="reveal"]
+  )
+  .intro-word-inner {
+  opacity: 1;
+}
+.intro-overlay[data-stage="reveal"] .intro-word {
+  opacity: 0;
+  transition:
+    opacity 0.4s ease,
+    transform 0.65s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+@media (max-width: 1100px) {
+  .intro-word {
+    font-size: clamp(40px, 14vw, 100px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-overlay {
+    display: none;
+  }
+  html.intro-active,
+  html.intro-active body {
+    overflow: auto;
+  }
+}

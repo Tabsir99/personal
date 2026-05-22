@@ -9,6 +9,9 @@
 @import "../components/portfolio/styles/services.css";
 @import "../components/portfolio/styles/work.css";
 
+/* Page-entry overlay (loads last so its stage-driven rules win) ----- */
+@import "../components/portfolio/styles/intro.css";
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 20%;

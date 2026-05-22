@@ -4,6 +4,7 @@ import { type Metadata } from "next";
 import { Lato, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { Header } from "@/components/portfolio/header";
 import { Footer } from "@/components/portfolio/footer";
+import { Intro } from "@/components/portfolio/intro";
 import { ScrollIsland } from "@/components/ui/scroll-island";
 
 const latoFont = Lato({
@@ -79,6 +80,7 @@ export default function RootLayout({
       )}
       <body>
         <Header />
+        <Intro />
         <ScrollIsland />
         <main className=" py-10">{children}</main>
         <Footer />

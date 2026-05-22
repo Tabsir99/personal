@@ -13,6 +13,8 @@ interface ScrambleWordProps {
   stagger?: number;
   /** characters used while scrambling */
   chars?: string;
+  /** ms to wait before the first cycle starts. Zeroed under prefers-reduced-motion. */
+  delay?: number;
   className?: string;
 }
 
@@ -34,6 +36,7 @@ export const ScrambleWord = memo(
     shuffleRate = 0.6,
     stagger = 0.3,
     chars = DEFAULT_CHARS,
+    delay = 0,
     className = "",
   }: ScrambleWordProps) => {
     const ref = useRef<HTMLSpanElement>(null);
@@ -103,14 +106,19 @@ export const ScrambleWord = memo(
         setText(from, words[i]);
       };
 
+      const reducedMotion =
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      const firstWait = reducedMotion ? hold : hold + delay;
+
       el.textContent = words[0];
-      timeoutId = setTimeout(next, words.length > 1 ? hold : 1e9);
+      timeoutId = setTimeout(next, words.length > 1 ? firstWait : 1e9);
 
       return () => {
         cancelAnimationFrame(rafId);
         clearTimeout(timeoutId);
       };
-    }, [words, hold, duration, shuffleRate, stagger, chars]);
+    }, [words, hold, duration, shuffleRate, stagger, chars, delay]);
 
     return (
       <span ref={ref} className={className}>
@@ -125,7 +133,8 @@ export const ScrambleWord = memo(
       p.duration === n.duration &&
       p.shuffleRate === n.shuffleRate &&
       p.stagger === n.stagger &&
-      p.chars === n.chars
+      p.chars === n.chars &&
+      p.delay === n.delay
     );
   },
 );
