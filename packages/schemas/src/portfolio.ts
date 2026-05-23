@@ -10,11 +10,15 @@ const linkSchema = z.object({
     .enum(["live", "repo", "case-study", "video", "other"])
     .default("other"),
 });
+export type ProjectLink = z.infer<typeof linkSchema>;
 
-const imageSchema = z.object({
+const stillSchema = z.object({
   url: optionalUrl,
   alt: z.string().default(""),
+  label: z.string().default(""),
+  kind: z.enum(["image", "video"]).default("image"),
 });
+export type ProjectStill = z.infer<typeof stillSchema>;
 
 export const projectSchema = z.object({
   title: z.string(),
@@ -25,12 +29,10 @@ export const projectSchema = z.object({
     .enum(["shipped", "in-progress", "archived", "discontinued"])
     .default("shipped"),
 
-  image: optionalUrl,
-  video: optionalUrl,
-  gallery: z.array(imageSchema).default([]),
+  role: z.string().default(""),
+  year: z.string().default(""),
+  tag: z.string().default(""),
 
-  links: z.array(linkSchema).default([]),
-  skills: z.array(z.string()).default([]),
   metrics: z
     .array(
       z.object({
@@ -39,69 +41,67 @@ export const projectSchema = z.object({
       }),
     )
     .default([]),
+  skills: z.array(z.string()).default([]),
+  links: z.array(linkSchema).default([]),
+  stills: z.array(stillSchema).default([]),
 
-  role: z.string().default(""),
-  year: z.string().default(""),
-
-  featured: z.boolean().default(false),
   order: z.number().default(0),
-  visible: z.boolean().default(true),
-
-  // Metadata
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
+  isActive: z.boolean().default(true),
 });
+export type Project = z.infer<typeof projectSchema>;
 
 export const testimonialSchema = z.object({
   name: z.string(),
   company: z.string().default(""),
-  location: z.string().default(""),
-  role: z.string().default(""),
-  project: z.string().default(""),
-  // NOTE: layout concern — consider moving to a display config eventually
-  size: z.enum(["large", "medium", "small"]),
+  period: z.string().default(""),
   rating: z.number().min(0).max(5),
   text: z.string().default(""),
   video: optionalUrl,
-  isActive: z.boolean().default(true),
   avatar: optionalUrl,
-  date: z.string().default(""), // free-form ("March 2024", "2024", etc.)
-  projectDuration: z.string().default(""),
-  projectBudget: z.string().default(""),
-  featured: z.boolean().default(false),
+  displaySlot: z
+    .enum(["endorsement", "voices", "none"])
+    .default("none"),
+  isActive: z.boolean().default(true),
+  order: z.number().default(0),
 });
+export type Testimonial = z.infer<typeof testimonialSchema>;
+
+export const serviceSchema = z.object({
+  label: z.string().default(""),
+  title: z.string(),
+  desc: z.string().default(""),
+  frameNum: z.string().default(""),
+  frameLabel: z.string().default(""),
+  frameTitle: z.string().default(""),
+  items: z.array(z.string()).default([]),
+  isActive: z.boolean().default(true),
+  order: z.number().default(0),
+});
+export type Service = z.infer<typeof serviceSchema>;
 
 export const skillGroupSchema = z.object({
   title: z.string(),
-  icon: z.string().default(""),
   skills: z
     .array(
       z.object({
         name: z.string(),
         level: z.number().min(1).max(5),
-        icon: z.string().default(""),
       }),
     )
     .default([]),
   isActive: z.boolean().default(true),
+  order: z.number().default(0),
 });
+export type SkillGroup = z.infer<typeof skillGroupSchema>;
 
 export const credentialSchema = z.object({
   title: z.string(),
-  issuer: z.string().default(""),
-  date: z.string().default(""),
-  description: z.string().default(""),
-  link: optionalUrl,
   image: optionalUrl,
+  link: optionalUrl,
   isActive: z.boolean().default(true),
+  order: z.number().default(0),
 });
-
-export const serviceSchema = z.object({
-  title: z.string(),
-  content: z.string().default(""),
-  icon: z.string().default(""),
-  isActive: z.boolean().default(true),
-});
+export type Credential = z.infer<typeof credentialSchema>;
 
 export const contactSchema = z.object({
   email: z.email(),
@@ -109,32 +109,37 @@ export const contactSchema = z.object({
     .array(
       z.object({
         name: z.string(),
-        url: z.url(), // required — if a social exists, the URL must be valid
+        url: z.url(),
         icon: z.string().default(""),
       }),
     )
     .default([]),
 });
+export type Contact = z.infer<typeof contactSchema>;
+
+export const heroStatSchema = z.object({
+  value: z.string(),
+  label: z.string(),
+  order: z.number().default(0),
+});
+export type HeroStat = z.infer<typeof heroStatSchema>;
 
 export const pageDataSchema = z.object({
   title: z.string(),
   description: z.string().default(""),
   keywords: z.array(z.string()).default([]),
   profilePicture: optionalUrl,
-  stats: z.object({
-    yearsExperience: z.number().int().nonnegative().default(0),
-    projectsCompleted: z.number().int().nonnegative().default(0),
-    jobSuccessRate: z.number().min(0).max(100).default(0),
-    responseTime: z.string().default(""),
-    happyClients: z.number().int().nonnegative().default(0),
-  }),
+
+  aboutText: z.string().default(""),
+  heroStats: z.array(heroStatSchema).default([]),
+
+  contact: contactSchema,
+
   projects: z.array(projectSchema).default([]),
+  services: z.array(serviceSchema).default([]),
   testimonials: z.array(testimonialSchema).default([]),
-  about: z.array(z.string()).default([]),
   skills: z.array(skillGroupSchema).default([]),
   credentials: z.array(credentialSchema).default([]),
-  contact: contactSchema,
-  services: z.array(serviceSchema).default([]),
 });
 export type PageData = z.infer<typeof pageDataSchema>;
 

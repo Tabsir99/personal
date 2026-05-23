@@ -11,7 +11,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const homepageImages = [
     pageData.profilePicture,
-    ...pageData.projects.map((p) => p.image),
+    ...pageData.projects.flatMap((p) =>
+      p.stills.filter((s) => s.kind === "image").map((s) => s.url),
+    ),
     ...pageData.credentials.map((c) => c.image),
   ].filter(Boolean);
 

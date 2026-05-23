@@ -1,4 +1,3 @@
-import { env } from "@/config/env.server";
 import { NextRequest } from "next/server";
 import { PageData, pageDataSchema } from "@tabsircg/schemas/portfolio";
 import { S3Bucket, deleteObjects } from "@/config/cloudflareS3";
@@ -7,6 +6,7 @@ import {
   readPortfolioPageData,
   writePortfolioPageData,
 } from "@/actions/configActions";
+import { sendRevalidateRequest } from "@/lib/blogUtils";
 
 export const GET = wrapRoute(async () => readPortfolioPageData());
 
@@ -21,21 +21,17 @@ export const POST = wrapRoute(async (request: NextRequest) => {
 
   await writePortfolioPageData(pageData);
 
-  await fetch("https://tabsircg.com/api/revalidate", {
-    headers: { Authorization: env.SERVER_TOKEN },
-  });
-  await fetch("https://tabsircg.com");
+  await sendRevalidateRequest({ tag: "page-data" });
 
   return null;
 });
 
 async function deleteRemovedMedia(oldData: PageData, newData: PageData) {
   const oldUrls = extractMediaUrls(oldData);
-  const newUrls = extractMediaUrls(newData);
+  const newUrls = new Set(extractMediaUrls(newData));
 
-  const removedUrls = oldUrls.filter((url) => !newUrls.includes(url));
+  const removedUrls = oldUrls.filter((url) => !newUrls.has(url));
 
-  console.info(removedUrls);
   if (removedUrls.length > 0) {
     await deleteObjects(S3Bucket.PUBLIC, removedUrls);
   }
@@ -48,16 +44,20 @@ function extractMediaUrls(pageData: PageData): string[] {
 
   if (pageData.profilePicture) urls.push(pageData.profilePicture);
 
-  // Projects
   pageData.projects?.forEach((project) => {
-    if (project.image) urls.push(project.image);
+    project.stills?.forEach((still) => {
+      if (still.url) urls.push(still.url);
+    });
   });
 
-  // Credentials
   pageData.credentials?.forEach((credential) => {
     if (credential.image) urls.push(credential.image);
   });
 
-  // Filter out empty strings and only include blob URLs
+  pageData.testimonials?.forEach((testimonial) => {
+    if (testimonial.avatar) urls.push(testimonial.avatar);
+    if (testimonial.video) urls.push(testimonial.video);
+  });
+
   return urls.filter((url) => !!url);
 }

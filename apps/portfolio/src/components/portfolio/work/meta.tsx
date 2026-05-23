@@ -1,18 +1,27 @@
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { LINK_BG, LINK_ICONS, PROJECTS } from "./data";
 
-/* All 5 stack in one grid cell; only the active one has opacity 1. */
-export function WorkMeta({ className }: { className?: string }) {
+import type { Project } from "@tabsircg/schemas/portfolio";
+
+import { cn } from "@/lib/utils";
+import { LINK_BG, LINK_ICONS } from "./glyphs";
+
+/* All stacks share one grid cell; only the active one has opacity 1. */
+export function WorkMeta({
+  projects,
+  className,
+}: {
+  projects: Project[];
+  className?: string;
+}) {
   return (
     <div
       data-reveal
       className={cn("grid", className)}
       style={{ animationDelay: "100ms" }}
     >
-      {PROJECTS.map((project, i) => (
+      {projects.map((project, i) => (
         <div
-          key={i}
+          key={project.title + i}
           data-work-meta-idx={i}
           style={{ "--i": i } as React.CSSProperties}
           className="work-meta grid grid-cols-[0.78fr_1.22fr] gap-14 items-start max-xl:grid-cols-1 max-xl:gap-8"
@@ -49,7 +58,7 @@ export function WorkMeta({ className }: { className?: string }) {
             )}
           </dl>
 
-          <div className="col-start-1 flex flex-wrap gap-2.5 pl-6 max-xl:pl-0">
+          <div className="col-span-full flex flex-wrap gap-2.5 pl-6 max-xl:pl-0">
             {project.links.map((l, j) => {
               const isReal = !!l.url && l.url !== "#";
               const className = cn(
@@ -68,7 +77,7 @@ export function WorkMeta({ className }: { className?: string }) {
                 </>
               );
               return isReal ? (
-                <Link key={j} href={l.url!} className={className}>
+                <Link key={j} href={l.url} className={className}>
                   {inner}
                 </Link>
               ) : (

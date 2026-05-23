@@ -12,7 +12,6 @@ import {
   MessageSquare,
   Package,
   Save,
-  User,
   type LucideIcon,
 } from "lucide-react";
 
@@ -34,7 +33,6 @@ const SECTIONS: Section[] = [
   { id: "services", label: "Services", icon: Package },
   { id: "projects", label: "Projects", icon: Briefcase },
   { id: "testimonials", label: "Testimonials", icon: MessageSquare },
-  { id: "about", label: "About", icon: User },
   { id: "skills", label: "Skills", icon: Code },
   { id: "credentials", label: "Credentials", icon: Award },
 ];

@@ -4,24 +4,18 @@ import { callWithToast } from "@/lib/utils";
 import { create } from "zustand";
 
 const defaultPageData: PageData = {
-  title: "Tabsir - Full Stack Developer",
-  description: "Portfolio of Tabsir, a full-stack developer",
-  keywords: ["developer", "full-stack", "react"],
-  stats: {
-    yearsExperience: 0,
-    projectsCompleted: 0,
-    jobSuccessRate: 0,
-    responseTime: "",
-    happyClients: 0,
-  },
+  title: "Tabsir CG — Full-stack developer",
+  description: "",
+  keywords: [],
+  profilePicture: "",
+  aboutText: "",
+  heroStats: [],
   contact: { email: "", social: [] },
   projects: [],
+  services: [],
   testimonials: [],
-  about: [],
-  profilePicture: "",
   skills: [],
   credentials: [],
-  services: [],
 };
 
 type ArrayElement<K extends keyof PageData> =
@@ -64,7 +58,7 @@ interface PortfolioStore {
   credentials: EntityHandlers<"credentials">;
   services: EntityHandlers<"services">;
   skills: EntityHandlers<"skills">;
-  about: EntityHandlers<"about">;
+  heroStats: EntityHandlers<"heroStats">;
 }
 
 export const usePortfolioStore = create<PortfolioStore>((set, get) => {
@@ -247,19 +241,17 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => {
     credentials: createEntityHandlers("credentials"),
     services: createEntityHandlers("services"),
     skills: createEntityHandlers("skills"),
-    about: createEntityHandlers("about"),
+    heroStats: createEntityHandlers("heroStats"),
   };
 });
+
+type BlobUploadItem = { url: string; path: string; blob?: Blob };
 
 async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
   // Deep-clone so we don't mutate live Zustand state.
   const next: PageData = JSON.parse(JSON.stringify(pageData));
 
-  const blobsToUpload: Array<{
-    url: string;
-    path: string;
-    blob?: Blob;
-  }> = [];
+  const blobsToUpload: BlobUploadItem[] = [];
 
   if (next.profilePicture.startsWith("blob:")) {
     blobsToUpload.push({
@@ -269,14 +261,28 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
   }
 
   next.projects.forEach((project, i) => {
-    if (project.image.startsWith("blob:")) {
-      blobsToUpload.push({ url: project.image, path: `projects/${i}` });
-    }
+    project.stills.forEach((still, j) => {
+      if (still.url.startsWith("blob:")) {
+        blobsToUpload.push({
+          url: still.url,
+          path: `projects/${i}/stills/${j}`,
+        });
+      }
+    });
   });
 
   next.credentials.forEach((credential, i) => {
     if (credential.image.startsWith("blob:")) {
       blobsToUpload.push({ url: credential.image, path: `credentials/${i}` });
+    }
+  });
+
+  next.testimonials.forEach((testimonial, i) => {
+    if (testimonial.avatar.startsWith("blob:")) {
+      blobsToUpload.push({
+        url: testimonial.avatar,
+        path: `testimonials/${i}/avatar`,
+      });
     }
   });
 
@@ -319,13 +325,26 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
   );
 
   urls.forEach(({ key, path }) => {
-    if (path === "profilePicture") next.profilePicture = key;
-    else if (path.startsWith("projects/")) {
-      const projectIndex = parseInt(path.split("/")[1]);
-      next.projects[projectIndex].image = key;
-    } else if (path.startsWith("credentials/")) {
-      const credentialIndex = parseInt(path.split("/")[1]);
-      next.credentials[credentialIndex].image = key;
+    if (path === "profilePicture") {
+      next.profilePicture = key;
+      return;
+    }
+    const projectStill = path.match(/^projects\/(\d+)\/stills\/(\d+)$/);
+    if (projectStill) {
+      const projectIndex = parseInt(projectStill[1]);
+      const stillIndex = parseInt(projectStill[2]);
+      next.projects[projectIndex].stills[stillIndex].url = key;
+      return;
+    }
+    const credentialMatch = path.match(/^credentials\/(\d+)$/);
+    if (credentialMatch) {
+      next.credentials[parseInt(credentialMatch[1])].image = key;
+      return;
+    }
+    const testimonialAvatar = path.match(/^testimonials\/(\d+)\/avatar$/);
+    if (testimonialAvatar) {
+      next.testimonials[parseInt(testimonialAvatar[1])].avatar = key;
+      return;
     }
   });
 

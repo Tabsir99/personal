@@ -22,9 +22,9 @@ interface SkillCategoryDialogProps {
 
 const defaultFormData: PageData["skills"][number] = {
   title: "",
-  icon: "",
   skills: [],
   isActive: true,
+  order: 0,
 };
 
 export default function SkillCategoryDialog({
@@ -79,11 +79,11 @@ export default function SkillCategoryDialog({
           ? formData.title || "Edit category"
           : "Add skill category"
       }
-      description="Group related skills under a single icon header."
+      description="Group related skills under a single header."
       footer={
         <PortfolioModalActions
           onSubmit={handleSubmit}
-          submitDisabled={!formData.title || !formData.icon}
+          submitDisabled={!formData.title}
           submitLabel="Add category"
           updateLabel="Save changes"
           isUpdating={isUpdating}
@@ -94,27 +94,11 @@ export default function SkillCategoryDialog({
       <ModalSection title="Basics">
         <FormField label="Title">
           <Input
-            placeholder="Frontend development"
+            placeholder="Front-end"
             value={formData.title}
             onChange={(e) =>
               setFormData({ ...formData, title: e.target.value })
             }
-          />
-        </FormField>
-      </ModalSection>
-
-      <ModalSection title="Media">
-        <FormField
-          label="Icon URL"
-          hint="Use a small image (PNG / SVG) to represent this category."
-        >
-          <Input
-            placeholder="https://…/icon.png"
-            value={formData.icon}
-            onChange={(e) =>
-              setFormData({ ...formData, icon: e.target.value })
-            }
-            className="font-mono text-xs"
           />
         </FormField>
       </ModalSection>

@@ -1,9 +1,10 @@
 "use client";
 import { useShallow } from "zustand/shallow";
-import { Award, Calendar, CheckCircle2, ExternalLink } from "lucide-react";
+import { Award, ExternalLink } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import Img from "@/components/ui/image";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import CredentialDialog from "@/components/portfolio/modals/Credential";
 import { AddCard } from "@/components/ui/add-card";
@@ -23,7 +24,7 @@ export default function Credentials() {
           Certifications &amp; achievements
         </h1>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Public-facing record of what you&apos;ve completed.
+          Image-backed records used for sitemap and social preview.
         </p>
       </header>
 
@@ -33,7 +34,7 @@ export default function Credentials() {
             key={c.title + index}
             style={{ ["--stagger-index" as string]: index }}
           >
-            <Card className="group/credential relative tactile-lift">
+            <Card className="group/card relative tactile-lift">
               <ActionButtonGroup
                 buttons={[
                   {
@@ -60,30 +61,28 @@ export default function Credentials() {
               />
               <CardContent className="flex h-full flex-col p-6">
                 <div className="mb-3 flex items-start gap-3">
-                  <div className="rounded-md border border-primary/15 bg-primary/8 p-2 text-primary">
-                    <Award className="h-4 w-4" />
-                  </div>
+                  {c.image ? (
+                    <Img
+                      src={c.image}
+                      alt={c.title}
+                      width={36}
+                      height={36}
+                      className="h-9 w-9 shrink-0 rounded-md object-cover"
+                    />
+                  ) : (
+                    <div className="rounded-md border border-primary/15 bg-primary/8 p-2 text-primary">
+                      <Award className="h-4 w-4" />
+                    </div>
+                  )}
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <h3 className="truncate text-base leading-snug font-semibold tracking-tight text-foreground">
                       {c.title}
                     </h3>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <CheckCircle2 className="h-3 w-3 text-success" />
-                      <span className="truncate">{c.issuer}</span>
-                    </div>
                   </div>
                 </div>
 
-                <p className="mb-4 grow text-sm leading-relaxed text-foreground/80">
-                  {c.description}
-                </p>
-
-                <div className="flex items-center justify-between border-t border-foreground/6 pt-3 font-mono text-kbd text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Calendar className="h-3 w-3" />
-                    {c.date}
-                  </span>
-                  {c.link && (
+                {c.link && (
+                  <div className="mt-auto flex items-center justify-end border-t border-foreground/6 pt-3 font-mono text-kbd text-muted-foreground">
                     <a
                       href={c.link}
                       target="_blank"
@@ -96,8 +95,8 @@ export default function Credentials() {
                       <span>Verify</span>
                       <ExternalLink className="h-3 w-3" />
                     </a>
-                  )}
-                </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

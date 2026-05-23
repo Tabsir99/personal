@@ -1,13 +1,13 @@
-const STATS = [
-  { value: "∼2", label: "Years shipping" },
-  { value: "17", label: "Projects merged" },
-  { value: "4", label: "Stacks daily" },
-  { value: "0", label: "Frameworks worshipped" },
-];
+import type { HeroStat } from "@tabsircg/schemas/portfolio";
 
-export function About() {
-  const text =
-    "I write code for the messy middle — where product specs collide with reality. I care about response budgets, accessible focus rings, sensible primary keys, and shipping things small enough to fix on a Friday. Two years in, mostly across SaaS dashboards, marketplaces, and a handful of internal tools nobody ever sees but everyone depends on.";
+export function About({
+  stats,
+  text,
+}: {
+  stats: HeroStat[];
+  text: string;
+}) {
+  if (!text && stats.length === 0) return null;
   const words = text.split(" ");
 
   return (
@@ -21,8 +21,8 @@ export function About() {
         <div className="eyebrow col-span-2 border-b border-line pb-10">
           A short note
         </div>
-        {STATS.map((s) => (
-          <div key={s.label} className="flex flex-col gap-1.5">
+        {stats.map((s, i) => (
+          <div key={s.label + i} className="flex flex-col gap-1.5">
             <span className="font-serif text-[48px] leading-none">
               {s.value}
             </span>

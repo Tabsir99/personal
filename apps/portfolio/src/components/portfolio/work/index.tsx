@@ -1,3 +1,5 @@
+import type { Project } from "@tabsircg/schemas/portfolio";
+
 import { WorkList } from "./list";
 import { WorkViewport } from "./viewport";
 import { WorkMeta } from "./meta";
@@ -7,7 +9,7 @@ import { NavLink } from "@/components/ui/nav-link";
 
 /* List/viewport/meta are server-rendered; state-island writes data-*
    + CSS vars on the section, CSS does the cross-fade choreography. */
-export function Work() {
+export function Work({ projects }: { projects: Project[] }) {
   return (
     <section
       id="work"
@@ -26,9 +28,9 @@ export function Work() {
       <WorkStateIsland />
 
       <span className="margin-note top-[260px]">
-        five recent,
+        {projects.length} recent,
         <br />
-        seventeen total.
+        many more to come.
       </span>
 
       <header data-reveal className="flex justify-between col-span-2">
@@ -39,20 +41,19 @@ export function Work() {
         </H2>
         <div className="flex flex-col gap-4">
           <p className="max-w-md leading-relaxed">
-            Five from the last two years. Quiet UIs, opinionated back-ends, and
-            a couple of weekends that quietly turned into demos. Hover the index
-            to wander.
+            Quiet UIs, opinionated back-ends, and a couple of weekends that
+            quietly turned into demos. Hover the index to wander.
           </p>
           <NavLink href="#work" underline>
-            All 17 projects · the full archive
+            The full archive
           </NavLink>
         </div>
       </header>
 
-      <WorkList />
-      <WorkViewport />
+      <WorkList projects={projects} />
+      <WorkViewport projects={projects} />
 
-      <WorkMeta className="col-span-2 -mt-20" />
+      <WorkMeta projects={projects} className="col-span-2 -mt-20" />
     </section>
   );
 }

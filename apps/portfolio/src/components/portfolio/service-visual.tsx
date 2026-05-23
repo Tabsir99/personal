@@ -48,7 +48,8 @@ const FRAME2_EDGES: Array<[number, number, number, number]> = [
 const FRAME3_RING_BASES = [60, 100, 140, 180];
 
 export function ServiceVisual({ idx }: { idx: number }) {
-  if (idx === 0) {
+  const variant = ((idx % 4) + 4) % 4;
+  if (variant === 0) {
     return (
       <svg viewBox="0 0 400 500" style={visStyle} preserveAspectRatio="xMidYMid slice">
         <defs>
@@ -79,7 +80,7 @@ export function ServiceVisual({ idx }: { idx: number }) {
       </svg>
     );
   }
-  if (idx === 1) {
+  if (variant === 1) {
     return (
       <svg viewBox="0 0 400 500" style={visStyle}>
         {FRAME1_RECTS.map((r, i) => (
@@ -97,7 +98,7 @@ export function ServiceVisual({ idx }: { idx: number }) {
       </svg>
     );
   }
-  if (idx === 2) {
+  if (variant === 2) {
     return (
       <svg viewBox="0 0 400 500" style={visStyle}>
         {FRAME2_NODES.map(([x, y], i) => (

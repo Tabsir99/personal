@@ -5,10 +5,8 @@ import { Check, Code, Plus, Trash2, X } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { FormField } from "@/components/ui/FormField";
-import Img from "@/components/ui/image";
 import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
 import { ConfigMultiSelect } from "@/components/ui/configMultiSelect";
@@ -25,10 +23,9 @@ import { cn } from "@/lib/utils";
 interface SkillDraft {
   name: string;
   level: number;
-  icon: string;
 }
 
-const EMPTY_DRAFT: SkillDraft = { name: "", level: 50, icon: "" };
+const EMPTY_DRAFT: SkillDraft = { name: "", level: 3 };
 
 export default function Skills() {
   const [addingTo, setAddingTo] = useState<number | null>(null);
@@ -40,11 +37,14 @@ export default function Skills() {
   );
   const skill = usePortfolioStore().skills;
 
-  const { data: catalog, mutate: mutateCatalog, isLoading: catalogLoading } =
-    useCustomSWR<PortfolioCatalog>("/api/config/portfolio");
+  const {
+    data: catalog,
+    mutate: mutateCatalog,
+    isLoading: catalogLoading,
+  } = useCustomSWR<PortfolioCatalog>("/api/config/portfolio");
 
   const commitNew = (categoryIndex: number) => {
-    if (!newSkill.name.trim() || !newSkill.icon.trim()) return;
+    if (!newSkill.name.trim()) return;
     skill.update(categoryIndex, {
       ...skillCategories[categoryIndex],
       skills: [...skillCategories[categoryIndex].skills, newSkill],
@@ -62,10 +62,10 @@ export default function Skills() {
     <div className="space-y-6">
       <header className="space-y-1.5">
         <h1 className="text-2xl leading-tight font-semibold tracking-tight">
-          Technical skills
+          Technical stack
         </h1>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Grouped categories with per-skill proficiency.
+          Grouped categories with per-skill proficiency (1–5).
         </p>
       </header>
 
@@ -75,7 +75,7 @@ export default function Skills() {
             key={category.title + categoryIndex}
             style={{ ["--stagger-index" as string]: categoryIndex }}
           >
-            <Card className="group/category relative tactile-lift">
+            <Card className="group/card relative tactile-lift">
               <ActionButtonGroup
                 buttons={[
                   {
@@ -106,16 +106,6 @@ export default function Skills() {
               />
               <CardContent className="p-6">
                 <div className="mb-5 flex items-center gap-3">
-                  <div className="rounded-md border border-foreground/6 bg-foreground/2 p-2">
-                    <Img
-                      width={24}
-                      height={24}
-                      src={category.icon}
-                      alt={category.title}
-                      fetchPriority="low"
-                      loading="lazy"
-                    />
-                  </div>
                   <h3 className="text-base leading-snug font-semibold tracking-tight">
                     {category.title}
                   </h3>
@@ -124,26 +114,16 @@ export default function Skills() {
                 <ul className="flex flex-col gap-3">
                   {category.skills.map((skillItem, skillIndex) => (
                     <li
-                      key={skillItem.name}
+                      key={skillItem.name + skillIndex}
                       className="group/skill flex flex-col gap-1.5"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <Img
-                            width={16}
-                            height={16}
-                            src={skillItem.icon}
-                            alt={skillItem.name}
-                            fetchPriority="low"
-                            loading="lazy"
-                          />
-                          <span className="truncate text-sm font-medium text-foreground">
-                            {skillItem.name}
-                          </span>
-                        </div>
+                        <span className="truncate text-sm font-medium text-foreground">
+                          {skillItem.name}
+                        </span>
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-kbd tabular-nums text-muted-foreground">
-                            {skillItem.level}%
+                            {skillItem.level}/5
                           </span>
                           <Button
                             size="icon-xs"
@@ -166,7 +146,7 @@ export default function Skills() {
                       <div className="h-1 overflow-hidden rounded-full bg-foreground/6">
                         <div
                           className="h-full rounded-full bg-primary transition-[width] duration-500"
-                          style={{ width: `${skillItem.level}%` }}
+                          style={{ width: `${(skillItem.level / 5) * 100}%` }}
                         />
                       </div>
                     </li>
@@ -196,7 +176,7 @@ export default function Skills() {
                               (prev) =>
                                 prev
                                   ? { ...prev, skillCatalog: values }
-                                  : { skillCatalog: values, clientTypeCatalog: [] },
+                                  : { skillCatalog: values },
                               false,
                             )
                           }
@@ -205,7 +185,7 @@ export default function Skills() {
                               (prev) =>
                                 prev
                                   ? { ...prev, skillCatalog: values }
-                                  : { skillCatalog: values, clientTypeCatalog: [] },
+                                  : { skillCatalog: values },
                               false,
                             )
                           }
@@ -219,22 +199,12 @@ export default function Skills() {
                           }}
                         />
                       </FormField>
-                      <FormField label="Icon URL">
-                        <Input
-                          placeholder="https://…/icon.png"
-                          value={newSkill.icon}
-                          onChange={(e) =>
-                            setNewSkill({ ...newSkill, icon: e.target.value })
-                          }
-                          className="font-mono text-xs"
-                        />
-                      </FormField>
                       <FormField
                         label={
                           <span className="inline-flex items-center justify-between gap-2 w-full">
                             <span>Proficiency</span>
                             <span className="font-mono normal-case tabular-nums tracking-normal text-foreground/80">
-                              {newSkill.level}%
+                              {newSkill.level}/5
                             </span>
                           </span>
                         }
@@ -244,11 +214,11 @@ export default function Skills() {
                           onValueChange={(value) =>
                             setNewSkill({
                               ...newSkill,
-                              level: value[0] ?? 0,
+                              level: value[0] ?? 1,
                             })
                           }
-                          min={0}
-                          max={100}
+                          min={1}
+                          max={5}
                           step={1}
                           className="w-full"
                         />
@@ -258,7 +228,7 @@ export default function Skills() {
                           size="sm"
                           onClick={() => commitNew(categoryIndex)}
                           className="flex-1"
-                          disabled={!newSkill.name || !newSkill.icon}
+                          disabled={!newSkill.name}
                         >
                           <Check className="h-3 w-3" />
                           Add skill

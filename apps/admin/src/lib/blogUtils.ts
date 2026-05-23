@@ -160,11 +160,17 @@ export function createNewBlogFormData(title?: string): BlogFormData {
   };
 }
 
-export async function sendRevalidateRequest(path: string) {
+type RevalidateTarget = { path?: string; tag?: string };
+
+export async function sendRevalidateRequest(target: string | RevalidateTarget) {
+  const body =
+    typeof target === "string"
+      ? { path: `/blogs/${target}` }
+      : target;
   try {
     const res = await fetch(`${clientEnv.BLOG_ORIGIN}/api/revalidate`, {
       method: "POST",
-      body: JSON.stringify({ path: `/blogs/${path}` }),
+      body: JSON.stringify(body),
       headers: {
         "Content-Type": "application/json",
         acs_tkn: env.SERVER_TOKEN,

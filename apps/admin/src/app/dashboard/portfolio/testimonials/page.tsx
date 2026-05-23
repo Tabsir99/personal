@@ -12,6 +12,12 @@ import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
 import { cn } from "@/lib/utils";
 
+const SLOT_LABEL: Record<"endorsement" | "voices" | "none", string> = {
+  endorsement: "Endorsement",
+  voices: "Voices",
+  none: "Hidden",
+};
+
 export default function Testimonials() {
   const testimonials = usePortfolioStore(
     useShallow((state) => state.pageData.testimonials),
@@ -26,7 +32,7 @@ export default function Testimonials() {
           Client testimonials
         </h1>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Quotes and reviews displayed on the testimonials page.
+          Quotes and reviews displayed on the portfolio home.
         </p>
       </header>
 
@@ -35,12 +41,8 @@ export default function Testimonials() {
           <div
             key={t.name + index}
             style={{ ["--stagger-index" as string]: index }}
-            className={cn(
-              t.size === "large" && "md:col-span-2 lg:col-span-2",
-              t.size === "medium" && "md:col-span-2 lg:col-span-1",
-            )}
           >
-            <Card className="group/testimonial relative tactile-lift">
+            <Card className="group/card relative tactile-lift">
               <ActionButtonGroup
                 buttons={[
                   {
@@ -71,18 +73,23 @@ export default function Testimonials() {
               />
 
               <div className="relative flex flex-col gap-4 p-6">
-                <div className="flex items-center gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={cn(
-                        "h-3.5 w-3.5",
-                        i < t.rating
-                          ? "fill-star text-star"
-                          : "text-foreground/15",
-                      )}
-                    />
-                  ))}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={cn(
+                          "h-3.5 w-3.5",
+                          i < t.rating
+                            ? "fill-star text-star"
+                            : "text-foreground/15",
+                        )}
+                      />
+                    ))}
+                  </div>
+                  {t.displaySlot !== "none" && (
+                    <Badge variant="accent">{SLOT_LABEL[t.displaySlot]}</Badge>
+                  )}
                 </div>
 
                 <p className="text-sm leading-relaxed text-foreground/85">
@@ -94,26 +101,18 @@ export default function Testimonials() {
                     <span className="truncate text-sm font-semibold tracking-tight text-foreground">
                       {t.name}
                     </span>
-                    <span className="truncate text-xs leading-relaxed text-muted-foreground">
-                      {t.role}
-                      {t.company ? `, ${t.company}` : null}
-                    </span>
-                    {t.location && (
+                    {t.company && (
+                      <span className="truncate text-xs leading-relaxed text-muted-foreground">
+                        {t.company}
+                      </span>
+                    )}
+                    {t.period && (
                       <Eyebrow tone="muted" family="mono">
-                        {t.location}
+                        {t.period}
                       </Eyebrow>
                     )}
                   </div>
-                  {t.featured && (
-                    <Badge variant="accent">Featured</Badge>
-                  )}
                 </div>
-
-                {t.project && (
-                  <Eyebrow tone="muted" family="mono">
-                    Project · {t.project}
-                  </Eyebrow>
-                )}
               </div>
             </Card>
           </div>

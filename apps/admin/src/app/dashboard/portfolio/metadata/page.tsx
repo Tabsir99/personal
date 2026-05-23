@@ -1,31 +1,54 @@
 "use client";
+import { useRef, useState } from "react";
 import { useShallow } from "zustand/shallow";
+import { Pencil, Plus, X } from "lucide-react";
 
 import KeywordsSection from "@/components/portfolio/metadata/KeyWords";
 import SocialLinksSection from "@/components/portfolio/metadata/SocialLinkSection";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { NumericInput } from "@/components/ui/NumericInput";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/FormField";
+import Img from "@/components/ui/image";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 
 export default function PortfolioMetadata() {
-  const { title, description, stats } = usePortfolioStore(
-    useShallow((state) => ({
-      title: state.pageData.title,
-      description: state.pageData.description,
-      stats: state.pageData.stats,
-    })),
-  );
+  const { title, description, profilePicture, aboutText, heroStats } =
+    usePortfolioStore(
+      useShallow((state) => ({
+        title: state.pageData.title,
+        description: state.pageData.description,
+        profilePicture: state.pageData.profilePicture,
+        aboutText: state.pageData.aboutText,
+        heroStats: state.pageData.heroStats,
+      })),
+    );
 
   const updatePageData = usePortfolioStore.getState().updatePageData;
-  const setField = (field: string, value: string) =>
-    updatePageData({ [field]: value });
+  const heroStat = usePortfolioStore().heroStats;
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [newStat, setNewStat] = useState({ value: "", label: "" });
+
+  const setField = (
+    field: "title" | "description" | "aboutText",
+    value: string,
+  ) => updatePageData({ [field]: value });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) updatePageData({ profilePicture: URL.createObjectURL(file) });
+  };
+
+  const handleAddStat = () => {
+    if (!newStat.value.trim() || !newStat.label.trim()) return;
+    heroStat.add({
+      value: newStat.value.trim(),
+      label: newStat.label.trim(),
+      order: heroStats.length,
+    });
+    setNewStat({ value: "", label: "" });
+  };
 
   return (
     <div className="space-y-6">
@@ -71,6 +94,73 @@ export default function PortfolioMetadata() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader className="flex flex-col gap-1 pt-5 pb-3">
+          <h2 className="text-base leading-tight font-semibold tracking-tight">
+            About me
+          </h2>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            The short bio paragraph rendered alongside the headline stats.
+          </p>
+        </CardHeader>
+        <CardContent className="pt-1 pb-5">
+          <FormField
+            label="Bio"
+            hint={`${aboutText.length} characters · one paragraph reads best.`}
+          >
+            <Textarea
+              value={aboutText}
+              onChange={(e) => setField("aboutText", e.target.value)}
+              rows={6}
+              placeholder="I write code for the messy middle — where product specs collide with reality…"
+            />
+          </FormField>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-col gap-1 pt-5 pb-3">
+          <h2 className="text-base leading-tight font-semibold tracking-tight">
+            Profile picture
+          </h2>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            The avatar that shows up next to the bio.
+          </p>
+        </CardHeader>
+        <CardContent className="pt-1 pb-5">
+          <div className="group relative aspect-square w-48 overflow-hidden rounded-md border border-foreground/6 bg-foreground/2">
+            {profilePicture ? (
+              <Img
+                src={profilePicture}
+                alt="Profile picture"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                No image
+              </div>
+            )}
+            <div className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-foreground/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <Button
+                size="sm"
+                className="gap-2 bg-background/90 text-foreground hover:bg-background"
+                onClick={() => imageInputRef.current?.click()}
+              >
+                <Pencil size={14} />
+                Change image
+              </Button>
+            </div>
+            <Input
+              type="file"
+              ref={imageInputRef}
+              onChange={handleImageChange}
+              className="hidden"
+              accept="image/*"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <KeywordsSection />
       <SocialLinksSection />
 
@@ -80,85 +170,80 @@ export default function PortfolioMetadata() {
             Headline stats
           </h2>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            Numbers shown above the fold.
+            The strip of value/label pairs shown above the fold.
           </p>
         </CardHeader>
-        <CardContent className="pt-1 pb-5">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <FormField label="Years of experience">
-              <NumericInput
-                id="years-exp"
-                min={0}
-                allowDecimal
-                value={stats.yearsExperience}
-                onChange={(value) =>
-                  updatePageData({
-                    stats: {
-                      ...stats,
-                      yearsExperience: Math.max(0, value),
-                    },
-                  })
-                }
-              />
-            </FormField>
-            <FormField label="Projects completed">
-              <NumericInput
-                id="projects"
-                min={0}
-                value={stats.projectsCompleted}
-                onChange={(value) =>
-                  updatePageData({
-                    stats: {
-                      ...stats,
-                      projectsCompleted: Math.max(0, value),
-                    },
-                  })
-                }
-              />
-            </FormField>
-            <FormField label="Job success rate (%)">
-              <NumericInput
-                id="success-rate"
-                min={0}
-                max={100}
-                value={stats.jobSuccessRate}
-                onChange={(value) =>
-                  updatePageData({
-                    stats: {
-                      ...stats,
-                      jobSuccessRate: Math.max(0, value),
-                    },
-                  })
-                }
-              />
-            </FormField>
-            <FormField label="Response time">
+        <CardContent className="space-y-3 pt-1 pb-5">
+          {heroStats.map((stat, i) => (
+            <div
+              key={i}
+              className="group/stat grid grid-cols-[1fr_2fr_auto] items-end gap-2"
+            >
+              <FormField label="Value">
+                <Input
+                  value={stat.value}
+                  onChange={(e) =>
+                    heroStat.update(i, { value: e.target.value })
+                  }
+                  className="font-mono text-sm"
+                  placeholder="∼2"
+                />
+              </FormField>
+              <FormField label="Label">
+                <Input
+                  value={stat.label}
+                  onChange={(e) =>
+                    heroStat.update(i, { label: e.target.value })
+                  }
+                  placeholder="Years shipping"
+                />
+              </FormField>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => heroStat.delete(i)}
+                className="text-muted-foreground hover:bg-destructive/8 hover:text-destructive"
+                aria-label="Remove stat"
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ))}
+
+          <div className="grid grid-cols-[1fr_2fr_auto] items-end gap-2 border-t border-foreground/6 pt-3">
+            <FormField label="New value">
               <Input
-                id="response-time"
-                placeholder="<2h, 24h"
-                value={stats.responseTime}
+                value={newStat.value}
                 onChange={(e) =>
-                  updatePageData({
-                    stats: { ...stats, responseTime: e.target.value },
-                  })
+                  setNewStat({ ...newStat, value: e.target.value })
                 }
+                className="font-mono text-sm"
+                placeholder="17"
               />
             </FormField>
-            <FormField label="Happy clients">
-              <NumericInput
-                id="happy-clients"
-                min={0}
-                value={stats.happyClients}
-                onChange={(value) =>
-                  updatePageData({
-                    stats: {
-                      ...stats,
-                      happyClients: Math.max(0, value),
-                    },
-                  })
+            <FormField label="New label">
+              <Input
+                value={newStat.label}
+                onChange={(e) =>
+                  setNewStat({ ...newStat, label: e.target.value })
                 }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddStat();
+                  }
+                }}
+                placeholder="Repos shipped"
               />
             </FormField>
+            <Button
+              size="default"
+              onClick={handleAddStat}
+              disabled={!newStat.value.trim() || !newStat.label.trim()}
+              aria-label="Add stat"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 
 import { Card, CardContent } from "@/components/ui/card";
-import Img from "@/components/ui/image";
+import { Eyebrow } from "@/components/ui/Eyebrow";
 import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
 import ServiceDialog from "@/components/portfolio/modals/ServiceModal";
@@ -35,7 +35,7 @@ export default function Services() {
             key={item.title + index}
             style={{ ["--stagger-index" as string]: index }}
           >
-            <Card className="group/service relative tactile-lift">
+            <Card className="group/card relative tactile-lift">
               <ActionButtonGroup
                 buttons={[
                   {
@@ -63,22 +63,35 @@ export default function Services() {
               />
               <CardContent className="p-6">
                 <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-md border border-foreground/6 bg-foreground/2 p-2">
-                      <Img
-                        src={item.icon}
-                        alt={item.title}
-                        width={28}
-                        height={28}
-                      />
-                    </div>
-                    <h3 className="truncate text-base leading-snug font-semibold tracking-tight">
-                      {item.title}
-                    </h3>
+                  <div className="flex items-center justify-between gap-2">
+                    {item.label && (
+                      <Eyebrow tone="foreground" family="mono">
+                        {item.label}
+                      </Eyebrow>
+                    )}
+                    {item.frameNum && (
+                      <span className="font-mono text-kbd text-muted-foreground">
+                        {item.frameNum}
+                      </span>
+                    )}
                   </div>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {item.content}
-                  </p>
+                  <h3 className="text-base leading-snug font-semibold tracking-tight whitespace-pre-line">
+                    {item.title}
+                  </h3>
+                  {item.desc && (
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {item.desc}
+                    </p>
+                  )}
+                  {item.items.length > 0 && (
+                    <ul className="mt-1 flex flex-col gap-1 border-t border-foreground/6 pt-3 text-xs text-muted-foreground">
+                      {item.items.map((bullet, i) => (
+                        <li key={i} className="font-mono">
+                          · {bullet}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </CardContent>
             </Card>

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { db, Collections } from "@/config/firebaseAdmin";
 import { wrap } from "@/lib/appUtils";
 import { siteConfigSchema, type SiteConfig } from "@tabsircg/schemas/site";
-import type { PageData } from "@tabsircg/schemas/portfolio";
+import { pageDataSchema, type PageData } from "@tabsircg/schemas/portfolio";
 
 const CONFIG_DOC = "blog";
 const CONFIG_DOC_REF = db.collection(Collections.CONFIG).doc(CONFIG_DOC);
@@ -67,36 +67,24 @@ export const updateSiteConfig = wrap(async (patch: Partial<SiteConfig>) => {
 
 const portfolioCatalogSchema = z.object({
   skillCatalog: z.array(z.string()).default([]),
-  clientTypeCatalog: z.array(z.string()).default([]),
 });
 export type PortfolioCatalog = z.infer<typeof portfolioCatalogSchema>;
 
-type PortfolioCatalogField = "skillCatalog" | "clientTypeCatalog";
-
-async function addPortfolioCatalogValue(
-  field: PortfolioCatalogField,
-  value: string,
-) {
-  const trimmed = valueInputSchema.parse(value);
-
-  const existing = (await readPortfolioCatalog())[field];
-  const seen = new Set(existing.map((v) => v.toLowerCase()));
-  if (!seen.has(trimmed.toLowerCase())) existing.push(trimmed);
-  const values = existing.slice().sort((a, b) => a.localeCompare(b));
-
-  await PORTFOLIO_DOC_REF.set({ [field]: values }, { merge: true });
-
-  return { value: trimmed, values };
-}
-
 export async function readPortfolioPageData(): Promise<PageData | null> {
   const snap = await PORTFOLIO_DOC_REF.get();
-  const data = snap.data();
-  return (data?.pageData as PageData | undefined) ?? null;
+  const raw = snap.data()?.pageData;
+  if (!raw) return null;
+  return pageDataSchema.parse(raw);
 }
 
 export async function writePortfolioPageData(data: PageData): Promise<void> {
-  await PORTFOLIO_DOC_REF.set({ pageData: data }, { merge: true });
+  // mergeFields: only the `pageData` field is touched; sibling fields
+  // (skillCatalog) are preserved. The `pageData` object itself is replaced
+  // wholesale — no deep merge — so removed keys do not linger.
+  await PORTFOLIO_DOC_REF.set(
+    { pageData: data },
+    { mergeFields: ["pageData"] },
+  );
 }
 
 export async function readPortfolioCatalog(): Promise<PortfolioCatalog> {
@@ -104,10 +92,15 @@ export async function readPortfolioCatalog(): Promise<PortfolioCatalog> {
   return portfolioCatalogSchema.parse(snap.data() ?? {});
 }
 
-export const addPortfolioSkill = wrap((value: string) =>
-  addPortfolioCatalogValue("skillCatalog", value),
-);
+export const addPortfolioSkill = wrap(async (value: string) => {
+  const trimmed = valueInputSchema.parse(value);
 
-export const addPortfolioClientType = wrap((value: string) =>
-  addPortfolioCatalogValue("clientTypeCatalog", value),
-);
+  const existing = (await readPortfolioCatalog()).skillCatalog;
+  const seen = new Set(existing.map((v) => v.toLowerCase()));
+  if (!seen.has(trimmed.toLowerCase())) existing.push(trimmed);
+  const values = existing.slice().sort((a, b) => a.localeCompare(b));
+
+  await PORTFOLIO_DOC_REF.set({ skillCatalog: values }, { merge: true });
+
+  return { value: trimmed, values };
+});

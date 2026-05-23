@@ -1,17 +1,19 @@
+import type { Project } from "@tabsircg/schemas/portfolio";
+
 import { cn } from "@/lib/utils";
-import { PROJECTS, ROW_STATUS_STYLES } from "./data";
 import { H3 } from "@/components/ui/H2";
+import { ROW_STATUS_STYLES, glyphFor } from "./glyphs";
 
 /* Per-row styles derive from `--i` vs `--work-active` in work.css. */
-export function WorkList() {
+export function WorkList({ projects }: { projects: Project[] }) {
   return (
     <ol
       data-reveal-stagger
       className="flex flex-col list-none border-t border-line"
     >
-      {PROJECTS.map((p, i) => (
+      {projects.map((p, i) => (
         <li
-          key={i}
+          key={p.title + i}
           data-work-row-idx={i}
           tabIndex={0}
           role="button"
@@ -23,7 +25,7 @@ export function WorkList() {
             className="row-glyph font-mono text-[14px] w-5 text-center max-xl:hidden"
             aria-hidden="true"
           >
-            {p.glyph}
+            {glyphFor(p.tag, i)}
           </span>
           <H3 className="row-title" variant="serif">
             {p.title}

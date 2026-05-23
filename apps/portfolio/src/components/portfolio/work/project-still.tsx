@@ -1,12 +1,6 @@
-import type { Project } from "./data";
+import type { Project } from "@tabsircg/schemas/portfolio";
 
-const GLYPH_TINTS: Record<string, { tint: string; tint2: string }> = {
-  "◢": { tint: "oklch(0.34 0.06 38)", tint2: "oklch(0.22 0.02 38)" },
-  "◇": { tint: "oklch(0.32 0.04 80)", tint2: "oklch(0.20 0.015 80)" },
-  "◐": { tint: "oklch(0.30 0.04 140)", tint2: "oklch(0.20 0.012 140)" },
-  "◉": { tint: "oklch(0.30 0.05 210)", tint2: "oklch(0.18 0.015 210)" },
-  "◔": { tint: "oklch(0.30 0.04 320)", tint2: "oklch(0.18 0.015 320)" },
-};
+import { GLYPH_TINTS, glyphFor } from "./glyphs";
 
 export function ProjectStill({
   project,
@@ -15,11 +9,12 @@ export function ProjectStill({
   project: Project;
   idx: number;
 }) {
-  const tints = GLYPH_TINTS[project.glyph];
+  const glyph = glyphFor(project.tag, idx);
+  const tints = GLYPH_TINTS[glyph];
   return (
     <div
       data-work-proj-idx={idx}
-      data-glyph={project.glyph}
+      data-glyph={glyph}
       className="work-still absolute inset-0 flex items-center justify-center"
       style={
         {
@@ -45,11 +40,42 @@ export function ProjectStill({
       >
         {project.title}
       </div>
+      {project.stills.map(
+        (s, j) =>
+          s.url && (
+            <div
+              key={`media-${j}`}
+              style={{ "--i": j } as React.CSSProperties}
+              className="work-still-media absolute inset-0 z-2"
+            >
+              {s.kind === "video" ? (
+                <video
+                  src={s.url}
+                  className="h-full w-full object-cover"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  aria-label={s.alt || s.label}
+                />
+              ) : (
+                <img
+                  src={s.url}
+                  alt={s.alt || s.label}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+            </div>
+          ),
+      )}
       <div
         className="absolute top-[18px] left-[50px] text-[22px] text-accent opacity-70 z-3"
         aria-hidden="true"
       >
-        {project.glyph}
+        {glyph}
       </div>
       {project.stills.map((s, j) => (
         <div
@@ -66,7 +92,7 @@ export function ProjectStill({
       ))}
       {project.stills.map(
         (s, j) =>
-          s.kind === "video" && (
+          s.kind === "video" && !s.url && (
             <div
               key={j}
               style={{ "--i": j } as React.CSSProperties}

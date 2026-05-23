@@ -1,11 +1,16 @@
+import type { Testimonial } from "@tabsircg/schemas/portfolio";
+
 import { BlockQuote } from "../ui/BlockQuote";
 import { H2 } from "../ui/H2";
 import { VoicesPlayer } from "./voices-player";
 
-const VIDEO_URL =
-  "https://media.tabsircg.com/portfolio/testimonials/client-testimonial-ERIC-Postchart.mov";
+export function Voices({
+  testimonial,
+}: {
+  testimonial: Testimonial | undefined;
+}) {
+  if (!testimonial || !testimonial.video) return null;
 
-export function Voices() {
   return (
     <section id="voices" className="page-shell flex flex-col gap-12">
       <span className="margin-note top-[260px]">
@@ -20,24 +25,18 @@ export function Voices() {
           <br />
           own words.
         </H2>
-        <p className="max-w-md">
-          A short walkthrough from Eric at Postchart — the project was a custom
-          AI-featured Facebook Page management system with a bulk scheduler.
-          Press play.
-        </p>
+        <p className="max-w-md">{testimonial.text}</p>
       </header>
 
-      <VoicesPlayer src={VIDEO_URL} />
+      <VoicesPlayer src={testimonial.video} />
 
       <BlockQuote
-        author="Eric Bihr"
-        company="Postchart"
-        period="Mar — Jul 2025"
+        author={testimonial.name}
+        company={testimonial.company}
+        period={testimonial.period}
         className="em-accent"
       >
-        <em>[Placeholder]</em> &nbsp;Drop in the strongest line from
-        Eric&rsquo;s walkthrough here — the one sentence that sells the
-        relationship. .
+        {testimonial.text}
       </BlockQuote>
     </section>
   );

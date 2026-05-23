@@ -64,7 +64,7 @@ export function ActionButtonGroup({
   const openModal = useUIStore.getState().openModal;
 
   return (
-    <div className="absolute top-0 right-0 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+    <div className="absolute top-0 right-0 z-10 opacity-0 group-hover/card:opacity-100 transition-all duration-300 translate-x-2 group-hover/card:translate-x-0">
       {buttons.map((button, idx) => {
         const Icon =
           button.icon ||

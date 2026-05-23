@@ -1,8 +1,7 @@
 import { useRef, useState } from "react";
-import { Image as ImageIcon, Calendar, Plus } from "lucide-react";
+import { Image as ImageIcon, Plus } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { FormField } from "@/components/ui/FormField";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
@@ -21,12 +20,10 @@ interface CredentialDialogProps {
 
 const defaultFormData: PageData["credentials"][number] = {
   title: "",
-  issuer: "",
-  date: "",
-  description: "",
-  link: "",
   image: "",
+  link: "",
   isActive: true,
+  order: 0,
 };
 
 export default function CredentialDialog({ children }: CredentialDialogProps) {
@@ -43,16 +40,11 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
     <PortfolioModalFrame
       trigger={children}
       title="Add credential"
-      description="Certifications, awards, or anything you want to prove."
+      description="Certificate-style asset. Just title + image + optional verify link."
       footer={
         <PortfolioModalActions
           onSubmit={handleSubmit}
-          submitDisabled={
-            !formData.title ||
-            !formData.issuer ||
-            !formData.date ||
-            !formData.description
-          }
+          submitDisabled={!formData.title}
           submitLabel="Add credential"
           updateLabel="Add credential"
           submitIcon={<Plus className="h-3.5 w-3.5" />}
@@ -66,46 +58,6 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
             value={formData.title}
             onChange={(e) =>
               setFormData({ ...formData, title: e.target.value })
-            }
-          />
-        </FormField>
-
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <FormField label="Issuer">
-            <Input
-              placeholder="Amazon Web Services"
-              value={formData.issuer}
-              onChange={(e) =>
-                setFormData({ ...formData, issuer: e.target.value })
-              }
-            />
-          </FormField>
-          <FormField
-            label="Issue date"
-            hint={"e.g. “2024” or “January 2024”"}
-          >
-            <div className="relative">
-              <Input
-                placeholder="2024"
-                value={formData.date}
-                onChange={(e) =>
-                  setFormData({ ...formData, date: e.target.value })
-                }
-              />
-              <Calendar
-                className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/60"
-                aria-hidden="true"
-              />
-            </div>
-          </FormField>
-        </div>
-
-        <FormField label="Description">
-          <Textarea
-            placeholder="Professional certification for AWS development…"
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
             }
           />
         </FormField>
