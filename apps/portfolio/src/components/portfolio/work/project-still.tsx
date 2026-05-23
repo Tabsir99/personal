@@ -1,5 +1,4 @@
 import type { Project } from "@tabsircg/schemas/portfolio";
-
 import { GLYPH_TINTS, glyphFor } from "./glyphs";
 
 export function ProjectStill({
@@ -71,12 +70,7 @@ export function ProjectStill({
             </div>
           ),
       )}
-      <div
-        className="absolute top-[18px] left-[50px] text-[22px] text-accent opacity-70 z-3"
-        aria-hidden="true"
-      >
-        {glyph}
-      </div>
+
       {project.stills.map((s, j) => (
         <div
           key={j}
@@ -92,7 +86,8 @@ export function ProjectStill({
       ))}
       {project.stills.map(
         (s, j) =>
-          s.kind === "video" && !s.url && (
+          s.kind === "video" &&
+          !s.url && (
             <div
               key={j}
               style={{ "--i": j } as React.CSSProperties}

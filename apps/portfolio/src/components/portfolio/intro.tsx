@@ -18,7 +18,7 @@ function IntroRings() {
     rx: 70 + i * 58,
     ry: 50 + i * 42,
     rot: -14 + i * 0.6,
-    opacity: 0.65 - i * 0.025,
+    opacity: 0.25,
     delay: 0.04 + i * 0.05,
   }));
   return (

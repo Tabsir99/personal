@@ -1,213 +1,169 @@
 "use client";
 import { useRef, useState } from "react";
-import { cn } from "@/lib/utils";
 
-/* preload="metadata" + seek 1.8s in skips a black opening for the thumbnail. */
-
-const DURATION_GUESS = 73;
-
-const BASE_CONTROL_BTN =
-  "font-mono tracking-widest uppercase text-cream-2 px-2.5 py-1.5 border border-line rounded-xs bg-transparent transition-all duration-250 inline-flex items-center justify-center hover:border-accent hover:text-accent";
-
-function ControlButton({
-  onClick,
-  ariaLabel,
-  className,
-  children,
-}: {
-  onClick: () => void;
-  ariaLabel: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      className={cn(BASE_CONTROL_BTN, className)}
-      onClick={onClick}
-      aria-label={ariaLabel}
-    >
-      {children}
-    </button>
-  );
-}
-
-function fmtTime(s: number) {
+const fmt = (s: number) => {
   if (!isFinite(s) || s < 0) s = 0;
-  const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60);
-  return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
-}
+  const m = String(Math.floor(s / 60)).padStart(2, "0");
+  const sec = String(Math.floor(s % 60)).padStart(2, "0");
+  return `${m}:${sec}`;
+};
 
 export function VoicesPlayer({ src }: { src: string }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const scrubRef = useRef<HTMLDivElement>(null);
+  const v = useRef<HTMLVideoElement>(null);
+  const seek = useRef<HTMLInputElement>(null);
+  const time = useRef<HTMLSpanElement>(null);
+
   const [started, setStarted] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
-  const [time, setTime] = useState(0);
-  const [duration, setDuration] = useState(DURATION_GUESS);
+  const [dur, setDur] = useState(0);
 
-  function start() {
-    const v = videoRef.current;
-    if (v) {
-      v.currentTime = 0;
-      v.play().catch(() => {
-        v.muted = true;
+  const toggle = () =>
+    v.current?.paused ? v.current.play() : v.current?.pause();
+
+  const start = () => {
+    const el = v.current;
+    if (el) {
+      el.currentTime = 0;
+      el.play().catch(() => {
+        el.muted = true;
         setMuted(true);
-        v.play().catch(() => {});
+        el.play().catch(() => {});
       });
     }
     setStarted(true);
-  }
-  function toggle() {
-    const v = videoRef.current;
-    if (!v) return;
-    if (v.paused) v.play().catch(() => {});
-    else v.pause();
-  }
-  function toggleMute() {
-    const v = videoRef.current;
-    if (!v) return;
-    v.muted = !v.muted;
-    setMuted(v.muted);
-  }
-  function seekFromEvent(e: React.MouseEvent<HTMLDivElement>) {
-    const v = videoRef.current;
-    const el = scrubRef.current;
-    if (!v || !el || !duration) return;
-    const r = el.getBoundingClientRect();
-    const p = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-    v.currentTime = p * duration;
-    setTime(v.currentTime);
-  }
-  function seekBy(deltaSec: number) {
-    const v = videoRef.current;
-    if (!v || !duration) return;
-    v.currentTime = Math.min(duration, Math.max(0, v.currentTime + deltaSec));
-    setTime(v.currentTime);
-  }
-  function onScrubKey(e: React.KeyboardEvent<HTMLDivElement>) {
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      seekBy(-5);
-    } else if (e.key === "ArrowRight") {
-      e.preventDefault();
-      seekBy(5);
-    } else if (e.key === "Home") {
-      e.preventDefault();
-      const v = videoRef.current;
-      if (v) {
-        v.currentTime = 0;
-        setTime(0);
-      }
-    } else if (e.key === "End") {
-      e.preventDefault();
-      const v = videoRef.current;
-      if (v && duration) {
-        v.currentTime = duration;
-        setTime(duration);
-      }
-    }
-  }
-  function onLoaded(e: React.SyntheticEvent<HTMLVideoElement>) {
-    const v = e.currentTarget;
-    setDuration(v.duration || DURATION_GUESS);
-    if (!started && v.duration > 2) v.currentTime = 1.8;
-  }
-
-  const pct = duration > 0 ? (time / duration) * 100 : 0;
+  };
 
   return (
-    <>
-      <div className="voices-frame relative w-full aspect-video bg-black border border-line rounded-sm overflow-hidden origin-[center_60%] transition-[border-color] duration-500 will-change-transform hover:border-accent/45">
-        <video
-          ref={videoRef}
-          className="absolute inset-0 w-full h-full object-cover bg-black cursor-pointer"
-          src={src}
-          playsInline
-          preload="metadata"
-          onClick={started ? toggle : start}
-          onLoadedMetadata={onLoaded}
-          onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
-          onPlay={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
-          onEnded={() => setPlaying(false)}
-        />
+    <div className="group relative w-full aspect-video bg-black border border-line rounded-sm overflow-hidden">
+      <video
+        ref={v}
+        src={src}
+        playsInline
+        preload="metadata"
+        className="absolute inset-0 w-full h-full object-cover cursor-pointer"
+        onClick={toggle}
+        onLoadedMetadata={(e) => {
+          setDur(e.currentTarget.duration);
+          if (!started && e.currentTarget.duration > 2)
+            e.currentTarget.currentTime = 1.8;
+        }}
+        onTimeUpdate={(e) => {
+          const ct = e.currentTarget.currentTime;
+          if (seek.current) {
+            seek.current.value = String(ct);
+            seek.current.style.setProperty(
+              "--p",
+              `${(ct / (dur || 1)) * 100}%`,
+            );
+          }
+          if (time.current) time.current.textContent = fmt(ct);
+        }}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+      />
 
-        {!started && (
-          <button
-            className="group absolute inset-0 border-0 p-0 m-0 bg-transparent cursor-pointer block text-left z-2"
-            onClick={start}
-            aria-label="Play testimonial"
-          >
-            <div
-              className="absolute inset-0 [background:linear-gradient(180deg,color-mix(in_oklab,black_18%,transparent)_0%,color-mix(in_oklab,black_45%,transparent)_100%),radial-gradient(ellipse_at_center,color-mix(in_oklab,var(--color-ink)_0%,transparent)_35%,color-mix(in_oklab,var(--color-ink)_55%,transparent)_100%)]"
-              aria-hidden="true"
-            ></div>
-            <div className="absolute left-[clamp(20px,2.5vw,40px)] bottom-[clamp(20px,2.5vw,36px)] font-serif italic text-[clamp(18px,1.6vw,24px)] text-cream tracking-[-0.005em] leading-none [text-shadow:0_1px_12px_color-mix(in_oklab,black_50%,transparent)]">
-              Eric &middot; Postchart
-            </div>
-            <div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center w-[clamp(72px,7vw,104px)] h-[clamp(72px,7vw,104px)] rounded-full bg-accent/95 text-ink transition-[scale,background] duration-300 ease-soft [box-shadow:0_0_0_1px_color-mix(in_oklab,var(--color-accent)_50%,transparent),0_16px_32px_-10px_color-mix(in_oklab,black_60%,transparent)] group-hover:scale-[1.06] group-hover:bg-accent"
-              aria-hidden="true"
+      {!started && (
+        <button
+          onClick={start}
+          aria-label="Play testimonial"
+          className="group/p absolute inset-0 z-20 grid place-items-center cursor-pointer"
+        >
+          <div className="absolute inset-0 bg-linear-to-t from-ink/60 to-transparent" />
+          <span className="grid size-16 place-items-center rounded-full border border-cream/40 text-cream transition-colors group-hover/p:border-accent group-hover/p:text-accent">
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="ml-0.5 size-5"
             >
-              <span className="text-[clamp(22px,2vw,30px)] leading-none ml-1">
-                ▶
-              </span>
-            </div>
-            <div className="absolute right-[clamp(20px,2.5vw,40px)] bottom-[clamp(22px,2.5vw,38px)] font-mono text-xs tracking-widest text-cream-2 [text-shadow:0_1px_12px_color-mix(in_oklab,black_50%,transparent)]">
-              01:13
-            </div>
-          </button>
-        )}
-      </div>
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </span>
+          <span className="absolute left-6 bottom-5 font-serif italic text-lg text-cream/90">
+            Eric &middot; Postchart
+          </span>
+        </button>
+      )}
 
       {started && (
-        <div className="flex items-center gap-4 px-4 py-3 mt-3.5 border border-line bg-ink-2/60 rounded-[3px] opacity-0 animate-fade-in animation-duration-[400ms] max-xl:flex-wrap max-xl:gap-2.5 max-xl:p-2.5">
-          <ControlButton
+        <div
+          className={`absolute inset-x-0 bottom-0 z-10 flex items-center gap-3 px-4 py-3 bg-linear-to-t from-ink/80 to-transparent transition-opacity ${
+            playing
+              ? "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+              : "opacity-100"
+          }`}
+        >
+          <button
             onClick={toggle}
-            ariaLabel={playing ? "Pause" : "Play"}
-            className="text-xs min-w-9"
+            aria-label={playing ? "Pause" : "Play"}
+            className="shrink-0 text-cream-2 transition-colors hover:text-accent"
           >
-            {playing ? "❚❚" : "▶"}
-          </ControlButton>
-          <div className="inline-flex items-baseline gap-1 font-mono text-xs tracking-widest text-cream min-w-24 whitespace-nowrap">
-            <span>{fmtTime(time)}</span>
-            <span className="text-line">/</span>
-            <span className="text-muted">{fmtTime(duration)}</span>
-          </div>
-          <div
-            ref={scrubRef}
-            className="group/scrub relative flex-1 h-[26px] cursor-pointer flex items-center max-xl:-order-1 max-xl:basis-full focus-visible:outline-2 focus-visible:outline-accent"
-            onClick={seekFromEvent}
-            onKeyDown={onScrubKey}
-            role="slider"
-            tabIndex={0}
-            aria-label="Seek video"
-            aria-valuemin={0}
-            aria-valuemax={duration}
-            aria-valuenow={time}
-            aria-valuetext={fmtTime(time)}
+            <svg viewBox="0 0 24 24" fill="currentColor" className="size-4">
+              {playing ? (
+                <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
+              ) : (
+                <path d="M8 5v14l11-7z" />
+              )}
+            </svg>
+          </button>
+
+          <span
+            ref={time}
+            className="shrink-0 font-mono text-[11px] tabular-nums text-cream-2"
           >
-            <div className="w-full h-0.5 bg-line rounded-[1px]"></div>
-            <div
-              className="absolute left-0 top-1/2 h-0.5 bg-accent -translate-y-1/2 pointer-events-none"
-              style={{ width: `${pct}%` }}
-            ></div>
-            <div
-              className="absolute top-1/2 w-2.5 h-2.5 rounded-full bg-phosphor -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-150 group-hover/scrub:scale-[1.3]"
-              style={{ left: `${pct}%` }}
-            ></div>
-          </div>
-          <ControlButton
-            onClick={toggleMute}
-            ariaLabel={muted ? "Unmute" : "Mute"}
-            className="text-xs min-w-16"
+            00:00
+          </span>
+
+          <input
+            ref={seek}
+            type="range"
+            min={0}
+            max={dur || 0}
+            step="any"
+            defaultValue={0}
+            aria-label="Seek"
+            onChange={(e) => {
+              if (v.current) v.current.currentTime = +e.target.value;
+            }}
+            className="flex-1 voices-seek"
+          />
+
+          <span className="shrink-0 font-mono text-[11px] tabular-nums">
+            {fmt(dur)}
+          </span>
+
+          <button
+            onClick={() => {
+              if (!v.current) return;
+              v.current.muted = !v.current.muted;
+              setMuted(v.current.muted);
+            }}
+            aria-label={muted ? "Unmute" : "Mute"}
+            className="shrink-0 text-cream-2 transition-colors hover:text-accent"
           >
-            {muted ? "MUTED" : "AUDIO"}
-          </ControlButton>
+            <svg viewBox="0 0 24 24" className="size-4">
+              <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
+              {muted ? (
+                <path
+                  d="M16 9.5l5 5m0-5l-5 5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              ) : (
+                <path
+                  d="M16 9.5a3.5 3.5 0 010 5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              )}
+            </svg>
+          </button>
         </div>
       )}
-    </>
+    </div>
   );
 }

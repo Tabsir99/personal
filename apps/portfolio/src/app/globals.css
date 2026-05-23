@@ -6,6 +6,7 @@
 @import "../components/portfolio/styles/terminal.css";
 @import "../components/portfolio/styles/services.css";
 @import "../components/portfolio/styles/work.css";
+@import "../components/portfolio/styles/player.css";
 
 /* Loads last so stage-driven rules win. */
 @import "../components/portfolio/styles/intro.css";
@@ -297,7 +298,7 @@ html {
     line-height: 1.35;
     max-width: 160px;
     pointer-events: none;
-    right: 32px;
+    right: -32px;
     text-align: right;
     z-index: 5;
   }

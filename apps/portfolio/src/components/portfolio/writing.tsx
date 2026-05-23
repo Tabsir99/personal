@@ -14,7 +14,7 @@ export function Writing({ posts }: { posts: PostMeta[] }) {
           from the keyboard.
         </H2>
         <NavLink href="/blog" underline>
-          All writing ↗
+          All writing
         </NavLink>
       </header>
 

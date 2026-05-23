@@ -1,10 +1,6 @@
 import type { Service } from "@tabsircg/schemas/portfolio";
-
 import { H2, H3 } from "@/components/ui/H2";
 import { ServiceVisual } from "./service-visual";
-
-/* 400vh wrap with data-pin-steps="<count>"; scroll-island writes --pin-sub.
-   All cross-fades read those signals via services.css. */
 
 export function Services({ services }: { services: Service[] }) {
   if (services.length === 0) return null;
@@ -13,7 +9,7 @@ export function Services({ services }: { services: Service[] }) {
     <section id="services">
       <div
         className="relative"
-        style={{ height: `${services.length * 100}vh` }}
+        style={{ height: `${services.length * 150}vh` }}
         data-pin-steps={services.length}
         data-pin-step="0"
       >
@@ -70,9 +66,6 @@ export function Services({ services }: { services: Service[] }) {
                   style={{ "--i": i } as React.CSSProperties}
                   className="svc-frame absolute inset-0 flex flex-col justify-end p-7"
                 >
-                  <div className="absolute top-7 right-7 font-mono text-xs tracking-widest text-muted">
-                    {s.frameNum}
-                  </div>
                   <ServiceVisual idx={i} />
                   <div className="relative z-2">
                     <div className="mb-2.5 font-mono text-xs uppercase tracking-widest text-accent">
