@@ -1,14 +1,12 @@
-// `id` matches the rendered `<section id>`. `inNav` filters the header pill.
+// Header nav metadata. `id` must match a rendered `<section id>` / `<footer id>`.
+// Sections are discovered from the DOM by scroll-island; this list is only the
+// subset surfaced as nav pills.
 export const SECTIONS = [
-  { id: "hero", label: "Index", inNav: false },
-  { id: "about", label: "About", inNav: true },
-  { id: "stack", label: "Stack", inNav: true },
-  { id: "services", label: "Services", inNav: false },
-  { id: "work", label: "Work", inNav: true },
-  { id: "voices", label: "Voices", inNav: true },
-  { id: "writing", label: "Writing", inNav: true },
-  { id: "now", label: "Now", inNav: true },
-  { id: "contact", label: "Contact", inNav: false },
+  { id: "about", label: "About" },
+  { id: "stack", label: "Stack" },
+  { id: "work", label: "Work" },
+  { id: "voices", label: "Voices" },
+  { id: "writing", label: "Writing" },
 ] as const;
 
 export type SectionId = (typeof SECTIONS)[number]["id"];

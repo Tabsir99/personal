@@ -1,6 +1,5 @@
 import { Atmosphere } from "@/components/portfolio/atmosphere";
 import { CursorGlow } from "@/components/portfolio/cursor-glow";
-import { Rail } from "@/components/portfolio/rail";
 import { Hero } from "@/components/portfolio/hero";
 import { Endorsement } from "@/components/portfolio/endorsement";
 import { About } from "@/components/portfolio/about";
@@ -34,14 +33,11 @@ export default async function Home() {
     (t) => t.isActive && t.displaySlot === "voices",
   );
 
-  console.log(pageData);
-
   return (
     <>
       <Intro />
       <Atmosphere />
       <CursorGlow />
-      <Rail />
 
       <Header />
 

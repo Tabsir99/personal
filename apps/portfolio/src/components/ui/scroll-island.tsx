@@ -1,54 +1,58 @@
 "use client";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import {
-  SECTIONS,
-  BACKGROUND_PLANES,
-} from "@/components/portfolio/sections-data";
+import { BACKGROUND_PLANES } from "@/components/portfolio/sections-data";
 
-interface SectionRect {
+// Sections are discovered from the DOM. Covers: page sections (`<section id>`),
+// the contact footer (`<footer id="contact">`), and blog post headings rendered
+// by DocRenderer under `.open-notion-doc`.
+const SECTION_SELECTOR =
+  "section[id], footer[id], .open-notion-doc :is(h2, h3, h4)[id]";
+
+// Match `scroll-padding-top: 20%` in globals.css so clicked anchors land on a
+// section that's immediately active.
+const ACTIVE_THRESHOLD = 0.2;
+
+interface Section {
   id: string;
   top: number;
-  height: number;
 }
 
-interface AppVisualState {
+interface State {
   vh: number;
   pinTop: number;
   pinHeight: number;
   pinSteps: number;
-  sections: SectionRect[];
+  sections: Section[];
   cur: string;
+  lastStep: number;
   raf: number;
-  targetY: number;
-  currentY: number;
-  smoothing: boolean;
 }
-
-// Lerp factor — lower = slower/silkier.
-const LERP = 0.025;
-// Below this pixel delta we snap the animation closed (higher = shorter trail).
-const SNAP = 1;
 
 export function ScrollIsland() {
   const path = usePathname();
   useEffect(() => {
     const root = document.documentElement;
-    const bar = document.getElementById("rail-bar");
-    const dot = document.getElementById("rail-dot");
     const pin = document.querySelector<HTMLElement>("[data-pin-steps]");
+    const navNodes = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-nav]"),
+    );
+    const planes: { el: HTMLElement; factor: number }[] = [];
 
-    const state: AppVisualState = {
+    for (const [id, factor] of Object.entries(BACKGROUND_PLANES)) {
+      const el = document.getElementById(id);
+      if (el) planes.push({ el, factor });
+    }
+
+    const state: State = {
       vh: innerHeight,
       pinTop: 0,
       pinHeight: 0,
-      pinSteps: parseInt(pin?.dataset.pinSteps ?? "4"),
+      pinSteps: Number(pin?.dataset.pinSteps ?? "4"),
       sections: [],
       cur: "",
+      lastStep: -1,
       raf: 0,
-      targetY: scrollY,
-      currentY: scrollY,
-      smoothing: false,
     };
 
     const ioReveal = new IntersectionObserver(
@@ -62,7 +66,13 @@ export function ScrollIsland() {
       { threshold: 0.4, rootMargin: "0px 0px -10% 0px" },
     );
 
-    const ro = new ResizeObserver(() => measure(state, pin));
+    let measureRaf = 0;
+    const ro = new ResizeObserver(() => {
+      measureRaf ||= requestAnimationFrame(() => {
+        measureRaf = 0;
+        measure();
+      });
+    });
     ro.observe(document.body);
 
     document
@@ -71,87 +81,63 @@ export function ScrollIsland() {
       )
       .forEach((el) => ioReveal.observe(el));
 
-    measure(state, pin);
-    document.fonts?.ready.then(() => measure(state, pin)).catch(() => {});
+    document.fonts?.ready.then(() => measure()).catch(() => {});
+
+    function measure() {
+      state.vh = innerHeight;
+      const y = scrollY;
+
+      if (pin) {
+        const r = pin.getBoundingClientRect();
+        state.pinTop = r.top + y;
+        state.pinHeight = r.height;
+      }
+
+      state.sections = [];
+      for (const el of document.querySelectorAll<HTMLElement>(
+        SECTION_SELECTOR,
+      )) {
+        state.sections.push({
+          id: el.id,
+          top: el.getBoundingClientRect().top + y,
+        });
+      }
+      state.sections.sort((a, b) => a.top - b.top);
+    }
 
     function tick() {
       state.raf = 0;
-      if (state.smoothing) {
-        const diff = state.targetY - state.currentY;
-        if (Math.abs(diff) < SNAP) {
-          state.currentY = state.targetY;
-          state.smoothing = false;
-          window.scrollTo({ top: state.currentY, behavior: "instant" });
-        } else {
-          state.currentY += diff * LERP;
-          state.raf = requestAnimationFrame(tick);
-          window.scrollTo({ top: state.currentY, behavior: "instant" });
-        }
-      }
-      const y = state.smoothing ? state.currentY : scrollY;
+      const y = scrollY;
 
-      if (path === "/")
-        Object.entries(BACKGROUND_PLANES).forEach(
-          ([plane, factor]) =>
-            (document.getElementById(plane)!.style.transform =
-              `translate3d(0,${y * factor}px,0)`),
-        );
-
-      // Active section + rail progress, both keyed on viewport top (y). The
-      // active section is the one whose [top, top+height) contains y; intra
-      // hits 1 exactly when the next section becomes active, so the dot
-      // moves smoothly across boundaries.
-      const N = state.sections.length;
-      let curIdx = -1;
-      for (let k = 0; k < N; k++) {
-        const next = state.sections[k + 1];
-        if (state.sections[k].top <= y && (!next || next.top > y)) {
-          curIdx = k;
-          break;
-        }
+      for (const { el, factor } of planes) {
+        el.style.transform = `translate3d(0,${y * factor}px,0)`;
       }
-      if (curIdx >= 0) {
-        const s = state.sections[curIdx];
-        if (s.id !== state.cur) {
-          state.cur = s.id;
-          root.dataset.activeSection = s.id;
-          document
-            .querySelectorAll<HTMLElement>("[data-nav]")
-            .forEach((n) =>
-              n.classList.toggle("is-active", n.dataset.nav === s.id),
-            );
-        }
-        if (N > 1) {
-          const intra = Math.min(
-            1,
-            Math.max(0, (y - s.top) / Math.max(1, s.height)),
-          );
-          const rp = Math.min(1, (curIdx + intra) / (N - 1));
-          if (bar) bar.style.transform = `scaleY(${rp})`;
-          if (dot) dot.style.transform = `translateY(${rp * 100}%)`;
+
+      const padTop = state.vh * ACTIVE_THRESHOLD;
+      const s = state.sections.findLast((sec) => sec.top - padTop <= y);
+      if (s && s.id !== state.cur) {
+        state.cur = s.id;
+        root.dataset.activeSection = s.id;
+        for (const n of navNodes) {
+          n.classList.toggle("is-active", n.dataset.nav === s.id);
         }
       }
 
-      // Pin uses absolute doc top so reload-mid-pin doesn't clamp p to 1.
-      if (state.pinHeight > state.vh) {
+      if (pin && state.pinHeight > state.vh) {
         const p = Math.min(
           1,
           Math.max(0, (y - state.pinTop) / (state.pinHeight - state.vh)),
         );
         const i = Math.min(state.pinSteps - 1, (p * state.pinSteps) | 0);
-        pin?.style.setProperty("--pin-step", "" + i);
-        pin?.style.setProperty(
-          "--pin-sub",
-          (p * state.pinSteps - i).toFixed(3),
-        );
+        if (i !== state.lastStep) {
+          state.lastStep = i;
+          pin.style.setProperty("--pin-step", String(i));
+        }
+        pin.style.setProperty("--pin-sub", (p * state.pinSteps - i).toFixed(3));
       }
     }
 
     const onScroll = () => {
-      if (!state.smoothing) {
-        state.targetY = scrollY;
-        state.currentY = scrollY;
-      }
       state.raf ||= requestAnimationFrame(tick);
     };
 
@@ -162,37 +148,8 @@ export function ScrollIsland() {
       ro.disconnect();
       removeEventListener("scroll", onScroll);
       if (state.raf) cancelAnimationFrame(state.raf);
+      if (measureRaf) cancelAnimationFrame(measureRaf);
     };
   }, [path]);
   return null;
-}
-
-function measure(state: AppVisualState, pin: HTMLElement | null) {
-  state.vh = innerHeight;
-  const y = scrollY;
-
-  if (pin) {
-    const r = pin.getBoundingClientRect();
-    state.pinTop = r.top + y;
-    state.pinHeight = r.height;
-  }
-
-  state.sections = [];
-  for (const { id } of SECTIONS) {
-    const el = document.getElementById(id);
-    if (el)
-      state.sections.push({
-        id,
-        top: el.getBoundingClientRect().top + y,
-        height: el.offsetHeight,
-      });
-  }
-
-  // Equal-spaced ticks; ticks without a corresponding section are hidden.
-  const N = state.sections.length;
-  document.querySelectorAll<HTMLElement>("[data-rail-tick]").forEach((t) => {
-    const i = state.sections.findIndex((s) => s.id === (t.dataset.nav ?? ""));
-    t.style.display = i >= 0 ? "" : "none";
-    if (i >= 0) t.style.top = `${(i / Math.max(1, N - 1)) * 100}%`;
-  });
 }

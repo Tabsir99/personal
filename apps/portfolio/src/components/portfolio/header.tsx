@@ -3,8 +3,6 @@ import { SECTIONS } from "./sections-data";
 import Image from "next/image";
 
 export function Header() {
-  const navItems = SECTIONS.filter((s) => s.inNav);
-
   return (
     <header
       className="fixed top-[20px] inset-x-0 w-fit mx-auto z-100 flex items-center -translate-y-2 gap-5 rounded-full border border-line py-[6px] pr-[8px] pl-[14px] whitespace-nowrap opacity-0 
@@ -25,7 +23,7 @@ export function Header() {
         aria-label="Sections"
         className="flex gap-5 border-l border-line pr-1 pl-2 max-xl:hidden"
       >
-        {navItems.map((it) => (
+        {SECTIONS.map((it) => (
           <NavLink key={it.id} href={`#${it.id}`} data-nav={it.id}>
             {it.label}
           </NavLink>

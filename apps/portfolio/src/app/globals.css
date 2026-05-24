@@ -34,7 +34,6 @@ html {
 
   --text-xxs: 10px;
 
-  --rail-x: 56px;
   --rail-gutter: 180px;
   --gutter: 96px;
   --max-w: 1600px;
@@ -375,7 +374,6 @@ html {
   :root {
     --gutter: 56px;
     --rail-gutter: 120px;
-    --rail-x: 32px;
   }
 }
 
