@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
 const fmt = (s: number) => {
   if (!isFinite(s) || s < 0) s = 0;
@@ -8,7 +9,15 @@ const fmt = (s: number) => {
   return `${m}:${sec}`;
 };
 
-export function VoicesPlayer({ src }: { src: string }) {
+export function VoicesPlayer({
+  src,
+  label,
+  className,
+}: {
+  src: string;
+  label?: string;
+  className?: string;
+}) {
   const v = useRef<HTMLVideoElement>(null);
   const seek = useRef<HTMLInputElement>(null);
   const time = useRef<HTMLSpanElement>(null);
@@ -35,7 +44,12 @@ export function VoicesPlayer({ src }: { src: string }) {
   };
 
   return (
-    <div className="group relative w-full aspect-video bg-black border border-line rounded-sm overflow-hidden">
+    <div
+      className={cn(
+        "group relative w-full h-full bg-black border border-line rounded-sm overflow-hidden",
+        className,
+      )}
+    >
       <video
         ref={v}
         src={src}
@@ -66,7 +80,7 @@ export function VoicesPlayer({ src }: { src: string }) {
       {!started && (
         <button
           onClick={start}
-          aria-label="Play testimonial"
+          aria-label={label ? `Play ${label}` : "Play video"}
           className="group/p absolute inset-0 z-20 grid place-items-center cursor-pointer"
         >
           <div className="absolute inset-0 bg-linear-to-t from-ink/60 to-transparent" />
@@ -79,9 +93,11 @@ export function VoicesPlayer({ src }: { src: string }) {
               <path d="M8 5v14l11-7z" />
             </svg>
           </span>
-          <span className="absolute left-6 bottom-5 font-serif italic text-lg text-cream/90">
-            Eric &middot; Postchart
-          </span>
+          {label && (
+            <span className="absolute left-6 bottom-5 font-serif italic text-lg text-cream/90">
+              {label}
+            </span>
+          )}
         </button>
       )}
 

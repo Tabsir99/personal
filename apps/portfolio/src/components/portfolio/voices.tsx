@@ -28,7 +28,15 @@ export function Voices({
         <p className="max-w-md">{testimonial.text}</p>
       </header>
 
-      <VoicesPlayer src={testimonial.video} />
+      <VoicesPlayer
+        src={testimonial.video}
+        label={
+          testimonial.company
+            ? `${testimonial.name} · ${testimonial.company}`
+            : testimonial.name
+        }
+        className="aspect-video h-auto"
+      />
 
       <BlockQuote
         author={testimonial.name}

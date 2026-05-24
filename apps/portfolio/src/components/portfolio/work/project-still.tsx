@@ -1,5 +1,6 @@
 import type { Project } from "@tabsircg/schemas/portfolio";
 import { GLYPH_TINTS, glyphFor } from "./glyphs";
+import { VoicesPlayer } from "../voices-player";
 
 export function ProjectStill({
   project,
@@ -48,15 +49,9 @@ export function ProjectStill({
               className="work-still-media absolute inset-0 z-2"
             >
               {s.kind === "video" ? (
-                <video
+                <VoicesPlayer
                   src={s.url}
-                  className="h-full w-full object-cover"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  aria-label={s.alt || s.label}
+                  className="border-0 rounded-none"
                 />
               ) : (
                 <img
