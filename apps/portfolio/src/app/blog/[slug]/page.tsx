@@ -11,6 +11,7 @@ import ScoreMeter from "@/components/Blog/post/ScoreMeter";
 import Share from "@/components/Blog/post/Share";
 import BlogPostJsonLd from "@/components/Blog/post/BlogPostJsonLd";
 import Script from "next/script";
+import TocIsland from "@/components/Blog/post/TocIsland";
 
 type RouteParams = Promise<{ slug: string }>;
 
@@ -93,6 +94,8 @@ export default async function PostPage({ params }: { params: RouteParams }) {
           </div>
         </aside>
       </div>
+
+      <TocIsland />
     </article>
   );
 }

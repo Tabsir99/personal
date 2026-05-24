@@ -57,7 +57,7 @@ export default function Toc({ items }: { items: TocItem[] }) {
           // on this page
         </H3>
 
-        <ul className="list-none m-0 p-0 flex flex-col gap-1">
+        <ul className="list-none m-0 p-0 flex flex-col gap-1" id="toc-list">
           {renderItems(items)}
         </ul>
       </nav>

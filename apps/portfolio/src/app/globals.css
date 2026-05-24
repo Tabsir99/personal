@@ -13,7 +13,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 20%;
+  scroll-padding-top: calc(20% - 2px);
 }
 
 @theme {
