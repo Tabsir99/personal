@@ -11,7 +11,6 @@ export function Services({ services }: { services: Service[] }) {
         className="relative"
         style={{ height: `${services.length * 150}vh` }}
         data-pin-steps={services.length}
-        data-pin-step="0"
       >
         <div className="sticky top-0 flex h-screen items-center overflow-hidden">
           <div className="page-shell w-full grid grid-cols-[0.85fr_1fr] items-center gap-16 max-xl:grid-cols-[1fr] max-xl:gap-10">

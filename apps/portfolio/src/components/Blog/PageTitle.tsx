@@ -1,4 +1,3 @@
-import { H1 } from "@/components/ui/H2";
 import { Breadcrumb } from "./Breadcrumb";
 
 export default function PageTitle({
@@ -11,13 +10,11 @@ export default function PageTitle({
   return (
     <header className="relative pt-2 pb-14 mb-2 after:content-[''] after:block after:h-px after:bg-line after:mt-14 max-sm:pb-8 max-sm:after:mt-8">
       <Breadcrumb
-        className="mb-7"
-        crumbs={[
-          { label: "tabsircg.com", href: "/" },
-          { label: "blog" },
-        ]}
+        className="mb-16"
+        crumbs={[{ label: "tabsircg.com", href: "/" }, { label: "blog" }]}
       />
-      <H1 size="page">
+
+      <h1 className="text-[clamp(40px,18vw,360px)] leading-[0.85] tracking-tighter font-bold font-serif">
         <span
           className="inline-block opacity-0 translate-y-10 animate-rise-in"
           style={{ animationDelay: "80ms" }}
@@ -27,7 +24,7 @@ export default function PageTitle({
             .
           </span>
         </span>
-      </H1>
+      </h1>
       <p
         className="text-[clamp(18px,1.6vw,22px)] leading-[1.45] text-cream-2 max-w-[56ch] mt-7 mb-0 font-light opacity-0 translate-y-5 animate-rise-in"
         style={{ animationDelay: "320ms" }}

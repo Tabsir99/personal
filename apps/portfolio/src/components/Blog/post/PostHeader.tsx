@@ -1,5 +1,4 @@
 import { KIND_LABEL, formatDate, type PostMeta } from "@/lib/posts";
-import { H1 } from "@/components/ui/H2";
 import { Breadcrumb } from "../Breadcrumb";
 import { TagPill } from "../TagPill";
 
@@ -60,7 +59,9 @@ export default function PostHeader({ post }: { post: PostMeta }) {
         </time>
       </div>
 
-      <H1 className="mb-6 max-sm:mb-[18px]">{post.title}</H1>
+      <h1 className="text-[clamp(40px,7vw,160px)] leading-[1.1] tracking-tighter font-serif mb-6">
+        {post.title}
+      </h1>
 
       <p className="text-[clamp(18px,1.6vw,22px)] leading-[1.45] text-cream-2 max-w-[56ch] m-0 mb-9 font-light text-pretty max-sm:mb-6">
         {post.dek}

@@ -3,25 +3,6 @@ import { HTMLAttributes } from "react";
 
 type HeadingBase = HTMLAttributes<HTMLElement>;
 
-type H1Size = "post" | "page";
-
-export const H1 = ({
-  size = "post",
-  className,
-  ...props
-}: HeadingBase & { size?: H1Size }) => (
-  <h1
-    {...props}
-    className={cn(
-      "m-0 font-serif italic text-cream text-balance",
-      size === "page"
-        ? "leading-[0.85] tracking-[-0.055em] text-[clamp(80px,12vw,200px)]"
-        : "leading-[0.95] tracking-[-0.035em] text-[clamp(40px,6vw,80px)]",
-      className,
-    )}
-  />
-);
-
 type H2Variant = "section" | "editorial";
 
 export const H2 = ({

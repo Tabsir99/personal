@@ -53,16 +53,10 @@ export default function Toc({ items }: { items: TocItem[] }) {
       </details>
 
       <nav className="relative text-sm leading-[1.45] pl-[18px] max-xl:hidden">
-        <H3 variant="widget" className="mb-4">// on this page</H3>
-        <div
-          className="absolute left-0 top-8 bottom-0 w-0.5 bg-cream/8 rounded-xs overflow-hidden"
-          aria-hidden="true"
-        >
-          <span
-            className="block w-full bg-accent rounded-xs shadow-[0_0_8px_color-mix(in_srgb,var(--color-accent)_50%,transparent)] transition-[height] duration-300 ease-out"
-            style={{ height: "calc(var(--nav-progress, 0) * 1%)" }}
-          />
-        </div>
+        <H3 variant="widget" className="mb-4">
+          // on this page
+        </H3>
+
         <ul className="list-none m-0 p-0 flex flex-col gap-1">
           {renderItems(items)}
         </ul>
