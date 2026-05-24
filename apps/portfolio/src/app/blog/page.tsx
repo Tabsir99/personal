@@ -56,7 +56,7 @@ export default async function BlogIndexPage({
     landing?.heroTagline || "Field notes from a software engineer.";
 
   return (
-    <div className="page-shell pt-40 pb-20">
+    <div className="page-shell pb-20">
       <PageTitle heading={heading} tagline={tagline} />
       <div className="flex gap-20">
         {featured && <FeaturedCard post={featured} />}

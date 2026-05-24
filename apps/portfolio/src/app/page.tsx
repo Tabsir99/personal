@@ -12,6 +12,7 @@ import { Writing } from "@/components/portfolio/writing";
 import { getPageData } from "@/lib/pageData";
 import { getRecentBlogs } from "@/lib/posts";
 import { Intro } from "@/components/portfolio/intro";
+import { Header } from "@/components/portfolio/header";
 
 export default async function Home() {
   const [pageData, recent] = await Promise.all([
@@ -33,12 +34,16 @@ export default async function Home() {
     (t) => t.isActive && t.displaySlot === "voices",
   );
 
+  console.log(pageData);
+
   return (
     <>
       <Intro />
       <Atmosphere />
       <CursorGlow />
       <Rail />
+
+      <Header />
 
       <Hero />
       <Endorsement testimonial={endorsement} />

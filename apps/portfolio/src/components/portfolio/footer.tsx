@@ -28,7 +28,7 @@ const SERVICES_OFFERED = [
 
 export function Footer() {
   return (
-    <footer id="contact" className="page-shell flex flex-col gap-20">
+    <footer id="contact" className="page-shell flex flex-col gap-20 mb-0 pb-2">
       <H2
         data-reveal
         className="em-accent text-[clamp(6rem,12vw,13rem)] leading-[0.88]"

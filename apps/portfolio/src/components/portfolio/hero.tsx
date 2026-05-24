@@ -37,7 +37,7 @@ export function Hero() {
       className={cn(
         "page-shell min-h-dvh overflow-hidden z-50",
         "grid grid-cols-[2fr_1.4fr] gap-16",
-        "items-center",
+        "items-center pt-36",
       )}
     >
       <div className="min-w-0">

@@ -59,7 +59,7 @@ export default async function PostPage({ params }: { params: RouteParams }) {
   const initialScore = await getPostScore(post.slug);
 
   return (
-    <article className="bg-ink text-cream min-h-full w-full pt-20 ">
+    <article className="bg-ink-2 text-cream min-h-full w-full">
       <Script
         src="https://cdn.jsdelivr.net/npm/@open-notion/assets@latest/hydration.js/+esm"
         type="module"

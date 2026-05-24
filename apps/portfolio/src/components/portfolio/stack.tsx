@@ -1,5 +1,4 @@
 import type { SkillGroup } from "@tabsircg/schemas/portfolio";
-
 import { cn } from "@/lib/utils";
 import { H2, H3 } from "../ui/H2";
 

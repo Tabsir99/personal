@@ -15,7 +15,7 @@ export default function Filters({
   count: number;
 }) {
   return (
-    <div className="sticky top-0 bg-ink z-10 pt-4 pb-[22px] mb-6 border-b border-line before:content-[''] before:absolute before:-left-8 before:-right-8 before:top-0 before:bottom-0 before:bg-ink before:-z-10">
+    <div className="sticky top-0 z-10 py-10 px-6 mb-6  border-b border-line bg-bg">
       <H2
         variant="editorial"
         className="mb-[18px] text-3xl flex items-baseline gap-3.5"
@@ -46,7 +46,7 @@ export default function Filters({
               {t}
               {isOn && (
                 <span
-                  className="absolute right-[-3px] top-[-3px] size-2.5 rounded-full bg-accent shadow-[0_0_0_2px_var(--color-ink)]"
+                  className="absolute -right-1 -top-1 size-2.5 rounded-full bg-accent shadow-[0_0_0_2px_var(--color-ink)]"
                   aria-hidden="true"
                 />
               )}

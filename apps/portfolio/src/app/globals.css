@@ -30,6 +30,7 @@ html {
   --color-accent-2: #c5532e;
   --color-phosphor: #b8d89c;
   --color-field-gray: #a8a18b;
+  --color-bg: color-mix(in oklab, var(--color-ink-2) 40%, var(--color-ink));
 
   --text-xxs: 10px;
 
@@ -185,7 +186,7 @@ html {
 @layer base {
   html,
   body {
-    background: var(--color-ink);
+    background: var(--color-bg);
     color: var(--color-cream);
     font-family: var(--sans);
     font-weight: 300;

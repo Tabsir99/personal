@@ -76,9 +76,8 @@ export default function RootLayout({
         </head>
       )}
       <body>
-        <Header />
         <ScrollIsland />
-        <main className=" py-10">{children}</main>
+        <main>{children}</main>
         <Footer />
       </body>
     </html>
