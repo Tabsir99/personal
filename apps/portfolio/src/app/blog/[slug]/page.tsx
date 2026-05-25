@@ -1,5 +1,6 @@
 import "@open-notion/assets/doc.css";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { DocRenderer } from "@open-notion/serializers/react";
 import { docToToc } from "@open-notion/serializers/toc";
@@ -7,7 +8,7 @@ import { getAllBlogs, getPost, getPostScore } from "@/lib/posts";
 import PostHeader from "@/components/Blog/post/PostHeader";
 import PostFooter from "@/components/Blog/post/PostFooter";
 import Toc from "@/components/Blog/post/Toc";
-import ScoreMeter from "@/components/Blog/post/ScoreMeter";
+import FeltMeter from "@/components/Blog/post/FeltMeter";
 import Share from "@/components/Blog/post/Share";
 import BlogPostJsonLd from "@/components/Blog/post/BlogPostJsonLd";
 import Script from "next/script";
@@ -89,7 +90,9 @@ export default async function PostPage({ params }: { params: RouteParams }) {
 
         <aside className="sticky top-8" aria-label="Article actions">
           <div className="sticky top-8 flex flex-col gap-7 pt-1 max-xl:static max-xl:flex-row max-xl:flex-wrap max-xl:gap-8 max-xl:mt-8 max-xl:pt-6 max-xl:border-t max-xl:border-line max-xl:*:flex-1 max-xl:*:basis-[240px]">
-            <ScoreMeter slug={post.slug} initialScore={initialScore} />
+            <Suspense fallback={<div className="h-[150px]" aria-hidden />}>
+              <FeltMeter slug={post.slug} initialScore={initialScore} />
+            </Suspense>
             <Share url={url} title={post.title} />
           </div>
         </aside>

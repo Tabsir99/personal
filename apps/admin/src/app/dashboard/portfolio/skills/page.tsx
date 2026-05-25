@@ -5,7 +5,6 @@ import { Check, Code, Plus, Trash2, X } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { FormField } from "@/components/ui/FormField";
 import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
@@ -104,26 +103,52 @@ export default function Skills() {
                 ]}
                 entityName="Skill Category"
               />
-              <CardContent className="p-6">
-                <div className="mb-5 flex items-center gap-3">
-                  <h3 className="text-base leading-snug font-semibold tracking-tight">
+              <CardContent
+                className={cn("p-5", !category.isActive && "opacity-50")}
+              >
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="font-mono text-eyebrow tracking-widest tabular-nums text-primary">
+                    {String(categoryIndex + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="font-heading text-[15px] leading-snug font-medium tracking-tight">
                     {category.title}
                   </h3>
+                  <span className="h-px flex-1 bg-foreground/8" />
+                  <span className="font-mono text-eyebrow tracking-widest tabular-nums text-muted-foreground/60">
+                    {category.skills.length}
+                  </span>
                 </div>
 
-                <ul className="flex flex-col gap-3">
-                  {category.skills.map((skillItem, skillIndex) => (
-                    <li
-                      key={skillItem.name + skillIndex}
-                      className="group/skill flex flex-col gap-1.5"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="truncate text-sm font-medium text-foreground">
+                {category.skills.length === 0 ? (
+                  <p className="py-1 text-xs italic text-muted-foreground/50">
+                    No skills yet.
+                  </p>
+                ) : (
+                  <ul className="flex flex-col">
+                    {category.skills.map((skillItem, skillIndex) => (
+                      <li
+                        key={skillItem.name + skillIndex}
+                        className="group/skill flex items-center justify-between gap-3 border-b border-foreground/4 py-1.5 last:border-0"
+                      >
+                        <span className="truncate text-[13px] text-foreground/90">
                           {skillItem.name}
                         </span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-kbd tabular-nums text-muted-foreground">
-                            {skillItem.level}/5
+                        <div className="flex shrink-0 items-center gap-2.5">
+                          <span
+                            className="flex items-center gap-1"
+                            aria-label={`Proficiency ${skillItem.level} of 5`}
+                          >
+                            {[0, 1, 2, 3, 4].map((k) => (
+                              <span
+                                key={k}
+                                className={cn(
+                                  "size-1.5 rounded-full transition-colors",
+                                  k < skillItem.level
+                                    ? "bg-primary"
+                                    : "bg-foreground/15",
+                                )}
+                              />
+                            ))}
                           </span>
                           <Button
                             size="icon-xs"
@@ -142,16 +167,10 @@ export default function Skills() {
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
-                      </div>
-                      <div className="h-1 overflow-hidden rounded-full bg-foreground/6">
-                        <div
-                          className="h-full rounded-full bg-primary transition-[width] duration-500"
-                          style={{ width: `${(skillItem.level / 5) * 100}%` }}
-                        />
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
                 <div
                   className="grid transition-[grid-template-rows] duration-300 ease-out"
@@ -209,19 +228,33 @@ export default function Skills() {
                           </span>
                         }
                       >
-                        <Slider
-                          value={[newSkill.level]}
-                          onValueChange={(value) =>
-                            setNewSkill({
-                              ...newSkill,
-                              level: value[0] ?? 1,
-                            })
-                          }
-                          min={1}
-                          max={5}
-                          step={1}
-                          className="w-full"
-                        />
+                        <div
+                          role="group"
+                          aria-label="Proficiency level"
+                          className="flex items-center gap-1.5"
+                        >
+                          {[1, 2, 3, 4, 5].map((lvl) => (
+                            <button
+                              key={lvl}
+                              type="button"
+                              onClick={() =>
+                                setNewSkill({ ...newSkill, level: lvl })
+                              }
+                              aria-label={`Set proficiency to ${lvl}`}
+                              aria-pressed={newSkill.level === lvl}
+                              className="group/dot flex h-7 flex-1 items-center justify-center rounded-md border border-foreground/8 bg-foreground/2 transition-colors hover:border-primary/40 hover:bg-primary/5"
+                            >
+                              <span
+                                className={cn(
+                                  "size-2 rounded-full transition-colors",
+                                  lvl <= newSkill.level
+                                    ? "bg-primary"
+                                    : "bg-foreground/20 group-hover/dot:bg-primary/40",
+                                )}
+                              />
+                            </button>
+                          ))}
+                        </div>
                       </FormField>
                       <div className="flex items-center gap-1.5 pt-1">
                         <Button

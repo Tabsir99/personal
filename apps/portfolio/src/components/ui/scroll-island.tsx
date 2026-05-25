@@ -1,8 +1,10 @@
 "use client";
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { BACKGROUND_PLANES } from "@/components/portfolio/sections-data";
 
 export function ScrollIsland() {
+  const pathname = usePathname();
   useEffect(() => {
     const ioReveal = new IntersectionObserver(
       (es) => {
@@ -59,6 +61,6 @@ export function ScrollIsland() {
       removeEventListener("scroll", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [pathname]);
   return null;
 }

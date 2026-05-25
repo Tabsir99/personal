@@ -41,8 +41,14 @@ const seed: PageData = {
     { value: "0", label: "Frameworks worshipped", order: 3 },
   ],
 
+  studioName: "Tabsir CG · Independent practice",
+  address: "Apt 4B, Banani Road 11\nDhaka 1213, Bangladesh",
+
   contact: {
     email: "admin@tabsircg.com",
+    phone: "",
+    calLabel: "",
+    calUrl: "",
     social: [],
   },
 

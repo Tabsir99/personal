@@ -1,4 +1,6 @@
+import { Fragment } from "react";
 import { NavLink } from "@/components/ui/nav-link";
+import { getPageData } from "@/lib/pageData";
 import { H2, H3 } from "../ui/H2";
 
 function Column({
@@ -18,15 +20,16 @@ function Column({
   );
 }
 
-const ELSEWHERE = ["GitHub", "Read.cv", "Bluesky", "LinkedIn"];
-const SERVICES_OFFERED = [
-  "Full project (~6 wks +)",
-  "Sprint engagement (1–2 wks)",
-  "Advisory retainer",
-  "Code-review on call",
-];
+export async function Footer() {
+  const { contact, services, studioName, address } = await getPageData();
+  const { email, phone, calLabel, calUrl, social } = contact;
 
-export function Footer() {
+  const offerings = services
+    .filter((s) => s.isActive)
+    .sort((a, b) => a.order - b.order);
+
+  const addressLines = address.split("\n").filter((line) => line.trim());
+
   return (
     <footer id="contact" className="page-shell flex flex-col gap-20 mb-0 pb-2">
       <H2
@@ -42,43 +45,58 @@ export function Footer() {
         <br />
         <span className="text-muted">sturdy,</span> &amp; <em>true.</em>
       </H2>
-      <NavLink
-        href="mailto:hello@tabsircg.com"
-        data-reveal
-        className="w-fit group gap-4 px-7 py-[18px] border border-cream rounded-xs tracking-widest uppercase text-cream transition-all duration-300 hover:bg-accent hover:border-accent hover:text-ink"
-      >
-        hello@tabsircg.com
-        <span className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">
-          ↗
-        </span>
-      </NavLink>
+      {email && (
+        <NavLink
+          href={`mailto:${email}`}
+          data-reveal
+          className="w-fit group gap-4 px-7 py-[18px] border border-cream rounded-xs tracking-widest uppercase text-cream transition-all duration-300 hover:bg-accent hover:border-accent hover:text-ink"
+        >
+          {email}
+          <span className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">
+            ↗
+          </span>
+        </NavLink>
+      )}
       <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-10 pt-10 border-t border-line">
         <Column title="Studio" gap="gap-2">
-          <p className="text-sm text-cream mb-2 leading-normal">
-            Tabsir CG · Independent practice
-          </p>
-          <p className="text-sm text-muted leading-normal">
-            Apt 4B, Banani Road 11
-            <br />
-            Dhaka 1213, Bangladesh
-          </p>
+          {studioName && (
+            <p className="text-sm text-cream mb-2 leading-normal">
+              {studioName}
+            </p>
+          )}
+          {addressLines.length > 0 && (
+            <p className="text-sm text-muted leading-normal">
+              {addressLines.map((line, i) => (
+                <Fragment key={i}>
+                  {i > 0 && <br />}
+                  {line}
+                </Fragment>
+              ))}
+            </p>
+          )}
         </Column>
         <Column title="Direct">
-          <NavLink href="mailto:hello@tabsircg.com">hello@tabsircg.com</NavLink>
-          <NavLink>
-            +880 17 ████ ████{" "}
-            <span className="text-muted-2 text-xxs">(on request)</span>
-          </NavLink>
-          <NavLink>Cal.com / tabsir</NavLink>
+          {email && <NavLink href={`mailto:${email}`}>{email}</NavLink>}
+          {phone && (
+            <NavLink>
+              {phone}{" "}
+              <span className="text-muted-2 text-xxs">(on request)</span>
+            </NavLink>
+          )}
+          {calLabel && (
+            <NavLink href={calUrl || undefined}>{calLabel}</NavLink>
+          )}
         </Column>
         <Column title="Elsewhere">
-          {ELSEWHERE.map((s) => (
-            <NavLink key={s}>{s}</NavLink>
+          {social.map((s) => (
+            <NavLink key={s.name} href={s.url || undefined}>
+              {s.name}
+            </NavLink>
           ))}
         </Column>
         <Column title="Work with me">
-          {SERVICES_OFFERED.map((s) => (
-            <NavLink key={s}>{s}</NavLink>
+          {offerings.map((s) => (
+            <NavLink key={s.title}>{s.title}</NavLink>
           ))}
         </Column>
       </div>

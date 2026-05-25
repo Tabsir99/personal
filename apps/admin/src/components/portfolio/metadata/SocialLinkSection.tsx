@@ -32,8 +32,8 @@ const SocialLinksSection = memo(
     );
     const updatePageData = usePortfolioStore.getState().updatePageData;
 
-    const updateEmail = (email: string) =>
-      updatePageData({ contact: { ...contact, email } });
+    const updateContact = (patch: Partial<typeof contact>) =>
+      updatePageData({ contact: { ...contact, ...patch } });
 
     const updateSocial = (index: number, field: keyof SocialDraft, value: string) => {
       const next = [...contact.social];
@@ -72,15 +72,48 @@ const SocialLinksSection = memo(
           </h2>
         </CardHeader>
         <CardContent className="space-y-6 pt-1 pb-5">
-          <div className="flex flex-col gap-2">
-            <FieldLabel htmlFor="email">Email address</FieldLabel>
-            <Input
-              id="email"
-              type="email"
-              value={contact.email}
-              onChange={(e) => updateEmail(e.target.value)}
-              placeholder="your@email.com"
-            />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <FieldLabel htmlFor="email">Email address</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                value={contact.email}
+                onChange={(e) => updateContact({ email: e.target.value })}
+                placeholder="your@email.com"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <FieldLabel htmlFor="phone">Phone</FieldLabel>
+              <Input
+                id="phone"
+                value={contact.phone}
+                onChange={(e) => updateContact({ phone: e.target.value })}
+                placeholder="+880 17 ████ ████"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_1.5fr]">
+            <div className="flex flex-col gap-2">
+              <FieldLabel htmlFor="cal-label">Booking label</FieldLabel>
+              <Input
+                id="cal-label"
+                value={contact.calLabel}
+                onChange={(e) => updateContact({ calLabel: e.target.value })}
+                placeholder="Cal.com / tabsir"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <FieldLabel htmlFor="cal-url">Booking URL</FieldLabel>
+              <Input
+                id="cal-url"
+                value={contact.calUrl}
+                onChange={(e) => updateContact({ calUrl: e.target.value })}
+                className="font-mono text-xs"
+                placeholder="https://cal.com/tabsir"
+              />
+            </div>
           </div>
 
           <div className="space-y-3">

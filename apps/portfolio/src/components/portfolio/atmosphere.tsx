@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import { ContourSVG } from "./contour-svg";
 import { CoordOverlay } from "./coord-overlay";
-import { BACKGROUND_PLANES } from "./sections-data";
 
 /* Taller than viewport so parallax never reveals an empty edge. */
 const PLANE = "absolute inset-x-0 top-[-20vh] h-[240vh] will-change-transform";
@@ -94,6 +93,10 @@ export function Atmosphere() {
 
       <div id="atm-far" className={cn(PLANE)}>
         <ContourSVG />
+      </div>
+
+      <div id="atm-near" className={cn(PLANE)}>
+        <CoordOverlay />
       </div>
 
       <div className="atm-tint absolute inset-0"></div>

@@ -4,9 +4,11 @@ import { db, Collections } from "@/config/firebaseAdmin";
 import { BlogStatus, PublishedBlogDB } from "@tabsircg/schemas/blog";
 import { wrapRoute } from "@/lib/appUtils";
 
+const MAX_FELT = 50;
 const slugSchema = z.string().min(1);
-const deltaSchema = z.object({
-  delta: z.number().int().positive().max(50),
+const bodySchema = z.object({
+  id: z.string().min(1).max(100),
+  count: z.number().int().positive().max(MAX_FELT),
 });
 
 async function getPublishedDocRefBySlug(slug: string) {
@@ -21,13 +23,21 @@ async function getPublishedDocRefBySlug(slug: string) {
 }
 
 export const GET = wrapRoute(
-  async (_req, { params }: { params: Promise<{ slug: string }> }) => {
+  async (req: NextRequest, { params }: { params: Promise<{ slug: string }> }) => {
     const { slug } = await params;
     const parsedSlug = slugSchema.parse(slug);
+    const id = req.nextUrl.searchParams.get("id") ?? "";
+
     const ref = await getPublishedDocRefBySlug(parsedSlug);
     const snap = await ref.get();
-    const data = snap.data() as PublishedBlogDB | undefined;
-    return { score: data?.stats?.score ?? 0 };
+    const score = (snap.data() as PublishedBlogDB | undefined)?.stats?.score ?? 0;
+
+    let mine = 0;
+    if (id) {
+      const deviceSnap = await ref.collection("felt").doc(id).get();
+      mine = (deviceSnap.data()?.count as number | undefined) ?? 0;
+    }
+    return { score, mine };
   },
 );
 
@@ -35,23 +45,27 @@ export const POST = wrapRoute(
   async (req: NextRequest, { params }: { params: Promise<{ slug: string }> }) => {
     const { slug } = await params;
     const parsedSlug = slugSchema.parse(slug);
-    const { delta } = deltaSchema.parse(await req.json());
+    const { id, count } = bodySchema.parse(await req.json());
 
     const ref = await getPublishedDocRefBySlug(parsedSlug);
+    const deviceRef = ref.collection("felt").doc(id);
 
-    // TODO: rate limit
-    // Read + write inside the same txn so concurrent taps serialize and the
-    // returned value matches what was actually persisted.
-    const newScore = await db.runTransaction(async (tx) => {
-      const fresh = await tx.get(ref);
-      if (!fresh.exists) throw new Error("Not found");
-      const current =
-        (fresh.data() as PublishedBlogDB | undefined)?.stats?.score ?? 0;
-      const next = current + delta;
-      tx.update(ref, { "stats.score": next });
-      return next;
+    return db.runTransaction(async (tx) => {
+      const [blogSnap, deviceSnap] = await Promise.all([
+        tx.get(ref),
+        tx.get(deviceRef),
+      ]);
+      if (!blogSnap.exists) throw new Error("Not found");
+
+      const score = (blogSnap.data() as PublishedBlogDB).stats?.score ?? 0;
+      const stored = (deviceSnap.data()?.count as number | undefined) ?? 0;
+      const nextMine = Math.min(MAX_FELT, Math.max(stored, count));
+      const added = nextMine - stored;
+      if (added > 0) {
+        tx.set(deviceRef, { count: nextMine });
+        tx.update(ref, { "stats.score": score + added });
+      }
+      return { mine: nextMine };
     });
-
-    return { score: newScore };
   },
 );

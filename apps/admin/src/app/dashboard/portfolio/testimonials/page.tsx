@@ -1,11 +1,11 @@
 "use client";
 import { useState } from "react";
 import { useShallow } from "zustand/shallow";
-import { Star } from "lucide-react";
+import { Star, Video } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Eyebrow } from "@/components/ui/Eyebrow";
+import Img from "@/components/ui/image";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import TestimonialDialog from "@/components/portfolio/modals/Testimonial";
 import { AddCard } from "@/components/ui/add-card";
@@ -72,46 +72,73 @@ export default function Testimonials() {
                 entityName="Testimonial"
               />
 
-              <div className="relative flex flex-col gap-4 p-6">
+              <div
+                className={cn(
+                  "relative flex flex-col gap-4 p-5",
+                  !t.isActive && "opacity-50",
+                )}
+              >
                 <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={cn(
-                          "h-3.5 w-3.5",
-                          i < t.rating
-                            ? "fill-star text-star"
-                            : "text-foreground/15",
-                        )}
-                      />
-                    ))}
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={cn(
+                            "h-3.5 w-3.5",
+                            i < t.rating
+                              ? "fill-star text-star"
+                              : "text-foreground/15",
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <span className="font-mono text-eyebrow tabular-nums text-muted-foreground/70">
+                      {t.rating.toFixed(1)}
+                    </span>
                   </div>
                   {t.displaySlot !== "none" && (
                     <Badge variant="accent">{SLOT_LABEL[t.displaySlot]}</Badge>
                   )}
                 </div>
 
-                <p className="text-sm leading-relaxed text-foreground/85">
-                  &ldquo;{t.text}&rdquo;
+                <p className="line-clamp-5 border-l-2 border-foreground/10 pl-3.5 text-[13px] leading-relaxed text-foreground/80 italic">
+                  {t.text}
                 </p>
 
-                <div className="flex items-start justify-between gap-4 border-t border-foreground/6 pt-4">
-                  <div className="flex min-w-0 flex-col gap-0.5">
-                    <span className="truncate text-sm font-semibold tracking-tight text-foreground">
-                      {t.name}
-                    </span>
-                    {t.company && (
-                      <span className="truncate text-xs leading-relaxed text-muted-foreground">
-                        {t.company}
-                      </span>
-                    )}
-                    {t.period && (
-                      <Eyebrow tone="muted" family="mono">
-                        {t.period}
-                      </Eyebrow>
+                <div className="flex items-center gap-3 border-t border-foreground/6 pt-4">
+                  <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-foreground/6 text-kbd font-medium text-muted-foreground">
+                    {t.avatar ? (
+                      <Img
+                        src={t.avatar}
+                        alt={t.name}
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      t.name
+                        .split(/\s+/)
+                        .map((w) => w[0])
+                        .slice(0, 2)
+                        .join("")
+                        .toUpperCase()
                     )}
                   </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="truncate text-sm font-medium tracking-tight text-foreground">
+                      {t.name}
+                    </span>
+                    {(t.company || t.period) && (
+                      <span className="truncate font-mono text-eyebrow tracking-wider text-muted-foreground">
+                        {[t.company, t.period].filter(Boolean).join(" · ")}
+                      </span>
+                    )}
+                  </div>
+                  {t.video && (
+                    <Badge variant="neutral" className="gap-1">
+                      <Video />
+                      Video
+                    </Badge>
+                  )}
                 </div>
               </div>
             </Card>

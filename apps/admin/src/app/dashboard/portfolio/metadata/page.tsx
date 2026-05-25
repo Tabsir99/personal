@@ -14,16 +14,25 @@ import Img from "@/components/ui/image";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 
 export default function PortfolioMetadata() {
-  const { title, description, profilePicture, aboutText, heroStats } =
-    usePortfolioStore(
-      useShallow((state) => ({
-        title: state.pageData.title,
-        description: state.pageData.description,
-        profilePicture: state.pageData.profilePicture,
-        aboutText: state.pageData.aboutText,
-        heroStats: state.pageData.heroStats,
-      })),
-    );
+  const {
+    title,
+    description,
+    profilePicture,
+    aboutText,
+    heroStats,
+    studioName,
+    address,
+  } = usePortfolioStore(
+    useShallow((state) => ({
+      title: state.pageData.title,
+      description: state.pageData.description,
+      profilePicture: state.pageData.profilePicture,
+      aboutText: state.pageData.aboutText,
+      heroStats: state.pageData.heroStats,
+      studioName: state.pageData.studioName,
+      address: state.pageData.address,
+    })),
+  );
 
   const updatePageData = usePortfolioStore.getState().updatePageData;
   const heroStat = usePortfolioStore().heroStats;
@@ -31,7 +40,7 @@ export default function PortfolioMetadata() {
   const [newStat, setNewStat] = useState({ value: "", label: "" });
 
   const setField = (
-    field: "title" | "description" | "aboutText",
+    field: "title" | "description" | "aboutText" | "studioName" | "address",
     value: string,
   ) => updatePageData({ [field]: value });
 
@@ -89,6 +98,37 @@ export default function PortfolioMetadata() {
               onChange={(e) => setField("description", e.target.value)}
               rows={4}
               placeholder="A few sentences on what this portfolio is and who it's for."
+            />
+          </FormField>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-col gap-1 pt-5 pb-3">
+          <h2 className="text-base leading-tight font-semibold tracking-tight">
+            Studio
+          </h2>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            The identity line and address shown in the site footer.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-5 pt-1 pb-5">
+          <FormField
+            label="Studio name"
+            hint="The identity line, e.g. practice name and descriptor."
+          >
+            <Input
+              value={studioName}
+              onChange={(e) => setField("studioName", e.target.value)}
+              placeholder="Tabsir CG · Independent practice"
+            />
+          </FormField>
+          <FormField label="Address" hint="One line per row.">
+            <Textarea
+              value={address}
+              onChange={(e) => setField("address", e.target.value)}
+              rows={3}
+              placeholder={"Apt 4B, Banani Road 11\nDhaka 1213, Bangladesh"}
             />
           </FormField>
         </CardContent>

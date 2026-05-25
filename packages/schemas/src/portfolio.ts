@@ -105,6 +105,10 @@ export type Credential = z.infer<typeof credentialSchema>;
 
 export const contactSchema = z.object({
   email: z.email(),
+  phone: z.string().default(""),
+  // Booking link shown in the footer's "Direct" column.
+  calLabel: z.string().default(""),
+  calUrl: optionalUrl,
   social: z
     .array(
       z.object({
@@ -132,6 +136,10 @@ export const pageDataSchema = z.object({
 
   aboutText: z.string().default(""),
   heroStats: z.array(heroStatSchema).default([]),
+
+  // Footer "Studio" column: identity line + (newline-separated) address.
+  studioName: z.string().default(""),
+  address: z.string().default(""),
 
   contact: contactSchema,
 

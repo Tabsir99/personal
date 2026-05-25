@@ -14,4 +14,5 @@ export type SectionId = (typeof SECTIONS)[number]["id"];
 export const BACKGROUND_PLANES = {
   "atm-far": -0.025,
   "atm-mid": -0.1,
+  "atm-near": -0.2,
 } as const;

@@ -1,6 +1,7 @@
 import { PageData } from "@tabsircg/schemas/portfolio";
 import type { ApiResponse } from "@/lib/appUtils";
 import { callWithToast } from "@/lib/utils";
+import { clientEnv } from "@/config/env.client";
 import { create } from "zustand";
 
 const defaultPageData: PageData = {
@@ -10,7 +11,9 @@ const defaultPageData: PageData = {
   profilePicture: "",
   aboutText: "",
   heroStats: [],
-  contact: { email: "", social: [] },
+  studioName: "",
+  address: "",
+  contact: { email: "", phone: "", calLabel: "", calUrl: "", social: [] },
   projects: [],
   services: [],
   testimonials: [],
@@ -325,25 +328,26 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
   );
 
   urls.forEach(({ key, path }) => {
+    const url = `${clientEnv.MEDIA_ORIGIN}/${key}`;
     if (path === "profilePicture") {
-      next.profilePicture = key;
+      next.profilePicture = url;
       return;
     }
     const projectStill = path.match(/^projects\/(\d+)\/stills\/(\d+)$/);
     if (projectStill) {
       const projectIndex = parseInt(projectStill[1]);
       const stillIndex = parseInt(projectStill[2]);
-      next.projects[projectIndex].stills[stillIndex].url = key;
+      next.projects[projectIndex].stills[stillIndex].url = url;
       return;
     }
     const credentialMatch = path.match(/^credentials\/(\d+)$/);
     if (credentialMatch) {
-      next.credentials[parseInt(credentialMatch[1])].image = key;
+      next.credentials[parseInt(credentialMatch[1])].image = url;
       return;
     }
     const testimonialAvatar = path.match(/^testimonials\/(\d+)\/avatar$/);
     if (testimonialAvatar) {
-      next.testimonials[parseInt(testimonialAvatar[1])].avatar = key;
+      next.testimonials[parseInt(testimonialAvatar[1])].avatar = url;
       return;
     }
   });

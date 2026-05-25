@@ -54,8 +54,6 @@ html {
   --animate-bar-pulse: bar-pulse 2.4s var(--ease-soft) infinite;
   --animate-shrink: shrink 4s var(--ease-soft) infinite;
   --animate-fill: fill 1.2s 0.2s var(--ease-soft) both;
-  --animate-ring-burst: ring-burst 0.52s var(--ease-soft) forwards;
-  --animate-count-burst: count-burst 0.7s var(--ease-soft) forwards;
 
   /* Trough at 0.3; override via --pulse-min. */
   @keyframes pulse {
@@ -135,30 +133,6 @@ html {
     }
   }
 
-  @keyframes ring-burst {
-    0% {
-      box-shadow: 0 0 0 0
-        color-mix(in srgb, var(--color-accent) 55%, transparent);
-    }
-    100% {
-      box-shadow: 0 0 0 18px
-        color-mix(in srgb, var(--color-accent) 0%, transparent);
-    }
-  }
-
-  @keyframes count-burst {
-    0% {
-      opacity: 0;
-      transform: translate(-50%, 6px) scale(0.8);
-    }
-    20% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-      transform: translate(-50%, -28px) scale(1);
-    }
-  }
 }
 
 @theme inline {
@@ -415,10 +389,71 @@ html {
   transition: background-size 600ms var(--ease-soft);
 }
 
-/* Reads --fill (deg) from the inline style set per render. */
-@utility blog-dial {
-  background: conic-gradient(
-    var(--color-accent) var(--fill, 0deg),
-    color-mix(in srgb, var(--color-cream) 8%, transparent) 0
-  );
+@layer components {
+  /* Editorial double-rule share cards. Inner ghost rule, dot-grid backdrop,
+     hover lift, accent fill on copy success. No text inside. */
+  .share-card {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      color-mix(in oklab, var(--color-cream) 7%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 10px 10px;
+    background-position: 4px 4px;
+    transition:
+      border-color 220ms ease,
+      color 220ms ease,
+      background-color 220ms ease,
+      translate 220ms var(--ease-soft),
+      box-shadow 220ms ease;
+  }
+  .share-card::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border: 1px solid
+      color-mix(in srgb, var(--color-cream) 5%, transparent);
+    border-radius: 2px;
+    pointer-events: none;
+    transition: border-color 220ms ease;
+  }
+  .share-card:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background-color: color-mix(
+      in oklab,
+      var(--color-ink-2),
+      var(--color-accent) 4%
+    );
+    translate: 0 -2px;
+    box-shadow: 0 8px 18px -10px
+      color-mix(in srgb, var(--color-accent) 35%, transparent);
+  }
+  .share-card:hover::before {
+    border-color: color-mix(in srgb, var(--color-accent) 32%, transparent);
+  }
+  .share-card:active {
+    translate: 0 0;
+    box-shadow: inset 0 1px 0
+      color-mix(in srgb, var(--color-ink) 60%, transparent);
+  }
+  .share-card-stamped,
+  .share-card-stamped:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-ink);
+    translate: 0 0;
+    box-shadow: 0 0 0 0 transparent;
+    background-image: none;
+  }
+  .share-card-stamped::before,
+  .share-card-stamped:hover::before {
+    border-color: color-mix(in srgb, var(--color-ink) 18%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .share-card {
+      transition: none;
+    }
+  }
 }
