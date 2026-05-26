@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# apps/admin
 
-## Getting Started
+Private CMS for [tabsircg.com](https://tabsircg.com). Next.js 16, port `5000`. Owns Firestore and Cloudflare R2.
 
-First, run the development server:
+The cross-app picture lives in the root [README.md](../../README.md) and [ARCHITECTURE.md](../../ARCHITECTURE.md). This file only covers what matters when you're running admin on its own.
+
+## Run
+
+From the workspace root:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm dev:admin          # admin only, :5000
+pnpm dev                # admin + portfolio
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+From this directory:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev                # same as pnpm dev:admin above
+pnpm emulators          # Firebase emulators instead of production Firestore
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## What it needs
 
-## Learn More
+`.env` in this directory. Required keys are listed in the root README under "Run it". The ones unique to admin:
 
-To learn more about Next.js, take a look at the following resources:
+- `ADMIN_USERNAME` / `ADMIN_PASSWORD` — login credentials. There's no user table; these are the only account.
+- `JWT_SECRET` — signs the `t` session cookie.
+- `FIREBASE_PRIVATE_KEY` / `FIREBASE_CLIENT_EMAIL` — service-account access to Firestore.
+- `CLOUDFLARE_R2_AK_ID` / `CLOUDFLARE_R2_AK` / `CLOUDFLARE_R2_ENDPOINT` — R2 credentials for image uploads.
+- `LINKEDIN_CLINET_ID` / `LINKEDIN_CLINET_SECRET` — LinkedIn OAuth (note the typo, it's in code).
+- `SERVER_TOKEN` — has to match portfolio's `SERVER_TOKEN`. Used by portfolio to call admin's API.
+- `ANTHROPIC_AUTH_TOKEN` — only needed if you use the AI authoring features.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tests and types
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm tc                 # typecheck
+pnpm test               # vitest
+```
 
-## Deploy on Vercel
+## Firestore migrations
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+One-off backfills live in `src/scripts/migrate*`. Always run with `dryRun: true` first.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Gotcha worth re-stating here
+
+`tsconfig.json` has `exactOptionalPropertyTypes: true`. Don't pass `undefined` for optional props. Use the spread-when-defined pattern: `{...(x ? { prop: ... } : {})}`. Portfolio doesn't have this flag, so code that lifts cleanly between the two apps can still trip on this.

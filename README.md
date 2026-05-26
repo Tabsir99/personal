@@ -1,82 +1,72 @@
 # tabsircg
 
-Personal site monorepo: a public **portfolio + blog** ([tabsircg.com](https://tabsircg.com)) and a private **admin/CMS** that powers it. Built as a pnpm workspace so the public site and the admin share Zod schemas and TypeScript types over the wire without a build step.
+Source for [tabsircg.com](https://tabsircg.com): the public portfolio + blog (`apps/portfolio`) and the CMS that feeds it (`apps/admin`). pnpm workspace, Next.js 16 on both sides, shared Zod schemas in `packages/schemas`.
 
 ```
 apps/portfolio  ──REST──►  apps/admin  ──►  Firestore + Cloudflare R2
    (public)                  (private CMS)
 ```
 
-For the data-flow, rendering matrix, and per-app file layout, see [ARCHITECTURE.md](ARCHITECTURE.md).
+[ARCHITECTURE.md](ARCHITECTURE.md) goes into the data flow, rendering matrix, and per-app layout.
 
 ---
 
-## What's inside
+## The apps
 
-### `apps/admin` — Private CMS (Next.js 16, port `5000`)
-- Notion-style block editor (`@open-notion/editor`) for writing posts.
-- Drafts → publish workflow with featured-post management.
-- Dashboard for managing portfolio content: projects, services, skills, testimonials, credentials, metadata.
-- Analytics dashboard: page views, geo breakdown, traffic sources, time-series stats.
-- Image uploads to **Cloudflare R2** via presigned URLs.
-- JWT-cookie session auth (`jose`) gated by `ADMIN_USERNAME` / `ADMIN_PASSWORD`.
-- LinkedIn OAuth integration for cross-posting.
-- Anthropic Claude Agent SDK wired in (`@anthropic-ai/claude-agent-sdk`) for AI-assisted authoring.
-- Firestore-backed: blogs, drafts, portfolio config, site config, analytics aggregates.
+### `apps/admin` (Next.js 16, port `5000`)
 
-### `apps/portfolio` — Public site (Next.js 16, port `3001`)
-- Animated hero, terminal/scramble effects, services, work showcase, voices/testimonials, contact.
-- Blog index with featured slot + cursor-paginated regular list.
-- Per-post pages with TOC, share buttons, heart/score feedback, "felt meter".
-- Legal pages: privacy, terms, refund policy.
-- SEO: dynamic sitemap, robots.txt, OG metadata.
-- On-demand revalidation endpoint (`/api/revalidate`) so admin can push fresh content without a redeploy.
-- Score proxy (`/api/score`) that forwards reactions to admin.
+Private CMS. Notion-style block editor via `@open-notion/editor`, drafts → publish flow, featured-post management. Dashboard CRUD over everything portfolio renders (projects, services, skills, testimonials, credentials, site metadata) plus an analytics dashboard (page views, geo, traffic sources, time-series).
+
+Image uploads go to Cloudflare R2 via presigned URLs. Auth is one JWT cookie (`jose`) gated by `ADMIN_USERNAME` / `ADMIN_PASSWORD` — no user table, single tenant. LinkedIn OAuth for cross-posting. Optional Claude Agent SDK (`@anthropic-ai/claude-agent-sdk`) for AI-assisted authoring. Everything else is Firestore.
+
+### `apps/portfolio` (Next.js 16, port `3001`)
+
+Public site. Animated hero with terminal/scramble bits, services, work showcase, voices/testimonials, contact. Blog index with a featured slot plus a cursor-paginated regular list. Per-post pages have TOC, share buttons, heart/score reactions, the "felt meter". Legal pages (privacy, terms, refund policy). SEO: dynamic sitemap, `robots.txt`, OG metadata.
+
+`/api/revalidate` is how admin pushes fresh content without a redeploy. `/api/score` proxies reactions back to admin so the `felt-id` cookie stays same-origin.
 
 ### `packages/schemas` — `@tabsircg/schemas`
-Shared Zod schemas + types. Exports its `.ts` source directly via the `exports` map — no build, no `dist`. Both apps `transpilePackages` it so edits hot-reload in both servers instantly.
+
+Shared Zod schemas and types. Exports its `.ts` source directly through the `exports` map (no build, no `dist`). Both apps `transpilePackages` it, so a schema edit hot-reloads in both servers.
 
 Modules: `blog`, `portfolio`, `user`, `dashboard`, `api`, `site`, `ai`.
 
 ---
 
-## Tech stack
+## Stack
 
 | Layer | Choice |
 |---|---|
-| Framework | Next.js **16** (App Router, Turbopack), React **19** |
+| Framework | Next.js 16 (App Router, Turbopack), React 19 |
 | Language | TypeScript 5.9 |
-| Styling | Tailwind CSS **v4** (CSS-first `@theme`), `tw-animate-css` |
-| UI primitives | `@base-ui/react`, `shadcn`, `lucide-react`, `react-icons` |
+| Styling | Tailwind v4 (CSS-first `@theme`), `tw-animate-css` |
+| UI | `@base-ui/react`, `shadcn`, `lucide-react`, `react-icons` |
 | Validation | Zod 4 |
-| Data | Firestore (via `firebase-admin`) |
-| Object storage | Cloudflare R2 (S3-compatible, `@aws-sdk/client-s3`) |
-| Editor | `@open-notion/editor` (block editor) |
+| Data | Firestore via `firebase-admin` |
+| Storage | Cloudflare R2 (S3-compatible, `@aws-sdk/client-s3`) |
+| Editor | `@open-notion/editor` |
 | Auth | `jose` JWTs in HTTP-only cookies |
-| Forms/state | `swr`, `zustand`, server actions |
+| State | `swr`, `zustand`, server actions |
 | Charts | `recharts` |
 | Tests | `vitest` |
-| Runtime | Node **24.13** (see `.nvmrc`), pnpm workspaces |
+| Runtime | Node 24.13 (`.nvmrc`), pnpm workspaces |
 | AI | `@anthropic-ai/claude-agent-sdk` |
 
 ---
 
-## Quick start
+## Run it
 
-Requires Node `24.13.0` (`.nvmrc`) and `pnpm`.
+Node 24.13 (`.nvmrc`) and pnpm.
 
 ```bash
 pnpm install
 
-# Both apps in parallel: admin on :5000, portfolio on :3001
-pnpm dev
-
-# One app at a time
-pnpm dev:admin
-pnpm dev:portfolio
+pnpm dev               # both apps: admin :5000, portfolio :3001
+pnpm dev:admin         # just admin
+pnpm dev:portfolio     # just portfolio
 ```
 
-Each app needs its own `.env` file (env files are not loaded from workspace root by Next). Required keys:
+Each app loads its own `.env`. Next doesn't pick env files up from the workspace root, so shared values get duplicated.
 
 **`apps/admin/.env`**
 ```
@@ -98,7 +88,7 @@ ANTHROPIC_AUTH_TOKEN=...
 **`apps/portfolio/.env`**
 ```
 ADMIN_ORIGIN=http://localhost:5000
-SERVER_TOKEN=...   # must match admin's SERVER_TOKEN
+SERVER_TOKEN=...   # has to match admin's SERVER_TOKEN
 ```
 
 Firebase emulators (admin only):
@@ -113,24 +103,24 @@ pnpm seed:firestore
 
 ---
 
-## Workspace commands
+## Commands
 
 | Command | What it does |
 |---|---|
-| `pnpm dev` | Run both apps in parallel |
-| `pnpm dev:admin` / `pnpm dev:portfolio` | Run one app |
-| `pnpm dev:clean` | Nuke `.next/` then `dev` |
-| `pnpm build` | Build both apps |
-| `pnpm tc` | Typecheck both apps |
-| `pnpm test` | Run vitest in every workspace |
-| `pnpm seed:firestore` | Seed admin's Firestore (config, blogs, portfolio, analytics) |
-| `pnpm clean:pnpm` | Wipe `node_modules` + lockfile, reinstall |
+| `pnpm dev` | Both apps in parallel |
+| `pnpm dev:admin` / `pnpm dev:portfolio` | One app |
+| `pnpm dev:clean` | Wipe `.next/`, then dev |
+| `pnpm build` | Build both |
+| `pnpm tc` | Typecheck both |
+| `pnpm test` | vitest in every workspace |
+| `pnpm seed:firestore` | Seed admin's Firestore |
+| `pnpm clean:pnpm` | Nuke `node_modules` + lockfile, reinstall |
 
 ---
 
-## Wire contracts (admin → portfolio)
+## Wire contracts
 
-Every admin REST response is wrapped by `wrapRoute` ([apps/admin/src/lib/appUtils.ts](apps/admin/src/lib/appUtils.ts)) into:
+Every admin REST response goes through `wrapRoute` ([apps/admin/src/lib/appUtils.ts](apps/admin/src/lib/appUtils.ts)) and ends up shaped like this:
 
 ```ts
 type ApiResponse<T> =
@@ -138,7 +128,7 @@ type ApiResponse<T> =
   | { status: "error"; message: string };
 ```
 
-Portfolio's `fetchJson` helper unwraps it. List endpoints (currently just `/api/blogs`) wrap `data` again in a cursor page:
+Portfolio's `fetchJson` unwraps it. List endpoints (just `/api/blogs` so far) wrap `data` once more:
 
 ```ts
 interface CursorPage<T> {
@@ -147,13 +137,13 @@ interface CursorPage<T> {
 }
 ```
 
-The header `serverToken` is portfolio's auth to admin (described but not yet enforced — add validation in `wrapRoute` once admin's API gets a public hostname).
+The `serverToken` header is portfolio's auth into admin. It's documented but not enforced at the route level yet. Add validation in `wrapRoute` once admin's API picks up a public hostname.
 
-### Public API surface (admin)
+### Public API (admin)
 
 ```
 GET    /api/blogs                  paginated list (status, kind, tag, cursor, limit, orderBy)
-GET    /api/blogs/featured         the current featured post
+GET    /api/blogs/featured         current featured post
 GET    /api/blogs/[slug]           single published post
 POST   /api/blogs/[slug]/score     react to a post
 GET    /api/site-config            global site config
@@ -164,20 +154,23 @@ GET    /api/dashboard/{stats,geo,pages,sources}    analytics aggregates (admin-o
 
 ---
 
-## Key concepts
+## Things that bite
 
-### Featured posts
-A blog's "featured" flag is a `featuredAt: number | null` timestamp, **not** a boolean. The post with the highest non-null `featuredAt` across published blogs wins. Featuring is an explicit action (`featureBlog(blogId)` server action or `GET /api/blogs/featured`); there is no `unfeatureBlog` — once anything has ever been featured, there is always a featured post. Requires the `(status, featuredAt desc)` Firestore composite index in [apps/admin/firestore.indexes.json](apps/admin/firestore.indexes.json).
+### Featured is a timestamp, not a boolean
 
-### Blog content storage
-`PublishedBlogDB.content` and `BlogDraftDB.content` are stored as **`JSON.stringify(DocContent)` strings** in Firestore. Parsing/stringifying happens at the boundary in [apps/admin/src/lib/blogUtils.ts](apps/admin/src/lib/blogUtils.ts) and [apps/portfolio/src/lib/posts.ts](apps/portfolio/src/lib/posts.ts).
+`featuredAt: number | null`. Whichever published blog has the highest non-null `featuredAt` is "featured". Featuring is an explicit action (`featureBlog(blogId)` server action, or `GET /api/blogs/featured` for the portfolio side). There's no `unfeatureBlog`. So once you've featured anything, something is always featured — that's the design, accept it. Requires the `(status, featuredAt desc)` Firestore composite index ([apps/admin/firestore.indexes.json](apps/admin/firestore.indexes.json)).
+
+### Blog content is a JSON string, not an object
+
+`PublishedBlogDB.content` and `BlogDraftDB.content` hold `JSON.stringify(DocContent)` strings in Firestore. The parse/stringify happens at the boundary: [apps/admin/src/lib/blogUtils.ts](apps/admin/src/lib/blogUtils.ts) on the admin side, [apps/portfolio/src/lib/posts.ts](apps/portfolio/src/lib/posts.ts) on the portfolio side. Treat it as `DocContent` everywhere else.
 
 ### Wire types vs view types
-- **Wire types** live in `@tabsircg/schemas` — shapes traveling over HTTP. Source of truth.
-- **View types** live in `apps/portfolio/src/lib/posts.ts` (`Post`, `PostMeta`, `Neighbour`) — presentation-only (e.g. `date` as an ISO string, computed `prev`/`next`). Don't move these into the shared package.
 
-### The no-build workspace trick
-`@tabsircg/schemas` is internal-only and never published, so its `exports` map points directly at `.ts` source. Both apps add `transpilePackages: ["@tabsircg/schemas"]` in `next.config.ts`, letting Turbopack read the source and watch it for HMR. Editing a schema instantly propagates to both apps. **Don't add a build step "just in case"** — it would break the dev story.
+Wire shapes live in `@tabsircg/schemas`. They're what travels over HTTP. View shapes (`Post`, `PostMeta`, `Neighbour` in [apps/portfolio/src/lib/posts.ts](apps/portfolio/src/lib/posts.ts)) are portfolio-only: ISO date strings, computed `prev`/`next`, that kind of thing. Don't move view types into the shared package.
+
+### The no-build workspace
+
+`@tabsircg/schemas` is internal-only and never gets published. Its `exports` map points straight at `.ts` source, both apps `transpilePackages` it, and Turbopack reads source. HMR is instant. Don't add a build step "just in case" — you'd need a dual `"development"`/`"production"` exports condition and you'd lose the live edit story. The only reason this works is that the package is never consumed from outside the repo.
 
 ---
 
@@ -187,7 +180,7 @@ A blog's "featured" flag is a `featuredAt: number | null` timestamp, **not** a b
 personal/
 ├── apps/
 │   ├── admin/                  Next.js 16 admin/CMS (port 5000)
-│   │   ├── src/app/api/        REST endpoints consumed by portfolio
+│   │   ├── src/app/api/        REST endpoints used by portfolio
 │   │   ├── src/app/dashboard/  Authoring + analytics UI
 │   │   ├── src/scripts/seed/   Firestore seeders
 │   │   ├── firestore.rules
@@ -199,20 +192,19 @@ personal/
     └── schemas/                @tabsircg/schemas — Zod sources, no build
 ```
 
-`CLAUDE.local.md` carries deeper notes (gotchas, schema migration policy, open work) — read it before changing the wire format or the dev story.
+`CLAUDE.local.md` has the deeper notes: gotchas, schema migration policy, open work. Read it before changing the wire format or the dev story.
 
 ---
 
-## Gotchas
+## Smaller stuff
 
-- Admin's `tsconfig.json` has `exactOptionalPropertyTypes: true` — never pass `undefined` for optional props. Use the spread-when-defined pattern: `{...(x ? { prop: ... } : {})}`. Portfolio does not have this flag.
-- `pnpm-lock.yaml` lives at the workspace root only; there are no per-app lockfiles.
-- `@open-notion/editor` is a peer dep of `@tabsircg/schemas` (only the `DocContent` type is referenced); both apps install it directly.
-- Each app loads its own `.env`. Shared values (e.g. `SERVER_TOKEN`) are duplicated in both files.
-- The portfolio's `getPost(slug)` computes prev/next by paginating all blogs — fine up to ~100 published posts. Beyond that, introduce a "navigation index" doc.
+- Admin's `tsconfig.json` has `exactOptionalPropertyTypes: true`. Don't pass `undefined` for optional props. Use spread-when-defined: `{...(x ? { prop: ... } : {})}`. Portfolio doesn't have that flag.
+- `pnpm-lock.yaml` lives at the workspace root only. There are no per-app lockfiles.
+- `@open-notion/editor` is a peer dep of `@tabsircg/schemas` (only the `DocContent` type is referenced). Both apps install it directly.
+- `getPost(slug)` in portfolio computes prev/next by paginating all blogs. Fine up to about 100 published posts. Past that, drop in a navigation-index doc.
 
 ---
 
 ## Deployment
 
-Both apps are Next.js 16 standalone builds and run on Node. Production targets Vercel; admin's Firestore data is in production Firebase. The portfolio's `/api/revalidate` endpoint lets admin push fresh content without a redeploy.
+Both apps are Next.js 16 standalone builds on Node. Production runs on Vercel. Admin's Firestore is production Firebase. Portfolio's `/api/revalidate` is how admin pushes content updates without a redeploy.

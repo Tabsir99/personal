@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# apps/portfolio
 
-## Getting Started
+Public site at [tabsircg.com](https://tabsircg.com). Next.js 16, port `3001`. Reads admin's REST API and revalidates on push.
 
-First, run the development server:
+The cross-app picture lives in the root [README.md](../../README.md) and [ARCHITECTURE.md](../../ARCHITECTURE.md). This file only covers what matters when you're running portfolio on its own.
+
+## Run
+
+From the workspace root:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm dev:portfolio      # portfolio only, :3001
+pnpm dev                # admin + portfolio
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+From this directory:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev                # same as pnpm dev:portfolio above
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Admin needs to be reachable at `ADMIN_ORIGIN` for any data to render. If you run portfolio alone, hit `pnpm seed:firestore` from the workspace root first so admin has something to serve.
 
-## Learn More
+## What it needs
 
-To learn more about Next.js, take a look at the following resources:
+`.env` in this directory:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+ADMIN_ORIGIN=http://localhost:5000
+SERVER_TOKEN=...        # has to match admin's SERVER_TOKEN
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+That's it. Portfolio doesn't talk to Firestore or R2 directly — admin handles all of that. The two env values above are the entire surface area.
 
-## Deploy on Vercel
+## Tests and types
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm tc                 # typecheck
+pnpm test               # vitest
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## What's served where
+
+- `/` — home, ISR
+- `/blog`, `/blog/[slug]` — blog index + post pages, SSG with tag-driven revalidation
+- `/privacy`, `/terms`, `/refund-policy` — pure static
+- `sitemap.xml`, `robots.txt` — SEO
+- `/api/revalidate` — receives tag invalidation pings from admin
+- `/api/score` — proxies score reactions to admin, injects the `felt-id` cookie
+
+[ARCHITECTURE.md](../../ARCHITECTURE.md) has the full rendering matrix and the read/write paths.
+
+## Gotcha worth re-stating here
+
+`getPost(slug)` paginates all blogs to compute prev/next. Fine up to ~100 published posts. Past that, build a navigation index doc in admin and read that instead.
