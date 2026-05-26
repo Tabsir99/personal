@@ -14,39 +14,13 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
         className="relative bg-[linear-gradient(160deg,oklch(20%_0.02_60),oklch(13%_0.02_60))] text-cream p-8 min-h-[380px] flex flex-col justify-between overflow-hidden before:content-[''] before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_20%_0%,color-mix(in_srgb,var(--color-accent)_35%,transparent),transparent_50%),radial-gradient(circle_at_100%_100%,color-mix(in_srgb,var(--color-phosphor)_30%,transparent),transparent_50%)] before:pointer-events-none max-lg:min-h-[240px]"
         aria-hidden="true"
       >
-        {post.coverImageUrl ? (
-          <Image
-            src={post.coverImageUrl}
-            alt=""
-            fill
-            sizes="(max-width: 980px) 100vw, 50vw"
-            className="object-cover"
-          />
-        ) : (
-          <>
-            <div className="relative grid grid-cols-12 gap-1 flex-1 mb-4">
-              {Array.from({ length: 60 }).map((_, i) => (
-                <span
-                  key={i}
-                  className="block h-3.5 rounded-xs bg-[color-mix(in_srgb,var(--color-accent)_30%,transparent)] odd:bg-[color-mix(in_srgb,oklch(72%_0.13_60)_40%,transparent)] nth-[7n]:bg-[color-mix(in_srgb,var(--color-phosphor)_50%,transparent)] animate-bar-pulse"
-                  style={{ animationDelay: `${(i % 12) * 80}ms` }}
-                />
-              ))}
-            </div>
-            <div className="relative text-xs flex gap-2.5 items-baseline">
-              <span className="font-mono">EXPLAIN ANALYZE</span>
-              <span className="font-mono text-muted">
-                — rows=4_207_388 · cost=14_902.11
-              </span>
-            </div>
-            <div className="relative mt-3 h-1 rounded-xs bg-[oklch(20%_0.02_60)] overflow-visible">
-              <div className="absolute left-0 top-0 bottom-0 w-[12%] bg-accent rounded-xs animate-shrink shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-accent)_15%,transparent)]" />
-              <span className="absolute right-0 top-[-22px] text-xs text-[oklch(72%_0.13_60)] font-mono">
-                ↓ 40s → 412ms
-              </span>
-            </div>
-          </>
-        )}
+        <Image
+          src={post.coverImageUrl}
+          alt={`Cover image for ${post.title}`}
+          fill
+          sizes="(max-width: 980px) 100vw, 50vw"
+          className="object-cover"
+        />
       </div>
       <div className="py-10 px-11 flex flex-col gap-5 max-lg:p-7">
         <div className="flex justify-between items-center pb-3.5 border-b border-dashed border-cream/8">
@@ -57,7 +31,9 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
             {formatDate(post.date)}
           </span>
         </div>
-        <H2 variant="editorial" className="mt-1.5">{post.title}</H2>
+        <H2 variant="editorial" className="mt-1.5">
+          {post.title}
+        </H2>
         <p className="text-cream-2 m-0 max-w-[50ch]">{post.excerpt}</p>
         <div className="flex flex-wrap gap-2 mt-auto">
           {post.tags.map((t) => (
