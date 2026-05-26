@@ -4,6 +4,8 @@ import { getAllBlogs } from "@/lib/posts";
 
 const BASE_URL = "https://tabsircg.com";
 
+// Daily backstop; also regenerates on-demand when getAllBlogs()/getPageData()'s
+// "blogs"/"page-data" tags are revalidated after an admin mutation.
 export const revalidate = 86400;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

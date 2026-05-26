@@ -27,8 +27,6 @@ export function Terminal({
 }: {
   title: string;
   lines: TerminalLine[];
-  /* Step-0 only. Keep in sync with rise-in `delay-*` so typing doesn't
-     advance while the terminal is hidden behind the intro overlay. */
   startDelay?: number;
 }) {
   const [step, setStep] = useState(0);
@@ -47,7 +45,15 @@ export function Terminal({
       return t;
     };
 
-    const initialWait = step === 0 ? startDelay : line.delayBefore || 300;
+    const skipIntro =
+      typeof document !== "undefined" &&
+      document.documentElement.dataset.skipIntro === "1";
+    const initialWait =
+      step === 0
+        ? skipIntro
+          ? 300
+          : startDelay
+        : line.delayBefore || 300;
     after(initialWait, () => {
       if (cancelled) return;
       if (typedRef.current) typedRef.current.textContent = "";
@@ -95,8 +101,9 @@ export function Terminal({
   return (
     <div
       aria-hidden="true"
+      style={{ animationDelay: "var(--hero-stagger)" }}
       className="relative overflow-hidden rounded-lg border border-phosphor/10 font-mono
-      opacity-0 translate-y-4 animate-rise-in delay-6300
+      opacity-0 translate-y-4 animate-rise-in
       shadow-md shadow-phosphor/10"
     >
       <div className="flex items-center justify-between px-[14px] py-[10px] border-b border-phosphor/15 bg-black/20">

@@ -3,15 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { ScrambleWord } from "./scramble-word";
 
-type Stage =
-  | "void"
-  | "rings"
-  | "brackets"
-  | "scramble"
-  | "morph"
-  | "reveal"
-  | "done";
-
 /* Mirrors ContourSVG's Summit A so rings align with Atmosphere on fade. */
 function IntroRings() {
   const summit = Array.from({ length: 16 }, (_, i) => ({
@@ -39,7 +30,7 @@ function IntroRings() {
             transform={`rotate(${r.rot} 420 780)`}
             opacity={r.opacity}
             pathLength="1"
-            style={{ animationDelay: `${r.delay}s` }}
+            style={{ "--ring-d": `${r.delay}s` } as React.CSSProperties}
           />
         ))}
       </g>
@@ -48,30 +39,14 @@ function IntroRings() {
   );
 }
 
-const SCRAMBLE_WORDS = ["TABSIR · CG", "FRICTION"] as const;
-
-/* Must stay in sync with .intro-scan's animation-delay and hero/terminal
-   `delay-*` utilities so the overlay doesn't slam in on paint. */
-const INTRO_DELAY = 1000;
-
-/* `done` must fire before ScrambleWord's auto-loop triggers its second
-   scramble (~100ms later). */
-const TIMINGS = {
-  rings: INTRO_DELAY + 900,
-  brackets: INTRO_DELAY + 1500,
-  scramble: INTRO_DELAY + 1850,
-  morph: INTRO_DELAY + 4100,
-  reveal: INTRO_DELAY + 4700,
-  done: INTRO_DELAY + 5250,
-} as const;
+/* Total intro length; must outlast the longest animation in intro.css and
+   stay in step with --hero-stagger. */
+const INTRO_DURATION = 6000;
 
 function IntroInner({ onDone }: { onDone: () => void }) {
-  const [stage, setStage] = useState<Stage>("void");
-  const [morphTransform, setMorphTransform] = useState<string | null>(null);
   const wordWrapRef = useRef<HTMLDivElement>(null);
 
-  /* FLIP: measure hero brackets, compute translate+scale onto them. */
-  const computeMorph = useCallback(() => {
+  useEffect(() => {
     const heroWord = document.querySelector<HTMLElement>("[data-hero-word]");
     const heroL = heroWord?.querySelector<HTMLElement>(
       "[data-hero-bracket='l']",
@@ -80,83 +55,35 @@ function IntroInner({ onDone }: { onDone: () => void }) {
       "[data-hero-bracket='r']",
     );
     const src = wordWrapRef.current;
-    if (!heroWord || !heroL || !heroR || !src) return null;
 
-    const hwRect = heroWord.getBoundingClientRect();
-    const lRect = heroL.getBoundingClientRect();
-    const rRect = heroR.getBoundingClientRect();
-    const sr = src.getBoundingClientRect();
+    if (heroWord && heroL && heroR && src) {
+      const hwRect = heroWord.getBoundingClientRect();
+      const lRect = heroL.getBoundingClientRect();
+      const rRect = heroR.getBoundingClientRect();
+      const sr = src.getBoundingClientRect();
 
-    const tLeft = lRect.left;
-    const tRight = rRect.right;
-    const tWidth = tRight - tLeft;
-    const tHeight = hwRect.height;
-    if (tWidth === 0 || sr.width === 0) return null;
+      const tLeft = lRect.left;
+      const tRight = rRect.right;
+      const tWidth = tRight - tLeft;
+      const tHeight = hwRect.height;
 
-    const scale = tWidth / sr.width;
-    const sCx = sr.left + sr.width / 2;
-    const sCy = sr.top + sr.height / 2;
-    const tCx = tLeft + tWidth / 2;
-    const tCy = hwRect.top + tHeight / 2;
-    const dx = tCx - sCx;
-    const dy = tCy - sCy;
-
-    return `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${scale})`;
-  }, []);
-
-  useEffect(() => {
-    if (
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      setStage("done");
-      return;
-    }
-    document.documentElement.classList.add("intro-active");
-
-    const timers: ReturnType<typeof setTimeout>[] = [
-      setTimeout(() => setStage("rings"), TIMINGS.rings),
-      setTimeout(() => setStage("brackets"), TIMINGS.brackets),
-      setTimeout(() => setStage("scramble"), TIMINGS.scramble),
-      setTimeout(() => {
-        const m = computeMorph();
-        if (m) setMorphTransform(m);
-        setStage("morph");
-      }, TIMINGS.morph),
-      setTimeout(() => setStage("reveal"), TIMINGS.reveal),
-      setTimeout(() => setStage("done"), TIMINGS.done),
-    ];
-
-    return () => timers.forEach(clearTimeout);
-  }, [computeMorph]);
-
-  useEffect(() => {
-    function onResize() {
-      if (stage === "morph" || stage === "reveal") {
-        const m = computeMorph();
-        if (m) setMorphTransform(m);
+      if (tWidth > 0 && sr.width > 0) {
+        const scale = tWidth / sr.width;
+        const sCx = sr.left + sr.width / 2;
+        const sCy = sr.top + sr.height / 2;
+        const tCx = tLeft + tWidth / 2;
+        const tCy = hwRect.top + tHeight / 2;
+        const dx = tCx - sCx;
+        const dy = tCy - sCy;
+        /* Setting the inline transform after first paint triggers the CSS
+           transition (delayed in intro.css) into the morph target. */
+        src.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${scale})`;
       }
     }
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [stage, computeMorph]);
 
-  useEffect(() => {
-    if (stage === "done") {
-      document.documentElement.classList.remove("intro-active");
-      onDone();
-    }
-  }, [stage, onDone]);
-
-  if (stage === "done") return null;
-
-  const wordStyle: React.CSSProperties | undefined =
-    (stage === "morph" || stage === "reveal") && morphTransform
-      ? { transform: morphTransform }
-      : undefined;
-
-  const showScramble =
-    stage === "scramble" || stage === "morph" || stage === "reveal";
+    const t = setTimeout(onDone, INTRO_DURATION);
+    return () => clearTimeout(t);
+  }, [onDone]);
 
   return (
     <div
@@ -164,38 +91,36 @@ function IntroInner({ onDone }: { onDone: () => void }) {
         "intro-overlay fixed inset-0 font-mono",
         "pointer-events-auto select-none",
       )}
-      data-stage={stage}
       aria-hidden="true"
     >
       <div className="intro-bg absolute inset-0 bg-ink"></div>
       <div className="intro-scan pointer-events-none absolute inset-x-0 top-0 h-0.5"></div>
 
-      <div className="intro-rings pointer-events-none absolute inset-x-0 top-[-20vh] h-[240vh] opacity-0">
+      <div className="intro-rings pointer-events-none absolute inset-x-0 top-[-20vh] h-[240vh]">
         <IntroRings />
       </div>
 
       <div
         ref={wordWrapRef}
-        style={wordStyle}
         className={cn(
           "intro-word absolute top-1/2 left-1/2 z-10",
           "inline-flex items-baseline gap-[0.04em]",
           "font-mono font-medium text-accent uppercase whitespace-nowrap",
         )}
       >
-        <span className="intro-bracket intro-bracket--l inline-block font-normal text-accent-2 opacity-0">
+        <span className="intro-bracket intro-bracket--l inline-block font-normal text-accent-2">
           [
         </span>
-        <span className="intro-word-inner inline-block text-center opacity-0">
-          {showScramble && (
-            <ScrambleWord
-              words={[...SCRAMBLE_WORDS]}
-              hold={1300}
-              duration={900}
-            />
-          )}
+        <span className="intro-word-inner inline-block text-center">
+          <ScrambleWord
+            words={["TABSIR · CG", "FRICTION"]}
+            hold={1300}
+            duration={900}
+            delay={2850}
+            loop={false}
+          />
         </span>
-        <span className="intro-bracket intro-bracket--r inline-block font-normal text-accent-2 opacity-0">
+        <span className="intro-bracket intro-bracket--r inline-block font-normal text-accent-2">
           ]
         </span>
       </div>
@@ -203,10 +128,24 @@ function IntroInner({ onDone }: { onDone: () => void }) {
   );
 }
 
-/* Unmount once `done` so timers and listeners are torn down. */
 export function Intro() {
-  const [mounted, setMounted] = useState(true);
-  const handleDone = useCallback(() => setMounted(false), []);
-  if (!mounted) return null;
-  return <IntroInner onDone={handleDone} />;
+  const [show, setShow] = useState(true);
+
+  useEffect(() => {
+    if (document.documentElement.dataset.skipIntro === "1") setShow(false);
+  }, []);
+
+  const handleDone = useCallback(() => {
+    localStorage.setItem("intro-played", String(Date.now()));
+    document.documentElement.dataset.skipIntro = "1";
+    setShow(false);
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <div id="intro-root">
+      <IntroInner onDone={handleDone} />
+    </div>
+  );
 }

@@ -1,6 +1,5 @@
 "use client";
-
-import { use, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { H3 } from "@/components/ui/H2";
 import { HeartButton } from "./HeartButton";
 
@@ -12,37 +11,28 @@ function ensureDeviceId() {
   document.cookie = `felt-id=${crypto.randomUUID()}; path=/; max-age=31536000; samesite=lax`;
 }
 
-const mineCache = new Map<string, Promise<number>>();
-function loadMine(slug: string): Promise<number> {
-  if (typeof window === "undefined") return new Promise<number>(() => {});
-  let p = mineCache.get(slug);
-  if (!p) {
-    ensureDeviceId();
-    p = fetch(`/api/score?slug=${encodeURIComponent(slug)}`)
-      .then((r) => (r.ok ? (r.json() as Promise<{ mine: number }>) : null))
-      .then((d) => d?.mine ?? 0)
-      .catch(() => 0);
-    mineCache.set(slug, p);
-  }
-  return p;
-}
+type Felt = { score: number; mine: number };
 
-export default function FeltMeter({
-  slug,
-  initialScore = 0,
-}: {
-  slug: string;
-  initialScore?: number;
-}) {
-  const [felt, setFelt] = useState({
-    score: initialScore,
-    mine: use(loadMine(slug)),
-  });
+export default function FeltMeter({ slug }: { slug: string }) {
+  const [felt, setFelt] = useState<Felt | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useLayoutEffect(() => {
+    ensureDeviceId();
+    fetch(`/api/score?slug=${encodeURIComponent(slug)}`)
+      .then((r) => (r.ok ? (r.json() as Promise<Felt>) : null))
+      .then((d) => setFelt(d))
+      .catch(() => {});
+  }, [slug]);
+
+  const loading = felt === null;
+  const score = felt?.score ?? 0;
+  const mine = felt?.mine ?? 0;
+  const maxed = mine >= MAX;
+
   const tap = () => {
-    if (felt.mine >= MAX) return;
-    const next = { score: felt.score + 1, mine: felt.mine + 1 };
+    if (loading || maxed) return;
+    const next = { score: score + 1, mine: mine + 1 };
     setFelt(next);
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
@@ -55,23 +45,23 @@ export default function FeltMeter({
   };
 
   return (
-    <div className="flex flex-col items-start gap-3.5 font-sans">
+    <div className="flex flex-col items-start gap-2">
       <H3 variant="widget">// felt</H3>
       <HeartButton
+        fill={mine / MAX}
         size={84}
-        step={1 / MAX}
-        onChange={tap}
-        ariaLabel={felt.mine >= MAX ? "Felt maxed out" : "Tap to add warmth"}
+        onTap={tap}
+        ariaLabel={maxed ? "Felt maxed out" : "Tap to add warmth"}
       />
       <div className="flex flex-col gap-1" aria-live="polite">
         <span className="font-serif italic text-sm leading-none text-cream-2">
           felt by{" "}
           <span className="not-italic font-medium tabular-nums text-accent">
-            {felt.score}
+            {loading ? "—" : score}
           </span>
         </span>
         <span className="font-mono text-xxs uppercase tracking-widest text-muted-2">
-          [<span className="tabular-nums">{felt.mine}</span>/{MAX}]
+          [<span className="tabular-nums">{loading ? "—" : mine}</span>/{MAX}]
         </span>
       </div>
     </div>

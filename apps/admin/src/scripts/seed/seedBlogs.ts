@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { Firestore } from "firebase-admin/firestore";
 import {
   BlogStatus,
+  publishedBlogDBSchema,
   type BlogStats,
   type PublishedBlogDB,
 } from "@tabsircg/schemas/blog";
@@ -64,8 +65,13 @@ export async function seedBlogs(
     blogDocs[i].recommendedBlogIds = blogIds.filter((_, j) => j !== i);
   }
 
+  // Validate against the live schema so any drift between the seed and
+  // @tabsircg/schemas surfaces here instead of as bad data in Firestore.
   const writes: Array<[FirebaseFirestore.DocumentReference, PublishedBlogDB]> =
-    blogDocs.map((b) => [db.collection("blogs").doc(b.blogId), b]);
+    blogDocs.map((b) => [
+      db.collection("blogs").doc(b.blogId),
+      publishedBlogDBSchema.parse(b),
+    ]);
   await batchedWrites(db, writes);
 
   console.log(`  ✓ ${blogDocs.length} blogs`);

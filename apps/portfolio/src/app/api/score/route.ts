@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     if (json.status === "error") {
       return NextResponse.json({ error: json.message }, { status: 502 });
     }
-    return NextResponse.json({ mine: json.data.mine });
+    return NextResponse.json({ score: json.data.score, mine: json.data.mine });
   } catch (err) {
     console.error("score fetch failed:", err);
     return NextResponse.json({ error: "upstream failed" }, { status: 502 });

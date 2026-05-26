@@ -18,6 +18,7 @@ const [{ db }, { SEED }, { BLOG_SEEDS }, { simulateTraffic }] =
   ]);
 const { seedConfig } = await import("./seedConfig");
 const { seedSiteConfig } = await import("./seedSiteConfig");
+const { seedPortfolio } = await import("./seedPortfolio");
 const { seedBlogs } = await import("./seedBlogs");
 const { seedValidLinks } = await import("./seedValidLinks");
 const { seedAnalytics } = await import("./seedAnalytics");
@@ -32,6 +33,7 @@ const simulation = simulateTraffic(slugs);
 
 if (SEED.config) await seedConfig(db);
 if (SEED.siteConfig) await seedSiteConfig(db);
+if (SEED.portfolio) await seedPortfolio(db);
 if (SEED.blogs) await seedBlogs(db, simulation.slugViews);
 if (SEED.validLinks) await seedValidLinks(db, slugs);
 if (SEED.analytics) await seedAnalytics(db, simulation);

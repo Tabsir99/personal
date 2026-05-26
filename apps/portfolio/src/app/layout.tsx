@@ -63,7 +63,7 @@ export default function RootLayout({
   } as React.CSSProperties;
 
   return (
-    <html lang="en" style={fontVars}>
+    <html lang="en" style={fontVars} suppressHydrationWarning>
       {process.env.NODE_ENV === "development" && (
         <head>
           <script

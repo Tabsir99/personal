@@ -1,5 +1,11 @@
 /* ─── Heart button (component only) ─── */
 .heart-btn {
+  /* the only knobs: one color per role */
+  --heart-empty: var(--color-ink-3);
+  --heart-fill: var(--color-accent);
+  --heart-vignette: var(--color-ink);
+  --heart-spark: var(--color-accent);
+
   position: relative;
   display: inline-block;
   padding: 0;
@@ -9,6 +15,30 @@
   outline: none;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* gradient stops — color math lives here, JSX just names them */
+.heart-empty-top {
+  stop-color: color-mix(in oklab, var(--heart-empty) 62%, var(--color-muted));
+}
+.heart-empty-mid {
+  stop-color: var(--heart-empty);
+}
+.heart-empty-bot {
+  stop-color: color-mix(in oklab, var(--heart-empty) 78%, var(--color-ink));
+}
+.heart-fill-top {
+  stop-color: color-mix(in oklab, var(--heart-fill) 78%, #fff);
+}
+.heart-fill-mid {
+  stop-color: var(--heart-fill);
+}
+.heart-fill-bot {
+  stop-color: color-mix(in oklab, var(--heart-fill) 62%, var(--color-ink));
+}
+.heart-vignette-stop {
+  stop-color: var(--heart-vignette);
+}
+
 .heart-stage {
   position: relative;
   display: block;
@@ -45,7 +75,6 @@
     transform: scale(0.96);
   }
 }
-
 /* --fill (0..1) raises water; one shallow long-wavelength curve drifts uniformly. */
 .water-rise {
   transform: translateY(calc((1 - var(--fill, 0)) * 105px - 15px));
@@ -59,7 +88,6 @@
     transform: translateX(-100px);
   }
 }
-
 .burst {
   position: absolute;
   inset: 0;
@@ -72,7 +100,12 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff, #ff6086 55%, #ef2960);
+  background: radial-gradient(
+    circle at 35% 30%,
+    #fff,
+    var(--heart-spark) 55%,
+    color-mix(in oklab, var(--heart-spark) 70%, var(--color-ink))
+  );
   transform: translate(-50%, -50%);
   opacity: 0;
   animation: fly 900ms cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
@@ -98,7 +131,7 @@
   width: 60%;
   aspect-ratio: 1;
   border-radius: 50%;
-  border: 2px solid #ff6086;
+  border: 2px solid var(--heart-spark);
   transform: translate(-50%, -50%) scale(0.4);
   opacity: 0.8;
   animation: ring 700ms cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
@@ -115,7 +148,7 @@
   top: 38%;
   font-weight: 700;
   font-size: 18px;
-  color: #ef2960;
+  color: var(--heart-spark);
   transform: translate(-50%, -50%);
   opacity: 0;
   animation: rise 1100ms cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
@@ -134,7 +167,6 @@
     transform: translate(-50%, -160%) scale(1);
   }
 }
-
 @media (prefers-reduced-motion: reduce) {
   .wave,
   .is-pulsing .heart-svg {

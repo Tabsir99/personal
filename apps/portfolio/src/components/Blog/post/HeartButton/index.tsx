@@ -1,14 +1,12 @@
 import "./style.css";
-import { useState, type CSSProperties } from "react";
+import { useId, useRef, useState, type CSSProperties } from "react";
 
 const H =
   "M50 87C22 71 4 51 4 30 4 16 15 6 28 6 38 6 46 12 50 22 54 12 62 6 72 6 85 6 96 16 96 30 96 51 78 71 50 87Z";
 const W =
   "M-100 5 Q-75 2 -50 5 Q-25 8 0 5 Q25 2 50 5 Q75 8 100 5 Q125 2 150 5 Q175 8 200 5 V110 H-100 Z";
-let _n = 0;
 
 // Lets you put CSS custom properties (--foo) in a style object without TS complaining.
-// The `--${string}` key type only matches custom props, so it never clashes with real CSS keys.
 type CSSVars = CSSProperties & Record<`--${string}`, string | number>;
 
 interface BurstParticle {
@@ -23,33 +21,32 @@ interface Burst {
   parts: BurstParticle[];
 }
 
-interface HeartButtonProps {
+interface WaveHeartProps {
+  fill: number; // 0..1, owned by parent — single source of truth
   size?: number;
-  step?: number;
-  onChange?: () => void;
+  onTap?: () => void;
   ariaLabel?: string;
 }
 
 export function HeartButton({
+  fill,
   size = 96,
-  step = 0.13,
-  onChange,
+  onTap,
   ariaLabel = "Like",
-}: HeartButtonProps) {
-  const [fill, setFill] = useState(0);
+}: WaveHeartProps) {
   const [bursts, setBursts] = useState<Burst[]>([]);
   const [pulse, setPulse] = useState(false);
-  const u = "h" + _n++;
+  const u = useId(); // stable, unique per instance, SSR-safe
+  const burstId = useRef(0); // per-instance burst counter
   const full = fill >= 0.999;
 
   const click = () => {
-    setFill((f) => (f >= 0.999 ? 0 : Math.min(1, f + step)));
+    onTap?.();
     setPulse(false);
     requestAnimationFrame(() => setPulse(true));
     setTimeout(() => setPulse(false), 470);
-    onChange?.();
 
-    const id = ++_n;
+    const id = ++burstId.current;
     const parts: BurstParticle[] = Array.from({ length: 9 }, (_, i) => {
       const a =
         -Math.PI / 2 + (i / 9) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
@@ -79,18 +76,26 @@ export function HeartButton({
         <svg className="heart-svg" viewBox="0 0 100 100" aria-hidden="true">
           <defs>
             <radialGradient id={"b" + u} cx="36%" cy="26%" r="78%">
-              <stop offset="0%" stopColor="#fff1f5" />
-              <stop offset="48%" stopColor="#f6c4d2" />
-              <stop offset="100%" stopColor="#b87589" />
+              <stop offset="0%" className="heart-empty-top" />
+              <stop offset="48%" className="heart-empty-mid" />
+              <stop offset="100%" className="heart-empty-bot" />
             </radialGradient>
             <linearGradient id={"w" + u} x2="0" y2="1">
-              <stop offset="0%" stopColor="#ff7493" />
-              <stop offset="40%" stopColor="#f02b62" />
-              <stop offset="100%" stopColor="#960c36" />
+              <stop offset="0%" className="heart-fill-top" />
+              <stop offset="40%" className="heart-fill-mid" />
+              <stop offset="100%" className="heart-fill-bot" />
             </linearGradient>
             <radialGradient id={"v" + u} cx="50%" cy="48%" r="60%">
-              <stop offset="55%" stopColor="#3a0011" stopOpacity="0" />
-              <stop offset="100%" stopColor="#3a0011" stopOpacity=".42" />
+              <stop
+                offset="55%"
+                className="heart-vignette-stop"
+                stopOpacity="0"
+              />
+              <stop
+                offset="100%"
+                className="heart-vignette-stop"
+                stopOpacity=".42"
+              />
             </radialGradient>
             <clipPath id={"c" + u}>
               <path d={H} />
@@ -103,13 +108,7 @@ export function HeartButton({
             </g>
             <rect width="100" height="100" fill={`url(#v${u})`} />
           </g>
-          <path
-            d={H}
-            fill="none"
-            stroke="#a01138"
-            strokeWidth="1.4"
-            strokeLinejoin="round"
-          />
+          <path d={H} fill="none" strokeWidth="1.4" strokeLinejoin="round" />
         </svg>
         {bursts.map((b) => (
           <span className="burst" key={b.id} aria-hidden="true">

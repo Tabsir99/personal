@@ -14,6 +14,7 @@
 export const SEED = {
   config: true,
   siteConfig: true,
+  portfolio: true,
   blogs: true,
   validLinks: true,
   analytics: true,

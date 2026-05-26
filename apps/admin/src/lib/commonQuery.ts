@@ -108,10 +108,26 @@ export const readNDocs = async <T>({
 
   if (orderBy) {
     query = query.orderBy(orderBy.field as string, orderBy.order);
+    // Stable tiebreaker: without it, docs sharing an orderBy value (e.g. equal
+    // timestamps) get skipped or duplicated across cursor pages.
+    query = query.orderBy(firestore.FieldPath.documentId(), orderBy.order);
   }
 
   if (cursorValue) {
-    query = query.startAfter(cursorValue);
+    // Cursor is `${orderByValue}__${docId}` (see callers). Decode and coerce the
+    // value back to a number when it is numeric, so startAfter compares against
+    // numeric fields correctly instead of as a string.
+    const sep = cursorValue.indexOf("__");
+    if (orderBy && sep !== -1) {
+      const rawValue = cursorValue.slice(0, sep);
+      const docId = cursorValue.slice(sep + 2);
+      const asNumber = Number(rawValue);
+      const value =
+        rawValue !== "" && Number.isFinite(asNumber) ? asNumber : rawValue;
+      query = query.startAfter(value, docId);
+    } else {
+      query = query.startAfter(cursorValue);
+    }
   }
   const querySnapshot = await query.get();
 

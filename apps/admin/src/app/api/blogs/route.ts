@@ -77,9 +77,10 @@ export const GET = wrapRoute(async (request: NextRequest) => {
     },
   });
 
+  const last = items[items.length - 1];
   const nextCursor =
     items.length === parsed.limit
-      ? String(items[items.length - 1][parsed.orderBy])
+      ? `${last[parsed.orderBy]}__${last.blogId}`
       : null;
 
   const page: CursorPage<PublishedBlogDB> = { items, nextCursor };

@@ -1,4 +1,15 @@
-/* Unlayered so stage-driven opacity beats utility-layer `opacity-0`. */
+/* Hero entrance is gated on intro completion. Override to 0 when the intro
+   is skipped so the hero animates in immediately. */
+:root {
+  --hero-stagger: 6000ms;
+}
+html[data-skip-intro="1"] {
+  --hero-stagger: 0ms;
+}
+
+html[data-skip-intro="1"] #intro-root {
+  display: none;
+}
 
 @keyframes intro-scan-sweep {
   0% {
@@ -21,10 +32,36 @@
     stroke-dashoffset: 0;
   }
 }
-
-html.intro-active,
-html.intro-active body {
-  overflow: hidden;
+@keyframes intro-bg-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes intro-rings-in {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes intro-rings-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes intro-bracket-in {
+  to {
+    opacity: 0.7;
+    transform: translateX(0);
+  }
+}
+@keyframes intro-word-inner-in {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes hero-word-snap {
+  to {
+    opacity: 1;
+  }
 }
 
 .intro-overlay {
@@ -32,10 +69,7 @@ html.intro-active body {
 }
 
 .intro-bg {
-  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.intro-overlay:is([data-stage="morph"], [data-stage="reveal"]) .intro-bg {
-  opacity: 0;
+  animation: intro-bg-out 800ms cubic-bezier(0.4, 0, 0.2, 1) 5100ms forwards;
 }
 
 .intro-scan {
@@ -46,59 +80,41 @@ html.intro-active body {
     rgba(232, 148, 85, 0)
   );
   box-shadow: 0 0 24px rgba(232, 148, 85, 0.35);
-  /* `both` keeps opacity:0 during the lead-in. Delay matches INTRO_DELAY. */
   animation: intro-scan-sweep 1.6s cubic-bezier(0.22, 1, 0.36, 1) 1000ms both;
 }
 
-/* Mirrors Atmosphere's Summit A geometry; opacity-only so position is stable. */
 .intro-rings {
-  transition: opacity 0.8s ease;
+  opacity: 0;
+  animation:
+    intro-rings-in 800ms ease 1900ms forwards,
+    intro-rings-out 850ms ease 5100ms forwards;
 }
 .intro-rings ellipse {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
   animation: intro-ring-draw 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  animation-play-state: paused;
-}
-.intro-overlay:is(
-    [data-stage="rings"],
-    [data-stage="brackets"],
-    [data-stage="scramble"]
-  )
-  .intro-rings {
-  opacity: 1;
-}
-.intro-overlay:is(
-    [data-stage="rings"],
-    [data-stage="brackets"],
-    [data-stage="scramble"],
-    [data-stage="morph"],
-    [data-stage="reveal"]
-  )
-  .intro-rings
-  ellipse {
-  animation-play-state: running;
-}
-.intro-overlay:is([data-stage="morph"], [data-stage="reveal"]) .intro-rings {
-  opacity: 0;
-  transition: opacity 0.85s ease;
+  /* Per-ellipse stagger from inline --ring-d composes onto the base. */
+  animation-delay: calc(1900ms + var(--ring-d, 0s));
 }
 
-/* Letter-spacing matches hero's `tracking-tight` so chars align after FLIP. */
+/* JS sets the inline morph transform after first paint; the transition's
+   delay holds the word at center until scramble settles, then animates it
+   into hero-word position. The intro-word stays opaque the entire intro —
+   when it unmounts, the hero word (snapped visible at the same instant)
+   is sitting at the identical position, so the handoff is invisible. */
 .intro-word {
   transform: translate(-50%, -50%) scale(1);
   font-size: clamp(48px, 11vw, 160px);
   line-height: 1.04;
   letter-spacing: -0.025em;
   text-shadow: 0 0 40px rgba(232, 148, 85, 0.35);
-  transition:
-    transform 0.65s cubic-bezier(0.7, 0, 0.2, 1),
-    opacity 0.5s ease;
+  transition: transform 650ms cubic-bezier(0.7, 0, 0.2, 1) 5100ms;
 }
+
 .intro-bracket {
-  transition:
-    opacity 0.55s ease 0.1s,
-    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  opacity: 0;
+  animation: intro-bracket-in 600ms cubic-bezier(0.22, 1, 0.36, 1) 2500ms
+    forwards;
 }
 .intro-bracket--l {
   transform: translateX(-0.55em);
@@ -106,33 +122,20 @@ html.intro-active body {
 .intro-bracket--r {
   transform: translateX(0.55em);
 }
-.intro-overlay:is(
-    [data-stage="brackets"],
-    [data-stage="scramble"],
-    [data-stage="morph"],
-    [data-stage="reveal"]
-  )
-  .intro-bracket {
-  opacity: 0.7;
-  transform: translateX(0);
-}
+
 .intro-word-inner {
   min-width: 11ch;
-  transition: opacity 0.4s ease;
-}
-.intro-overlay:is(
-    [data-stage="scramble"],
-    [data-stage="morph"],
-    [data-stage="reveal"]
-  )
-  .intro-word-inner {
-  opacity: 1;
-}
-.intro-overlay[data-stage="reveal"] .intro-word {
   opacity: 0;
-  transition:
-    opacity 0.4s ease,
-    transform 0.65s cubic-bezier(0.7, 0, 0.2, 1);
+  animation: intro-word-inner-in 400ms ease 2850ms forwards;
+}
+
+/* Hero word stays invisible until the intro morph lands on it, then snaps
+   in (no fade) so it visually IS the intro word. Skipped sessions bypass
+   the rule entirely so the word renders instantly with no first-frame flash. */
+html:not([data-skip-intro="1"]) [data-hero-word] {
+  opacity: 0;
+  animation: hero-word-snap 1ms step-end forwards;
+  animation-delay: var(--hero-stagger);
 }
 
 @media (max-width: 1100px) {
@@ -144,9 +147,5 @@ html.intro-active body {
 @media (prefers-reduced-motion: reduce) {
   .intro-overlay {
     display: none;
-  }
-  html.intro-active,
-  html.intro-active body {
-    overflow: auto;
   }
 }

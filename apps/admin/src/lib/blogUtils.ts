@@ -160,17 +160,18 @@ export function createNewBlogFormData(title?: string): BlogFormData {
   };
 }
 
-type RevalidateTarget = { path?: string; tag?: string };
+type RevalidateTarget = {
+  path?: string | string[];
+  paths?: string[];
+  tag?: string | string[];
+  tags?: string[];
+};
 
-export async function sendRevalidateRequest(target: string | RevalidateTarget) {
-  const body =
-    typeof target === "string"
-      ? { path: `/blogs/${target}` }
-      : target;
+export async function sendRevalidateRequest(target: RevalidateTarget) {
   try {
     const res = await fetch(`${clientEnv.BLOG_ORIGIN}/api/revalidate`, {
       method: "POST",
-      body: JSON.stringify(body),
+      body: JSON.stringify(target),
       headers: {
         "Content-Type": "application/json",
         acs_tkn: env.SERVER_TOKEN,
@@ -182,4 +183,11 @@ export async function sendRevalidateRequest(target: string | RevalidateTarget) {
   } catch (error) {
     console.error(error);
   }
+}
+
+// A blog mutation affects the post page (`blog:${slug}`) and every list that
+// surfaces it — the /blog index, the home Writing section, the featured slot,
+// and the sitemap — all of which share the "blogs" tag in the portfolio.
+export async function revalidateBlog(slug: string) {
+  await sendRevalidateRequest({ tags: ["blogs", `blog:${slug}`] });
 }

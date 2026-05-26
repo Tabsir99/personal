@@ -20,6 +20,9 @@ const FALLBACK: PageData = {
   credentials: [],
 };
 
+// ISR: cached in the data cache, revalidated on-demand via the "page-data" tag
+// (admin POSTs { tag: "page-data" } to /api/revalidate on save). cache() dedupes
+// within a request (home + footer both call it).
 export const getPageData = cache(async (): Promise<PageData> => {
   try {
     const response = await fetch(`${env.ADMIN_ORIGIN}/api/page-data`, {

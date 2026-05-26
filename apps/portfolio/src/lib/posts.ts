@@ -2,6 +2,7 @@ import type { DocContent } from "@open-notion/serializers";
 import type { ApiResponse, CursorPage } from "@tabsircg/schemas/api";
 import type { PublishedBlogDB } from "@tabsircg/schemas/blog";
 import type { SiteConfig } from "@tabsircg/schemas/site";
+import { cache } from "react";
 import { env } from "@/config/env";
 
 // Mirrors `fieldsToRead` in apps/admin/src/app/api/blogs/route.ts.
@@ -71,10 +72,15 @@ export function formatDate(iso: string): string {
 
 const ADMIN_HEADERS = { serverToken: env.SERVER_TOKEN } as const;
 
-async function fetchJson<T>(path: string): Promise<T | null> {
+// ISR: responses are stored in the data cache (force-cache) and revalidated
+// on-demand by tag. Admin POSTs the matching tags to /api/revalidate after a
+// mutation (see apps/admin/src/lib/blogUtils.ts → revalidateBlog).
+async function fetchJson<T>(path: string, tags: string[]): Promise<T | null> {
   try {
     const res = await fetch(`${env.ADMIN_ORIGIN}${path}`, {
       headers: ADMIN_HEADERS,
+      cache: "force-cache",
+      next: { tags },
     });
     const json = (await res.json()) as ApiResponse<T>;
     if (json.status === "error") return null;
@@ -106,7 +112,10 @@ const toPostMeta = (b: BlogListItem): PostMeta => ({
 const toNeighbour = ({ slug, title }: PostMeta): Neighbour => ({ slug, title });
 
 export async function getFeaturedBlog(): Promise<PostMeta | null> {
-  const blog = await fetchJson<PublishedBlogDB | null>("/api/blogs/featured");
+  const blog = await fetchJson<PublishedBlogDB | null>(
+    "/api/blogs/featured",
+    ["blogs"],
+  );
   if (!blog) return null;
   return toPostMeta(blog);
 }
@@ -122,13 +131,15 @@ export async function getRecentBlogs(
   if (cursor) params.set("cursor", cursor);
   const page = await fetchJson<CursorPage<BlogListItem>>(
     `/api/blogs?${params.toString()}`,
+    ["blogs"],
   );
   if (!page) return { items: [], nextCursor: null };
   return { items: page.items.map(toPostMeta), nextCursor: page.nextCursor };
 }
 
 // Acceptable up to ~100 published blogs; past that, swap in a nav index.
-export async function getAllBlogs(): Promise<PostMeta[]> {
+// cache() dedupes the page-walk within a single request render.
+export const getAllBlogs = cache(async (): Promise<PostMeta[]> => {
   const all: PostMeta[] = [];
   let cursor: string | undefined = undefined;
   for (let safety = 0; safety < 50; safety++) {
@@ -138,11 +149,15 @@ export async function getAllBlogs(): Promise<PostMeta[]> {
     cursor = page.nextCursor;
   }
   return all;
-}
+});
 
-export async function getPost(slug: string): Promise<Post | null> {
+// cache() dedupes getPost across generateMetadata + the page render.
+export const getPost = cache(async (slug: string): Promise<Post | null> => {
   const [blog, list] = await Promise.all([
-    fetchJson<PublishedBlogDB>(`/api/blogs/${encodeURIComponent(slug)}`),
+    fetchJson<PublishedBlogDB>(`/api/blogs/${encodeURIComponent(slug)}`, [
+      "blogs",
+      `blog:${slug}`,
+    ]),
     getAllBlogs(),
   ]);
   if (!blog) return null;
@@ -178,20 +193,15 @@ export async function getPost(slug: string): Promise<Post | null> {
     prev,
     next,
   };
-}
+});
 
 export async function getSiteConfig(): Promise<SiteConfig | null> {
-  return fetchJson<SiteConfig>("/api/site-config");
+  return fetchJson<SiteConfig>("/api/site-config", ["site-config"]);
 }
 
 export async function getBlogTags(): Promise<string[]> {
-  const cfg = await fetchJson<{ tags: string[] }>("/api/config");
+  const cfg = await fetchJson<{ tags: string[] }>("/api/config", [
+    "blog-config",
+  ]);
   return ["all", ...(cfg?.tags ?? [])];
-}
-
-export async function getPostScore(slug: string): Promise<number> {
-  const r = await fetchJson<{ score: number }>(
-    `/api/blogs/${encodeURIComponent(slug)}/score`,
-  );
-  return r?.score ?? 0;
 }

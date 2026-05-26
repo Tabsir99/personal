@@ -41,17 +41,20 @@ export const readSingleBlog = async <T>({
   fieldsToRead,
 }: ReadSingleBlogParams<T>): Promise<T | null> => {
   const docRef = db.collection(Collections.BLOGS).doc(docId);
-  const snapshot = await docRef.get();
 
-  if (!snapshot.exists) return null;
-
-  const data = snapshot.data() as Record<string, unknown>;
-
-  if (!fieldsToRead) return data as T;
-
-  const projected: Record<string, unknown> = {};
-  for (const [field, include] of Object.entries(fieldsToRead)) {
-    if (include) projected[field] = data[field];
+  // Project at the database level with a field mask so large fields (e.g. the
+  // serialized blog `content`) aren't read off the wire when only a few small
+  // fields are needed.
+  if (fieldsToRead) {
+    const fields = Object.entries(fieldsToRead)
+      .filter(([, include]) => include)
+      .map(([field]) => field);
+    if (fields.length > 0) {
+      const [snapshot] = await db.getAll(docRef, { fieldMask: fields });
+      return snapshot.exists ? (snapshot.data() as T) : null;
+    }
   }
-  return projected as T;
+
+  const snapshot = await docRef.get();
+  return snapshot.exists ? (snapshot.data() as T) : null;
 };

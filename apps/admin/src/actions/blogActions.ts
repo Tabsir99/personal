@@ -14,7 +14,7 @@ import {
   formDataToDraftDB,
   formDataToPublishedDB,
   publishedDBToFormData,
-  sendRevalidateRequest,
+  revalidateBlog,
 } from "@/lib/blogUtils";
 import {
   BlogDraftDB,
@@ -44,8 +44,6 @@ export const loadBlogForEditing = wrap(async (blogId: string) => {
   const blog = await readSingleBlog<PublishedBlogDB | BlogDraftDB>({
     docId: parsedBlogId,
   });
-
-  console.log("blog", parsedBlogId, blogId);
 
   if (!blog) throw new Error("Blog not found");
 
@@ -154,7 +152,7 @@ export const publishBlog = wrap(async (draftId: string) => {
     });
   }
 
-  await sendRevalidateRequest(publishedBlog.slug);
+  await revalidateBlog(publishedBlog.slug);
 
   return null;
 });
@@ -186,7 +184,7 @@ export const toggleBlogStatus = wrap(async (blogId: string) => {
     },
   });
 
-  await sendRevalidateRequest(blogDoc.slug);
+  await revalidateBlog(blogDoc.slug);
 
   return null;
 });
@@ -211,7 +209,7 @@ export const featureBlog = wrap(async (blogId: string) => {
     },
   });
 
-  await sendRevalidateRequest(blogDoc.slug);
+  await revalidateBlog(blogDoc.slug);
   return null;
 });
 
@@ -235,7 +233,7 @@ export const updateBlogCoverImage = wrap(
       },
     });
 
-    await sendRevalidateRequest(blogDoc.slug);
+    await revalidateBlog(blogDoc.slug);
 
     return null;
   },
@@ -254,7 +252,7 @@ export const deleteBlog = wrap(async (blogId: string) => {
     docId: blogId,
   });
 
-  await sendRevalidateRequest(blogDoc.slug);
+  await revalidateBlog(blogDoc.slug);
 
   return null;
 });

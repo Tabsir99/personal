@@ -34,7 +34,7 @@ function MetadataRow({
 
 export default function PostHeader({ post }: { post: PostMeta }) {
   return (
-    <header className="pb-10 border-b border-line mb-12 max-sm:pb-7 max-sm:mb-8">
+    <header className="pb-12 border-b border-line mb-12 max-sm:pb-7 max-sm:mb-8">
       <Breadcrumb
         className="mb-8 max-sm:mb-5"
         crumbs={[
@@ -44,22 +44,19 @@ export default function PostHeader({ post }: { post: PostMeta }) {
         ]}
       />
 
-      <div className="flex items-center gap-3.5 mb-7">
+      <div className="flex items-center gap-3 mb-7">
         <span
-          className={`inline-block px-3 py-[5px] rounded-full font-mono text-xs lowercase tracking-wider ${KIND_KICKER[post.kind]}`}
+          className={`inline-block px-3 py-1 rounded-full font-mono text-xs lowercase tracking-wider ${KIND_KICKER[post.kind]}`}
         >
           {KIND_LABEL[post.kind]}
         </span>
-        <span
-          className="shrink-0 w-6 h-px bg-line opacity-40"
-          aria-hidden="true"
-        />
+        <span className="shrink-0 w-6 h-px bg-muted/50" aria-hidden="true" />
         <time className="font-mono text-muted text-xs" dateTime={post.date}>
           {formatDate(post.date)}
         </time>
       </div>
 
-      <h1 className="text-[clamp(40px,7vw,160px)] leading-[1.1] tracking-tighter font-serif mb-6">
+      <h1 className="text-[clamp(60px,10vw,120px)] leading-[1.1] tracking-tighter font-serif mb-6">
         {post.title}
       </h1>
 

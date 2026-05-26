@@ -1,10 +1,9 @@
 import "@open-notion/assets/doc.css";
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { DocRenderer } from "@open-notion/serializers/react";
 import { docToToc } from "@open-notion/serializers/toc";
-import { getAllBlogs, getPost, getPostScore } from "@/lib/posts";
+import { getAllBlogs, getPost } from "@/lib/posts";
 import PostHeader from "@/components/Blog/post/PostHeader";
 import PostFooter from "@/components/Blog/post/PostFooter";
 import Toc from "@/components/Blog/post/Toc";
@@ -58,10 +57,9 @@ export default async function PostPage({ params }: { params: RouteParams }) {
 
   const toc = docToToc(post.body);
   const url = `https://tabsircg.com/blog/${post.slug}`;
-  const initialScore = await getPostScore(post.slug);
 
   return (
-    <article className="bg-ink-2 text-cream min-h-full w-full">
+    <article className="bg-ink-2 text-cream min-h-full w-full py-8 px-8 max-sm:px-4">
       <Script
         src="https://cdn.jsdelivr.net/npm/@open-notion/assets@latest/hydration.js/+esm"
         type="module"
@@ -70,31 +68,29 @@ export default async function PostPage({ params }: { params: RouteParams }) {
 
       <BlogPostJsonLd post={post} />
 
-      <div className="max-w-[1280px] mx-auto pt-14 px-8 pb-24 grid grid-cols-[220px_minmax(0,1fr)_80px] gap-x-14 items-start max-xl:grid-cols-[minmax(0,1fr)] max-xl:gap-x-0 max-xl:px-6 max-xl:pt-8 max-xl:pb-20 max-sm:px-[18px] max-sm:pt-6 max-sm:pb-16">
+      <div className="max-w-7xl mx-auto grid grid-cols-[220px_minmax(0,1fr)_80px] gap-x-10 gap-y-6 items-start max-lg:grid-cols-[minmax(0,1fr)]">
         <aside
-          className="sticky top-8 max-xl:static max-xl:pb-0"
+          className="sticky top-8 max-xl:static"
           aria-label="Table of contents"
         >
           <Toc items={toc} />
         </aside>
 
-        <div className="min-w-0 max-w-[720px] justify-self-center w-full">
+        <div className="min-w-0 max-w-3xl justify-self-center w-full">
           <PostHeader post={post} />
 
-          {/* Dark is needed for the Editor */}
           <div className="dark pb-14">
             <DocRenderer doc={post.body} />
           </div>
           <PostFooter prev={post.prev ?? null} next={post.next ?? null} />
         </div>
 
-        <aside className="sticky top-8" aria-label="Article actions">
-          <div className="sticky top-8 flex flex-col gap-7 pt-1 max-xl:static max-xl:flex-row max-xl:flex-wrap max-xl:gap-8 max-xl:mt-8 max-xl:pt-6 max-xl:border-t max-xl:border-line max-xl:*:flex-1 max-xl:*:basis-[240px]">
-            <Suspense fallback={<div className="h-[150px]" aria-hidden />}>
-              <FeltMeter slug={post.slug} initialScore={initialScore} />
-            </Suspense>
-            <Share url={url} title={post.title} />
-          </div>
+        <aside
+          className="sticky top-8 max-lg:static flex flex-col gap-8 max-lg:flex-row max-lg:justify-center"
+          aria-label="Article actions"
+        >
+          <FeltMeter slug={post.slug} />
+          <Share url={url} title={post.title} />
         </aside>
       </div>
 

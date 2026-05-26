@@ -49,8 +49,6 @@ export function Hero() {
               "text-[clamp(40px,6.4vw,96px)] leading-[1.04] tracking-tight",
               "text-accent uppercase",
               "whitespace-nowrap",
-              "translate-y-2 opacity-0",
-              "animate-rise-in delay-6300",
               "max-xl:text-[clamp(36px,9vw,64px)]",
             )}
           >
@@ -66,7 +64,7 @@ export function Hero() {
                   "RE-WRITES",
                   "SLOW SHIPS",
                 ]}
-                delay={6300}
+                delay={6000}
               />
             </span>
 
@@ -83,15 +81,19 @@ export function Hero() {
               "max-xl:text-[clamp(48px,12vw,96px)]",
             )}
           >
-            <span className="block translate-y-[0.4em] opacity-0 animate-rise-in animation-duration-[1s] delay-6400">
+            <span
+              className="block translate-y-[0.4em] opacity-0 animate-rise-in animation-duration-[1s]"
+              style={{ animationDelay: "calc(var(--hero-stagger) + 100ms)" }}
+            >
               is not
             </span>
             <span
               className={cn(
                 "em-accent block translate-y-[0.4em] opacity-0",
                 "pl-[clamp(28px,5vw,96px)] max-xl:pl-6",
-                "animate-rise-in animation-duration-[1s] delay-6500",
+                "animate-rise-in duration-1000",
               )}
+              style={{ animationDelay: "calc(var(--hero-stagger) + 200ms)" }}
             >
               a <em>feature.</em>
             </span>
@@ -103,8 +105,9 @@ export function Hero() {
             "em-accent",
             "text-[clamp(17px,1.55vw,22px)] leading-[1.45]",
             "text-cream-2 mt-9 mb-11 max-w-[52ch]",
-            "opacity-0 animate-fade-in delay-6600",
+            "opacity-0 animate-fade-in",
           )}
+          style={{ animationDelay: "calc(var(--hero-stagger) + 300ms)" }}
         >
           Full-stack web work for teams who&rsquo;d rather{" "}
           <em className="underline underline-offset-2">move than rewrite</em>.
@@ -112,7 +115,10 @@ export function Hero() {
           show.
         </p>
 
-        <div className="flex flex-wrap items-center  gap-7 opacity-0 animate-fade-in delay-6700">
+        <div
+          className="flex flex-wrap items-center  gap-7 opacity-0 animate-fade-in"
+          style={{ animationDelay: "calc(var(--hero-stagger) + 400ms)" }}
+        >
           <a
             href="#contact"
             className={cn(

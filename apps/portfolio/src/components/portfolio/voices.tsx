@@ -4,12 +4,8 @@ import { BlockQuote } from "../ui/BlockQuote";
 import { H2 } from "../ui/H2";
 import { VoicesPlayer } from "./voices-player";
 
-export function Voices({
-  testimonial,
-}: {
-  testimonial: Testimonial | undefined;
-}) {
-  if (!testimonial || !testimonial.video) return null;
+export function Voices({ testimonial }: { testimonial?: Testimonial }) {
+  if (!testimonial?.video) return null;
 
   return (
     <section id="voices" className="page-shell flex flex-col gap-12">
