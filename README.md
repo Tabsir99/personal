@@ -7,6 +7,8 @@ apps/portfolio  ──REST──►  apps/admin  ──►  Firestore + Cloudfla
    (public)                  (private CMS)
 ```
 
+For the data-flow, rendering matrix, and per-app file layout, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ---
 
 ## What's inside
