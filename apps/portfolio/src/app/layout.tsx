@@ -4,6 +4,7 @@ import { type Metadata } from "next";
 import { Lato, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { Footer } from "@/components/portfolio/footer";
 import { ScrollIsland } from "@/components/ui/scroll-island";
+import { Tracker } from "@/components/Tracker";
 
 const latoFont = Lato({
   weight: ["300", "400", "700"],
@@ -78,6 +79,7 @@ export default function RootLayout({
         <ScrollIsland />
         <main>{children}</main>
         <Footer />
+        <Tracker />
       </body>
     </html>
   );

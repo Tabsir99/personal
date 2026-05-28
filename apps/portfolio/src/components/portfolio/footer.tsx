@@ -102,7 +102,7 @@ export async function Footer() {
       </div>
       <div className="py-8 border-t border-line flex justify-between items-center">
         <span className="font-mono text-xxs tracking-widest text-muted-2">
-          © 2026 · Tabsir CG · v2.6 · No tracking
+          © 2026 · Tabsir CG · v2.6 · No cookies, no third-parties
         </span>
         <NavLink href="#hero">↑ back to top</NavLink>
       </div>

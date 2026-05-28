@@ -1,1 +1,11 @@
 temp
+emulator-data
+firebase-debug.log
+firestore-debug.log
+firebase.json
+firestore.rules
+firestore.indexes.json
+src/scripts
+vitest
+vitest.config.ts
+dist

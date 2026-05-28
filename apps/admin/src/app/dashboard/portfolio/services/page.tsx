@@ -68,21 +68,14 @@ export default function Services() {
                   !item.isActive && "opacity-50",
                 )}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <span className="font-mono text-eyebrow tracking-widest tabular-nums text-primary">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    {item.label && (
-                      <Eyebrow tone="muted" family="mono" className="truncate">
-                        {item.label}
-                      </Eyebrow>
-                    )}
-                  </div>
-                  {item.frameNum && (
-                    <span className="font-mono text-eyebrow tracking-widest tabular-nums text-muted-foreground/60">
-                      {item.frameNum}
-                    </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-eyebrow tracking-widest tabular-nums text-primary">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  {item.label && (
+                    <Eyebrow tone="muted" family="mono" className="truncate">
+                      {item.label}
+                    </Eyebrow>
                   )}
                 </div>
 
@@ -127,9 +120,7 @@ export default function Services() {
         open={editingIndex !== null}
         onOpenChange={(open) => !open && setEditingIndex(null)}
         serviceIndex={editingIndex}
-        {...(editingIndex !== null
-          ? { service: services[editingIndex] }
-          : {})}
+        {...(editingIndex !== null ? { service: services[editingIndex] } : {})}
       />
     </div>
   );

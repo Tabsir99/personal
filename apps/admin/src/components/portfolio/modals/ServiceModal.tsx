@@ -28,7 +28,6 @@ const defaultFormData: Service = {
   label: "",
   title: "",
   desc: "",
-  frameNum: "",
   frameLabel: "",
   frameTitle: "",
   items: [],
@@ -133,26 +132,14 @@ export default function ServiceDialog({
           <Textarea
             placeholder="What you do here, in one paragraph."
             value={formData.desc}
-            onChange={(e) =>
-              setFormData({ ...formData, desc: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
             rows={4}
           />
         </FormField>
       </ModalSection>
 
       <ModalSection title="Frame">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-          <FormField label="Frame number">
-            <Input
-              placeholder="S/01"
-              value={formData.frameNum}
-              onChange={(e) =>
-                setFormData({ ...formData, frameNum: e.target.value })
-              }
-              className="font-mono text-xs"
-            />
-          </FormField>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <FormField label="Frame label">
             <Input
               placeholder="Full-stack delivery"

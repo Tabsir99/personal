@@ -58,9 +58,7 @@ export const testimonialSchema = z.object({
   text: z.string().default(""),
   video: optionalUrl,
   avatar: optionalUrl,
-  displaySlot: z
-    .enum(["endorsement", "voices", "none"])
-    .default("none"),
+  displaySlot: z.enum(["endorsement", "voices", "none"]).default("none"),
   isActive: z.boolean().default(true),
   order: z.number().default(0),
 });
@@ -70,7 +68,6 @@ export const serviceSchema = z.object({
   label: z.string().default(""),
   title: z.string(),
   desc: z.string().default(""),
-  frameNum: z.string().default(""),
   frameLabel: z.string().default(""),
   frameTitle: z.string().default(""),
   items: z.array(z.string()).default([]),
