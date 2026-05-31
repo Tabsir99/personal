@@ -1,42 +1,18 @@
-import { Terminal, type TerminalLine } from "./terminal";
+import Image from "next/image";
 import { ScrambleWord } from "./scramble-word";
 import { cn } from "@/lib/utils";
 import { NavLink } from "../ui/nav-link";
 
-const TERMINAL_TITLE = "tabsir@field-station";
-const TERMINAL_LINES: TerminalLine[] = [
-  {
-    command: "whoami",
-    response: "full-stack engineer · 2y in production · javascript by default",
-    delayBefore: 400,
-  },
-  {
-    command: "cat stack.txt",
-    response:
-      "react · node · typescript · postgres\nnext.js · prisma · docker · aws",
-    delayBefore: 500,
-  },
-  {
-    command: "ls ./recent-work",
-    response:
-      "✓ field-survey.app    [shipped]\n✓ contour-cli         [shipped]\n· terminal-os         [in flight]",
-    delayBefore: 500,
-  },
-  {
-    command: "echo $STATUS",
-    response: "available for work — Dhaka, BD",
-    delayBefore: 500,
-  },
-];
+const portraitMask =
+  "radial-gradient(ellipse at center, #000 38%, transparent 100%)";
 
-/* ScrambleWord's `delay` keeps the hook word static until the intro ends. */
-export function Hero() {
+export function Hero({ photo }: { photo: string }) {
   return (
     <section
       id="hero"
       className={cn(
         "page-shell min-h-dvh overflow-hidden z-50",
-        "grid grid-cols-[2fr_1.4fr] gap-16",
+        "grid grid-cols-[2fr_1.4fr] gap-16 max-md:grid-cols-1",
         "items-center pt-36",
       )}
     >
@@ -46,10 +22,9 @@ export function Hero() {
             data-hero-word
             className={cn(
               "inline-flex items-baseline gap-[0.04em] font-mono font-medium",
-              "text-[clamp(40px,6.4vw,96px)] leading-[1.04] tracking-tight",
+              "text-[clamp(46px,6vw,96px)] leading-[1.04] tracking-tight",
               "text-accent uppercase",
               "whitespace-nowrap",
-              "max-xl:text-[clamp(36px,9vw,64px)]",
             )}
           >
             <span data-hero-bracket="l" className="text-accent-2 opacity-70">
@@ -76,9 +51,8 @@ export function Hero() {
           <span
             className={cn(
               "mt-1.5 flex flex-col",
-              "text-[clamp(56px,9vw,130px)] leading-[0.92] tracking-[-0.035em]",
+              "text-[clamp(68px,9vw,130px)] leading-[0.92] tracking-[-0.035em]",
               "text-cream",
-              "max-xl:text-[clamp(48px,12vw,96px)]",
             )}
           >
             <span
@@ -90,7 +64,7 @@ export function Hero() {
             <span
               className={cn(
                 "em-accent block translate-y-[0.4em] opacity-0",
-                "pl-[clamp(28px,5vw,96px)] max-xl:pl-6",
+                "pl-[clamp(40px,5vw,96px)]",
                 "animate-rise-in duration-1000",
               )}
               style={{ animationDelay: "calc(var(--hero-stagger) + 200ms)" }}
@@ -103,7 +77,7 @@ export function Hero() {
         <p
           className={cn(
             "em-accent",
-            "text-[clamp(17px,1.55vw,22px)] leading-[1.45]",
+            "text-[clamp(16px,1.5vw,22px)] leading-[1.45]",
             "text-cream-2 mt-9 mb-11 max-w-[52ch]",
             "opacity-0 animate-fade-in",
           )}
@@ -122,7 +96,7 @@ export function Hero() {
           <a
             href="#contact"
             className={cn(
-              "group inline-flex items-center gap-3.5 px-6 py-4",
+              "group inline-flex items-center gap-3 px-6 py-4 max-lg:px-4 max-lg:text-xxs max-lg:py-3",
               "bg-accent text-ink border border-accent rounded-xs",
               "font-mono text-xs tracking-widest uppercase",
               "transition-[background,color] duration-300",
@@ -134,26 +108,35 @@ export function Hero() {
               →
             </span>
           </a>
-          <NavLink href="#services" underline>
+          <NavLink href="#services" underline className="max-lg:text-xxs">
             How I work
           </NavLink>
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-col gap-5 max-xl:max-w-[540px]">
-        <Terminal
-          title={TERMINAL_TITLE}
-          lines={TERMINAL_LINES}
-          startDelay={6500}
-        />
+      <div
+        className="relative w-full opacity-0 animate-rise-in duration-1000"
+        style={{ animationDelay: "calc(var(--hero-stagger) + 300ms)" }}
+      >
+        <div className="relative aspect-square">
+          <Image
+            src={photo}
+            alt="Tabsir"
+            fill
+            priority
+            sizes="(max-width: 1280px) 50vw, 400px"
+            className="object-cover object-[50%_20%]"
+            style={{
+              WebkitMaskImage: portraitMask,
+              maskImage: portraitMask,
+            }}
+          />
+        </div>
       </div>
 
-      <div className="flex items-center gap-5 text-sm  self-end">
-        <span className="inline-block font-mono uppercase">↓ Scroll</span>
-        <span className="font-serif italic text-muted">
-          Two years shipping. Seventeen projects merged.
-        </span>
-      </div>
+      <span className="inline-block font-mono uppercase text-xs self-end opacity-75">
+        ↓ Scroll
+      </span>
     </section>
   );
 }

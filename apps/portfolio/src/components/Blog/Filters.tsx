@@ -16,10 +16,7 @@ export default function Filters({
 }) {
   return (
     <div className="sticky top-0 z-10 py-10 px-6 mb-6  border-b border-line bg-bg">
-      <H2
-        variant="editorial"
-        className="mb-[18px] text-3xl flex items-baseline gap-3.5"
-      >
+      <H2 className="mb-[18px] text-3xl flex items-baseline gap-3.5">
         <span className="not-italic tabular-nums font-mono text-lg text-accent bg-accent/8 px-2.5 py-1 rounded-md">
           {String(count).padStart(2, "0")}
         </span>

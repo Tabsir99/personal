@@ -77,7 +77,7 @@ export default function PostFooter({
         aria-hidden="true"
       />
 
-      <div className="grid grid-cols-2 gap-6 mb-14 max-[720px]:grid-cols-1">
+      <div className="grid grid-cols-2 gap-6 mb-14">
         <NeighbourCard direction="prev" neighbour={prev} />
         <NeighbourCard direction="next" neighbour={next} />
       </div>

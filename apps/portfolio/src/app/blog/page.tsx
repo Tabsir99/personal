@@ -9,7 +9,6 @@ import PageTitle from "@/components/Blog/PageTitle";
 import FeaturedCard from "@/components/Blog/FeaturedCard";
 import PostRow from "@/components/Blog/PostRow";
 import Filters from "@/components/Blog/Filters";
-import Aside from "@/components/Blog/Aside";
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteConfig();
@@ -60,10 +59,10 @@ export default async function BlogIndexPage({
       <PageTitle heading={heading} tagline={tagline} />
       <div className="flex gap-20">
         {featured && <FeaturedCard post={featured} />}
-        <Aside
+        {/* <Aside
           nowReading={site?.nowReading ?? []}
           currentlyBuilding={site?.currentlyBuilding}
-        />
+        /> */}
       </div>
 
       <div className="flex flex-col">

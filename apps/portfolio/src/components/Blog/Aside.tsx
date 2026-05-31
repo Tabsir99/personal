@@ -55,10 +55,10 @@ export default function Aside({
   };
 
   return (
-    <aside className="sticky top-[120px] min-w-80 flex flex-col gap-8 max-lg:static max-lg:flex-row max-lg:flex-wrap">
+    <aside className="sticky top-[120px] min-w-80 flex flex-col gap-8">
       {hasReading && (
         <div
-          className="relative bg-[oklch(94%_0.04_90)] text-ink pt-7 px-6 pb-5 rounded-md shadow-[0_12px_30px_-12px_rgba(0,0,0,0.7)] select-none cursor-grab transition-shadow duration-200 border border-ink/6 active:cursor-grabbing active:shadow-[0_24px_40px_-10px_rgba(0,0,0,0.8)] max-lg:flex-1 max-lg:basis-[280px]"
+          className="relative bg-[oklch(94%_0.04_90)] text-ink pt-7 px-6 pb-5 rounded-md shadow-[0_12px_30px_-12px_rgba(0,0,0,0.7)] select-none cursor-grab transition-shadow duration-200 border border-ink/6 active:cursor-grabbing active:shadow-[0_24px_40px_-10px_rgba(0,0,0,0.8)]"
           style={{
             transform: `translate(${drag.x}px, ${drag.y}px) rotate(${drag.rot}deg)`,
           }}
@@ -97,7 +97,7 @@ export default function Aside({
       )}
 
       {hasBuilding && (
-        <div className="bg-ink-2 border border-line py-[22px] px-5 rounded-[10px] max-lg:flex-1 max-lg:basis-[280px]">
+        <div className="bg-ink-2 border border-line py-[22px] px-5 rounded-[10px]">
           <H3
             variant="widget"
             className="lowercase mb-3 before:content-['//_'] before:text-accent"

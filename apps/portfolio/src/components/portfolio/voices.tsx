@@ -1,6 +1,7 @@
 import type { Testimonial } from "@tabsircg/schemas/portfolio";
 
 import { BlockQuote } from "../ui/BlockQuote";
+import { RichText } from "../ui/rich-text";
 import { H2 } from "../ui/H2";
 import { VoicesPlayer } from "./voices-player";
 
@@ -9,7 +10,7 @@ export function Voices({ testimonial }: { testimonial?: Testimonial }) {
 
   return (
     <section id="voices" className="page-shell flex flex-col gap-12">
-      <span className="margin-note top-[260px]">
+      <span className="margin-note">
         one minute,
         <br />
         one client.
@@ -21,7 +22,6 @@ export function Voices({ testimonial }: { testimonial?: Testimonial }) {
           <br />
           own words.
         </H2>
-        <p className="max-w-md">{testimonial.text}</p>
       </header>
 
       <VoicesPlayer
@@ -40,7 +40,7 @@ export function Voices({ testimonial }: { testimonial?: Testimonial }) {
         period={testimonial.period}
         className="em-accent"
       >
-        {testimonial.text}
+        <RichText text={testimonial.text} />
       </BlockQuote>
     </section>
   );

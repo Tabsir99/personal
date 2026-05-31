@@ -8,7 +8,7 @@ export default function PageTitle({
   tagline: string;
 }) {
   return (
-    <header className="relative pt-2 pb-14 mb-2 after:content-[''] after:block after:h-px after:bg-line after:mt-14 max-sm:pb-8 max-sm:after:mt-8">
+    <header className="relative pt-2 pb-14 mb-2 after:content-[''] after:block after:h-px after:bg-line after:mt-14">
       <Breadcrumb
         className="mb-16"
         crumbs={[{ label: "tabsircg.com", href: "/" }, { label: "blog" }]}

@@ -33,8 +33,32 @@ export default async function Home() {
     (t) => t.isActive && t.displaySlot === "voices",
   );
 
+  const personLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Tabsir CG",
+    url: "https://tabsircg.com",
+    jobTitle: "Full-Stack Developer",
+    description: pageData.description || undefined,
+    image: pageData.profilePicture || undefined,
+    ...(pageData.contact.email
+      ? { email: `mailto:${pageData.contact.email}` }
+      : {}),
+    sameAs: pageData.contact.social.map((s) => s.url).filter(Boolean),
+    knowsAbout: pageData.skills.flatMap((g) => g.skills.map((s) => s.name)),
+    ...(pageData.studioName
+      ? { worksFor: { "@type": "Organization", name: pageData.studioName } }
+      : {}),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(personLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <script
         dangerouslySetInnerHTML={{
           __html: `(function(){try{
@@ -51,7 +75,7 @@ export default async function Home() {
 
       <Header />
 
-      <Hero />
+      <Hero photo={pageData.profilePicture} />
       <Endorsement testimonial={endorsement} />
       <About stats={activeStats} text={pageData.aboutText} />
       <Stack groups={activeSkills} />

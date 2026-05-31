@@ -2,31 +2,28 @@ import { Fragment } from "react";
 import { NavLink } from "@/components/ui/nav-link";
 import { getPageData } from "@/lib/pageData";
 import { H2, H3 } from "../ui/H2";
+import { cn } from "@/lib/utils";
 
 function Column({
   title,
-  gap = "gap-3",
+  className,
   children,
 }: {
   title: string;
-  gap?: string;
+  className?: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className={`flex flex-col ${gap}`}>
-      <H3>{title}</H3>
+    <div className={cn("grid grid-cols-1 gap-2", className)}>
+      <H3 className="col-span-full">{title}</H3>
       {children}
     </div>
   );
 }
 
 export async function Footer() {
-  const { contact, services, studioName, address } = await getPageData();
-  const { email, phone, calLabel, calUrl, social } = contact;
-
-  const offerings = services
-    .filter((s) => s.isActive)
-    .sort((a, b) => a.order - b.order);
+  const { contact, studioName, address } = await getPageData();
+  const { email, social } = contact;
 
   const addressLines = address.split("\n").filter((line) => line.trim());
 
@@ -57,8 +54,8 @@ export async function Footer() {
           </span>
         </NavLink>
       )}
-      <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-10 pt-10 border-t border-line">
-        <Column title="Studio" gap="gap-2">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] gap-10 pt-10 border-t border-line">
+        <Column title="Studio">
           {studioName && (
             <p className="text-sm text-cream mb-2 leading-normal">
               {studioName}
@@ -75,28 +72,12 @@ export async function Footer() {
             </p>
           )}
         </Column>
-        <Column title="Direct">
-          {email && <NavLink href={`mailto:${email}`}>{email}</NavLink>}
-          {phone && (
-            <NavLink>
-              {phone}{" "}
-              <span className="text-muted-2 text-xxs">(on request)</span>
-            </NavLink>
-          )}
-          {calLabel && (
-            <NavLink href={calUrl || undefined}>{calLabel}</NavLink>
-          )}
-        </Column>
-        <Column title="Elsewhere">
+
+        <Column title="Elsewhere" className="max-md:grid-cols-4">
           {social.map((s) => (
             <NavLink key={s.name} href={s.url || undefined}>
               {s.name}
             </NavLink>
-          ))}
-        </Column>
-        <Column title="Work with me">
-          {offerings.map((s) => (
-            <NavLink key={s.title}>{s.title}</NavLink>
           ))}
         </Column>
       </div>

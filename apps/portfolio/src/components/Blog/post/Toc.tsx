@@ -18,7 +18,7 @@ function renderItems(xs: TocItem[]) {
         <span className="line-clamp-2">{it.text}</span>
       </a>
       {it.children.length > 0 && (
-        <ul className="list-none m-0 p-0 flex flex-col gap-1 mt-1 pl-3.5 max-lg:pl-0">
+        <ul className="list-none m-0 p-0 flex flex-col gap-1 mt-1 pl-3.5">
           {renderItems(it.children)}
         </ul>
       )}
@@ -32,7 +32,7 @@ export default function Toc({ items }: { items: TocItem[] }) {
 
   return (
     <>
-      <details className="group hidden max-lg:block bg-ink-2 border border-line rounded-2xl text-sm">
+      <details className="group hidden bg-ink-2 border border-line rounded-2xl text-sm">
         <summary className="flex items-center gap-2.5 px-4 py-3 cursor-pointer text-cream font-mono text-xs tracking-wide select-none list-none [&::-webkit-details-marker]:hidden">
           <span
             className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-accent)_22%,transparent)]"
@@ -52,7 +52,7 @@ export default function Toc({ items }: { items: TocItem[] }) {
         </ul>
       </details>
 
-      <nav className="relative text-sm leading-[1.45] pl-[18px] max-lg:hidden">
+      <nav className="relative text-sm leading-[1.45] pl-[18px]">
         <H3 variant="widget" className="mb-4">
           // on this page
         </H3>

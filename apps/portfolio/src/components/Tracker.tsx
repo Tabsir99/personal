@@ -18,11 +18,9 @@ export function Tracker() {
   const exitedRef = useRef(false);
   const portfolioViewedRef = useRef(false);
   const sessionStartedRef = useRef(false);
-  const firstPageViewRef = useRef(true);
 
   useEffect(() => {
     const path = pathname || "/";
-    const now = Date.now();
 
     const flushExit = () => {
       if (exitedRef.current) return;
@@ -33,7 +31,7 @@ export function Tracker() {
         sessionId: getSessionId(),
         timestamp: Date.now(),
         path: currentPathRef.current,
-        data: { timeOnPage: Date.now() - pageStartRef.current },
+        data: { timeOnPage: Math.round((Date.now() - pageStartRef.current) / 1000) },
       });
     };
 
@@ -50,7 +48,7 @@ export function Tracker() {
           send({
             type: "session_start",
             sessionId: sid,
-            timestamp: now,
+            timestamp: Date.now(),
             path,
             country: "unknown",
             ip: "unknown",
@@ -72,7 +70,6 @@ export function Tracker() {
             ...(loadTime !== undefined ? { loadTime } : {}),
           },
         });
-        firstPageViewRef.current = false;
         currentPathRef.current = path;
         pageStartRef.current = Date.now();
         if (path === "/" && !portfolioViewedRef.current) {
@@ -102,7 +99,7 @@ export function Tracker() {
       send({
         type: "page_view",
         sessionId: sid,
-        timestamp: now,
+        timestamp: Date.now(),
         path,
         data: {},
       });

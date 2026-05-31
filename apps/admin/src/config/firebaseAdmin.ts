@@ -7,7 +7,7 @@ function initFirebase() {
   if (getApps().length) return getFirestore(getApps()[0]);
 
   let app: App;
-  if (env.RUNTIME === "local") {
+  if (process.env.NODE_ENV === "development") {
     app = initializeApp({
       projectId: "tabsir-s-blog",
     });
@@ -23,7 +23,7 @@ function initFirebase() {
 
   const db = getFirestore(app);
 
-  if (env.RUNTIME === "local") {
+  if (process.env.NODE_ENV === "development") {
     db.settings({
       host: "localhost:8085",
       ssl: false,

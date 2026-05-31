@@ -78,27 +78,27 @@ const FRAME1_RECTS: SVGProps<SVGRectElement>[] = [
 
 const FRAME0_LABELS = [
   "UI · React / Next",
-  "API · Node / tRPC",
+  "API · Node / Express",
   "Data · Postgres",
   "Infra · AWS / Docker",
 ];
 
 const FRAME2_NODES: Array<[number, number]> = [
-  [100, 150],
-  [250, 130],
-  [320, 220],
-  [180, 250],
-  [80, 320],
-  [220, 340],
+  [100, 110],
+  [250, 100],
+  [320, 180],
+  [180, 210],
+  [80, 280],
+  [220, 300],
 ];
 
 const FRAME2_EDGES: Array<[number, number, number, number]> = [
-  [100, 150, 250, 130],
-  [250, 130, 320, 220],
-  [320, 220, 180, 250],
+  [100, 110, 250, 100],
+  [250, 100, 320, 180],
+  [320, 180, 180, 210],
   [180, 250, 80, 320],
-  [80, 320, 220, 340],
-  [100, 150, 180, 250],
+  [80, 280, 220, 300],
+  [100, 110, 180, 210],
 ];
 
 const FRAME3_RING_BASES = [60, 100, 140, 180];
@@ -127,7 +127,7 @@ export function ServiceVisual({ idx }: { idx: number }) {
           </linearGradient>
         </defs>
         {[0, 1, 2, 3].map((i) => {
-          const y = 120 + i * 50;
+          const y = 80 + i * 50;
           return (
             <g
               key={i}

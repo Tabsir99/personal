@@ -34,8 +34,6 @@ html {
 
   --text-xxs: 10px;
 
-  --rail-gutter: 180px;
-  --gutter: 96px;
   --max-w: 1600px;
 
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
@@ -132,7 +130,6 @@ html {
       transform: scaleX(1);
     }
   }
-
 }
 
 @theme inline {
@@ -164,8 +161,8 @@ html {
     font-family: var(--sans);
     font-weight: 300;
     line-height: 1.6;
-    font-size: 16px;
-    text-rendering: optimizeSpeed;
+    font-size: 18px;
+    text-rendering: optimizeLegibility;
   }
 
   body {
@@ -213,17 +210,11 @@ html {
     contain-intrinsic-size: 100dvh;
   }
 }
-#about {
-  contain-intrinsic-size: 24rem;
-}
-#services {
-  contain-intrinsic-size: 400dvh;
-}
 
 @utility page-shell {
   max-width: var(--max-w);
   margin: 0 auto 5rem auto;
-  padding: 5rem var(--gutter) 5rem var(--rail-gutter);
+  padding: 5vw;
   position: relative;
 }
 
@@ -242,7 +233,7 @@ html {
     align-items: center;
     gap: 0.75rem;
     font-family: var(--mono);
-    font-size: 0.75rem;
+    font-size: clamp(14px, 1.5vw, 18px);
     line-height: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -264,15 +255,14 @@ html {
   .margin-note {
     position: absolute;
     font-family: var(--serif);
-    font-style: italic;
-    font-size: 13px;
-    letter-spacing: 0.005em;
+    font-size: 14px;
     color: var(--color-accent);
-    opacity: 0.6;
+    opacity: 0.75;
     line-height: 1.35;
     max-width: 160px;
     pointer-events: none;
-    right: -32px;
+    right: 0px;
+    top: 5rem;
     text-align: right;
     z-index: 5;
   }
@@ -343,22 +333,6 @@ html {
   }
 }
 
-/* :root var overrides stay unlayered (vars aren't cascade-layered). */
-@media (max-width: 1100px) {
-  :root {
-    --gutter: 56px;
-    --rail-gutter: 120px;
-  }
-}
-
-@layer components {
-  @media (max-width: 1100px) {
-    .margin-note {
-      display: none;
-    }
-  }
-}
-
 /* Override per-instance via --text-highlight-color. */
 @utility text-highlight {
   background-image: linear-gradient(
@@ -411,8 +385,7 @@ html {
     content: "";
     position: absolute;
     inset: 4px;
-    border: 1px solid
-      color-mix(in srgb, var(--color-cream) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-cream) 5%, transparent);
     border-radius: 2px;
     pointer-events: none;
     transition: border-color 220ms ease;

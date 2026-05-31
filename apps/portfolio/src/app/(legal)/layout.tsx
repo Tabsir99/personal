@@ -6,7 +6,7 @@ export default function LegalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-transparent py-20 px-4 md:px-8">
+    <div className="bg-transparent py-20 px-4">
       <div className="max-w-3xl mx-auto">
         {children}
 

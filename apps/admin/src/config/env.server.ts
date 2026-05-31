@@ -9,7 +9,6 @@ function requireEnv(key: string): string {
 }
 
 export const env = {
-  RUNTIME: requireEnv("RUNTIME"),
   // ===== Auth =====
   ADMIN_USERNAME: requireEnv("ADMIN_USERNAME"),
   ADMIN_PASSWORD: requireEnv("ADMIN_PASSWORD"),
@@ -24,10 +23,6 @@ export const env = {
   CLOUDFLARE_R2_AK_ID: requireEnv("CLOUDFLARE_R2_AK_ID"),
   CLOUDFLARE_R2_AK: requireEnv("CLOUDFLARE_R2_AK"),
   CLOUDFLARE_R2_ENDPOINT: requireEnv("CLOUDFLARE_R2_ENDPOINT"),
-
-  // ===== LinkedIn OAuth =====
-  LINKEDIN_CLINET_ID: requireEnv("LINKEDIN_CLINET_ID"),
-  LINKEDIN_CLINET_SECRET: requireEnv("LINKEDIN_CLINET_SECRET"),
 
   // ===== Server to server token =====
   SERVER_TOKEN: requireEnv("SERVER_TOKEN"),

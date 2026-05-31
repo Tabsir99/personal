@@ -13,7 +13,7 @@ export default function Share({ url, title }: { url: string; title: string }) {
   return (
     <div className="flex flex-col gap-3.5">
       <H3 variant="widget">// share</H3>
-      <div className="flex flex-col gap-2.5 max-lg:flex-row">
+      <div className="flex flex-col gap-2.5">
         <CopyShareLink url={url} />
         <a
           className={CARD}

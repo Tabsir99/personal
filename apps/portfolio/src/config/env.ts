@@ -8,6 +8,6 @@ function requireEnv(key: string): string {
 }
 
 export const env = {
-  ADMIN_ORIGIN: requireEnv("ADMIN_ORIGIN"),
+  ADMIN_ORIGIN: requireEnv("NEXT_PUBLIC_ADMIN_ORIGIN"),
   SERVER_TOKEN: requireEnv("SERVER_TOKEN"),
 } as const;

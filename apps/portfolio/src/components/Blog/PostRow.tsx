@@ -20,13 +20,13 @@ export default function PostRow({
   return (
     <article
       data-reveal
-      className="group relative grid grid-cols-[56px_1fr] grid-rows-[auto_auto_auto_auto] gap-x-6 pt-7 pb-8 border-b border-line transition-[padding] duration-360 ease-soft first:pt-2 hover:pl-3 max-sm:grid-cols-1"
+      className="group relative grid grid-cols-[56px_1fr] grid-rows-[auto_auto_auto_auto] gap-x-6 pt-7 pb-8 border-b border-line transition-[padding] duration-360 ease-soft first:pt-2 hover:pl-3"
       style={{ ["--row-i" as string]: idx }}
     >
-      <div className="row-span-4 font-mono text-sm text-muted pt-1.5 tabular-nums max-sm:hidden">
+      <div className="row-span-4 font-mono text-sm text-muted pt-1.5 tabular-nums">
         {String(idx + 1).padStart(2, "0")}
       </div>
-      <div className="flex items-center justify-between font-mono text-xs text-muted mb-2 max-sm:flex-col max-sm:items-start max-sm:gap-1.5">
+      <div className="flex items-center justify-between font-mono text-xs text-muted mb-2">
         <div className="tracking-wide">{formatDate(post.date)}</div>
         <span
           className={`inline-block px-2.5 py-[3px] rounded-full text-xs tracking-wider lowercase border border-line bg-ink-2 ${KIND_BADGE[post.kind]}`}

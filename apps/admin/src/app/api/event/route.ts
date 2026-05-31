@@ -40,7 +40,7 @@ export const POST = wrapRoute(async (request: NextRequest) => {
     };
   }
 
-  if (process.env.RUNTIME === "local") {
+  if (process.env.NODE_ENV === "development") {
     console.info(newSession);
   }
 

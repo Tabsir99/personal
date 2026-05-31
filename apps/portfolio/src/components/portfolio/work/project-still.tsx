@@ -1,6 +1,7 @@
 import type { Project } from "@tabsircg/schemas/portfolio";
 import { GLYPH_TINTS, glyphFor } from "./glyphs";
 import { VoicesPlayer } from "../voices-player";
+import { RichText } from "@/components/ui/rich-text";
 
 export function ProjectStill({
   project,
@@ -38,7 +39,7 @@ export function ProjectStill({
         className="h-serif relative z-2 text-[clamp(64px,9vw,132px)] text-cream opacity-[0.08] tracking-tight italic text-center select-none"
         aria-hidden="true"
       >
-        {project.title}
+        <RichText text={project.title} />
       </div>
       {project.stills.map(
         (s, j) =>
@@ -49,10 +50,7 @@ export function ProjectStill({
               className="work-still-media absolute inset-0 z-2"
             >
               {s.kind === "video" ? (
-                <VoicesPlayer
-                  src={s.url}
-                  className="border-0 rounded-none"
-                />
+                <VoicesPlayer src={s.url} className="border-0 rounded-none" />
               ) : (
                 <img
                   src={s.url}
@@ -72,10 +70,8 @@ export function ProjectStill({
           style={{ "--i": j } as React.CSSProperties}
           className="work-still-meta absolute top-[18px] right-[50px] z-3 font-mono text-xxs tracking-widest uppercase text-cream-2 flex gap-2 items-center"
         >
-          <span>{s.label}</span>
-          <span className="text-accent opacity-60">·</span>
           <span>
-            {s.kind === "video" ? "00:42 · 24fps" : "1920×1080 · 16:9"}
+            <RichText text={s.label} />
           </span>
         </div>
       ))}

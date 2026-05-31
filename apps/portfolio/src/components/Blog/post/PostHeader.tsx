@@ -34,9 +34,9 @@ function MetadataRow({
 
 export default function PostHeader({ post }: { post: PostMeta }) {
   return (
-    <header className="pb-12 border-b border-line mb-12 max-sm:pb-7 max-sm:mb-8">
+    <header className="pb-12 border-b border-line mb-12">
       <Breadcrumb
-        className="mb-8 max-sm:mb-5"
+        className="mb-8"
         crumbs={[
           { label: "tabsircg.com", href: "/" },
           { label: "blog", href: "/blog" },
@@ -60,11 +60,11 @@ export default function PostHeader({ post }: { post: PostMeta }) {
         {post.title}
       </h1>
 
-      <p className="text-[clamp(18px,1.6vw,22px)] leading-[1.45] text-cream-2 max-w-[56ch] m-0 mb-9 font-light text-pretty max-sm:mb-6">
+      <p className="text-[clamp(18px,1.6vw,22px)] leading-[1.45] text-cream-2 max-w-[56ch] m-0 mb-9 font-light text-pretty">
         {post.dek}
       </p>
 
-      <dl className="font-mono flex flex-wrap gap-7 m-0 text-xs text-muted max-sm:gap-4">
+      <dl className="font-mono flex flex-wrap gap-7 m-0 text-xs text-muted">
         <MetadataRow label="read">
           <span
             className="inline-block w-[60px] h-[3px] rounded-xs bg-cream/8 overflow-hidden"

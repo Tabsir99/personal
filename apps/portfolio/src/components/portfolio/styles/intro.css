@@ -138,12 +138,6 @@ html:not([data-skip-intro="1"]) [data-hero-word] {
   animation-delay: var(--hero-stagger);
 }
 
-@media (max-width: 1100px) {
-  .intro-word {
-    font-size: clamp(40px, 14vw, 100px);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .intro-overlay {
     display: none;

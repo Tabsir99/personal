@@ -1,6 +1,8 @@
 import { H2, H3 } from "../ui/H2";
 import { NavLink } from "../ui/nav-link";
 import { KIND_LABEL, formatDate, type PostMeta } from "@/lib/posts";
+import { RichText } from "../ui/rich-text";
+import Link from "next/link";
 
 export function Writing({ posts }: { posts: PostMeta[] }) {
   if (posts.length === 0) return null;
@@ -14,37 +16,45 @@ export function Writing({ posts }: { posts: PostMeta[] }) {
           from the keyboard.
         </H2>
         <NavLink href="/blog" underline>
-          All writing
+          Blog
         </NavLink>
       </header>
 
       <div data-reveal-stagger className="border-t border-line">
         {posts.map((post, i) => (
-          <a
+          <Link
             key={post.slug}
             href={`/blog/${post.slug}`}
             style={{ "--i": i } as React.CSSProperties}
-            className="group grid grid-cols-[80px_140px_1fr_160px_100px] gap-10 items-center py-7 border-b border-line transition-colors duration-300 hover:bg-accent/2 max-xl:grid-cols-[60px_120px_1fr_auto]"
+            className="group flex flex-col gap-3 py-7 border-b border-line transition-colors duration-300 hover:bg-accent/2 lg:grid lg:grid-cols-[80px_140px_1fr_160px_100px] lg:gap-10 lg:items-center"
           >
-            <div className="font-mono text-xs text-muted">
-              {String(i + 1).padStart(2, "0")}
+            {/* top row on mobile · cells 1–2 on desktop */}
+            <div className="flex justify-between items-center lg:contents">
+              <div className="font-mono text-xs text-muted">
+                {String(i + 1).padStart(2, "0")}
+              </div>
+              <div className="font-mono text-xs text-muted">
+                {formatDate(post.date)}
+              </div>
             </div>
-            <div className="font-mono text-xs text-muted">
-              {formatDate(post.date)}
-            </div>
+
             <H3
               variant="serif"
-              className="text-[26px] leading-[1.2] transition-colors duration-300 group-hover:text-accent"
+              className="text-2xl leading-[1.2] transition-colors duration-300 group-hover:text-accent"
             >
-              {post.title}
+              <RichText text={post.title} />
             </H3>
-            <div className="font-mono text-xs text-muted tracking-wider max-xl:hidden">
-              {post.readTime} min · {KIND_LABEL[post.kind] ?? post.kind}
+
+            {/* bottom row on mobile · cells 4–5 on desktop */}
+            <div className="flex justify-between items-center lg:contents">
+              <div className="font-mono text-xs text-muted tracking-wider">
+                {post.readTime} min · {KIND_LABEL[post.kind] ?? post.kind}
+              </div>
+              <div className="justify-self-end font-mono text-xs text-muted">
+                Read ↗
+              </div>
             </div>
-            <div className="justify-self-end font-mono text-xs text-muted max-xl:hidden">
-              Read ↗
-            </div>
-          </a>
+          </Link>
         ))}
       </div>
     </section>

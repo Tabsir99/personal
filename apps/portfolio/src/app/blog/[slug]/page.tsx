@@ -59,7 +59,7 @@ export default async function PostPage({ params }: { params: RouteParams }) {
   const url = `https://tabsircg.com/blog/${post.slug}`;
 
   return (
-    <article className="bg-ink-2 text-cream min-h-full w-full py-8 px-8 max-sm:px-4">
+    <article className="bg-ink-2 text-cream min-h-full w-full py-8 px-8">
       <Script
         src="https://cdn.jsdelivr.net/npm/@open-notion/assets@latest/hydration.js/+esm"
         type="module"
@@ -68,9 +68,9 @@ export default async function PostPage({ params }: { params: RouteParams }) {
 
       <BlogPostJsonLd post={post} />
 
-      <div className="max-w-7xl mx-auto grid grid-cols-[220px_minmax(0,1fr)_80px] gap-x-10 gap-y-6 items-start max-lg:grid-cols-[minmax(0,1fr)]">
+      <div className="max-w-7xl mx-auto grid grid-cols-[220px_minmax(0,1fr)_80px] gap-x-10 gap-y-6 items-start">
         <aside
-          className="sticky top-8 max-xl:static"
+          className="sticky top-8"
           aria-label="Table of contents"
         >
           <Toc items={toc} />
@@ -86,7 +86,7 @@ export default async function PostPage({ params }: { params: RouteParams }) {
         </div>
 
         <aside
-          className="sticky top-8 max-lg:static flex flex-col gap-8 max-lg:flex-row max-lg:justify-center"
+          className="sticky top-8 flex flex-col gap-8"
           aria-label="Article actions"
         >
           <FeltMeter slug={post.slug} />

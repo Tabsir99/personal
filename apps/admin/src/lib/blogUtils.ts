@@ -177,7 +177,7 @@ export async function sendRevalidateRequest(target: RevalidateTarget) {
         acs_tkn: env.SERVER_TOKEN,
       },
     });
-    if (env.RUNTIME === "local") {
+    if (process.env.NODE_ENV === "development") {
       console.info(res.status, res.statusText);
     }
   } catch (error) {

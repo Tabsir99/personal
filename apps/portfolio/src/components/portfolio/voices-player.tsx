@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { RichText } from "@/components/ui/rich-text";
 
 const fmt = (s: number) => {
   if (!isFinite(s) || s < 0) s = 0;
@@ -56,6 +57,7 @@ export function VoicesPlayer({
         playsInline
         preload="metadata"
         className="absolute inset-0 w-full h-full object-cover cursor-pointer"
+        disablePictureInPicture
         onClick={toggle}
         onLoadedMetadata={(e) => {
           setDur(e.currentTarget.duration);
@@ -95,7 +97,7 @@ export function VoicesPlayer({
           </span>
           {label && (
             <span className="absolute left-6 bottom-5 font-serif italic text-lg text-cream/90">
-              {label}
+              <RichText text={label} />
             </span>
           )}
         </button>

@@ -164,7 +164,7 @@ const DashBoardSidebar = () => {
                 )}
                 <item.Icon
                   className={cn(
-                    "h-5 w-5 shrink-0 transition-colors",
+                    "h-4 w-4 shrink-0 transition-colors",
                     item.isActive
                       ? "text-primary"
                       : "text-muted-foreground/70 group-hover:text-foreground",
