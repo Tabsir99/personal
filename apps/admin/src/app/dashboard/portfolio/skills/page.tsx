@@ -133,7 +133,7 @@ export default function Skills() {
                         <span className="truncate text-[13px] text-foreground/90">
                           {skillItem.name}
                         </span>
-                        <div className="flex shrink-0 items-center gap-2.5">
+                        <div className="flex shrink-0 items-center gap-3">
                           <span
                             className="flex items-center gap-1"
                             aria-label={`Proficiency ${skillItem.level} of 5`}
@@ -175,7 +175,8 @@ export default function Skills() {
                 <div
                   className="grid transition-[grid-template-rows] duration-300 ease-out"
                   style={{
-                    gridTemplateRows: addingTo === categoryIndex ? "1fr" : "0fr",
+                    gridTemplateRows:
+                      addingTo === categoryIndex ? "1fr" : "0fr",
                   }}
                 >
                   <div className="min-h-0 overflow-hidden">

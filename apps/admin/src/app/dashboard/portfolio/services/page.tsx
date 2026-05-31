@@ -64,7 +64,7 @@ export default function Services() {
               />
               <CardContent
                 className={cn(
-                  "flex flex-col gap-3.5 p-5",
+                  "flex flex-col gap-4 p-5",
                   !item.isActive && "opacity-50",
                 )}
               >

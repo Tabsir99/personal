@@ -76,7 +76,7 @@ export function Services({ services }: { services: Service[] }) {
                   {s.items.map((it, j) => (
                     <li
                       key={j}
-                      className="flex items-center gap-2.5 border-t border-line py-1.5 before:text-accent before:content-['→']"
+                      className="flex items-center gap-3 border-t border-line py-1.5 before:text-accent before:content-['→']"
                     >
                       <RichText text={it} />
                     </li>

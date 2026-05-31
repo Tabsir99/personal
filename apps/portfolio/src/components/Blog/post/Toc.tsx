@@ -32,18 +32,12 @@ export default function Toc({ items }: { items: TocItem[] }) {
 
   return (
     <>
-      <details className="group hidden bg-ink-2 border border-line rounded-2xl text-sm">
+      <details className="group md:hidden bg-ink-2 border border-line rounded-2xl text-sm ">
         <summary className="flex items-center gap-2.5 px-4 py-3 cursor-pointer text-cream font-mono text-xs tracking-wide select-none list-none [&::-webkit-details-marker]:hidden">
-          <span
-            className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-accent)_22%,transparent)]"
-            aria-hidden="true"
-          />
+          <span className="w-1.5 h-1.5 rounded-full bg-accent" />
           on this page
           <span className="text-muted">({total})</span>
-          <span
-            className="ml-auto text-sm font-bold text-muted transition-transform group-open:rotate-180"
-            aria-hidden="true"
-          >
+          <span className="ml-auto text-sm font-bold text-muted transition-transform group-open:rotate-180">
             ↓
           </span>
         </summary>
@@ -52,7 +46,7 @@ export default function Toc({ items }: { items: TocItem[] }) {
         </ul>
       </details>
 
-      <nav className="relative text-sm leading-[1.45] pl-[18px]">
+      <nav className="relative text-sm leading-[1.45] pl-[18px] max-md:hidden">
         <H3 variant="widget" className="mb-4">
           // on this page
         </H3>

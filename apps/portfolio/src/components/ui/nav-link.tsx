@@ -14,10 +14,10 @@ const BASE =
 
 // Inner span carries the actual underline so it shrinks to text width.
 const UL_OUTER =
-  "group gap-2.5 text-xs tracking-widest uppercase text-muted hover:text-accent duration-300";
+  "group gap-3 text-xs tracking-widest uppercase text-muted hover:text-accent duration-300";
 
 const UL_INNER =
-  "relative inline-flex items-baseline gap-2.5 pb-1 after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-px after:w-full after:bg-muted after:origin-left after:scale-x-[0.4] after:transition-[scale,background-color] after:duration-300 group-hover:after:scale-x-100 group-hover:after:bg-accent";
+  "relative inline-flex items-baseline gap-3 pb-1 after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-px after:w-full after:bg-muted after:origin-left after:scale-x-[0.4] after:transition-[scale,background-color] after:duration-300 group-hover:after:scale-x-100 group-hover:after:bg-accent";
 
 function Arrow({ external }: { external: boolean }) {
   return (

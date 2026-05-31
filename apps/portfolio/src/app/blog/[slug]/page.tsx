@@ -68,9 +68,9 @@ export default async function PostPage({ params }: { params: RouteParams }) {
 
       <BlogPostJsonLd post={post} />
 
-      <div className="max-w-7xl mx-auto grid grid-cols-[220px_minmax(0,1fr)_80px] gap-x-10 gap-y-6 items-start">
+      <div className="max-w-7xl mx-auto grid grid-cols-[220px_minmax(0,1fr)_80px] max-lg:grid-cols-[220px_minmax(0,1fr)] max-md:grid-cols-1 gap-x-10 gap-y-6 items-start">
         <aside
-          className="sticky top-8"
+          className="sticky top-8 max-md:static"
           aria-label="Table of contents"
         >
           <Toc items={toc} />
@@ -82,17 +82,18 @@ export default async function PostPage({ params }: { params: RouteParams }) {
           <div className="dark pb-14">
             <DocRenderer doc={post.body} />
           </div>
-          <PostFooter prev={post.prev ?? null} next={post.next ?? null} />
         </div>
 
         <aside
-          className="sticky top-8 flex flex-col gap-8"
+          className="sticky top-8 flex flex-col gap-8 max-md:flex-row"
           aria-label="Article actions"
         >
           <FeltMeter slug={post.slug} />
           <Share url={url} title={post.title} />
         </aside>
       </div>
+
+      <PostFooter prev={post.prev ?? null} next={post.next ?? null} />
 
       <TocIsland />
     </article>

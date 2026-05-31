@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --port 3001",
-    "build": "next build --turbopack",
+    "build": "next build --webpack",
     "start": "next start",
     "clean:pnpm": "rm -rf .next node_modules .next out package-lock.json && pnpm install",
     "dev:clean": "rm -rf .next .vercel dist out && pnpm dev",
@@ -23,6 +23,7 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.6",
     "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^20",
     "@types/react": "^19",

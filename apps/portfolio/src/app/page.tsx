@@ -59,16 +59,7 @@ export default async function Home() {
           __html: JSON.stringify(personLd).replace(/</g, "\\u003c"),
         }}
       />
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `(function(){try{
-        var p = parseInt(localStorage.getItem("intro-played") || "0");
-        var recent = p > Date.now() - 6048e5;            // 7 days
-        var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-        if (recent || reduced) document.documentElement.dataset.skipIntro = "1";
-      } catch(e){} })();`,
-        }}
-      />
+
       <Intro />
       <Atmosphere />
       <CursorGlow />

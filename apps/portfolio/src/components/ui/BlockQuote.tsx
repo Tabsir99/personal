@@ -38,9 +38,9 @@ export function BlockQuote({
       </p>
 
       {hasFooter && (
-        <footer className="flex items-center flex-wrap gap-3.5 mt-[clamp(28px,3vw,40px)] font-mono text-xs tracking-widest uppercase text-muted">
+        <footer className="flex items-center flex-wrap gap-4 mt-[clamp(28px,3vw,40px)] font-mono text-xs tracking-widest uppercase text-muted">
           {(author || authorAvatar) && (
-            <span className="flex items-center gap-2.5">
+            <span className="flex items-center gap-3">
               {authorAvatar && (
                 <Image
                   src={authorAvatar}

@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import analyzer from "@next/bundle-analyzer";
+
+const withAnalyzer = analyzer({ enabled: process.env.ANALYZE === "true" });
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["192.168.0.119"],
@@ -13,4 +16,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withAnalyzer(nextConfig);

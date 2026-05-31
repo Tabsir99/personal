@@ -71,13 +71,13 @@ export default function PostFooter({
   next?: Neighbour | null;
 }) {
   return (
-    <footer className="mt-24 pb-24">
+    <footer className="mt-20 mb-10">
       <div
         className="h-px bg-line mb-12 relative before:content-['✦'] before:absolute before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:bg-ink before:px-3.5 before:text-accent before:text-sm"
         aria-hidden="true"
       />
 
-      <div className="grid grid-cols-2 gap-6 mb-14">
+      <div className="grid grid-cols-2 gap-6 mb-14 max-md:grid-cols-1">
         <NeighbourCard direction="prev" neighbour={prev} />
         <NeighbourCard direction="next" neighbour={next} />
       </div>

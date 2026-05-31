@@ -11,9 +11,9 @@ export default function Share({ url, title }: { url: string; title: string }) {
   const bskyHref = `https://bsky.app/intent/compose?text=${intent}`;
 
   return (
-    <div className="flex flex-col gap-3.5">
+    <div className="flex flex-col gap-4">
       <H3 variant="widget">// share</H3>
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-3 max-md:flex-row">
         <CopyShareLink url={url} />
         <a
           className={CARD}

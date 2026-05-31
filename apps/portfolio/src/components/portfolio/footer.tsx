@@ -3,6 +3,7 @@ import { NavLink } from "@/components/ui/nav-link";
 import { getPageData } from "@/lib/pageData";
 import { H2, H3 } from "../ui/H2";
 import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
 
 function Column({
   title,
@@ -28,31 +29,30 @@ export async function Footer() {
   const addressLines = address.split("\n").filter((line) => line.trim());
 
   return (
-    <footer id="contact" className="page-shell flex flex-col gap-20 mb-0 pb-2">
+    <footer
+      id="contact"
+      className="page-shell flex flex-col gap-20 mb-0 pb-2 pt-10"
+    >
       <H2
         data-reveal
-        className="em-accent text-[clamp(6rem,12vw,13rem)] leading-[0.88]"
+        className="em-accent text-[clamp(6rem,12vw,12rem)] leading-[0.88]"
       >
         <span className="[-webkit-text-stroke:1px_var(--color-cream)] text-transparent">
-          Let&apos;s build
+          Got something
         </span>
         <br />
-        <em>something</em>
-        <span className="text-muted"> small,</span>
+        <span className="text-muted">to</span> <em>build</em>
         <br />
-        <span className="text-muted">sturdy,</span> &amp; <em>true.</em>
+        <span className="text-muted">or something that&apos;s</span>{" "}
+        <em>breaking?</em>
       </H2>
       {email && (
-        <NavLink
+        <Button
           href={`mailto:${email}`}
+          label={email}
           data-reveal
-          className="w-fit group gap-4 px-7 py-[18px] border border-cream rounded-xs tracking-widest uppercase text-cream transition-all duration-300 hover:bg-accent hover:border-accent hover:text-ink"
-        >
-          {email}
-          <span className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">
-            ↗
-          </span>
-        </NavLink>
+          className="max-w-fit py-4 uppercase"
+        />
       )}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] gap-10 pt-10 border-t border-line">
         <Column title="Studio">

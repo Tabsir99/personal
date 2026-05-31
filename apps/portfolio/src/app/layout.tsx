@@ -87,16 +87,28 @@ export default function RootLayout({
 
   return (
     <html lang="en" style={fontVars} suppressHydrationWarning>
-      {process.env.NODE_ENV === "development" && (
-        <head>
+      <head>
+        {process.env.NODE_ENV === "development" && (
           <script
             src="https://unpkg.com/react-scan/dist/auto.global.js"
             async
             defer
             fetchPriority="low"
           ></script>
-        </head>
-      )}
+        )}
+
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{
+        var p = parseInt(localStorage.getItem("intro-played") || "0");
+        var recent = p > Date.now() - 6048e5;            // 7 days
+        var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (recent || reduced) document.documentElement.dataset.skipIntro = "1";
+      } catch(e){} })();`,
+          }}
+        />
+      </head>
+
       <body>
         <ScrollIsland />
         <main>{children}</main>
