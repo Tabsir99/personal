@@ -40,7 +40,10 @@ const DashBoardSidebar = () => {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
-  const [isDark, setIsDark] = useState(readDarkPreference);
+  // Must match the server's render (which has no localStorage/<html> access)
+  // to avoid a hydration mismatch; the real preference is synced in the
+  // mount effect below.
+  const [isDark, setIsDark] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -192,23 +195,12 @@ const DashBoardSidebar = () => {
             expanded ? "gap-3 px-3" : "justify-center px-0",
           )}
         >
+          {/* Icon visibility is CSS-driven off the `.dark` class (set pre-paint
+              in layout.tsx), so it's correct on first paint with no React-state
+              flash and no hydration mismatch. */}
           <div className="relative h-4 w-4 shrink-0">
-            <Sun
-              className={cn(
-                "absolute inset-0 h-4 w-4 transition-all duration-200",
-                isDark
-                  ? "rotate-90 scale-0 opacity-0"
-                  : "rotate-0 scale-100 opacity-100",
-              )}
-            />
-            <Moon
-              className={cn(
-                "absolute inset-0 h-4 w-4 transition-all duration-200",
-                isDark
-                  ? "rotate-0 scale-100 opacity-100"
-                  : "-rotate-90 scale-0 opacity-0",
-              )}
-            />
+            <Sun className="absolute inset-0 h-4 w-4 rotate-0 scale-100 opacity-100 transition-all duration-200 dark:rotate-90 dark:scale-0 dark:opacity-0" />
+            <Moon className="absolute inset-0 h-4 w-4 -rotate-90 scale-0 opacity-0 transition-all duration-200 dark:rotate-0 dark:scale-100 dark:opacity-100" />
           </div>
           {expanded && (
             <span className="flex-1 text-left text-sm font-medium">
