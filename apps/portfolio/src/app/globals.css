@@ -49,8 +49,6 @@ html {
   --animate-ken-burns: ken-burns 14s var(--ease-soft) infinite alternate;
   --animate-wipe: wipe 620ms var(--ease-soft);
   --animate-bounce: bounce 2.4s 1.4s cubic-bezier(0.5, 1.6, 0.4, 1) infinite;
-  --animate-bar-pulse: bar-pulse 2.4s var(--ease-soft) infinite;
-  --animate-shrink: shrink 4s var(--ease-soft) infinite;
   --animate-fill: fill 1.2s 0.2s var(--ease-soft) both;
 
   /* Trough at 0.3; override via --pulse-min. */
@@ -96,29 +94,6 @@ html {
     }
     94% {
       transform: translateY(0) scale(1);
-    }
-  }
-
-  @keyframes bar-pulse {
-    0%,
-    100% {
-      transform: scaleY(0.4);
-      opacity: 0.6;
-    }
-    50% {
-      transform: scaleY(1);
-      opacity: 1;
-    }
-  }
-
-  @keyframes shrink {
-    0%,
-    10% {
-      width: 95%;
-    }
-    60%,
-    100% {
-      width: 12%;
     }
   }
 

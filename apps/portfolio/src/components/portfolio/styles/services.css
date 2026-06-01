@@ -44,13 +44,6 @@
     transition: opacity 600ms ease;
   }
 
-  /* Past bars filled, active bar = --pin-sub, future bars at 0. */
-  .svc-bar-fill {
-    transform: scaleX(calc(var(--past) + var(--active) * var(--pin-sub, 0)));
-    transform-origin: left;
-    transition: transform 100ms linear;
-  }
-
   /* CSS trig keeps motion scroll-linked to --pin-sub.
      Conversions: sub*2π → sub*1turn, sub*4π → sub*2turn, phase i → i*1rad. */
 

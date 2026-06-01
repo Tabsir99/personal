@@ -37,7 +37,6 @@
   .work-still,
   .work-meta,
   .work-thumb-pack,
-  .work-link-strip,
   .work-still-meta,
   .work-still-play,
   .work-still-media,
@@ -57,8 +56,7 @@
   .work-row,
   .work-still,
   .work-meta,
-  .work-thumb-pack,
-  .work-link-strip {
+  .work-thumb-pack {
     --ref: var(--work-active, 0);
   }
   .work-still-meta,
@@ -170,14 +168,6 @@
   .work-still-media {
     opacity: var(--active);
     transition: opacity 250ms ease-out;
-  }
-  .work-link-strip {
-    opacity: var(--active);
-    pointer-events: none;
-    transition: opacity 350ms ease-out;
-  }
-  .work-link-strip > * {
-    pointer-events: auto;
   }
   .work-still-meta {
     opacity: calc(0.7 * var(--active));

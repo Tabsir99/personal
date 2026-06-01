@@ -116,9 +116,8 @@
   --shadow-focus-ring: 0 0 0 3px
     color-mix(in oklch, var(--ring) 18%, transparent);
 
-  /* Motion budget — one slow breathe, one quick kbd press */
+  /* Motion budget — one slow breathe */
   --animate-breathe: breathe 2400ms ease-in-out infinite;
-  --animate-kbd-press: kbd-press 140ms ease-out;
 }
 
 :root {
@@ -266,16 +265,6 @@
   }
 }
 
-@keyframes kbd-press {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(0.5px);
-  }
-}
-
 @keyframes skeleton-shimmer {
   100% {
     transform: translateX(100%);
@@ -304,17 +293,6 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes stagger-in-from-left {
-  from {
-    opacity: 0;
-    transform: translateX(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
   }
 }
 

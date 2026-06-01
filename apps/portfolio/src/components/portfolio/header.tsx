@@ -23,6 +23,7 @@ export function Header({ resume }: { resume?: Resume }) {
       >
         <div className="relative z-2 mx-auto flex h-20 max-w-(--max-w) items-center gap-6 px-5 lg:gap-16 lg:px-14">
           <a
+            data-brand
             className="flex-none font-mono text-xl leading-none tracking-tighter text-cream transition-colors duration-200 ease-soft hover:text-accent"
             href="#"
           >

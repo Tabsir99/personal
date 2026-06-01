@@ -41,47 +41,38 @@ function IntroRings() {
 /* Total intro length; must outlast the longest animation in intro.css and
    stay in step with --hero-stagger. */
 const INTRO_DURATION = 6000;
+/* When the word starts flying to the header — slightly before the rings fade,
+   so it's clearly travelling (not lingering) as they clear. */
+const MORPH_AT = 4850;
 
 function IntroInner({ onDone }: { onDone: () => void }) {
   const wordWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const heroWord = document.querySelector<HTMLElement>("[data-hero-word]");
-    const heroL = heroWord?.querySelector<HTMLElement>(
-      "[data-hero-bracket='l']",
-    );
-    const heroR = heroWord?.querySelector<HTMLElement>(
-      "[data-hero-bracket='r']",
-    );
-    const src = wordWrapRef.current;
-
-    if (heroWord && heroL && heroR && src) {
-      const hwRect = heroWord.getBoundingClientRect();
-      const lRect = heroL.getBoundingClientRect();
-      const rRect = heroR.getBoundingClientRect();
+    /* FLIP morph: just before the backdrop fades, measure the live source
+       and the header brand ([data-brand]) and translate+scale the word onto
+       it. Measuring at morph time (not mount) keeps it correct at any
+       viewport, so it's responsive by construction. The word then sits on the
+       brand as the overlay unmounts — one TabsirCG, no double. */
+    const morph = setTimeout(() => {
+      const brand = document.querySelector<HTMLElement>("[data-brand]");
+      const src = wordWrapRef.current;
+      if (!brand || !src) return;
+      const br = brand.getBoundingClientRect();
       const sr = src.getBoundingClientRect();
-
-      const tLeft = lRect.left;
-      const tRight = rRect.right;
-      const tWidth = tRight - tLeft;
-      const tHeight = hwRect.height;
-
-      if (tWidth > 0 && sr.width > 0) {
-        const scale = tWidth / sr.width;
-        const sCx = sr.left + sr.width / 2;
-        const sCy = sr.top + sr.height / 2;
-        const tCx = tLeft + tWidth / 2;
-        const tCy = hwRect.top + tHeight / 2;
-        const dx = tCx - sCx;
-        const dy = tCy - sCy;
-        /* Setting the inline transform after first paint triggers the CSS
-           transition (delayed in intro.css) into the morph target. */
+      if (br.width > 0 && sr.width > 0) {
+        const scale = br.width / sr.width;
+        const dx = br.left + br.width / 2 - (sr.left + sr.width / 2);
+        const dy = br.top + br.height / 2 - (sr.top + sr.height / 2);
         src.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${scale})`;
       }
-    }
+    }, MORPH_AT);
 
-    const t = setTimeout(onDone, INTRO_DURATION);
-    return () => clearTimeout(t);
+    const done = setTimeout(onDone, INTRO_DURATION);
+    return () => {
+      clearTimeout(morph);
+      clearTimeout(done);
+    };
   }, [onDone]);
 
   return (
@@ -99,23 +90,24 @@ function IntroInner({ onDone }: { onDone: () => void }) {
         <IntroRings />
       </div>
 
+      {/* Mirrors the header brand exactly (cream Tabsir + accent CG, mono,
+          tracking-tighter) so the morph lands as a seamless single word. Each
+          character types in one at a time (staggered via --char-i). Width is
+          fixed from the start (chars only fade), so the centred word never
+          shifts and the morph measures a stable box. */}
       <div
         ref={wordWrapRef}
-        className={cn(
-          "intro-word absolute top-1/2 left-1/2 z-10",
-          "inline-flex items-baseline gap-[0.04em]",
-          "font-mono font-medium text-accent uppercase whitespace-nowrap",
-        )}
+        className="intro-word absolute top-1/2 left-1/2 z-10 font-mono leading-none tracking-tighter text-cream whitespace-nowrap"
       >
-        <span className="intro-bracket intro-bracket--l inline-block font-normal text-accent-2">
-          [
-        </span>
-        <span className="intro-word-inner inline-block text-center">
-          TABSIR . CG
-        </span>
-        <span className="intro-bracket intro-bracket--r inline-block font-normal text-accent-2">
-          ]
-        </span>
+        {"TabsirCG".split("").map((ch, i) => (
+          <span
+            key={i}
+            className={cn("intro-char inline-block", i >= 6 && "text-accent")}
+            style={{ "--char-i": i } as React.CSSProperties}
+          >
+            {ch}
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -125,13 +117,32 @@ export function Intro() {
   const [show, setShow] = useState(true);
 
   useEffect(() => {
-    if (document.documentElement.dataset.skipIntro === "1") setShow(false);
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (document.documentElement.dataset.skipIntro === "1" || reduced) {
+      /* Skip the intro entirely. Setting data-skip-intro zeroes --hero-stagger
+         (hero animates immediately) and un-hides the header brand, so a
+         reduced-motion user never sees the word stuck at center. */
+      document.documentElement.dataset.skipIntro = "1";
+      setShow(false);
+    }
   }, []);
 
   const handleDone = useCallback(() => {
     localStorage.setItem("intro-played", String(Date.now()));
-    document.documentElement.dataset.skipIntro = "1";
+    /* Reveal the header brand in the SAME commit that unmounts the overlay, so
+       the landed word and the real brand swap on a single frame — they're never
+       both visible. */
+    document.documentElement.dataset.introDone = "1";
     setShow(false);
+    /* Defer the skip flag until the hero entrance has finished. Flipping
+       --hero-stagger to 0ms mid-handoff would recompute the hero animation
+       delays into the past and snap them in; flipping it after they've played
+       is invisible, and lets later in-session remounts skip the intro. */
+    window.setTimeout(() => {
+      document.documentElement.dataset.skipIntro = "1";
+    }, 2000);
   }, []);
 
   if (!show) return null;

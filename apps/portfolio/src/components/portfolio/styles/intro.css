@@ -1,7 +1,8 @@
-/* Hero entrance is gated on intro completion. Override to 0 when the intro
-   is skipped so the hero animates in immediately. */
+/* Hero entrance is gated so it begins as the intro backdrop clears (~5s) — not
+   after the overlay fully unmounts (6s) — so the revealed page is already
+   alive instead of blank. Override to 0 when the intro is skipped. */
 :root {
-  --hero-stagger: 6000ms;
+  --hero-stagger: 5000ms;
 }
 html[data-skip-intro="1"] {
   --hero-stagger: 0ms;
@@ -47,23 +48,11 @@ html[data-skip-intro="1"] #intro-root {
     opacity: 0;
   }
 }
-@keyframes intro-bracket-in {
-  to {
-    opacity: 0.7;
-    transform: translateX(0);
-  }
-}
-@keyframes intro-word-inner-in {
+@keyframes intro-char-in {
   to {
     opacity: 1;
   }
 }
-@keyframes hero-word-snap {
-  to {
-    opacity: 1;
-  }
-}
-
 .intro-overlay {
   z-index: 9999;
 }
@@ -97,49 +86,41 @@ html[data-skip-intro="1"] #intro-root {
   animation-delay: calc(1900ms + var(--ring-d, 0s));
 }
 
-/* JS sets the inline morph transform after first paint; the transition's
-   delay holds the word at center until scramble settles, then animates it
-   into hero-word position. The intro-word stays opaque the entire intro —
-   when it unmounts, the hero word (snapped visible at the same instant)
-   is sitting at the identical position, so the handoff is invisible. */
+/* Outer element owns position + the morph: JS sets an inline transform that
+   the transition eases, flying the word onto the header brand ([data-brand])
+   as the backdrop fades. No glow, so the landed word is identical to the real
+   brand and the handoff reads as a single TabsirCG. Transform stays free for
+   the morph — the entrance lives on the per-character .intro-char spans. */
 .intro-word {
   transform: translate(-50%, -50%) scale(1);
-  font-size: clamp(48px, 11vw, 160px);
-  line-height: 1.04;
-  letter-spacing: -0.025em;
-  text-shadow: 0 0 40px rgba(232, 148, 85, 0.35);
-  transition: transform 650ms cubic-bezier(0.7, 0, 0.2, 1) 5100ms;
+  font-size: clamp(40px, 10vw, 150px);
+  will-change: transform;
+  /* Quick, prompt start so the word is clearly travelling while the rings
+     fade, then eases to rest on the brand. */
+  transition: transform 720ms cubic-bezier(0.2, 0.75, 0.25, 1);
 }
 
-.intro-bracket {
+/* Entrance: each character types in one at a time. Opacity-only (compositor
+   cheap, no blur), starting after the rings have drawn so the word doesn't
+   sit idle at center for seconds. --char-i staggers left-to-right. */
+.intro-char {
   opacity: 0;
-  animation: intro-bracket-in 600ms cubic-bezier(0.22, 1, 0.36, 1) 2500ms
-    forwards;
-}
-.intro-bracket--l {
-  transform: translateX(-0.55em);
-}
-.intro-bracket--r {
-  transform: translateX(0.55em);
+  animation: intro-char-in 90ms ease forwards;
+  animation-delay: calc(2800ms + var(--char-i, 0) * 70ms);
 }
 
-.intro-word-inner {
-  min-width: 11ch;
+/* Header brand stays hidden through the intro; it's revealed by data-intro-done
+   in the same commit the overlay unmounts, so the landed word and the real
+   brand swap on a single frame — never both visible at once. */
+html:not([data-intro-done]):not([data-skip-intro="1"]) [data-brand] {
   opacity: 0;
-  animation: intro-word-inner-in 400ms ease 2850ms forwards;
-}
-
-/* Hero word stays invisible until the intro morph lands on it, then snaps
-   in (no fade) so it visually IS the intro word. Skipped sessions bypass
-   the rule entirely so the word renders instantly with no first-frame flash. */
-html:not([data-skip-intro="1"]) [data-hero-word] {
-  opacity: 0;
-  animation: hero-word-snap 1ms step-end forwards;
-  animation-delay: var(--hero-stagger);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .intro-overlay {
     display: none;
+  }
+  [data-brand] {
+    opacity: 1;
   }
 }

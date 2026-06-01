@@ -68,12 +68,7 @@ export function Hero({ photo }: { photo: string }) {
                   <span
                     key={i}
                     className="word"
-                    style={
-                      {
-                        "--word-i": i,
-                        animationDelay: `${300 + 50 * i}ms`,
-                      } as React.CSSProperties
-                    }
+                    style={{ "--word-i": i } as React.CSSProperties}
                   >
                     {seg.accent ? (
                       <em className="text-accent italic">{word}</em>
