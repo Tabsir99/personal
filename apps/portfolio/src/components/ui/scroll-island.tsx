@@ -62,5 +62,41 @@ export function ScrollIsland() {
       if (raf) cancelAnimationFrame(raf);
     };
   }, [pathname]);
+
+  const SCROLL_EASE = 0.08; // gap covered per frame. higher = settles fast / stops when you stop · lower = floaty, keeps gliding after you stop
+  const SETTLE_PX = 0.4; // snap to target inside this gap — kills the end-of-travel crawl
+  const LINE_STEP_PX = 30; // px per line for wheels reporting in line mode (deltaMode 1)
+
+  useEffect(() => {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let current = scrollY,
+      target = current,
+      raf = 0;
+    const max = () => document.documentElement.scrollHeight - innerHeight;
+    const loop = () => {
+      current += (target - current) * SCROLL_EASE;
+      if (Math.abs(target - current) < SETTLE_PX) current = target;
+      scrollTo(0, current);
+      raf = current === target ? 0 : requestAnimationFrame(loop);
+    };
+    const onWheel = (e: WheelEvent) => {
+      if (
+        e.ctrlKey ||
+        (e.target as Element | null)?.closest?.("[data-native-scroll]")
+      )
+        return;
+      e.preventDefault();
+      if (!raf) target = scrollY;
+      const d = e.deltaMode ? e.deltaY * LINE_STEP_PX : e.deltaY;
+      target = Math.max(0, Math.min(max(), target + d));
+      raf ||= requestAnimationFrame(loop);
+    };
+    addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      removeEventListener("wheel", onWheel);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return null;
 }

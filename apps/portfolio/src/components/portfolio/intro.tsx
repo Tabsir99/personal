@@ -1,7 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { ScrambleWord } from "./scramble-word";
 
 /* Mirrors ContourSVG's Summit A so rings align with Atmosphere on fade. */
 function IntroRings() {
@@ -112,13 +111,7 @@ function IntroInner({ onDone }: { onDone: () => void }) {
           [
         </span>
         <span className="intro-word-inner inline-block text-center">
-          <ScrambleWord
-            words={["TABSIR · CG", "FRICTION"]}
-            hold={1300}
-            duration={900}
-            delay={2850}
-            loop={false}
-          />
+          TABSIR . CG
         </span>
         <span className="intro-bracket intro-bracket--r inline-block font-normal text-accent-2">
           ]

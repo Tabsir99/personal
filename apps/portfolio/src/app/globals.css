@@ -322,6 +322,36 @@ html {
     animation-delay: calc(300ms + var(--word-i, 0) * 25ms);
   }
 
+  /* Hero headline: each word rises out of an overflow-hidden mask on mount.
+     Gated on --hero-stagger so it plays as the intro clears (0ms when
+     skipped), matching the subtext/CTA cascade. Each word carries --i. */
+  @keyframes hero-rise {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  [data-hero-rise] .word {
+    display: inline-block;
+    overflow: hidden;
+    margin-right: 0.16em;
+    /* Clip room so the accent line's slanted italic glyphs aren't shaved off. */
+    padding-right: 0.06em;
+  }
+  [data-hero-rise] .word > span {
+    display: inline-block;
+    animation: hero-rise 0.55s var(--ease-soft) both;
+    animation-delay: calc(var(--hero-stagger, 0ms) + var(--i, 0) * 0.07s);
+  }
+
+  /* Hero subtext reuses About's reveal-words wave (see about.tsx), but gated on
+     --hero-stagger so it arrives with the headline once the intro clears. */
+  #hero [data-reveal-words] .word {
+    animation-delay: calc(var(--hero-stagger, 0ms) + var(--word-i, 0) * 25ms);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     [data-reveal],
     [data-reveal-stagger] > *,

@@ -88,14 +88,14 @@ export default function RootLayout({
   return (
     <html lang="en" style={fontVars} suppressHydrationWarning>
       <head>
-        {process.env.NODE_ENV === "development" && (
+        {/* {process.env.NODE_ENV === "development" && (
           <script
             src="https://unpkg.com/react-scan/dist/auto.global.js"
             async
             defer
             fetchPriority="low"
           ></script>
-        )}
+        )} */}
 
         <script
           dangerouslySetInnerHTML={{

@@ -1,12 +1,23 @@
 import Image from "next/image";
-import { ScrambleWord } from "./scramble-word";
 import { cn } from "@/lib/utils";
+import { splitAccent } from "@/components/ui/rich-text";
 import { NavLink } from "../ui/nav-link";
 
 const portraitMask =
   "radial-gradient(ellipse at center, #000 38%, transparent 100%)";
 
+const desc = `I built a Facebook scheduling platform that's been live a year —
+real users, real payments, hundreds of pages, ::built solo.::
+React and Node, plus the reliability work most people skip.`;
+
 export function Hero({ photo }: { photo: string }) {
+  let w = 0;
+  let sw = 0;
+  const headlineLines = [
+    { text: "I ship things that", accent: false },
+    { text: "stay shipped.", accent: true },
+  ];
+
   return (
     <section
       id="hero"
@@ -17,76 +28,62 @@ export function Hero({ photo }: { photo: string }) {
       )}
     >
       <div className="min-w-0">
-        <h1 className="m-0 mb-7 flex flex-col text-balance font-serif">
-          <span
-            data-hero-word
-            className={cn(
-              "inline-flex items-baseline gap-[0.04em] font-mono font-medium",
-              "text-[clamp(46px,6vw,96px)] leading-[1.04] tracking-tight",
-              "text-accent uppercase",
-              "whitespace-nowrap",
-            )}
-          >
-            <span data-hero-bracket="l" className="text-accent-2 opacity-70">
-              [
-            </span>
-            <span className="inline-block min-w-[11ch] text-center">
-              <ScrambleWord
-                words={[
-                  "FRICTION",
-                  "FRAGILITY",
-                  "FRUSTRATION",
-                  "RE-WRITES",
-                  "SLOW SHIPS",
-                ]}
-                delay={6000}
-              />
-            </span>
-
-            <span data-hero-bracket="r" className="text-accent-2 opacity-70">
-              ]
-            </span>
-          </span>
-
-          <span
-            className={cn(
-              "mt-1.5 flex flex-col",
-              "text-[clamp(68px,9vw,130px)] leading-[0.92] tracking-[-0.035em]",
-              "text-cream",
-            )}
-          >
+        <h1
+          data-hero-rise
+          className="h-serif m-0 mb-7 text-cream text-[clamp(3rem,10vw,7rem)] leading-[0.9]"
+        >
+          {headlineLines.map((line, li) => (
             <span
-              className="block translate-y-[0.4em] opacity-0 animate-rise-in animation-duration-[1s]"
-              style={{ animationDelay: "calc(var(--hero-stagger) + 100ms)" }}
+              key={li}
+              className={cn("block", line.accent && "italic text-accent")}
             >
-              is not
+              {line.text.split(" ").map((word) => {
+                const i = w++;
+                return (
+                  <span key={i} className="word">
+                    <span style={{ "--i": i } as React.CSSProperties}>
+                      {word}
+                    </span>
+                  </span>
+                );
+              })}
             </span>
-            <span
-              className={cn(
-                "em-accent block translate-y-[0.4em] opacity-0",
-                "pl-[clamp(40px,5vw,96px)]",
-                "animate-rise-in duration-1000",
-              )}
-              style={{ animationDelay: "calc(var(--hero-stagger) + 200ms)" }}
-            >
-              a <em>feature.</em>
-            </span>
-          </span>
+          ))}
         </h1>
 
         <p
+          data-reveal-words
           className={cn(
-            "em-accent",
             "text-[clamp(16px,1.5vw,22px)] leading-[1.45]",
             "text-cream-2 mt-9 mb-11 max-w-[52ch]",
-            "opacity-0 animate-fade-in",
           )}
-          style={{ animationDelay: "calc(var(--hero-stagger) + 300ms)" }}
         >
-          Full-stack web work for teams who&rsquo;d rather{" "}
-          <em className="underline underline-offset-2">move than rewrite</em>.
-          APIs, dashboards, the seams between them — built so they don&rsquo;t
-          show.
+          {splitAccent(desc).flatMap((seg) =>
+            seg.text
+              .split(" ")
+              .filter(Boolean)
+              .map((word) => {
+                const i = sw++;
+                return (
+                  <span
+                    key={i}
+                    className="word"
+                    style={
+                      {
+                        "--word-i": i,
+                        animationDelay: `${300 + 50 * i}ms`,
+                      } as React.CSSProperties
+                    }
+                  >
+                    {seg.accent ? (
+                      <em className="text-accent italic">{word}</em>
+                    ) : (
+                      word
+                    )}
+                  </span>
+                );
+              }),
+          )}
         </p>
 
         <div
