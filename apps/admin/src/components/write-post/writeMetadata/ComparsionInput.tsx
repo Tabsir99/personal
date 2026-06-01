@@ -10,18 +10,12 @@ import {
   type ReactNode,
 } from "react";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
 const norm = (s: string | null | undefined): string => (s ?? "").trim();
 const differs = (
   a: string | null | undefined,
   b: string | null | undefined,
 ): boolean => norm(a).toLowerCase() !== norm(b).toLowerCase();
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────────────────────
 type Phase = "idle" | "accepting" | "applied" | "dismissed";
 type PressedKey = "tab" | "esc" | null;
 
@@ -42,14 +36,12 @@ export interface SuggestionFieldProps {
   multiLine?: boolean | undefined;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // SuggestionField — reusable controlled input with attached suggestion strip.
 //
 // Parent owns `value` and `suggested`. When `suggested` differs from `value`,
 // the input's text is rendered with rose tint + strikethrough to signal "this
 // will be replaced", and the strip shows the proposed replacement. Tab accepts
 // (calls onChange(suggested)); Esc dismisses until the suggested prop changes.
-// ─────────────────────────────────────────────────────────────────────────────
 export function SuggestionField({
   id,
   type = "text",
@@ -214,7 +206,6 @@ export function SuggestionField({
         </div>
       </div>
 
-      {/* Helper text */}
       {helperText && (
         <p className="mt-2 px-0.5 text-xs text-muted-foreground">{helperText}</p>
       )}

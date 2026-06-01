@@ -21,7 +21,6 @@ interface Particle {
   
         setParticles((prev) => [...prev, newParticle]);
   
-        // Remove particle after animation completes
         setTimeout(() => {
           setParticles((prev) => prev.filter((p) => p.id !== newParticle.id));
         }, 1000);
@@ -64,7 +63,7 @@ interface Particle {
   
       const handleMouseMove = (e: MouseEvent) => {
         points.current.push({ x: e.clientX, y: e.clientY });
-        if (points.current.length > 20) points.current.shift(); // Keep last 20 points
+        if (points.current.length > 20) points.current.shift();
       };
   
       const animate = () => {

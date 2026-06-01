@@ -1,10 +1,7 @@
 import { z } from "zod";
 import type { DocContent } from "@open-notion/editor";
 
-// ============================================================================
-// ENUMS (defined in zod, source of truth)
-// ============================================================================
-
+// ENUMS defined in zod, source of truth
 export const blogStatusSchema = z.enum([
   "published",
   "unpublished",
@@ -14,18 +11,11 @@ export const blogStatusSchema = z.enum([
 export type BlogStatus = z.infer<typeof blogStatusSchema>;
 export const BlogStatus = blogStatusSchema.enum;
 
-// ============================================================================
-// EDITOR CONTENT (opaque object from @open-notion/editor)
-// ============================================================================
-
+// EDITOR CONTENT: opaque object from @open-notion/editor
 export const docContentSchema = z.custom<DocContent>(
   (v) => typeof v === "object" && v !== null,
   { message: "Invalid editor content" },
 );
-
-// ============================================================================
-// BLOG SCHEMAS
-// ============================================================================
 
 export const blogStatsSchema = z.object({
   views: z.number().default(0),
@@ -101,10 +91,6 @@ export const blogFormDataSchema = z.object({
     .optional(),
 });
 export type BlogFormData = z.infer<typeof blogFormDataSchema>;
-
-// ============================================================================
-// ANCILLARY SHAPES
-// ============================================================================
 
 export const validLinksSchema = z.object({
   categoryLinks: z.array(z.string()).default([]),

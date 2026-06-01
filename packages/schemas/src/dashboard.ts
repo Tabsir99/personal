@@ -1,9 +1,5 @@
 import { z } from "zod";
 
-// ============================================================================
-// ENUMS
-// ============================================================================
-
 export const eventTypeSchema = z.enum([
   "session_start",
   "page_view",
@@ -24,10 +20,6 @@ export const referralSourceSchema = z.enum([
 ]);
 export type ReferralSource = z.infer<typeof referralSourceSchema>;
 export const ReferralSource = referralSourceSchema.enum;
-
-// ============================================================================
-// EVENT SCHEMAS
-// ============================================================================
 
 const baseEventSchema = z.object({
   sessionId: z.string().min(1).max(128),
@@ -83,10 +75,6 @@ export const analyticsEventSchema = z.discriminatedUnion("type", [
   portfolioViewEventSchema,
 ]);
 export type AnalyticsEvent = z.infer<typeof analyticsEventSchema>;
-
-// ============================================================================
-// AGGREGATE STATS
-// ============================================================================
 
 export const dailyStatsSchema = z.object({
   date: z.string(),

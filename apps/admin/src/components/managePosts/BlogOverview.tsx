@@ -142,7 +142,6 @@ const BlogOverview = () => {
           )}
         </div>
 
-        {/* Footer */}
         <div className="mt-10 inline-flex items-baseline gap-3 rounded-md border border-foreground/6 bg-card px-4 py-2.5 font-mono text-xs text-muted-foreground">
           <span>
             <span className="text-foreground">{items.length}</span> total

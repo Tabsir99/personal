@@ -66,8 +66,6 @@ export const updateSiteConfig = wrap(async (patch: Partial<SiteConfig>) => {
   return merged;
 });
 
-// --- Portfolio (page data + skill catalog) -----------------------------------
-
 const portfolioCatalogSchema = z.object({
   skillCatalog: z.array(z.string()).default([]),
 });

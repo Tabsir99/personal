@@ -9,22 +9,18 @@ function requireEnv(key: string): string {
 }
 
 export const env = {
-  // ===== Auth =====
   ADMIN_USERNAME: requireEnv("ADMIN_USERNAME"),
   ADMIN_PASSWORD: requireEnv("ADMIN_PASSWORD"),
   JWT_SECRET: requireEnv("JWT_SECRET"),
   COOKIE_NAME: "t",
 
-  // ===== Firebase =====
   FIREBASE_PRIVATE_KEY: requireEnv("FIREBASE_PRIVATE_KEY"),
   FIREBASE_CLIENT_EMAIL: requireEnv("FIREBASE_CLIENT_EMAIL"),
 
-  // ===== Cloudflare R2 =====
   CLOUDFLARE_R2_AK_ID: requireEnv("CLOUDFLARE_R2_AK_ID"),
   CLOUDFLARE_R2_AK: requireEnv("CLOUDFLARE_R2_AK"),
   CLOUDFLARE_R2_ENDPOINT: requireEnv("CLOUDFLARE_R2_ENDPOINT"),
 
-  // ===== Server to server token =====
   SERVER_TOKEN: requireEnv("SERVER_TOKEN"),
 } as const;
 

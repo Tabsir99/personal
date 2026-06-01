@@ -60,7 +60,6 @@ export default async function middleware(request: NextRequest) {
 
   const userAuthenticated = await isLoggedIn(token);
 
-  // Login page: redirect already-authenticated users to dashboard.
   if (pathname === "/") {
     return userAuthenticated
       ? NextResponse.redirect(

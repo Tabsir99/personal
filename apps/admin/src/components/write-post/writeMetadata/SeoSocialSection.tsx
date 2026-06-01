@@ -43,7 +43,6 @@ export default function SeoSocialSection({
   return (
     <Card className="bg-card/60 border-border">
       <CardContent className="p-6 space-y-6">
-        {/* ─── SEO ─── */}
         <div>
           <SectionHeader icon={Globe} title="SEO" complete={seoComplete} />
 
@@ -80,10 +79,8 @@ export default function SeoSocialSection({
           </div>
         </div>
 
-        {/* Divider that spans the full card width */}
         <div className="-mx-6 border-t border-border/50" />
 
-        {/* ─── Social ─── */}
         <div>
           <SectionHeader
             icon={Share2}

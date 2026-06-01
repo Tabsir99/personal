@@ -90,8 +90,6 @@ export default function WriteMetadataComp({
     });
   };
 
-  // ─── Per-field handlers ─────────────────────────────────────────
-
   const skipField = (key: ProseField) => {
     setSuggestion((prev) => {
       if (!prev) return null;
@@ -107,8 +105,6 @@ export default function WriteMetadataComp({
     setBlogFormData({ [key]: value } as Partial<BlogFormData>);
     skipField(key);
   };
-
-  // ─── Tag handlers ───────────────────────────────────────────────
 
   const applyTagAddition = (tag: string) => {
     addTag(tag);
@@ -129,8 +125,6 @@ export default function WriteMetadataComp({
       prev ? { ...prev, tags: [...prev.tags, tag] } : prev,
     );
   };
-
-  // ─── Change count for banner ────────────────────────────────────
 
   const changeCount = useMemo(() => {
     if (!suggestion) return 0;
@@ -154,8 +148,6 @@ export default function WriteMetadataComp({
       setSuggestion(null);
     }
   }, [suggestion, changeCount]);
-
-  // ─── Bulk actions ───────────────────────────────────────────────
 
   const handleApplyAll = () => {
     if (!suggestion) return;
@@ -187,8 +179,6 @@ export default function WriteMetadataComp({
   };
 
   const handleDiscard = () => setSuggestion(null);
-
-  // ─── Render ─────────────────────────────────────────────────────
 
   return (
     <Sheet open={showSidebar} onOpenChange={closeSidebar}>

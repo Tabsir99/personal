@@ -1,8 +1,6 @@
 import { z } from "zod";
 import type { DocContent } from "@open-notion/editor";
 
-// --- Shared attr shapes -----------------------------------------------------
-
 const blockAttrsSchema = z.object({
   backgroundColor: z.string().optional(),
   textColor: z.string().optional(),
@@ -17,8 +15,6 @@ const cellAttrsSchema = z.object({
   rowspan: z.number().optional(),
   colwidth: z.array(z.number()).nullable(),
 });
-
-// --- Marks ------------------------------------------------------------------
 
 const anyMarkSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("bold") }),
@@ -43,8 +39,6 @@ const anyMarkSchema = z.discriminatedUnion("type", [
   }),
 ]);
 
-// --- Inline nodes -----------------------------------------------------------
-
 const textNodeSchema = z.object({
   type: z.literal("text"),
   text: z.string(),
@@ -67,8 +61,6 @@ const inlineNodeSchema = z.discriminatedUnion("type", [
   hardBreakNodeSchema,
   emojiNodeSchema,
 ]);
-
-// --- Block nodes (recursive via z.lazy) ------------------------------------
 
 type BlockNode = DocContent["content"][number];
 
@@ -203,7 +195,7 @@ export const docContentSchema = z.object({
   content: z.array(blockNodeSchema),
 });
 
-// --- Compile-time drift check ----------------------------------------------
+// Compile-time drift check.
 // Under EOPT (apps/admin), strict structural `satisfies` between Zod's output
 // (`attrs?: T | undefined`) and DocContent's `attrs?: T` is impossible. We
 // instead check that the SET of discriminator literals on block, inline, and

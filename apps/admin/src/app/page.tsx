@@ -34,14 +34,12 @@ export default function LogIn() {
 
   return (
     <div className="dark flex min-h-screen items-center justify-center bg-background bg-[radial-gradient(hsl(var(--border))_1px,transparent_1px)] bg-size-[28px_28px] p-4">
-      {/* Ambient glow — single tight focal point */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed top-1/4 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-primary/4 blur-[80px]"
       />
 
       <div className="stagger-cascade relative z-10 w-full max-w-md">
-        {/* Top meta row */}
         <div
           className="mb-5 flex items-center justify-between px-0.5"
           style={{ ["--stagger-index" as string]: 0 }}
@@ -57,7 +55,6 @@ export default function LogIn() {
           </span>
         </div>
 
-        {/* Card */}
         <Card
           className="relative overflow-hidden bg-card shadow-dialog"
           style={{ ["--stagger-index" as string]: 1 }}
@@ -135,7 +132,6 @@ export default function LogIn() {
           </CardContent>
         </Card>
 
-        {/* Footer note */}
         <div
           className="mt-5 text-center"
           style={{ ["--stagger-index" as string]: 2 }}

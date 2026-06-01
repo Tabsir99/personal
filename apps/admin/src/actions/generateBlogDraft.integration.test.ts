@@ -85,13 +85,11 @@ describeMaybe("generateBlogDraftContent — real Anthropic call", () => {
       // eslint-disable-next-line no-console
       console.log("===== END AI OUTPUT =====\n");
 
-      // --- Shape sanity ---
       expect(ai.title.length).toBeGreaterThan(0);
       expect(ai.title.length).toBeLessThanOrEqual(120);
       expect(ai.doc.type).toBe("doc");
       expect(ai.doc.content.length).toBeGreaterThan(2);
 
-      // --- Voice anti-patterns the prompt forbids ---
       const titleLow = ai.title.toLowerCase();
       const bannedOpeners = [
         "learn how to",
@@ -103,7 +101,6 @@ describeMaybe("generateBlogDraftContent — real Anthropic call", () => {
         expect(titleLow.startsWith(phrase)).toBe(false);
       }
 
-      // --- Hierarchy rules ---
       // First block must be a heading at level 2 (title is rendered as H1
       // by the page; body opens at H2).
       const first = ai.doc.content[0] as
@@ -157,7 +154,6 @@ describeMaybe("generateBlogDraftContent — real Anthropic call", () => {
         }
       }
 
-      // --- Block-type whitelist ---
       const seenBlockTypes = new Set<string>();
       walkBlocks(ai.doc.content as Block[], (b) => {
         seenBlockTypes.add(b.type);
@@ -167,7 +163,6 @@ describeMaybe("generateBlogDraftContent — real Anthropic call", () => {
       // since each heading must be followed by body content).
       expect(seenBlockTypes.has("paragraph")).toBe(true);
 
-      // --- Inline + mark whitelist ---
       walkInlines(ai.doc.content as Block[], (node) => {
         expect(FORBIDDEN_INLINE_TYPES.has(node.type)).toBe(false);
         for (const mark of node.marks ?? []) {
@@ -175,7 +170,6 @@ describeMaybe("generateBlogDraftContent — real Anthropic call", () => {
         }
       });
 
-      // --- Normalizer round-trip ---
       const finalized = finalizeAiDoc(ai.doc);
       expect(finalized.type).toBe("doc");
       expect(finalized.content.length).toBe(ai.doc.content.length);

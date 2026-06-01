@@ -25,15 +25,12 @@ type ClaudeTool =
 const ENABLED_TOOLS: ClaudeTool[] = ["WebSearch", "WebFetch"];
 
 const DEFAULT_OPTIONS: Options = {
-  // Model
   model: "claude-opus-4-7",
   effort: "xhigh",
   thinking: { type: "disabled" },
 
-  // Tools — only StructuredOutput for schema support; everything else off
   tools: ENABLED_TOOLS,
 
-  // Session behaviour
   maxTurns: 7,
   promptSuggestions: false,
   agentProgressSummaries: false,
@@ -46,7 +43,6 @@ const DEFAULT_OPTIONS: Options = {
   plugins: [],
   hooks: {},
 
-  // Suppress all hooks, MCP servers, and background features via settings layer
   settings: {
     disableAllHooks: true,
     disableBackgroundAgents: true,

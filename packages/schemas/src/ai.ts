@@ -14,7 +14,6 @@ export const aiBlogMetadataSchema = z.object({
 
 export type AIBlogMetadata = z.infer<typeof aiBlogMetadataSchema>;
 
-// --- AI draft generation ---------------------------------------------------
 // AI emits a DocContent-shaped JSON that's MOSTLY strict; only auto-derivable
 // required attrs are made optional. The normalizer in apps/admin fills them
 // in and returns a value that satisfies the strict `DocContent`.
@@ -159,5 +158,4 @@ export const aiBlogDraftSchema = z.object({
 });
 export type AIBlogDraft = z.infer<typeof aiBlogDraftSchema>;
 
-// Re-export the strict DocContent type for downstream consumers
 export type { DocContent };

@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────
-// SectionHeader, FieldLabel — unchanged
-// ─────────────────────────────────────────────────────────────────────────
-
 import { cn } from "@/lib/utils";
 import { ComponentType } from "react";
 
