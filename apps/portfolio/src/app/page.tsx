@@ -64,7 +64,7 @@ export default async function Home() {
       <Atmosphere />
       <CursorGlow />
 
-      <Header />
+      <Header resume={pageData.resume} />
 
       <Hero photo={pageData.profilePicture} />
       <Endorsement testimonial={endorsement} />

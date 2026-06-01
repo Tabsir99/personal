@@ -2,6 +2,7 @@
 import { z } from "zod";
 import { db, Collections } from "@/config/firebaseAdmin";
 import { wrap } from "@/lib/appUtils";
+import { sendRevalidateRequest } from "@/lib/blogUtils";
 import { siteConfigSchema, type SiteConfig } from "@tabsircg/schemas/site";
 import { pageDataSchema, type PageData } from "@tabsircg/schemas/portfolio";
 
@@ -44,6 +45,7 @@ export const addConfigValue = wrap(
     const values = existing.slice().sort((a, b) => a.localeCompare(b));
 
     await CONFIG_DOC_REF.set({ [field]: values }, { merge: true });
+    await sendRevalidateRequest({ tag: "blog-config" });
 
     return { value: normalized, values };
   },
@@ -60,6 +62,7 @@ export const updateSiteConfig = wrap(async (patch: Partial<SiteConfig>) => {
     ...patch,
   });
   await SITE_DOC_REF.set(merged);
+  await sendRevalidateRequest({ tag: "site-config" });
   return merged;
 });
 

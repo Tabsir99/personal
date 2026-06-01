@@ -18,11 +18,19 @@ const geoStats = db.collection("geo_stats");
 const pagePerformance = db.collection("page_performance");
 const trafficSources = db.collection("traffic_sources");
 
+// xCountry is a forgeable request header that flows into Firestore doc ids
+// (`${date}_${country}`). Doc ids can't contain "/" and are capped at ~1500
+// bytes, so strip slashes and bound the length before it becomes an id.
+function sanitizeCountry(raw: string | null): string {
+  const cleaned = (raw || "unknown").replace(/\//g, "_").slice(0, 64);
+  return cleaned || "unknown";
+}
+
 export const POST = wrapRoute(async (request: NextRequest) => {
   const body = await request.json();
   const session = analyticsEventSchema.parse(body);
 
-  const country = request.headers.get("xCountry") || "unknown";
+  const country = sanitizeCountry(request.headers.get("xCountry"));
 
   let newSession: AnalyticsEvent = session;
   if (session.type === "session_start") {

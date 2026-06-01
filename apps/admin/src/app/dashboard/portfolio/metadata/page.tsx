@@ -4,6 +4,7 @@ import { useShallow } from "zustand/shallow";
 import { Pencil, Plus, X } from "lucide-react";
 
 import KeywordsSection from "@/components/portfolio/metadata/KeyWords";
+import ResumeSection from "@/components/portfolio/metadata/ResumeSection";
 import SocialLinksSection from "@/components/portfolio/metadata/SocialLinkSection";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -200,6 +201,8 @@ export default function PortfolioMetadata() {
           </div>
         </CardContent>
       </Card>
+
+      <ResumeSection />
 
       <KeywordsSection />
       <SocialLinksSection />

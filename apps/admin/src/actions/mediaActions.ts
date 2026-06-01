@@ -3,6 +3,7 @@ import s3, { S3Bucket } from "@/config/cloudflareS3";
 import { wrap } from "@/lib/appUtils";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { randomUUID } from "crypto";
 
 interface FileInfo {
   fileName: string;
@@ -33,3 +34,23 @@ export const getImageUploadSignedUrl = wrap(
     return { signedUrl, key };
   },
 );
+
+// Resume / CV upload. Stored as a public PDF under a UUID key so re-uploads bust
+// the immutable cache. Content type is fixed to application/pdf; the original
+// filename rides along in pageData for the portfolio's download link.
+export const getResumeUploadSignedUrl = wrap(async (contentLength: number) => {
+  const key = `portfolio/resume/${randomUUID()}.pdf`;
+
+  const command = new PutObjectCommand({
+    Bucket: S3Bucket.PUBLIC,
+    Key: key,
+    ContentType: "application/pdf",
+    ContentLength: contentLength,
+    ACL: "public-read",
+    CacheControl: "public, max-age=31536000, immutable",
+  });
+
+  const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+
+  return { signedUrl, key };
+});

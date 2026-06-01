@@ -133,7 +133,7 @@ export default function Testimonials() {
                       </span>
                     )}
                   </div>
-                  {t.video && (
+                  {t.video.length > 0 && (
                     <Badge variant="neutral" className="gap-1">
                       <Video />
                       Video

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
+import { loadVideoSources } from "@/lib/utils";
 
 /* Writes data-* + --work-active / --work-still on the section.
    Never re-renders — siblings react via CSS selectors. */
@@ -29,6 +30,11 @@ export function WorkStateIsland() {
       projects.forEach((el, j) => {
         el.inert = j !== i;
       });
+      // Lazy-load the now-active project's deferred video(s); inactive ones
+      // stay unloaded until activated (ScrollIsland loads the first/standalone).
+      projects[i]
+        ?.querySelectorAll<HTMLVideoElement>("video")
+        .forEach(loadVideoSources);
       if (transitTimer) clearTimeout(transitTimer);
       transitTimer = setTimeout(() => {
         section!.dataset.workTransit = "0";

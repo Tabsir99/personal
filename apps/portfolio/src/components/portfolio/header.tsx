@@ -1,8 +1,9 @@
 import "./styles/header.css";
+import type { Resume } from "@tabsircg/schemas/portfolio";
 import { Button } from "../ui/button";
 import { SECTIONS } from "./sections-data";
 
-export function Header() {
+export function Header({ resume }: { resume?: Resume }) {
   return (
     <>
       {/* Toggle + overlay sit OUTSIDE <header> on purpose: the header carries a
@@ -22,10 +23,10 @@ export function Header() {
       >
         <div className="relative z-2 mx-auto flex h-20 max-w-(--max-w) items-center gap-6 px-5 lg:gap-16 lg:px-14">
           <a
-            className="flex-none font-serif text-2xl leading-none tracking-tight text-cream transition-colors duration-200 ease-soft hover:text-accent"
+            className="flex-none font-mono text-xl leading-none tracking-tighter text-cream transition-colors duration-200 ease-soft hover:text-accent"
             href="#"
           >
-            Tabsir CG
+            Tabsir<span className="text-accent">CG</span>
           </a>
 
           <nav
@@ -50,9 +51,17 @@ export function Header() {
           </nav>
 
           <div className="ml-auto flex flex-none items-center gap-3.5">
-            <span className="hidden lg:block">
-              <Button href="#" label="Download CV" />
-            </span>
+            {resume?.url && (
+              <span className="hidden lg:block">
+                <Button
+                  href={resume.url}
+                  label="Download CV"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  {...(resume.filename ? { download: resume.filename } : {})}
+                />
+              </span>
+            )}
 
             <label
               className="hdr-shell__burger relative z-3 -mr-2 flex size-11 cursor-pointer flex-col items-center justify-center gap-1.5 lg:hidden"
@@ -85,9 +94,17 @@ export function Header() {
               {label}
             </a>
           ))}
-          <div className="hdr-shell__mactions mt-6 flex flex-wrap justify-center gap-3.5">
-            <Button href="#" label="Download CV" />
-          </div>
+          {resume?.url && (
+            <div className="hdr-shell__mactions mt-6 flex flex-wrap justify-center gap-3.5">
+              <Button
+                href={resume.url}
+                label="Download CV"
+                target="_blank"
+                rel="noopener noreferrer"
+                {...(resume.filename ? { download: resume.filename } : {})}
+              />
+            </div>
+          )}
         </nav>
       </div>
     </>

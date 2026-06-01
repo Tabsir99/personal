@@ -17,6 +17,23 @@ const isApiRequest = (pathname: string) => pathname.startsWith("/api/");
 const isActionRequest = (request: NextRequest) =>
   request.headers.get("next-action") != null;
 
+// serverToken (portfolio → admin) may only reach public, portfolio-facing
+// reads — never the analytics dashboard, content writes, or the upload
+// presigner, which all require a real admin login.
+const serverTokenAllowed = (request: NextRequest) => {
+  const { pathname } = request.nextUrl;
+  if (
+    pathname.startsWith("/api/blogs") || // list, featured, [slug], score
+    pathname.startsWith("/api/config") || // blog config (tags / kinds)
+    pathname === "/api/site-config" ||
+    pathname === "/api/event" // analytics ingest
+  ) {
+    return true;
+  }
+  // page-data is publicly readable, but only writable behind a login.
+  return pathname === "/api/page-data" && request.method === "GET";
+};
+
 const unauthorizedResponse = (request: NextRequest) => {
   if (
     isApiRequest(request.nextUrl.pathname) ||
@@ -35,9 +52,9 @@ export default async function middleware(request: NextRequest) {
   const token = request.cookies.get(env.COOKIE_NAME)?.value;
   const serverToken = request.headers.get("serverToken");
 
-  // serverToken (portfolio → admin read access) only bypasses /api/*.
-  // It must NOT grant access to dashboard pages or server actions.
-  if (serverToken === env.SERVER_TOKEN && isApiRequest(pathname)) {
+  // serverToken (portfolio → admin) bypasses login only for the public,
+  // portfolio-facing endpoints — never dashboard data, writes, or uploads.
+  if (serverToken === env.SERVER_TOKEN && serverTokenAllowed(request)) {
     return NextResponse.next();
   }
 

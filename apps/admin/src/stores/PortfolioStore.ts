@@ -9,6 +9,7 @@ const defaultPageData: PageData = {
   description: "",
   keywords: [],
   profilePicture: "",
+  resume: { url: "", filename: "" },
   aboutText: "",
   heroStats: [],
   studioName: "",
@@ -271,6 +272,14 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
           path: `projects/${i}/stills/${j}`,
         });
       }
+      still.sources?.forEach((s, k) => {
+        if (s.url.startsWith("blob:")) {
+          blobsToUpload.push({
+            url: s.url,
+            path: `projects/${i}/stills/${j}/sources/${k}`,
+          });
+        }
+      });
     });
   });
 
@@ -287,6 +296,14 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
         path: `testimonials/${i}/avatar`,
       });
     }
+    testimonial.video.forEach((s, k) => {
+      if (s.url.startsWith("blob:")) {
+        blobsToUpload.push({
+          url: s.url,
+          path: `testimonials/${i}/video/${k}`,
+        });
+      }
+    });
   });
 
   if (blobsToUpload.length === 0) return next;
@@ -321,7 +338,13 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
       const res = await fetch(urls[index].presignedUrl, {
         method: "PUT",
         body: item.blob!,
-        headers: { "Content-Type": item.blob!.type },
+        // Must mirror exactly the headers signed in upload-urls/route.ts, or
+        // R2 rejects the PUT with AccessDenied (signed-header mismatch).
+        headers: {
+          "Content-Type": item.blob!.type,
+          "Content-Disposition": "inline",
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
       });
       if (!res.ok) throw new Error("Upload failed");
     })
@@ -340,6 +363,15 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
       next.projects[projectIndex].stills[stillIndex].url = url;
       return;
     }
+    const stillSource = path.match(
+      /^projects\/(\d+)\/stills\/(\d+)\/sources\/(\d+)$/,
+    );
+    if (stillSource) {
+      const sources =
+        next.projects[+stillSource[1]].stills[+stillSource[2]].sources;
+      if (sources) sources[+stillSource[3]].url = url;
+      return;
+    }
     const credentialMatch = path.match(/^credentials\/(\d+)$/);
     if (credentialMatch) {
       next.credentials[parseInt(credentialMatch[1])].image = url;
@@ -348,6 +380,12 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
     const testimonialAvatar = path.match(/^testimonials\/(\d+)\/avatar$/);
     if (testimonialAvatar) {
       next.testimonials[parseInt(testimonialAvatar[1])].avatar = url;
+      return;
+    }
+    const testimonialVideo = path.match(/^testimonials\/(\d+)\/video\/(\d+)$/);
+    if (testimonialVideo) {
+      next.testimonials[+testimonialVideo[1]].video[+testimonialVideo[2]].url =
+        url;
       return;
     }
   });

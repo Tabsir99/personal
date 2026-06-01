@@ -2,12 +2,15 @@ import { z } from "zod";
 import { NextRequest } from "next/server";
 import { db, Collections } from "@/config/firebaseAdmin";
 import { BlogStatus, PublishedBlogDB } from "@tabsircg/schemas/blog";
-import { wrapRoute } from "@/lib/appUtils";
+import { wrapRoute, HttpError } from "@/lib/appUtils";
 
 const MAX_FELT = 50;
 const slugSchema = z.string().min(1);
+// felt-id is a client-generated opaque id; constrain the charset so it can't
+// smuggle "/" into the Firestore doc path (which would otherwise throw a 500).
+const feltIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,100}$/);
 const bodySchema = z.object({
-  id: z.string().min(1).max(100),
+  id: feltIdSchema,
   count: z.number().int().positive().max(MAX_FELT),
 });
 
@@ -18,7 +21,7 @@ async function getPublishedDocRefBySlug(slug: string) {
     .where("status", "==", BlogStatus.published)
     .limit(1)
     .get();
-  if (snapshot.empty) throw new Error("Not found");
+  if (snapshot.empty) throw new HttpError(404, "Not found");
   return snapshot.docs[0].ref;
 }
 
@@ -26,7 +29,8 @@ export const GET = wrapRoute(
   async (req: NextRequest, { params }: { params: Promise<{ slug: string }> }) => {
     const { slug } = await params;
     const parsedSlug = slugSchema.parse(slug);
-    const id = req.nextUrl.searchParams.get("id") ?? "";
+    const idParam = req.nextUrl.searchParams.get("id");
+    const id = idParam ? feltIdSchema.parse(idParam) : "";
 
     const ref = await getPublishedDocRefBySlug(parsedSlug);
     const snap = await ref.get();
@@ -55,7 +59,7 @@ export const POST = wrapRoute(
         tx.get(ref),
         tx.get(deviceRef),
       ]);
-      if (!blogSnap.exists) throw new Error("Not found");
+      if (!blogSnap.exists) throw new HttpError(404, "Not found");
 
       const score = (blogSnap.data() as PublishedBlogDB).stats?.score ?? 0;
       const stored = (deviceSnap.data()?.count as number | undefined) ?? 0;

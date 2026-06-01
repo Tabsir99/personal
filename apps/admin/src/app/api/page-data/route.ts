@@ -26,27 +26,44 @@ export const POST = wrapRoute(async (request: NextRequest) => {
   return null;
 });
 
+// Stored media values are full public URLs (`${MEDIA_ORIGIN}/${key}`), but R2
+// deletes by object key — the URL path with the leading slash stripped.
+function urlToKey(url: string): string | null {
+  try {
+    return new URL(url).pathname.replace(/^\/+/, "");
+  } catch {
+    return null;
+  }
+}
+
 async function deleteRemovedMedia(oldData: PageData, newData: PageData) {
   const oldUrls = extractMediaUrls(oldData);
   const newUrls = new Set(extractMediaUrls(newData));
 
-  const removedUrls = oldUrls.filter((url) => !newUrls.has(url));
+  const removedKeys = oldUrls
+    .filter((url) => !newUrls.has(url))
+    .map(urlToKey)
+    .filter((key): key is string => key !== null);
 
-  if (removedUrls.length > 0) {
-    await deleteObjects(S3Bucket.PUBLIC, removedUrls);
+  if (removedKeys.length > 0) {
+    await deleteObjects(S3Bucket.PUBLIC, removedKeys);
   }
 
-  console.info(`Deleted ${removedUrls.length} unused media files`);
+  console.info(`Deleted ${removedKeys.length} unused media files`);
 }
 
 function extractMediaUrls(pageData: PageData): string[] {
   const urls: string[] = [];
 
   if (pageData.profilePicture) urls.push(pageData.profilePicture);
+  if (pageData.resume.url) urls.push(pageData.resume.url);
 
   pageData.projects?.forEach((project) => {
     project.stills?.forEach((still) => {
       if (still.url) urls.push(still.url);
+      still.sources?.forEach((s) => {
+        if (s.url) urls.push(s.url);
+      });
     });
   });
 
@@ -56,7 +73,9 @@ function extractMediaUrls(pageData: PageData): string[] {
 
   pageData.testimonials?.forEach((testimonial) => {
     if (testimonial.avatar) urls.push(testimonial.avatar);
-    if (testimonial.video) urls.push(testimonial.video);
+    testimonial.video.forEach((s) => {
+      if (s.url) urls.push(s.url);
+    });
   });
 
   return urls.filter((url) => !!url);

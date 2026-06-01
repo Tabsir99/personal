@@ -18,7 +18,7 @@ import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import ProjectDialog from "@/components/portfolio/modals/ProjectModal";
-import { PageData } from "@tabsircg/schemas/portfolio";
+import { PageData, videoSourceType } from "@tabsircg/schemas/portfolio";
 import { cn } from "@/lib/utils";
 
 type LinkType = PageData["projects"][number]["links"][number]["type"];
@@ -51,7 +51,11 @@ export default function Projects() {
 
       <div className="stagger-cascade-tight grid grid-cols-1 gap-4 lg:grid-cols-2">
         {projects.map((p, index) => {
-          const cover = p.stills.find((s) => s.kind === "image" && s.url);
+          // Prefer an image still; fall back to a video still so video-only
+          // projects still show a thumbnail instead of "No still uploaded".
+          const cover =
+            p.stills.find((s) => s.kind === "image" && s.url) ??
+            p.stills.find((s) => s.kind === "video" && s.sources?.length);
           return (
             <div
               key={p.title + index}
@@ -60,13 +64,30 @@ export default function Projects() {
               <Card className="group/card relative flex h-full flex-col overflow-hidden tactile-lift pt-0">
                 <div className="relative aspect-video overflow-hidden bg-foreground/4">
                   {cover ? (
-                    <Img
-                      src={cover.url}
-                      alt={cover.alt || p.title}
-                      className="h-full w-full object-cover"
-                      fetchPriority="low"
-                      loading="lazy"
-                    />
+                    cover.kind === "video" ? (
+                      <video
+                        muted
+                        playsInline
+                        preload="metadata"
+                        className="h-full w-full object-cover"
+                      >
+                        {(cover.sources ?? []).map((s, i) => (
+                          <source
+                            key={i}
+                            src={s.url}
+                            type={videoSourceType(s) || undefined}
+                          />
+                        ))}
+                      </video>
+                    ) : (
+                      <Img
+                        src={cover.url}
+                        alt={cover.alt || p.title}
+                        className="h-full w-full object-cover"
+                        fetchPriority="low"
+                        loading="lazy"
+                      />
+                    )
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
                       No still uploaded

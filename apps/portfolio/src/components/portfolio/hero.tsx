@@ -116,18 +116,20 @@ export function Hero({ photo }: { photo: string }) {
         style={{ animationDelay: "calc(var(--hero-stagger) + 300ms)" }}
       >
         <div className="relative aspect-square">
-          <Image
-            src={photo}
-            alt="Tabsir"
-            fill
-            priority
-            sizes="(max-width: 1280px) 50vw, 400px"
-            className="object-cover object-[50%_20%]"
-            style={{
-              WebkitMaskImage: portraitMask,
-              maskImage: portraitMask,
-            }}
-          />
+          {photo && (
+            <Image
+              src={photo}
+              alt="Tabsir"
+              fill
+              priority
+              sizes="(max-width: 1280px) 50vw, 400px"
+              className="object-cover object-[50%_20%]"
+              style={{
+                WebkitMaskImage: portraitMask,
+                maskImage: portraitMask,
+              }}
+            />
+          )}
         </div>
       </div>
 

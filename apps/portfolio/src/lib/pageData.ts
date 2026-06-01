@@ -8,6 +8,7 @@ const FALLBACK: PageData = {
   description: "",
   keywords: [],
   profilePicture: "",
+  resume: { url: "", filename: "" },
   aboutText: "",
   heroStats: [],
   studioName: "",

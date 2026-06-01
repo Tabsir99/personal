@@ -6,7 +6,7 @@ import { H2 } from "../ui/H2";
 import { VoicesPlayer } from "./voices-player";
 
 export function Voices({ testimonial }: { testimonial?: Testimonial }) {
-  if (!testimonial?.video) return null;
+  if (!testimonial?.video?.length) return null;
 
   return (
     <section id="voices" className="page-shell flex flex-col gap-12">
@@ -25,7 +25,7 @@ export function Voices({ testimonial }: { testimonial?: Testimonial }) {
       </header>
 
       <VoicesPlayer
-        src={testimonial.video}
+        sources={testimonial.video}
         label={
           testimonial.company
             ? `${testimonial.name} · ${testimonial.company}`

@@ -30,9 +30,11 @@ export const ReferralSource = referralSourceSchema.enum;
 // ============================================================================
 
 const baseEventSchema = z.object({
-  sessionId: z.string().min(1),
+  sessionId: z.string().min(1).max(128),
   timestamp: z.number(),
-  path: z.string(),
+  // Bounded so `${date}_${encodeURIComponent(path)}` stays under Firestore's
+  // ~1500-byte doc-id limit and can't be used to spray unbounded analytics docs.
+  path: z.string().max(256),
 });
 
 export const sessionStartEventSchema = z.object({

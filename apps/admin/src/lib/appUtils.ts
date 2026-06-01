@@ -19,6 +19,19 @@ export function slugify(text: string): string {
 const toMessage = (e: unknown) =>
   e instanceof Error ? e.message : String(e);
 
+// Throw from a route handler to return a specific HTTP status (e.g. 404)
+// instead of a generic 500. The message is sent to the client verbatim, so
+// keep it safe/intentional.
+export class HttpError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "HttpError";
+  }
+}
+
 export function wrap<Args extends any[], T>(
   fn: (...args: Args) => Promise<T>,
 ): (...args: Args) => Promise<ApiResponse<T>> {
@@ -53,8 +66,15 @@ export function wrapRoute<T>(
           { status: 400 },
         );
       }
+      if (error instanceof HttpError) {
+        return NextResponse.json<ApiResponse<T>>(
+          { status: "error", message: error.message },
+          { status: error.status },
+        );
+      }
+      // Don't leak internal error text (Firestore index URLs, stack details).
       return NextResponse.json<ApiResponse<T>>(
-        { status: "error", message: toMessage(error) },
+        { status: "error", message: "Internal server error" },
         { status: 500 },
       );
     }

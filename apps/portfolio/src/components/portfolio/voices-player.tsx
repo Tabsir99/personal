@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
-import { cn } from "@/lib/utils";
+import { videoSourceType, type VideoSource } from "@tabsircg/schemas/portfolio";
+import { cn, loadVideoSources } from "@/lib/utils";
 import { RichText } from "@/components/ui/rich-text";
 
 const fmt = (s: number) => {
@@ -11,11 +12,11 @@ const fmt = (s: number) => {
 };
 
 export function VoicesPlayer({
-  src,
+  sources,
   label,
   className,
 }: {
-  src: string;
+  sources: VideoSource[];
   label?: string;
   className?: string;
 }) {
@@ -34,6 +35,8 @@ export function VoicesPlayer({
   const start = () => {
     const el = v.current;
     if (el) {
+      // Safety net: load deferred sources now if the observer hasn't yet.
+      loadVideoSources(el);
       el.currentTime = 0;
       el.play().catch(() => {
         el.muted = true;
@@ -53,7 +56,6 @@ export function VoicesPlayer({
     >
       <video
         ref={v}
-        src={src}
         playsInline
         preload="metadata"
         className="absolute inset-0 w-full h-full object-cover cursor-pointer"
@@ -77,7 +79,17 @@ export function VoicesPlayer({
         }}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
-      />
+      >
+        {/* Deferred src (data-src) so nothing downloads until lazy-loaded; the
+            browser picks the first source whose `type` it can play. */}
+        {sources.map((s, i) => (
+          <source
+            key={i}
+            data-src={s.url}
+            type={videoSourceType(s) || undefined}
+          />
+        ))}
+      </video>
 
       {!started && (
         <button
@@ -146,7 +158,7 @@ export function VoicesPlayer({
             className="flex-1 voices-seek"
           />
 
-          <span className="shrink-0 font-mono text-[11px] tabular-nums">
+          <span className="shrink-0 font-mono text-xxs tabular-nums">
             {fmt(dur)}
           </span>
 

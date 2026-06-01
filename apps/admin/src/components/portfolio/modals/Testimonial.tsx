@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Star, Video } from "lucide-react";
+import { Plus, Star } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +20,7 @@ import {
   PortfolioModalActions,
   PortfolioModalFrame,
 } from "./_shared";
+import { VideoSourcesEditor } from "./VideoSourcesEditor";
 
 interface TestimonialDialogProps {
   children?: React.ReactNode;
@@ -38,7 +39,7 @@ const defaultFormData: Testimonial = {
   period: "",
   rating: 5,
   text: "",
-  video: "",
+  video: [],
   avatar: "",
   displaySlot: "none",
   isActive: true,
@@ -89,7 +90,7 @@ export default function TestimonialDialog({
         <PortfolioModalActions
           onSubmit={handleSubmit}
           submitDisabled={
-            !formData.name || (!formData.text && !formData.video)
+            !formData.name || (!formData.text && !formData.video.length)
           }
           submitLabel="Add testimonial"
           updateLabel="Update testimonial"
@@ -206,25 +207,15 @@ export default function TestimonialDialog({
       </ModalSection>
 
       <ModalSection title="Video">
-        <FormField label="Video URL" hint="YouTube, Vimeo, or direct file URL.">
-          <Input
-            placeholder="https://youtube.com/…"
+        <FormField
+          label="Video sources"
+          hint="Upload or paste one or more encoded files (webm/mp4/…). The browser plays the most efficient codec it supports."
+        >
+          <VideoSourcesEditor
             value={formData.video}
-            onChange={(e) =>
-              setFormData({ ...formData, video: e.target.value })
-            }
-            className="font-mono text-xs"
+            onChange={(video) => setFormData({ ...formData, video })}
           />
         </FormField>
-
-        {formData.video && (
-          <div className="flex items-center gap-3 rounded-md border border-foreground/6 bg-foreground/2 px-3 py-2">
-            <Video className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <span className="flex-1 truncate font-mono text-xs">
-              {formData.video}
-            </span>
-          </div>
-        )}
       </ModalSection>
     </PortfolioModalFrame>
   );

@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { BACKGROUND_PLANES } from "@/components/portfolio/sections-data";
+import { loadVideoSources } from "@/lib/utils";
 
 export function ScrollIsland() {
   const pathname = usePathname();
@@ -14,7 +15,7 @@ export function ScrollIsland() {
             ioReveal.unobserve(e.target);
           }
       },
-      { threshold: 0.4, rootMargin: "0px 0px -10% 0px" },
+      { threshold: 0.3, rootMargin: "0px 0px -20% 0px" },
     );
     document
       .querySelectorAll<HTMLElement>(
@@ -61,6 +62,29 @@ export function ScrollIsland() {
       removeEventListener("scroll", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
+  }, [pathname]);
+
+  // Lazy-load <video> sources. VoicesPlayer renders <source data-src> with no
+  // real src, so nothing offscreen downloads on load. Work stills are stacked +
+  // only opacity-toggled, so they all intersect at once — load just the active
+  // (non-inert) one here; switching projects loads the rest (WorkStateIsland).
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          const v = e.target as HTMLVideoElement;
+          if (v.closest<HTMLElement>("[data-work-proj-idx]")?.inert) continue;
+          loadVideoSources(v);
+          io.unobserve(v);
+        }
+      },
+      { rootMargin: "200px 0px" },
+    );
+    document.querySelectorAll<HTMLVideoElement>("video").forEach((v) => {
+      if (v.querySelector("source[data-src]")) io.observe(v);
+    });
+    return () => io.disconnect();
   }, [pathname]);
 
   const SCROLL_EASE = 0.08; // gap covered per frame. higher = settles fast / stops when you stop · lower = floaty, keeps gliding after you stop

@@ -14,13 +14,15 @@ export default function FeaturedCard({ post }: { post: PostMeta }) {
         className="relative text-cream p-8 min-h-[380px] flex flex-col justify-between overflow-hidden before:pointer-events-none"
         aria-hidden="true"
       >
-        <Image
-          src={post.coverImageUrl}
-          alt={`Cover image for ${post.title}`}
-          fill
-          sizes="(max-width: 980px) 100vw, 50vw"
-          className="object-cover"
-        />
+        {post.coverImageUrl && (
+          <Image
+            src={post.coverImageUrl}
+            alt={`Cover image for ${post.title}`}
+            fill
+            sizes="(max-width: 980px) 100vw, 50vw"
+            className="object-cover"
+          />
+        )}
       </div>
       <div className="py-10 px-11 flex flex-col gap-5">
         <div className="flex justify-between items-center pb-3.5 border-b border-dashed border-cream/8">

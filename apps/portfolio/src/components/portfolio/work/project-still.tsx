@@ -41,16 +41,22 @@ export function ProjectStill({
       >
         <RichText text={project.title} />
       </div>
-      {project.stills.map(
-        (s, j) =>
-          s.url && (
+      {project.stills.map((s, j) => {
+        // Video stills use `sources` (multi-codec); images use `url`.
+        const videoSources = s.sources ?? [];
+        const hasMedia = s.kind === "video" ? videoSources.length > 0 : !!s.url;
+        return (
+          hasMedia && (
             <div
               key={`media-${j}`}
               style={{ "--i": j } as React.CSSProperties}
               className="work-still-media absolute inset-0 z-2"
             >
               {s.kind === "video" ? (
-                <VoicesPlayer src={s.url} className="border-0 rounded-none" />
+                <VoicesPlayer
+                  sources={videoSources}
+                  className="border-0 rounded-none"
+                />
               ) : (
                 <img
                   src={s.url}
@@ -61,8 +67,9 @@ export function ProjectStill({
                 />
               )}
             </div>
-          ),
-      )}
+          )
+        );
+      })}
 
       {project.stills.map((s, j) => (
         <div
@@ -78,7 +85,7 @@ export function ProjectStill({
       {project.stills.map(
         (s, j) =>
           s.kind === "video" &&
-          !s.url && (
+          !s.sources?.length && (
             <div
               key={j}
               style={{ "--i": j } as React.CSSProperties}

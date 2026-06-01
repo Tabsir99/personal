@@ -137,7 +137,7 @@ interface CursorPage<T> {
 }
 ```
 
-The `serverToken` header is portfolio's auth into admin. It's documented but not enforced at the route level yet. Add validation in `wrapRoute` once admin's API picks up a public hostname.
+The `serverToken` header is portfolio's auth into admin. It's enforced at the proxy ([apps/admin/src/proxy.ts](apps/admin/src/proxy.ts)) and scoped to the public, portfolio-facing endpoints only — blog reads, config, `GET /api/page-data`, and event ingest — never the dashboard analytics or content writes, which require the admin JWT cookie.
 
 ### Public API (admin)
 

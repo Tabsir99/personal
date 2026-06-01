@@ -3,6 +3,29 @@ import { z } from "zod";
 // Optional URL field that also accepts empty string
 const optionalUrl = z.url().or(z.literal("")).default("");
 
+// One encoded variant of a video.
+// - `type` is the container MIME for the <source type> attribute, e.g.
+//   "video/webm" or "video/mp4".
+// - `codec` is the optional `codecs=` parameter, e.g. 'avc1.42E01E, mp4a.40.2'
+//   (H.264/AAC), "vp9", or "av01.0.05M.08". Splitting it out keeps the UI
+//   simple; `videoSourceType` recombines the two into the real attribute.
+// The browser reads the combined value to download only a source it can decode.
+const videoSourceSchema = z.object({
+  url: optionalUrl,
+  type: z.string().default(""),
+  codec: z.string().default(""),
+});
+export type VideoSource = z.infer<typeof videoSourceSchema>;
+
+// Build the value for a <source type> attribute from a VideoSource: the
+// container MIME plus an optional codecs clause. Returns "" when no MIME is
+// set (so callers can fall back to `undefined` and let the browser sniff).
+export function videoSourceType(s: VideoSource): string {
+  if (!s.type) return "";
+  const codec = s.codec.trim();
+  return codec ? `${s.type}; codecs="${codec}"` : s.type;
+}
+
 const linkSchema = z.object({
   text: z.string().default(""),
   url: optionalUrl,
@@ -17,6 +40,9 @@ const stillSchema = z.object({
   alt: z.string().default(""),
   label: z.string().default(""),
   kind: z.enum(["image", "video"]).default("image"),
+  // Encoded sources for a video still (browser picks the best codec it can
+  // play). Only set when `kind === "video"`; images use `url`.
+  sources: z.array(videoSourceSchema).optional(),
 });
 export type ProjectStill = z.infer<typeof stillSchema>;
 
@@ -56,7 +82,7 @@ export const testimonialSchema = z.object({
   period: z.string().default(""),
   rating: z.number().min(0).max(5),
   text: z.string().default(""),
-  video: optionalUrl,
+  video: z.array(videoSourceSchema).default([]),
   avatar: optionalUrl,
   displaySlot: z.enum(["endorsement", "voices", "none"]).default("none"),
   isActive: z.boolean().default(true),
@@ -125,11 +151,22 @@ export const heroStatSchema = z.object({
 });
 export type HeroStat = z.infer<typeof heroStatSchema>;
 
+export const resumeSchema = z.object({
+  // Public URL of the uploaded PDF (empty until one is uploaded).
+  url: optionalUrl,
+  // Original filename, used as the download name on the portfolio CV button.
+  filename: z.string().default(""),
+});
+export type Resume = z.infer<typeof resumeSchema>;
+
 export const pageDataSchema = z.object({
   title: z.string(),
   description: z.string().default(""),
   keywords: z.array(z.string()).default([]),
   profilePicture: optionalUrl,
+  // Resume / CV: uploaded PDF URL + original filename (used as the download
+  // name on the portfolio's "Download CV" button).
+  resume: resumeSchema.default({ url: "", filename: "" }),
 
   aboutText: z.string().default(""),
   heroStats: z.array(heroStatSchema).default([]),
