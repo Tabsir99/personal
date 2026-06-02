@@ -87,7 +87,7 @@ export function ScrollIsland() {
     return () => io.disconnect();
   }, [pathname]);
 
-  const SCROLL_EASE = 0.08; // gap covered per frame. higher = settles fast / stops when you stop · lower = floaty, keeps gliding after you stop
+  const SCROLL_EASE = 0.05; // gap covered per frame. higher = settles fast / stops when you stop · lower = floaty, keeps gliding after you stop
   const SETTLE_PX = 0.4; // snap to target inside this gap — kills the end-of-travel crawl
   const LINE_STEP_PX = 30; // px per line for wheels reporting in line mode (deltaMode 1)
 
@@ -110,14 +110,24 @@ export function ScrollIsland() {
       )
         return;
       e.preventDefault();
-      if (!raf) target = scrollY;
+      if (!raf) current = target = scrollY;
       const d = e.deltaMode ? e.deltaY * LINE_STEP_PX : e.deltaY;
       target = Math.max(0, Math.min(max(), target + d));
       raf ||= requestAnimationFrame(loop);
     };
+
+    const onAnchorClick = (e: MouseEvent) => {
+      if (!(e.target as Element | null)?.closest?.('a[href^="#"]')) return;
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
+    };
     addEventListener("wheel", onWheel, { passive: false });
+    addEventListener("click", onAnchorClick);
     return () => {
       removeEventListener("wheel", onWheel);
+      removeEventListener("click", onAnchorClick);
       cancelAnimationFrame(raf);
     };
   }, []);
