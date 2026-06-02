@@ -13,11 +13,7 @@ function initFirebase() {
     });
   } else {
     app = initializeApp({
-      credential: cert({
-        projectId: "tabsir-s-blog",
-        privateKey: env.FIREBASE_PRIVATE_KEY,
-        clientEmail: env.FIREBASE_CLIENT_EMAIL,
-      }),
+      credential: cert(env.FIREBASE_CREDENTIAL),
     });
   }
 
