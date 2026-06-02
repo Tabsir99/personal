@@ -109,13 +109,10 @@ const toPostMeta = (b: BlogListItem): PostMeta => ({
   coverImageUrl: b.coverImageUrl,
 });
 
-const toNeighbour = ({ slug, title }: PostMeta): Neighbour => ({ slug, title });
-
 export async function getFeaturedBlog(): Promise<PostMeta | null> {
-  const blog = await fetchJson<PublishedBlogDB | null>(
-    "/api/blogs/featured",
-    ["blogs"],
-  );
+  const blog = await fetchJson<PublishedBlogDB | null>("/api/blogs/featured", [
+    "blogs",
+  ]);
   if (!blog) return null;
   return toPostMeta(blog);
 }
@@ -137,36 +134,26 @@ export async function getRecentBlogs(
   return { items: page.items.map(toPostMeta), nextCursor: page.nextCursor };
 }
 
-// Acceptable up to ~100 published blogs; past that, swap in a nav index.
-// cache() dedupes the page-walk within a single request render.
-export const getAllBlogs = cache(async (): Promise<PostMeta[]> => {
-  const all: PostMeta[] = [];
-  let cursor: string | undefined = undefined;
-  for (let safety = 0; safety < 50; safety++) {
-    const page = await getRecentBlogs(50, cursor);
-    all.push(...page.items);
-    if (!page.nextCursor) break;
-    cursor = page.nextCursor;
-  }
-  return all;
-});
+export interface BlogNavItem {
+  slug: string;
+  title: string;
+  publishedAt: number;
+  updatedAt: number;
+  coverImageUrl: string;
+}
+
+// Lightweight list of all published posts (slug + a few fields) for the sitemap
+// and generateStaticParams — one projected fetch, no corpus walk.
+export async function getBlogNav(): Promise<BlogNavItem[]> {
+  return (await fetchJson<BlogNavItem[]>("/api/blogs/nav", ["blogs"])) ?? [];
+}
 
 // cache() dedupes getPost across generateMetadata + the page render.
 export const getPost = cache(async (slug: string): Promise<Post | null> => {
-  const [blog, list] = await Promise.all([
-    fetchJson<PublishedBlogDB>(`/api/blogs/${encodeURIComponent(slug)}`, [
-      "blogs",
-      `blog:${slug}`,
-    ]),
-    getAllBlogs(),
-  ]);
+  const blog = await fetchJson<
+    PublishedBlogDB & { prev: Neighbour | null; next: Neighbour | null }
+  >(`/api/blogs/${encodeURIComponent(slug)}`, [`blog:${slug}`]);
   if (!blog) return null;
-
-  const sorted = [...list].sort((a, b) => b.date.localeCompare(a.date));
-  const idx = sorted.findIndex((p) => p.slug === slug);
-  const next = idx > 0 ? toNeighbour(sorted[idx - 1]) : null;
-  const prev =
-    idx >= 0 && idx < sorted.length - 1 ? toNeighbour(sorted[idx + 1]) : null;
 
   let body: DocContent;
   try {
@@ -190,8 +177,8 @@ export const getPost = cache(async (slug: string): Promise<Post | null> => {
     updatedAt: blog.updatedAt,
     coverImageUrl: blog.coverImageUrl,
     body,
-    prev,
-    next,
+    prev: blog.prev,
+    next: blog.next,
   };
 });
 

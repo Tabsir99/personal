@@ -7,6 +7,8 @@ import {
 } from "@tabsircg/schemas/blog";
 import { randomUUID } from "crypto";
 import { slugify } from "./appUtils";
+import { fetchPublishedNeighbours } from "./blogQuery";
+import { db, Collections } from "@/config/firebaseAdmin";
 import { env } from "@/config/env.server";
 import { clientEnv } from "@/config/env.client";
 
@@ -185,9 +187,21 @@ export async function sendRevalidateRequest(target: RevalidateTarget) {
   }
 }
 
-// A blog mutation affects the post page (`blog:${slug}`) and every list that
-// surfaces it — the /blog index, the home Writing section, the featured slot,
-// and the sitemap — all of which share the "blogs" tag in the portfolio.
+// Refresh the lists ("blogs"), the post itself, and its neighbours (whose
+// prev/next now point at it).
 export async function revalidateBlog(slug: string) {
-  await sendRevalidateRequest({ tags: ["blogs", `blog:${slug}`] });
+  const tags = ["blogs", `blog:${slug}`];
+  const snap = await db
+    .collection(Collections.BLOGS)
+    .where("slug", "==", slug)
+    .limit(1)
+    .get();
+  if (!snap.empty) {
+    const { prev, next } = await fetchPublishedNeighbours(
+      snap.docs[0].get("publishedAt"),
+    );
+    if (prev) tags.push(`blog:${prev.slug}`);
+    if (next) tags.push(`blog:${next.slug}`);
+  }
+  await sendRevalidateRequest({ tags });
 }

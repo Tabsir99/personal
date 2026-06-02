@@ -1,15 +1,14 @@
 import { MetadataRoute } from "next";
 import { getPageData } from "@/lib/pageData";
-import { getAllBlogs } from "@/lib/posts";
+import { getBlogNav } from "@/lib/posts";
 
 const BASE_URL = "https://tabsircg.com";
 
-// Daily backstop; also regenerates on-demand when getAllBlogs()/getPageData()'s
-// "blogs"/"page-data" tags are revalidated after an admin mutation.
+// Daily backstop; also regenerates on-demand via the "blogs"/"page-data" tags.
 export const revalidate = 86400;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [pageData, blogs] = await Promise.all([getPageData(), getAllBlogs()]);
+  const [pageData, blogs] = await Promise.all([getPageData(), getBlogNav()]);
 
   const homepageImages = [
     pageData.profilePicture,

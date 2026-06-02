@@ -1,5 +1,39 @@
 import { firestore } from "firebase-admin";
 import { db, Collections } from "@/config/firebaseAdmin";
+import { BlogStatus } from "@tabsircg/schemas/blog";
+
+export interface BlogNeighbour {
+  slug: string;
+  title: string;
+}
+
+// prev = next-older post, next = next-newer, by publishedAt (two indexed reads).
+export async function fetchPublishedNeighbours(
+  publishedAt: number,
+): Promise<{ prev: BlogNeighbour | null; next: BlogNeighbour | null }> {
+  const published = db
+    .collection(Collections.BLOGS)
+    .where("status", "==", BlogStatus.published);
+  const [olderSnap, newerSnap] = await Promise.all([
+    published
+      .where("publishedAt", "<", publishedAt)
+      .orderBy("publishedAt", "desc")
+      .limit(1)
+      .get(),
+    published
+      .where("publishedAt", ">", publishedAt)
+      .orderBy("publishedAt", "asc")
+      .limit(1)
+      .get(),
+  ]);
+  const toNeighbour = (
+    snap: FirebaseFirestore.QuerySnapshot,
+  ): BlogNeighbour | null =>
+    snap.empty
+      ? null
+      : { slug: snap.docs[0].get("slug"), title: snap.docs[0].get("title") };
+  return { prev: toNeighbour(olderSnap), next: toNeighbour(newerSnap) };
+}
 
 export const deleteBlogdb = async ({
   blogId,

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DocRenderer } from "@open-notion/serializers/react";
 import { docToToc } from "@open-notion/serializers/toc";
-import { getAllBlogs, getPost } from "@/lib/posts";
+import { getBlogNav, getPost } from "@/lib/posts";
 import PostHeader from "@/components/Blog/post/PostHeader";
 import PostFooter from "@/components/Blog/post/PostFooter";
 import Toc from "@/components/Blog/post/Toc";
@@ -16,7 +16,7 @@ import TocIsland from "@/components/Blog/post/TocIsland";
 type RouteParams = Promise<{ slug: string }>;
 
 export async function generateStaticParams() {
-  const blogs = await getAllBlogs();
+  const blogs = await getBlogNav();
   return blogs.map((b) => ({ slug: b.slug }));
 }
 

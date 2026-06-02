@@ -69,15 +69,16 @@ export const useBlogEditorStore = create<BlogEditorState>()(
           "setBlogFormData",
         ),
 
-      addTag: (trimmedTag) => {
+      addTag: (rawTag) => {
         const { blogFormData } = get();
+        const tag = rawTag.trim().toLowerCase();
 
-        if (trimmedTag && !blogFormData.tags.includes(trimmedTag)) {
+        if (tag && !blogFormData.tags.includes(tag)) {
           set(
             (state) => ({
               blogFormData: {
                 ...state.blogFormData,
-                tags: [...state.blogFormData.tags, trimmedTag],
+                tags: [...state.blogFormData.tags, tag],
               },
             }),
             false,

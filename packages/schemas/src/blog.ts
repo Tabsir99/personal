@@ -28,7 +28,7 @@ export const blogUserMetaSchema = z.object({
   title: z.string(),
   dek: z.string().default(""),
   excerpt: z.string().default(""),
-  tags: z.array(z.string()).default([]),
+  tags: z.array(z.string().trim().toLowerCase()).default([]),
   coverImageUrl: z.string().default(""),
   seoTitle: z.string().default(""),
   metaDescription: z.string().default(""),

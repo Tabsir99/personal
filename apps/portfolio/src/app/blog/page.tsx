@@ -7,8 +7,7 @@ import {
 } from "@/lib/posts";
 import PageTitle from "@/components/Blog/PageTitle";
 import FeaturedCard from "@/components/Blog/FeaturedCard";
-import PostRow from "@/components/Blog/PostRow";
-import Filters from "@/components/Blog/Filters";
+import BlogArchive from "@/components/Blog/BlogArchive";
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteConfig();
@@ -29,16 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-type SearchParams = Promise<{ tag?: string }>;
-
-export default async function BlogIndexPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
-  const sp = await searchParams;
-  const activeTag = sp.tag ?? "all";
-
+export default async function BlogIndexPage() {
   const [featured, page, site, tags] = await Promise.all([
     getFeaturedBlog(),
     getRecentBlogs(),
@@ -46,8 +36,6 @@ export default async function BlogIndexPage({
     getBlogTags(),
   ]);
   const rest = page.items.filter((b) => b.slug !== featured?.slug);
-  const filtered =
-    activeTag === "all" ? rest : rest.filter((b) => b.tags.includes(activeTag));
 
   const landing = site?.blogLanding;
   const heading = landing?.heroHeading || "Writing";
@@ -59,29 +47,9 @@ export default async function BlogIndexPage({
       <PageTitle heading={heading} tagline={tagline} />
       <div className="flex gap-20">
         {featured && <FeaturedCard post={featured} />}
-        {/* <Aside
-          nowReading={site?.nowReading ?? []}
-          currentlyBuilding={site?.currentlyBuilding}
-        /> */}
       </div>
 
-      <div className="flex flex-col">
-        <Filters tags={tags} active={activeTag} count={filtered.length} />
-        {filtered.length === 0 ? (
-          <div className="py-20 text-center text-muted grid gap-4 place-items-center">
-            <div className="text-[96px] leading-none text-cream/8 font-thin">
-              ∅
-            </div>
-            <div>
-              nothing tagged{" "}
-              <code className="font-mono text-accent">#{activeTag}</code> yet —
-              try another?
-            </div>
-          </div>
-        ) : (
-          filtered.map((p, i) => <PostRow key={p.slug} post={p} idx={i} />)
-        )}
-      </div>
+      <BlogArchive posts={rest} tags={tags} active="all" />
     </div>
   );
 }

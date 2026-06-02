@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --port 3001",
-    "build": "next build --webpack",
+    "build": "next build --turbopack",
     "start": "next start",
     "clean:pnpm": "rm -rf .next node_modules .next out package-lock.json && pnpm install",
     "dev:clean": "rm -rf .next .vercel dist out && pnpm dev",

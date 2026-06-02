@@ -24,7 +24,7 @@ export function TagPill({
   }
   return (
     <Link
-      href={`/blog?tag=${encodeURIComponent(tag)}`}
+      href={`/blog/tag/${encodeURIComponent(tag)}`}
       className={className}
       scroll={scroll}
     >

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { db, Collections } from "@/config/firebaseAdmin";
 import { BlogStatus, PublishedBlogDB } from "@tabsircg/schemas/blog";
 import { wrapRoute, HttpError } from "@/lib/appUtils";
+import { fetchPublishedNeighbours } from "@/lib/blogQuery";
 
 const slugSchema = z.string().min(1);
 
@@ -19,6 +20,8 @@ export const GET = wrapRoute(
 
     if (snapshot.empty) throw new HttpError(404, "Not found");
 
-    return snapshot.docs[0].data() as PublishedBlogDB;
+    const post = snapshot.docs[0].data() as PublishedBlogDB;
+    const { prev, next } = await fetchPublishedNeighbours(post.publishedAt);
+    return { ...post, prev, next };
   },
 );

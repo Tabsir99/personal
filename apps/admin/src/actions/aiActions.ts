@@ -66,7 +66,7 @@ The post's format — what shape the writing takes, not its topic. A piece about
 Schema.org @type for the JSON-LD blob. Should match the post's form (a how-to gets HowTo, an opinion piece gets BlogPosting, a Q&A gets FAQPage). Prefer the whitelist; invent only if nothing fits.
 
 ## tags (≤5)
-Prefer the whitelist. If nothing on the list fits, or a clearly better tag is missing, you may add one. Default bias is whitelist. 2-3 well-chosen tags beats 5 loose ones.
+Internal-linking layer, not SEO — they cluster this post with related ones. Reuse the whitelist; add a new tag only for a real recurring theme, never for keywords. 2-3 that connect beat 5 loose.
 
 # Anti-patterns
 - Generic openers: "Learn how to…", "Discover…", "Everything you need to know…", "A complete guide to…"
@@ -189,7 +189,12 @@ const draftTopicSchema = z
   .string()
   .trim()
   .transform((s) => s.replace(/\s+/g, " "))
-  .pipe(z.string().min(1, "Provide a topic.").max(500, "Topic is too long — keep it under 500 characters."));
+  .pipe(
+    z
+      .string()
+      .min(1, "Provide a topic.")
+      .max(500, "Topic is too long — keep it under 500 characters."),
+  );
 
 const draftKindSchema = z.string().trim().max(60).optional();
 
@@ -221,29 +226,27 @@ export async function generateBlogDraftContent(
   return { ai, cleanKind };
 }
 
-export const generateBlogDraft = wrap(
-  async (topic: string, kind?: string) => {
-    await requireAuth();
-    const { ai, cleanKind } = await generateBlogDraftContent(topic, kind);
+export const generateBlogDraft = wrap(async (topic: string, kind?: string) => {
+  await requireAuth();
+  const { ai, cleanKind } = await generateBlogDraftContent(topic, kind);
 
-    const content = finalizeAiDoc(ai.doc);
-    const readTime = await measureEstReadTime(content);
+  const content = finalizeAiDoc(ai.doc);
+  const readTime = await measureEstReadTime(content);
 
-    const base = createNewBlogFormData(ai.title);
-    const formData = {
-      ...base,
-      title: ai.title,
-      kind: cleanKind || base.kind,
-      content,
-      readTime,
-    };
+  const base = createNewBlogFormData(ai.title);
+  const formData = {
+    ...base,
+    title: ai.title,
+    kind: cleanKind || base.kind,
+    content,
+    readTime,
+  };
 
-    await createData<BlogDraftDB>({
-      collectionName: "BLOGS",
-      docId: formData.blogId,
-      data: formDataToDraftDB(formData),
-    });
+  await createData<BlogDraftDB>({
+    collectionName: "BLOGS",
+    docId: formData.blogId,
+    data: formDataToDraftDB(formData),
+  });
 
-    return formData;
-  },
-);
+  return formData;
+});
