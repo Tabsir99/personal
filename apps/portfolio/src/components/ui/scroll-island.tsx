@@ -100,7 +100,7 @@ export function ScrollIsland() {
     const loop = () => {
       current += (target - current) * SCROLL_EASE;
       if (Math.abs(target - current) < SETTLE_PX) current = target;
-      scrollTo(0, current);
+      scrollTo({ top: current, left: 0, behavior: "instant" });
       raf = current === target ? 0 : requestAnimationFrame(loop);
     };
     const onWheel = (e: WheelEvent) => {
