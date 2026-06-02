@@ -17,9 +17,7 @@ const s3 = new S3Client({
   endpoint: env.CLOUDFLARE_R2_ENDPOINT,
   forcePathStyle: true,
   region: "auto",
-  // aws-sdk v3 defaults to adding CRC32 checksums to every request, which R2
-  // rejects: batch-delete needs Content-MD5, and presigned PUTs get an
-  // empty-body CRC32 baked in that fails (surfaces as a misleading CORS 403).
+  // Avoid aws-sdk v3's CRC32 default that R2 rejects (batch-delete + presigned PUTs).
   requestChecksumCalculation: "WHEN_REQUIRED",
   responseChecksumValidation: "WHEN_REQUIRED",
 });
