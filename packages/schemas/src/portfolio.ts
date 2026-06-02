@@ -14,6 +14,9 @@ const videoSourceSchema = z.object({
   url: optionalUrl,
   type: z.string().default(""),
   codec: z.string().default(""),
+  // Original upload filename, kept so each encoded source stays identifiable
+  // in the editor once `url` becomes an opaque uploaded URL. Display-only.
+  filename: z.string().default(""),
 });
 export type VideoSource = z.infer<typeof videoSourceSchema>;
 

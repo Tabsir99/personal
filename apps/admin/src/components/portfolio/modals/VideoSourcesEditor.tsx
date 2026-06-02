@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Film, Plus, Upload, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Film, Plus, Upload, X } from "lucide-react";
 
 import { videoSourceType, type VideoSource } from "@tabsircg/schemas/portfolio";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,13 @@ export function VideoSourcesEditor({
   const update = (i: number, patch: Partial<VideoSource>) =>
     onChange(value.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
   const remove = (i: number) => onChange(value.filter((_, idx) => idx !== i));
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= value.length) return;
+    const next = value.slice();
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  };
 
   const playable = value.filter((s) => s.url);
 
@@ -53,42 +60,80 @@ export function VideoSourcesEditor({
       )}
 
       {value.map((s, i) => (
-        <div key={i} className="grid grid-cols-[1fr_104px_148px_auto] gap-2">
-          <Input
-            placeholder="https://… or upload"
-            value={s.url}
-            onChange={(e) => {
-              const patch: Partial<VideoSource> = { url: e.target.value };
-              if (!s.type) {
-                const t = typeFromName(e.target.value);
-                if (t) patch.type = t;
-              }
-              update(i, patch);
-            }}
-            className="font-mono text-xs"
-          />
-          <Input
-            placeholder="video/mp4"
-            value={s.type}
-            onChange={(e) => update(i, { type: e.target.value })}
-            className="font-mono text-xs"
-          />
-          <Input
-            placeholder='codecs e.g. avc1.42E01E'
-            value={s.codec}
-            onChange={(e) => update(i, { codec: e.target.value })}
-            className="font-mono text-xs"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => remove(i)}
-            className="self-center text-muted-foreground hover:bg-destructive/8 hover:text-destructive"
-            aria-label="Remove source"
-          >
-            <X className="h-3.5 w-3.5" />
-          </Button>
+        <div key={i} className="flex flex-col gap-1">
+          {s.filename && (
+            <span
+              className="truncate font-mono text-[11px] text-muted-foreground"
+              title={s.filename}
+            >
+              {s.filename}
+            </span>
+          )}
+          <div className="grid grid-cols-[1fr_104px_148px_auto] gap-2">
+            <Input
+              placeholder="https://… or upload"
+              value={s.url}
+              onChange={(e) => {
+                const patch: Partial<VideoSource> = { url: e.target.value };
+                if (!s.type) {
+                  const t = typeFromName(e.target.value);
+                  if (t) patch.type = t;
+                }
+                update(i, patch);
+              }}
+              className="font-mono text-xs"
+            />
+            <Input
+              placeholder="video/mp4"
+              value={s.type}
+              onChange={(e) => update(i, { type: e.target.value })}
+              className="font-mono text-xs"
+            />
+            <Input
+              placeholder='codecs e.g. avc1.42E01E'
+              value={s.codec}
+              onChange={(e) => update(i, { codec: e.target.value })}
+              className="font-mono text-xs"
+            />
+            <div className="flex items-center self-center">
+              {value.length > 1 && (
+                <>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => move(i, -1)}
+                    disabled={i === 0}
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label="Move source up"
+                  >
+                    <ArrowUp className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => move(i, 1)}
+                    disabled={i === value.length - 1}
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label="Move source down"
+                  >
+                    <ArrowDown className="h-3.5 w-3.5" />
+                  </Button>
+                </>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => remove(i)}
+                className="text-muted-foreground hover:bg-destructive/8 hover:text-destructive"
+                aria-label="Remove source"
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
         </div>
       ))}
 
@@ -106,6 +151,7 @@ export function VideoSourcesEditor({
                 url: URL.createObjectURL(f),
                 type: f.type || typeFromName(f.name),
                 codec: "",
+                filename: f.name,
               })),
             ]);
           }
@@ -129,7 +175,9 @@ export function VideoSourcesEditor({
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => onChange([...value, { url: "", type: "", codec: "" }])}
+          onClick={() =>
+            onChange([...value, { url: "", type: "", codec: "", filename: "" }])
+          }
           className="flex-1 text-muted-foreground hover:text-foreground"
         >
           <Plus className="h-3.5 w-3.5" />
