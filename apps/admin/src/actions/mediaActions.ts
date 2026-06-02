@@ -1,5 +1,5 @@
 "use server";
-import s3, { S3Bucket } from "@/config/cloudflareS3";
+import s3, { Bucket } from "@/config/cloudflareS3";
 import { wrap } from "@/lib/appUtils";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -12,7 +12,7 @@ interface FileInfo {
 }
 const _getUploadSignedUrl = async (key: string, fileInfo: FileInfo) => {
   const command = new PutObjectCommand({
-    Bucket: S3Bucket.PUBLIC,
+    Bucket,
     Key: key,
     ContentType: fileInfo.contentType,
     ContentLength: fileInfo.contentLength,
@@ -42,7 +42,7 @@ export const getResumeUploadSignedUrl = wrap(async (contentLength: number) => {
   const key = `portfolio/resume/${randomUUID()}.pdf`;
 
   const command = new PutObjectCommand({
-    Bucket: S3Bucket.PUBLIC,
+    Bucket,
     Key: key,
     ContentType: "application/pdf",
     ContentLength: contentLength,

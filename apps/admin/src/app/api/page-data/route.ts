@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { PageData, pageDataSchema } from "@tabsircg/schemas/portfolio";
-import { S3Bucket, deleteObjects } from "@/config/cloudflareS3";
+import { deleteObjects } from "@/config/cloudflareS3";
 import { wrapRoute } from "@/lib/appUtils";
 import {
   readPortfolioPageData,
@@ -46,7 +46,7 @@ async function deleteRemovedMedia(oldData: PageData, newData: PageData) {
     .filter((key): key is string => key !== null);
 
   if (removedKeys.length > 0) {
-    await deleteObjects(S3Bucket.PUBLIC, removedKeys);
+    await deleteObjects(removedKeys);
   }
 
   console.info(`Deleted ${removedKeys.length} unused media files`);

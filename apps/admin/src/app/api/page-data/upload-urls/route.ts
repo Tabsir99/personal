@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import s3, { S3Bucket } from "@/config/cloudflareS3";
+import s3, { Bucket } from "@/config/cloudflareS3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
@@ -14,13 +14,13 @@ export const POST = wrapRoute(async (request: NextRequest) => {
     const key = `portfolio/${randomUUID()}`;
 
     const command = new PutObjectCommand({
-      Bucket: S3Bucket.PUBLIC,
+      Bucket,
       Key: key,
       ContentType: type,
       ContentDisposition: "inline", // play in place, never download
       CacheControl: "public, max-age=31536000, immutable",
     });
-    // Sign every header the client PUT sends — R2 403s on unsigned headers.
+
     const presignedUrl = await getSignedUrl(s3, command, {
       expiresIn: 3600,
       signableHeaders: new Set([

@@ -27,14 +27,14 @@ type ArrayElement<K extends keyof PageData> =
 
 type EntityHandlers<K extends keyof PageData> = {
   add: (
-    item: ArrayElement<K> | ((prev: ArrayElement<K>[]) => ArrayElement<K>)
+    item: ArrayElement<K> | ((prev: ArrayElement<K>[]) => ArrayElement<K>),
   ) => void;
 
   update: (
     index: number,
     updates: PageData[K] extends Array<infer U>
       ? Partial<U> | ((prev: U) => Partial<U>)
-      : never
+      : never,
   ) => void;
   delete: (index: number) => void;
   moveUp: (index: number) => void;
@@ -67,7 +67,7 @@ interface PortfolioStore {
 
 export const usePortfolioStore = create<PortfolioStore>((set, get) => {
   const createEntityHandlers = <K extends keyof PageData>(
-    key: K
+    key: K,
   ): EntityHandlers<K> => {
     type T = ArrayElement<K>;
 
@@ -163,7 +163,7 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => {
               [key]: prevArray.map((item, i) =>
                 i === index
                   ? { ...(item as object), [field]: !item[field] }
-                  : item
+                  : item,
               ),
             },
           };
@@ -312,7 +312,7 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
     blobsToUpload.map(async (item) => {
       const response = await fetch(item.url);
       item.blob = await response.blob();
-    })
+    }),
   );
 
   const urlResponse = await fetch("/api/page-data/upload-urls", {
@@ -323,7 +323,7 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
         type: item.blob!.type,
         size: item.blob!.size,
         path: item.path,
-      }))
+      })),
     ),
   });
 
@@ -347,7 +347,7 @@ async function extractAndUploadBlobs(pageData: PageData): Promise<PageData> {
         },
       });
       if (!res.ok) throw new Error("Upload failed");
-    })
+    }),
   );
 
   urls.forEach(({ key, path }) => {

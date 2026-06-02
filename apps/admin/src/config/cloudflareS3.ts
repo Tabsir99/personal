@@ -22,16 +22,13 @@ const s3 = new S3Client({
   responseChecksumValidation: "WHEN_REQUIRED",
 });
 
-export enum S3Bucket {
-  PUBLIC = "public-data",
-  PRIVATE = "private-data",
-}
+export const Bucket = "public-data";
 
-export const readObject = async (bucket: S3Bucket, key: string) => {
+export const readObject = async (key: string) => {
   // NoSuchKey is a domain "missing" signal that callers want as null;
   // any other failure (network, auth) should propagate to wrapRoute.
   const response = await s3
-    .send(new GetObjectCommand({ Bucket: bucket, Key: key }))
+    .send(new GetObjectCommand({ Bucket, Key: key }))
     .catch((error: unknown) => {
       if (error instanceof NoSuchKey) return null;
       throw error;
@@ -39,10 +36,10 @@ export const readObject = async (bucket: S3Bucket, key: string) => {
   return response?.Body ?? null;
 };
 
-export const deleteObjects = async (bucket: S3Bucket, keys: string[]) => {
+export const deleteObjects = async (keys: string[]) => {
   await s3.send(
     new DeleteObjectsCommand({
-      Bucket: bucket,
+      Bucket,
       Delete: { Objects: keys.map((k) => ({ Key: k })), Quiet: true },
     }),
   );
