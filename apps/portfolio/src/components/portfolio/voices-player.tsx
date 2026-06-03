@@ -58,7 +58,7 @@ export function VoicesPlayer({
         ref={v}
         playsInline
         preload="metadata"
-        className="absolute inset-0 w-full h-full object-cover cursor-pointer"
+        className="absolute inset-0 w-full h-full object-contain cursor-pointer"
         disablePictureInPicture
         onClick={toggle}
         onLoadedMetadata={(e) => {
@@ -77,7 +77,10 @@ export function VoicesPlayer({
           }
           if (time.current) time.current.textContent = fmt(ct);
         }}
-        onPlay={() => setPlaying(true)}
+        onPlay={() => {
+          setPlaying(true);
+          setStarted(true);
+        }}
         onPause={() => setPlaying(false)}
       >
         {/* Deferred src (data-src) so nothing downloads until lazy-loaded; the

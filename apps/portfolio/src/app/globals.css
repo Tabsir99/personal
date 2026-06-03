@@ -46,7 +46,6 @@ html {
   --animate-breathe: breathe 22s var(--ease-soft) infinite;
   --animate-drift: drift 28s var(--ease-soft) infinite;
   --animate-expand-pulse: expand-pulse 2.4s var(--ease-soft) infinite;
-  --animate-ken-burns: ken-burns 14s var(--ease-soft) infinite alternate;
   --animate-wipe: wipe 620ms var(--ease-soft);
   --animate-bounce: bounce 2.4s 1.4s cubic-bezier(0.5, 1.6, 0.4, 1) infinite;
   --animate-fill: fill 1.2s 0.2s var(--ease-soft) both;

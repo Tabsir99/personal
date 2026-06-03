@@ -25,12 +25,6 @@
   }
 }
 
-@keyframes ken-burns {
-  to {
-    transform: scale(1.06) translate(-1%, 1%);
-  }
-}
-
 @layer components {
   /* --active: 1 when --i matches --ref, else 0. --past is row-only. */
   .work-row,
@@ -145,8 +139,6 @@
     font-style: italic;
   }
 
-  /* Ken-burns is gated to the active still — otherwise its animation
-     timeline ticks on all 5 stills even though they paint nothing. */
   .work-still {
     opacity: var(--active);
     z-index: calc(1 + var(--active));
@@ -157,13 +149,6 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg, var(--p-tint) 0%, var(--p-tint-2) 100%);
-  }
-  [data-work-active="0"] .work-still[data-work-proj-idx="0"]::before,
-  [data-work-active="1"] .work-still[data-work-proj-idx="1"]::before,
-  [data-work-active="2"] .work-still[data-work-proj-idx="2"]::before,
-  [data-work-active="3"] .work-still[data-work-proj-idx="3"]::before,
-  [data-work-active="4"] .work-still[data-work-proj-idx="4"]::before {
-    animation: var(--animate-ken-burns);
   }
   .work-still-media {
     opacity: var(--active);
@@ -180,7 +165,6 @@
 
   .work-thumb-pack {
     display: flex;
-    gap: 0.375rem;
     flex: var(--active) 1 0;
     min-width: 0;
     overflow: hidden;

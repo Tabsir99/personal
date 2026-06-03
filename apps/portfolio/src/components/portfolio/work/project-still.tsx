@@ -49,6 +49,7 @@ export function ProjectStill({
           hasMedia && (
             <div
               key={`media-${j}`}
+              data-work-still-idx={j}
               style={{ "--i": j } as React.CSSProperties}
               className="work-still-media absolute inset-0 z-2"
             >
@@ -61,7 +62,7 @@ export function ProjectStill({
                 <img
                   src={s.url}
                   alt={s.alt || s.label}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain"
                   loading="lazy"
                   decoding="async"
                 />
