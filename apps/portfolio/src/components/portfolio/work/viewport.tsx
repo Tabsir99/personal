@@ -5,7 +5,7 @@ import { ProjectStill } from "./project-still";
    the asset; the thumb switcher stacks in its own row below — no overlap. */
 export function WorkViewport({ projects }: { projects: Project[] }) {
   return (
-    <div className="work-frame group/frame relative self-start bg-ink-2 border border-line overflow-hidden rounded-sm">
+    <div className="work-frame group/frame relative self-start bg-ink-2 border border-line w-full overflow-hidden rounded-sm">
       <div className="work-stage relative aspect-video">
         {projects.map((p, i) => (
           <ProjectStill key={p.title + i} project={p} idx={i} />
