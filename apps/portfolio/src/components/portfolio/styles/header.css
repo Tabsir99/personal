@@ -1,6 +1,6 @@
 /* What's left here is what Tailwind utilities can't express cleanly:
-   the checkbox-driven overlay reveal (clip-path has no utility), the
-   scanline ::before, the body scroll-lock, and a vendor tap-highlight
+   the :target-driven overlay reveal (clip-path has no utility), the
+   scanline ::before, the page scroll-lock, and a vendor tap-highlight
    reset. Everything else lives as utilities in header.tsx. */
 
 .hdr-shell__overlay {
@@ -29,17 +29,17 @@
     transform 0.4s var(--ease-soft);
 }
 
-.hdr-shell__toggle:checked ~ .hdr-shell__overlay {
+.hdr-shell__overlay:target {
   clip-path: circle(150% at calc(100% - 42px) 40px);
   pointer-events: auto;
 }
-.hdr-shell__toggle:checked ~ .hdr-shell__overlay .hdr-shell__mactions {
+.hdr-shell__overlay:target .hdr-shell__mactions {
   opacity: 1;
   transform: translateY(0);
   transition-delay: 0.42s;
 }
 
-html:has(.hdr-shell__toggle:checked) {
+html:has(.hdr-shell__overlay:target) {
   overflow: hidden;
 }
 

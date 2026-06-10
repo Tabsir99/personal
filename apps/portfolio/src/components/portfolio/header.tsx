@@ -6,17 +6,6 @@ import { SECTIONS } from "./sections-data";
 export function Header({ resume }: { resume?: Resume }) {
   return (
     <>
-      {/* Toggle + overlay sit OUTSIDE <header> on purpose: the header carries a
-          transform (from data-reveal), and a transformed ancestor becomes the
-          containing block for position:fixed children — which would trap the
-          overlay inside the 80px bar instead of letting it cover the viewport.
-          Kept as siblings so the `:checked ~ .hdr-shell__overlay` reveal works. */}
-      <input
-        type="checkbox"
-        id="hdr-shell-menu"
-        className="hdr-shell__toggle pointer-events-none absolute h-px w-px opacity-0"
-      />
-
       <header
         data-reveal
         className="fixed top-0 left-0 z-100 w-dvw border-b border-line/50 before:absolute before:inset-0 before:h-full before:w-full before:bg-ink/20 before:backdrop-blur-sm before:content-['']"
@@ -64,27 +53,43 @@ export function Header({ resume }: { resume?: Resume }) {
               </span>
             )}
 
-            <label
+            <a
               className="hdr-shell__burger relative z-3 -mr-2 flex size-11 cursor-pointer flex-col items-center justify-center gap-1.5 lg:hidden"
-              htmlFor="hdr-shell-menu"
+              href="#menu"
               aria-label="Open menu"
             >
               <span className="h-px w-6.5 bg-cream"></span>
               <span className="h-px w-6.5 bg-cream"></span>
               <span className="h-px w-6.5 bg-cream"></span>
-            </label>
+            </a>
           </div>
         </div>
       </header>
 
-      <div className="hdr-shell__overlay fixed inset-0 z-110 flex flex-col items-center justify-center bg-ink p-5 sm:p-10 lg:hidden">
-        <label
+      {/* The overlay opens/closes purely via :target — no JS, no checkbox:
+          - the burger links to #menu; the overlay is position:fixed (always in
+            view), so the browser has nothing to scroll when it becomes the
+            target — unlike a focused hidden checkbox, which sat at document
+            top and dragged the page up on every toggle
+          - a section link replaces the hash, so the overlay loses :target and
+            closes itself while the page scrolls to that section
+          - close links to "#!": a fragment matching no element clears :target
+            without scrolling
+          It sits OUTSIDE <header> because the header carries a transform (from
+          data-reveal), and a transformed ancestor becomes the containing block
+          for position:fixed children — which would trap the overlay inside the
+          80px bar instead of letting it cover the viewport. */}
+      <div
+        id="menu"
+        className="hdr-shell__overlay fixed inset-0 z-110 flex flex-col items-center justify-center bg-ink p-5 sm:p-10 lg:hidden"
+      >
+        <a
           className="hdr-shell__close absolute top-6.5 right-5 flex size-11 cursor-pointer items-center justify-center font-mono text-2xl text-muted transition duration-300 ease-soft hover:rotate-90 hover:text-accent sm:right-10"
-          htmlFor="hdr-shell-menu"
+          href="#!"
           aria-label="Close menu"
         >
           ×
-        </label>
+        </a>
         <nav className="flex w-full flex-col items-center" aria-label="Mobile">
           {SECTIONS.map(({ id, label }) => (
             <a
