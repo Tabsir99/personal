@@ -86,7 +86,7 @@ export function Hero({ photo }: { photo: string }) {
           style={{ animationDelay: "calc(var(--hero-stagger) + 400ms)" }}
         >
           <a
-            href="#contact"
+            href="#work"
             className={cn(
               "group inline-flex items-center gap-3 px-6 py-4 max-lg:px-4 max-lg:text-xxs max-lg:py-3",
               "bg-accent text-ink border border-accent rounded-xs",
@@ -95,7 +95,7 @@ export function Hero({ photo }: { photo: string }) {
               "hover:bg-transparent hover:text-accent",
             )}
           >
-            <span>Start a project</span>
+            <span>See my work</span>
             <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
               →
             </span>
