@@ -46,7 +46,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const metaTitle = title || FALLBACK_TITLE;
   const metaDescription = description || FALLBACK_DESCRIPTION;
-  const images = profilePicture ? [profilePicture] : undefined;
+  // Static 1200x630 social card (a screenshot of the hero) served from public/.
+  // Resolved against metadataBase, so it goes out as an absolute URL. The CMS
+  // profilePicture is kept as a secondary image for scrapers that want a square.
+  const images = [
+    { url: "/og.jpg", width: 1200, height: 630, alt: metaTitle },
+    ...(profilePicture ? [{ url: profilePicture, alt: metaTitle }] : []),
+  ];
 
   return {
     metadataBase: new URL("https://tabsircg.com"),
@@ -65,7 +71,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: metaTitle,
       description: metaDescription,
-      images,
+      images: ["/og.jpg"],
     },
     alternates: { canonical: "/" },
     authors: [{ name: "Tabsir CG" }],
