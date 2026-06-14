@@ -42,17 +42,16 @@ const FALLBACK_DESCRIPTION =
 // constants above when the admin API is unreachable. getPageData() is cached
 // and shares the request-level fetch with the Footer.
 export async function generateMetadata(): Promise<Metadata> {
-  const { title, description, keywords, profilePicture } = await getPageData();
+  const { title, description, keywords } = await getPageData();
 
   const metaTitle = title || FALLBACK_TITLE;
   const metaDescription = description || FALLBACK_DESCRIPTION;
   // Static 1200x630 social card (a screenshot of the hero) served from public/.
-  // Resolved against metadataBase, so it goes out as an absolute URL. The CMS
-  // profilePicture is kept as a secondary image for scrapers that want a square.
-  const images = [
-    { url: "/og.jpg", width: 1200, height: 630, alt: metaTitle },
-    ...(profilePicture ? [{ url: profilePicture, alt: metaTitle }] : []),
-  ];
+  // Resolved against metadataBase, so it goes out as an absolute URL.
+  // Keep this to a SINGLE og:image. Discord/Slack/etc. render every og:image
+  // tag as a multi-image grid, so adding the square profilePicture as a second
+  // entry made the preview tile in half and crop the card.
+  const images = [{ url: "/og.jpg", width: 1200, height: 630, alt: metaTitle }];
 
   return {
     metadataBase: new URL("https://tabsircg.com"),
