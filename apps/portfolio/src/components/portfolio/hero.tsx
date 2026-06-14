@@ -118,8 +118,9 @@ export function Hero({ photo }: { photo: string }) {
               fill
               priority
               sizes="(max-width: 1280px) 50vw, 400px"
-              className="object-cover object-[50%_20%]"
+              className="object-contain object-center"
               style={{
+                filter: "brightness(0.6)",
                 WebkitMaskImage: portraitMask,
                 maskImage: portraitMask,
               }}
