@@ -120,7 +120,7 @@ export function Hero({ photo }: { photo: string }) {
               sizes="(max-width: 1280px) 50vw, 400px"
               className="object-contain object-center"
               style={{
-                filter: "brightness(0.6)",
+                filter: "brightness(0.8)",
                 WebkitMaskImage: portraitMask,
                 maskImage: portraitMask,
               }}
