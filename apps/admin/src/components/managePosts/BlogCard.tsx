@@ -13,8 +13,6 @@ import {
 import BlogMenu from "./BlogMenu";
 import { clientEnv } from "@/config/env.client";
 
-
-
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
@@ -46,17 +44,14 @@ export default function CMSBlogCard({
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             {isFeatured && (
-              <span className="inline-flex items-center gap-1.5">
-                <Star
-                  size={12}
-                  weight="fill"
-                  className="fill-warning text-warning"
-                  aria-hidden="true"
-                />
-                <Eyebrow tone="primary" size="xs" family="mono">
-                  Featured
-                </Eyebrow>
-              </span>
+              <Badge
+                tone="warning"
+                size="md"
+                icon={<Star weight="fill" />}
+                className="self-start"
+              >
+                Featured
+              </Badge>
             )}
             <h2 className="truncate text-lg leading-snug font-semibold tracking-tight text-foreground transition-colors group-hover/blog-card:text-foreground/90">
               {blog.title}
@@ -98,7 +93,15 @@ export default function CMSBlogCard({
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-muted-foreground">
           {!hideStatusBadge && (
             <>
-              <StatusBadge status={blog.status === BlogStatus.published ? "published" : blog.status === BlogStatus.unpublished ? "failed" : "draft"} />
+              <StatusBadge
+                status={
+                  blog.status === BlogStatus.published
+                    ? "published"
+                    : blog.status === BlogStatus.unpublished
+                      ? "failed"
+                      : "draft"
+                }
+              />
               <span aria-hidden="true">·</span>
             </>
           )}
@@ -112,12 +115,14 @@ export default function CMSBlogCard({
         {visibleTags.length > 0 && (
           <div className="mt-4 flex flex-wrap items-center gap-1.5">
             {visibleTags.map((tag, index) => (
-              <Badge key={index} tone="neutral">
-                {tag}
+              <Badge key={index} tone="neutral" variant="outline">
+                #{tag}
               </Badge>
             ))}
             {overflowTags > 0 && (
-              <Badge tone="neutral" variant="outline">+{overflowTags}</Badge>
+              <Badge tone="neutral" variant="outline">
+                +{overflowTags}
+              </Badge>
             )}
           </div>
         )}

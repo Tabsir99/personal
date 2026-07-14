@@ -188,9 +188,10 @@ export function SuggestionField({
       </div>
 
       {helperText && (
-        <p className="mt-2 px-0.5 text-xs text-muted-foreground">{helperText}</p>
+        <p className="mt-2 px-0.5 text-xs text-muted-foreground">
+          {helperText}
+        </p>
       )}
     </div>
   );
 }
-

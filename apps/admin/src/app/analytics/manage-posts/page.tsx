@@ -14,12 +14,8 @@ const ManagePosts = () => {
         title="Manage Posts"
         actionButton={{
           onClick: openCreateBlogDialog,
-          text: (
-            <>
-              <Plus />
-              Create New Blog
-            </>
-          ),
+          text: "Create New Blog",
+          iconLeft: <Plus />,
         }}
       />
       <BlogOverview />

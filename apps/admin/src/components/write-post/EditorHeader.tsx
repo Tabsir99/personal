@@ -4,8 +4,7 @@ import { Eye, Gear, PaperPlaneTilt } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Button } from "premium-ds/button";
 import { Kbd } from "@/components/ui/Kbd";
-import { StatusDot } from "@/components/ui/StatusDot";
-
+import { Badge } from "premium-ds/badge";
 export default function EditorHeader({
   saveStatus,
   onPreview,
@@ -26,7 +25,7 @@ export default function EditorHeader({
             saveStatus === "saving" ? "opacity-100" : "opacity-0",
           )}
         >
-          <StatusDot tone="warning" size="sm" breathing />
+          <Badge dot live tone="warning" />
           <span className="text-sm text-muted-foreground">Saving…</span>
         </div>
         <div
@@ -35,7 +34,7 @@ export default function EditorHeader({
             saveStatus === "saved" ? "opacity-100" : "opacity-0",
           )}
         >
-          <StatusDot tone="success" size="sm" />
+          <Badge dot tone="success" />
           <span className="text-sm text-muted-foreground">Saved</span>
         </div>
       </div>
@@ -45,7 +44,6 @@ export default function EditorHeader({
           variant="ghost"
           size="sm"
           onClick={onPreview}
-          className="text-muted-foreground hover:text-foreground"
           iconLeft={<Eye size={14} />}
         >
           Preview
@@ -57,7 +55,6 @@ export default function EditorHeader({
           variant="ghost"
           size="sm"
           onClick={onSettings}
-          className="text-muted-foreground hover:text-foreground"
           iconLeft={<Gear size={14} />}
         >
           Settings

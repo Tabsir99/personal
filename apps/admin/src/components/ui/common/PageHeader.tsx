@@ -10,6 +10,8 @@ interface PageHeaderProps {
   actionButton?: {
     onClick: () => void;
     text: ReactNode;
+    iconLeft?: ReactNode;
+    iconRight?: ReactNode;
     isLoading?: boolean;
     disabled?: boolean;
   };
@@ -43,6 +45,8 @@ export const PageHeader = ({
           onClick={actionButton.onClick}
           disabled={actionButton.disabled}
           loading={!!actionButton.isLoading}
+          iconLeft={actionButton.iconLeft}
+          iconRight={actionButton.iconRight}
         >
           {actionButton.text}
         </Button>

@@ -93,14 +93,14 @@ export default function Projects() {
                   )}
                   <Badge
                     tone="neutral"
-                    className="absolute top-3 left-3 border-foreground/8 bg-card/85 backdrop-blur-md"
+                    className="absolute top-3 left-3"
                   >
                     {p.type}
                   </Badge>
                   {p.tag && (
                     <Badge
                       tone="info"
-                      className="absolute top-3 right-3 border-primary/30 bg-primary/12 backdrop-blur-md"
+                      className="absolute top-3 right-3"
                     >
                       {p.tag}
                     </Badge>

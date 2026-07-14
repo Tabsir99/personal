@@ -9,8 +9,7 @@ import { Button } from "premium-ds/button";
 import { TextField } from "premium-ds/text-field";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Kbd } from "@/components/ui/Kbd";
-import { StatusDot } from "@/components/ui/StatusDot";
-
+import { Badge } from "premium-ds/badge";
 export default function LogIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -45,12 +44,9 @@ export default function LogIn() {
           <Eyebrow tone="muted" family="mono">
             sys / admin
           </Eyebrow>
-          <span className="inline-flex items-center gap-1.5 rounded-sm border border-primary/25 bg-primary/8 px-2 py-0.5">
-            <StatusDot tone="primary" size="xs" breathing />
-            <Eyebrow tone="primary" family="mono">
-              Secure
-            </Eyebrow>
-          </span>
+          <Badge tone="info" dot live pill>
+            Secure
+          </Badge>
         </div>
 
         <div

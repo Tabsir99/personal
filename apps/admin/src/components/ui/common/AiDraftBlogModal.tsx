@@ -7,7 +7,7 @@ import { CircleNotch } from "@phosphor-icons/react";
 import { Dialog } from "premium-ds/dialog";
 import { Button } from "premium-ds/button";
 import { Textarea } from "premium-ds/textarea";
-import { StatusDot } from "@/components/ui/StatusDot";
+
 import ConfigSingleSelect from "@/components/write-post/writeMetadata/ConfigSingleSelect";
 
 import { generateBlogDraft } from "@/actions/aiActions";
@@ -78,10 +78,10 @@ export const AiDraftBlogModal = () => {
           </Button>
           <Button
             onClick={handleGenerate}
-            disabled={!topic.trim() || isSubmitting}
-            iconLeft={isSubmitting ? <CircleNotch className="animate-spin" /> : <StatusDot tone="primary" size="xs" />}
+            disabled={!topic.trim()}
+            loading={isSubmitting}
           >
-            {isSubmitting ? "Generating…" : "Generate draft"}
+            Generate draft
           </Button>
         </div>
       }
