@@ -11,7 +11,7 @@ interface BlogEditorState {
   isCreateDialogOpen: boolean;
   isAiDraftDialogOpen: boolean;
   isSaving: boolean;
-  lastSaved?: number;
+  lastSaved: number | undefined;
   isPublishedBlog: () => boolean;
 
   setBlogFormData: (data: Partial<BlogFormData>) => void;

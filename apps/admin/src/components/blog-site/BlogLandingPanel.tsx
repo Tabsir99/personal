@@ -1,11 +1,11 @@
 "use client";
 
 import { useShallow } from "zustand/react/shallow";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useSiteConfigStore } from "@/stores/SiteConfigStore";
 import Panel from "./Panel";
 import Field from "./Field";
+import { TextField } from "premium-ds/text-field";
+import { Textarea } from "premium-ds/textarea";
 
 export default function BlogLandingPanel() {
   const { draft, initial } = useSiteConfigStore(
@@ -31,7 +31,7 @@ export default function BlogLandingPanel() {
             hint={`${draft.heroHeading.length}`}
             edited={edited("heroHeading")}
           >
-            <Input
+            <TextField
               value={draft.heroHeading}
               onChange={(e) => setBlogLanding({ heroHeading: e.target.value })}
               placeholder="Writing"
@@ -43,7 +43,7 @@ export default function BlogLandingPanel() {
             hint={`${draft.metaTitle.length}`}
             edited={edited("metaTitle")}
           >
-            <Input
+            <TextField
               value={draft.metaTitle}
               onChange={(e) => setBlogLanding({ metaTitle: e.target.value })}
               placeholder="Writing — yourdomain.com"
@@ -60,8 +60,8 @@ export default function BlogLandingPanel() {
             value={draft.heroTagline}
             onChange={(e) => setBlogLanding({ heroTagline: e.target.value })}
             placeholder="What you cover, in one breath."
-            rows={2}
-            className="resize-none leading-relaxed"
+            minRows={2}
+            maxRows={4}
           />
         </Field>
 
@@ -76,8 +76,8 @@ export default function BlogLandingPanel() {
               setBlogLanding({ metaDescription: e.target.value })
             }
             placeholder="Used for browser tab, search results, and social cards."
-            rows={3}
-            className="resize-none leading-relaxed"
+            minRows={3}
+            maxRows={6}
           />
         </Field>
       </div>

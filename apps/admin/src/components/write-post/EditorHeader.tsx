@@ -1,8 +1,8 @@
 "use client";
-import { Eye, Settings, Send } from "lucide-react";
+import { Eye, Gear, PaperPlaneTilt } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "premium-ds/button";
 import { Kbd } from "@/components/ui/Kbd";
 import { StatusDot } from "@/components/ui/StatusDot";
 
@@ -45,9 +45,9 @@ export default function EditorHeader({
           variant="ghost"
           size="sm"
           onClick={onPreview}
-          className="gap-1.5 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground"
+          iconLeft={<Eye size={14} />}
         >
-          <Eye className="h-3.5 w-3.5" />
           Preview
           <Kbd size="sm" className="ml-1">
             ⌘P
@@ -57,16 +57,21 @@ export default function EditorHeader({
           variant="ghost"
           size="sm"
           onClick={onSettings}
-          className="gap-1.5 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground"
+          iconLeft={<Gear size={14} />}
         >
-          <Settings className="h-3.5 w-3.5" />
           Settings
           <Kbd size="sm" className="ml-1">
             ⌘,
           </Kbd>
         </Button>
-        <Button size="sm" onClick={onPublish} className="ml-1 gap-1.5">
-          <Send className="h-3.5 w-3.5" />
+        <Button 
+          variant="primary" 
+          size="sm" 
+          onClick={onPublish} 
+          className="ml-1"
+          iconLeft={<PaperPlaneTilt size={14} />}
+        >
           Publish
           <Kbd size="sm" className="ml-1 border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground">
             ⌘⏎
@@ -76,3 +81,4 @@ export default function EditorHeader({
     </div>
   );
 }
+

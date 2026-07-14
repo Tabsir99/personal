@@ -1,0 +1,313 @@
+"use client";
+import { useState } from "react";
+import { useShallow } from "zustand/shallow";
+import { Check, Code, Plus, Trash, X } from "@phosphor-icons/react";
+
+import { Button } from "premium-ds/button";
+import { FormField } from "@/components/ui/FormField";
+import { AddCard } from "@/components/ui/add-card";
+import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
+import { ConfigMultiSelect } from "@/components/ui/configMultiSelect";
+
+import { usePortfolioStore } from "@/stores/PortfolioStore";
+import { useCustomSWR } from "@/hooks/useCustomSwr";
+import {
+  addPortfolioSkill,
+  type PortfolioCatalog,
+} from "@/actions/configActions";
+import SkillCategoryDialog from "@/components/portfolio/modals/SkillCategory";
+import { cn } from "@/lib/utils";
+
+interface SkillDraft {
+  name: string;
+  level: number;
+}
+
+const EMPTY_DRAFT: SkillDraft = { name: "", level: 3 };
+
+export default function Skills() {
+  const [addingTo, setAddingTo] = useState<number | null>(null);
+  const [editingCategory, setEditingCategory] = useState<number | null>(null);
+  const [newSkill, setNewSkill] = useState<SkillDraft>(EMPTY_DRAFT);
+
+  const skillCategories = usePortfolioStore(
+    useShallow((state) => state.pageData.skills),
+  );
+  const skill = usePortfolioStore().skills;
+
+  const {
+    data: catalog,
+    mutate: mutateCatalog,
+    isLoading: catalogLoading,
+  } = useCustomSWR<PortfolioCatalog>("/api/config/portfolio");
+
+  const commitNew = (categoryIndex: number) => {
+    if (!newSkill.name.trim()) return;
+    skill.update(categoryIndex, {
+      ...skillCategories[categoryIndex],
+      skills: [...skillCategories[categoryIndex].skills, newSkill],
+    });
+    setNewSkill(EMPTY_DRAFT);
+    setAddingTo(null);
+  };
+
+  const cancelNew = () => {
+    setAddingTo(null);
+    setNewSkill(EMPTY_DRAFT);
+  };
+
+  return (
+    <div className="space-y-6">
+      <header className="space-y-1.5">
+        <h1 className="text-2xl leading-tight font-semibold tracking-tight">
+          Technical stack
+        </h1>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Grouped categories with per-skill proficiency (1–5).
+        </p>
+      </header>
+
+      <div className="stagger-cascade-tight grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+        {skillCategories.map((category, categoryIndex) => (
+          <div
+            key={category.title + categoryIndex}
+            style={{ ["--stagger-index" as string]: categoryIndex }}
+          >
+            <div className="group/card relative rounded-lg border border-border bg-card tactile-lift">
+              <ActionButtonGroup
+                buttons={[
+                  {
+                    variant: "moveUp",
+                    onClick: () => skill.moveUp(categoryIndex),
+                    disabled: categoryIndex === 0,
+                  },
+                  {
+                    variant: "moveDown",
+                    onClick: () => skill.moveDown(categoryIndex),
+                    disabled: categoryIndex === skillCategories.length - 1,
+                  },
+                  {
+                    variant: "toggle",
+                    onClick: () => skill.toggle(categoryIndex, "isActive"),
+                    active: category.isActive,
+                  },
+                  {
+                    variant: "edit",
+                    onClick: () => setEditingCategory(categoryIndex),
+                  },
+                  {
+                    variant: "delete",
+                    onClick: () => skill.delete(categoryIndex),
+                  },
+                ]}
+                entityName="Skill Category"
+              />
+              <div
+                className={cn("p-5", !category.isActive && "opacity-50")}
+              >
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="font-mono text-eyebrow tracking-widest tabular-nums text-primary">
+                    {String(categoryIndex + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="font-heading text-[15px] leading-snug font-medium tracking-tight">
+                    {category.title}
+                  </h3>
+                  <span className="h-px flex-1 bg-foreground/8" />
+                  <span className="font-mono text-eyebrow tracking-widest tabular-nums text-muted-foreground/60">
+                    {category.skills.length}
+                  </span>
+                </div>
+
+                {category.skills.length === 0 ? (
+                  <p className="py-1 text-xs italic text-muted-foreground/50">
+                    No skills yet.
+                  </p>
+                ) : (
+                  <ul className="flex flex-col">
+                    {category.skills.map((skillItem, skillIndex) => (
+                      <li
+                        key={skillItem.name + skillIndex}
+                        className="group/skill flex items-center justify-between gap-3 border-b border-foreground/4 py-1.5 last:border-0"
+                      >
+                        <span className="truncate text-[13px] text-foreground/90">
+                          {skillItem.name}
+                        </span>
+                        <div className="flex shrink-0 items-center gap-3">
+                          <span
+                            className="flex items-center gap-1"
+                            aria-label={`Proficiency ${skillItem.level} of 5`}
+                          >
+                            {[0, 1, 2, 3, 4].map((k) => (
+                              <span
+                                key={k}
+                                className={cn(
+                                  "size-1.5 rounded-full transition-colors",
+                                  k < skillItem.level
+                                    ? "bg-primary"
+                                    : "bg-foreground/15",
+                                )}
+                              />
+                            ))}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() =>
+                              skill.update(categoryIndex, {
+                                ...skillCategories[categoryIndex],
+                                skills: skillCategories[
+                                  categoryIndex
+                                ].skills.filter((_, i) => i !== skillIndex),
+                              })
+                            }
+                            className="opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/skill:opacity-100 focus-visible:opacity-100"
+                            aria-label={`Remove ${skillItem.name}`}
+                            iconLeft={<Trash size={14} />}
+                          />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                <div
+                  className="grid transition-[grid-template-rows] duration-300 ease-out"
+                  style={{
+                    gridTemplateRows:
+                      addingTo === categoryIndex ? "1fr" : "0fr",
+                  }}
+                >
+                  <div className="min-h-0 overflow-hidden">
+                    <div className="mt-6 space-y-3 rounded-md border border-foreground/6 bg-foreground/2 p-3">
+                      <FormField label="Skill">
+                        <ConfigMultiSelect
+                          mode="single"
+                          value={newSkill.name ? [newSkill.name] : []}
+                          onChange={(next) =>
+                            setNewSkill({ ...newSkill, name: next[0] ?? "" })
+                          }
+                          available={catalog?.skillCatalog ?? []}
+                          loading={catalogLoading}
+                          onCreate={addPortfolioSkill}
+                          onOptimisticCreate={(values) =>
+                            mutateCatalog(
+                              (prev) =>
+                                prev
+                                  ? { ...prev, skillCatalog: values }
+                                  : { skillCatalog: values },
+                              false,
+                            )
+                          }
+                          onAfterCreate={(values) =>
+                            mutateCatalog(
+                              (prev) =>
+                                prev
+                                  ? { ...prev, skillCatalog: values }
+                                  : { skillCatalog: values },
+                              false,
+                            )
+                          }
+                          placeholder="Pick or create a skill…"
+                          searchPlaceholder="Search or create a skill…"
+                          itemIcon={Code}
+                          toastMessages={{
+                            loading: "Creating skill…",
+                            success: "Skill added to catalog",
+                            err: "Failed to create skill",
+                          }}
+                        />
+                      </FormField>
+                      <FormField
+                        label={
+                          <span className="inline-flex items-center justify-between gap-2 w-full">
+                            <span>Proficiency</span>
+                            <span className="font-mono normal-case tabular-nums tracking-normal text-foreground/80">
+                              {newSkill.level}/5
+                            </span>
+                          </span>
+                        }
+                      >
+                        <div
+                          role="group"
+                          aria-label="Proficiency level"
+                          className="flex items-center gap-1.5"
+                        >
+                          {[1, 2, 3, 4, 5].map((lvl) => (
+                            <button
+                              key={lvl}
+                              type="button"
+                              onClick={() =>
+                                setNewSkill({ ...newSkill, level: lvl })
+                              }
+                              aria-label={`Set proficiency to ${lvl}`}
+                              aria-pressed={newSkill.level === lvl}
+                              className="group/dot flex h-7 flex-1 items-center justify-center rounded-md border border-foreground/8 bg-foreground/2 transition-colors hover:border-primary/40 hover:bg-primary/5 cursor-pointer"
+                            >
+                              <span
+                                className={cn(
+                                  "size-2 rounded-full transition-colors",
+                                  lvl <= newSkill.level
+                                    ? "bg-primary"
+                                    : "bg-foreground/20 group-hover/dot:bg-primary/40",
+                                )}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </FormField>
+                      <div className="flex items-center gap-1.5 pt-1">
+                        <Button
+                          size="sm"
+                          onClick={() => commitNew(categoryIndex)}
+                          className="flex-1"
+                          disabled={!newSkill.name}
+                          iconLeft={<Check size={14} />}
+                        >
+                          Add skill
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={cancelNew}
+                          aria-label="Cancel"
+                          iconLeft={<X size={14} />}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {addingTo !== categoryIndex && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setAddingTo(categoryIndex)}
+                    className={cn(
+                      "mt-5 w-full text-muted-foreground hover:text-foreground",
+                    )}
+                    iconLeft={<Plus size={14} />}
+                  >
+                    Add skill
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <SkillCategoryDialog>
+          <AddCard title="Add category" className="min-h-full" />
+        </SkillCategoryDialog>
+      </div>
+
+      <SkillCategoryDialog
+        open={editingCategory !== null}
+        onOpenChange={(open) => !open && setEditingCategory(null)}
+        categoryIndex={editingCategory}
+        {...(editingCategory !== null
+          ? { category: skillCategories[editingCategory] }
+          : {})}
+      />
+    </div>
+  );
+}

@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-import { Button } from "../button";
+import { Button } from "premium-ds/button";
 import { Eyebrow } from "../Eyebrow";
 
 interface PageHeaderProps {
@@ -41,9 +41,10 @@ export const PageHeader = ({
       {actionButton && (
         <Button
           onClick={actionButton.onClick}
-          disabled={actionButton.disabled || actionButton.isLoading}
+          disabled={actionButton.disabled}
+          loading={!!actionButton.isLoading}
         >
-          {actionButton.isLoading ? "Loading…" : actionButton.text}
+          {actionButton.text}
         </Button>
       )}
     </header>

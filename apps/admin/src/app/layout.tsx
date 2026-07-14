@@ -44,21 +44,7 @@ export default async function RootLayout({
       lang="en"
     >
       <head>
-        <meta name="color-scheme" content="dark light" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-        (function() {
-          try {
-            var stored = localStorage.getItem('theme');
-            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            var isDark = stored ? stored === 'dark' : prefersDark;
-            if (isDark) document.documentElement.classList.add('dark');
-          } catch (e) {}
-        })();
-      `,
-          }}
-        />
+        <meta name="color-scheme" content="light" />
       </head>
       <body className="overflow-x-hidden">{children}</body>
     </html>

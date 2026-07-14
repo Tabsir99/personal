@@ -1,17 +1,8 @@
 "use client";
 
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Dialog } from "premium-ds/dialog";
+import { Button } from "premium-ds/button";
+
 
 export const ModalSection = ({
   title,
@@ -29,18 +20,12 @@ export const ModalSection = ({
 
 export type PortfolioModalSize = "sm" | "md" | "lg";
 
-const modalSizeClass: Record<PortfolioModalSize, string> = {
-  sm: "sm:max-w-md",
-  md: "sm:max-w-2xl",
-  lg: "sm:max-w-3xl",
-};
-
 type PortfolioModalFrameProps = {
   title: React.ReactNode;
   description: React.ReactNode;
   size?: PortfolioModalSize;
   children: React.ReactNode;
-  footer: React.ReactNode;
+  footer: React.ReactNode | ((close: () => void) => React.ReactNode);
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -58,28 +43,17 @@ export function PortfolioModalFrame({
 }: PortfolioModalFrameProps) {
   return (
     <Dialog
-      {...(open !== undefined && onOpenChange ? { open, onOpenChange } : {})}
+      open={!!open}
+      onOpenChange={onOpenChange ?? (() => {})}
+      trigger={trigger as React.ReactElement | null}
+      title={title}
+      description={description}
+      size={size}
+      footer={footer}
     >
-      {trigger && <DialogTrigger render={trigger as React.ReactElement} />}
-      <DialogContent
-        className={cn(
-          "flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0",
-          modalSizeClass[size],
-        )}
-      >
-        <DialogHeader className="shrink-0 border-b border-foreground/6 px-6 py-4">
-          <DialogTitle className="text-lg font-semibold tracking-tight">
-            {title}
-          </DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-
-        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-4">
-          {children}
-        </div>
-
-        <DialogFooter>{footer}</DialogFooter>
-      </DialogContent>
+      <div className="space-y-5">
+        {children}
+      </div>
     </Dialog>
   );
 }
@@ -91,6 +65,7 @@ type PortfolioModalActionsProps = {
   updateLabel: React.ReactNode;
   isUpdating?: boolean;
   submitIcon?: React.ReactNode;
+  close?: () => void;
 };
 
 export function PortfolioModalActions({
@@ -100,24 +75,23 @@ export function PortfolioModalActions({
   updateLabel,
   isUpdating,
   submitIcon,
+  close,
 }: PortfolioModalActionsProps) {
   return (
-    <>
-      <DialogClose render={<Button variant="outline">Cancel</Button>} />
-      <DialogClose
-        render={
-          <Button onClick={onSubmit} disabled={submitDisabled}>
-            {isUpdating ? (
-              updateLabel
-            ) : (
-              <>
-                {submitIcon}
-                {submitLabel}
-              </>
-            )}
-          </Button>
-        }
-      />
-    </>
+    <div className="flex justify-end gap-2">
+      <Button variant="secondary" onClick={close}>Cancel</Button>
+      <Button 
+        variant="primary" 
+        onClick={() => {
+          onSubmit();
+          close?.();
+        }} 
+        disabled={submitDisabled}
+        iconLeft={submitIcon}
+      >
+        {isUpdating ? updateLabel : submitLabel}
+      </Button>
+    </div>
   );
 }
+

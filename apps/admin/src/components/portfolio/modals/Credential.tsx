@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import { Image as ImageIcon, Plus } from "lucide-react";
+import { Image as ImageIcon, Plus } from "@phosphor-icons/react";
 
-import { Input } from "@/components/ui/input";
+import { TextField } from "premium-ds/text-field";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { FormField } from "@/components/ui/FormField";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
@@ -41,26 +41,27 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
       trigger={children}
       title="Add credential"
       description="Certificate-style asset. Just title + image + optional verify link."
-      footer={
+      footer={(close) => (
         <PortfolioModalActions
           onSubmit={handleSubmit}
           submitDisabled={!formData.title}
           submitLabel="Add credential"
           updateLabel="Add credential"
-          submitIcon={<Plus className="h-3.5 w-3.5" />}
+          submitIcon={<Plus size={14} />}
+          close={close}
         />
-      }
+      )}
     >
       <ModalSection title="Basics">
-        <FormField label="Title">
-          <Input
-            placeholder="AWS Certified Developer"
-            value={formData.title}
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
-          />
-        </FormField>
+        <TextField
+          id="credential-title"
+          label="Title"
+          placeholder="AWS Certified Developer"
+          value={formData.title}
+          onChange={(e) =>
+            setFormData({ ...formData, title: e.target.value })
+          }
+        />
       </ModalSection>
 
       <ModalSection title="Media">
@@ -77,14 +78,14 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
               />
             ) : (
               <div className="flex flex-col items-center gap-1.5">
-                <ImageIcon className="h-5 w-5 text-muted-foreground/60" />
+                <ImageIcon size={20} className="text-muted-foreground/60" />
                 <Eyebrow tone="muted" family="mono">
                   Click to upload
                 </Eyebrow>
               </div>
             )}
           </div>
-          <Input
+          <input
             type="file"
             ref={imageInputRef}
             onChange={(e) => {
@@ -103,20 +104,19 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
       </ModalSection>
 
       <ModalSection title="Reference">
-        <FormField
+        <TextField
+          id="credential-verify"
           label="Verification link"
-          hint="A public URL that proves the credential."
-        >
-          <Input
-            placeholder="https://aws.amazon.com/verification/…"
-            value={formData.link}
-            onChange={(e) =>
-              setFormData({ ...formData, link: e.target.value })
-            }
-            className="font-mono text-xs"
-          />
-        </FormField>
+          helper="A public URL that proves the credential."
+          placeholder="https://aws.amazon.com/verification/…"
+          value={formData.link}
+          onChange={(e) =>
+            setFormData({ ...formData, link: e.target.value })
+          }
+          className="font-mono text-xs"
+        />
       </ModalSection>
     </PortfolioModalFrame>
   );
 }
+

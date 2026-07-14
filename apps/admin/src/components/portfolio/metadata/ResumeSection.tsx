@@ -1,11 +1,10 @@
 "use client";
 import { useRef, useState } from "react";
-import { FileText, Loader2, Trash2, Upload } from "lucide-react";
-import { toast } from "sonner";
+import { FilePdf, CircleNotch, Trash, Upload } from "@phosphor-icons/react";
+import { toast } from "premium-ds/toast";
 import { useShallow } from "zustand/shallow";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "premium-ds/button";
 import { getResumeUploadSignedUrl } from "@/actions/mediaActions";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { callWithToast } from "@/lib/utils";
@@ -79,20 +78,20 @@ export default function ResumeSection() {
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-col gap-1 pt-5 pb-3">
+    <div className="rounded-lg border border-border bg-card">
+      <div className="flex flex-col gap-1 pt-5 pb-3 px-6">
         <h2 className="text-base leading-tight font-semibold tracking-tight">
           Resume / CV
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
           The PDF served by the “Download CV” button in the site header.
         </p>
-      </CardHeader>
-      <CardContent className="pt-1 pb-5">
+      </div>
+      <div className="pt-1 pb-5 px-6">
         {resume.url ? (
           <div className="flex items-center gap-3 rounded-lg border border-foreground/8 bg-foreground/2 p-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/8 text-primary">
-              <FileText className="h-5 w-5" />
+              <FilePdf size={20} />
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-foreground">
@@ -109,28 +108,24 @@ export default function ResumeSection() {
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={pick}
                 disabled={uploading}
+                loading={uploading}
+                iconLeft={<Upload size={14} />}
               >
-                {uploading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Upload className="h-3.5 w-3.5" />
-                )}
                 Replace
               </Button>
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={remove}
                 disabled={uploading}
                 className="text-muted-foreground hover:bg-destructive/8 hover:text-destructive"
                 aria-label="Remove resume"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+                iconLeft={<Trash size={14} />}
+              />
             </div>
           </div>
         ) : (
@@ -142,9 +137,9 @@ export default function ResumeSection() {
           >
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
               {uploading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <CircleNotch size={20} className="animate-spin" />
               ) : (
-                <Upload className="h-5 w-5" />
+                <Upload size={20} />
               )}
             </div>
             <p className="mb-1 font-medium text-foreground">
@@ -163,7 +158,7 @@ export default function ResumeSection() {
           onChange={handleFile}
           className="hidden"
         />
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

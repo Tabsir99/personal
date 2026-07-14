@@ -5,21 +5,14 @@ import {
   Plus,
   Code,
   Upload,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+  CaretLeft,
+  CaretRight,
+} from "@phosphor-icons/react";
 
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { DialogClose } from "@/components/ui/dialog";
+import { TextField } from "premium-ds/text-field";
+import { Textarea } from "premium-ds/textarea";
+import { Select } from "premium-ds/select";
+import { Button } from "premium-ds/button";
 import Img from "@/components/ui/image";
 import { ConfigMultiSelect } from "@/components/ui/configMultiSelect";
 import { Eyebrow } from "@/components/ui/Eyebrow";
@@ -61,6 +54,29 @@ const LINK_TYPE_OPTIONS: {
   { value: "video", label: "Video", placeholder: "Watch video" },
   { value: "other", label: "Other", placeholder: "Visit" },
 ];
+
+const TYPE_OPTIONS = [
+  { value: "Personal", label: "Personal" },
+  { value: "Demo", label: "Demo" },
+  { value: "Freelance", label: "Freelance" }
+];
+
+const STATUS_OPTIONS = [
+  { value: "shipped", label: "Shipped" },
+  { value: "in-progress", label: "In progress" },
+  { value: "archived", label: "Archived" },
+  { value: "discontinued", label: "Discontinued" }
+];
+
+const KIND_OPTIONS = [
+  { value: "image", label: "Image" },
+  { value: "video", label: "Video" }
+];
+
+const LINK_TYPE_SELECT_OPTIONS = LINK_TYPE_OPTIONS.map((opt) => ({
+  value: opt.value,
+  label: opt.label,
+}));
 
 const STEPS = ["Basics", "Stills", "Links", "Tech & outcomes", "Engagement"];
 
@@ -236,7 +252,7 @@ export default function ProjectDialog({
       size="lg"
       title={isUpdating ? formData.title || "Edit project" : "Add project"}
       description="Links, skills, stills, metrics — everything that appears on the project card."
-      footer={
+      footer={(close) => (
         <div className="flex w-full items-center justify-between gap-3">
           <div className="flex items-center gap-1.5" aria-hidden="true">
             {STEPS.map((_, i) => (
@@ -251,44 +267,37 @@ export default function ProjectDialog({
           </div>
           <div className="flex items-center gap-2">
             {step > 0 ? (
-              <Button type="button" variant="outline" onClick={back}>
-                <ChevronLeft className="h-3.5 w-3.5" />
+              <Button type="button" variant="secondary" onClick={back} iconLeft={<CaretLeft size={14} />}>
                 Back
               </Button>
             ) : (
-              <DialogClose render={<Button variant="outline">Cancel</Button>} />
+              <Button variant="secondary" onClick={close}>Cancel</Button>
             )}
             {step < STEPS.length - 1 ? (
               <Button
                 type="button"
                 onClick={next}
                 disabled={step === 0 && (!formData.title || !formData.dek)}
+                iconRight={<CaretRight size={14} />}
               >
                 Next
-                <ChevronRight className="h-3.5 w-3.5" />
               </Button>
             ) : (
-              <DialogClose
-                render={
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={!formData.title || !formData.dek}
-                  >
-                    {isUpdating ? (
-                      "Update project"
-                    ) : (
-                      <>
-                        <Plus className="h-3.5 w-3.5" />
-                        Add project
-                      </>
-                    )}
-                  </Button>
-                }
-              />
+              <Button
+                variant="primary"
+                onClick={() => {
+                  handleSubmit();
+                  close();
+                }}
+                disabled={!formData.title || !formData.dek}
+                iconLeft={<Plus size={14} />}
+              >
+                {isUpdating ? "Update project" : "Add project"}
+              </Button>
             )}
           </div>
         </div>
-      }
+      )}
     >
       <div
         className="overflow-hidden transition-[height] duration-300 ease-out"
@@ -304,71 +313,60 @@ export default function ProjectDialog({
           >
         {step === 0 && (
           <ModalSection title="Basics">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <FormField label="Title">
-            <Input
-              placeholder="E-commerce platform"
-              value={formData.title}
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <TextField
+                id="project-title"
+                label="Title"
+                placeholder="E-commerce platform"
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+              />
+              <FormField label="Type">
+                <Select
+                  options={TYPE_OPTIONS}
+                  value={formData.type}
+                  onChange={(value) =>
+                    setFormData({ ...formData, type: value as any })
+                  }
+                  placeholder="Choose type"
+                  ariaLabel="Type"
+                />
+              </FormField>
+              <FormField label="Status">
+                <Select
+                  options={STATUS_OPTIONS}
+                  value={formData.status}
+                  onChange={(value) =>
+                    setFormData({ ...formData, status: value as any })
+                  }
+                  placeholder="Choose status"
+                  ariaLabel="Status"
+                />
+              </FormField>
+              <TextField
+                id="project-tag"
+                label="Tag"
+                helper="e.g. Operations · Tooling · Platform"
+                placeholder="Operations"
+                value={formData.tag}
+                onChange={(e) =>
+                  setFormData({ ...formData, tag: e.target.value })
+                }
+              />
+            </div>
+            <Textarea
+              id="project-dek"
+              label="Description"
+              placeholder="A full-featured e-commerce platform with payment integration…"
+              value={formData.dek}
               onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
+                setFormData({ ...formData, dek: e.target.value })
               }
+              minRows={3}
             />
-          </FormField>
-          <FormField label="Type">
-            <Select
-              value={formData.type}
-              onValueChange={(value: "Personal" | "Demo" | "Freelance") =>
-                setFormData({ ...formData, type: value })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Personal">Personal</SelectItem>
-                <SelectItem value="Demo">Demo</SelectItem>
-                <SelectItem value="Freelance">Freelance</SelectItem>
-              </SelectContent>
-            </Select>
-          </FormField>
-          <FormField label="Status">
-            <Select
-              value={formData.status}
-              onValueChange={(
-                value: "shipped" | "in-progress" | "archived" | "discontinued",
-              ) => setFormData({ ...formData, status: value })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="shipped">Shipped</SelectItem>
-                <SelectItem value="in-progress">In progress</SelectItem>
-                <SelectItem value="archived">Archived</SelectItem>
-                <SelectItem value="discontinued">Discontinued</SelectItem>
-              </SelectContent>
-            </Select>
-          </FormField>
-          <FormField label="Tag" hint="e.g. Operations · Tooling · Platform">
-            <Input
-              placeholder="Operations"
-              value={formData.tag}
-              onChange={(e) =>
-                setFormData({ ...formData, tag: e.target.value })
-              }
-            />
-          </FormField>
-        </div>
-        <FormField label="Description">
-          <Textarea
-            placeholder="A full-featured e-commerce platform with payment integration…"
-            value={formData.dek}
-            onChange={(e) =>
-              setFormData({ ...formData, dek: e.target.value })
-            }
-          />
-        </FormField>
-      </ModalSection>
+          </ModalSection>
         )}
         {step === 1 && (
           <ModalSection title="Stills">
@@ -378,41 +376,35 @@ export default function ProjectDialog({
             className="space-y-3 rounded-md border border-foreground/6 bg-foreground/2 p-3"
           >
             <div className="grid grid-cols-[1fr_120px_auto] items-end gap-2">
-              <FormField label="Label">
-                <Input
-                  placeholder="Dashboard hero"
-                  value={still.label}
-                  onChange={(e) =>
-                    handleUpdateStill(i, { label: e.target.value })
-                  }
-                />
-              </FormField>
+              <TextField
+                id={`still-label-${i}`}
+                label="Label"
+                placeholder="Dashboard hero"
+                value={still.label}
+                onChange={(e) =>
+                  handleUpdateStill(i, { label: e.target.value })
+                }
+              />
               <FormField label="Kind">
                 <Select
+                  options={KIND_OPTIONS}
                   value={still.kind}
-                  onValueChange={(value: "image" | "video") =>
-                    handleUpdateStill(i, { kind: value })
+                  onChange={(value) =>
+                    handleUpdateStill(i, { kind: value as any })
                   }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="image">Image</SelectItem>
-                    <SelectItem value="video">Video</SelectItem>
-                  </SelectContent>
-                </Select>
+                  placeholder="Choose kind"
+                  ariaLabel="Kind"
+                />
               </FormField>
               <Button
                 type="button"
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => handleRemoveStill(i)}
-                className="text-muted-foreground hover:bg-destructive/8 hover:text-destructive"
+                className="text-muted-foreground hover:bg-destructive/8 hover:text-destructive self-end"
                 aria-label="Remove still"
-              >
-                <X className="h-3.5 w-3.5" />
-              </Button>
+                iconLeft={<X size={14} />}
+              />
             </div>
             {still.kind === "video" ? (
               <FormField label="Video sources">
@@ -422,7 +414,7 @@ export default function ProjectDialog({
                 />
               </FormField>
             ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-[220px_1fr]">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-[220px_1fr] items-end">
                 <button
                   type="button"
                   onClick={() => {
@@ -442,44 +434,44 @@ export default function ProjectDialog({
                         className="h-full w-full object-cover"
                       />
                       <span className="absolute inset-0 flex items-center justify-center gap-1.5 bg-background/65 text-xs font-medium text-foreground opacity-0 backdrop-blur-[1px] transition-opacity group-hover/thumb:opacity-100">
-                        <Upload className="h-3.5 w-3.5" />
+                        <Upload size={14} />
                         Replace
                       </span>
                     </>
                   ) : (
                     <span className="flex h-full w-full flex-col items-center justify-center gap-1.5 text-muted-foreground">
-                      <ImageIcon className="h-6 w-6 opacity-60" />
+                      <ImageIcon size={24} className="opacity-60" />
                       <span className="text-xs">Click to upload</span>
                     </span>
                   )}
                 </button>
                 <div className="flex flex-col gap-2">
-                  <FormField label="URL">
-                    <Input
-                      placeholder="https://… or upload"
-                      value={still.url}
-                      onChange={(e) =>
-                        handleUpdateStill(i, { url: e.target.value })
-                      }
-                      className="font-mono text-xs"
-                    />
-                  </FormField>
-                  <FormField label="Alt text">
-                    <Input
-                      placeholder="Description for screen readers"
-                      value={still.alt}
-                      onChange={(e) =>
-                        handleUpdateStill(i, { alt: e.target.value })
-                      }
-                    />
-                  </FormField>
+                  <TextField
+                    id={`still-url-${i}`}
+                    label="URL"
+                    placeholder="https://… or upload"
+                    value={still.url}
+                    onChange={(e) =>
+                      handleUpdateStill(i, { url: e.target.value })
+                    }
+                    className="font-mono text-xs"
+                  />
+                  <TextField
+                    id={`still-alt-${i}`}
+                    label="Alt text"
+                    placeholder="Description for screen readers"
+                    value={still.alt}
+                    onChange={(e) =>
+                      handleUpdateStill(i, { alt: e.target.value })
+                    }
+                  />
                 </div>
               </div>
             )}
           </div>
         ))}
 
-        <Input
+        <input
           type="file"
           ref={stillFileRef}
           accept="image/*"
@@ -498,11 +490,11 @@ export default function ProjectDialog({
 
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           onClick={handleAddStill}
           className="w-full text-muted-foreground hover:text-foreground"
+          iconLeft={<Plus size={14} />}
         >
-          <Plus className="h-3.5 w-3.5" />
           Add still
         </Button>
       </ModalSection>
@@ -520,50 +512,41 @@ export default function ProjectDialog({
             >
               <FormField label="Type">
                 <Select
+                  options={LINK_TYPE_SELECT_OPTIONS}
                   value={link.type}
-                  onValueChange={(value: LinkType) =>
-                    handleUpdateLink(i, { type: value })
+                  onChange={(value) =>
+                    handleUpdateLink(i, { type: value as LinkType })
                   }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {LINK_TYPE_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormField>
-              <FormField label="Text">
-                <Input
-                  placeholder={placeholder}
-                  value={link.text}
-                  onChange={(e) =>
-                    handleUpdateLink(i, { text: e.target.value })
-                  }
+                  placeholder="Type"
+                  ariaLabel="Link type"
                 />
               </FormField>
-              <FormField label="URL">
-                <Input
-                  placeholder="https://…"
-                  value={link.url}
-                  onChange={(e) => handleUpdateLink(i, { url: e.target.value })}
-                  className="font-mono text-xs"
-                />
-              </FormField>
+              <TextField
+                id={`link-text-${i}`}
+                label="Text"
+                placeholder={placeholder}
+                value={link.text}
+                onChange={(e) =>
+                  handleUpdateLink(i, { text: e.target.value })
+                }
+              />
+              <TextField
+                id={`link-url-${i}`}
+                label="URL"
+                placeholder="https://…"
+                value={link.url}
+                onChange={(e) => handleUpdateLink(i, { url: e.target.value })}
+                className="font-mono text-xs"
+              />
               <Button
                 type="button"
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => handleRemoveLink(i)}
                 className="text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/link:opacity-100 focus-visible:opacity-100"
                 aria-label="Remove link"
-              >
-                <X className="h-3.5 w-3.5" />
-              </Button>
+                iconLeft={<X size={14} />}
+              />
             </div>
           );
         })}
@@ -576,48 +559,40 @@ export default function ProjectDialog({
               : "max-h-0 border-transparent p-0",
           )}
         >
-          <div className="mb-2 grid grid-cols-[120px_1fr_1fr] gap-2">
+          <div className="mb-2 grid grid-cols-[120px_1fr_1fr] gap-2 items-end">
             <FormField label="Type">
               <Select
+                options={LINK_TYPE_SELECT_OPTIONS}
                 value={newLink.type}
-                onValueChange={(value: LinkType) =>
-                  setNewLink({ ...newLink, type: value })
+                onChange={(value) =>
+                  setNewLink({ ...newLink, type: value as LinkType })
                 }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {LINK_TYPE_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormField>
-            <FormField label="Text">
-              <Input
-                placeholder={
-                  LINK_TYPE_OPTIONS.find((o) => o.value === newLink.type)
-                    ?.placeholder ?? "Link text"
-                }
-                value={newLink.text}
-                onChange={(e) =>
-                  setNewLink({ ...newLink, text: e.target.value })
-                }
+                placeholder="Type"
+                ariaLabel="New link type"
               />
             </FormField>
-            <FormField label="URL">
-              <Input
-                placeholder="https://…"
-                value={newLink.url}
-                onChange={(e) =>
-                  setNewLink({ ...newLink, url: e.target.value })
-                }
-                className="font-mono text-xs"
-              />
-            </FormField>
+            <TextField
+              id="new-link-text"
+              label="Text"
+              placeholder={
+                LINK_TYPE_OPTIONS.find((o) => o.value === newLink.type)
+                  ?.placeholder ?? "Link text"
+              }
+              value={newLink.text}
+              onChange={(e) =>
+                setNewLink({ ...newLink, text: e.target.value })
+              }
+            />
+            <TextField
+              id="new-link-url"
+              label="URL"
+              placeholder="https://…"
+              value={newLink.url}
+              onChange={(e) =>
+                setNewLink({ ...newLink, url: e.target.value })
+              }
+              className="font-mono text-xs"
+            />
           </div>
           <div className="flex justify-end gap-1.5">
             <Button
@@ -634,8 +609,8 @@ export default function ProjectDialog({
               size="sm"
               onClick={handleCommitNewLink}
               disabled={!newLink.text.trim() && !newLink.url.trim()}
+              iconLeft={<Plus size={14} />}
             >
-              <Plus className="h-3 w-3" />
               Add link
             </Button>
           </div>
@@ -644,11 +619,11 @@ export default function ProjectDialog({
         {!isAddingLink && (
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={() => setIsAddingLink(true)}
             className="w-full text-muted-foreground hover:text-foreground"
+            iconLeft={<Plus size={14} />}
           >
-            <Plus className="h-3.5 w-3.5" />
             Add link
           </Button>
         )}
@@ -698,8 +673,9 @@ export default function ProjectDialog({
           hint="Up to two results worth showcasing (10K users, 0.8s load time)."
         >
           {formData.metrics.length < 2 && (
-            <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
-              <Input
+            <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">
+              <TextField
+                id="metric-label"
                 placeholder="Label"
                 value={metricLabel}
                 onChange={(e) => setMetricLabel(e.target.value)}
@@ -710,7 +686,8 @@ export default function ProjectDialog({
                   }
                 }}
               />
-              <Input
+              <TextField
+                id="metric-value"
                 placeholder="Value"
                 value={metricValue}
                 onChange={(e) => setMetricValue(e.target.value)}
@@ -723,12 +700,11 @@ export default function ProjectDialog({
               />
               <Button
                 type="button"
-                size="default"
                 onClick={handleAddMetric}
                 aria-label="Add metric"
-              >
-                <Plus className="h-3.5 w-3.5" />
-              </Button>
+                iconLeft={<Plus size={14} />}
+                variant="secondary"
+              />
             </div>
           )}
 
@@ -750,9 +726,9 @@ export default function ProjectDialog({
                       })
                     }
                     aria-label={`Remove ${metric.label}`}
-                    className="absolute right-1.5 top-1.5 rounded-sm p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/metric:opacity-100 focus-visible:opacity-100"
+                    className="absolute right-1.5 top-1.5 rounded-sm p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/metric:opacity-100 focus-visible:opacity-100 cursor-pointer"
                   >
-                    <X className="h-3 w-3" />
+                    <X size={12} />
                   </button>
                   <Eyebrow tone="muted">{metric.label}</Eyebrow>
                   <span className="font-mono text-base font-semibold tabular-nums text-foreground">
@@ -773,27 +749,27 @@ export default function ProjectDialog({
         )}
         {step === 4 && (
           <ModalSection title="Engagement">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <FormField label="Year">
-            <Input
-              placeholder="2024"
-              value={formData.year}
-              onChange={(e) =>
-                setFormData({ ...formData, year: e.target.value })
-              }
-            />
-          </FormField>
-          <FormField label="Role">
-            <Input
-              placeholder="Sole engineer"
-              value={formData.role || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, role: e.target.value })
-              }
-            />
-          </FormField>
-        </div>
-      </ModalSection>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <TextField
+                id="engagement-year"
+                label="Year"
+                placeholder="2024"
+                value={formData.year}
+                onChange={(e) =>
+                  setFormData({ ...formData, year: e.target.value })
+                }
+              />
+              <TextField
+                id="engagement-role"
+                label="Role"
+                placeholder="Sole engineer"
+                value={formData.role || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, role: e.target.value })
+                }
+              />
+            </div>
+          </ModalSection>
         )}
           </div>
         </div>

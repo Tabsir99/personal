@@ -63,7 +63,7 @@ export default async function middleware(request: NextRequest) {
   if (pathname === "/") {
     return userAuthenticated
       ? NextResponse.redirect(
-          `${process.env.NEXT_PUBLIC_ADMIN_ORIGIN}/dashboard`,
+          `${process.env.NEXT_PUBLIC_ADMIN_ORIGIN}/analytics`,
         )
       : NextResponse.next();
   }
@@ -73,5 +73,5 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/api/:path*", "/dashboard/:path*"],
+  matcher: ["/", "/api/:path*", "/analytics/:path*"],
 };

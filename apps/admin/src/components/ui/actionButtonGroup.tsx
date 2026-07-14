@@ -1,15 +1,15 @@
 import useUIStore from "@/stores/UIStore";
-import { Button } from "./button";
+import { Button } from "premium-ds/button";
 import {
-  Edit2,
-  Trash2,
+  PencilSimple,
+  Trash,
   Check,
   X,
   ArrowDown,
   ArrowUp,
   Power,
-  PowerOff,
-} from "lucide-react";
+  ToggleLeft,
+} from "@phosphor-icons/react";
 
 interface ActionButton {
   icon?: React.ComponentType<{ className?: string | undefined }>;
@@ -53,8 +53,8 @@ export function ActionButtonGroup({
   };
 
   const defaultIcons = {
-    edit: Edit2,
-    delete: Trash2,
+    edit: PencilSimple,
+    delete: Trash,
     save: Check,
     cancel: X,
     moveUp: ArrowUp,
@@ -70,7 +70,7 @@ export function ActionButtonGroup({
           button.icon ||
           (button.variant === "toggle"
             ? button.active
-              ? PowerOff
+              ? ToggleLeft
               : Power
             : null) ||
           (button.variant && button.variant !== "custom"
@@ -86,8 +86,9 @@ export function ActionButtonGroup({
         return (
           <Button
             key={idx}
-            size="icon"
-            className={`${baseClass} ${variantClass}`}
+            variant="ghost"
+            size="sm"
+            className={`${baseClass} ${variantClass} p-1 min-w-0 inline-flex items-center justify-center`}
             onClick={() => {
               if (button.variant === "delete") {
                 return openModal("confirmation", {
@@ -96,9 +97,9 @@ export function ActionButtonGroup({
                     message: `Are you sure you want to delete this ${entityName}?`,
                     onConfirm: button.onClick,
                     confirmButtonText: "Delete",
-                    confirmButtonVariant: "destructive",
+                    confirmButtonVariant: "danger",
                     cancelButtonText: "Cancel",
-                    cancelButtonVariant: "outline",
+                    cancelButtonVariant: "secondary",
                   },
                 });
               }

@@ -1,8 +1,8 @@
 "use client";
 
-import { RotateCw } from "lucide-react";
+import { ArrowClockwise } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "premium-ds/button";
 
 interface GenerateMetadataButtonProps {
   onClick: () => void;
@@ -23,7 +23,7 @@ export function GenerateMetadataButton({
 
   return (
     <Button
-      variant="outline"
+      variant="secondary"
       onClick={onClick}
       disabled={disabled || loading}
       className={cn(
@@ -33,6 +33,14 @@ export function GenerateMetadataButton({
         className,
       )}
       aria-busy={loading || undefined}
+      iconLeft={
+        showRegenerate && !loading ? (
+          <ArrowClockwise
+            className="h-3 w-3 opacity-50 transition-opacity group-hover:opacity-80"
+            aria-hidden
+          />
+        ) : undefined
+      }
     >
       {loading ? (
         <>
@@ -44,14 +52,7 @@ export function GenerateMetadataButton({
           <Ellipsis />
         </>
       ) : showRegenerate ? (
-        <>
-          <RotateCw
-            className="h-3 w-3 opacity-50 transition-opacity group-hover:opacity-80"
-            strokeWidth={2.2}
-            aria-hidden
-          />
-          <span>Regenerate metadata</span>
-        </>
+        <span>Regenerate metadata</span>
       ) : (
         <span>Generate metadata</span>
       )}
@@ -133,7 +134,7 @@ export function SuggestionsActionBar({
 
       <div className="flex shrink-0 items-center gap-1">
         <Button
-          variant="outline"
+          variant="secondary"
           type="button"
           onClick={onDiscardAll}
           disabled={applying}
@@ -145,7 +146,7 @@ export function SuggestionsActionBar({
           onClick={onApplyAll}
           disabled={applying}
           aria-busy={applying || undefined}
-          variant="default"
+          variant="primary"
         >
           {applying ? (
             <>
@@ -163,3 +164,4 @@ export function SuggestionsActionBar({
     </div>
   );
 }
+

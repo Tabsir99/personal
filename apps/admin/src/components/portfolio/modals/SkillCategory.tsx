@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus } from "@phosphor-icons/react";
 
-import { Input } from "@/components/ui/input";
-import { FormField } from "@/components/ui/FormField";
+import { TextField } from "premium-ds/text-field";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { PageData } from "@tabsircg/schemas/portfolio";
 
@@ -80,28 +79,30 @@ export default function SkillCategoryDialog({
           : "Add skill category"
       }
       description="Group related skills under a single header."
-      footer={
+      footer={(close) => (
         <PortfolioModalActions
           onSubmit={handleSubmit}
           submitDisabled={!formData.title}
           submitLabel="Add category"
           updateLabel="Save changes"
           isUpdating={isUpdating}
-          submitIcon={<Plus className="h-3.5 w-3.5" />}
+          submitIcon={<Plus size={14} />}
+          close={close}
         />
-      }
+      )}
     >
       <ModalSection title="Basics">
-        <FormField label="Title">
-          <Input
-            placeholder="Front-end"
-            value={formData.title}
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
-          />
-        </FormField>
+        <TextField
+          id="skill-category-title"
+          label="Title"
+          placeholder="Front-end"
+          value={formData.title}
+          onChange={(e) =>
+            setFormData({ ...formData, title: e.target.value })
+          }
+        />
       </ModalSection>
     </PortfolioModalFrame>
   );
 }
+

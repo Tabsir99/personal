@@ -1,9 +1,7 @@
 import { create } from "zustand";
-import { buttonVariants } from "@/components/ui/button";
+import { type ButtonProps } from "premium-ds/button";
 
-type ButtonVariant = NonNullable<
-  NonNullable<Parameters<typeof buttonVariants>[0]>["variant"]
->;
+type ButtonVariant = ButtonProps["variant"];
 
 interface ConfirmationConfig {
   message: string;

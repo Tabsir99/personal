@@ -1,9 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import "premium-ds/styles.css";
 @import "@open-notion/editor/styles";
 
-@custom-variant dark (&:is(.dark *));
 
 @layer base {
   * {
@@ -182,78 +181,7 @@
   --editor-selected: #21bab225;
 }
 
-.dark {
-  /* Warmer + slightly lifted background, clearer card separation */
-  --background: oklch(0.14 0.005 285);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.18 0.006 285);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.18 0.006 285);
-  --popover-foreground: oklch(0.985 0 0);
-  /* Soften so it doesn't fight the deep background */
-  --primary: oklch(0.66 0.18 259);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: color-mix(in oklch, var(--primary) 12%, var(--background));
-  --accent-foreground: var(--primary);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.145 0 0);
-  --success: oklch(0.78 0.13 162);
-  --success-foreground: oklch(0.145 0 0);
-  --warning: oklch(0.85 0.15 80);
-  --warning-foreground: oklch(0.145 0 0);
-  --star: oklch(0.87 0.15 87);
-  /* Down from 10% — half-step lighter hairline */
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: var(--primary);
 
-  /* Charts (unchanged from prior dark tuning) */
-  --chart-1: oklch(0.72 0.16 258);
-  --chart-2: oklch(0.8 0.11 215);
-  --chart-3: oklch(0.74 0.17 295);
-  --chart-4: oklch(0.78 0.13 162);
-  --chart-5: oklch(0.74 0.17 18);
-  --chart-positive: var(--chart-4);
-  --chart-negative: var(--chart-5);
-  --chart-grid: oklch(1 0 0 / 8%);
-
-  /* Sidebar matches new card for unified panel feel */
-  --sidebar: oklch(0.18 0.006 285);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.556 0 0);
-
-  /* Editor */
-  --editor-surface: #18181b;
-  --editor-surface-hover: #27272a;
-  --editor-border: #27272a;
-  --editor-text: #fafafa;
-  --editor-text-secondary: #a1a1aa;
-  --editor-text-muted: #52525b;
-  --editor-accent: #3b82f6;
-  --editor-selected: #21bab225;
-
-  /* Heavier ambient, lighter contact for dark surfaces */
-  --shadow-card-rest:
-    0 1px 2px 0 rgb(0 0 0 / 0.16), 0 8px 24px -8px rgb(0 0 0 / 0.4);
-  --shadow-card-hover:
-    0 1px 2px 0 rgb(0 0 0 / 0.2), 0 12px 32px -10px rgb(0 0 0 / 0.5);
-  --shadow-dialog:
-    0 24px 56px -16px rgb(0 0 0 / 0.5), 0 2px 6px 0 rgb(0 0 0 / 0.2);
-  --shadow-kbd-rest:
-    inset 0 -1px 0 0 rgb(255 255 255 / 0.06), 0 1px 0 0 rgb(0 0 0 / 0.2);
-  --shadow-kbd-press: inset 0 1px 0 0 rgb(255 255 255 / 0.1);
-  --shadow-focus-ring: 0 0 0 3px
-    color-mix(in oklch, var(--ring) 22%, transparent);
-}
 
 @keyframes breathe {
   0%,

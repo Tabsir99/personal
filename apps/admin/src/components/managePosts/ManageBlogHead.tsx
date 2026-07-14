@@ -1,18 +1,11 @@
 "use client";
 
 import { BlogStatus } from "@tabsircg/schemas/blog";
-import SearchInput from "../ui/common/SearchInput";
-import { Button } from "../ui/button";
-import { X } from "lucide-react";
+import { Button } from "premium-ds/button";
+import { Popover } from "premium-ds/popover";
+import { TextField } from "premium-ds/text-field";
+import { X, MagnifyingGlass } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-} from "../ui/select";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import type { BlogConfig } from "@/actions/configActions";
 
@@ -45,33 +38,49 @@ function FilterChip<T extends string>({
   options,
 }: FilterChipProps<T>) {
   const isActive = value !== defaultValue;
+  const activeOption = options.find((o) => o.value === value);
+
   return (
-    <Select value={value} onValueChange={(v) => onChange(v as T)}>
-      <SelectTrigger
-        className={cn(
-          "w-auto capitalize h-9 px-3 gap-1.5 rounded-md border bg-card text-sm transition-colors hover:bg-foreground/3",
-          isActive
-            ? "border-primary/30 bg-primary/5 text-foreground hover:bg-primary/8"
-            : "border-border text-foreground",
-        )}
-      >
-        <span className="text-muted-foreground">{label}</span>
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent className="rounded-md" sideOffset={6}>
-        <SelectGroup>
+    <Popover
+      side="bottom"
+      align="start"
+      trigger={
+        <button
+          type="button"
+          className={cn(
+            "w-auto capitalize h-9 px-3 gap-1.5 rounded-md border bg-card text-sm transition-colors hover:bg-foreground/3 flex items-center justify-between cursor-pointer",
+            isActive
+              ? "border-primary/30 bg-primary/5 text-foreground hover:bg-primary/8"
+              : "border-border text-foreground",
+          )}
+        >
+          <span className="text-muted-foreground mr-1">{label}:</span>
+          <span className="font-medium">{activeOption?.label || value}</span>
+        </button>
+      }
+    >
+      {({ close }) => (
+        <div className="flex flex-col p-1 w-40 bg-popover text-popover-foreground rounded-lg border border-border shadow-dialog">
           {options.map((option) => (
-            <SelectItem
+            <button
               key={option.value}
-              value={option.value}
-              className="cursor-pointer text-sm"
+              onClick={() => {
+                close();
+                onChange(option.value);
+              }}
+              className={cn(
+                "flex w-full items-center px-3 py-1.5 text-left text-sm rounded-md transition-colors cursor-pointer",
+                option.value === value
+                  ? "bg-primary/8 text-primary font-medium"
+                  : "hover:bg-foreground/4 text-foreground",
+              )}
             >
               {option.label}
-            </SelectItem>
+            </button>
           ))}
-        </SelectGroup>
-      </SelectContent>
-    </Select>
+        </div>
+      )}
+    </Popover>
   );
 }
 
@@ -109,10 +118,14 @@ export default function ManagePostHead({
 
   return (
     <div className="flex flex-wrap items-center gap-6 relative z-20">
-      <SearchInput
-        searchTerm={searchTerm}
-        handleChange={(e) => setSearchTerm(e.target.value)}
-      />
+      <div className="w-full sm:w-72">
+        <TextField
+          placeholder="Search posts..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          leadingIcon={<MagnifyingGlass size={16} />}
+        />
+      </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <FilterChip
@@ -142,8 +155,8 @@ export default function ManagePostHead({
             size="sm"
             onClick={onClearFilters}
             className="h-9 px-2.5 text-sm text-muted-foreground hover:text-foreground"
+            iconLeft={<X size={14} />}
           >
-            <X className="h-3.5 w-3.5" />
             Clear
           </Button>
         )}

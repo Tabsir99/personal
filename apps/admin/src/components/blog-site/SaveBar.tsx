@@ -3,7 +3,7 @@
 import { useShallow } from "zustand/react/shallow";
 
 import { useSiteConfigStore } from "@/stores/SiteConfigStore";
-import { Button } from "@/components/ui/button";
+import { Button } from "premium-ds/button";
 import { Kbd } from "@/components/ui/Kbd";
 import { StatusDot } from "@/components/ui/StatusDot";
 
@@ -40,16 +40,18 @@ export default function SaveBar() {
           type="button"
           size="sm"
           onClick={() => useSiteConfigStore.getState().save()}
-          disabled={saving}
+          loading={saving}
           className="gap-1.5 rounded-full bg-foreground text-background shadow-card-rest hover:bg-foreground/90"
+          iconRight={
+            <Kbd
+              size="sm"
+              className="border-background/15 bg-background/15 text-background/80"
+            >
+              ⌘S
+            </Kbd>
+          }
         >
-          <span>{saving ? "Saving…" : "Save changes"}</span>
-          <Kbd
-            size="sm"
-            className="border-background/15 bg-background/15 text-background/80"
-          >
-            ⌘S
-          </Kbd>
+          Save changes
         </Button>
       </div>
     </div>

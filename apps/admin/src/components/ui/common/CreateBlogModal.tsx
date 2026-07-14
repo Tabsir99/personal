@@ -2,19 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { FormField } from "@/components/ui/FormField";
+import { Dialog } from "premium-ds/dialog";
+import { Button } from "premium-ds/button";
+import { TextField } from "premium-ds/text-field";
 import { Kbd } from "@/components/ui/Kbd";
 import { startBlogWriting } from "@/actions/blogActions";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
@@ -41,61 +31,53 @@ export const CreateBlogModal = () => {
 
     if (result?.status === "success") {
       setBlogFormData(result.data);
-      router.push(`/dashboard/write-blog/${result.data.blogId}`);
+      router.push(`/analytics/write-blog/${result.data.blogId}`);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={closeCreateDialog}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="text-lg font-semibold tracking-tight">
-            New blog
-          </DialogTitle>
-          <DialogDescription>
-            Start with a working title. You can rename, retag, and SEO it in the
-            metadata panel.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-2">
-          <FormField label="Working title">
-            <Input
-              id="blogTitle"
-              placeholder="Why the dependency boundary matters more than the language"
-              value={newBlogTitle}
-              onChange={(e) => setNewBlogTitle(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && newBlogTitle.trim()) {
-                  handleCreateBlog();
-                }
-              }}
-              autoFocus
-            />
-          </FormField>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={closeCreateDialog}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={closeCreateDialog}
+      title="New blog"
+      description="Start with a working title. You can rename, retag, and SEO it in the metadata panel."
+      footer={
+        <div className="flex justify-end gap-2.5">
+          <Button variant="secondary" onClick={closeCreateDialog}>
             Cancel
           </Button>
-          <DialogClose
-            render={
-              <Button
-                onClick={handleCreateBlog}
-                disabled={newBlogTitle.trim() === ""}
-                className="gap-1.5"
+          <Button
+            onClick={handleCreateBlog}
+            disabled={newBlogTitle.trim() === ""}
+            iconRight={
+              <Kbd
+                size="sm"
+                className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground"
               >
-                <span>Create &amp; edit</span>
-                <Kbd
-                  size="sm"
-                  className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground"
-                >
-                  ⏎
-                </Kbd>
-              </Button>
+                ⏎
+              </Kbd>
             }
-          />
-        </DialogFooter>
-      </DialogContent>
+          >
+            Create & edit
+          </Button>
+        </div>
+      }
+    >
+      <div className="py-2">
+        <TextField
+          id="blogTitle"
+          label="Working title"
+          placeholder="Why the dependency boundary matters more than the language"
+          value={newBlogTitle}
+          onChange={(e) => setNewBlogTitle(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && newBlogTitle.trim()) {
+              handleCreateBlog();
+            }
+          }}
+          autoFocus
+        />
+      </div>
     </Dialog>
   );
 };

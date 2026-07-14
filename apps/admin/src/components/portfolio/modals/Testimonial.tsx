@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
-import { Plus, Star } from "lucide-react";
+import { Plus, Star } from "@phosphor-icons/react";
 
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { TextField } from "premium-ds/text-field";
+import { Textarea } from "premium-ds/textarea";
+import { Select } from "premium-ds/select";
 import { FormField } from "@/components/ui/FormField";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { PageData } from "@tabsircg/schemas/portfolio";
@@ -32,6 +26,12 @@ interface TestimonialDialogProps {
 
 type Testimonial = PageData["testimonials"][number];
 type DisplaySlot = Testimonial["displaySlot"];
+
+const DISPLAY_SLOT_OPTIONS = [
+  { value: "none", label: "Hidden" },
+  { value: "endorsement", label: "Endorsement" },
+  { value: "voices", label: "Voices" },
+];
 
 const defaultFormData: Testimonial = {
   name: "",
@@ -86,7 +86,7 @@ export default function TestimonialDialog({
         isUpdating ? formData.name || "Edit testimonial" : "Add testimonial"
       }
       description="Client quote, optional video, and where it surfaces on the home page."
-      footer={
+      footer={(close) => (
         <PortfolioModalActions
           onSubmit={handleSubmit}
           submitDisabled={
@@ -95,49 +95,51 @@ export default function TestimonialDialog({
           submitLabel="Add testimonial"
           updateLabel="Update testimonial"
           isUpdating={isUpdating}
-          submitIcon={<Plus className="h-3.5 w-3.5" />}
+          submitIcon={<Plus size={14} />}
+          close={close}
         />
-      }
+      )}
     >
       <ModalSection title="Client">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <FormField label="Name">
-            <Input
-              placeholder="Zohaib"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-            />
-          </FormField>
-          <FormField label="Company">
-            <Input
-              placeholder="DataZoro"
-              value={formData.company}
-              onChange={(e) =>
-                setFormData({ ...formData, company: e.target.value })
-              }
-            />
-          </FormField>
-          <FormField label="Period" hint="e.g. Mar — Jul 2025">
-            <Input
-              placeholder="Mar — Jul 2025"
-              value={formData.period}
-              onChange={(e) =>
-                setFormData({ ...formData, period: e.target.value })
-              }
-            />
-          </FormField>
-          <FormField label="Avatar URL">
-            <Input
-              placeholder="https://…"
-              value={formData.avatar}
-              onChange={(e) =>
-                setFormData({ ...formData, avatar: e.target.value })
-              }
-              className="font-mono text-xs"
-            />
-          </FormField>
+          <TextField
+            id="testimonial-name"
+            label="Name"
+            placeholder="Zohaib"
+            value={formData.name}
+            onChange={(e) =>
+              setFormData({ ...formData, name: e.target.value })
+            }
+          />
+          <TextField
+            id="testimonial-company"
+            label="Company"
+            placeholder="DataZoro"
+            value={formData.company}
+            onChange={(e) =>
+              setFormData({ ...formData, company: e.target.value })
+            }
+          />
+          <TextField
+            id="testimonial-period"
+            label="Period"
+            helper="e.g. Mar — Jul 2025"
+            placeholder="Mar — Jul 2025"
+            value={formData.period}
+            onChange={(e) =>
+              setFormData({ ...formData, period: e.target.value })
+            }
+          />
+          <TextField
+            id="testimonial-avatar"
+            label="Avatar URL"
+            placeholder="https://…"
+            value={formData.avatar}
+            onChange={(e) =>
+              setFormData({ ...formData, avatar: e.target.value })
+            }
+            className="font-mono text-xs"
+          />
         </div>
       </ModalSection>
 
@@ -147,20 +149,14 @@ export default function TestimonialDialog({
           hint="Endorsement = quote-only card. Voices = video testimonial slot."
         >
           <Select
+            options={DISPLAY_SLOT_OPTIONS}
             value={formData.displaySlot}
-            onValueChange={(value: DisplaySlot) =>
-              setFormData({ ...formData, displaySlot: value })
+            onChange={(value) =>
+              setFormData({ ...formData, displaySlot: value as DisplaySlot })
             }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Hidden</SelectItem>
-              <SelectItem value="endorsement">Endorsement</SelectItem>
-              <SelectItem value="voices">Voices</SelectItem>
-            </SelectContent>
-          </Select>
+            placeholder="Choose placement"
+            ariaLabel="Display slot"
+          />
         </FormField>
       </ModalSection>
 
@@ -178,10 +174,12 @@ export default function TestimonialDialog({
                 aria-label={`Set rating to ${star}`}
               >
                 <Star
+                  size={24}
+                  weight={star <= (hoverRating || formData.rating) ? "fill" : "regular"}
                   className={cn(
-                    "h-6 w-6 transition-colors duration-150",
+                    "transition-colors duration-150",
                     star <= (hoverRating || formData.rating)
-                      ? "fill-star text-star"
+                      ? "text-amber-500"
                       : "text-foreground/15",
                   )}
                 />
@@ -193,17 +191,15 @@ export default function TestimonialDialog({
           </div>
         </FormField>
 
-        <FormField
+        <Textarea
+          id="testimonial-quote"
           label="Quote"
-          hint="Optional — leave blank if using a video testimonial."
-        >
-          <Textarea
-            placeholder="Excellent work — professional and delivered on time…"
-            value={formData.text}
-            onChange={(e) => setFormData({ ...formData, text: e.target.value })}
-            rows={5}
-          />
-        </FormField>
+          helper="Optional — leave blank if using a video testimonial."
+          placeholder="Excellent work — professional and delivered on time…"
+          value={formData.text}
+          onChange={(e) => setFormData({ ...formData, text: e.target.value })}
+          minRows={5}
+        />
       </ModalSection>
 
       <ModalSection title="Video">
@@ -220,3 +216,4 @@ export default function TestimonialDialog({
     </PortfolioModalFrame>
   );
 }
+

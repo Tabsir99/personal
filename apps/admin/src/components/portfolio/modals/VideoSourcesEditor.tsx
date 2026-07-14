@@ -1,9 +1,9 @@
 import { useRef } from "react";
-import { ArrowDown, ArrowUp, Film, Plus, Upload, X } from "lucide-react";
+import { ArrowDown, ArrowUp, VideoCamera, Plus, Upload, X } from "@phosphor-icons/react";
 
 import { videoSourceType, type VideoSource } from "@tabsircg/schemas/portfolio";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { TextField } from "premium-ds/text-field";
+import { Button } from "premium-ds/button";
 
 // Map a file/URL to the <source type> the browser uses to pick a codec.
 function typeFromName(name: string): string {
@@ -15,9 +15,6 @@ function typeFromName(name: string): string {
   return "";
 }
 
-// Edits a video's ordered source list. Upload (multi-file, blob: + auto type)
-// or paste a URL; uploaded blobs are swapped for public URLs on save by
-// extractAndUploadBlobs. List most-efficient first.
 export function VideoSourcesEditor({
   value,
   onChange,
@@ -43,8 +40,6 @@ export function VideoSourcesEditor({
   return (
     <div className="flex flex-col gap-2">
       {playable.length > 0 && (
-        // Render every source so the browser previews whichever codec it
-        // supports; `key` on the sources forces a reload when URLs change.
         <video
           key={playable.map((s) => s.url).join("|")}
           muted
@@ -69,8 +64,9 @@ export function VideoSourcesEditor({
               {s.filename}
             </span>
           )}
-          <div className="grid grid-cols-[1fr_104px_148px_auto] gap-2">
-            <Input
+          <div className="grid grid-cols-[1fr_104px_148px_auto] gap-2 items-center">
+            <TextField
+              id={`video-url-${i}`}
               placeholder="https://… or upload"
               value={s.url}
               onChange={(e) => {
@@ -83,55 +79,54 @@ export function VideoSourcesEditor({
               }}
               className="font-mono text-xs"
             />
-            <Input
+            <TextField
+              id={`video-type-${i}`}
               placeholder="video/mp4"
               value={s.type}
               onChange={(e) => update(i, { type: e.target.value })}
               className="font-mono text-xs"
             />
-            <Input
+            <TextField
+              id={`video-codec-${i}`}
               placeholder='codecs e.g. avc1.42E01E'
               value={s.codec}
               onChange={(e) => update(i, { codec: e.target.value })}
               className="font-mono text-xs"
             />
-            <div className="flex items-center self-center">
+            <div className="flex items-center self-center gap-0.5">
               {value.length > 1 && (
                 <>
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon-sm"
+                    size="sm"
                     onClick={() => move(i, -1)}
                     disabled={i === 0}
                     className="text-muted-foreground hover:text-foreground"
                     aria-label="Move source up"
-                  >
-                    <ArrowUp className="h-3.5 w-3.5" />
-                  </Button>
+                    iconLeft={<ArrowUp size={14} />}
+                  />
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon-sm"
+                    size="sm"
                     onClick={() => move(i, 1)}
                     disabled={i === value.length - 1}
                     className="text-muted-foreground hover:text-foreground"
                     aria-label="Move source down"
-                  >
-                    <ArrowDown className="h-3.5 w-3.5" />
-                  </Button>
+                    iconLeft={<ArrowDown size={14} />}
+                  />
                 </>
               )}
               <Button
                 type="button"
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => remove(i)}
                 className="text-muted-foreground hover:bg-destructive/8 hover:text-destructive"
                 aria-label="Remove source"
-              >
-                <X className="h-3.5 w-3.5" />
-              </Button>
+                iconLeft={<X size={14} />}
+              />
             </div>
           </div>
         </div>
@@ -163,31 +158,31 @@ export function VideoSourcesEditor({
       <div className="flex gap-2">
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           size="sm"
           onClick={() => fileRef.current?.click()}
           className="flex-1 text-muted-foreground hover:text-foreground"
+          iconLeft={<Upload size={14} />}
         >
-          <Upload className="h-3.5 w-3.5" />
           Upload video(s)
         </Button>
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           size="sm"
           onClick={() =>
             onChange([...value, { url: "", type: "", codec: "", filename: "" }])
           }
           className="flex-1 text-muted-foreground hover:text-foreground"
+          iconLeft={<Plus size={14} />}
         >
-          <Plus className="h-3.5 w-3.5" />
           Add URL
         </Button>
       </div>
 
       {value.length === 0 && (
         <p className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Film className="h-3.5 w-3.5 shrink-0" />
+          <VideoCamera size={14} className="shrink-0" />
           Add encoded files (e.g. webm + mp4). The browser downloads only the
           most efficient codec it supports.
         </p>
@@ -195,3 +190,4 @@ export function VideoSourcesEditor({
     </div>
   );
 }
+

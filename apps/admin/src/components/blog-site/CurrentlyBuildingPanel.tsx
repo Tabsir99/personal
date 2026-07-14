@@ -1,12 +1,12 @@
 "use client";
 
 import { useShallow } from "zustand/react/shallow";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useSiteConfigStore } from "@/stores/SiteConfigStore";
 import Panel from "./Panel";
 import Field from "./Field";
 import HeightTransition from "./HeightTransition";
+import { TextField } from "premium-ds/text-field";
+import { Textarea } from "premium-ds/textarea";
 
 export default function CurrentlyBuildingPanel() {
   const { draft, initial } = useSiteConfigStore(
@@ -29,7 +29,7 @@ export default function CurrentlyBuildingPanel() {
       <div className="grid gap-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[140px_minmax(0,1fr)]">
           <Field label="Code" edited={edited("code")}>
-            <Input
+            <TextField
               value={draft.code}
               onChange={(e) => setCurrentlyBuilding({ code: e.target.value })}
               placeholder="tinypg"
@@ -40,15 +40,15 @@ export default function CurrentlyBuildingPanel() {
               value={draft.body}
               onChange={(e) => setCurrentlyBuilding({ body: e.target.value })}
               placeholder="One-line description shown beside the code."
-              rows={2}
-              className="resize-none leading-relaxed"
+              minRows={2}
+              maxRows={4}
             />
           </Field>
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_1fr]">
           <Field label="Link label" edited={edited("linkLabel")}>
-            <Input
+            <TextField
               value={draft.linkLabel}
               onChange={(e) =>
                 setCurrentlyBuilding({ linkLabel: e.target.value })
@@ -57,7 +57,7 @@ export default function CurrentlyBuildingPanel() {
             />
           </Field>
           <Field label="Link href" edited={edited("linkHref")}>
-            <Input
+            <TextField
               value={draft.linkHref}
               onChange={(e) =>
                 setCurrentlyBuilding({ linkHref: e.target.value })

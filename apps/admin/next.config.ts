@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@tabsircg/schemas"],
+  transpilePackages: ["@tabsircg/schemas", "premium-ds"],
   logging: { serverFunctions: false },
   devIndicators: false,
   /* config options here */

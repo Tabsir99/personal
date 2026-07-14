@@ -1,13 +1,9 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
-import { FaImages, FaUpload } from "react-icons/fa6";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Images, UploadSimple } from "@phosphor-icons/react";
+import { Dialog } from "premium-ds/dialog";
+import { Button } from "premium-ds/button";
 import { callWithToast, cn } from "@/lib/utils";
 import Img from "../ui/image";
 import useUIStore from "@/stores/UIStore";
@@ -28,7 +24,6 @@ export default function ThumbnailModal() {
 
   const closeModal = useUIStore().closeAllModals;
 
-  // The Dialog stays mounted, so re-sync state when reopened for a different blog.
   useEffect(() => {
     setSelectedFile(null);
     setPreviewUrl(data?.thumbnailUrl ?? null);
@@ -99,68 +94,15 @@ export default function ThumbnailModal() {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="sm:max-w-3xl shadow-lg">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
-            Cover image
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="my-6">
-          <div
-            className={cn(
-              "group relative cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-border transition-all hover:border-border/80",
-              previewUrl ? "h-96" : "h-64",
-            )}
-          >
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="absolute inset-0 cursor-pointer opacity-0 z-10"
-              id="thumbnail-upload"
-            />
-
-            {previewUrl ? (
-              <div className="relative h-full w-full">
-                <Img
-                  src={previewUrl}
-                  alt="Thumbnail Preview"
-                  className="h-full w-full object-cover transition-opacity"
-                />
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/60 opacity-0 transition-opacity group-hover:opacity-100">
-                  <FaUpload size={32} className="mb-2 text-background" />
-                  <p className="font-medium text-background">
-                    Click to replace image
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex h-full flex-col items-center justify-center p-6">
-                <FaImages size={48} className="mb-3 text-muted-foreground" />
-                <p className="mb-2 text-center font-medium text-foreground">
-                  Drag and drop or click to upload
-                </p>
-                <p className="text-center text-sm text-muted-foreground">
-                  Recommended: 1200 × 630px or larger (16:9 ratio)
-                </p>
-              </div>
-            )}
-          </div>
-
-          {selectedFile && (
-            <p className="mt-2 text-sm text-muted-foreground">
-              Selected: {selectedFile.name} (
-              {Math.round(selectedFile.size / 1024)} KB)
-            </p>
-          )}
-        </div>
-
-        <DialogFooter className="flex flex-col sm:flex-row gap-2">
+    <Dialog
+      open={isOpen}
+      onOpenChange={closeModal}
+      title="Cover image"
+      footer={
+        <div className="flex flex-col sm:flex-row gap-2 justify-end w-full">
           {selectedFile && (
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={resetSelection}
               className="w-full sm:w-auto"
             >
@@ -169,27 +111,71 @@ export default function ThumbnailModal() {
           )}
           <Button
             onClick={handleSubmit}
-            disabled={!selectedFile || isLoading}
-            className="w-full sm:w-auto disabled:bg-muted disabled:text-muted-foreground"
+            disabled={!selectedFile}
+            loading={isLoading}
+            className="w-full sm:w-auto"
           >
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
-                Updating...
-              </span>
-            ) : (
-              "Save"
-            )}
+            Save
           </Button>
           <Button
             onClick={closeModal}
-            variant="outline"
+            variant="secondary"
             className="w-full sm:w-auto"
           >
             Cancel
           </Button>
-        </DialogFooter>
-      </DialogContent>
+        </div>
+      }
+    >
+      <div className="my-6">
+        <div
+          className={cn(
+            "group relative cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-border transition-all hover:border-border/80",
+            previewUrl ? "h-96" : "h-64",
+          )}
+        >
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            className="absolute inset-0 cursor-pointer opacity-0 z-10"
+            id="thumbnail-upload"
+          />
+
+          {previewUrl ? (
+            <div className="relative h-full w-full">
+              <Img
+                src={previewUrl}
+                alt="Thumbnail Preview"
+                className="h-full w-full object-cover transition-opacity"
+              />
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/60 opacity-0 transition-opacity group-hover:opacity-100">
+                <UploadSimple size={32} className="mb-2 text-background" />
+                <p className="font-medium text-background">
+                  Click to replace image
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center p-6">
+              <Images size={48} className="mb-3 text-muted-foreground" />
+              <p className="mb-2 text-center font-medium text-foreground">
+                Drag and drop or click to upload
+              </p>
+              <p className="text-center text-sm text-muted-foreground">
+                Recommended: 1200 × 630px or larger (16:9 ratio)
+              </p>
+            </div>
+          )}
+        </div>
+
+        {selectedFile && (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Selected: {selectedFile.name} (
+            {Math.round(selectedFile.size / 1024)} KB)
+          </p>
+        )}
+      </div>
     </Dialog>
   );
 }

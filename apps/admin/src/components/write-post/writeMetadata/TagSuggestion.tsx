@@ -1,4 +1,4 @@
-import { Minus, Plus, X } from "lucide-react";
+import { Minus, Plus, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 interface TagSuggestionsProps {
@@ -60,6 +60,7 @@ export function TagSuggestions({
   );
 }
 
+// Keep comments descriptive of what the code does now.
 function SuggestionRow({
   eyebrow,
   count,
@@ -115,7 +116,7 @@ function SuggestedChip({
         )}
         aria-label={isAdd ? `Add tag: ${tag}` : `Remove tag: ${tag}`}
       >
-        <Icon className="h-3 w-3" strokeWidth={2.5} />
+        <Icon size={12} weight="bold" />
         <span
           className={cn(!isAdd && "line-through decoration-destructive/20")}
         >
@@ -133,8 +134,9 @@ function SuggestedChip({
         )}
         aria-label={isAdd ? `Skip adding ${tag}` : `Keep ${tag}`}
       >
-        <X className="h-3 w-3" strokeWidth={2} />
+        <X size={12} weight="bold" />
       </button>
     </div>
   );
 }
+

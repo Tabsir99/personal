@@ -1,8 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "premium-ds/button";
+import { TextField } from "premium-ds/text-field";
+import { Textarea } from "premium-ds/textarea";
 import { Kbd } from "@/components/ui/Kbd";
 import { cn } from "@/lib/utils";
+import { Check, X } from "@phosphor-icons/react";
 import {
   useState,
   type ChangeEvent,
@@ -20,9 +21,6 @@ type Phase = "idle" | "accepting" | "applied" | "dismissed";
 type PressedKey = "tab" | "esc" | null;
 
 export interface SuggestionFieldProps {
-  // Each `| undefined` is explicit so this compiles cleanly under
-  // `exactOptionalPropertyTypes: true` when callers pass values coming from
-  // chains like `result?.suggestion`.
   id?: string | undefined;
   type?: string | undefined;
   helperText?: ReactNode;
@@ -36,12 +34,6 @@ export interface SuggestionFieldProps {
   multiLine?: boolean | undefined;
 }
 
-// SuggestionField — reusable controlled input with attached suggestion strip.
-//
-// Parent owns `value` and `suggested`. When `suggested` differs from `value`,
-// the input's text is rendered with rose tint + strikethrough to signal "this
-// will be replaced", and the strip shows the proposed replacement. Tab accepts
-// (calls onChange(suggested)); Esc dismisses until the suggested prop changes.
 export function SuggestionField({
   id,
   type = "text",
@@ -116,27 +108,39 @@ export function SuggestionField({
   const striking = activeSuggestion != null && phase === "idle";
   const applyingOrApplied = phase === "accepting" || phase === "applied";
 
-  const As = multiLine ? Textarea : Input;
-
   return (
     <div className={`w-full ${className}`}>
       <div className="bg-background ring-1 ring-border/50 focus-within:ring-border focus-within:ring-2 focus-within:ring-offset-2 rounded-lg overflow-hidden transition-all duration-200">
-        <As
-          id={id}
-          type={type}
-          placeholder={placeholder}
-          value={value ?? ""}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          className={cn(
-            "border-none focus-visible:ring-0",
-            striking &&
-              "text-muted-foreground line-through decoration-muted-foreground/50",
-          )}
-        />
+        {multiLine ? (
+          <Textarea
+            id={id}
+            placeholder={placeholder}
+            value={value ?? ""}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            className={cn(
+              "w-full bg-transparent border-none [&_.txa]:border-none [&_.txa]:bg-transparent [&_.txa]:shadow-none [&_.txa\_\_input]:bg-transparent [&_.txa\_\_input]:focus:ring-0 [&_.txa\_\_input]:focus:shadow-none",
+              striking &&
+                "[&_.txa\_\_input]:text-muted-foreground [&_.txa\_\_input]:line-through [&_.txa\_\_input]:decoration-muted-foreground/50 [&_.txa\_\_mirror]:text-muted-foreground [&_.txa\_\_mirror]:line-through [&_.txa\_\_mirror]:decoration-muted-foreground/50",
+            )}
+          />
+        ) : (
+          <TextField
+            id={id}
+            type={type}
+            placeholder={placeholder}
+            value={value ?? ""}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            className={cn(
+              "w-full bg-transparent border-none [&_.fld\_\_input]:border-none [&_.fld\_\_input]:bg-transparent [&_.fld\_\_input]:focus:ring-0 [&_.fld\_\_input]:focus:shadow-none [&_.fld\_\_input]:focus:bg-transparent",
+              striking &&
+                "[&_.fld\_\_input]:text-muted-foreground [&_.fld\_\_input]:line-through [&_.fld\_\_input]:decoration-muted-foreground/50",
+            )}
+          />
+        )}
 
         {/* Suggestion strip — slides in/out on max-height */}
-
         <div
           className={cn(
             "px-3 h-8 flex items-center justify-between text-xs transition-all duration-300 ease-out bg-muted/40 border-t border-border/50",
@@ -145,35 +149,12 @@ export function SuggestionField({
         >
           {applyingOrApplied ? (
             <div className="flex items-center gap-2 py-1 text-success">
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 12 12"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="2.5 6.5 5 9 9.5 3.5" />
-              </svg>
+              <Check size={12} weight="bold" />
               <span>Applied</span>
             </div>
           ) : phase === "dismissed" ? (
             <div className="flex items-center gap-2 py-1 text-muted-foreground">
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 12 12"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="3" y1="3" x2="9" y2="9" />
-                <line x1="9" y1="3" x2="3" y2="9" />
-              </svg>
+              <X size={12} weight="bold" />
               <span>Dismissed</span>
             </div>
           ) : activeSuggestion != null ? (
@@ -212,3 +193,4 @@ export function SuggestionField({
     </div>
   );
 }
+

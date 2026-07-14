@@ -1,21 +1,10 @@
 "use client";
-import { useState } from "react";
-import {
-  FaTwitter,
-  FaFacebook,
-  FaLinkedin,
-  FaReddit,
-} from "react-icons/fa";
-import { Check, Link2 } from "lucide-react";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { Check, Link, TwitterLogo, FacebookLogo, LinkedinLogo, RedditLogo } from "@phosphor-icons/react";
+
+import { Dialog } from "premium-ds/dialog";
+import { Button } from "premium-ds/button";
 import { Kbd } from "@/components/ui/Kbd";
 import useUIStore from "@/stores/UIStore";
 import { useShallow } from "zustand/shallow";
@@ -35,28 +24,28 @@ const BlogShareModal = () => {
   const platforms = [
     {
       name: "Twitter",
-      Icon: FaTwitter,
+      Icon: TwitterLogo,
       link: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
         `${url}?utm_source=twitter`,
       )}${title ? `&text=${encodeURIComponent(title)}` : ""}`,
     },
     {
       name: "Facebook",
-      Icon: FaFacebook,
+      Icon: FacebookLogo,
       link: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
         `${url}?utm_source=facebook`,
       )}`,
     },
     {
       name: "LinkedIn",
-      Icon: FaLinkedin,
+      Icon: LinkedinLogo,
       link: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
         `${url}?utm_source=linkedin`,
       )}`,
     },
     {
       name: "Reddit",
-      Icon: FaReddit,
+      Icon: RedditLogo,
       link: `https://reddit.com/submit?url=${encodeURIComponent(
         `${url}?utm_source=reddit`,
       )}${title ? `&title=${encodeURIComponent(title)}` : ""}`,
@@ -84,64 +73,56 @@ const BlogShareModal = () => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader className="space-y-1.5">
-          <DialogTitle className="text-xl font-semibold tracking-tight">
-            Share {title ? `"${title}"` : "post"}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6 pt-2">
-          <div className="space-y-2.5">
-            <div className="grid grid-cols-2 gap-2">
-              {platforms.map(({ name, Icon, link }) => (
-                <Button
-                  key={name}
-                  onClick={() => handlePlatformClick(link)}
-                  variant="outline"
-                  size="lg"
-                  className="h-11 justify-start gap-3 text-sm font-medium"
-                >
-                  <Icon size={16} aria-hidden="true" />
-                  <span>{name}</span>
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2.5">
-            <div className="flex items-center gap-2">
-              <Input
-                value={url}
-                readOnly
-                className="flex-1 font-mono text-xs"
-              />
+    <Dialog
+      open={isOpen}
+      onOpenChange={closeModal}
+      title={title ? `Share "${title}"` : "Share post"}
+    >
+      <div className="space-y-6 pt-2">
+        <div className="space-y-2.5">
+          <div className="grid grid-cols-2 gap-2">
+            {platforms.map(({ name, Icon, link }) => (
               <Button
-                onClick={copyToClipboard}
-                variant={copySuccess ? "default" : "outline"}
-                size="default"
-                className="shrink-0 gap-1.5"
+                key={name}
+                onClick={() => handlePlatformClick(link)}
+                variant="secondary"
+                size="lg"
+                className="h-11 justify-start gap-3 text-sm font-medium"
+                iconLeft={<Icon size={16} aria-hidden="true" />}
               >
-                {copySuccess ? (
-                  <>
-                    <Check className="h-3.5 w-3.5" />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <Link2 className="h-3.5 w-3.5" />
-                    Copy
-                    <Kbd size="sm" className="ml-1">
-                      ⌘C
-                    </Kbd>
-                  </>
-                )}
+                <span>{name}</span>
               </Button>
-            </div>
+            ))}
           </div>
         </div>
-      </DialogContent>
+
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-2">
+            <input
+              value={url}
+              readOnly
+              className="w-full h-9 px-3 bg-muted/40 text-xs font-mono rounded-md border border-border outline-none focus:border-primary flex-1"
+            />
+            <Button
+              onClick={copyToClipboard}
+              variant={copySuccess ? "primary" : "secondary"}
+              className="shrink-0 gap-1.5 min-h-[36px]"
+              iconLeft={copySuccess ? <Check size={14} /> : <Link size={14} />}
+            >
+              {copySuccess ? (
+                "Copied"
+              ) : (
+                <>
+                  Copy
+                  <Kbd size="sm" className="ml-1">
+                    ⌘C
+                  </Kbd>
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
     </Dialog>
   );
 };

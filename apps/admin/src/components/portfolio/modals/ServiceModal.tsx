@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, X } from "@phosphor-icons/react";
 
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { FormField } from "@/components/ui/FormField";
+import { TextField } from "premium-ds/text-field";
+import { Textarea } from "premium-ds/textarea";
+import { Button } from "premium-ds/button";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { PageData } from "@tabsircg/schemas/portfolio";
 
@@ -96,74 +95,77 @@ export default function ServiceDialog({
       size="md"
       title={isUpdating ? formData.title || "Edit service" : "Add service"}
       description="A framed offering shown on the portfolio landing page."
-      footer={
+      footer={(close) => (
         <PortfolioModalActions
           onSubmit={handleSubmit}
           submitDisabled={!formData.title}
           submitLabel="Add service"
           updateLabel="Save changes"
           isUpdating={isUpdating}
-          submitIcon={<Plus className="h-3.5 w-3.5" />}
+          submitIcon={<Plus size={14} />}
+          close={close}
         />
-      }
+      )}
     >
       <ModalSection title="Basics">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <FormField label="Label" hint="Short eyebrow above the title.">
-            <Input
-              placeholder="Build"
-              value={formData.label}
-              onChange={(e) =>
-                setFormData({ ...formData, label: e.target.value })
-              }
-            />
-          </FormField>
-          <FormField label="Title" hint="Multi-line with \n.">
-            <Input
-              placeholder="Full-stack delivery"
-              value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
-            />
-          </FormField>
-        </div>
-        <FormField label="Description">
-          <Textarea
-            placeholder="What you do here, in one paragraph."
-            value={formData.desc}
-            onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
-            rows={4}
+          <TextField
+            id="service-label"
+            label="Label"
+            helper="Short eyebrow above the title."
+            placeholder="Build"
+            value={formData.label}
+            onChange={(e) =>
+              setFormData({ ...formData, label: e.target.value })
+            }
           />
-        </FormField>
+          <TextField
+            id="service-title"
+            label="Title"
+            helper="Multi-line with \n."
+            placeholder="Full-stack delivery"
+            value={formData.title}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
+          />
+        </div>
+        <Textarea
+          id="service-desc"
+          label="Description"
+          placeholder="What you do here, in one paragraph."
+          value={formData.desc}
+          onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
+          minRows={4}
+        />
       </ModalSection>
 
       <ModalSection title="Frame">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <FormField label="Frame label">
-            <Input
-              placeholder="Full-stack delivery"
-              value={formData.frameLabel}
-              onChange={(e) =>
-                setFormData({ ...formData, frameLabel: e.target.value })
-              }
-            />
-          </FormField>
-          <FormField label="Frame title">
-            <Input
-              placeholder="Build"
-              value={formData.frameTitle}
-              onChange={(e) =>
-                setFormData({ ...formData, frameTitle: e.target.value })
-              }
-            />
-          </FormField>
+          <TextField
+            id="service-frame-label"
+            label="Frame label"
+            placeholder="Full-stack delivery"
+            value={formData.frameLabel}
+            onChange={(e) =>
+              setFormData({ ...formData, frameLabel: e.target.value })
+            }
+          />
+          <TextField
+            id="service-frame-title"
+            label="Frame title"
+            placeholder="Build"
+            value={formData.frameTitle}
+            onChange={(e) =>
+              setFormData({ ...formData, frameTitle: e.target.value })
+            }
+          />
         </div>
       </ModalSection>
 
       <ModalSection title="Deliverables">
         {formData.items.length > 0 && (
-          <ul className="flex flex-col gap-1.5">
+          <ul className="flex flex-col gap-1.5 mb-3">
             {formData.items.map((item, i) => (
               <li
                 key={i}
@@ -173,19 +175,19 @@ export default function ServiceDialog({
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon-sm"
+                  size="sm"
                   onClick={() => handleRemoveItem(i)}
                   className="text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/item:opacity-100 focus-visible:opacity-100"
                   aria-label={`Remove ${item}`}
-                >
-                  <X className="h-3.5 w-3.5" />
-                </Button>
+                  iconLeft={<X size={14} />}
+                />
               </li>
             ))}
           </ul>
         )}
         <div className="flex gap-2">
-          <Input
+          <TextField
+            id="service-new-deliverable"
             placeholder="Add a deliverable…"
             value={newItem}
             onChange={(e) => setNewItem(e.target.value)}
@@ -195,13 +197,15 @@ export default function ServiceDialog({
                 handleAddItem();
               }
             }}
+            className="flex-1"
           />
           <Button
             type="button"
             onClick={handleAddItem}
             disabled={!newItem.trim()}
+            iconLeft={<Plus size={14} />}
+            variant="secondary"
           >
-            <Plus className="h-3.5 w-3.5" />
             Add
           </Button>
         </div>
@@ -209,3 +213,4 @@ export default function ServiceDialog({
     </PortfolioModalFrame>
   );
 }
+
