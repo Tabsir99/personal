@@ -66,7 +66,7 @@ export default function NowReadingPanel() {
           variant="secondary"
           size="sm"
           onClick={() => useSiteConfigStore.getState().addNowReading()}
-          className="transition-transform active:scale-[0.97]"
+          className="transition-transform active:scale-95"
           iconLeft={<Plus size={14} />}
         >
           Add book
@@ -95,7 +95,7 @@ export default function NowReadingPanel() {
             const anyEdited = titleEdited || authorEdited;
             return (
               <RowShell key={id} isLeaving={isLeaving} isNew={isNew}>
-                <div className="group relative grid grid-cols-[auto_minmax(0,1.4fr)_minmax(0,1fr)_auto] items-center gap-3 border-b border-foreground/5 py-3 last:border-b-0 pl-2">
+                <div className="group relative grid grid-cols-[auto_minmax(0,1.4fr)_minmax(0,1fr)_auto] items-center gap-3 border-b border-foreground/5 py-3 pl-2 last:border-b-0">
                   <span
                     aria-hidden
                     className={[
@@ -224,8 +224,8 @@ function IconBtn({
       title={label}
       className={
         destructive
-          ? "text-foreground/60 hover:bg-destructive/10 hover:text-destructive p-1 min-w-0"
-          : "text-foreground/60 p-1 min-w-0"
+          ? "min-w-0 p-1 text-foreground/60 hover:bg-destructive/10 hover:text-destructive"
+          : "min-w-0 p-1 text-foreground/60"
       }
     >
       {children}

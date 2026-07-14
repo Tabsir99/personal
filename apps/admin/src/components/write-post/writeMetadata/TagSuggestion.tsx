@@ -77,7 +77,9 @@ function SuggestionRow({
           {eyebrow}
         </span>
         <span className="text-xs text-muted-foreground/50">·</span>
-        <span className="text-xs tabular-nums text-muted-foreground">{count}</span>
+        <span className="text-xs text-muted-foreground tabular-nums">
+          {count}
+        </span>
       </div>
       <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>
@@ -111,7 +113,7 @@ function SuggestedChip({
         type="button"
         onClick={onAccept}
         className={cn(
-          "flex items-center gap-1 py-0.5 pl-2 pr-2 transition-colors",
+          "flex items-center gap-1 px-2 py-0.5 transition-colors",
           isAdd ? "hover:bg-primary/10" : "hover:bg-destructive/10",
         )}
         aria-label={isAdd ? `Add tag: ${tag}` : `Remove tag: ${tag}`}
@@ -139,4 +141,3 @@ function SuggestedChip({
     </div>
   );
 }
-

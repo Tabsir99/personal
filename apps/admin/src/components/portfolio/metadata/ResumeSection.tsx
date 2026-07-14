@@ -79,7 +79,7 @@ export default function ResumeSection() {
 
   return (
     <div className="rounded-lg border border-border bg-card">
-      <div className="flex flex-col gap-1 pt-5 pb-3 px-6">
+      <div className="flex flex-col gap-1 px-6 pt-5 pb-3">
         <h2 className="text-base leading-tight font-semibold tracking-tight">
           Resume / CV
         </h2>
@@ -87,10 +87,10 @@ export default function ResumeSection() {
           The PDF served by the “Download CV” button in the site header.
         </p>
       </div>
-      <div className="pt-1 pb-5 px-6">
+      <div className="px-6 pt-1 pb-5">
         {resume.url ? (
           <div className="flex items-center gap-3 rounded-lg border border-foreground/8 bg-foreground/2 p-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/8 text-primary">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/8 text-primary">
               <FilePdf size={20} />
             </div>
             <div className="min-w-0 flex-1">
@@ -135,7 +135,7 @@ export default function ResumeSection() {
             disabled={uploading}
             className="group flex w-full flex-col items-center rounded-lg border-2 border-dashed border-border p-8 text-center transition-all hover:border-primary/40 hover:bg-accent/30 disabled:pointer-events-none disabled:opacity-60"
           >
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+            <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
               {uploading ? (
                 <CircleNotch size={20} className="animate-spin" />
               ) : (

@@ -131,7 +131,7 @@ export function ConfigMultiSelect({
         }
       >
         {({ close }) => (
-          <div className="flex flex-col p-2 w-64 bg-popover text-popover-foreground rounded-lg border border-border shadow-dialog space-y-2 max-h-80 overflow-hidden">
+          <div className="flex max-h-80 w-64 flex-col space-y-2 overflow-hidden rounded-lg border border-border bg-popover p-2 text-popover-foreground shadow-dialog">
             <TextField
               placeholder={searchPlaceholder}
               value={search}
@@ -140,13 +140,13 @@ export function ConfigMultiSelect({
               autoFocus
             />
             
-            <div className="flex-1 overflow-y-auto space-y-1 pr-1">
+            <div className="flex-1 space-y-1 overflow-y-auto pr-1">
               {loading ? (
                 <div className="space-y-1">
                   {[0, 1, 2].map((i) => (
                     <div
                       key={i}
-                      className="h-7 rounded bg-muted/50 animate-pulse"
+                      className="h-7 animate-pulse rounded-md bg-muted/50"
                       style={{ animationDelay: `${i * 100}ms` }}
                     />
                   ))}
@@ -155,7 +155,7 @@ export function ConfigMultiSelect({
                 <>
                   {filteredUnselected.length > 0 ? (
                     <div className="space-y-0.5">
-                      <div className="text-[10px] font-semibold text-muted-foreground px-2 py-1 uppercase tracking-wider">
+                      <div className="px-2 py-1 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                         Existing
                       </div>
                       {filteredUnselected.map((item) => (
@@ -163,7 +163,7 @@ export function ConfigMultiSelect({
                           key={item}
                           type="button"
                           onClick={() => handleSelect(item, close)}
-                          className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-sm hover:bg-foreground/4 rounded-md transition-colors cursor-pointer text-foreground"
+                          className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-foreground/4"
                         >
                           {ItemIcon && <ItemIcon className="shrink-0 text-muted-foreground" size={14} />}
                           <span>{item}</span>
@@ -172,7 +172,7 @@ export function ConfigMultiSelect({
                     </div>
                   ) : (
                     !canCreate && (
-                      <div className="text-center text-xs text-muted-foreground py-3">
+                      <div className="py-3 text-center text-xs text-muted-foreground">
                         No matches.
                       </div>
                     )
@@ -181,7 +181,7 @@ export function ConfigMultiSelect({
                     <button
                       type="button"
                       onClick={() => handleCreate(close)}
-                      className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-sm hover:bg-primary/10 text-primary rounded-md transition-colors cursor-pointer font-medium"
+                      className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm font-medium text-primary transition-colors hover:bg-primary/10"
                     >
                       <Plus size={14} className="shrink-0" />
                       <span>Create &quot;{normalized}&quot;</span>
@@ -195,13 +195,13 @@ export function ConfigMultiSelect({
       </Popover>
 
       {showPills && (
-        <div className="flex flex-wrap gap-2 animate-in fade-in duration-200">
+        <div className="flex animate-in flex-wrap gap-2 duration-200 fade-in">
           {value.map((item) => (
             <span
               key={item}
               className="inline-flex items-stretch overflow-hidden rounded-full border border-border bg-muted text-xs font-medium text-foreground"
             >
-              <span className="flex items-center gap-1 py-1 pl-2.5 pr-1.5">
+              <span className="flex items-center gap-1 py-1 pr-1.5 pl-2.5">
                 {ItemIcon && (
                   <ItemIcon className="text-muted-foreground" size={12} />
                 )}
@@ -211,7 +211,7 @@ export function ConfigMultiSelect({
                 type="button"
                 onClick={() => handleRemove(item)}
                 aria-label={`Remove ${item}`}
-                className="flex items-center px-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive cursor-pointer"
+                className="flex cursor-pointer items-center px-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
               >
                 <X size={12} />
               </button>

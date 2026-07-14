@@ -90,7 +90,7 @@ const DashBoardSidebar = () => {
     <aside
       className={cn(
         "fixed top-0 left-0 z-30 flex h-screen flex-col border-r border-border bg-background/95 backdrop-blur-xl transition-[width,box-shadow] duration-200 ease-out",
-        expanded ? "w-56 shadow-card-rest" : "w-[72px]",
+        expanded ? "w-56 shadow-card-rest" : "w-18",
       )}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
@@ -142,7 +142,7 @@ const DashBoardSidebar = () => {
                 )}
                 <item.Icon
                   className={cn(
-                    "h-4 w-4 shrink-0 transition-colors",
+                    "size-4 shrink-0 transition-colors",
                     item.isActive
                       ? "text-primary"
                       : "text-muted-foreground/70 group-hover:text-foreground",
@@ -159,7 +159,7 @@ const DashBoardSidebar = () => {
         </ul>
       </nav>
 
-      <div className="flex shrink-0 flex-col gap-0.5 border-t border-border px-2 py-2">
+      <div className="flex shrink-0 flex-col gap-0.5 border-t border-border p-2">
         <button
           type="button"
           onClick={handleLogout}
@@ -171,7 +171,7 @@ const DashBoardSidebar = () => {
             expanded ? "gap-3 px-3" : "justify-center px-0",
           )}
         >
-          <SignOut className="h-4 w-4 shrink-0" />
+          <SignOut className="size-4 shrink-0" />
           {expanded && (
             <span className="flex-1 text-left text-sm font-medium">
               Sign out

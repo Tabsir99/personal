@@ -26,7 +26,7 @@ export default function Credentials() {
         </p>
       </header>
 
-      <div className="stagger-cascade-tight grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid stagger-cascade-tight grid-cols-1 gap-4 md:grid-cols-2">
         {credentials.map((c, index) => (
           <div
             key={c.title + index}
@@ -65,7 +65,7 @@ export default function Credentials() {
                       alt={c.title}
                       width={36}
                       height={36}
-                      className="h-9 w-9 shrink-0 rounded-md object-cover"
+                      className="size-9 shrink-0 rounded-md object-cover"
                     />
                   ) : (
                     <div className="rounded-md border border-primary/15 bg-primary/8 p-2 text-primary">
@@ -80,12 +80,12 @@ export default function Credentials() {
                 </div>
 
                 {c.link && (
-                  <div className="mt-auto flex items-center justify-end border-t border-foreground/6 pt-3 font-mono text-kbd text-muted-foreground">
+                  <div className="mt-auto flex items-center justify-end border-t border-foreground/6 pt-3 font-mono text-sm font-medium text-muted-foreground">
                     <a
                       href={c.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                     >
                       <span>Verify</span>
                       <ArrowSquareOut size={12} />

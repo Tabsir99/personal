@@ -25,7 +25,7 @@ export default function Field({
           {label}
         </FieldLabel>
         {hint && (
-          <span className="font-mono text-xs tabular-nums text-foreground/40">
+          <span className="font-mono text-xs text-foreground/40 tabular-nums">
             {hint}
           </span>
         )}
@@ -34,7 +34,7 @@ export default function Field({
         <span
           aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute -left-3 top-1 bottom-1 w-px bg-primary transition-opacity duration-160 ease-out",
+            "pointer-events-none absolute inset-y-1 -left-3 w-px bg-primary transition-opacity duration-160 ease-out",
             edited ? "opacity-100" : "opacity-0",
           )}
         />

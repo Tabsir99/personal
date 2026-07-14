@@ -46,7 +46,7 @@ export function VideoSourcesEditor({
           playsInline
           controls
           preload="metadata"
-          className="aspect-video w-full max-w-[260px] overflow-hidden rounded-md border border-foreground/8 bg-black object-cover"
+          className="aspect-video w-full max-w-65 overflow-hidden rounded-md border border-foreground/8 bg-[rgb(0,0,0)] object-cover"
         >
           {playable.map((s, i) => (
             <source key={i} src={s.url} type={videoSourceType(s) || undefined} />
@@ -64,7 +64,7 @@ export function VideoSourcesEditor({
               {s.filename}
             </span>
           )}
-          <div className="grid grid-cols-[1fr_104px_148px_auto] gap-2 items-center">
+          <div className="grid grid-cols-[1fr_104px_148px_auto] items-center gap-2">
             <TextField
               id={`video-url-${i}`}
               placeholder="https://… or upload"
@@ -93,7 +93,7 @@ export function VideoSourcesEditor({
               onChange={(e) => update(i, { codec: e.target.value })}
               className="font-mono text-xs"
             />
-            <div className="flex items-center self-center gap-0.5">
+            <div className="flex items-center gap-0.5 self-center">
               {value.length > 1 && (
                 <>
                   <Button

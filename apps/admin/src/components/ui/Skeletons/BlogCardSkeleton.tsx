@@ -1,8 +1,9 @@
 
 
+ 
 const Skeleton = ({ className }: { className?: string }) => {
   return (
-    <div className={`animate-pulse rounded bg-foreground/8 ${className || ""}`} />
+    <div className={`animate-pulse rounded-md bg-foreground/8 ${className || ""}`} />
   );
 };
 
@@ -16,8 +17,8 @@ const BlogCardSkeleton = () => {
             <Skeleton className="h-5 w-11/12" />
           </div>
           <div className="flex shrink-0 items-center gap-1">
-            <Skeleton className="h-8 w-8" />
-            <Skeleton className="h-8 w-8" />
+            <Skeleton className="size-8" />
+            <Skeleton className="size-8" />
           </div>
         </div>
       </div>
@@ -34,7 +35,7 @@ const BlogCardSkeleton = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 border-t border-foreground/6 px-6 pt-4 pb-4">
+      <div className="grid grid-cols-3 gap-4 border-t border-foreground/6 px-6 py-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="flex flex-col gap-1">
             <Skeleton className="h-3 w-10" />
@@ -48,14 +49,14 @@ const BlogCardSkeleton = () => {
 
 const DraftBlogCardSkeleton = () => {
   return (
-    <div className="tactile-lift rounded-lg border border-foreground/6 bg-card text-card-foreground shadow-card-rest">
+    <div className="rounded-lg border border-foreground/6 bg-card text-card-foreground shadow-card-rest tactile-lift">
       <div className="px-6 pt-5 pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <Skeleton className="h-7 w-3/4" />
             <Skeleton className="h-10 w-full" />
           </div>
-          <Skeleton className="h-8 w-8 shrink-0" />
+          <Skeleton className="size-8 shrink-0" />
         </div>
       </div>
 

@@ -36,7 +36,7 @@ export default function Testimonials() {
         </p>
       </header>
 
-      <div className="stagger-cascade-tight grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid stagger-cascade-tight grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {testimonials.map((t, index) => (
           <div
             key={t.name + index}
@@ -95,7 +95,7 @@ export default function Testimonials() {
                         />
                       ))}
                     </div>
-                    <span className="font-mono text-eyebrow tabular-nums text-muted-foreground/70">
+                    <span className="font-mono text-sm font-medium tracking-wider text-muted-foreground/70 uppercase tabular-nums">
                       {t.rating.toFixed(1)}
                     </span>
                   </div>
@@ -115,13 +115,13 @@ export default function Testimonials() {
                       {t.name}
                     </span>
                     {(t.company || t.period) && (
-                      <span className="truncate font-mono text-eyebrow tracking-wider text-muted-foreground">
+                      <span className="truncate font-mono text-sm font-medium tracking-wider tracking-wider text-muted-foreground uppercase">
                         {[t.company, t.period].filter(Boolean).join(" · ")}
                       </span>
                     )}
                   </div>
                   {t.video.length > 0 && (
-                    <Badge tone="neutral" className="gap-1 flex items-center">
+                    <Badge tone="neutral" className="flex items-center gap-1">
                       <VideoCamera size={12} />
                       Video
                     </Badge>

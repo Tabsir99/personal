@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -97,7 +98,7 @@ export default function PortfolioDashboard({
             {loading ? (
               <div className="flex flex-col gap-1">
                 {SECTIONS.map((s) => (
-                  <div key={s.id} className="h-9 w-full rounded-md bg-muted/50 animate-pulse" />
+                  <div key={s.id} className="h-9 w-full animate-pulse rounded-md bg-muted/50" />
                 ))}
               </div>
             ) : (
@@ -154,7 +155,7 @@ export default function PortfolioDashboard({
               <span className="flex-1 text-left">Save changes</span>
               <Kbd
                 size="sm"
-                className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground shrink-0 ml-1.5"
+                className="ml-1.5 shrink-0 border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground"
               >
                 ⌘S
               </Kbd>

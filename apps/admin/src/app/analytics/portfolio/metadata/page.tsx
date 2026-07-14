@@ -70,12 +70,12 @@ export default function PortfolioMetadata() {
       </header>
 
       <div className="rounded-lg border border-border bg-card">
-        <div className="flex flex-col gap-1 pt-5 pb-3 px-6">
+        <div className="flex flex-col gap-1 px-6 pt-5 pb-3">
           <h2 className="text-base leading-tight font-semibold tracking-tight">
             Title & description
           </h2>
         </div>
-        <div className="space-y-5 pt-1 pb-5 px-6">
+        <div className="space-y-5 px-6 pt-1 pb-5">
           <TextField
             id="site-title"
             label="Site title"
@@ -97,7 +97,7 @@ export default function PortfolioMetadata() {
       </div>
 
       <div className="rounded-lg border border-border bg-card">
-        <div className="flex flex-col gap-1 pt-5 pb-3 px-6">
+        <div className="flex flex-col gap-1 px-6 pt-5 pb-3">
           <h2 className="text-base leading-tight font-semibold tracking-tight">
             Studio
           </h2>
@@ -105,7 +105,7 @@ export default function PortfolioMetadata() {
             The identity line and address shown in the site footer.
           </p>
         </div>
-        <div className="space-y-5 pt-1 pb-5 px-6">
+        <div className="space-y-5 px-6 pt-1 pb-5">
           <TextField
             id="studio-name"
             label="Studio name"
@@ -127,7 +127,7 @@ export default function PortfolioMetadata() {
       </div>
 
       <div className="rounded-lg border border-border bg-card">
-        <div className="flex flex-col gap-1 pt-5 pb-3 px-6">
+        <div className="flex flex-col gap-1 px-6 pt-5 pb-3">
           <h2 className="text-base leading-tight font-semibold tracking-tight">
             About me
           </h2>
@@ -135,7 +135,7 @@ export default function PortfolioMetadata() {
             The short bio paragraph rendered alongside the headline stats.
           </p>
         </div>
-        <div className="pt-1 pb-5 px-6">
+        <div className="px-6 pt-1 pb-5">
           <Textarea
             id="about-bio"
             label="Bio"
@@ -149,7 +149,7 @@ export default function PortfolioMetadata() {
       </div>
 
       <div className="rounded-lg border border-border bg-card">
-        <div className="flex flex-col gap-1 pt-5 pb-3 px-6">
+        <div className="flex flex-col gap-1 px-6 pt-5 pb-3">
           <h2 className="text-base leading-tight font-semibold tracking-tight">
             Profile picture
           </h2>
@@ -157,16 +157,16 @@ export default function PortfolioMetadata() {
             The avatar that shows up next to the bio.
           </p>
         </div>
-        <div className="pt-1 pb-5 px-6">
+        <div className="px-6 pt-1 pb-5">
           <div className="group relative aspect-square w-48 overflow-hidden rounded-md border border-foreground/6 bg-foreground/2">
             {profilePicture ? (
               <Img
                 src={profilePicture}
                 alt="Profile picture"
-                className="h-full w-full object-cover"
+                className="size-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+              <div className="flex size-full items-center justify-center text-xs text-muted-foreground">
                 No image
               </div>
             )}
@@ -197,7 +197,7 @@ export default function PortfolioMetadata() {
       <SocialLinksSection />
 
       <div className="rounded-lg border border-border bg-card">
-        <div className="flex flex-col gap-1 pt-5 pb-3 px-6">
+        <div className="flex flex-col gap-1 px-6 pt-5 pb-3">
           <h2 className="text-base leading-tight font-semibold tracking-tight">
             Headline stats
           </h2>
@@ -205,7 +205,7 @@ export default function PortfolioMetadata() {
             The strip of value/label pairs shown above the fold.
           </p>
         </div>
-        <div className="space-y-3 pt-1 pb-5 px-6">
+        <div className="space-y-3 px-6 pt-1 pb-5">
           {heroStats.map((stat, i) => (
             <div
               key={i}

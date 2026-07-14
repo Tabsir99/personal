@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const metricNumberVariants = cva(
-  "inline-flex items-baseline gap-1 font-mono tabular-nums tracking-tight text-foreground",
+  "inline-flex items-baseline gap-1 font-mono tracking-tight text-foreground tabular-nums",
   {
     variants: {
       size: {

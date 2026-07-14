@@ -65,24 +65,24 @@ describeMaybe("generateBlogDraftContent — real Anthropic call", () => {
       const { ai, cleanKind } = await generateBlogDraftContent(topic, "essay");
 
       // Dump the full AI output so the human reader can eyeball voice/shape.
-      // eslint-disable-next-line no-console
+       
       console.log("\n========== AI OUTPUT ==========");
-      // eslint-disable-next-line no-console
+       
       console.log("kind sent:", cleanKind);
-      // eslint-disable-next-line no-console
+       
       console.log("title:    ", ai.title);
-      // eslint-disable-next-line no-console
+       
       console.log("blocks:   ", ai.doc.content.length);
-      // eslint-disable-next-line no-console
+       
       console.log(
         "types:    ",
         ai.doc.content.map((b: { type: string }) => b.type).join(", "),
       );
-      // eslint-disable-next-line no-console
+       
       console.log("=============================");
-      // eslint-disable-next-line no-console
+       
       console.log(JSON.stringify(ai, null, 2));
-      // eslint-disable-next-line no-console
+       
       console.log("===== END AI OUTPUT =====\n");
 
       expect(ai.title.length).toBeGreaterThan(0);

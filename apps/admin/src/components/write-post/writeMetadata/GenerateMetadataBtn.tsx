@@ -36,7 +36,7 @@ export function GenerateMetadataButton({
       iconLeft={
         showRegenerate && !loading ? (
           <ArrowClockwise
-            className="h-3 w-3 opacity-50 transition-opacity group-hover:opacity-80"
+            className="size-3 opacity-50 transition-opacity group-hover:opacity-80"
             aria-hidden
           />
         ) : undefined
@@ -45,7 +45,7 @@ export function GenerateMetadataButton({
       {loading ? (
         <>
           <span
-            className="h-1.5 w-1.5 rounded-full bg-foreground/55 animate-pulse"
+            className="size-1.5 animate-pulse rounded-full bg-foreground/55"
             aria-hidden
           />
           <span>Generating</span>
@@ -65,7 +65,7 @@ export function GenerateMetadataButton({
 // whole label.
 function Ellipsis() {
   return (
-    <span className="inline-flex items-baseline gap-px ml-px" aria-hidden>
+    <span className="ml-px inline-flex items-baseline gap-px" aria-hidden>
       <Dot delay="0ms" />
       <Dot delay="160ms" />
       <Dot delay="320ms" />
@@ -114,17 +114,17 @@ export function SuggestionsActionBar({
   return (
     <div
       className={cn(
-        "flex items-center justify-between gap-20 mx-auto",
+        "mx-auto flex items-center justify-between gap-20",
         "rounded-lg px-3.5 py-2",
         "border border-border bg-card",
-        "animate-in fade-in slide-in-from-top-2 duration-200",
+        "animate-in duration-200 fade-in slide-in-from-top-2",
         className,
       )}
       role="region"
       aria-label="AI suggestions"
     >
       <div className="flex min-w-0 items-baseline gap-1.5">
-        <span className="shrink-0 text-sm font-medium tabular-nums text-foreground">
+        <span className="shrink-0 text-sm font-medium text-foreground tabular-nums">
           {count}
         </span>
         <span className="shrink-0 text-sm text-foreground/70">
@@ -151,7 +151,7 @@ export function SuggestionsActionBar({
           {applying ? (
             <>
               <span
-                className="h-1.5 w-1.5 rounded-full bg-primary-foreground/70 animate-pulse"
+                className="size-1.5 animate-pulse rounded-full bg-primary-foreground/70"
                 aria-hidden
               />
               <span>Applying</span>

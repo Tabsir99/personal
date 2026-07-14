@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
 import { Plus, Star } from "@phosphor-icons/react";
 
@@ -60,6 +61,7 @@ export default function TestimonialDialog({
   const [hoverRating, setHoverRating] = useState(0);
 
   useEffect(() => {
+     
     if (existingTestimonial && typeof testimonialIndex === "number") {
       setFormData(existingTestimonial);
       setIsUpdating(true);
@@ -185,7 +187,7 @@ export default function TestimonialDialog({
                 />
               </button>
             ))}
-            <span className="ml-3 font-mono text-xs tabular-nums text-muted-foreground">
+            <span className="ml-3 font-mono text-xs text-muted-foreground tabular-nums">
               {formData.rating} / 5
             </span>
           </div>

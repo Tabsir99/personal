@@ -110,7 +110,7 @@ export function SuggestionField({
 
   return (
     <div className={`w-full ${className}`}>
-      <div className="bg-background ring-1 ring-border/50 focus-within:ring-border focus-within:ring-2 focus-within:ring-offset-2 rounded-lg overflow-hidden transition-all duration-200">
+      <div className="overflow-hidden rounded-lg bg-background ring-1 ring-border/50 transition-all duration-200 focus-within:ring-2 focus-within:ring-border focus-within:ring-offset-2">
         {multiLine ? (
           <Textarea
             id={id}
@@ -119,7 +119,7 @@ export function SuggestionField({
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             className={cn(
-              "w-full bg-transparent border-none [&_.txa]:border-none [&_.txa]:bg-transparent [&_.txa]:shadow-none [&_.txa\_\_input]:bg-transparent [&_.txa\_\_input]:focus:ring-0 [&_.txa\_\_input]:focus:shadow-none",
+              "w-full border-none bg-transparent [&_.txa]:border-none [&_.txa]:bg-transparent [&_.txa]:shadow-none [&_.txa__input]:bg-transparent [&_.txa__input]:focus:shadow-none [&_.txa__input]:focus:ring-0",
               striking &&
                 "[&_.txa\_\_input]:text-muted-foreground [&_.txa\_\_input]:line-through [&_.txa\_\_input]:decoration-muted-foreground/50 [&_.txa\_\_mirror]:text-muted-foreground [&_.txa\_\_mirror]:line-through [&_.txa\_\_mirror]:decoration-muted-foreground/50",
             )}
@@ -133,7 +133,7 @@ export function SuggestionField({
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             className={cn(
-              "w-full bg-transparent border-none [&_.fld\_\_input]:border-none [&_.fld\_\_input]:bg-transparent [&_.fld\_\_input]:focus:ring-0 [&_.fld\_\_input]:focus:shadow-none [&_.fld\_\_input]:focus:bg-transparent",
+              "w-full border-none bg-transparent [&_.fld__input]:border-none [&_.fld__input]:bg-transparent [&_.fld__input]:focus:bg-transparent [&_.fld__input]:focus:shadow-none [&_.fld__input]:focus:ring-0",
               striking &&
                 "[&_.fld\_\_input]:text-muted-foreground [&_.fld\_\_input]:line-through [&_.fld\_\_input]:decoration-muted-foreground/50",
             )}
@@ -143,8 +143,8 @@ export function SuggestionField({
         {/* Suggestion strip — slides in/out on max-height */}
         <div
           className={cn(
-            "px-3 h-8 flex items-center justify-between text-xs transition-all duration-300 ease-out bg-muted/40 border-t border-border/50",
-            stripVisible ? "opacity-100 max-h-20" : "opacity-0 max-h-0",
+            "flex h-8 items-center justify-between border-t border-border/50 bg-muted/40 px-3 text-xs transition-all duration-300 ease-out",
+            stripVisible ? "max-h-20 opacity-100" : "max-h-0 opacity-0",
           )}
         >
           {applyingOrApplied ? (
@@ -159,15 +159,15 @@ export function SuggestionField({
             </div>
           ) : activeSuggestion != null ? (
             <>
-              <span className="text-sm min-w-0 truncate">
+              <span className="min-w-0 truncate text-sm">
                 {activeSuggestion}
               </span>
-              <div className="flex items-center shrink-0 ml-2">
+              <div className="ml-2 flex shrink-0 items-center">
                 <Button
                   variant="ghost"
                   onClick={reject}
                   onMouseDown={(e) => e.preventDefault()}
-                  className="py-2 px-1.5"
+                  className="px-1.5 py-2"
                   aria-label="Dismiss suggestion"
                 >
                   <Kbd pressed={pressedKey === "esc"}>esc</Kbd>
@@ -176,7 +176,7 @@ export function SuggestionField({
                   variant="ghost"
                   onClick={accept}
                   onMouseDown={(e) => e.preventDefault()}
-                  className="py-2 px-1.5"
+                  className="px-1.5 py-2"
                   aria-label="Accept suggestion"
                 >
                   <Kbd pressed={pressedKey === "tab"}>tab</Kbd>

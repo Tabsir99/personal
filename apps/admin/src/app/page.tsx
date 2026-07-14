@@ -34,10 +34,10 @@ export default function LogIn() {
     <div className="flex min-h-screen items-center justify-center bg-background bg-[radial-gradient(hsl(var(--border))_1px,transparent_1px)] bg-size-[28px_28px] p-4">
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed top-1/4 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-primary/4 blur-[80px]"
+        className="pointer-events-none fixed top-1/4 left-1/2 h-100 w-150 -translate-x-1/2 rounded-full bg-primary/4 blur-[80px]"
       />
 
-      <div className="stagger-cascade relative z-10 w-full max-w-md">
+      <div className="relative z-10 w-full max-w-md stagger-cascade">
         <div
           className="mb-5 flex items-center justify-between px-0.5"
           style={{ ["--stagger-index" as string]: 0 }}
@@ -54,7 +54,7 @@ export default function LogIn() {
         </div>
 
         <div
-          className="relative overflow-hidden bg-card rounded-lg border border-border shadow-dialog"
+          className="relative overflow-hidden rounded-lg border border-border bg-card shadow-dialog"
           style={{ ["--stagger-index" as string]: 1 }}
         >
           <div className="px-8 pt-8 pb-2">

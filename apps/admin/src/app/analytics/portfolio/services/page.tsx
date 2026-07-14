@@ -29,7 +29,7 @@ export default function Services() {
         </p>
       </header>
 
-      <div className="stagger-cascade-tight grid grid-cols-1 items-start gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid stagger-cascade-tight grid-cols-1 items-start gap-4 md:grid-cols-2 lg:grid-cols-3">
         {services.map((item, index) => (
           <div
             key={item.title + index}
@@ -68,7 +68,7 @@ export default function Services() {
                 )}
               >
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-eyebrow tracking-widest tabular-nums text-primary">
+                  <span className="font-mono text-sm font-medium tracking-widest text-primary uppercase tabular-nums">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   {item.label && (

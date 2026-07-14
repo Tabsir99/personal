@@ -73,7 +73,7 @@ export default function WriteBlog() {
       />
 
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap text-green-500 items-center gap-6">
+        <div className="flex flex-wrap items-center gap-6 text-success">
           {!isEmpty && (
             <div className="w-full max-w-md">
               <TextField
@@ -107,7 +107,7 @@ export default function WriteBlog() {
           ) : isEmpty ? (
             <NoBlogs search={search} />
           ) : (
-            <div className="stagger-cascade-tight grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid stagger-cascade-tight grid-cols-1 gap-4 md:grid-cols-2">
               {filteredBlogs
                 .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
                 .map((blog, index) => (

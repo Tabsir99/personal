@@ -114,7 +114,7 @@ const BlogOverview = () => {
       />
 
       <div className="mx-auto w-full max-w-full py-5">
-        <div className="stagger-cascade-tight grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid stagger-cascade-tight grid-cols-1 gap-4 md:grid-cols-2">
           {isLoading ? (
             <BlogCardSkeletonGrid />
           ) : filteredPosts.length > 0 ? (

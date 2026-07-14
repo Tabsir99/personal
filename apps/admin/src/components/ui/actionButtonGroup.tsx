@@ -64,7 +64,7 @@ export function ActionButtonGroup({
   const openModal = useUIStore.getState().openModal;
 
   return (
-    <div className="absolute top-0 right-0 z-10 opacity-0 group-hover/card:opacity-100 transition-all duration-300 translate-x-2 group-hover/card:translate-x-0">
+    <div className="absolute top-0 right-0 z-10 translate-x-2 opacity-0 transition-all duration-300 group-hover/card:translate-x-0 group-hover/card:opacity-100">
       {buttons.map((button, idx) => {
         const Icon =
           button.icon ||
@@ -88,7 +88,7 @@ export function ActionButtonGroup({
             key={idx}
             variant="ghost"
             size="sm"
-            className={`${baseClass} ${variantClass} p-1 min-w-0 inline-flex items-center justify-center`}
+            className={`${baseClass} ${variantClass} inline-flex min-w-0 items-center justify-center p-1`}
             onClick={() => {
               if (button.variant === "delete") {
                 return openModal("confirmation", {
@@ -108,7 +108,7 @@ export function ActionButtonGroup({
             }}
             disabled={button.disabled}
           >
-            {Icon && <Icon className="h-4 w-4" />}
+            {Icon && <Icon className="size-4" />}
           </Button>
         );
       })}

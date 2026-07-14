@@ -47,7 +47,7 @@ export default function Projects() {
         </p>
       </header>
 
-      <div className="stagger-cascade-tight grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid stagger-cascade-tight grid-cols-1 gap-4 lg:grid-cols-2">
         {projects.map((p, index) => {
           // Prefer an image still; fall back to a video still so video-only
           // projects still show a thumbnail instead of "No still uploaded".
@@ -59,7 +59,7 @@ export default function Projects() {
               key={p.title + index}
               style={{ ["--stagger-index" as string]: index }}
             >
-              <div className="group/card relative flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card tactile-lift pt-0">
+              <div className="group/card relative flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card pt-0 tactile-lift">
                 <div className="relative aspect-video overflow-hidden bg-foreground/4">
                   {cover ? (
                     cover.kind === "video" ? (
@@ -67,7 +67,7 @@ export default function Projects() {
                         muted
                         playsInline
                         preload="metadata"
-                        className="h-full w-full object-cover"
+                        className="size-full object-cover"
                       >
                         {(cover.sources ?? []).map((s, i) => (
                           <source
@@ -81,13 +81,13 @@ export default function Projects() {
                       <Img
                         src={cover.url}
                         alt={cover.alt || p.title}
-                        className="h-full w-full object-cover"
+                        className="size-full object-cover"
                         fetchPriority="low"
                         loading="lazy"
                       />
                     )
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                    <div className="flex size-full items-center justify-center text-xs text-muted-foreground">
                       No still uploaded
                     </div>
                   )}
@@ -142,11 +142,11 @@ export default function Projects() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className={cn(
-                              "inline-flex items-center justify-center gap-1.5 rounded border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-accent hover:text-foreground transition-colors min-w-24 shrink-0",
-                              isPrimary && "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
+                              "inline-flex min-w-24 shrink-0 items-center justify-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-accent hover:text-foreground",
+                              isPrimary && "border-primary bg-primary text-primary-foreground hover:bg-primary/90"
                             )}
                           >
-                            <Icon className="h-3 w-3" />
+                            <Icon className="size-3" />
                             <span className="truncate">
                               {link.text || link.type}
                             </span>

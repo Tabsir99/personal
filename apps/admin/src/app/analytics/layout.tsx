@@ -24,7 +24,7 @@ export default function DashBoardLayout({
   return (
     <>
       <DashBoardSidebar />
-      <main className="h-screen w-screen overflow-y-scroll bg-background py-6 pl-24 pr-8 text-foreground">
+      <main className="h-screen w-screen overflow-y-scroll bg-background py-6 pr-8 pl-24 text-foreground">
         {children}
       </main>
 

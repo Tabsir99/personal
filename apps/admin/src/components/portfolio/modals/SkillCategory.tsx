@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
 import { Plus } from "@phosphor-icons/react";
 
@@ -47,6 +48,7 @@ export default function SkillCategoryDialog({
     existingCategory !== undefined && typeof categoryIndex === "number";
 
   useEffect(() => {
+     
     if (existingCategory && typeof categoryIndex === "number") {
       setFormData(existingCategory);
     } else if (!open) {

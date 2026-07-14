@@ -14,7 +14,7 @@ export default function SaveBar() {
 
   if (!isDirty && !saving) return null;
   return (
-    <div className="pointer-events-none fixed bottom-6 left-1/2 z-40 -translate-x-1/2 animate-in fade-in slide-in-from-bottom-2 duration-200 ease-out">
+    <div className="pointer-events-none fixed bottom-6 left-1/2 z-40 -translate-x-1/2 animate-in duration-200 ease-out fade-in slide-in-from-bottom-2">
       <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-foreground/8 bg-card/95 px-4 py-2 shadow-dialog backdrop-blur">
         <div className="flex items-center gap-2">
           <StatusDot tone="primary" size="sm" breathing />

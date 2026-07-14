@@ -150,28 +150,32 @@
   }
 }
 
-.stagger-cascade > * {
-  opacity: 0;
-  animation: stagger-in 480ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: calc(var(--stagger-index, 0) * 60ms + 80ms);
+@utility stagger-cascade {
+  & > * {
+    opacity: 0;
+    animation: stagger-in 480ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(var(--stagger-index, 0) * 60ms + 80ms);
+  }
 }
 
-.stagger-cascade-tight > * {
-  opacity: 0;
-  animation: stagger-in 360ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: calc(var(--stagger-index, 0) * 40ms + 40ms);
+@utility stagger-cascade-tight {
+  & > * {
+    opacity: 0;
+    animation: stagger-in 360ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(var(--stagger-index, 0) * 40ms + 40ms);
+  }
 }
 
 /* Explicit rest shadow matches the hover shadow's layer structure, so the
    two interpolate smoothly. (A bare ring-1 composite can't tween into a
    2-layer shadow — CSS falls back to discrete interpolation and snaps.) */
-.tactile-lift {
+@utility tactile-lift {
   box-shadow: var(--shadow-card-rest);
   transition: box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1);
-}
 
-.tactile-lift:hover {
-  box-shadow: var(--shadow-card-hover);
+  &:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
 }
 
 /* Root-level view transition crossfade for route changes — kicks in

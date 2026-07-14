@@ -60,12 +60,12 @@ const SocialLinksSection = memo(
 
     return (
       <div className="rounded-lg border border-border bg-card">
-        <div className="flex flex-col gap-1 pt-5 pb-3 px-6">
+        <div className="flex flex-col gap-1 px-6 pt-5 pb-3">
           <h2 className="text-base leading-tight font-semibold tracking-tight">
             How people reach you
           </h2>
         </div>
-        <div className="space-y-6 pt-1 pb-5 px-6">
+        <div className="space-y-6 px-6 pt-1 pb-5">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <TextField
               id="email"
@@ -145,7 +145,7 @@ const SocialLinksSection = memo(
                     variant="ghost"
                     size="sm"
                     onClick={() => removeSocial(i)}
-                    className="text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/social:opacity-100 focus-visible:opacity-100"
+                    className="text-muted-foreground opacity-0 transition-opacity group-hover/social:opacity-100 hover:bg-destructive/8 hover:text-destructive focus-visible:opacity-100"
                     aria-label={`Remove ${social.name || "social link"}`}
                     iconLeft={<Trash size={14} />}
                   />

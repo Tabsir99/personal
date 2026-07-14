@@ -74,7 +74,7 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
               <Img
                 src={formData.image}
                 alt="Preview"
-                className="h-full w-full object-cover"
+                className="size-full object-cover"
               />
             ) : (
               <div className="flex flex-col items-center gap-1.5">

@@ -34,7 +34,7 @@ const KeywordsSection = memo(
 
     return (
       <div className="rounded-lg border border-border bg-card">
-        <div className="flex flex-col gap-1 pt-5 pb-3 px-6">
+        <div className="flex flex-col gap-1 px-6 pt-5 pb-3">
           <h2 className="text-base leading-tight font-semibold tracking-tight">
             Keywords
           </h2>
@@ -42,7 +42,7 @@ const KeywordsSection = memo(
             Topic tags search engines use to surface this portfolio.
           </p>
         </div>
-        <div className="pt-1 pb-5 px-6">
+        <div className="px-6 pt-1 pb-5">
           <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-md border border-foreground/6 bg-foreground/2 p-2.5">
             {keywords.length > 0 && (
               <TagGroup label="Keywords list" className="flex flex-wrap gap-1.5">
@@ -72,7 +72,7 @@ const KeywordsSection = memo(
                       setNewKeyword("");
                     }
                   }}
-                  className="w-36 [&_.fld\_\_input]:h-7 text-sm"
+                  className="w-36 text-sm [&_.fld\_\_input]:h-7"
                   placeholder="Type keyword…"
                   autoFocus
                   size="sm"

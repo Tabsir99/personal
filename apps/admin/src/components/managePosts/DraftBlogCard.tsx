@@ -1,3 +1,4 @@
+ 
 import Link from "next/link";
 import { Badge } from "premium-ds/badge";
 import { BlogFormData, BlogStatus } from "@tabsircg/schemas/blog";
@@ -19,7 +20,7 @@ export default function DraftBlogCard({
     <Link
       draggable={false}
       href={`write-blog/${blog.blogId}`}
-      className="group/draft-card block rounded-xl border border-foreground/6 bg-card text-card-foreground shadow-card-rest tactile-lift overflow-hidden"
+      className="group/draft-card block overflow-hidden rounded-xl border border-foreground/6 bg-card text-card-foreground shadow-card-rest tactile-lift"
     >
       <div className="px-6 pt-5 pb-3">
         <div className="flex items-start justify-between gap-3">

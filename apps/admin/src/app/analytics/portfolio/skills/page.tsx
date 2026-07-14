@@ -67,7 +67,7 @@ export default function Skills() {
         </p>
       </header>
 
-      <div className="stagger-cascade-tight grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+      <div className="grid stagger-cascade-tight grid-cols-1 items-start gap-4 lg:grid-cols-2">
         {skillCategories.map((category, categoryIndex) => (
           <div
             key={category.title + categoryIndex}
@@ -106,20 +106,20 @@ export default function Skills() {
                 className={cn("p-5", !category.isActive && "opacity-50")}
               >
                 <div className="mb-4 flex items-center gap-3">
-                  <span className="font-mono text-eyebrow tracking-widest tabular-nums text-primary">
+                  <span className="font-mono text-sm font-medium tracking-widest text-primary uppercase tabular-nums">
                     {String(categoryIndex + 1).padStart(2, "0")}
                   </span>
                   <h3 className="font-heading text-[15px] leading-snug font-medium tracking-tight">
                     {category.title}
                   </h3>
                   <span className="h-px flex-1 bg-foreground/8" />
-                  <span className="font-mono text-eyebrow tracking-widest tabular-nums text-muted-foreground/60">
+                  <span className="font-mono text-sm font-medium tracking-widest text-muted-foreground/60 uppercase tabular-nums">
                     {category.skills.length}
                   </span>
                 </div>
 
                 {category.skills.length === 0 ? (
-                  <p className="py-1 text-xs italic text-muted-foreground/50">
+                  <p className="py-1 text-xs text-muted-foreground/50 italic">
                     No skills yet.
                   </p>
                 ) : (
@@ -160,7 +160,7 @@ export default function Skills() {
                                 ].skills.filter((_, i) => i !== skillIndex),
                               })
                             }
-                            className="opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/skill:opacity-100 focus-visible:opacity-100"
+                            className="opacity-0 transition-opacity group-hover/skill:opacity-100 hover:bg-destructive/8 hover:text-destructive focus-visible:opacity-100"
                             aria-label={`Remove ${skillItem.name}`}
                             iconLeft={<Trash size={14} />}
                           />
@@ -219,9 +219,9 @@ export default function Skills() {
                       </FormField>
                       <FormField
                         label={
-                          <span className="inline-flex items-center justify-between gap-2 w-full">
+                          <span className="inline-flex w-full items-center justify-between gap-2">
                             <span>Proficiency</span>
-                            <span className="font-mono normal-case tabular-nums tracking-normal text-foreground/80">
+                            <span className="font-mono tracking-normal text-foreground/80 normal-case tabular-nums">
                               {newSkill.level}/5
                             </span>
                           </span>
@@ -241,7 +241,7 @@ export default function Skills() {
                               }
                               aria-label={`Set proficiency to ${lvl}`}
                               aria-pressed={newSkill.level === lvl}
-                              className="group/dot flex h-7 flex-1 items-center justify-center rounded-md border border-foreground/8 bg-foreground/2 transition-colors hover:border-primary/40 hover:bg-primary/5 cursor-pointer"
+                              className="group/dot flex h-7 flex-1 cursor-pointer items-center justify-center rounded-md border border-foreground/8 bg-foreground/2 transition-colors hover:border-primary/40 hover:bg-primary/5"
                             >
                               <span
                                 className={cn(

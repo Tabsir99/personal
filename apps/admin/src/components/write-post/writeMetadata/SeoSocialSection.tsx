@@ -40,7 +40,7 @@ export default function SeoSocialSection({
   const socialComplete = Boolean(socialTitle && socialDescription);
 
   return (
-    <div className="rounded-lg border border-border bg-card/60 p-6 space-y-6">
+    <div className="space-y-6 rounded-lg border border-border bg-card/60 p-6">
       <div>
         <SectionHeader icon={Globe} title="SEO" complete={seoComplete} />
 
@@ -77,7 +77,7 @@ export default function SeoSocialSection({
         </div>
       </div>
 
-      <div className="h-px bg-foreground/6 w-full" />
+      <div className="h-px w-full bg-foreground/6" />
 
       <div>
         <SectionHeader

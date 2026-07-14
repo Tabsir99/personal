@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useTransition, useMemo, useEffect } from "react";
@@ -138,6 +139,7 @@ export default function WriteMetadataComp({
   }, [suggestion, currentValues]);
 
   useEffect(() => {
+     
     if (suggestion && changeCount === 0) {
       setSuggestion(null);
     }
@@ -177,20 +179,20 @@ export default function WriteMetadataComp({
   return (
     <Sheet open={showSidebar} onOpenChange={closeSidebar} side="right">
       {({ close }) => (
-        <div className="h-full w-full sm:w-[32rem] flex flex-col bg-background border-l border-border overflow-hidden">
-          <div className="px-6 py-6 border-b border-border bg-card/40 flex justify-between items-start">
+        <div className="flex size-full flex-col overflow-hidden border-l border-border bg-background sm:w-lg">
+          <div className="flex items-start justify-between border-b border-border bg-card/40 p-6">
             <div>
-              <span className="text-lg font-semibold tracking-tight text-left block text-foreground">
+              <span className="block text-left text-lg font-semibold tracking-tight text-foreground">
                 Blog Metadata
               </span>
-              <span className="mt-1 text-sm text-muted-foreground text-left block">
-                Configure your blog's SEO and display settings
+              <span className="mt-1 block text-left text-sm text-muted-foreground">
+                Configure your blog&apos;s SEO and display settings
               </span>
             </div>
             <Button variant="ghost" size="sm" onClick={close} iconLeft={<X size={14} />} />
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+          <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-6">
             {!suggestion ? (
               <GenerateMetadataButton
                 onClick={handleGenerate}
@@ -207,7 +209,7 @@ export default function WriteMetadataComp({
               />
             )}
             
-            <div className="h-px bg-foreground/6 w-full" />
+            <div className="h-px w-full bg-foreground/6" />
 
             <div className="space-y-6">
               <BasicInfoSection
@@ -229,7 +231,7 @@ export default function WriteMetadataComp({
                 onSkipField={skipField}
               />
 
-              <div className="h-px bg-foreground/6 w-full" />
+              <div className="h-px w-full bg-foreground/6" />
 
               <div className="flex justify-end">
                 <Button

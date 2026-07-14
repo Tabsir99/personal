@@ -86,7 +86,7 @@ export default function BasicInfoSection({
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+    <div className="rounded-lg border border-border bg-card p-6 shadow-card-rest">
       <SectionHeader
         icon={FileText}
         title="Basic Information"

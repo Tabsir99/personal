@@ -1,0 +1,27 @@
+
+/home/tabsir/ap/reactp/personal/apps/admin/src/app/analytics/portfolio/services/page.tsx
+  71:66  error  'tracking-wider' conflicts with 'tracking-widest'  tailwindcss/no-contradicting-classname
+  71:81  error  'tracking-widest' conflicts with 'tracking-wider'  tailwindcss/no-contradicting-classname
+
+/home/tabsir/ap/reactp/personal/apps/admin/src/app/analytics/portfolio/skills/page.tsx
+  109:66  error  'tracking-wider' conflicts with 'tracking-widest'  tailwindcss/no-contradicting-classname
+  109:81  error  'tracking-widest' conflicts with 'tracking-wider'  tailwindcss/no-contradicting-classname
+  116:66  error  'tracking-wider' conflicts with 'tracking-widest'  tailwindcss/no-contradicting-classname
+  116:81  error  'tracking-widest' conflicts with 'tracking-wider'  tailwindcss/no-contradicting-classname
+
+/home/tabsir/ap/reactp/personal/apps/admin/src/app/analytics/write-blog/page.tsx
+  28:9  warning  The 'items' logical expression could make the dependencies of useMemo Hook (at line 43) change on every render. To fix this, wrap the initialization of 'items' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+/home/tabsir/ap/reactp/personal/apps/admin/src/components/Sidebar.tsx
+  90:5  warning  The attribute aria-expanded is not supported by the role complementary. This role is implicit on the element aside  jsx-a11y/role-supports-aria-props
+
+/home/tabsir/ap/reactp/personal/apps/admin/src/components/managePosts/BlogMenu.tsx
+  84:15  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+/home/tabsir/ap/reactp/personal/apps/admin/src/components/managePosts/BlogOverview.tsx
+  38:9  warning  The 'items' logical expression could make the dependencies of useMemo Hook (at line 50) change on every render. To fix this, wrap the initialization of 'items' in its own useMemo() Hook  react-hooks/exhaustive-deps
+  38:9  warning  The 'items' logical expression could make the dependencies of useMemo Hook (at line 60) change on every render. To fix this, wrap the initialization of 'items' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+✖ 11 problems (6 errors, 5 warnings)
+
+[ELIFECYCLE] Command failed with exit code 1.

@@ -41,7 +41,7 @@ export default function CMSBlogCard({
   const overflowTags = blog.tags.length - visibleTags.length;
 
   return (
-    <div className="group/blog-card tactile-lift flex flex-col justify-between rounded-lg border border-foreground/6 bg-card text-card-foreground shadow-card-rest">
+    <div className="group/blog-card flex flex-col justify-between rounded-lg border border-foreground/6 bg-card text-card-foreground shadow-card-rest tactile-lift">
       <div className="px-6 pt-5 pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -85,7 +85,7 @@ export default function CMSBlogCard({
                 href={`${clientEnv.ADMIN_ORIGIN}/blogs/${blog.slug}`}
                 target="_blank"
                 title="View Blog"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-foreground/4 hover:text-foreground transition-colors"
+                className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-foreground/4 hover:text-foreground"
               >
                 <ArrowSquareOut size={16} />
               </Link>
@@ -124,7 +124,7 @@ export default function CMSBlogCard({
       </div>
 
       {isPublished && (
-        <div className="grid grid-cols-3 gap-4 border-t border-foreground/6 px-6 pt-4 pb-4">
+        <div className="grid grid-cols-3 gap-4 border-t border-foreground/6 px-6 py-4">
           <Stat label="Views" value={blog.stats.views} />
           <Stat label="Score" value={blog.stats.score} />
           <Stat label="Shares" value={blog.stats.shares} />

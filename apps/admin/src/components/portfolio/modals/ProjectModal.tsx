@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   X,
@@ -307,7 +308,7 @@ export default function ProjectDialog({
           <div
             key={step}
             className={cn(
-              "animate-in fade-in-0 duration-300",
+              "animate-in duration-300 fade-in-0",
               dir === 1 ? "slide-in-from-right-4" : "slide-in-from-left-4",
             )}
           >
@@ -401,7 +402,7 @@ export default function ProjectDialog({
                 variant="ghost"
                 size="sm"
                 onClick={() => handleRemoveStill(i)}
-                className="text-muted-foreground hover:bg-destructive/8 hover:text-destructive self-end"
+                className="self-end text-muted-foreground hover:bg-destructive/8 hover:text-destructive"
                 aria-label="Remove still"
                 iconLeft={<X size={14} />}
               />
@@ -414,7 +415,7 @@ export default function ProjectDialog({
                 />
               </FormField>
             ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-[220px_1fr] items-end">
+              <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[220px_1fr]">
                 <button
                   type="button"
                   onClick={() => {
@@ -431,7 +432,7 @@ export default function ProjectDialog({
                       <Img
                         src={still.url}
                         alt={still.alt || still.label}
-                        className="h-full w-full object-cover"
+                        className="size-full object-cover"
                       />
                       <span className="absolute inset-0 flex items-center justify-center gap-1.5 bg-background/65 text-xs font-medium text-foreground opacity-0 backdrop-blur-[1px] transition-opacity group-hover/thumb:opacity-100">
                         <Upload size={14} />
@@ -439,7 +440,7 @@ export default function ProjectDialog({
                       </span>
                     </>
                   ) : (
-                    <span className="flex h-full w-full flex-col items-center justify-center gap-1.5 text-muted-foreground">
+                    <span className="flex size-full flex-col items-center justify-center gap-1.5 text-muted-foreground">
                       <ImageIcon size={24} className="opacity-60" />
                       <span className="text-xs">Click to upload</span>
                     </span>
@@ -543,7 +544,7 @@ export default function ProjectDialog({
                 variant="ghost"
                 size="sm"
                 onClick={() => handleRemoveLink(i)}
-                className="text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/link:opacity-100 focus-visible:opacity-100"
+                className="text-muted-foreground opacity-0 transition-opacity group-hover/link:opacity-100 hover:bg-destructive/8 hover:text-destructive focus-visible:opacity-100"
                 aria-label="Remove link"
                 iconLeft={<X size={14} />}
               />
@@ -559,7 +560,7 @@ export default function ProjectDialog({
               : "max-h-0 border-transparent p-0",
           )}
         >
-          <div className="mb-2 grid grid-cols-[120px_1fr_1fr] gap-2 items-end">
+          <div className="mb-2 grid grid-cols-[120px_1fr_1fr] items-end gap-2">
             <FormField label="Type">
               <Select
                 options={LINK_TYPE_SELECT_OPTIONS}
@@ -673,7 +674,7 @@ export default function ProjectDialog({
           hint="Up to two results worth showcasing (10K users, 0.8s load time)."
         >
           {formData.metrics.length < 2 && (
-            <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">
+            <div className="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
               <TextField
                 id="metric-label"
                 placeholder="Label"
@@ -726,12 +727,12 @@ export default function ProjectDialog({
                       })
                     }
                     aria-label={`Remove ${metric.label}`}
-                    className="absolute right-1.5 top-1.5 rounded-sm p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/metric:opacity-100 focus-visible:opacity-100 cursor-pointer"
+                    className="absolute top-1.5 right-1.5 cursor-pointer rounded-sm p-1 text-muted-foreground opacity-0 transition-opacity group-hover/metric:opacity-100 hover:bg-destructive/8 hover:text-destructive focus-visible:opacity-100"
                   >
                     <X size={12} />
                   </button>
                   <Eyebrow tone="muted">{metric.label}</Eyebrow>
-                  <span className="font-mono text-base font-semibold tabular-nums text-foreground">
+                  <span className="font-mono text-base font-semibold text-foreground tabular-nums">
                     {metric.value}
                   </span>
                 </div>

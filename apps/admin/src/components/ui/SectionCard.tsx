@@ -76,7 +76,7 @@ function SectionCardDivider({
     <hr
       data-slot="section-card-divider"
       className={cn(
-        "my-4 -mx-5 h-px border-0 bg-foreground/6",
+        "-mx-5 my-4 h-px border-0 bg-foreground/6",
         className,
       )}
       {...props}

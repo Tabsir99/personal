@@ -115,7 +115,7 @@ export default function TagsSection({
               </Button>
             }
           >
-            <div className="w-64 p-3 bg-popover text-popover-foreground rounded-md shadow-md border border-border space-y-3">
+            <div className="w-64 space-y-3 rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-card-hover">
               <TextField
                 id="tag-search"
                 placeholder="Search or create..."
@@ -124,13 +124,13 @@ export default function TagsSection({
                 size="sm"
                 autoFocus
               />
-              <div className="max-h-48 overflow-y-auto space-y-1">
+              <div className="max-h-48 space-y-1 overflow-y-auto">
                 {isLoading ? (
                   <div className="space-y-1">
                     {[0, 1, 2].map((i) => (
                       <div
                         key={i}
-                        className="h-7 rounded bg-muted/50 animate-pulse"
+                        className="h-7 animate-pulse rounded-md bg-muted/50"
                         style={{ animationDelay: `${i * 100}ms` }}
                       />
                     ))}
@@ -139,34 +139,34 @@ export default function TagsSection({
                   <>
                     {filteredUnselected.length > 0 && (
                       <div className="space-y-1">
-                        <span className="text-[10px] font-semibold text-muted-foreground px-2 uppercase tracking-wider block">
+                        <span className="block px-2 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                           Existing
                         </span>
                         {filteredUnselected.map((tag) => (
                           <button
                             key={tag}
                             type="button"
-                            className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-accent hover:text-accent-foreground flex items-center transition-colors cursor-pointer"
+                            className="flex w-full cursor-pointer items-center rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
                             onClick={() => handleSelect(tag)}
                           >
-                            <TagIcon className="mr-2 h-3 w-3 shrink-0 text-muted-foreground" />
+                            <TagIcon className="mr-2 size-3 shrink-0 text-muted-foreground" />
                             <span className="truncate">{tag}</span>
                           </button>
                         ))}
                       </div>
                     )}
                     {filteredUnselected.length === 0 && !canCreate && (
-                      <div className="text-sm text-muted-foreground px-2 py-4 text-center">
+                      <div className="px-2 py-4 text-center text-sm text-muted-foreground">
                         No matching tags.
                       </div>
                     )}
                     {canCreate && (
                       <button
                         type="button"
-                        className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-accent hover:text-accent-foreground flex items-center text-primary font-medium transition-colors cursor-pointer"
+                        className="flex w-full cursor-pointer items-center rounded-md px-2 py-1.5 text-left text-sm font-medium text-primary transition-colors hover:bg-accent hover:text-accent-foreground"
                         onClick={handleCreate}
                       >
-                        <Plus className="mr-2 h-4 w-4 shrink-0" />
+                        <Plus className="mr-2 size-4 shrink-0" />
                         <span className="truncate">Create &quot;{normalized}&quot;</span>
                       </button>
                     )}
@@ -178,7 +178,7 @@ export default function TagsSection({
         </div>
 
         {tags && tags.length > 0 && (
-          <TagGroup label="Selected tags" className="flex flex-wrap gap-2 animate-in fade-in duration-200">
+          <TagGroup label="Selected tags" className="flex animate-in flex-wrap gap-2 duration-200 fade-in">
             {tags.map((tag) => (
               <Tag
                 key={tag}

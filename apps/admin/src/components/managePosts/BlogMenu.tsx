@@ -48,7 +48,7 @@ export default function BlogMenu({
           variant="ghost"
           size="sm"
           aria-label="Open menu"
-          className="text-muted-foreground hover:text-foreground p-1 min-w-0"
+          className="min-w-0 p-1 text-muted-foreground hover:text-foreground"
           onClick={(e) => e.stopPropagation()}
         >
           <DotsThree size={20} weight="bold" />
@@ -57,7 +57,7 @@ export default function BlogMenu({
     >
       {({ close }) => (
         <div
-          className="flex flex-col p-1 w-48 bg-popover text-popover-foreground rounded-lg border border-border shadow-dialog"
+          className="flex w-48 flex-col rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-dialog"
           onClick={(e) => e.stopPropagation()}
         >
           {!isDraft && (
@@ -66,7 +66,7 @@ export default function BlogMenu({
                 close();
                 handleBlogEdit();
               }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-foreground/4 rounded-md transition-colors cursor-pointer text-foreground"
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-foreground/4"
             >
               <PencilSimple size={16} />
               <span>Edit Post</span>
@@ -79,7 +79,7 @@ export default function BlogMenu({
                 close();
                 openModal("blogThumbnail", { data: { blogId, thumbnailUrl } });
               }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-foreground/4 rounded-md transition-colors cursor-pointer text-foreground"
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-foreground/4"
             >
               <Image size={16} />
               <span>Change Thumbnail</span>
@@ -99,7 +99,7 @@ export default function BlogMenu({
                   },
                 });
               }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-foreground/4 rounded-md transition-colors cursor-pointer text-foreground"
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-foreground/4"
             >
               <Power size={16} />
               <span>
@@ -114,7 +114,7 @@ export default function BlogMenu({
                 close();
                 setFeatured();
               }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-foreground/4 rounded-md transition-colors cursor-pointer text-foreground"
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-foreground/4"
             >
               <Star size={16} />
               <span>Set as featured</span>
@@ -132,7 +132,7 @@ export default function BlogMenu({
                   },
                 });
               }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-foreground/4 rounded-md transition-colors cursor-pointer text-foreground"
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-foreground/4"
             >
               <ShareNetwork size={16} />
               <span>Share Post</span>
@@ -151,7 +151,7 @@ export default function BlogMenu({
                 },
               });
             }}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-destructive/8 text-destructive rounded-md transition-colors cursor-pointer"
+            className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-destructive transition-colors hover:bg-destructive/8"
           >
             <Trash size={16} />
             <span>Delete Post</span>

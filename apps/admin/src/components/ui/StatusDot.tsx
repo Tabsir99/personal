@@ -13,9 +13,9 @@ const statusDotVariants = cva("inline-block shrink-0 rounded-full", {
       destructive: "bg-destructive",
     },
     size: {
-      xs: "h-1 w-1",
-      sm: "h-1.5 w-1.5",
-      md: "h-2 w-2",
+      xs: "size-1",
+      sm: "size-1.5",
+      md: "size-2",
     },
   },
   defaultVariants: {

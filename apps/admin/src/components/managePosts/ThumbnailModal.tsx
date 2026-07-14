@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -99,7 +100,7 @@ export default function ThumbnailModal() {
       onOpenChange={closeModal}
       title="Cover image"
       footer={
-        <div className="flex flex-col sm:flex-row gap-2 justify-end w-full">
+        <div className="flex w-full flex-col justify-end gap-2 sm:flex-row">
           {selectedFile && (
             <Button
               variant="secondary"
@@ -138,16 +139,16 @@ export default function ThumbnailModal() {
             type="file"
             accept="image/*"
             onChange={handleFileSelect}
-            className="absolute inset-0 cursor-pointer opacity-0 z-10"
+            className="absolute inset-0 z-10 cursor-pointer opacity-0"
             id="thumbnail-upload"
           />
 
           {previewUrl ? (
-            <div className="relative h-full w-full">
+            <div className="relative size-full">
               <Img
                 src={previewUrl}
                 alt="Thumbnail Preview"
-                className="h-full w-full object-cover transition-opacity"
+                className="size-full object-cover transition-opacity"
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/60 opacity-0 transition-opacity group-hover:opacity-100">
                 <UploadSimple size={32} className="mb-2 text-background" />

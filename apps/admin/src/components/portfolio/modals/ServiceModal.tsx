@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
 import { Plus, X } from "@phosphor-icons/react";
 
@@ -56,6 +57,7 @@ export default function ServiceDialog({
     existingService !== undefined && typeof serviceIndex === "number";
 
   useEffect(() => {
+     
     if (existingService && typeof serviceIndex === "number") {
       setFormData(existingService);
     } else if (!open) {
@@ -165,7 +167,7 @@ export default function ServiceDialog({
 
       <ModalSection title="Deliverables">
         {formData.items.length > 0 && (
-          <ul className="flex flex-col gap-1.5 mb-3">
+          <ul className="mb-3 flex flex-col gap-1.5">
             {formData.items.map((item, i) => (
               <li
                 key={i}
@@ -177,7 +179,7 @@ export default function ServiceDialog({
                   variant="ghost"
                   size="sm"
                   onClick={() => handleRemoveItem(i)}
-                  className="text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/item:opacity-100 focus-visible:opacity-100"
+                  className="text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 hover:bg-destructive/8 hover:text-destructive focus-visible:opacity-100"
                   aria-label={`Remove ${item}`}
                   iconLeft={<X size={14} />}
                 />

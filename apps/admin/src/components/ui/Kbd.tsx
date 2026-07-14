@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const kbdVariants = cva(
-  "inline-flex items-center justify-center font-mono font-medium select-none whitespace-nowrap border border-border/80 bg-card text-foreground transition-shadow",
+  "inline-flex items-center justify-center border border-border/80 bg-card font-mono font-medium whitespace-nowrap text-foreground transition-shadow select-none",
   {
     variants: {
       size: {
@@ -13,7 +13,7 @@ const kbdVariants = cva(
       },
       tone: {
         default: "shadow-kbd-rest",
-        pressed: "shadow-kbd-press translate-y-[0.5px]",
+        pressed: "translate-y-[0.5px] shadow-kbd-press",
       },
     },
     defaultVariants: {

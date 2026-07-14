@@ -101,12 +101,12 @@ const BlogShareModal = () => {
             <input
               value={url}
               readOnly
-              className="w-full h-9 px-3 bg-muted/40 text-xs font-mono rounded-md border border-border outline-none focus:border-primary flex-1"
+              className="h-9 w-full flex-1 rounded-md border border-border bg-muted/40 px-3 font-mono text-xs outline-none focus:border-primary"
             />
             <Button
               onClick={copyToClipboard}
               variant={copySuccess ? "primary" : "secondary"}
-              className="shrink-0 gap-1.5 min-h-[36px]"
+              className="min-h-9 shrink-0 gap-1.5"
               iconLeft={copySuccess ? <Check size={14} /> : <Link size={14} />}
             >
               {copySuccess ? (

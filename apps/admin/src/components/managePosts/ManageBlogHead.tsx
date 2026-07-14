@@ -48,19 +48,19 @@ function FilterChip<T extends string>({
         <button
           type="button"
           className={cn(
-            "w-auto capitalize h-9 px-3 gap-1.5 rounded-md border bg-card text-sm transition-colors hover:bg-foreground/3 flex items-center justify-between cursor-pointer",
+            "flex h-9 w-auto cursor-pointer items-center justify-between gap-1.5 rounded-md border bg-card px-3 text-sm capitalize transition-colors hover:bg-foreground/3",
             isActive
               ? "border-primary/30 bg-primary/5 text-foreground hover:bg-primary/8"
               : "border-border text-foreground",
           )}
         >
-          <span className="text-muted-foreground mr-1">{label}:</span>
+          <span className="mr-1 text-muted-foreground">{label}:</span>
           <span className="font-medium">{activeOption?.label || value}</span>
         </button>
       }
     >
       {({ close }) => (
-        <div className="flex flex-col p-1 w-40 bg-popover text-popover-foreground rounded-lg border border-border shadow-dialog">
+        <div className="flex w-40 flex-col rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-dialog">
           {options.map((option) => (
             <button
               key={option.value}
@@ -69,10 +69,10 @@ function FilterChip<T extends string>({
                 onChange(option.value);
               }}
               className={cn(
-                "flex w-full items-center px-3 py-1.5 text-left text-sm rounded-md transition-colors cursor-pointer",
+                "flex w-full cursor-pointer items-center rounded-md px-3 py-1.5 text-left text-sm transition-colors",
                 option.value === value
-                  ? "bg-primary/8 text-primary font-medium"
-                  : "hover:bg-foreground/4 text-foreground",
+                  ? "bg-primary/8 font-medium text-primary"
+                  : "text-foreground hover:bg-foreground/4",
               )}
             >
               {option.label}
@@ -117,7 +117,7 @@ export default function ManagePostHead({
     filters.schemaType !== "all";
 
   return (
-    <div className="flex flex-wrap items-center gap-6 relative z-20">
+    <div className="relative z-20 flex flex-wrap items-center gap-6">
       <div className="w-full sm:w-72">
         <TextField
           placeholder="Search posts..."
