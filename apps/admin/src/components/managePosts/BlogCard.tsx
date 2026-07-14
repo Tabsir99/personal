@@ -50,7 +50,7 @@ export default function CMSBlogCard({
                 <Star
                   size={12}
                   weight="fill"
-                  className="fill-star text-star"
+                  className="fill-warning text-warning"
                   aria-hidden="true"
                 />
                 <Eyebrow tone="primary" size="xs" family="mono">

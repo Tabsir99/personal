@@ -89,7 +89,7 @@ const DashBoardSidebar = () => {
   return (
     <aside
       className={cn(
-        "fixed top-0 left-0 z-30 flex h-screen flex-col border-r border-sidebar-border bg-sidebar/95 backdrop-blur-xl transition-[width,box-shadow] duration-200 ease-out",
+        "fixed top-0 left-0 z-30 flex h-screen flex-col border-r border-border bg-background/95 backdrop-blur-xl transition-[width,box-shadow] duration-200 ease-out",
         expanded ? "w-56 shadow-card-rest" : "w-[72px]",
       )}
       onMouseEnter={() => setIsExpanded(true)}
@@ -99,7 +99,7 @@ const DashBoardSidebar = () => {
     >
       <div
         className={cn(
-          "flex h-16 shrink-0 items-center border-b border-sidebar-border transition-[padding,gap] duration-200 ease-out",
+          "flex h-16 shrink-0 items-center border-b border-border transition-[padding,gap] duration-200 ease-out",
           expanded ? "gap-3 px-4" : "justify-center px-0",
         )}
       >
@@ -159,7 +159,7 @@ const DashBoardSidebar = () => {
         </ul>
       </nav>
 
-      <div className="flex shrink-0 flex-col gap-0.5 border-t border-sidebar-border px-2 py-2">
+      <div className="flex shrink-0 flex-col gap-0.5 border-t border-border px-2 py-2">
         <button
           type="button"
           onClick={handleLogout}
@@ -180,11 +180,11 @@ const DashBoardSidebar = () => {
         </button>
 
         {expanded && (
-          <div className="mt-1 flex items-center justify-between border-t border-sidebar-border px-3 pt-2 pb-1">
-            <span className="font-mono text-eyebrow text-muted-foreground/60">
+          <div className="mt-1 flex items-center justify-between border-t border-border px-3 pt-2 pb-1">
+            <span className="font-mono text-xs text-muted-foreground/60">
               {isPinned ? "Pinned" : "Hover to expand"}
             </span>
-            <Kbd size="sm" className="border-sidebar-border/60">
+            <Kbd size="sm" className="border-border/60">
               ⌘\
             </Kbd>
           </div>

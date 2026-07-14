@@ -179,7 +179,7 @@ export default function TestimonialDialog({
                   className={cn(
                     "transition-colors duration-150",
                     star <= (hoverRating || formData.rating)
-                      ? "text-amber-500"
+                      ? "text-warning"
                       : "text-foreground/15",
                   )}
                 />

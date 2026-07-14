@@ -89,7 +89,7 @@ export default function Testimonials() {
                           className={cn(
                             "transition-colors duration-150",
                             i < t.rating
-                              ? "text-amber-500"
+                              ? "text-warning"
                               : "text-foreground/15",
                           )}
                         />

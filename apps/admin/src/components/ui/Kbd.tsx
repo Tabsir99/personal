@@ -8,8 +8,8 @@ const kbdVariants = cva(
   {
     variants: {
       size: {
-        sm: "h-5 min-w-5 rounded-sm px-1 text-eyebrow tracking-tight",
-        md: "h-5 min-w-5 rounded-sm px-1.5 text-kbd tracking-tight",
+        sm: "h-5 min-w-5 rounded-sm px-1 text-xs tracking-tight",
+        md: "h-5 min-w-5 rounded-sm px-1.5 text-xs tracking-tight",
       },
       tone: {
         default: "shadow-kbd-rest",

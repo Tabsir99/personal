@@ -4,7 +4,6 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "premium-ds/toast";
 
-
 import { logInAction } from "@/actions/authActions";
 import { Button } from "premium-ds/button";
 import { TextField } from "premium-ds/text-field";
@@ -86,7 +85,6 @@ export default function LogIn() {
                 onChange={(e) => setUsername(e.target.value)}
                 required
                 disabled={isLoading}
-                className="h-10 font-mono text-sm"
               />
 
               <TextField
@@ -99,12 +97,11 @@ export default function LogIn() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
-                className="h-10 font-mono text-sm"
               />
 
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || !username || !password}
                 loading={isLoading}
                 size="lg"
                 className="mt-2 h-10 w-full justify-center gap-2"

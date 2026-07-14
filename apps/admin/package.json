@@ -9,7 +9,7 @@
     "dev": "pnpm run \"/^(dev:server|emulators)$/\"",
     "build": "next build",
     "start": "next start -p 5000",
-    "lint": "next lint",
+    "lint": "eslint src",
     "tc": "tsc --noEmit",
     "test": "vitest run",
     "prebuild": "tsc --noEmit",
@@ -46,15 +46,18 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.6",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "concurrently": "^9.2.1",
     "dotenv": "^17.4.2",
-    "eslint": "^9.39.4",
-    "eslint-config-next": "^16.2.4",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.10",
+    "eslint-plugin-tailwindcss": "^4.2.0",
     "prettier": "^3.8.3",
     "tw-animate-css": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "typescript-eslint": "^8.63.0"
   }
 }

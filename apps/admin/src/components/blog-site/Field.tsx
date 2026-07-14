@@ -25,7 +25,7 @@ export default function Field({
           {label}
         </FieldLabel>
         {hint && (
-          <span className="font-mono text-eyebrow tabular-nums text-foreground/40">
+          <span className="font-mono text-xs tabular-nums text-foreground/40">
             {hint}
           </span>
         )}

@@ -1,10 +1,11 @@
 import type { NextConfig } from "next";
+import { withPremiumDS } from "premium-ds/next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@tabsircg/schemas", "premium-ds"],
+  transpilePackages: ["@tabsircg/schemas"],
   logging: { serverFunctions: false },
   devIndicators: false,
-  /* config options here */
+
   images: {
     remotePatterns: [
       { hostname: "localhost" },
@@ -15,4 +16,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPremiumDS(nextConfig);

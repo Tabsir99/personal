@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FileText, Plus, MagnifyingGlass, Sparkle } from "@phosphor-icons/react";
+import {
+  FileText,
+  Plus,
+  MagnifyingGlass,
+  Sparkle,
+} from "@phosphor-icons/react";
 
 import { Button } from "premium-ds/button";
 import { TextField } from "premium-ds/text-field";
@@ -68,7 +73,7 @@ export default function WriteBlog() {
       />
 
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-6">
+        <div className="flex flex-wrap text-green-500 items-center gap-6">
           {!isEmpty && (
             <div className="w-full max-w-md">
               <TextField
@@ -84,7 +89,11 @@ export default function WriteBlog() {
             <Button onClick={openCreateDialog} iconLeft={<Plus size={14} />}>
               New draft
             </Button>
-            <Button variant="secondary" onClick={openAiDraftDialog} iconLeft={<Sparkle size={14} />}>
+            <Button
+              variant="secondary"
+              onClick={openAiDraftDialog}
+              iconLeft={<Sparkle size={14} />}
+            >
               Draft with AI
             </Button>
           </div>
@@ -145,7 +154,11 @@ const NoBlogs = ({ search }: { search: string }) => {
         <Button onClick={openCreateDialog} iconLeft={<Plus size={14} />}>
           New draft
         </Button>
-        <Button variant="secondary" onClick={openAiDraftDialog} iconLeft={<Sparkle size={14} />}>
+        <Button
+          variant="secondary"
+          onClick={openAiDraftDialog}
+          iconLeft={<Sparkle size={14} />}
+        >
           Draft with AI
         </Button>
       </div>
