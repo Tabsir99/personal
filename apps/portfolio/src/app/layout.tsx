@@ -8,7 +8,6 @@ import {
 } from "next/font/google";
 import { Footer } from "@/components/portfolio/footer";
 import { ScrollIsland } from "@/components/ui/scroll-island";
-import { Tracker } from "@/components/Tracker";
 import { getPageData } from "@/lib/pageData";
 
 const instrumentSansFont = Instrument_Sans({
@@ -118,7 +117,6 @@ export default function RootLayout({
         <ScrollIsland />
         <main>{children}</main>
         <Footer />
-        <Tracker />
       </body>
     </html>
   );
