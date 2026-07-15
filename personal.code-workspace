@@ -2,12 +2,16 @@
   "folders": [
     {
       "name": "personal",
-      "path": "."
+      "path": ".",
     },
     {
       "name": "premium-ds",
-      "path": "../premium-ds"
-    }
+      "path": "../premium-ds",
+    },
+    {
+      "name": "analytics",
+      "path": "../tabsircg/analytics",
+    },
   ],
-  "settings": {}
+  "settings": {},
 }
