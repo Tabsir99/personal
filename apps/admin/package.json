@@ -25,6 +25,7 @@
     "@open-notion/editor": "catalog:",
     "@phosphor-icons/react": "catalog:",
     "@tabsircg/schemas": "workspace:*",
+    "@tabsircg/analytics": "catalog:",
     "@tailwindcss/postcss": "catalog:",
     "class-variance-authority": "^0.7.1",
     "clsx": "catalog:",

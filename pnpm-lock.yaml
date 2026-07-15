@@ -58,7 +58,7 @@ catalogs:
       specifier: ^4.4.3
       version: 4.4.3
 
-pnpmfileChecksum: sha256-P6FXekZWBwtBelecu9K3HREcbCcO+BVPdQdLt6MqkIQ=
+pnpmfileChecksum: sha256-lb7QvfgCwFLYbScYQWCxDMPj2YBk2Ij5mpNEh5d2O+8=
 
 importers:
 
@@ -91,6 +91,9 @@ importers:
       '@phosphor-icons/react':
         specifier: 'catalog:'
         version: 2.1.10(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@tabsircg/analytics':
+        specifier: link:/home/tabsir/ap/reactp/tabsircg/analytics/packages/analytics
+        version: link:../../../tabsircg/analytics/packages/analytics
       '@tabsircg/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas

@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 import { withPremiumDS } from "premium-ds/next";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve, relative } from "node:path";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@tabsircg/schemas"],
+  transpilePackages: ["@tabsircg/schemas", "@tabsircg/analytics"],
   logging: { serverFunctions: false },
   devIndicators: false,
 
@@ -16,4 +18,18 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withPremiumDS(nextConfig);
+const config = withPremiumDS(nextConfig);
+
+if (config.turbopack) {
+  const analyticsPkgDir = "/home/tabsir/ap/reactp/tabsircg/analytics/packages/analytics";
+  const projectDir = dirname(fileURLToPath(import.meta.url));
+  
+  config.turbopack.resolveAlias = {
+    ...config.turbopack.resolveAlias,
+    "@tabsircg/analytics": relative(projectDir, resolve(analyticsPkgDir, "src/index.ts")),
+    "@tabsircg/analytics/sdk": relative(projectDir, resolve(analyticsPkgDir, "src/sdk.ts")),
+    "@tabsircg/analytics/react": relative(projectDir, resolve(analyticsPkgDir, "src/react.tsx")),
+  };
+}
+
+export default config;
