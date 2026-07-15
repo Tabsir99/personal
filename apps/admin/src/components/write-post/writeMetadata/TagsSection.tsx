@@ -52,7 +52,7 @@ export default function TagsSection({
   const isComplete = (tags?.length ?? 0) > 0;
 
   const filteredUnselected = unselected.filter((tag) =>
-    tag.toLowerCase().includes(normalized)
+    tag.toLowerCase().includes(normalized),
   );
 
   const handleSelect = (tag: string) => {
@@ -97,8 +97,8 @@ export default function TagsSection({
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Popover 
-            open={open} 
+          <Popover
+            open={open}
             onOpenChange={setOpen}
             align="start"
             trigger={
@@ -167,7 +167,9 @@ export default function TagsSection({
                         onClick={handleCreate}
                       >
                         <Plus className="mr-2 size-4 shrink-0" />
-                        <span className="truncate">Create &quot;{normalized}&quot;</span>
+                        <span className="truncate">
+                          Create &quot;{normalized}&quot;
+                        </span>
                       </button>
                     )}
                   </>
@@ -177,20 +179,18 @@ export default function TagsSection({
           </Popover>
         </div>
 
-        {tags && tags.length > 0 && (
-          <TagGroup label="Selected tags" className="flex animate-in flex-wrap gap-2 duration-200 fade-in">
-            {tags.map((tag) => (
-              <Tag
-                key={tag}
-                icon={<TagIcon size={12} />}
-                onRemove={() => removeTag(tag)}
-                removeLabel={`Remove ${tag}`}
-              >
-                {tag}
-              </Tag>
-            ))}
-          </TagGroup>
-        )}
+        <TagGroup label="Selected tags">
+          {tags.map((tag) => (
+            <Tag
+              key={tag}
+              icon={<TagIcon size={12} />}
+              onRemove={() => removeTag(tag)}
+              removeLabel={`Remove ${tag}`}
+            >
+              {tag}
+            </Tag>
+          ))}
+        </TagGroup>
 
         <TagSuggestions
           current={tags ?? []}
@@ -204,5 +204,3 @@ export default function TagsSection({
     </div>
   );
 }
-
-

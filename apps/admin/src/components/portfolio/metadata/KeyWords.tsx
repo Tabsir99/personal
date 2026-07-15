@@ -44,20 +44,18 @@ const KeywordsSection = memo(
         </div>
         <div className="px-6 pt-1 pb-5">
           <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-md border border-foreground/6 bg-foreground/2 p-2.5">
-            {keywords.length > 0 && (
-              <TagGroup label="Keywords list" className="flex flex-wrap gap-1.5">
-                {keywords.map((keyword, i) => (
-                  <Tag
-                    key={i}
-                    onRemove={() => handleRemove(i)}
-                    removeLabel={`Remove ${keyword}`}
-                    size="sm"
-                  >
-                    {keyword}
-                  </Tag>
-                ))}
-              </TagGroup>
-            )}
+            <TagGroup label="Keywords list">
+              {keywords.map((keyword, i) => (
+                <Tag
+                  key={keyword}
+                  onRemove={() => handleRemove(i)}
+                  removeLabel={`Remove ${keyword}`}
+                  size="sm"
+                >
+                  {keyword}
+                </Tag>
+              ))}
+            </TagGroup>
 
             {isAddingKeyword ? (
               <span className="flex items-center gap-1.5">
@@ -111,4 +109,3 @@ const KeywordsSection = memo(
 );
 
 export default KeywordsSection;
-
