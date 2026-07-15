@@ -51,47 +51,46 @@ export function ActionButtonGroup({
   return (
     <div className="absolute top-0 right-0 z-10 translate-x-2 opacity-0 transition-all duration-300 group-hover/card:translate-x-0 group-hover/card:opacity-100">
       <div className="flex items-center overflow-hidden rounded-bl-xl border border-border/60 bg-background/60 backdrop-blur-sm">
-      {buttons.map((button, idx) => {
-        const Icon =
-          button.icon ||
-          (button.variant === "toggle"
-            ? button.active
-              ? ToggleLeft
-              : Power
-            : null) ||
-          (button.variant && button.variant !== "custom"
-            ? defaultIcons[button.variant]
-            : undefined);
+        {buttons.map((button, idx) => {
+          const Icon =
+            button.icon ||
+            (button.variant === "toggle"
+              ? button.active
+                ? ToggleLeft
+                : Power
+              : null) ||
+            (button.variant && button.variant !== "custom"
+              ? defaultIcons[button.variant]
+              : undefined);
 
-        return (
-          <Button
-            key={idx}
-            variant={button.variant === "delete" ? "danger" : "ghost"}
-            size="icon"
-            className={`rounded-none ${button.customClassName || ""}`}
-            onClick={() => {
-              if (button.variant === "delete") {
-                return openModal("confirmation", {
-                  data: {
-                    headerText: `Delete ${entityName}`,
-                    message: `Are you sure you want to delete this ${entityName}?`,
-                    onConfirm: button.onClick,
-                    confirmButtonText: "Delete",
-                    confirmButtonVariant: "danger",
-                    cancelButtonText: "Cancel",
-                    cancelButtonVariant: "secondary",
-                  },
-                });
-              }
+          return (
+            <Button
+              key={idx}
+              variant={button.variant === "delete" ? "danger" : "ghost"}
+              size="icon"
+              onClick={() => {
+                if (button.variant === "delete") {
+                  return openModal("confirmation", {
+                    data: {
+                      headerText: `Delete ${entityName}`,
+                      message: `Are you sure you want to delete this ${entityName}?`,
+                      onConfirm: button.onClick,
+                      confirmButtonText: "Delete",
+                      confirmButtonVariant: "danger",
+                      cancelButtonText: "Cancel",
+                      cancelButtonVariant: "secondary",
+                    },
+                  });
+                }
 
-              if (button.onClick) return button.onClick();
-            }}
-            disabled={button.disabled}
-          >
-            {Icon && <Icon className="size-4" />}
-          </Button>
-        );
-      })}
+                if (button.onClick) return button.onClick();
+              }}
+              disabled={button.disabled}
+            >
+              {Icon && <Icon className="size-4" />}
+            </Button>
+          );
+        })}
       </div>
     </div>
   );

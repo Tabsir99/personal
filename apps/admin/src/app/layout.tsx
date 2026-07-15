@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Geist, JetBrains_Mono } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { MotionDevtools } from "premium-ds/motion-devtools";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -47,6 +48,7 @@ export default async function RootLayout({
         <meta name="color-scheme" content="light" />
       </head>
       <body className="overflow-x-hidden">{children}</body>
+      <MotionDevtools />
     </html>
   );
 }

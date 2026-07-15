@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@tabsircg/schemas", "@tabsircg/analytics"],
   logging: { serverFunctions: false },
   devIndicators: false,
+  reactStrictMode: true,
 
   images: {
     remotePatterns: [
@@ -21,14 +22,24 @@ const nextConfig: NextConfig = {
 const config = withPremiumDS(nextConfig);
 
 if (config.turbopack) {
-  const analyticsPkgDir = "/home/tabsir/ap/reactp/tabsircg/analytics/packages/analytics";
+  const analyticsPkgDir =
+    "/home/tabsir/ap/reactp/tabsircg/analytics/packages/analytics";
   const projectDir = dirname(fileURLToPath(import.meta.url));
-  
+
   config.turbopack.resolveAlias = {
     ...config.turbopack.resolveAlias,
-    "@tabsircg/analytics": relative(projectDir, resolve(analyticsPkgDir, "src/index.ts")),
-    "@tabsircg/analytics/sdk": relative(projectDir, resolve(analyticsPkgDir, "src/sdk.ts")),
-    "@tabsircg/analytics/react": relative(projectDir, resolve(analyticsPkgDir, "src/react.tsx")),
+    "@tabsircg/analytics": relative(
+      projectDir,
+      resolve(analyticsPkgDir, "src/index.ts"),
+    ),
+    "@tabsircg/analytics/sdk": relative(
+      projectDir,
+      resolve(analyticsPkgDir, "src/sdk.ts"),
+    ),
+    "@tabsircg/analytics/react": relative(
+      projectDir,
+      resolve(analyticsPkgDir, "src/react.tsx"),
+    ),
   };
 }
 
