@@ -4,7 +4,7 @@ import { useShallow } from "zustand/shallow";
 import { Check, Code, Plus, Trash, X } from "@phosphor-icons/react";
 
 import { Button } from "premium-ds/button";
-import { FormField } from "@/components/ui/FormField";
+
 import { AddCard } from "@/components/ui/add-card";
 import { ActionButtonGroup } from "@/components/ui/actionButtonGroup";
 import { ConfigMultiSelect } from "@/components/ui/configMultiSelect";
@@ -179,7 +179,10 @@ export default function Skills() {
                 >
                   <div className="min-h-0 overflow-hidden">
                     <div className="mt-6 space-y-3 rounded-md border border-foreground/6 bg-foreground/2 p-3">
-                      <FormField label="Skill">
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium leading-none">
+                          Skill
+                        </label>
                         <ConfigMultiSelect
                           mode="single"
                           value={newSkill.name ? [newSkill.name] : []}
@@ -216,17 +219,14 @@ export default function Skills() {
                             err: "Failed to create skill",
                           }}
                         />
-                      </FormField>
-                      <FormField
-                        label={
-                          <span className="inline-flex w-full items-center justify-between gap-2">
-                            <span>Proficiency</span>
-                            <span className="font-mono tracking-normal text-foreground/80 normal-case tabular-nums">
-                              {newSkill.level}/5
-                            </span>
+                      </div>
+                      <div className="space-y-1.5">
+                        <div className="flex w-full items-center justify-between gap-2">
+                          <label className="text-sm font-medium leading-none">Proficiency</label>
+                          <span className="font-mono text-sm tracking-normal text-foreground/80 tabular-nums">
+                            {newSkill.level}/5
                           </span>
-                        }
-                      >
+                        </div>
                         <div
                           role="group"
                           aria-label="Proficiency level"
@@ -254,7 +254,7 @@ export default function Skills() {
                             </button>
                           ))}
                         </div>
-                      </FormField>
+                      </div>
                       <div className="flex items-center gap-1.5 pt-1">
                         <Button
                           size="sm"

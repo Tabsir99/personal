@@ -9,7 +9,7 @@ import { Checkbox } from "premium-ds/checkbox";
 import { useSiteConfigStore } from "@/stores/SiteConfigStore";
 import Panel from "./Panel";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import HeightTransition from "./HeightTransition";
+import { Collapse } from "premium-ds/collapse";
 
 export default function NowReadingPanel() {
   const { draftRows, initialRows, draftIds, initialIds } = useSiteConfigStore(
@@ -73,7 +73,7 @@ export default function NowReadingPanel() {
         </Button>
       }
     >
-      <HeightTransition show={isEmpty}>
+      <Collapse open={isEmpty} fade>
         <div className="flex flex-col items-start gap-2 rounded-md border border-foreground/6 bg-foreground/2 px-4 py-6">
           <Eyebrow tone="muted" family="mono">
             Empty
@@ -82,8 +82,8 @@ export default function NowReadingPanel() {
             Nothing pinned. Add a book and it shows up in the /blog sticker.
           </p>
         </div>
-      </HeightTransition>
-      <HeightTransition show={!isEmpty}>
+      </Collapse>
+      <Collapse open={!isEmpty} fade>
         <ul>
           {draftRows.map((row, i) => {
             const id = draftIds[i] ?? `row-${i}`;
@@ -164,7 +164,7 @@ export default function NowReadingPanel() {
             );
           })}
         </ul>
-      </HeightTransition>
+      </Collapse>
     </Panel>
   );
 }
@@ -186,17 +186,9 @@ function RowShell({
   }, [isNew]);
   const collapsed = isLeaving || !open;
   return (
-    <li
-      className="grid ease-out"
-      style={{
-        gridTemplateRows: collapsed ? "0fr" : "1fr",
-        opacity: collapsed ? 0 : 1,
-        transitionProperty: "grid-template-rows, opacity",
-        transitionDuration: "240ms",
-      }}
-    >
-      <div className="overflow-hidden">{children}</div>
-    </li>
+    <Collapse As="li" open={!collapsed} fade>
+      {children}
+    </Collapse>
   );
 }
 

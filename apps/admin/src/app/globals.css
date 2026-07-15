@@ -23,6 +23,13 @@
   }
 }
 
+@layer utilities {
+  /* Fix conflict between Tailwind's visibility: collapse and premium-ds Collapse component */
+  .collapse[data-open='true'] {
+    visibility: inherit;
+  }
+}
+
 @theme inline {
   /* Wipe default colors, radii, and shadows so developers can only use our design tokens */
   --color-*: initial;

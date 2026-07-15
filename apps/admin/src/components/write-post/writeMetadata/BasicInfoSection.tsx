@@ -11,7 +11,7 @@ import { callWithToast } from "@/lib/utils";
 import { SuggestionField } from "./ComparsionInput";
 import ConfigSingleSelect from "./ConfigSingleSelect";
 import { SectionHeader } from "./SectionHeader";
-import { FieldLabel } from "@/components/ui/label";
+
 
 type ProseField = Exclude<keyof AIBlogMetadata, "tags">;
 
@@ -95,46 +95,40 @@ export default function BasicInfoSection({
       />
 
       <div className="space-y-4">
-        <div className="space-y-2">
-          <FieldLabel>Blog Title</FieldLabel>
-          <SuggestionField
-            id="blogTitle"
-            onAccept={() => onApplyField("title")}
-            onReject={() => onSkipField("title")}
-            onChange={(v) => setBlogFormData({ title: v })}
-            value={title}
-            suggested={suggestion?.title}
-            placeholder="Enter blog title..."
-          />
-        </div>
+        <SuggestionField
+          id="blogTitle"
+          label="Blog Title"
+          onAccept={() => onApplyField("title")}
+          onReject={() => onSkipField("title")}
+          onChange={(v) => setBlogFormData({ title: v })}
+          value={title}
+          suggested={suggestion?.title}
+          placeholder="Enter blog title..."
+        />
 
-        <div className="space-y-2">
-          <FieldLabel>Subtitle / Hook</FieldLabel>
-          <SuggestionField
-            id="dek"
-            value={dek}
-            suggested={suggestion?.dek}
-            onAccept={() => onApplyField("dek")}
-            onReject={() => onSkipField("dek")}
-            onChange={(v) => setBlogFormData({ dek: v })}
-          />
-        </div>
+        <SuggestionField
+          id="dek"
+          label="Subtitle / Hook"
+          value={dek}
+          suggested={suggestion?.dek}
+          onAccept={() => onApplyField("dek")}
+          onReject={() => onSkipField("dek")}
+          onChange={(v) => setBlogFormData({ dek: v })}
+        />
 
-        <div className="space-y-2">
-          <FieldLabel>Excerpt</FieldLabel>
-          <SuggestionField
-            id="excerpt"
-            onAccept={() => onApplyField("excerpt")}
-            onReject={() => onSkipField("excerpt")}
-            onChange={(v) => setBlogFormData({ excerpt: v })}
-            value={excerpt}
-            suggested={suggestion?.excerpt}
-          />
-        </div>
+        <SuggestionField
+          id="excerpt"
+          label="Excerpt"
+          onAccept={() => onApplyField("excerpt")}
+          onReject={() => onSkipField("excerpt")}
+          onChange={(v) => setBlogFormData({ excerpt: v })}
+          value={excerpt}
+          suggested={suggestion?.excerpt}
+        />
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <FieldLabel>Kind</FieldLabel>
+            <label className="text-sm font-medium leading-none">Kind</label>
             <ConfigSingleSelect
               value={kind}
               onValueChange={(value) => setBlogFormData({ kind: value })}
@@ -144,7 +138,7 @@ export default function BasicInfoSection({
           </div>
 
           <div className="space-y-2">
-            <FieldLabel>Schema Type</FieldLabel>
+            <label className="text-sm font-medium leading-none">Schema Type</label>
             <ConfigSingleSelect
               value={schemaType}
               onValueChange={(value) =>
@@ -163,7 +157,8 @@ export default function BasicInfoSection({
               variant="secondary"
               size="sm"
               onClick={handleSetFeatured}
-              disabled={!canFeature || isFeaturing}
+              disabled={!canFeature}
+              loading={isFeaturing}
               iconLeft={<Star size={16} />}
             >
               Set as featured (now)

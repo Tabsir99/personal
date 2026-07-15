@@ -50,7 +50,7 @@ export function ActionButtonGroup({
 
   return (
     <div className="absolute top-0 right-0 z-10 translate-x-2 opacity-0 transition-all duration-300 group-hover/card:translate-x-0 group-hover/card:opacity-100">
-      <div className="flex items-center overflow-hidden rounded-bl-xl border border-border/60 bg-background/60 backdrop-blur-sm shadow-lg">
+      <div className="flex items-center overflow-hidden rounded-bl-xl border border-border/60 bg-background/60 backdrop-blur-sm">
       {buttons.map((button, idx) => {
         const Icon =
           button.icon ||

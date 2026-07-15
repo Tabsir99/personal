@@ -10,6 +10,8 @@ export default function Img({ src, alt = "", ...props }: ImageProps) {
 
   const imageSrc = isFullUrl ? src : `${clientEnv.MEDIA_ORIGIN}/${src}`;
 
-  return // eslint-disable-next-line @next/next/no-img-element
-    <img {...props} src={imageSrc} alt={alt} />;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img {...props} src={imageSrc} alt={alt} />
+  );
 }

@@ -17,7 +17,7 @@ import { Button } from "premium-ds/button";
 import Img from "@/components/ui/image";
 import { ConfigMultiSelect } from "@/components/ui/configMultiSelect";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { FormField } from "@/components/ui/FormField";
+
 
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
@@ -324,7 +324,8 @@ export default function ProjectDialog({
                   setFormData({ ...formData, title: e.target.value })
                 }
               />
-              <FormField label="Type">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium leading-none">Type</label>
                 <Select
                   options={TYPE_OPTIONS}
                   value={formData.type}
@@ -334,8 +335,9 @@ export default function ProjectDialog({
                   placeholder="Choose type"
                   ariaLabel="Type"
                 />
-              </FormField>
-              <FormField label="Status">
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium leading-none">Status</label>
                 <Select
                   options={STATUS_OPTIONS}
                   value={formData.status}
@@ -345,7 +347,7 @@ export default function ProjectDialog({
                   placeholder="Choose status"
                   ariaLabel="Status"
                 />
-              </FormField>
+              </div>
               <TextField
                 id="project-tag"
                 label="Tag"
@@ -386,7 +388,8 @@ export default function ProjectDialog({
                   handleUpdateStill(i, { label: e.target.value })
                 }
               />
-              <FormField label="Kind">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium leading-none">Kind</label>
                 <Select
                   options={KIND_OPTIONS}
                   value={still.kind}
@@ -396,7 +399,7 @@ export default function ProjectDialog({
                   placeholder="Choose kind"
                   ariaLabel="Kind"
                 />
-              </FormField>
+              </div>
               <Button
                 type="button"
                 variant="ghost"
@@ -408,12 +411,15 @@ export default function ProjectDialog({
               />
             </div>
             {still.kind === "video" ? (
-              <FormField label="Video sources">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium leading-none">
+                  Video sources
+                </label>
                 <VideoSourcesEditor
                   value={still.sources ?? []}
                   onChange={(sources) => handleUpdateStill(i, { sources })}
                 />
-              </FormField>
+              </div>
             ) : (
               <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[220px_1fr]">
                 <button
@@ -511,7 +517,8 @@ export default function ProjectDialog({
               key={i}
               className="group/link grid grid-cols-[120px_1fr_1fr_auto] items-end gap-2"
             >
-              <FormField label="Type">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium leading-none">Type</label>
                 <Select
                   options={LINK_TYPE_SELECT_OPTIONS}
                   value={link.type}
@@ -521,7 +528,7 @@ export default function ProjectDialog({
                   placeholder="Type"
                   ariaLabel="Link type"
                 />
-              </FormField>
+              </div>
               <TextField
                 id={`link-text-${i}`}
                 label="Text"
@@ -561,7 +568,8 @@ export default function ProjectDialog({
           )}
         >
           <div className="mb-2 grid grid-cols-[120px_1fr_1fr] items-end gap-2">
-            <FormField label="Type">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium leading-none">Type</label>
               <Select
                 options={LINK_TYPE_SELECT_OPTIONS}
                 value={newLink.type}
@@ -571,7 +579,7 @@ export default function ProjectDialog({
                 placeholder="Type"
                 ariaLabel="New link type"
               />
-            </FormField>
+            </div>
             <TextField
               id="new-link-text"
               label="Text"
@@ -632,7 +640,10 @@ export default function ProjectDialog({
         )}
         {step === 3 && (
           <ModalSection title="Tech & outcomes">
-        <FormField label="Skills">
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium leading-none">
+            Skills
+          </label>
           <ConfigMultiSelect
             value={formData.skills}
             onChange={(next) => setFormData({ ...formData, skills: next })}
@@ -667,12 +678,13 @@ export default function ProjectDialog({
               err: "Failed to create skill",
             }}
           />
-        </FormField>
+        </div>
 
-        <FormField
-          label="Metrics"
-          hint="Up to two results worth showcasing (10K users, 0.8s load time)."
-        >
+        <div className="space-y-1.5">
+          <div className="mb-2 flex flex-col gap-1">
+            <label className="text-sm font-medium leading-none">Metrics</label>
+            <span className="text-xs text-muted-foreground">Up to two results worth showcasing (10K users, 0.8s load time).</span>
+          </div>
           {formData.metrics.length < 2 && (
             <div className="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
               <TextField
@@ -745,7 +757,7 @@ export default function ProjectDialog({
               Two metrics max — remove one to add another.
             </p>
           )}
-        </FormField>
+        </div>
       </ModalSection>
         )}
         {step === 4 && (

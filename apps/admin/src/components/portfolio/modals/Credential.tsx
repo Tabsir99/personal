@@ -3,7 +3,7 @@ import { Image as ImageIcon, Plus } from "@phosphor-icons/react";
 
 import { TextField } from "premium-ds/text-field";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { FormField } from "@/components/ui/FormField";
+
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import Img from "@/components/ui/image";
 import { PageData } from "@tabsircg/schemas/portfolio";
@@ -65,7 +65,8 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
       </ModalSection>
 
       <ModalSection title="Media">
-        <FormField label="Certificate image">
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium leading-none">Certificate image</label>
           <div
             onClick={() => imageInputRef.current?.click()}
             className="group/upload flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-md border border-foreground/6 bg-foreground/2 transition-colors hover:bg-foreground/4"
@@ -100,7 +101,7 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
             className="hidden"
             accept="image/*"
           />
-        </FormField>
+        </div>
       </ModalSection>
 
       <ModalSection title="Reference">

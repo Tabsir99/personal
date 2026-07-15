@@ -5,7 +5,7 @@ import { Plus, Star } from "@phosphor-icons/react";
 import { TextField } from "premium-ds/text-field";
 import { Textarea } from "premium-ds/textarea";
 import { Select } from "premium-ds/select";
-import { FormField } from "@/components/ui/FormField";
+
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { PageData } from "@tabsircg/schemas/portfolio";
 import { cn } from "@/lib/utils";
@@ -146,24 +146,28 @@ export default function TestimonialDialog({
       </ModalSection>
 
       <ModalSection title="Placement">
-        <FormField
-          label="Display slot"
-          hint="Endorsement = quote-only card. Voices = video testimonial slot."
-        >
-          <Select
-            options={DISPLAY_SLOT_OPTIONS}
-            value={formData.displaySlot}
-            onChange={(value) =>
-              setFormData({ ...formData, displaySlot: value as DisplaySlot })
-            }
-            placeholder="Choose placement"
-            ariaLabel="Display slot"
-          />
-        </FormField>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium leading-none">Display slot</label>
+              <Select
+                options={DISPLAY_SLOT_OPTIONS}
+                value={formData.displaySlot}
+                onChange={(value) =>
+                  setFormData({ ...formData, displaySlot: value as DisplaySlot })
+                }
+                placeholder="Choose placement"
+                ariaLabel="Display slot"
+              />
+              <p className="text-[13px] text-muted-foreground mt-1">
+                Endorsement = quote-only card. Voices = video testimonial slot.
+              </p>
+            </div>
       </ModalSection>
 
       <ModalSection title="Rating & quote">
-        <FormField label="Rating">
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium leading-none">
+            Rating
+          </label>
           <div className="flex items-center gap-1.5">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -191,7 +195,7 @@ export default function TestimonialDialog({
               {formData.rating} / 5
             </span>
           </div>
-        </FormField>
+        </div>
 
         <Textarea
           id="testimonial-quote"
@@ -205,15 +209,18 @@ export default function TestimonialDialog({
       </ModalSection>
 
       <ModalSection title="Video">
-        <FormField
-          label="Video sources"
-          hint="Upload or paste one or more encoded files (webm/mp4/…). The browser plays the most efficient codec it supports."
-        >
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium leading-none">
+            Video sources
+          </label>
           <VideoSourcesEditor
             value={formData.video}
             onChange={(video) => setFormData({ ...formData, video })}
           />
-        </FormField>
+          <p className="text-xs text-muted-foreground">
+            Upload or paste one or more encoded files (webm/mp4/…). The browser plays the most efficient codec it supports.
+          </p>
+        </div>
       </ModalSection>
     </PortfolioModalFrame>
   );

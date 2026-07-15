@@ -3,22 +3,20 @@
 import { useShallow } from "zustand/react/shallow";
 import { useSiteConfigStore } from "@/stores/SiteConfigStore";
 import Panel from "./Panel";
-import Field from "./Field";
-import HeightTransition from "./HeightTransition";
+import { Collapse } from "premium-ds/collapse";
 import { TextField } from "premium-ds/text-field";
 import { Textarea } from "premium-ds/textarea";
 
 export default function CurrentlyBuildingPanel() {
-  const { draft, initial } = useSiteConfigStore(
+  const { draft } = useSiteConfigStore(
     useShallow((s) => ({
       draft: s.draft.currentlyBuilding,
-      initial: s.initial.currentlyBuilding,
     })),
   );
 
   const setCurrentlyBuilding = (patch: Partial<typeof draft>) =>
     useSiteConfigStore.getState().setCurrentlyBuilding(patch);
-  const edited = (k: keyof typeof draft) => draft[k] !== initial[k];
+
   const previewVisible = !!draft.code || !!draft.body;
 
   return (
@@ -28,43 +26,39 @@ export default function CurrentlyBuildingPanel() {
     >
       <div className="grid gap-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[140px_minmax(0,1fr)]">
-          <Field label="Code" edited={edited("code")}>
             <TextField
+              label="Code"
               value={draft.code}
               onChange={(e) => setCurrentlyBuilding({ code: e.target.value })}
               placeholder="tinypg"
             />
-          </Field>
-          <Field label="Body" edited={edited("body")}>
             <Textarea
+              label="Body"
               value={draft.body}
               onChange={(e) => setCurrentlyBuilding({ body: e.target.value })}
               placeholder="One-line description shown beside the code."
               minRows={2}
               maxRows={4}
             />
-          </Field>
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_1fr]">
-          <Field label="Link label" edited={edited("linkLabel")}>
             <TextField
+              label="Link label"
               value={draft.linkLabel}
               onChange={(e) =>
                 setCurrentlyBuilding({ linkLabel: e.target.value })
               }
               placeholder="→ /lab"
             />
-          </Field>
-          <Field label="Link href" edited={edited("linkHref")}>
             <TextField
+              label="Link href"
               value={draft.linkHref}
               onChange={(e) =>
                 setCurrentlyBuilding({ linkHref: e.target.value })
               }
               placeholder="/lab"
             />
-          </Field>
         </div>
 
         <div>
@@ -72,7 +66,7 @@ export default function CurrentlyBuildingPanel() {
             Preview
           </p>
           <div className="rounded-md border border-foreground/6 bg-background/60 p-4">
-            <HeightTransition show={previewVisible}>
+            <Collapse open={previewVisible} fade>
               <div className="mt-3 text-sm leading-relaxed text-foreground/85">
                 {draft.code && (
                   <span className="rounded-sm bg-foreground/4 px-1.5 py-0.5 font-mono text-xs text-foreground/80">
@@ -87,12 +81,12 @@ export default function CurrentlyBuildingPanel() {
                   {draft.linkLabel || draft.linkHref}
                 </div>
               )}
-            </HeightTransition>
-            <HeightTransition show={!previewVisible}>
+            </Collapse>
+            <Collapse open={!previewVisible} fade>
               <p className="text-sm text-muted-foreground">
                 Hidden — neither code nor body set
               </p>
-            </HeightTransition>
+            </Collapse>
           </div>
         </div>
       </div>
