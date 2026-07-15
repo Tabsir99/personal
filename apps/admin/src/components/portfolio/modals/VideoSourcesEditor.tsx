@@ -77,21 +77,24 @@ export function VideoSourcesEditor({
                 }
                 update(i, patch);
               }}
-              className="font-mono text-xs"
+              size="sm"
+              className="font-mono"
             />
             <TextField
               id={`video-type-${i}`}
               placeholder="video/mp4"
               value={s.type}
               onChange={(e) => update(i, { type: e.target.value })}
-              className="font-mono text-xs"
+              size="sm"
+              className="font-mono"
             />
             <TextField
               id={`video-codec-${i}`}
               placeholder='codecs e.g. avc1.42E01E'
               value={s.codec}
               onChange={(e) => update(i, { codec: e.target.value })}
-              className="font-mono text-xs"
+              size="sm"
+              className="font-mono"
             />
             <div className="flex items-center gap-0.5 self-center">
               {value.length > 1 && (
@@ -120,10 +123,9 @@ export function VideoSourcesEditor({
               )}
               <Button
                 type="button"
-                variant="ghost"
+                variant="danger"
                 size="sm"
                 onClick={() => remove(i)}
-                className="text-muted-foreground hover:bg-destructive/8 hover:text-destructive"
                 aria-label="Remove source"
                 iconLeft={<X size={14} />}
               />

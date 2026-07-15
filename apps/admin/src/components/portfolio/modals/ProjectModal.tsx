@@ -402,10 +402,10 @@ export default function ProjectDialog({
               </div>
               <Button
                 type="button"
-                variant="ghost"
+                variant="danger"
                 size="sm"
                 onClick={() => handleRemoveStill(i)}
-                className="self-end text-muted-foreground hover:bg-destructive/8 hover:text-destructive"
+                className="self-end"
                 aria-label="Remove still"
                 iconLeft={<X size={14} />}
               />
@@ -461,7 +461,8 @@ export default function ProjectDialog({
                     onChange={(e) =>
                       handleUpdateStill(i, { url: e.target.value })
                     }
-                    className="font-mono text-xs"
+                    size="sm"
+                    className="font-mono"
                   />
                   <TextField
                     id={`still-alt-${i}`}
@@ -544,14 +545,15 @@ export default function ProjectDialog({
                 placeholder="https://…"
                 value={link.url}
                 onChange={(e) => handleUpdateLink(i, { url: e.target.value })}
-                className="font-mono text-xs"
+                size="sm"
+                className="font-mono"
               />
               <Button
                 type="button"
-                variant="ghost"
+                variant="danger"
                 size="sm"
                 onClick={() => handleRemoveLink(i)}
-                className="text-muted-foreground opacity-0 transition-opacity group-hover/link:opacity-100 hover:bg-destructive/8 hover:text-destructive focus-visible:opacity-100"
+                className="opacity-0 transition-opacity group-hover/link:opacity-100 focus-visible:opacity-100"
                 aria-label="Remove link"
                 iconLeft={<X size={14} />}
               />
@@ -600,7 +602,8 @@ export default function ProjectDialog({
               onChange={(e) =>
                 setNewLink({ ...newLink, url: e.target.value })
               }
-              className="font-mono text-xs"
+              size="sm"
+              className="font-mono"
             />
           </div>
           <div className="flex justify-end gap-1.5">

@@ -97,7 +97,8 @@ const SocialLinksSection = memo(
               label="Booking URL"
               value={contact.calUrl}
               onChange={(e) => updateContact({ calUrl: e.target.value })}
-              className="font-mono text-xs"
+              size="sm"
+              className="font-mono"
               placeholder="https://cal.com/tabsir"
             />
           </div>
@@ -129,7 +130,7 @@ const SocialLinksSection = memo(
                     label="URL"
                     value={social.url}
                     onChange={(e) => updateSocial(i, "url", e.target.value)}
-                    className="font-mono text-xs"
+                    className="font-mono"
                     placeholder="https://…"
                     size="sm"
                   />
@@ -137,15 +138,15 @@ const SocialLinksSection = memo(
                     label="Icon URL"
                     value={social.icon}
                     onChange={(e) => updateSocial(i, "icon", e.target.value)}
-                    className="font-mono text-xs"
+                    className="font-mono"
                     placeholder="https://…/icon.png"
                     size="sm"
                   />
                   <Button
-                    variant="ghost"
+                    variant="danger"
                     size="sm"
                     onClick={() => removeSocial(i)}
-                    className="text-muted-foreground opacity-0 transition-opacity group-hover/social:opacity-100 hover:bg-destructive/8 hover:text-destructive focus-visible:opacity-100"
+                    className="opacity-0 transition-opacity group-hover/social:opacity-100 focus-visible:opacity-100"
                     aria-label={`Remove ${social.name || "social link"}`}
                     iconLeft={<Trash size={14} />}
                   />
@@ -177,7 +178,7 @@ const SocialLinksSection = memo(
                     onChange={(e) =>
                       setNewSocial({ ...newSocial, url: e.target.value })
                     }
-                    className="font-mono text-xs"
+                    className="font-mono"
                     placeholder="https://…"
                     size="sm"
                   />
@@ -187,7 +188,7 @@ const SocialLinksSection = memo(
                     onChange={(e) =>
                       setNewSocial({ ...newSocial, icon: e.target.value })
                     }
-                    className="font-mono text-xs"
+                    className="font-mono"
                     placeholder="https://…/icon.png"
                     size="sm"
                   />

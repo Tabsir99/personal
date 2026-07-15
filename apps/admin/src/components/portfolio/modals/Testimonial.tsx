@@ -140,7 +140,8 @@ export default function TestimonialDialog({
             onChange={(e) =>
               setFormData({ ...formData, avatar: e.target.value })
             }
-            className="font-mono text-xs"
+            size="sm"
+            className="font-mono"
           />
         </div>
       </ModalSection>

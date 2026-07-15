@@ -114,7 +114,8 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
           onChange={(e) =>
             setFormData({ ...formData, link: e.target.value })
           }
-          className="font-mono text-xs"
+          size="sm"
+          className="font-mono"
         />
       </ModalSection>
     </PortfolioModalFrame>
