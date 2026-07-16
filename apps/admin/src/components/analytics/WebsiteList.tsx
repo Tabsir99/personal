@@ -85,6 +85,7 @@ function WebsiteCard({
       return;
     }
     toast.success(`"${site.name}" deleted`);
+    setOpenDelete(false);
     onMutate();
   };
 
@@ -113,12 +114,12 @@ function WebsiteCard({
               <button
                 type="button"
                 onClick={copyId}
-                className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground transition-colors hover:bg-foreground/4 hover:text-foreground"
+                className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground transition-colors hover:bg-foreground/4 hover:text-foreground"
                 title="Copy website ID"
               >
                 {site.id}
                 {copied ? (
-                  <Check size={10} weight="bold" className="text-green-600" />
+                  <Check size={10} weight="bold" className="text-success" />
                 ) : (
                   <Copy size={10} />
                 )}
@@ -146,6 +147,8 @@ function WebsiteCard({
             aria-label="Edit"
           />
           <Dialog
+            open={openDelete}
+            onOpenChange={setOpenDelete}
             trigger={
               <Button
                 variant="ghost"
@@ -156,8 +159,23 @@ function WebsiteCard({
                 className="hover:text-destructive!"
               />
             }
+            tone="danger"
             title="Delete website?"
             description="Are you sure you want to delete? All analytics will be deleted"
+            footer={(close) => (
+              <div className="flex gap-2">
+                <Button variant="ghost" onClick={close}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={handleDelete}
+                  loading={deleting}
+                >
+                  Delete
+                </Button>
+              </div>
+            )}
           />
         </div>
       </div>

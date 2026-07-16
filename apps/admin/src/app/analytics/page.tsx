@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -37,8 +38,8 @@ export default function AnalyticsPage() {
     return (
       <div className="mx-auto max-w-3xl">
         <div className="space-y-4 pt-2">
-          <div className="h-7 w-48 animate-pulse rounded bg-foreground/5" />
-          <div className="h-4 w-72 animate-pulse rounded bg-foreground/4" />
+          <div className="h-7 w-48 animate-pulse rounded-md bg-foreground/5" />
+          <div className="h-4 w-72 animate-pulse rounded-md bg-foreground/4" />
           <div className="mt-8 space-y-3">
             {[0, 1, 2].map((i) => (
               <div
