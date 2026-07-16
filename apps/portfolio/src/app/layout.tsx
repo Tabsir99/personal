@@ -58,6 +58,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: metaTitle,
     description: metaDescription,
     keywords: keywords.length ? keywords : undefined,
+    icons: "https://media.tabsircg.com/logo.png",
     openGraph: {
       title: metaTitle,
       description: metaDescription,
