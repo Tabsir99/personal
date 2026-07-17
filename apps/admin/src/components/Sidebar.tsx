@@ -122,7 +122,7 @@ const DashBoardSidebar = ({
       <div
         className={cn(
           "flex h-16 shrink-0 items-center border-b border-border transition-[padding] duration-200 ease-out",
-          expanded ? "px-4 justify-between" : "pl-4.5 justify-start",
+          expanded ? "justify-between px-4" : "justify-start pl-4.5",
         )}
       >
         <div className="flex items-center gap-3">
@@ -135,8 +135,8 @@ const DashBoardSidebar = ({
           />
           <span
             className={cn(
-              "font-semibold tracking-tight text-foreground text-sm transition-opacity duration-200 ease-out whitespace-nowrap",
-              expanded ? "opacity-100" : "opacity-0 pointer-events-none",
+              "text-sm font-semibold tracking-tight whitespace-nowrap text-foreground transition-opacity duration-200 ease-out",
+              expanded ? "opacity-100" : "pointer-events-none opacity-0",
             )}
           >
             Studio
@@ -170,8 +170,8 @@ const DashBoardSidebar = ({
                 aria-current={item.isActive ? "page" : undefined}
                 title={!expanded ? item.menuName : undefined}
                 className={cn(
-                  "group relative flex h-10 items-center overflow-hidden rounded-md text-sm font-medium transition-[padding,colors] duration-200 ease-out gap-3",
-                  expanded ? "pl-3 pr-3" : "pl-5 pr-3",
+                  "group relative flex h-10 items-center gap-3 overflow-hidden rounded-md text-sm font-medium transition-[padding,colors] duration-200 ease-out",
+                  expanded ? "px-3" : "pr-3 pl-5",
                   item.isActive
                     ? "bg-primary/6 text-foreground"
                     : "text-muted-foreground hover:bg-foreground/4 hover:text-foreground",
@@ -194,8 +194,8 @@ const DashBoardSidebar = ({
                 />
                 <span
                   className={cn(
-                    "text-sm transition-opacity duration-200 ease-out whitespace-nowrap",
-                    expanded ? "opacity-100" : "opacity-0 pointer-events-none",
+                    "text-sm whitespace-nowrap transition-opacity duration-200 ease-out",
+                    expanded ? "opacity-100" : "pointer-events-none opacity-0",
                   )}
                 >
                   {item.menuName}
@@ -217,15 +217,15 @@ const DashBoardSidebar = ({
           title={!expanded ? "Sign out" : undefined}
           aria-label="Sign out"
           className={cn(
-            "flex h-9 items-center overflow-hidden rounded-md text-muted-foreground transition-[padding,colors] duration-200 ease-out hover:bg-destructive/8 hover:text-destructive disabled:pointer-events-none disabled:opacity-50 gap-3",
-            expanded ? "pl-3 pr-3" : "pl-5 pr-3",
+            "flex h-9 items-center gap-3 overflow-hidden rounded-md text-muted-foreground transition-[padding,colors] duration-200 ease-out hover:bg-destructive/8 hover:text-destructive disabled:pointer-events-none disabled:opacity-50",
+            expanded ? "px-3" : "pr-3 pl-5",
           )}
         >
           <SignOut className="size-4 shrink-0" />
           <span
             className={cn(
-              "text-left text-sm font-medium transition-opacity duration-200 ease-out whitespace-nowrap",
-              expanded ? "opacity-100" : "opacity-0 pointer-events-none",
+              "text-left text-sm font-medium whitespace-nowrap transition-opacity duration-200 ease-out",
+              expanded ? "opacity-100" : "pointer-events-none opacity-0",
             )}
           >
             Sign out

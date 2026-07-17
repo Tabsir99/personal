@@ -22,7 +22,7 @@ export const GET = wrapRoute<EventsResponse>(async (req: NextRequest) => {
 
   const [eventsRes, totalRes] = await Promise.all([
     queryAE<{ name: string; uv: number; total: number }>(`
-      SELECT ${F.eventName} as name, COUNT(DISTINCT ${F.visitorId}) as uv, COUNT(*) as total
+      SELECT ${F.eventName} as name, COUNT(DISTINCT ${F.visitorId}) as uv, COUNT() as total
       FROM cgd
       WHERE index1 = '${params.websiteId}'
         AND ${F.type} = 'custom'

@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+ 
 import { useRef, useState } from "react";
 import {
   X,
@@ -327,7 +327,7 @@ export default function ProjectDialog({
                 }
               />
               <div className="space-y-1.5">
-                <label className="text-sm font-medium leading-none">Type</label>
+                <label className="text-sm leading-none font-medium">Type</label>
                 <Select
                   options={TYPE_OPTIONS}
                   value={formData.type}
@@ -339,7 +339,7 @@ export default function ProjectDialog({
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium leading-none">
+                <label className="text-sm leading-none font-medium">
                   Status
                 </label>
                 <Select
@@ -393,7 +393,7 @@ export default function ProjectDialog({
                     }
                   />
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium leading-none">
+                    <label className="text-sm leading-none font-medium">
                       Kind
                     </label>
                     <Select
@@ -418,7 +418,7 @@ export default function ProjectDialog({
                 </div>
                 {still.kind === "video" ? (
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium leading-none">
+                    <label className="text-sm leading-none font-medium">
                       Video sources
                     </label>
                     <VideoSourcesEditor
@@ -527,7 +527,7 @@ export default function ProjectDialog({
                   className="group/link grid grid-cols-[120px_1fr_1fr_auto] items-end gap-2"
                 >
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium leading-none">
+                    <label className="text-sm leading-none font-medium">
                       Type
                     </label>
                     <Select
@@ -583,7 +583,7 @@ export default function ProjectDialog({
             >
               <div className="mb-2 grid grid-cols-[120px_1fr_1fr] items-end gap-2">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium leading-none">
+                  <label className="text-sm leading-none font-medium">
                     Type
                   </label>
                   <Select
@@ -658,7 +658,7 @@ export default function ProjectDialog({
         <Collapse animation={{ ease: "glide" }} open={step === 3} fade>
           <section title="Tech & outcomes" className="space-y-6">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium leading-none">Skills</label>
+              <label className="text-sm leading-none font-medium">Skills</label>
               <ConfigMultiSelect
                 value={formData.skills}
                 onChange={(next) => setFormData({ ...formData, skills: next })}
@@ -701,7 +701,7 @@ export default function ProjectDialog({
 
             <div className="space-y-1.5">
               <div className="mb-2 flex flex-col gap-1">
-                <label className="text-sm font-medium leading-none">
+                <label className="text-sm leading-none font-medium">
                   Metrics
                 </label>
                 <span className="text-xs text-muted-foreground">

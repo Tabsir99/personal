@@ -15,7 +15,7 @@ export const GET = wrapRoute<ExitLinkMetric[]>(async (req: NextRequest) => {
   const { start, end } = periodToRange(params.period);
 
   const res = await queryAE<{ name: string; uv: number; exits: number }>(`
-    SELECT ${F.href} as name, COUNT(DISTINCT ${F.visitorId}) as uv, COUNT(*) as exits
+    SELECT ${F.href} as name, COUNT(DISTINCT ${F.visitorId}) as uv, COUNT() as exits
     FROM cgd
     WHERE index1 = '${params.websiteId}'
       AND ${F.type} = 'custom'

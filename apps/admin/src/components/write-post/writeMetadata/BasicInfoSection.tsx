@@ -128,7 +128,7 @@ export default function BasicInfoSection({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium leading-none">Kind</label>
+            <label className="text-sm leading-none font-medium">Kind</label>
             <ConfigSingleSelect
               value={kind}
               onValueChange={(value) => setBlogFormData({ kind: value })}
@@ -138,7 +138,7 @@ export default function BasicInfoSection({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium leading-none">Schema Type</label>
+            <label className="text-sm leading-none font-medium">Schema Type</label>
             <ConfigSingleSelect
               value={schemaType}
               onValueChange={(value) =>

@@ -21,7 +21,7 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
 
   const [pagesRes, sessionFirstRes] = await Promise.all([
     queryAE<{ name: string; uv: number; pageviews: number }>(`
-      SELECT ${F.href} as name, COUNT(DISTINCT ${F.visitorId}) as uv, COUNT(*) as pageviews
+      SELECT ${F.href} as name, COUNT(DISTINCT ${F.visitorId}) as uv, COUNT() as pageviews
       FROM cgd
       WHERE index1 = '${params.websiteId}'
         AND ${F.type} = 'pageview'

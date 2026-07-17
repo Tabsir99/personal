@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   AreaChart,
   Area,
@@ -15,15 +14,16 @@ import type { TimeseriesPoint } from "./types";
 interface MainChartProps {
   data: TimeseriesPoint[];
   granularity: "hourly" | "daily" | "weekly" | "monthly";
+  metric?: string;
 }
 
-type Metric = "visitors" | "pageviews" | "sessions";
+const CHART_KEYS = new Set(["visitors", "pageviews", "sessions"]);
 
-const METRICS: { key: Metric; label: string; color: string }[] = [
-  { key: "visitors", label: "Visitors", color: "var(--teal-500)" },
-  { key: "pageviews", label: "Pageviews", color: "var(--amber-500)" },
-  { key: "sessions", label: "Sessions", color: "var(--red-400)" },
-];
+const METRIC_META: Record<string, { label: string; color: string }> = {
+  visitors: { label: "Visitors", color: "var(--color-primary)" },
+  pageviews: { label: "Pageviews", color: "var(--color-primary)" },
+  sessions: { label: "Sessions", color: "var(--color-primary)" },
+};
 
 function formatTimestamp(ts: number, granularity: string): string {
   const d = new Date(ts);
@@ -33,37 +33,19 @@ function formatTimestamp(ts: number, granularity: string): string {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-export function MainChart({ data, granularity }: MainChartProps) {
-  const [active, setActive] = useState<Metric>("visitors");
-
-  const metric = METRICS.find((m) => m.key === active)!;
+export function MainChart({ data, granularity, metric = "visitors" }: MainChartProps) {
+  const key = CHART_KEYS.has(metric) ? metric : "visitors";
+  const meta = METRIC_META[key];
 
   return (
-    <div className="rounded-lg border border-foreground/6 bg-card p-5">
-      <div className="flex items-center gap-3 mb-4">
-        {METRICS.map((m) => (
-          <button
-            key={m.key}
-            type="button"
-            onClick={() => setActive(m.key)}
-            className={`text-[12px] font-medium px-2.5 py-1 rounded-md transition-colors duration-100 ${
-              active === m.key
-                ? "bg-foreground/5 text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="h-[240px]">
+    <div className="bg-card px-4 pt-2 pb-4">
+      <div className="h-50">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+          <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
             <defs>
-              <linearGradient id={`grad-${active}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={metric.color} stopOpacity={0.12} />
-                <stop offset="95%" stopColor={metric.color} stopOpacity={0} />
+              <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={meta.color} stopOpacity={0.1} />
+                <stop offset="95%" stopColor={meta.color} stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid
@@ -85,7 +67,7 @@ export function MainChart({ data, granularity }: MainChartProps) {
               tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}
               tickLine={false}
               axisLine={false}
-              width={36}
+              width={32}
               allowDecimals={false}
             />
             <Tooltip
@@ -105,14 +87,14 @@ export function MainChart({ data, granularity }: MainChartProps) {
                   day: "numeric",
                 })
               }
-              formatter={(value: number) => [value.toLocaleString(), metric.label]}
+              formatter={(value: number) => [value.toLocaleString(), meta.label]}
             />
             <Area
               type="monotone"
-              dataKey={active}
-              stroke={metric.color}
+              dataKey={key}
+              stroke={meta.color}
               strokeWidth={1.5}
-              fill={`url(#grad-${active})`}
+              fill="url(#chart-grad)"
               animationDuration={600}
               animationEasing="ease-out"
             />

@@ -73,7 +73,7 @@ export default function ManagePostHead({
             value={filters.status}
             onChange={(v) => onFilterChange("status", v as any)}
             options={STATUS_OPTIONS}
-            leadingIcon={<span className="text-muted-foreground mr-1">Status:</span>}
+            leadingIcon={<span className="mr-1 text-muted-foreground">Status:</span>}
             ariaLabel="Status"
           />
         </div>
@@ -82,7 +82,7 @@ export default function ManagePostHead({
             value={filters.kind}
             onChange={(v) => onFilterChange("kind", v)}
             options={kindOptions}
-            leadingIcon={<span className="text-muted-foreground mr-1">Kind:</span>}
+            leadingIcon={<span className="mr-1 text-muted-foreground">Kind:</span>}
             ariaLabel="Kind"
           />
         </div>
@@ -91,7 +91,7 @@ export default function ManagePostHead({
             value={filters.schemaType}
             onChange={(v) => onFilterChange("schemaType", v)}
             options={schemaTypeOptions}
-            leadingIcon={<span className="text-muted-foreground mr-1">Schema:</span>}
+            leadingIcon={<span className="mr-1 text-muted-foreground">Schema:</span>}
             ariaLabel="Schema"
           />
         </div>

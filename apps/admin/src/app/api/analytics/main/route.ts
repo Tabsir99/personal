@@ -40,7 +40,7 @@ async function fetchOverview(
     queryAE<{ visitors: number; pageviews: number; sessions: number }>(`
       SELECT
         COUNT(DISTINCT ${F.visitorId}) as visitors,
-        COUNT(*) as pageviews,
+        COUNT() as pageviews,
         COUNT(DISTINCT ${F.sessionId}) as sessions
       FROM cgd
       WHERE index1 = '${websiteId}'
@@ -49,7 +49,7 @@ async function fetchOverview(
         AND ${F.timestamp} < ${end}
     `),
     queryAE<{ sid: string; pvs: number; duration: number }>(`
-      SELECT ${F.sessionId} as sid, COUNT(*) as pvs,
+      SELECT ${F.sessionId} as sid, COUNT() as pvs,
              MAX(${F.timestamp}) - MIN(${F.timestamp}) as duration
       FROM cgd
       WHERE index1 = '${websiteId}'
@@ -85,11 +85,11 @@ async function fetchTimeseries(
   end: number,
   bucketMs: number,
 ): Promise<TimeseriesPoint[]> {
-  const res = await queryAE<{ bucket: number; visitors: number; pageviews: number; sessions: number }>(`
+  const res = await queryAE<{ bucket: string; visitors: number; pageviews: number; sessions: number }>(`
     SELECT
-      intDiv(toUInt64(${F.timestamp}), ${bucketMs}) as bucket,
+      (${F.timestamp} - (${F.timestamp} % ${bucketMs})) as bucket,
       COUNT(DISTINCT ${F.visitorId}) as visitors,
-      COUNT(*) as pageviews,
+      COUNT() as pageviews,
       COUNT(DISTINCT ${F.sessionId}) as sessions
     FROM cgd
     WHERE index1 = '${websiteId}'
@@ -101,7 +101,7 @@ async function fetchTimeseries(
   `);
 
   return res.data.map((row) => ({
-    timestamp: Number(row.bucket) * bucketMs,
+    timestamp: Number(row.bucket),
     visitors: Number(row.visitors),
     pageviews: Number(row.pageviews),
     sessions: Number(row.sessions),

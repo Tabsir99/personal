@@ -55,7 +55,7 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl h-full">
+    <div className="mx-auto h-full max-w-5xl">
       {websites.length === 0 ? (
         <WebsiteEmptyState onAdd={openAdd} />
       ) : (

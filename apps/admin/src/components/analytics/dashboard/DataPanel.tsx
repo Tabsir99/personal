@@ -13,7 +13,7 @@ export function DataPanel({ tabs, children }: DataPanelProps) {
   const [dir, setDir] = useState<-1 | 0 | 1>(0);
 
   return (
-    <div className="rounded-lg border border-foreground/6 bg-card overflow-hidden">
+    <div className="h-105 overflow-hidden rounded-lg border border-foreground/6 bg-card">
       <div className="border-b border-foreground/6 px-4 pt-3 pb-0">
         <Tabs
           label="Data view"
@@ -25,8 +25,8 @@ export function DataPanel({ tabs, children }: DataPanelProps) {
           }}
         />
       </div>
-      <TabPanel tab={tab} dir={dir}>
-        <div className="p-0">{children(tab, dir)}</div>
+      <TabPanel tab={tab} dir={dir} className="h-[calc(100%-44px)] overflow-y-auto">
+        {children(tab, dir)}
       </TabPanel>
     </div>
   );
@@ -38,13 +38,17 @@ interface RankedListProps {
   maxItems?: number;
 }
 
-export function RankedList({ items, valueLabel = "Visitors", maxItems = 10 }: RankedListProps) {
+export function RankedList({
+  items,
+  valueLabel = "Visitors",
+  maxItems = 10,
+}: RankedListProps) {
   const visible = items.slice(0, maxItems);
   const max = visible[0]?.value ?? 1;
 
   if (visible.length === 0) {
     return (
-      <div className="flex items-center justify-center py-10 text-[12px] text-muted-foreground/50">
+      <div className="flex h-full min-h-50 items-center justify-center text-[12px] text-muted-foreground/50">
         No data for this period
       </div>
     );
@@ -52,26 +56,31 @@ export function RankedList({ items, valueLabel = "Visitors", maxItems = 10 }: Ra
 
   return (
     <div>
-      <div className="flex items-center justify-between px-4 py-2 border-b border-foreground/4">
-        <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+      <div className="flex items-center justify-between border-b border-foreground/4 px-4 py-2">
+        <span className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
           Name
         </span>
-        <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+        <span className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
           {valueLabel}
         </span>
       </div>
       <div className="divide-y divide-foreground/4">
         {visible.map((item) => (
-          <div key={item.name} className="group relative flex items-center gap-3 px-4 py-2.5">
+          <div
+            key={item.name}
+            className="group relative flex items-center gap-3 px-4 py-2.5"
+          >
             <div
               className="absolute inset-y-0 left-0 bg-primary/[0.04] transition-all duration-300"
               style={{ width: `${(item.value / max) * 100}%` }}
             />
-            <div className="relative flex items-center gap-2 min-w-0 flex-1">
+            <div className="relative flex min-w-0 flex-1 items-center gap-2">
               {item.icon && <span className="shrink-0">{item.icon}</span>}
-              <span className="truncate text-[13px] text-foreground">{item.name || "(unknown)"}</span>
+              <span className="truncate text-[13px] text-foreground">
+                {item.name || "(unknown)"}
+              </span>
             </div>
-            <span className="relative font-mono text-[12px] tabular-nums text-foreground/80 font-medium">
+            <span className="relative font-mono text-[12px] font-medium text-foreground/80 tabular-nums">
               {item.value.toLocaleString()}
             </span>
           </div>

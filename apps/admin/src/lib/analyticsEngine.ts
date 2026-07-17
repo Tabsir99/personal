@@ -49,10 +49,13 @@ export async function queryAE<T = Record<string, string | number | null>>(
 
   if (!res.ok) {
     const text = await res.text();
+    console.log(text);
     throw new Error(`AE query failed (${res.status}): ${text}`);
   }
 
-  return res.json();
+  const json = await res.json();
+  console.log(json);
+  return json;
 }
 
 export type Period =
@@ -117,13 +120,23 @@ export function granularityToMs(granularity: Granularity): number {
 
 const periodSchema = z.union([
   z.enum(["today", "yesterday", "last7d", "last30d", "last90d"]),
-  z.string().regex(/^custom:\d{4}-\d{2}-\d{2}:\d{4}-\d{2}-\d{2}$/, "Invalid custom period format"),
+  z
+    .string()
+    .regex(
+      /^custom:\d{4}-\d{2}-\d{2}:\d{4}-\d{2}-\d{2}$/,
+      "Invalid custom period format",
+    ),
 ]);
 
 const analyticsParamsSchema = z.object({
-  websiteId: z.string().min(1, "websiteId is required").regex(/^[\w-]+$/, "Invalid websiteId"),
+  websiteId: z
+    .string()
+    .min(1, "websiteId is required")
+    .regex(/^[\w-]+$/, "Invalid websiteId"),
   period: periodSchema.default("last30d"),
-  granularity: z.enum(["hourly", "daily", "weekly", "monthly"]).default("daily"),
+  granularity: z
+    .enum(["hourly", "daily", "weekly", "monthly"])
+    .default("daily"),
 });
 
 export interface AnalyticsParams {
@@ -136,7 +149,9 @@ export function escapeSQL(value: string): string {
   return value.replace(/['\\]/g, "");
 }
 
-export function parseAnalyticsParams(searchParams: URLSearchParams): AnalyticsParams {
+export function parseAnalyticsParams(
+  searchParams: URLSearchParams,
+): AnalyticsParams {
   const raw = {
     websiteId: searchParams.get("websiteId") ?? "",
     period: searchParams.get("period") ?? undefined,

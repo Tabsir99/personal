@@ -33,7 +33,7 @@ export function WebsiteList({
         </Button>
       </header>
 
-      <div className="space-y-6 stagger-cascade">
+      <div className="stagger-cascade space-y-6">
         {websites.map((site, i) => (
           <div
             key={site.id}

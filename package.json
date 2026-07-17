@@ -15,5 +15,8 @@
   "devDependencies": {
     "typescript": "^5.9.3",
     "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "puppeteer-core": "^25.3.0"
   }
 }

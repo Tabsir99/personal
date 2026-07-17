@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+ 
 import { useState } from "react";
 import { Plus, Star } from "@phosphor-icons/react";
 
@@ -157,7 +157,7 @@ export default function TestimonialDialog({
 
         <section title="Placement" className="space-y-6">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium leading-none">Display slot</label>
+            <label className="text-sm leading-none font-medium">Display slot</label>
             <Select
               options={DISPLAY_SLOT_OPTIONS}
               value={formData.displaySlot}
@@ -167,7 +167,7 @@ export default function TestimonialDialog({
               placeholder="Choose placement"
               ariaLabel="Display slot"
             />
-            <p className="text-[13px] text-muted-foreground mt-1">
+            <p className="mt-1 text-[13px] text-muted-foreground">
               Endorsement = quote-only card. Voices = video testimonial slot.
             </p>
           </div>
@@ -175,7 +175,7 @@ export default function TestimonialDialog({
 
         <section title="Rating & quote" className="space-y-6">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium leading-none">
+            <label className="text-sm leading-none font-medium">
               Rating
             </label>
             <div className="flex items-center gap-1.5">
@@ -220,7 +220,7 @@ export default function TestimonialDialog({
 
         <section title="Video" className="space-y-6">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium leading-none">
+            <label className="text-sm leading-none font-medium">
               Video sources
             </label>
             <VideoSourcesEditor

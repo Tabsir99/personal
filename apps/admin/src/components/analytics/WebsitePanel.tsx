@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Globe,
@@ -41,26 +41,20 @@ export function WebsitePanel({ site, onEdit, onMutate }: WebsitePanelProps) {
   const [timeseries, setTimeseries] = useState<TimeseriesPoint[]>([]);
   const [chartLoading, setChartLoading] = useState(true);
 
-  const fetchChart = useCallback(async () => {
-    try {
-      const res = await fetch(
-        `/api/analytics/main?websiteId=${site.id}&period=30d&granularity=daily`,
-      );
-      if (!res.ok) return;
-      const json = await res.json();
-      if (json.status === "success") {
-        setTimeseries(json.data.timeseries ?? []);
-      }
-    } catch {
-      // chart is supplementary
-    } finally {
-      setChartLoading(false);
-    }
-  }, [site.id]);
-
   useEffect(() => {
-    fetchChart();
-  }, [fetchChart]);
+    let cancelled = false;
+    fetch(`/api/analytics/main?websiteId=${site.id}&period=30d&granularity=daily`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (cancelled || !json) return;
+        if (json.status === "success") {
+          setTimeseries(json.data.timeseries ?? []);
+        }
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setChartLoading(false); });
+    return () => { cancelled = true; };
+  }, [site.id]);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -100,13 +94,13 @@ init({ websiteId: '${site.id}' })`;
   return (
     <div className="group/panel rounded-lg border border-foreground/6 bg-card text-card-foreground shadow-card-rest">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-foreground/6">
-        <div className="flex items-center gap-3 min-w-0">
+      <div className="flex items-center justify-between gap-4 border-b border-foreground/6 px-6 py-4">
+        <div className="flex min-w-0 items-center gap-3">
           {faviconUrl ? (
             <img
               src={faviconUrl}
               alt=""
-              className="size-7 shrink-0 rounded-md object-contain bg-foreground/[0.03]"
+              className="size-7 shrink-0 rounded-md bg-foreground/[0.03] object-contain"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
                 e.currentTarget.nextElementSibling?.classList.remove("hidden");
@@ -120,12 +114,12 @@ init({ websiteId: '${site.id}' })`;
           </div>
           <Link
             href={`/analytics/${site.id}`}
-            className="truncate text-[15px] font-semibold tracking-tight text-foreground underline decoration-foreground/20 underline-offset-2 hover:decoration-foreground/60 transition-colors"
+            className="truncate text-[15px] font-semibold tracking-tight text-foreground underline decoration-foreground/20 underline-offset-2 transition-colors hover:decoration-foreground/60"
           >
             {site.name}
           </Link>
           {site.createdAt && (
-            <span className="hidden sm:inline text-[11px] text-muted-foreground/60 font-mono tabular-nums">
+            <span className="hidden font-mono text-[11px] text-muted-foreground/60 tabular-nums sm:inline">
               since{" "}
               {new Date(site.createdAt).toLocaleDateString(undefined, {
                 month: "short",
@@ -135,7 +129,7 @@ init({ websiteId: '${site.id}' })`;
           )}
         </div>
 
-        <div className="flex shrink-0 items-center gap-1 opacity-0 group-hover/panel:opacity-100 transition-opacity duration-150">
+        <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity duration-150 group-hover/panel:opacity-100">
           <Button
             variant="ghost"
             size="icon"
@@ -180,10 +174,10 @@ init({ websiteId: '${site.id}' })`;
       </div>
 
       {/* Chart + Info grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] divide-y lg:divide-y-0 lg:divide-x divide-foreground/6">
+      <div className="grid grid-cols-1 divide-y divide-foreground/6 lg:grid-cols-[1fr_280px] lg:divide-x lg:divide-y-0">
         {/* Chart */}
         <div className="p-5">
-          <div className="flex items-center justify-between mb-3">
+          <div className="mb-3 flex items-center justify-between">
             <Eyebrow tone="muted" size="xs">
               Visitors · 30 days
             </Eyebrow>
@@ -193,9 +187,9 @@ init({ websiteId: '${site.id}' })`;
               </Badge>
             )}
           </div>
-          <div className="h-[140px]">
+          <div className="h-35">
             {chartLoading ? (
-              <div className="h-full w-full animate-pulse rounded-md bg-foreground/[0.03]" />
+              <div className="size-full animate-pulse rounded-md bg-foreground/[0.03]" />
             ) : (
               <MiniChart
                 data={
@@ -237,16 +231,28 @@ init({ websiteId: '${site.id}' })`;
 
       {/* Tracking snippet */}
       <div className="border-t border-foreground/6 px-6 py-5">
-        <div className="flex items-center justify-between gap-4 mb-3">
+        <div className="mb-3 flex items-center justify-between gap-4">
           <Tabs
             label="Snippet format"
             items={[
               {
                 value: "script",
                 label: "Script tag",
-                icon: <Code size={13} />,
+                icon: (
+                  <Code
+                    weight={activeSnippet === "script" ? "bold" : "regular"}
+                  />
+                ),
               },
-              { value: "sdk", label: "NPM SDK", icon: <Package size={13} /> },
+              {
+                value: "sdk",
+                label: "Npm sdk",
+                icon: (
+                  <Package
+                    weight={activeSnippet === "sdk" ? "bold" : "regular"}
+                  />
+                ),
+              },
             ]}
             value={snippetTab}
             onChange={(v, d) => {
@@ -254,23 +260,16 @@ init({ websiteId: '${site.id}' })`;
               setSnippetDir(d);
             }}
           />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={copySnippet}
-            iconLeft={
-              snippetCopied ? (
-                <Check size={12} weight="bold" className="text-success" />
-              ) : (
-                <Copy size={12} />
-              )
-            }
-          >
-            {snippetCopied ? "Copied" : "Copy"}
+          <Button variant="ghost" size="icon" onClick={copySnippet}>
+            {snippetCopied ? (
+              <Check size={12} weight="bold" className="text-success" />
+            ) : (
+              <Copy size={12} />
+            )}
           </Button>
         </div>
         <TabPanel tab={snippetTab} dir={snippetDir}>
-          <pre className="font-mono text-xs rounded-md leading-relaxed text-foreground/75 select-all whitespace-pre px-4 py-3 bg-foreground/5">
+          <pre className="rounded-md bg-foreground/3 px-4 py-3 font-mono text-xs leading-relaxed whitespace-pre text-foreground/75 select-all">
             {activeSnippet}
           </pre>
         </TabPanel>
@@ -290,7 +289,7 @@ function InfoCell({
 }) {
   return (
     <div className="px-5 py-3.5">
-      <div className="flex items-center gap-1.5 mb-1.5">
+      <div className="mb-1.5 flex items-center gap-1.5">
         <span className="text-muted-foreground/50">{icon}</span>
         <Eyebrow tone="muted" size="xs">
           {label}

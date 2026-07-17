@@ -23,7 +23,7 @@ export default function BlogLandingPanel() {
       description="The headline, tagline, and SEO fields that wrap /blog."
     >
       <div className="grid gap-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 items-start">
+        <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2">
           <TextField
             label="Hero heading"
             helper={`${draft.heroHeading.length}/60`}

@@ -70,7 +70,7 @@ export default function CredentialDialog({ children }: CredentialDialogProps) {
 
         <section title="Media" className="space-y-6">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium leading-none">Certificate image</label>
+            <label className="text-sm leading-none font-medium">Certificate image</label>
             <div
               onClick={() => imageInputRef.current?.click()}
               className="group/upload flex min-h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-md border border-foreground/6 bg-foreground/2 transition-colors hover:bg-foreground/4"

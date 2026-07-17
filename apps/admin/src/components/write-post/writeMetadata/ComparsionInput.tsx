@@ -128,7 +128,7 @@ export function SuggestionField({
             variant="ghost"
             onClick={reject}
             onMouseDown={(e) => e.preventDefault()}
-            className="px-1.5 py-1 h-6"
+            className="h-6 px-1.5 py-1"
             aria-label="Dismiss suggestion"
           >
             <Kbd pressed={pressedKey === "esc"}>esc</Kbd>
@@ -137,7 +137,7 @@ export function SuggestionField({
             variant="ghost"
             onClick={accept}
             onMouseDown={(e) => e.preventDefault()}
-            className="px-1.5 py-1 h-6"
+            className="h-6 px-1.5 py-1"
             aria-label="Accept suggestion"
           >
             <Kbd pressed={pressedKey === "tab"}>tab</Kbd>
@@ -159,7 +159,7 @@ export function SuggestionField({
           value={value ?? ""}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          className={cn(striking && "opacity-50 line-through")}
+          className={cn(striking && "line-through opacity-50")}
         />
       ) : (
         <TextField
@@ -172,7 +172,7 @@ export function SuggestionField({
           value={value ?? ""}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          className={cn(striking && "opacity-50 line-through")}
+          className={cn(striking && "line-through opacity-50")}
         />
       )}
     </div>
