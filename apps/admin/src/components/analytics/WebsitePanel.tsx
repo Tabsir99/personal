@@ -23,7 +23,8 @@ import type { AnalyticsWebsite } from "@/actions/analyticsActions";
 import { deleteAnalyticsWebsite } from "@/actions/analyticsActions";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { MiniChart, generateEmptyTimeseries } from "./MiniChart";
-import type { TimeseriesPoint } from "./dashboard/types";
+import type { TimeseriesPoint } from "@/lib/analyticsTypes";
+import { getFaviconUrl } from "../ui/favicon";
 
 interface WebsitePanelProps {
   site: AnalyticsWebsite;
@@ -43,7 +44,9 @@ export function WebsitePanel({ site, onEdit, onMutate }: WebsitePanelProps) {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/analytics/main?websiteId=${site.id}&period=30d&granularity=daily`)
+    fetch(
+      `/api/analytics/main?websiteId=${site.id}&period=30d&granularity=daily`,
+    )
       .then((res) => (res.ok ? res.json() : null))
       .then((json) => {
         if (cancelled || !json) return;
@@ -52,8 +55,12 @@ export function WebsitePanel({ site, onEdit, onMutate }: WebsitePanelProps) {
         }
       })
       .catch(() => {})
-      .finally(() => { if (!cancelled) setChartLoading(false); });
-    return () => { cancelled = true; };
+      .finally(() => {
+        if (!cancelled) setChartLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [site.id]);
 
   const handleDelete = async () => {
@@ -89,7 +96,7 @@ init({ websiteId: '${site.id}' })`;
     setTimeout(() => setSnippetCopied(false), 2000);
   };
 
-  const faviconUrl = getFaviconUrl(site.origins);
+  const faviconUrl = getFaviconUrl(site.origins[0]);
 
   return (
     <div className="group/panel rounded-lg border border-foreground/6 bg-card text-card-foreground shadow-card-rest">
@@ -298,15 +305,4 @@ function InfoCell({
       <div>{children}</div>
     </div>
   );
-}
-
-function getFaviconUrl(origins: string[]): string | null {
-  const real = origins.find((o) => o !== "*" && o.startsWith("http"));
-  if (!real) return null;
-  try {
-    const hostname = new URL(real).hostname;
-    return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
-  } catch {
-    return null;
-  }
 }

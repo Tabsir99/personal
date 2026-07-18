@@ -2,10 +2,7 @@ import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
 import { queryAE, F } from "@/lib/analyticsEngine";
-
-interface RealtimeResponse {
-  count: number;
-}
+import type { RealtimeResponse } from "@/lib/analyticsTypes";
 
 export const GET = wrapRoute<RealtimeResponse>(async (req: NextRequest) => {
   await requireAuth();

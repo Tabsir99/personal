@@ -9,27 +9,7 @@ import {
   granularityToMs,
   F,
 } from "@/lib/analyticsEngine";
-
-interface OverviewMetrics {
-  visitors: number;
-  pageviews: number;
-  sessions: number;
-  bounceRate: number;
-  sessionDuration: number;
-}
-
-interface TimeseriesPoint {
-  timestamp: number;
-  visitors: number;
-  pageviews: number;
-  sessions: number;
-}
-
-interface MainResponse {
-  current: OverviewMetrics;
-  previous: OverviewMetrics;
-  timeseries: TimeseriesPoint[];
-}
+import type { OverviewMetrics, TimeseriesPoint, MainResponse } from "@/lib/analyticsTypes";
 
 interface PeriodRow {
   period: "current" | "previous";

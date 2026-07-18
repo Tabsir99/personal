@@ -151,6 +151,16 @@ export function escapeSQL(value: string): string {
   return value.replace(/['\\]/g, "");
 }
 
+export function partitionByLevel<T extends { level: string }>(
+  rows: T[],
+): Record<string, Omit<T, "level">[]> {
+  const result: Record<string, Omit<T, "level">[]> = {};
+  for (const { level, ...rest } of rows) {
+    (result[level] ??= []).push(rest as Omit<T, "level">);
+  }
+  return result;
+}
+
 export function parseAnalyticsParams(
   searchParams: URLSearchParams,
 ): AnalyticsParams {

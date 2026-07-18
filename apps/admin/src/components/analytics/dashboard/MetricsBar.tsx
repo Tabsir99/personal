@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { OverviewMetrics } from "./types";
+import type { OverviewMetrics } from "@/lib/analyticsTypes";
 
 export type ChartMetric =
   "visitors" | "pageviews" | "sessions" | "bounceRate" | "sessionDuration";
@@ -170,7 +170,6 @@ function MetricCell({
     return isGood ? "text-success" : "text-destructive";
   })();
 
-  const arrow = tone === "up" ? "↑" : tone === "down" ? "↓" : "";
   const showUnderline = active || hovered;
 
   return (
@@ -197,8 +196,22 @@ function MetricCell({
         <span className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
           {value}
           {delta && (
-            <span className={`ml-1.5 text-xs font-medium ${deltaColor}`}>
-              {delta} {arrow}
+            <span className={`ml-1.5 inline-flex items-center gap-0.5 text-xs font-medium ${deltaColor}`}>
+              {delta}
+              {tone !== "flat" && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  className={`size-3 shrink-0 ${tone === "up" ? "rotate-180" : ""}`}
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8 2a.75.75 0 0 1 .75.75v8.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.22 3.22V2.75A.75.75 0 0 1 8 2Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              )}
             </span>
           )}
         </span>

@@ -8,4 +8,4 @@ export { SourcesPanel } from "./SourcesPanel";
 export { LocationsPanel } from "./LocationsPanel";
 export { PagesPanel } from "./PagesPanel";
 export { SystemPanel } from "./SystemPanel";
-export type * from "./types";
+export type * from "@/lib/analyticsTypes";

@@ -6,7 +6,7 @@ import { useAnalyticsStore } from "./analyticsStore";
 import { MetricsBar } from "./MetricsBar";
 import { MainChart } from "./MainChart";
 import type { ChartMetric } from "./MetricsBar";
-import type { OverviewMetrics } from "./types";
+import type { OverviewMetrics } from "@/lib/analyticsTypes";
 
 const EMPTY_METRICS: OverviewMetrics = {
   visitors: 0,

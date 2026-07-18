@@ -3,6 +3,7 @@ import type {
   OverviewMetrics,
   TimeseriesPoint,
   SourceMetric,
+  ChannelMetric,
   PageMetric,
   LocationMetric,
   SystemMetric,
@@ -10,7 +11,7 @@ import type {
   HostnameMetric,
   Period,
   Granularity,
-} from "./types";
+} from "@/lib/analyticsTypes";
 import { mockFetchEndpoint } from "./analyticsMock";
 
 interface MainData {
@@ -21,11 +22,14 @@ interface MainData {
 
 interface SourcesData {
   referrers: SourceMetric[];
+  channels: ChannelMetric[];
 }
 
 interface PagesData {
   pages: PageMetric[];
   entryPages: PageMetric[];
+  hostnames: HostnameMetric[];
+  exitLinks: ExitLinkMetric[];
 }
 
 interface LocationsData {
@@ -59,12 +63,6 @@ interface AnalyticsState {
 
   system: SystemData | null;
   systemLoading: boolean;
-
-  exitLinks: ExitLinkMetric[] | null;
-  exitLinksLoading: boolean;
-
-  hostnames: HostnameMetric[] | null;
-  hostnamesLoading: boolean;
 
   realtimeCount: number | null;
   realtimeLoading: boolean;
@@ -132,12 +130,6 @@ export const useAnalyticsStore = create<AnalyticsState>((set, get) => ({
   system: null,
   systemLoading: true,
 
-  exitLinks: null,
-  exitLinksLoading: true,
-
-  hostnames: null,
-  hostnamesLoading: true,
-
   realtimeCount: null,
   realtimeLoading: true,
 
@@ -203,20 +195,6 @@ export const useAnalyticsStore = create<AnalyticsState>((set, get) => ({
       set({ systemLoading: true });
       fetchEndpoint<SystemData>("system", websiteId, period).then((system) =>
         set({ system, systemLoading: false }),
-      );
-    }
-
-    if (!same || !state.exitLinksLoading) {
-      set({ exitLinksLoading: true });
-      fetchEndpoint<ExitLinkMetric[]>("exit-links", websiteId, period).then(
-        (exitLinks) => set({ exitLinks, exitLinksLoading: false }),
-      );
-    }
-
-    if (!same || !state.hostnamesLoading) {
-      set({ hostnamesLoading: true });
-      fetchEndpoint<HostnameMetric[]>("hostnames", websiteId, period).then(
-        (hostnames) => set({ hostnames, hostnamesLoading: false }),
       );
     }
 

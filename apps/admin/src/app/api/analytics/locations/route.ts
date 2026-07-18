@@ -5,20 +5,11 @@ import {
   queryAE,
   parseAnalyticsParams,
   periodToRange,
+  partitionByLevel,
   escapeSQL,
   F,
 } from "@/lib/analyticsEngine";
-
-interface LocationMetric {
-  name: string;
-  uv: number;
-}
-
-interface LocationsResponse {
-  countries: LocationMetric[];
-  regions: LocationMetric[];
-  cities: LocationMetric[];
-}
+import type { LocationsResponse } from "@/lib/analyticsTypes";
 
 export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
   await requireAuth();
@@ -42,37 +33,31 @@ export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
   const cityWhere = `${regionWhere}${regionFilter ? ` AND ${F.region} = '${regionFilter}'` : ""}`;
 
   const res = await queryAE<{
-    level: "country" | "region" | "city";
+    level: "countries" | "regions" | "cities";
     name: string;
     uv: number;
+    country: string | null;
   }>(`
     (
-      SELECT 'country' as level, ${F.country} as name, COUNT(DISTINCT ${F.visitorId}) as uv
+      SELECT 'countries' as level, ${F.country} as name, COUNT(DISTINCT ${F.visitorId}) as uv, ${F.country} as country
       FROM ${F.engine} WHERE ${baseWhere}
       GROUP BY name ORDER BY uv DESC LIMIT 30
     )
     UNION ALL
     (
-      SELECT 'region' as level, ${F.region} as name, COUNT(DISTINCT ${F.visitorId}) as uv
+      SELECT 'regions' as level, ${F.region} as name, COUNT(DISTINCT ${F.visitorId}) as uv, any(${F.country}) as country
       FROM ${F.engine} WHERE ${regionWhere}
       GROUP BY name ORDER BY uv DESC LIMIT 30
     )
     UNION ALL
     (
-      SELECT 'city' as level, ${F.city} as name, COUNT(DISTINCT ${F.visitorId}) as uv
+      SELECT 'cities' as level, ${F.city} as name, COUNT(DISTINCT ${F.visitorId}) as uv, any(${F.country}) as country
       FROM ${F.engine} WHERE ${cityWhere}
       GROUP BY name ORDER BY uv DESC LIMIT 30
     )
   `);
 
-  const byLevel = (level: "country" | "region" | "city"): LocationMetric[] =>
-    res.data
-      .filter((r) => r.level === level)
-      .map((r) => ({ name: String(r.name), uv: Number(r.uv) }));
+  const { countries = [], regions = [], cities = [] } = partitionByLevel(res.data);
 
-  return {
-    countries: byLevel("country"),
-    regions: byLevel("region"),
-    cities: byLevel("city"),
-  };
+  return { countries, regions, cities };
 });

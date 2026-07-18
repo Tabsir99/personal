@@ -1,70 +1,68 @@
 import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
-import { queryAE, parseAnalyticsParams, periodToRange, F } from "@/lib/analyticsEngine";
-
-interface PageMetric {
-  name: string;
-  uv: number;
-  pageviews: number;
-}
-
-interface PagesResponse {
-  pages: PageMetric[];
-  entryPages: PageMetric[];
-}
+import {
+  queryAE,
+  parseAnalyticsParams,
+  periodToRange,
+  partitionByLevel,
+  F,
+} from "@/lib/analyticsEngine";
+import type { PagesResponse } from "@/lib/analyticsTypes";
 
 export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
   await requireAuth();
   const params = parseAnalyticsParams(req.nextUrl.searchParams);
   const { start, end } = periodToRange(params.period);
 
-  const [pagesRes, sessionFirstRes] = await Promise.all([
-    queryAE<{ name: string; uv: number; pageviews: number }>(`
-      SELECT ${F.href} as name, COUNT(DISTINCT ${F.visitorId}) as uv, COUNT() as pageviews
-      FROM ${F.engine}
-      WHERE ${F.websiteId} = '${params.websiteId}'
-        AND ${F.type} = 'pageview'
-        AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
-      GROUP BY name
-      ORDER BY uv DESC
-      LIMIT 50
-    `),
-    queryAE<{ sid: string; name: string; ts: number }>(`
-      SELECT ${F.sessionId} as sid, ${F.href} as name, MIN(${F.timestamp}) as ts
-      FROM ${F.engine}
-      WHERE ${F.websiteId} = '${params.websiteId}'
-        AND ${F.type} = 'pageview'
-        AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
-      GROUP BY sid, name
-      ORDER BY ts ASC
-    `),
-  ]);
+  const pageviewWhere = `
+    ${F.websiteId} = '${params.websiteId}'
+    AND ${F.type} = 'pageview'
+    AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
+  `;
 
-  const entryBySession = new Map<string, string>();
-  for (const row of sessionFirstRes.data) {
-    const sid = String(row.sid);
-    if (!entryBySession.has(sid)) {
-      entryBySession.set(sid, String(row.name));
-    }
-  }
+  const exitWhere = `
+    ${F.websiteId} = '${params.websiteId}'
+    AND ${F.type} = 'external_link'
+    AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
+  `;
 
-  const entryCount = new Map<string, number>();
-  for (const page of entryBySession.values()) {
-    entryCount.set(page, (entryCount.get(page) ?? 0) + 1);
-  }
+  const res = await queryAE<{
+    level: "pages" | "entryPages" | "hostnames" | "exitLinks";
+    name: string;
+    uv: number;
+    pageviews: number;
+    exits: number;
+  }>(`
+    (
+      SELECT 'pages' as level, ${F.href} as name, COUNT(DISTINCT ${F.visitorId}) as uv, COUNT() as pageviews, 0 as exits
+      FROM ${F.engine} WHERE ${pageviewWhere}
+      GROUP BY name ORDER BY uv DESC LIMIT 50
+    )
+    UNION ALL
+    (
+      SELECT 'entryPages' as level, name, COUNT() as uv, COUNT() as pageviews, 0 as exits FROM (
+        SELECT argMin(${F.href}, ${F.timestamp}) as name
+        FROM ${F.engine} WHERE ${pageviewWhere}
+        GROUP BY ${F.sessionId}
+      )
+      GROUP BY name ORDER BY uv DESC LIMIT 50
+    )
+    UNION ALL
+    (
+      SELECT 'hostnames' as level, ${F.domain} as name, COUNT(DISTINCT ${F.visitorId}) as uv, 0 as pageviews, 0 as exits
+      FROM ${F.engine} WHERE ${pageviewWhere}
+      GROUP BY name ORDER BY uv DESC LIMIT 20
+    )
+    UNION ALL
+    (
+      SELECT 'exitLinks' as level, ${F.href} as name, COUNT(DISTINCT ${F.visitorId}) as uv, 0 as pageviews, COUNT() as exits
+      FROM ${F.engine} WHERE ${exitWhere}
+      GROUP BY name ORDER BY uv DESC LIMIT 30
+    )
+  `);
 
-  const entryPages = [...entryCount.entries()]
-    .map(([name, uv]) => ({ name, uv, pageviews: uv }))
-    .sort((a, b) => b.uv - a.uv)
-    .slice(0, 50);
+  const { pages = [], entryPages = [], hostnames = [], exitLinks = [] } = partitionByLevel(res.data);
 
-  return {
-    pages: pagesRes.data.map((r) => ({
-      name: String(r.name),
-      uv: Number(r.uv),
-      pageviews: Number(r.pageviews),
-    })),
-    entryPages,
-  };
+  return { pages, entryPages, hostnames, exitLinks };
 });

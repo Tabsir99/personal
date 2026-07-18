@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { MouseHandlerDataParam } from "recharts";
-import type { TimeseriesPoint } from "./types";
+import type { TimeseriesPoint } from "@/lib/analyticsTypes";
 
 interface MainChartProps {
   data: TimeseriesPoint[];
@@ -81,9 +81,10 @@ export function MainChart({
                 x2="0"
                 y2="1"
               >
-                <stop offset="0%" stopColor={meta.color} stopOpacity={0.34} />
-                <stop offset="20%" stopColor={meta.color} stopOpacity={0.17} />
-                <stop offset="45%" stopColor={meta.color} stopOpacity={0.08} />
+                <stop offset="0%" stopColor={meta.color} stopOpacity={0.5} />
+                <stop offset="20%" stopColor={meta.color} stopOpacity={0.25} />
+                <stop offset="40%" stopColor={meta.color} stopOpacity={0.1} />
+                <stop offset="50%" stopColor={meta.color} stopOpacity={0.05} />
                 <stop offset="100%" stopColor={meta.color} stopOpacity={0} />
               </linearGradient>
 
@@ -172,7 +173,7 @@ export function MainChart({
                 meta.label,
               ]}
             />
-            {/* Muted background area (no tooltip entry, no active dots) */}
+            {/* Muted background area (dashed stroke, no tooltip entry, no active dots) */}
             <Area
               type="linear"
               dataKey={key}
@@ -191,10 +192,17 @@ export function MainChart({
               type="linear"
               dataKey={key}
               stroke={meta.color}
-              strokeWidth={2.5}
+              strokeWidth={3}
+              strokeLinecap="round"
               strokeOpacity={0.5}
               fill="url(#active-vertical-fill)"
               mask="url(#hover-mask)"
+              activeDot={{
+                r: 4,
+                stroke: "var(--color-card)",
+                strokeWidth: 2,
+                fill: meta.color,
+              }}
               animationDuration={600}
               animationEasing="ease-out"
             />

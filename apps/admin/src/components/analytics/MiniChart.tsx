@@ -9,7 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import type { TimeseriesPoint } from "./dashboard/types";
+import type { TimeseriesPoint } from "@/lib/analyticsTypes";
 
 interface MiniChartProps {
   data: TimeseriesPoint[];

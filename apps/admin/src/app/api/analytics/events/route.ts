@@ -2,18 +2,7 @@ import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
 import { queryAE, parseAnalyticsParams, periodToRange, F } from "@/lib/analyticsEngine";
-
-interface GoalMetric {
-  name: string;
-  uv: number;
-  total: number;
-  conversionRate: number;
-}
-
-interface EventsResponse {
-  goals: GoalMetric[];
-  totalVisitors: number;
-}
+import type { EventsResponse } from "@/lib/analyticsTypes";
 
 export const GET = wrapRoute<EventsResponse>(async (req: NextRequest) => {
   await requireAuth();
