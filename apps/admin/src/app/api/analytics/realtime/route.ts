@@ -17,6 +17,7 @@ export const GET = wrapRoute<RealtimeResponse>(async (req: NextRequest) => {
     FROM ${F.engine}
     WHERE ${F.websiteId} = '${websiteId}'
       AND ${F.type} = 'pageview'
+      AND ${F.isBot} = 0
       AND ${F.timestamp} >= ${tenMinAgo}
   `);
 

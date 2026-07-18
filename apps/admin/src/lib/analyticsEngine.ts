@@ -22,7 +22,12 @@ export const F = {
   country: "country",
   region: "region",
   city: "city",
-  userAgent: "user_agent",
+  browser: "browser",
+  os: "os",
+  device: "device",
+  isBot: "is_bot",
+  botCategory: "bot_category",
+  botName: "bot_name",
   ip: "ip",
 
   viewportW: "viewport_w",

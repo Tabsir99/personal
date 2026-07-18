@@ -52,6 +52,7 @@ async function fetchOverviewComparison(
       FROM ${F.engine}
       WHERE ${F.websiteId} = '${websiteId}'
         AND ${F.type} = 'pageview'
+        AND ${F.isBot} = 0
         AND ${F.timestamp} >= ${prevStart}
         AND ${F.timestamp} < ${end}
       GROUP BY sid, period
@@ -98,6 +99,7 @@ async function fetchTimeseries(
     FROM ${F.engine}
     WHERE ${F.websiteId} = '${websiteId}'
       AND ${F.type} = 'pageview'
+      AND ${F.isBot} = 0
       AND ${F.timestamp} >= ${start}
       AND ${F.timestamp} < ${end}
     GROUP BY bucket

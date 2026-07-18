@@ -15,6 +15,7 @@ export const GET = wrapRoute<EventsResponse>(async (req: NextRequest) => {
       FROM ${F.engine}
       WHERE ${F.websiteId} = '${params.websiteId}'
         AND ${F.type} != 'pageview'
+        AND ${F.isBot} = 0
         AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
       GROUP BY name
       ORDER BY total DESC
@@ -25,6 +26,7 @@ export const GET = wrapRoute<EventsResponse>(async (req: NextRequest) => {
       FROM ${F.engine}
       WHERE ${F.websiteId} = '${params.websiteId}'
         AND ${F.type} = 'pageview'
+        AND ${F.isBot} = 0
         AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
     `),
   ]);

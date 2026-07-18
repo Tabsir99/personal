@@ -26,6 +26,7 @@ export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
   const baseWhere = `
     ${F.websiteId} = '${params.websiteId}'
     AND ${F.type} = 'pageview'
+    AND ${F.isBot} = 0
     AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
   `;
 

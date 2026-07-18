@@ -18,12 +18,14 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
   const pageviewWhere = `
     ${F.websiteId} = '${params.websiteId}'
     AND ${F.type} = 'pageview'
+    AND ${F.isBot} = 0
     AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
   `;
 
   const exitWhere = `
     ${F.websiteId} = '${params.websiteId}'
     AND ${F.type} = 'external_link'
+    AND ${F.isBot} = 0
     AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
   `;
 
