@@ -2,12 +2,12 @@ import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
 import {
-  F,
   queryAE,
   parseAnalyticsParams,
   periodToRange,
   previousPeriodRange,
   granularityToMs,
+  F,
 } from "@/lib/analyticsEngine";
 
 interface OverviewMetrics {
@@ -31,52 +31,71 @@ interface MainResponse {
   timeseries: TimeseriesPoint[];
 }
 
-async function fetchOverview(
+interface PeriodRow {
+  period: "current" | "previous";
+  visitors: number;
+  pageviews: number;
+  sessions: number;
+  bounces: number;
+  totalDuration: number;
+}
+
+function toMetrics(row: PeriodRow | undefined): OverviewMetrics {
+  const sessions = Number(row?.sessions ?? 0);
+  const bounces = Number(row?.bounces ?? 0);
+  const totalDuration = Number(row?.totalDuration ?? 0);
+
+  return {
+    visitors: Number(row?.visitors ?? 0),
+    pageviews: Number(row?.pageviews ?? 0),
+    sessions,
+    bounceRate: sessions > 0 ? bounces / sessions : 0,
+    sessionDuration:
+      sessions > 0 ? Math.round(totalDuration / sessions / 1000) : 0,
+  };
+}
+
+async function fetchOverviewComparison(
   websiteId: string,
   start: number,
   end: number,
-): Promise<OverviewMetrics> {
-  const [metricsRes, sessionPvRes] = await Promise.all([
-    queryAE<{ visitors: number; pageviews: number; sessions: number }>(`
+  prevStart: number,
+): Promise<{ current: OverviewMetrics; previous: OverviewMetrics }> {
+  const res = await queryAE<PeriodRow>(`
+    WITH session_stats AS (
       SELECT
-        COUNT(DISTINCT ${F.visitorId}) as visitors,
-        COUNT() as pageviews,
-        COUNT(DISTINCT ${F.sessionId}) as sessions
-      FROM cgd
-      WHERE index1 = '${websiteId}'
+        ${F.sessionId} as sid,
+        CASE WHEN ${F.timestamp} >= ${start} THEN 'current' ELSE 'previous' END as period,
+        any(${F.visitorId}) as vid,
+        COUNT() as pvs,
+        MAX(${F.timestamp}) - MIN(${F.timestamp}) as duration
+      FROM ${F.engine}
+      WHERE ${F.websiteId} = '${websiteId}'
         AND ${F.type} = 'pageview'
-        AND ${F.timestamp} >= ${start}
+        AND ${F.timestamp} >= ${prevStart}
         AND ${F.timestamp} < ${end}
-    `),
-    queryAE<{ sid: string; pvs: number; duration: number }>(`
-      SELECT ${F.sessionId} as sid, COUNT() as pvs,
-             MAX(${F.timestamp}) - MIN(${F.timestamp}) as duration
-      FROM cgd
-      WHERE index1 = '${websiteId}'
-        AND ${F.type} = 'pageview'
-        AND ${F.timestamp} >= ${start}
-        AND ${F.timestamp} < ${end}
-      GROUP BY sid
-    `),
-  ]);
+      GROUP BY sid, period
+    )
+    SELECT
+      period,
+      COUNT(DISTINCT vid) as visitors,
+      SUM(pvs) as pageviews,
+      COUNT() as sessions,
+      SUM(CASE WHEN pvs = 1 THEN 1 ELSE 0 END) as bounces,
+      SUM(duration) as totalDuration
+    FROM session_stats
+    GROUP BY period
+  `);
 
-  const m = metricsRes.data[0];
-  const visitors = Number(m?.visitors ?? 0);
-  const pageviews = Number(m?.pageviews ?? 0);
-  const sessions = Number(m?.sessions ?? 0);
+  console.log("COMPARASION", res);
 
-  let bounces = 0;
-  let totalDuration = 0;
-  for (const row of sessionPvRes.data) {
-    if (Number(row.pvs) === 1) bounces++;
-    totalDuration += Number(row.duration ?? 0);
-  }
+  const currentRow = res.data.find((r) => r.period === "current");
+  const previousRow = res.data.find((r) => r.period === "previous");
 
-  const bounceRate = sessions > 0 ? bounces / sessions : 0;
-  const sessionDuration =
-    sessions > 0 ? Math.round(totalDuration / sessions / 1000) : 0;
-
-  return { visitors, pageviews, sessions, bounceRate, sessionDuration };
+  return {
+    current: toMetrics(currentRow),
+    previous: toMetrics(previousRow),
+  };
 }
 
 async function fetchTimeseries(
@@ -85,20 +104,27 @@ async function fetchTimeseries(
   end: number,
   bucketMs: number,
 ): Promise<TimeseriesPoint[]> {
-  const res = await queryAE<{ bucket: string; visitors: number; pageviews: number; sessions: number }>(`
+  const res = await queryAE<{
+    bucket: number;
+    visitors: number;
+    pageviews: number;
+    sessions: number;
+  }>(`
     SELECT
-      (${F.timestamp} - (${F.timestamp} % ${bucketMs})) as bucket,
+      intDiv(${F.timestamp}, ${bucketMs}) * ${bucketMs} as bucket,
       COUNT(DISTINCT ${F.visitorId}) as visitors,
       COUNT() as pageviews,
       COUNT(DISTINCT ${F.sessionId}) as sessions
-    FROM cgd
-    WHERE index1 = '${websiteId}'
+    FROM ${F.engine}
+    WHERE ${F.websiteId} = '${websiteId}'
       AND ${F.type} = 'pageview'
       AND ${F.timestamp} >= ${start}
       AND ${F.timestamp} < ${end}
     GROUP BY bucket
     ORDER BY bucket
   `);
+
+  console.log("TIMESERIES", res);
 
   return res.data.map((row) => ({
     timestamp: Number(row.bucket),
@@ -115,9 +141,8 @@ export const GET = wrapRoute<MainResponse>(async (req: NextRequest) => {
   const prev = previousPeriodRange(start, end);
   const bucketMs = granularityToMs(params.granularity ?? "daily");
 
-  const [current, previous, timeseries] = await Promise.all([
-    fetchOverview(params.websiteId, start, end),
-    fetchOverview(params.websiteId, prev.start, prev.end),
+  const [{ current, previous }, timeseries] = await Promise.all([
+    fetchOverviewComparison(params.websiteId, start, end, prev.start),
     fetchTimeseries(params.websiteId, start, end, bucketMs),
   ]);
 

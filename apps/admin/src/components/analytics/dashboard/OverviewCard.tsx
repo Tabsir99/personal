@@ -27,7 +27,7 @@ export function OverviewCard() {
   })));
 
   if (mainLoading) {
-    return <div className="h-85 animate-pulse rounded-lg bg-foreground/3" />;
+    return <div className="h-135 animate-pulse rounded-lg bg-foreground/3" />;
   }
 
   return (
@@ -43,7 +43,7 @@ export function OverviewCard() {
         {main ? (
           <MainChart data={main.timeseries} granularity={granularity} metric={chartMetric} />
         ) : (
-          <div className="flex h-50 flex-col items-center justify-center gap-2">
+          <div className="flex h-100 flex-col items-center justify-center gap-2">
             <p className="text-sm text-muted-foreground">Failed to load chart data</p>
             <button type="button" onClick={refresh} className="text-xs text-primary hover:underline">
               Retry

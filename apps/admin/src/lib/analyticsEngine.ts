@@ -2,33 +2,35 @@ import "server-only";
 import { z } from "zod";
 import { env } from "@/config/env.server";
 
-const CF_AE_ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${env.CF_ACCOUNT_ID}/analytics_engine/sql`;
-const CF_API_TOKEN = env.CF_API_TOKEN;
+const TB_HOST = env.TINYBIRD_HOST;
+const TB_TOKEN = env.TINYBIRD_TOKEN;
 
 export const F = {
-  websiteId: "blob1",
-  type: "blob2",
-  domain: "blob3",
-  href: "blob4",
-  referrer: "blob5",
-  visitorId: "blob6",
-  sessionId: "blob7",
-  language: "blob8",
-  timezone: "blob9",
-  eventName: "blob10",
-  extraData: "blob11",
-  country: "blob12",
-  region: "blob13",
-  city: "blob14",
-  userAgent: "blob15",
-  ip: "blob16",
+  engine: "analytics_events",
 
-  viewportW: "double1",
-  viewportH: "double2",
-  screenW: "double3",
-  screenH: "double4",
-  sessionNumber: "double5",
-  timestamp: "double6",
+  websiteId: "website_id",
+  type: "type",
+  domain: "domain",
+  href: "href",
+  referrer: "referrer",
+  visitorId: "visitor_id",
+  sessionId: "session_id",
+  language: "language",
+  timezone: "timezone",
+  eventName: "event_name",
+  extraData: "extra_data",
+  country: "country",
+  region: "region",
+  city: "city",
+  userAgent: "user_agent",
+  ip: "ip",
+
+  viewportW: "viewport_w",
+  viewportH: "viewport_h",
+  screenW: "screen_w",
+  screenH: "screen_h",
+  sessionNumber: "session_number",
+  timestamp: "timestamp",
 } as const;
 
 export interface AEQueryResult<T = Record<string, string | number | null>> {
@@ -41,20 +43,20 @@ export interface AEQueryResult<T = Record<string, string | number | null>> {
 export async function queryAE<T = Record<string, string | number | null>>(
   sql: string,
 ): Promise<AEQueryResult<T>> {
-  const res = await fetch(CF_AE_ENDPOINT, {
+  const res = await fetch(`${TB_HOST}/v0/sql`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${CF_API_TOKEN}` },
-    body: sql,
+    headers: { Authorization: `Bearer ${TB_TOKEN}` },
+    body: `${sql} FORMAT JSON`,
+    cache: "no-cache",
   });
 
   if (!res.ok) {
     const text = await res.text();
-    console.log(text);
-    throw new Error(`AE query failed (${res.status}): ${text}`);
+    console.error("Tinybird query failed:", text);
+    throw new Error(`Analytics query failed (${res.status}): ${text}`);
   }
 
   const json = await res.json();
-  console.log(json);
   return json;
 }
 

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
-import { F, queryAE } from "@/lib/analyticsEngine";
+import { queryAE, F } from "@/lib/analyticsEngine";
 
 interface RealtimeResponse {
   count: number;
@@ -17,8 +17,8 @@ export const GET = wrapRoute<RealtimeResponse>(async (req: NextRequest) => {
 
   const res = await queryAE<{ count: number }>(`
     SELECT COUNT(DISTINCT ${F.visitorId}) as count
-    FROM cgd
-    WHERE index1 = '${websiteId}'
+    FROM ${F.engine}
+    WHERE ${F.websiteId} = '${websiteId}'
       AND ${F.type} = 'pageview'
       AND ${F.timestamp} >= ${tenMinAgo}
   `);

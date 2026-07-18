@@ -1,7 +1,13 @@
 import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
-import { F, queryAE, parseAnalyticsParams, periodToRange, escapeSQL } from "@/lib/analyticsEngine";
+import {
+  queryAE,
+  parseAnalyticsParams,
+  periodToRange,
+  escapeSQL,
+  F,
+} from "@/lib/analyticsEngine";
 
 interface LocationMetric {
   name: string;
@@ -18,6 +24,7 @@ export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
   await requireAuth();
   const params = parseAnalyticsParams(req.nextUrl.searchParams);
   const { start, end } = periodToRange(params.period);
+
   const countryFilter = req.nextUrl.searchParams.get("country")
     ? escapeSQL(req.nextUrl.searchParams.get("country")!)
     : null;
@@ -26,38 +33,46 @@ export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
     : null;
 
   const baseWhere = `
-    index1 = '${params.websiteId}'
+    ${F.websiteId} = '${params.websiteId}'
     AND ${F.type} = 'pageview'
     AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
   `;
 
-  const [countriesRes, regionsRes, citiesRes] = await Promise.all([
-    queryAE<{ name: string; uv: number }>(`
-      SELECT ${F.country} as name, COUNT(DISTINCT ${F.visitorId}) as uv
-      FROM cgd WHERE ${baseWhere}
-      GROUP BY name ORDER BY uv DESC LIMIT 30
-    `),
-    queryAE<{ name: string; uv: number }>(`
-      SELECT ${F.region} as name, COUNT(DISTINCT ${F.visitorId}) as uv
-      FROM cgd WHERE ${baseWhere}
-        ${countryFilter ? `AND ${F.country} = '${countryFilter}'` : ""}
-      GROUP BY name ORDER BY uv DESC LIMIT 30
-    `),
-    queryAE<{ name: string; uv: number }>(`
-      SELECT ${F.city} as name, COUNT(DISTINCT ${F.visitorId}) as uv
-      FROM cgd WHERE ${baseWhere}
-        ${countryFilter ? `AND ${F.country} = '${countryFilter}'` : ""}
-        ${regionFilter ? `AND ${F.region} = '${regionFilter}'` : ""}
-      GROUP BY name ORDER BY uv DESC LIMIT 30
-    `),
-  ]);
+  const regionWhere = `${baseWhere}${countryFilter ? ` AND ${F.country} = '${countryFilter}'` : ""}`;
+  const cityWhere = `${regionWhere}${regionFilter ? ` AND ${F.region} = '${regionFilter}'` : ""}`;
 
-  const toMetrics = (data: { name: string; uv: number }[]) =>
-    data.map((r) => ({ name: String(r.name), uv: Number(r.uv) }));
+  const res = await queryAE<{
+    level: "country" | "region" | "city";
+    name: string;
+    uv: number;
+  }>(`
+    (
+      SELECT 'country' as level, ${F.country} as name, COUNT(DISTINCT ${F.visitorId}) as uv
+      FROM ${F.engine} WHERE ${baseWhere}
+      GROUP BY name ORDER BY uv DESC LIMIT 30
+    )
+    UNION ALL
+    (
+      SELECT 'region' as level, ${F.region} as name, COUNT(DISTINCT ${F.visitorId}) as uv
+      FROM ${F.engine} WHERE ${regionWhere}
+      GROUP BY name ORDER BY uv DESC LIMIT 30
+    )
+    UNION ALL
+    (
+      SELECT 'city' as level, ${F.city} as name, COUNT(DISTINCT ${F.visitorId}) as uv
+      FROM ${F.engine} WHERE ${cityWhere}
+      GROUP BY name ORDER BY uv DESC LIMIT 30
+    )
+  `);
+
+  const byLevel = (level: "country" | "region" | "city"): LocationMetric[] =>
+    res.data
+      .filter((r) => r.level === level)
+      .map((r) => ({ name: String(r.name), uv: Number(r.uv) }));
 
   return {
-    countries: toMetrics(countriesRes.data),
-    regions: toMetrics(regionsRes.data),
-    cities: toMetrics(citiesRes.data),
+    countries: byLevel("country"),
+    regions: byLevel("region"),
+    cities: byLevel("city"),
   };
 });

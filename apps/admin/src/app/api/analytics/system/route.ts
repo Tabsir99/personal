@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
-import { F, queryAE, parseAnalyticsParams, periodToRange } from "@/lib/analyticsEngine";
+import { queryAE, parseAnalyticsParams, periodToRange, F } from "@/lib/analyticsEngine";
 
 interface SystemMetric {
   name: string;
@@ -50,8 +50,8 @@ export const GET = wrapRoute<SystemResponse>(async (req: NextRequest) => {
 
   const res = await queryAE<{ ua: string; vid: string }>(`
     SELECT ${F.userAgent} as ua, ${F.visitorId} as vid
-    FROM cgd
-    WHERE index1 = '${params.websiteId}'
+    FROM ${F.engine}
+    WHERE ${F.websiteId} = '${params.websiteId}'
       AND ${F.type} = 'pageview'
       AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
     GROUP BY vid, ua

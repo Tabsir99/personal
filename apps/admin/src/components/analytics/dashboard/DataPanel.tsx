@@ -25,7 +25,11 @@ export function DataPanel({ tabs, children }: DataPanelProps) {
           }}
         />
       </div>
-      <TabPanel tab={tab} dir={dir} className="h-[calc(100%-44px)] overflow-y-auto">
+      <TabPanel
+        tab={tab}
+        dir={dir}
+        className="h-[calc(100%-44px)] overflow-y-auto"
+      >
         {children(tab, dir)}
       </TabPanel>
     </div>
@@ -64,14 +68,14 @@ export function RankedList({
           {valueLabel}
         </span>
       </div>
-      <div className="divide-y divide-foreground/4">
+      <div className="flex flex-col gap-1 p-1">
         {visible.map((item) => (
           <div
             key={item.name}
-            className="group relative flex items-center gap-3 px-4 py-2.5"
+            className="group relative flex items-center gap-3 rounded-md px-3 py-2.5"
           >
             <div
-              className="absolute inset-y-0 left-0 bg-primary/[0.04] transition-all duration-300"
+              className="absolute inset-y-0 left-0 rounded-md bg-primary/8 transition-all duration-300"
               style={{ width: `${(item.value / max) * 100}%` }}
             />
             <div className="relative flex min-w-0 flex-1 items-center gap-2">

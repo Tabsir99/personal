@@ -28,7 +28,7 @@ export default [
       "tailwindcss/classnames-order": "error",
       "tailwindcss/enforces-shorthand": "error",
       "tailwindcss/no-contradicting-classname": "error",
-      "tailwindcss/no-unnecessary-arbitrary-value": "error",
+      "tailwindcss/no-arbitrary-value": "error",
       "@typescript-eslint/no-explicit-any": "off",
     },
   },

@@ -25,6 +25,9 @@ export const env = {
   CF_ACCOUNT_ID: requireEnv("CF_ACCOUNT_ID"),
   CF_API_TOKEN: requireEnv("CF_API_TOKEN"),
   CF_KV_NAMESPACE_ID: requireEnv("CF_KV_NAMESPACE_ID"),
+
+  TINYBIRD_HOST: requireEnv("TINYBIRD_HOST"),
+  TINYBIRD_TOKEN: requireEnv("TINYBIRD_TOKEN"),
 } as const;
 
 // Boot-time presence check; SDK reads ANTHROPIC_AUTH_TOKEN from process.env itself.

@@ -21,8 +21,8 @@ catalog:
   zod: "^4.4.3"
   "@tabsircg/analytics": "^1.0.1"
 
-
 allowBuilds:
+  esbuild: true
   msw: true
   protobufjs: true
   sharp: true

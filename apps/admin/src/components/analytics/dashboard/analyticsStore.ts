@@ -11,6 +11,7 @@ import type {
   Period,
   Granularity,
 } from "./types";
+import { mockFetchEndpoint } from "./analyticsMock";
 
 interface MainData {
   current: OverviewMetrics;
@@ -94,6 +95,12 @@ async function fetchEndpoint<T>(
   period: Period,
   extra?: Record<string, string>,
 ): Promise<T | null> {
+  // Toggle this to test visuals with mock data without calling the server
+  const USE_MOCKS = true;
+  if (USE_MOCKS) {
+    return mockFetchEndpoint<T>(path, period);
+  }
+
   const params = new URLSearchParams({ websiteId, period, ...extra });
   try {
     const res = await fetch(`/api/analytics/${path}?${params}`);

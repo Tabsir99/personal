@@ -6,7 +6,6 @@ import { useShallow } from "zustand/react/shallow";
 import { ArrowLeft, ArrowsClockwise } from "@phosphor-icons/react";
 import { Button } from "premium-ds/button";
 import { Select } from "premium-ds/select";
-import { Badge } from "premium-ds/badge";
 import { getAnalyticsWebsites } from "@/actions/analyticsActions";
 import type { AnalyticsWebsite } from "@/actions/analyticsActions";
 import {
@@ -41,16 +40,26 @@ export default function WebsiteDetailPage() {
   const [website, setWebsite] = useState<AnalyticsWebsite | null>(null);
   const [siteLoading, setSiteLoading] = useState(true);
 
-  const { period, granularity, setPeriod, setGranularity, fetchAll, refresh, realtimeCount, mainLoading } = useAnalyticsStore(useShallow((s) => ({
-    period: s.period,
-    granularity: s.granularity,
-    setPeriod: s.setPeriod,
-    setGranularity: s.setGranularity,
-    fetchAll: s.fetchAll,
-    refresh: s.refresh,
-    realtimeCount: s.realtimeCount,
-    mainLoading: s.mainLoading,
-  })));
+  const {
+    period,
+    granularity,
+    setPeriod,
+    setGranularity,
+    fetchAll,
+    refresh,
+    mainLoading,
+  } = useAnalyticsStore(
+    useShallow((s) => ({
+      period: s.period,
+      granularity: s.granularity,
+      setPeriod: s.setPeriod,
+      setGranularity: s.setGranularity,
+      fetchAll: s.fetchAll,
+      refresh: s.refresh,
+      realtimeCount: s.realtimeCount,
+      mainLoading: s.mainLoading,
+    })),
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -61,7 +70,9 @@ export default function WebsiteDetailPage() {
       }
       setSiteLoading(false);
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [websiteId]);
 
   useEffect(() => {
@@ -72,7 +83,12 @@ export default function WebsiteDetailPage() {
     return (
       <div className="mx-auto max-w-6xl pt-12 text-center">
         <p className="text-muted-foreground">Website not found</p>
-        <Button variant="ghost" size="sm" onClick={() => router.push("/analytics")} className="mt-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push("/analytics")}
+          className="mt-4"
+        >
           Back to websites
         </Button>
       </div>
@@ -100,17 +116,13 @@ export default function WebsiteDetailPage() {
                   {website!.name}
                 </h1>
               )}
-              {realtimeCount !== null && realtimeCount > 0 && (
-                <Badge tone="success" size="sm" live>
-                  {realtimeCount} online
-                </Badge>
-              )}
             </div>
             {siteLoading ? (
               <div className="mt-1 h-3 w-56 animate-pulse rounded-md bg-foreground/4" />
             ) : (
               <p className="mt-0.5 truncate font-mono text-[12px] text-muted-foreground/70">
-                {website!.origins.filter((o) => o !== "*").join(", ") || website!.id}
+                {website!.origins.filter((o) => o !== "*").join(", ") ||
+                  website!.id}
               </p>
             )}
           </div>

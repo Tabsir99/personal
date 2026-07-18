@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
-import { F, queryAE, parseAnalyticsParams, periodToRange } from "@/lib/analyticsEngine";
+import { queryAE, parseAnalyticsParams, periodToRange, F } from "@/lib/analyticsEngine";
 
 interface PageMetric {
   name: string;
@@ -22,8 +22,8 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
   const [pagesRes, sessionFirstRes] = await Promise.all([
     queryAE<{ name: string; uv: number; pageviews: number }>(`
       SELECT ${F.href} as name, COUNT(DISTINCT ${F.visitorId}) as uv, COUNT() as pageviews
-      FROM cgd
-      WHERE index1 = '${params.websiteId}'
+      FROM ${F.engine}
+      WHERE ${F.websiteId} = '${params.websiteId}'
         AND ${F.type} = 'pageview'
         AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
       GROUP BY name
@@ -32,8 +32,8 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
     `),
     queryAE<{ sid: string; name: string; ts: number }>(`
       SELECT ${F.sessionId} as sid, ${F.href} as name, MIN(${F.timestamp}) as ts
-      FROM cgd
-      WHERE index1 = '${params.websiteId}'
+      FROM ${F.engine}
+      WHERE ${F.websiteId} = '${params.websiteId}'
         AND ${F.type} = 'pageview'
         AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
       GROUP BY sid, name
