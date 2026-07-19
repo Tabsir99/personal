@@ -2,18 +2,13 @@
 
 import { useState } from "react";
 import { getFaviconUrl } from "../../ui/favicon";
+import { CHART } from "./chartTheme";
 
 interface ChannelDonutProps {
   items: { name: string; value: number }[];
   /** channel name -> ordered representative referrer sources */
   sources?: Record<string, string[]>;
 }
-
-// One translucent teal (brand hue 198) at stepped alpha, so the ring reads as
-// washed haze rather than solid fills. Largest slice least faint.
-const RAMP = [0.36, 0.27, 0.21, 0.16, 0.13, 0.1].map(
-  (a) => `oklch(0.76 0.085 198 / ${a})`,
-);
 
 const W = 560;
 const H = 380;
@@ -115,7 +110,7 @@ export function ChannelDonut({ items, sources = {} }: ChannelDonutProps) {
             key={s.name}
             d={arc(s.t0, Math.max(s.t0, s.t1 - PAD), MID)}
             fill="none"
-            stroke={RAMP[s.i % RAMP.length]}
+            stroke={CHART.ramp[s.i % CHART.ramp.length]}
             strokeWidth={THICK + (hover === s.i ? GROW : 0)}
             opacity={dimOf(s.i)}
             pathLength={1}

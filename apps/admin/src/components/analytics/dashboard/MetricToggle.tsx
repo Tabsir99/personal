@@ -4,21 +4,26 @@ import { Button } from "premium-ds/button";
 import { UIMotion } from "premium-ds/motion-tokens";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowsDownUp } from "@phosphor-icons/react";
+import { CHART, alpha } from "./chartTheme";
 
 export const METRICS = {
   visitors: {
     label: "Visitors",
     format: (n: number) => n.toLocaleString(),
-    bar: "bg-primary/10",
+    color: alpha(CHART["series"], 0.1),
   },
   revenue: {
     label: "Revenue",
     format: (n: number) => `$${n.toLocaleString()}`,
-    bar: "bg-success/20",
+    color: alpha(CHART["revenue"], 0.2),
   },
 } as const satisfies Record<
   string,
-  { label: string; format: (n: number) => string; bar: string }
+  {
+    label: string;
+    format: (n: number) => string;
+    color: string;
+  }
 >;
 
 export const METRIC_IDS = Object.keys(METRICS) as MetricId[];

@@ -110,7 +110,11 @@ function RankedList({
           className="group relative flex items-center gap-3 rounded-md px-2 h-8"
         >
           <div className="pointer-events-none absolute inset-0 flex items-stretch gap-0.5">
-            {METRIC_IDS.sort((a) => a === sortKey && 0).map((id, j) => {
+            {METRIC_IDS.sort((a, b) => {
+              if (a === sortKey) return -1;
+              if (b === sortKey) return 1;
+              return 0;
+            }).map((id, j) => {
               const from = morphFrom?.[i]?.[id];
               const last = j === METRIC_IDS.length - 1;
               return (
@@ -120,7 +124,8 @@ function RankedList({
                   initial={{ width: pct(from) }}
                   animate={{ width: pct(widths[i][id]) }}
                   transition={UIMotion.t.layout}
-                  className={`h-full shrink-0 ${last ? "rounded-tr-sm rounded-br-sm" : "rounded-none"} ${METRICS[id].bar}`}
+                  style={{ background: METRICS[id].color }}
+                  className={`h-full shrink-0 ${last ? "rounded-tr-sm rounded-br-sm" : "rounded-none"}`}
                 />
               );
             })}

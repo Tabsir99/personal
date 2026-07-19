@@ -6,10 +6,11 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
   ResponsiveContainer,
 } from "recharts";
 import type { TimeseriesPoint } from "@/lib/analyticsTypes";
+import { CHART } from "./dashboard/chartTheme";
+import { AnalyticsTooltip } from "./dashboard/AnalyticsTooltip";
 
 interface MiniChartProps {
   data: TimeseriesPoint[];
@@ -26,21 +27,13 @@ export function MiniChart({ data, empty }: MiniChartProps) {
       >
         <defs>
           <linearGradient id="visitorsGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop
-              offset="0%"
-              stopColor="var(--color-primary)"
-              stopOpacity={0.15}
-            />
-            <stop
-              offset="95%"
-              stopColor="var(--color-primary)"
-              stopOpacity={0}
-            />
+            <stop offset="0%" stopColor={CHART.series} stopOpacity={0.15} />
+            <stop offset="95%" stopColor={CHART.series} stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid
           strokeDasharray="3 3"
-          stroke="var(--color-border)"
+          stroke={CHART.grid}
           strokeOpacity={0.4}
           vertical={false}
         />
@@ -50,41 +43,33 @@ export function MiniChart({ data, empty }: MiniChartProps) {
             const d = new Date(ts);
             return `${d.getDate()}/${d.getMonth() + 1}`;
           }}
-          tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}
+          tick={{ fontSize: 10, fill: CHART.muted }}
           tickLine={false}
           axisLine={false}
           interval="preserveStartEnd"
           minTickGap={40}
         />
         <YAxis
-          tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}
+          tick={{ fontSize: 10, fill: CHART.muted }}
           tickLine={false}
           axisLine={false}
           width={28}
           allowDecimals={false}
         />
-        <Tooltip
-          animationEasing="ease-out"
-          animationDuration={200}
-          contentStyle={{
-            background: "var(--color-popover)",
-            border: "1px solid var(--color-border)",
-            borderRadius: 8,
-            fontSize: 12,
-            boxShadow: "var(--shadow-card-hover)",
-          }}
-          labelFormatter={(ts) =>
-            new Date(ts as number).toLocaleDateString(undefined, {
-              month: "short",
-              day: "numeric",
-            })
-          }
-          formatter={(value: number) => [value, "Visitors"]}
+        <AnalyticsTooltip
+          sections={(p) => [
+            p.date,
+            {
+              color: "series",
+              label: "Visitors",
+              value: p.get("visitors").toLocaleString(),
+            },
+          ]}
         />
         <Area
           type="monotone"
           dataKey="visitors"
-          stroke="var(--color-primary)"
+          stroke={CHART.series}
           strokeWidth={1.5}
           fill="url(#visitorsGradient)"
           animationDuration={800}
