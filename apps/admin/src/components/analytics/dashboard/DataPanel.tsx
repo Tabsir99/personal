@@ -13,7 +13,7 @@ export function DataPanel({ tabs, children }: DataPanelProps) {
   const [dir, setDir] = useState<-1 | 0 | 1>(0);
 
   return (
-    <div className="h-105 overflow-hidden rounded-lg border border-foreground/6 bg-card">
+    <div className="max-h-120 overflow-hidden rounded-lg border border-foreground/6 bg-card">
       <div className="border-b border-foreground/6 px-4 pt-3 pb-0">
         <Tabs
           label="Data view"

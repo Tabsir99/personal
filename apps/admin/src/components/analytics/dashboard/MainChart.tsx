@@ -194,7 +194,7 @@ export function MainChart({
               stroke={meta.color}
               strokeWidth={3}
               strokeLinecap="round"
-              strokeOpacity={0.5}
+              strokeOpacity={0.3}
               fill="url(#active-vertical-fill)"
               mask="url(#hover-mask)"
               activeDot={{
