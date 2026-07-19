@@ -2,7 +2,7 @@
 
 import { useShallow } from "zustand/react/shallow";
 import { useAnalyticsStore } from "./analyticsStore";
-import { DataPanel, RankedList } from "./DataPanel";
+import { DataPanel } from "./DataPanel";
 import { ChannelDonut } from "./ChannelDonut";
 
 import { Favicon } from "../../ui/favicon";
@@ -29,13 +29,10 @@ export function SourcesPanel() {
   return (
     <DataPanel
       tabs={[
-        { value: "channel", label: "Channel" },
-        { value: "referrer", label: "Referrer" },
-      ]}
-    >
-      {(tab) => {
-        if (tab === "channel") {
-          return (
+        {
+          value: "channel",
+          label: "Channel",
+          content: (
             <ChannelDonut
               items={(sources?.channels ?? []).map((c) => ({
                 name: c.name,
@@ -43,18 +40,18 @@ export function SourcesPanel() {
               }))}
               sources={channelSources}
             />
-          );
-        }
-        return (
-          <RankedList
-            items={(sources?.referrers ?? []).map((r) => ({
-              name: r.name ?? r.channel,
-              value: r.uv,
-              icon: <Favicon source={r.name} />,
-            }))}
-          />
-        );
-      }}
-    </DataPanel>
+          ),
+        },
+        {
+          value: "referrer",
+          label: "Referrer",
+          items: (sources?.referrers ?? []).map((r) => ({
+            name: r.name ?? r.channel,
+            icon: <Favicon source={r.name} />,
+            values: { visitors: r.uv, revenue: r.revenue },
+          })),
+        },
+      ]}
+    />
   );
 }

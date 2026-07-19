@@ -190,13 +190,15 @@ function MetricCell({
         >
           {label}
           <span
-            className={`absolute bottom-0 left-0 h-[1.5px] w-full origin-left bg-primary/60 transition-transform duration-200 ${showUnderline ? "scale-x-100" : "scale-x-0"}`}
+            className={`absolute bottom-0 left-0 h-0.5 w-full origin-left bg-primary/60 transition-transform duration-200 ${showUnderline ? "scale-x-100" : "scale-x-0"}`}
           />
         </span>
         <span className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
           {value}
           {delta && (
-            <span className={`ml-1.5 inline-flex items-center gap-0.5 text-xs font-medium ${deltaColor}`}>
+            <span
+              className={`ml-1.5 inline-flex items-center gap-0.5 text-xs font-medium ${deltaColor}`}
+            >
               {delta}
               {tone !== "flat" && (
                 <svg

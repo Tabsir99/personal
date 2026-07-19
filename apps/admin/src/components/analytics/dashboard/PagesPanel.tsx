@@ -2,7 +2,7 @@
 
 import { useShallow } from "zustand/react/shallow";
 import { useAnalyticsStore } from "./analyticsStore";
-import { DataPanel, RankedList } from "./DataPanel";
+import { DataPanel } from "./DataPanel";
 
 import { Favicon } from "../../ui/favicon";
 
@@ -21,43 +21,41 @@ export function PagesPanel() {
   return (
     <DataPanel
       tabs={[
-        { value: "hostname", label: "Hostname" },
-        { value: "pages", label: "Page" },
-        { value: "entry", label: "Entry page" },
-        { value: "exit", label: "Exit link" },
+        {
+          value: "hostname",
+          label: "Hostname",
+          items: (pages?.hostnames ?? []).map((h) => ({
+            name: h.name,
+            icon: <Favicon source={h.name} />,
+            values: { visitors: h.uv, revenue: h.revenue },
+          })),
+        },
+        {
+          value: "pages",
+          label: "Page",
+          items: (pages?.pages ?? []).map((p) => ({
+            name: p.name,
+            values: { visitors: p.uv, revenue: p.revenue },
+          })),
+        },
+        {
+          value: "entry",
+          label: "Entry page",
+          items: (pages?.entryPages ?? []).map((p) => ({
+            name: p.name,
+            values: { visitors: p.uv, revenue: p.revenue },
+          })),
+        },
+        {
+          value: "exit",
+          label: "Exit link",
+          items: (pages?.exitLinks ?? []).map((l) => ({
+            name: l.name,
+            icon: <Favicon source={l.name} />,
+            values: { visitors: l.uv, revenue: l.revenue },
+          })),
+        },
       ]}
-    >
-      {(tab) => {
-        if (!pages) return <RankedList items={[]} />;
-        if (tab === "hostname") {
-          return (
-            <RankedList
-              items={pages.hostnames.map((h) => ({
-                name: h.name,
-                value: h.uv,
-                icon: <Favicon source={h.name} />,
-              }))}
-            />
-          );
-        }
-        if (tab === "exit") {
-          return (
-            <RankedList
-              items={pages.exitLinks.map((l) => ({
-                name: l.name,
-                value: l.uv,
-                icon: <Favicon source={l.name} />,
-              }))}
-            />
-          );
-        }
-        const list = tab === "pages" ? pages.pages : pages.entryPages;
-        return (
-          <RankedList
-            items={list.map((p) => ({ name: p.name, value: p.uv }))}
-          />
-        );
-      }}
-    </DataPanel>
+    />
   );
 }

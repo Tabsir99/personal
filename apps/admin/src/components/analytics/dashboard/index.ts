@@ -1,11 +1,12 @@
 export { MetricsBar } from "./MetricsBar";
 export type { ChartMetric } from "./MetricsBar";
 export { MainChart } from "./MainChart";
-export { DataPanel, RankedList } from "./DataPanel";
+export { DataPanel } from "./DataPanel";
 export { useAnalyticsStore } from "./analyticsStore";
 export { OverviewCard } from "./OverviewCard";
 export { SourcesPanel } from "./SourcesPanel";
 export { LocationsPanel } from "./LocationsPanel";
 export { PagesPanel } from "./PagesPanel";
 export { SystemPanel } from "./SystemPanel";
+export { BotPanel } from "./BotPanel";
 export type * from "@/lib/analyticsTypes";

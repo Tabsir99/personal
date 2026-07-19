@@ -11,6 +11,8 @@ import type {
   HostnameMetric,
   Period,
   Granularity,
+  BotsResponse,
+  BotPagesResponse,
 } from "@/lib/analyticsTypes";
 import { mockFetchEndpoint } from "./analyticsMock";
 
@@ -64,12 +66,16 @@ interface AnalyticsState {
   system: SystemData | null;
   systemLoading: boolean;
 
+  bots: BotsResponse | null;
+  botsLoading: boolean;
+
   realtimeCount: number | null;
   realtimeLoading: boolean;
 
   setPeriod: (period: Period) => void;
   setGranularity: (granularity: Granularity) => void;
   fetchAll: (websiteId: string, period: Period) => void;
+  fetchBotPages: (name: string) => Promise<BotPagesResponse | null>;
   refresh: () => void;
 }
 
@@ -87,16 +93,17 @@ function granularityForPeriod(period: Period): Granularity {
   }
 }
 
+// Toggle this to test visuals with mock data without calling the server
+const USE_MOCKS = true;
+
 async function fetchEndpoint<T>(
   path: string,
   websiteId: string,
   period: Period,
   extra?: Record<string, string>,
 ): Promise<T | null> {
-  // Toggle this to test visuals with mock data without calling the server
-  const USE_MOCKS = true;
   if (USE_MOCKS) {
-    return mockFetchEndpoint<T>(path, period);
+    return mockFetchEndpoint<T>(path, period, extra);
   }
 
   const params = new URLSearchParams({ websiteId, period, ...extra });
@@ -130,6 +137,9 @@ export const useAnalyticsStore = create<AnalyticsState>((set, get) => ({
   system: null,
   systemLoading: true,
 
+  bots: null,
+  botsLoading: true,
+
   realtimeCount: null,
   realtimeLoading: true,
 
@@ -153,6 +163,14 @@ export const useAnalyticsStore = create<AnalyticsState>((set, get) => ({
   refresh: () => {
     const { websiteId, period } = get();
     if (websiteId) get().fetchAll(websiteId, period);
+  },
+
+  fetchBotPages: (name) => {
+    const { websiteId, period } = get();
+    if (!websiteId) return Promise.resolve(null);
+    return fetchEndpoint<BotPagesResponse>("bots/pages", websiteId, period, {
+      bot: name,
+    });
   },
 
   fetchAll: (websiteId, period) => {
@@ -196,6 +214,13 @@ export const useAnalyticsStore = create<AnalyticsState>((set, get) => ({
       fetchEndpoint<SystemData>("system", websiteId, period).then((system) =>
         set({ system, systemLoading: false }),
       );
+    }
+
+    if (!same || !state.botsLoading) {
+      set({ botsLoading: true });
+      fetchEndpoint<BotsResponse>("bots", websiteId, period, {
+        granularity,
+      }).then((bots) => set({ bots, botsLoading: false }));
     }
 
     if (!same || !state.realtimeLoading) {

@@ -2,7 +2,7 @@
 
 import { useShallow } from "zustand/react/shallow";
 import { useAnalyticsStore } from "./analyticsStore";
-import { DataPanel, RankedList } from "./DataPanel";
+import { DataPanel } from "./DataPanel";
 
 const countryNames = new Intl.DisplayNames(["en"], { type: "region" });
 
@@ -13,7 +13,7 @@ function getCountryFlag(code: string | undefined) {
     <img
       src={`https://flagcdn.com/20x15/${lower}.png`}
       alt={code}
-      className="h-3 w-4 rounded-sm object-cover shadow-[0_0_1px_rgba(0,0,0,0.15)]"
+      className="h-3 w-4 rounded-sm object-cover ring-1 ring-foreground/10"
     />
   );
 }
@@ -23,10 +23,12 @@ function formatCountryName(code: string) {
 }
 
 export function LocationsPanel() {
-  const { locations, loading } = useAnalyticsStore(useShallow((s) => ({
-    locations: s.locations,
-    loading: s.locationsLoading,
-  })));
+  const { locations, loading } = useAnalyticsStore(
+    useShallow((s) => ({
+      locations: s.locations,
+      loading: s.locationsLoading,
+    })),
+  );
 
   if (loading) {
     return <div className="h-105 animate-pulse rounded-lg bg-foreground/3" />;
@@ -35,22 +37,34 @@ export function LocationsPanel() {
   return (
     <DataPanel
       tabs={[
-        { value: "country", label: "Country" },
-        { value: "region", label: "Region" },
-        { value: "city", label: "City" },
+        {
+          value: "country",
+          label: "Country",
+          items: (locations?.countries ?? []).map((l) => ({
+            name: formatCountryName(l.name),
+            icon: getCountryFlag(l.country),
+            values: { visitors: l.uv, revenue: l.revenue },
+          })),
+        },
+        {
+          value: "region",
+          label: "Region",
+          items: (locations?.regions ?? []).map((l) => ({
+            name: l.name,
+            icon: getCountryFlag(l.country),
+            values: { visitors: l.uv, revenue: l.revenue },
+          })),
+        },
+        {
+          value: "city",
+          label: "City",
+          items: (locations?.cities ?? []).map((l) => ({
+            name: l.name,
+            icon: getCountryFlag(l.country),
+            values: { visitors: l.uv, revenue: l.revenue },
+          })),
+        },
       ]}
-    >
-      {(tab) => {
-        if (!locations) return <RankedList items={[]} />;
-        const map = { country: locations.countries, region: locations.regions, city: locations.cities };
-        const rawItems = map[tab as keyof typeof map] ?? [];
-        const items = rawItems.map((l) => ({
-          name: tab === "country" ? formatCountryName(l.name) : l.name,
-          value: l.uv,
-          icon: getCountryFlag(l.country),
-        }));
-        return <RankedList items={items} />;
-      }}
-    </DataPanel>
+    />
   );
 }

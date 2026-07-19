@@ -19,8 +19,8 @@ const W = 560;
 const H = 380;
 const CX = W / 2;
 const CY = H / 2;
-const OUTER = 144;
-const INNER = 86;
+const OUTER = 164;
+const INNER = 100;
 const MID = (INNER + OUTER) / 2;
 const THICK = OUTER - INNER;
 const GROW = 10; // stroke-width added on hover -> ±7px animated thicken
@@ -57,17 +57,26 @@ export function ChannelDonut({ items, sources = {} }: ChannelDonutProps) {
   const data = items.filter((i) => i.value > 0);
   const total = data.reduce((s, i) => s + i.value, 0) || 1;
 
+  type Slice = (typeof data)[number] & {
+    i: number;
+    t0: number;
+    t1: number;
+    mid: number;
+    sweep: number;
+  };
+  const slices: Slice[] = [];
   let acc = 0;
-  const slices = data.map((it, i) => {
+  for (let i = 0; i < data.length; i++) {
+    const it = data[i];
     const t0 = (acc / total) * 2 * Math.PI;
     acc += it.value;
     const t1 = (acc / total) * 2 * Math.PI;
-    return { ...it, i, t0, t1, mid: (t0 + t1) / 2, sweep: t1 - t0 };
-  });
+    slices.push({ ...it, i, t0, t1, mid: (t0 + t1) / 2, sweep: t1 - t0 });
+  }
 
   if (slices.length === 0)
     return (
-      <div className="flex h-full min-h-50 items-center justify-center text-[12px] text-muted-foreground/50">
+      <div className="flex h-full min-h-50 items-center justify-center text-xs text-muted-foreground/50">
         No data for this period
       </div>
     );
@@ -93,8 +102,8 @@ export function ChannelDonut({ items, sources = {} }: ChannelDonutProps) {
   const dimOf = (i: number) => (hover !== null && hover !== i ? 0.55 : 1);
 
   return (
-    <div className="flex h-full w-full items-center justify-center">
-      <svg viewBox={`0 0 ${W} ${H}`} className="h-full w-full">
+    <div className="flex size-full items-center justify-center">
+      <svg viewBox={`0 0 ${W} ${H}`} className="size-full">
         <defs>
           <clipPath id="chip" clipPathUnits="objectBoundingBox">
             <circle cx="0.5" cy="0.5" r="0.5" />

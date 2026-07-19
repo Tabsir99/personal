@@ -1,20 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Tabs, TabPanel } from "premium-ds/tabs";
+import { UIMotion } from "premium-ds/motion-tokens";
+import { motion } from "motion/react";
+import { METRIC_IDS, MetricId, MetricToggle, METRICS } from "./MetricToggle";
 
-interface DataPanelProps {
-  tabs: { value: string; label: string }[];
-  children: (activeTab: string, dir: -1 | 0 | 1) => React.ReactNode;
+export interface RankedItem {
+  name: string;
+  icon?: React.ReactNode;
+  values: Record<MetricId, number>;
 }
 
-export function DataPanel({ tabs, children }: DataPanelProps) {
+export type PanelTab =
+  | { value: string; label: string; items: RankedItem[] }
+  | { value: string; label: string; content: React.ReactNode };
+
+type MorphWidths = Array<Record<MetricId, number>>;
+
+export function DataPanel({ tabs }: { tabs: PanelTab[] }) {
   const [tab, setTab] = useState(tabs[0].value);
   const [dir, setDir] = useState<-1 | 0 | 1>(0);
+  const [sortKey, setSortKey] = useState<MetricId>("visitors");
+  const morphRef = useRef<MorphWidths>([]);
+
+  const activeTab = tabs.find((t) => t.value === tab) ?? tabs[0];
 
   return (
-    <div className="max-h-120 overflow-hidden rounded-lg border border-foreground/6 bg-card">
-      <div className="border-b border-foreground/6 px-4 pt-3 pb-0">
+    <div className="flex h-120 flex-col overflow-hidden rounded-lg border border-foreground/6 bg-card gap-2">
+      <div className="flex shrink-0 items-center gap-2 border-b border-foreground/6 px-2 pt-2">
         <Tabs
           label="Data view"
           items={tabs.map((t) => ({ value: t.value, label: t.label }))}
@@ -23,73 +37,105 @@ export function DataPanel({ tabs, children }: DataPanelProps) {
             setTab(v);
             setDir(d);
           }}
+          className="min-w-0 flex-1"
         />
+        {"items" in activeTab && (
+          <MetricToggle active={sortKey} setActive={setSortKey} />
+        )}
       </div>
-      <TabPanel
-        tab={tab}
-        dir={dir}
-        className="h-[calc(100%-44px)] overflow-y-auto"
-      >
-        {children(tab, dir)}
+      <TabPanel tab={tab} dir={dir} className="min-h-0 flex-1 overflow-y-auto">
+        {"items" in activeTab ? (
+          <RankedList
+            items={activeTab.items}
+            sortKey={sortKey}
+            morphRef={morphRef}
+          />
+        ) : (
+          activeTab.content
+        )}
       </TabPanel>
     </div>
   );
 }
 
-interface RankedListProps {
-  items: { name: string; value: number; icon?: React.ReactNode }[];
-  valueLabel?: string;
-  maxItems?: number;
-}
-
-export function RankedList({
+function RankedList({
   items,
-  valueLabel = "Visitors",
-  maxItems = 10,
-}: RankedListProps) {
-  const visible = items.slice(0, maxItems);
-  const max = visible[0]?.value ?? 1;
+  sortKey,
+  morphRef,
+}: {
+  items: RankedItem[];
+  sortKey: MetricId;
+  morphRef: React.RefObject<MorphWidths>;
+}) {
+  // Snapshot the outgoing tab's bar widths (published before TabPanel remounts
+  // this list) so the incoming bars animate from them — the tab-change morph.
+  // eslint-disable-next-line react-hooks/refs
+  const [morphFrom] = useState(() =>
+    morphRef.current.length ? morphRef.current : null,
+  );
+
+  const visible = items.sort((a, b) => b.values[sortKey] - a.values[sortKey]);
+
+  const maxByMetric = {} as Record<MetricId, number>;
+  for (const id of METRIC_IDS) {
+    maxByMetric[id] = Math.max(1, ...visible.map((it) => it.values[id]));
+  }
+  const scale = 0.92 / METRIC_IDS.length;
+  const widths: MorphWidths = visible.map((it) => {
+    const w = {} as Record<MetricId, number>;
+    for (const id of METRIC_IDS)
+      w[id] = (it.values[id] / maxByMetric[id]) * scale;
+    return w;
+  });
+  morphRef.current = widths;
+
+  const pct = (f: number) =>
+    `${Math.max(0, Math.min(1, Number.isFinite(f) ? f : 0)) * 100}%`;
 
   if (visible.length === 0) {
     return (
-      <div className="flex h-full min-h-50 items-center justify-center text-[12px] text-muted-foreground/50">
+      <div className="flex h-full min-h-50 items-center justify-center text-xs text-muted-foreground/50">
         No data for this period
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between border-b border-foreground/4 px-4 py-2">
-        <span className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
-          Name
-        </span>
-        <span className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
-          {valueLabel}
-        </span>
-      </div>
-      <div className="flex flex-col gap-1 p-1">
-        {visible.map((item) => (
-          <div
-            key={item.name}
-            className="group relative flex items-center gap-3 rounded-md px-3 py-2.5"
-          >
-            <div
-              className="absolute inset-y-0 left-0 rounded-md bg-primary/8 transition-all duration-300"
-              style={{ width: `${(item.value / max) * 100}%` }}
-            />
-            <div className="relative flex min-w-0 flex-1 items-center gap-2">
-              {item.icon && <span className="shrink-0">{item.icon}</span>}
-              <span className="truncate text-[13px] text-foreground">
-                {item.name || "(unknown)"}
-              </span>
-            </div>
-            <span className="relative font-mono text-[12px] font-medium text-foreground/80 tabular-nums">
-              {item.value.toLocaleString()}
+    <div className="flex flex-col gap-1">
+      {visible.map((item, i) => (
+        <motion.div
+          key={item.name}
+          layout
+          transition={UIMotion.t.layout}
+          className="group relative flex items-center gap-3 rounded-md px-2 h-8"
+        >
+          <div className="pointer-events-none absolute inset-0 flex items-stretch gap-0.5">
+            {METRIC_IDS.sort((a) => a === sortKey && 0).map((id, j) => {
+              const from = morphFrom?.[i]?.[id];
+              const last = j === METRIC_IDS.length - 1;
+              return (
+                <motion.div
+                  key={id}
+                  aria-hidden
+                  initial={{ width: pct(from) }}
+                  animate={{ width: pct(widths[i][id]) }}
+                  transition={UIMotion.t.layout}
+                  className={`h-full shrink-0 ${last ? "rounded-tr-sm rounded-br-sm" : "rounded-none"} ${METRICS[id].bar}`}
+                />
+              );
+            })}
+          </div>
+          <div className="relative flex min-w-0 flex-1 items-center gap-2">
+            {item.icon && <span className="shrink-0">{item.icon}</span>}
+            <span className="truncate text-sm text-foreground">
+              {item.name}
             </span>
           </div>
-        ))}
-      </div>
+          <span className="relative font-mono text-xs font-medium text-foreground/80 tabular-nums">
+            {METRICS[sortKey].format(item.values[sortKey])}
+          </span>
+        </motion.div>
+      ))}
     </div>
   );
 }

@@ -15,6 +15,7 @@ import {
   LocationsPanel,
   PagesPanel,
   SystemPanel,
+  BotPanel,
 } from "@/components/analytics/dashboard";
 import type { Period, Granularity } from "@/components/analytics/dashboard";
 
@@ -169,6 +170,8 @@ export default function WebsiteDetailPage() {
           <PagesPanel />
           <SystemPanel />
         </div>
+
+        <BotPanel />
       </div>
     </div>
   );

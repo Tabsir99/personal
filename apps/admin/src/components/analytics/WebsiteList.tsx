@@ -23,7 +23,7 @@ export function WebsiteList({
       <header className="flex items-end justify-between pb-8">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Websites</h1>
-          <p className="mt-1 text-[13px] text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground">
             Tracked domains. Each website partitions analytics data
             independently.
           </p>

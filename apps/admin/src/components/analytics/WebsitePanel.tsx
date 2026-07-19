@@ -121,12 +121,12 @@ init({ websiteId: '${site.id}' })`;
           </div>
           <Link
             href={`/analytics/${site.id}`}
-            className="truncate text-[15px] font-semibold tracking-tight text-foreground underline decoration-foreground/20 underline-offset-2 transition-colors hover:decoration-foreground/60"
+            className="truncate text-sm font-semibold tracking-tight text-foreground underline decoration-foreground/20 underline-offset-2 transition-colors hover:decoration-foreground/60"
           >
             {site.name}
           </Link>
           {site.createdAt && (
-            <span className="hidden font-mono text-[11px] text-muted-foreground/60 tabular-nums sm:inline">
+            <span className="hidden font-mono text-xs text-muted-foreground/60 tabular-nums sm:inline">
               since{" "}
               {new Date(site.createdAt).toLocaleDateString(undefined, {
                 month: "short",
@@ -181,9 +181,9 @@ init({ websiteId: '${site.id}' })`;
       </div>
 
       {/* Chart + Info grid */}
-      <div className="grid grid-cols-1 divide-y divide-foreground/6 lg:grid-cols-[1fr_280px] lg:divide-x lg:divide-y-0">
+      <div className="flex flex-col divide-y divide-foreground/6 lg:flex-row lg:divide-x lg:divide-y-0">
         {/* Chart */}
-        <div className="p-5">
+        <div className="p-5 lg:flex-1">
           <div className="mb-3 flex items-center justify-between">
             <Eyebrow tone="muted" size="xs">
               Visitors · 30 days
@@ -209,12 +209,12 @@ init({ websiteId: '${site.id}' })`;
         </div>
 
         {/* Sidebar info */}
-        <div className="flex flex-col divide-y divide-foreground/6">
+        <div className="flex flex-col divide-y divide-foreground/6 lg:w-70 lg:shrink-0">
           <InfoCell icon={<Fingerprint size={13} />} label="Website ID">
             <button
               type="button"
               onClick={copyId}
-              className="inline-flex items-center gap-1.5 font-mono text-[11.5px] text-foreground/80 transition-colors hover:text-foreground"
+              className="inline-flex items-center gap-1.5 font-mono text-xs text-foreground/80 transition-colors hover:text-foreground"
             >
               {site.id}
               {copied ? (

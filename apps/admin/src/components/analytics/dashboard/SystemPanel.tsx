@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Globe, Monitor } from "@phosphor-icons/react";
 import { useAnalyticsStore } from "./analyticsStore";
-import { DataPanel, RankedList } from "./DataPanel";
+import { DataPanel } from "./DataPanel";
 
 type Kind = "browser" | "os" | "device";
 
@@ -35,7 +35,7 @@ function SystemIcon({ kind, name }: { kind: Kind; name: string }) {
     <img
       src={src}
       alt={name}
-      className="size-4 object-contain"
+      className="size-5 object-contain"
       onError={() => setErroredSrc(src)}
     />
   );
@@ -56,26 +56,34 @@ export function SystemPanel() {
   return (
     <DataPanel
       tabs={[
-        { value: "browser", label: "Browser" },
-        { value: "os", label: "OS" },
-        { value: "device", label: "Device" },
+        {
+          value: "browser",
+          label: "Browser",
+          items: (system?.browsers ?? []).map((s) => ({
+            name: s.name,
+            icon: <SystemIcon kind="browser" name={s.name} />,
+            values: { visitors: s.uv, revenue: s.revenue },
+          })),
+        },
+        {
+          value: "os",
+          label: "OS",
+          items: (system?.os ?? []).map((s) => ({
+            name: s.name,
+            icon: <SystemIcon kind="os" name={s.name} />,
+            values: { visitors: s.uv, revenue: s.revenue },
+          })),
+        },
+        {
+          value: "device",
+          label: "Device",
+          items: (system?.devices ?? []).map((s) => ({
+            name: s.name,
+            icon: <SystemIcon kind="device" name={s.name} />,
+            values: { visitors: s.uv, revenue: s.revenue },
+          })),
+        },
       ]}
-    >
-      {(tab) => {
-        if (!system) return <RankedList items={[]} />;
-        const kind = tab as Kind;
-        const map = {
-          browser: system.browsers,
-          os: system.os,
-          device: system.devices,
-        };
-        const items = (map[kind] ?? []).map((s) => ({
-          name: s.name,
-          value: s.uv,
-          icon: <SystemIcon kind={kind} name={s.name} />,
-        }));
-        return <RankedList items={items} />;
-      }}
-    </DataPanel>
+    />
   );
 }
