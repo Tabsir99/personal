@@ -5,6 +5,7 @@ import { Tabs, TabPanel } from "premium-ds/tabs";
 import { UIMotion } from "premium-ds/motion-tokens";
 import { motion } from "motion/react";
 import { METRIC_IDS, MetricId, MetricToggle, METRICS } from "./MetricToggle";
+import { useReveal } from "./reveal";
 
 export interface RankedItem {
   name: string;
@@ -23,11 +24,15 @@ export function DataPanel({ tabs }: { tabs: PanelTab[] }) {
   const [dir, setDir] = useState<-1 | 0 | 1>(0);
   const [sortKey, setSortKey] = useState<MetricId>("visitors");
   const morphRef = useRef<MorphWidths>([]);
+  const { ref, revealed, enter } = useReveal<HTMLDivElement>();
 
   const activeTab = tabs.find((t) => t.value === tab) ?? tabs[0];
 
   return (
-    <div className="flex h-120 flex-col overflow-hidden rounded-lg border border-foreground/6 bg-card gap-2">
+    <div
+      ref={ref}
+      className={`${enter} flex h-120 flex-col gap-2 overflow-hidden rounded-lg border border-foreground/6 bg-card`}
+    >
       <div className="flex shrink-0 items-center gap-2 border-b border-foreground/6 px-2 pt-2">
         <Tabs
           label="Data view"
@@ -49,6 +54,7 @@ export function DataPanel({ tabs }: { tabs: PanelTab[] }) {
             items={activeTab.items}
             sortKey={sortKey}
             morphRef={morphRef}
+            revealed={revealed}
           />
         ) : (
           activeTab.content
@@ -62,10 +68,12 @@ function RankedList({
   items,
   sortKey,
   morphRef,
+  revealed,
 }: {
   items: RankedItem[];
   sortKey: MetricId;
   morphRef: React.RefObject<MorphWidths>;
+  revealed: boolean;
 }) {
   // Snapshot the outgoing tab's bar widths (published before TabPanel remounts
   // this list) so the incoming bars animate from them — the tab-change morph.
@@ -107,7 +115,7 @@ function RankedList({
           key={item.name}
           layout
           transition={UIMotion.t.layout}
-          className="group relative flex items-center gap-3 rounded-md px-2 h-8"
+          className="group relative flex h-8 items-center gap-3 rounded-md px-2"
         >
           <div className="pointer-events-none absolute inset-0 flex items-stretch gap-0.5">
             {METRIC_IDS.sort((a, b) => {
@@ -122,10 +130,10 @@ function RankedList({
                   key={id}
                   aria-hidden
                   initial={{ width: pct(from) }}
-                  animate={{ width: pct(widths[i][id]) }}
+                  animate={{ width: pct(revealed ? widths[i][id] : 0) }}
                   transition={UIMotion.t.layout}
                   style={{ background: METRICS[id].color }}
-                  className={`h-full shrink-0 ${last ? "rounded-tr-sm rounded-br-sm" : "rounded-none"}`}
+                  className={`h-full shrink-0 ${last ? "rounded-r-sm" : "rounded-none"}`}
                 />
               );
             })}

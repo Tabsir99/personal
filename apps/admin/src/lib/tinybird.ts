@@ -1,44 +1,23 @@
 import "server-only";
 import { z } from "zod";
 import { env } from "@/config/env.server";
+import {
+  COLUMNS,
+  ANALYTICS_TABLE,
+  type AnalyticsEventRow,
+} from "@tabsircg/analytics-contract";
 
 const TB_HOST = env.TINYBIRD_HOST;
 const TB_TOKEN = env.TINYBIRD_TOKEN;
 
 export const F = {
-  engine: "analytics_events",
-
-  websiteId: "website_id",
-  type: "type",
-  domain: "domain",
-  href: "href",
-  referrer: "referrer",
-  visitorId: "visitor_id",
-  sessionId: "session_id",
-  language: "language",
-  timezone: "timezone",
-  eventName: "event_name",
-  extraData: "extra_data",
-  country: "country",
-  region: "region",
-  city: "city",
-  browser: "browser",
-  os: "os",
-  device: "device",
-  isBot: "is_bot",
-  botCategory: "bot_category",
-  botName: "bot_name",
-  ip: "ip",
-
-  viewportW: "viewport_w",
-  viewportH: "viewport_h",
-  screenW: "screen_w",
-  screenH: "screen_h",
-  sessionNumber: "session_number",
-  timestamp: "timestamp",
+  engine: ANALYTICS_TABLE,
+  ...COLUMNS,
 } as const;
 
-export interface TinybirdQueryResult<T = Record<string, string | number | null>> {
+export interface TinybirdQueryResult<
+  T = Record<string, string | number | null>,
+> {
   data: T[];
   meta: { name: string; type: string }[];
   rows: number;
@@ -63,6 +42,42 @@ export async function queryTinybird<T = Record<string, string | number | null>>(
 
   const json = await res.json();
   return json;
+}
+
+export async function writePaymentEvent(row: {
+  websiteId: string;
+  visitorId: string;
+  sessionId: string;
+  revenueCents: number;
+  eventName?: string;
+  extra?: Record<string, unknown>;
+  timestamp: number;
+}): Promise<void> {
+  const payload: Partial<AnalyticsEventRow> = {
+    website_id: row.websiteId,
+    type: "payment",
+    visitor_id: row.visitorId,
+    session_id: row.sessionId,
+    revenue_cents: row.revenueCents,
+    event_name: row.eventName ?? "payment",
+    extra_data: JSON.stringify(row.extra ?? {}),
+    timestamp: row.timestamp,
+  };
+  const body = JSON.stringify(payload);
+
+  const res = await fetch(`${TB_HOST}/v0/events?name=${ANALYTICS_TABLE}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${TB_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Tinybird payment ingest failed (${res.status}): ${text}`);
+  }
 }
 
 export type Period =

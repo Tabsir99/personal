@@ -4,7 +4,11 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve, relative } from "node:path";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@tabsircg/schemas", "@tabsircg/analytics"],
+  transpilePackages: [
+    "@tabsircg/schemas",
+    "@tabsircg/analytics",
+    "@tabsircg/analytics-contract",
+  ],
   logging: { serverFunctions: false },
   devIndicators: false,
   reactStrictMode: true,
@@ -22,9 +26,8 @@ const nextConfig: NextConfig = {
 const config = withPremiumDS(nextConfig);
 
 if (config.turbopack) {
-  const analyticsPkgDir =
-    "/home/tabsir/ap/reactp/tabsircg/analytics/packages/analytics";
   const projectDir = dirname(fileURLToPath(import.meta.url));
+  const analyticsPkgDir = resolve(projectDir, "../../packages/analytics");
 
   config.turbopack.resolveAlias = {
     ...config.turbopack.resolveAlias,

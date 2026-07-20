@@ -1,90 +1,36 @@
 "use server";
-import { z } from "zod";
-import { db, Collections } from "@/config/firebaseAdmin";
-import { env } from "@/config/env.server";
+import { FieldValue } from "firebase-admin/firestore";
 import { wrap } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
+import { setupStripe } from "@/lib/stripeStore";
+import {
+  websitesDocRef,
+  websiteSchema,
+  readWebsiteConfig,
+  slugify,
+  syncOriginsToKV,
+  deleteWebsiteFromKV,
+} from "@/lib/analyticsWebsites";
 
-const COLLECTION = Collections.CONFIG;
-const DOC_ID = "analytics";
-
-const websiteSchema = z.object({
-  id: z
-    .string()
-    .min(1)
-    .max(96)
-    .regex(/^[\w-]+$/, "Only alphanumeric, dashes, and underscores"),
-  name: z.string().min(1).max(100),
-  origins: z
-    .array(z.string().url().or(z.string().regex(/^\*$/)))
-    .min(1, "At least one origin required"),
-  createdAt: z.number(),
-});
-
-export type AnalyticsWebsite = z.infer<typeof websiteSchema>;
-
-interface AnalyticsConfig {
-  websites: AnalyticsWebsite[];
-}
-
-const docRef = db.collection(COLLECTION).doc(DOC_ID);
-
-async function readConfig(): Promise<AnalyticsConfig> {
-  const snap = await docRef.get();
-  const data = snap.data();
-  return { websites: data?.websites ?? [] };
-}
-
-async function syncToKV(websiteId: string, origins: string[]) {
-  const url = `https://api.cloudflare.com/client/v4/accounts/${env.CF_ACCOUNT_ID}/storage/kv/namespaces/${env.CF_KV_NAMESPACE_ID}/values/website_${websiteId}`;
-  const res = await fetch(url, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${env.CF_API_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(origins),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`CF KV sync failed (${res.status}): ${text}`);
-  }
-}
-
-async function deleteFromKV(websiteId: string) {
-  const url = `https://api.cloudflare.com/client/v4/accounts/${env.CF_ACCOUNT_ID}/storage/kv/namespaces/${env.CF_KV_NAMESPACE_ID}/values/website_${websiteId}`;
-  const res = await fetch(url, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${env.CF_API_TOKEN}` },
-  });
-  if (!res.ok && res.status !== 404) {
-    const text = await res.text();
-    throw new Error(`CF KV delete failed (${res.status}): ${text}`);
-  }
-}
+export type { AnalyticsWebsite } from "@/lib/analyticsWebsites";
 
 export const getAnalyticsWebsites = wrap(async () => {
   await requireAuth();
-  return (await readConfig()).websites;
+  return (await readWebsiteConfig()).websites;
 });
 
-function slugify(text: string) {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w-]/g, "")
-    .replace(/-{2,}/g, "-");
-}
-
 export const addAnalyticsWebsite = wrap(
-  async (input: { name: string; origins: string[] }) => {
+  async (input: {
+    name: string;
+    origins: string[];
+    restrictedKey?: string;
+  }) => {
     await requireAuth();
 
     const baseId = slugify(input.name);
     if (!baseId) throw new Error("Name must produce a valid ID");
 
-    const config = await readConfig();
+    const config = await readWebsiteConfig();
 
     let id = baseId;
     let suffix = 1;
@@ -92,36 +38,66 @@ export const addAnalyticsWebsite = wrap(
       id = `${baseId}-${suffix++}`;
     }
 
+    const setup = input.restrictedKey
+      ? await setupStripe(id, input.restrictedKey)
+      : null;
+
     const website = websiteSchema.parse({
       id,
       name: input.name,
       origins: input.origins,
       createdAt: Date.now(),
+      ...(setup ? { stripe: setup.marker } : {}),
     });
 
     config.websites.push(website);
-    await docRef.set({ websites: config.websites }, { merge: true });
-    await syncToKV(website.id, website.origins);
+    await websitesDocRef.set(
+      {
+        websites: config.websites,
+        ...(setup ? { stripeSecrets: { [id]: setup.secret } } : {}),
+      },
+      { merge: true },
+    );
+    await syncOriginsToKV(website.id, website.origins);
 
     return website;
   },
 );
 
 export const updateAnalyticsWebsite = wrap(
-  async (websiteId: string, patch: { name?: string; origins?: string[] }) => {
+  async (
+    websiteId: string,
+    patch: { name?: string; origins?: string[]; restrictedKey?: string },
+  ) => {
     await requireAuth();
 
-    const config = await readConfig();
+    const config = await readWebsiteConfig();
     const idx = config.websites.findIndex((w) => w.id === websiteId);
     if (idx === -1) throw new Error(`Website "${websiteId}" not found`);
 
-    const updated = { ...config.websites[idx], ...patch };
+    const { restrictedKey, ...websitePatch } = patch;
+
+    const setup = restrictedKey
+      ? await setupStripe(websiteId, restrictedKey)
+      : null;
+
+    const updated = {
+      ...config.websites[idx],
+      ...websitePatch,
+      ...(setup ? { stripe: setup.marker } : {}),
+    };
     websiteSchema.parse(updated);
     config.websites[idx] = updated;
 
-    await docRef.set({ websites: config.websites }, { merge: true });
-    if (patch.origins) {
-      await syncToKV(websiteId, patch.origins);
+    await websitesDocRef.set(
+      {
+        websites: config.websites,
+        ...(setup ? { stripeSecrets: { [websiteId]: setup.secret } } : {}),
+      },
+      { merge: true },
+    );
+    if (websitePatch.origins) {
+      await syncOriginsToKV(websiteId, websitePatch.origins);
     }
 
     return updated;
@@ -131,14 +107,17 @@ export const updateAnalyticsWebsite = wrap(
 export const deleteAnalyticsWebsite = wrap(async (websiteId: string) => {
   await requireAuth();
 
-  const config = await readConfig();
-  const filtered = config.websites.filter((w) => w.id !== websiteId);
-  if (filtered.length === config.websites.length) {
+  const config = await readWebsiteConfig();
+  if (!config.websites.some((w) => w.id === websiteId)) {
     throw new Error(`Website "${websiteId}" not found`);
   }
 
-  await docRef.set({ websites: filtered }, { merge: true });
-  await deleteFromKV(websiteId);
+  const filtered = config.websites.filter((w) => w.id !== websiteId);
+  await websitesDocRef.update({
+    websites: filtered,
+    [`stripeSecrets.${websiteId}`]: FieldValue.delete(),
+  });
+  await deleteWebsiteFromKV(websiteId);
 
   return { deleted: websiteId };
 });

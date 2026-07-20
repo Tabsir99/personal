@@ -71,7 +71,7 @@ Set by the client SDK as cookies (prefix `cgd_`):
 
 - **Live queries only**, no pre-aggregation: every route `POST`s SQL to Tinybird's
   `/v0/sql` endpoint (body = SQL + ` FORMAT JSON`, `Authorization: Bearer
-{TINYBIRD_TOKEN}`). Env: `TINYBIRD_HOST`, `TINYBIRD_TOKEN`.
+  {TINYBIRD_TOKEN}`). Env: `TINYBIRD_HOST`, `TINYBIRD_TOKEN`.
 - **One SQL statement per route** — multi-part panels are built with `UNION ALL` +
   a `level` discriminator and subqueries, never multiple round-trips.
 - Every route accepts `?websiteId=&period=&granularity=`; parsing + the shared

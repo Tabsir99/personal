@@ -125,7 +125,7 @@ export function ChannelDonut({ items, sources = {} }: ChannelDonutProps) {
               from="1"
               to="0"
               dur="0.12s"
-              begin={`${s.i * 0.12}s`}
+              begin={`${0.6 + s.i * 0.12}s`}
               fill="freeze"
             />
           </path>

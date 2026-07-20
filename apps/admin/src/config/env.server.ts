@@ -21,6 +21,7 @@ export const env = {
   CLOUDFLARE_R2_ENDPOINT: requireEnv("CLOUDFLARE_R2_ENDPOINT"),
 
   SERVER_TOKEN: requireEnv("SERVER_TOKEN"),
+  ADMIN_ORIGIN: requireEnv("NEXT_PUBLIC_ADMIN_ORIGIN"),
 
   CF_ACCOUNT_ID: requireEnv("CF_ACCOUNT_ID"),
   CF_API_TOKEN: requireEnv("CF_API_TOKEN"),

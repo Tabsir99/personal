@@ -8,10 +8,6 @@
       "name": "premium-ds",
       "path": "../premium-ds",
     },
-    {
-      "name": "analytics",
-      "path": "../tabsircg/analytics",
-    },
   ],
   "settings": {},
 }

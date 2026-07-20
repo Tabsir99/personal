@@ -31,6 +31,7 @@ export function WebsiteDialog({
   const [origins, setOrigins] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [originError, setOriginError] = useState<string | null>(null);
+  const [restrictedKey, setRestrictedKey] = useState("");
 
   useEffect(() => {
     if (open && editing) {
@@ -42,6 +43,7 @@ export function WebsiteDialog({
     }
     setOriginInput("");
     setOriginError(null);
+    setRestrictedKey("");
   }, [open, editing]);
 
   const commitOrigin = () => {
@@ -83,9 +85,18 @@ export function WebsiteDialog({
     if (!canSubmit) return;
     setSaving(true);
 
+    const key = restrictedKey.trim();
     const res = editing
-      ? await updateAnalyticsWebsite(editing.id, { name: name.trim(), origins })
-      : await addAnalyticsWebsite({ name: name.trim(), origins });
+      ? await updateAnalyticsWebsite(editing.id, {
+          name: name.trim(),
+          origins,
+          ...(key ? { restrictedKey: key } : {}),
+        })
+      : await addAnalyticsWebsite({
+          name: name.trim(),
+          origins,
+          ...(key ? { restrictedKey: key } : {}),
+        });
 
     setSaving(false);
 
@@ -171,6 +182,28 @@ export function WebsiteDialog({
               </Tag>
             ))}
           </TagGroup>
+        </div>
+
+        <div className="space-y-3">
+          <div className="text-sm font-medium">Stripe (revenue)</div>
+          {editing?.stripe?.configured && (
+            <div className="text-xs opacity-70">
+              Configured
+              {editing.stripe.restrictedKeyLast4
+                ? ` · rk ···· ${editing.stripe.restrictedKeyLast4}`
+                : ""}
+              . Enter a key to re-create the webhook; leave blank to keep.
+            </div>
+          )}
+          <TextField
+            id="ws-stripe-rk"
+            type="password"
+            label="Restricted key"
+            helper="rk_… with Webhook Endpoints write. The webhook is created automatically."
+            placeholder="rk_live_…"
+            value={restrictedKey}
+            onChange={(e) => setRestrictedKey(e.target.value)}
+          />
         </div>
       </div>
     </Dialog>
