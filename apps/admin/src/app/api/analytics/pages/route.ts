@@ -2,12 +2,12 @@ import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
 import {
-  queryAE,
+  queryTinybird,
   parseAnalyticsParams,
   periodToRange,
   partitionByLevel,
   F,
-} from "@/lib/analyticsEngine";
+} from "@/lib/tinybird";
 import type { PagesResponse } from "@/lib/analyticsTypes";
 
 export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
@@ -29,7 +29,7 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
     AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
   `;
 
-  const res = await queryAE<{
+  const res = await queryTinybird<{
     level: "pages" | "entryPages" | "hostnames" | "exitLinks";
     name: string;
     uv: number;

@@ -38,16 +38,16 @@ export const F = {
   timestamp: "timestamp",
 } as const;
 
-export interface AEQueryResult<T = Record<string, string | number | null>> {
+export interface TinybirdQueryResult<T = Record<string, string | number | null>> {
   data: T[];
   meta: { name: string; type: string }[];
   rows: number;
   rows_before_limit_at_least: number;
 }
 
-export async function queryAE<T = Record<string, string | number | null>>(
+export async function queryTinybird<T = Record<string, string | number | null>>(
   sql: string,
-): Promise<AEQueryResult<T>> {
+): Promise<TinybirdQueryResult<T>> {
   const res = await fetch(`${TB_HOST}/v0/sql`, {
     method: "POST",
     headers: { Authorization: `Bearer ${TB_TOKEN}` },

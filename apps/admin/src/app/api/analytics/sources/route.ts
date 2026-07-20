@@ -2,12 +2,12 @@ import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
 import {
-  queryAE,
+  queryTinybird,
   parseAnalyticsParams,
   periodToRange,
   partitionByLevel,
   F,
-} from "@/lib/analyticsEngine";
+} from "@/lib/tinybird";
 import type { SourcesResponse } from "@/lib/analyticsTypes";
 import { buildChannelSQL } from "./channels";
 
@@ -25,7 +25,7 @@ export const GET = wrapRoute<SourcesResponse>(async (req: NextRequest) => {
     AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
   `;
 
-  const res = await queryAE<{
+  const res = await queryTinybird<{
     level: "referrers" | "channels";
     name: string;
     uv: number;

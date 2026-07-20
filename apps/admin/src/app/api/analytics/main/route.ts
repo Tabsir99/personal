@@ -2,13 +2,13 @@ import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
 import {
-  queryAE,
+  queryTinybird,
   parseAnalyticsParams,
   periodToRange,
   previousPeriodRange,
   granularityToMs,
   F,
-} from "@/lib/analyticsEngine";
+} from "@/lib/tinybird";
 import type { OverviewMetrics, TimeseriesPoint, MainResponse } from "@/lib/analyticsTypes";
 
 interface PeriodRow {
@@ -41,7 +41,7 @@ async function fetchOverviewComparison(
   end: number,
   prevStart: number,
 ): Promise<{ current: OverviewMetrics; previous: OverviewMetrics }> {
-  const res = await queryAE<PeriodRow>(`
+  const res = await queryTinybird<PeriodRow>(`
     WITH session_stats AS (
       SELECT
         ${F.sessionId} as sid,
@@ -85,7 +85,7 @@ async function fetchTimeseries(
   end: number,
   bucketMs: number,
 ): Promise<TimeseriesPoint[]> {
-  const res = await queryAE<{
+  const res = await queryTinybird<{
     bucket: number;
     visitors: number;
     pageviews: number;

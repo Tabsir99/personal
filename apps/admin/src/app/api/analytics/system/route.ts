@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
-import { queryAE, parseAnalyticsParams, periodToRange, partitionByLevel, F } from "@/lib/analyticsEngine";
+import { queryTinybird, parseAnalyticsParams, periodToRange, partitionByLevel, F } from "@/lib/tinybird";
 import type { SystemResponse } from "@/lib/analyticsTypes";
 
 export const GET = wrapRoute<SystemResponse>(async (req: NextRequest) => {
@@ -16,7 +16,7 @@ export const GET = wrapRoute<SystemResponse>(async (req: NextRequest) => {
     AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
   `;
 
-  const res = await queryAE<{
+  const res = await queryTinybird<{
     level: "browsers" | "os" | "devices";
     name: string;
     uv: number;

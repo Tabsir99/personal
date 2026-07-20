@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
-import { queryAE, F } from "@/lib/analyticsEngine";
+import { queryTinybird, F } from "@/lib/tinybird";
 import type { RealtimeResponse } from "@/lib/analyticsTypes";
 
 export const GET = wrapRoute<RealtimeResponse>(async (req: NextRequest) => {
@@ -12,7 +12,7 @@ export const GET = wrapRoute<RealtimeResponse>(async (req: NextRequest) => {
 
   const tenMinAgo = Date.now() - 10 * 60 * 1000;
 
-  const res = await queryAE<{ count: number }>(`
+  const res = await queryTinybird<{ count: number }>(`
     SELECT COUNT(DISTINCT ${F.visitorId}) as count
     FROM ${F.engine}
     WHERE ${F.websiteId} = '${websiteId}'

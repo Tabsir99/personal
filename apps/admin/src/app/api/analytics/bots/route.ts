@@ -2,12 +2,12 @@ import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
 import {
-  queryAE,
+  queryTinybird,
   parseAnalyticsParams,
   periodToRange,
   granularityToMs,
   F,
-} from "@/lib/analyticsEngine";
+} from "@/lib/tinybird";
 import type {
   BotCategory,
   BotCategoryTotal,
@@ -38,7 +38,7 @@ export const GET = wrapRoute<BotsResponse>(async (req: NextRequest) => {
 
   // One query: per-bucket-per-category series rows + per-bot totals, tagged by
   // `level` so JS can split them (mirrors the partitionByLevel pattern).
-  const res = await queryAE<Row>(`
+  const res = await queryTinybird<Row>(`
     (
       SELECT
         'series' AS level,

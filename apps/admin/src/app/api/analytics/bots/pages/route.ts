@@ -2,12 +2,12 @@ import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
 import {
-  queryAE,
+  queryTinybird,
   parseAnalyticsParams,
   periodToRange,
   escapeSQL,
   F,
-} from "@/lib/analyticsEngine";
+} from "@/lib/tinybird";
 import type {
   BotCategory,
   BotPageMetric,
@@ -29,7 +29,7 @@ export const GET = wrapRoute<BotPagesResponse>(async (req: NextRequest) => {
   const { start, end } = periodToRange(params.period);
   const botName = escapeSQL(req.nextUrl.searchParams.get("bot") ?? "");
 
-  const res = await queryAE<{ name: string; category: string; cnt: number }>(`
+  const res = await queryTinybird<{ name: string; category: string; cnt: number }>(`
     SELECT
       ${F.href} AS name,
       any(${F.botCategory}) AS category,

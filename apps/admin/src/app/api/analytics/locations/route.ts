@@ -2,13 +2,13 @@ import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
 import {
-  queryAE,
+  queryTinybird,
   parseAnalyticsParams,
   periodToRange,
   partitionByLevel,
   escapeSQL,
   F,
-} from "@/lib/analyticsEngine";
+} from "@/lib/tinybird";
 import type { LocationsResponse } from "@/lib/analyticsTypes";
 
 export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
@@ -33,7 +33,7 @@ export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
   const regionWhere = `${baseWhere}${countryFilter ? ` AND ${F.country} = '${countryFilter}'` : ""}`;
   const cityWhere = `${regionWhere}${regionFilter ? ` AND ${F.region} = '${regionFilter}'` : ""}`;
 
-  const res = await queryAE<{
+  const res = await queryTinybird<{
     level: "countries" | "regions" | "cities";
     name: string;
     uv: number;

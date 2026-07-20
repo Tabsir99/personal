@@ -1,69 +1,92 @@
 # Analytics Architecture Reference
 
+How analytics works in this app — the data path, the identity model, and how the
+dashboard queries it.
+
+The client SDK and the ingestion Worker live in a **separate repo**, not this
+monorepo: `/home/tabsir/ap/reactp/tabsircg/analytics` — `packages/analytics` (the
+`@tabsircg/analytics` browser SDK) and `packages/backend` (the CF Worker). This
+doc describes observable behavior; the cookie/session logic is authoritative
+there.
+
 ## Stack
 
-| Layer | Our implementation | DataFast equivalent |
-|-------|-------------------|-------------------|
-| Event store | CF Analytics Engine (ClickHouse-based) | Tinybird (managed ClickHouse) |
-| App config | Firestore | MongoDB |
-| Ingestion | CF Worker at `analytics.tabsircg.com` | Their script + backend |
-| Dashboard API | Next.js route handlers → AE SQL API | Express → Tinybird API |
-| Client SDK | `@tabsircg/analytics` | Their script (we forked/adapted from it) |
+| Layer                | Implementation                                                                                 |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| Event store          | **Tinybird** (managed ClickHouse), datasource `analytics_events`                               |
+| Ingestion            | CF Worker at `analytics.tabsircg.com` → `POST {TINYBIRD_HOST}/v0/events?name=analytics_events` |
+| Client SDK           | `@tabsircg/analytics` (browser tracker; sets cookies, sends events)                            |
+| Dashboard API        | Next.js route handlers → `POST {TINYBIRD_HOST}/v0/sql` (ClickHouse SQL)                        |
+| App config / funnels | Firestore                                                                                      |
 
-## AE Data Schema
+> Historical note: this stack briefly used Cloudflare Analytics Engine before
+> moving to Tinybird. The admin read layer (`src/lib/tinybird.ts`, `queryTinybird`)
+> now reflects that. One vestige remains in the **Worker repo**: an unused
+> `AnalyticsEngineDataset` binding (`CGD`) in `packages/backend/wrangler.toml` —
+> nothing writes to it. The live store is Tinybird.
+
+## Data schema (`analytics_events` datasource)
+
+Flat, named columns (not positional). Column names are centralized in
+`src/lib/tinybird.ts` (`F`) so routes never hardcode them:
 
 ```
-indexes[0] = websiteId (partition key)
-
-blobs:  1=websiteId, 2=type, 3=domain, 4=href, 5=referrer, 6=visitorId,
-        7=sessionId, 8=language, 9=timezone, 10=eventName, 11=extraData(JSON),
-        12=country, 13=region, 14=city, 15=userAgent, 16=ip
-
-doubles: 1=viewportW, 2=viewportH, 3=screenW, 4=screenH, 5=visitorSessionNumber, 6=timestamp(ms)
+website_id  type  domain  href  referrer  visitor_id  session_id
+language  timezone  event_name  extra_data(JSON)  country  region  city
+browser  os  device  is_bot  bot_category  bot_name  ip
+viewport_w  viewport_h  screen_w  screen_h  session_number  timestamp
 ```
 
-## Query Patterns
+Server-side enrichment happens in the Worker at ingest, so these arrive as real
+columns (no query-time parsing needed):
 
-All queries hit AE SQL API live: `POST accounts/{CF_ACCOUNT_ID}/analytics_engine/sql`
+- **geo** — `country` / `region` / `city` / `ip` from the request.
+- **UA parse** — `browser` / `os` / `device` via `parseUA`.
+- **bot detect** — `is_bot` / `bot_category` / `bot_name` via `detectBot`
+  (categories: `search_index` / `answer_fetch` / `training` / `ai_crawler`). Real
+  crawlers are recorded, not dropped; only automation tools (Selenium/curl) are
+  blocked upstream by the SDK.
 
-Token scope: Account Analytics: Read. Env vars: `CF_ACCOUNT_ID`, `CF_API_TOKEN`.
+Where data still hides:
 
-Current total: 17 queries across all routes when called simultaneously.
+- **UTM params** live inside `href` (full URL incl. query string); the sources
+  route parses `utm_*` out server-side.
+- **Referrer** is the raw `document.referrer` (domain + path) in `referrer`.
 
-## Key Decisions
+## Identity & sessions
 
-1. **Live queries only** (no pre-aggregation) — same as DataFast/Tinybird. Works at our scale.
-2. **No extra Worker for reads** — AE SQL API is a universal REST endpoint.
-3. **Stripe integration** — restricted key (`rk_`), query Stripe API on-demand, correlate payments to visitors via `metadata.cgd_visitor_id` on checkout sessions.
-4. **Funnels** — defined in Firestore, computed server-side from AE events. No client SDK changes.
-5. **D1 only if/when needed** — for historical retention (>90 days) or expensive cross-session computations at scale.
+Set by the client SDK as cookies (prefix `cgd_`):
 
-## What the SDK already collects (relevant to unbuilt features)
+- **`cgd_visitor_id`** (365 days, UUID) — the persistent anonymous visitor. Primary
+  join key across all events.
+- **`cgd_session_id`** (30-min sliding, `s`+UUID) — one visit window under a
+  visitor. Rollover increments `cgd_visitor_session_count`.
+- **`identify` event** — `analytics.identify(userId, …)` links the anonymous
+  visitorId to your app's `user_id` via `extra_data` (does not replace the
+  visitorId; attaches to it).
+- **Cross-domain** — `_cgd_vid` / `_cgd_sid` (+ `_cgd_vfs`, `_cgd_vsn`) URL params
+  carry the identity across allowed hostnames; the tracker strips them after read.
 
-- **UTM params** — stored inside `F.href` (the full URL including query string). Sources route can parse `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content` out of it. Not a SDK limitation, just needs server-side parsing.
-- **Crawler/bot UAs** — the SDK's `isBot()` only blocks automation tools (Selenium, Puppeteer, curl). Real crawlers (Googlebot, GPTBot, ClaudeBot, Bingbot, etc.) pass through normally. Their full UA is stored in `F.userAgent`. A crawlers endpoint just needs UA pattern matching to categorize: `search_index`, `answer_fetch`, `training`, `ai_crawler`.
-- **Full referrer URL** — `document.referrer` stored as-is in `F.referrer`. Contains domain + path.
+## Query model
 
-## Session & Identity Model
+- **Live queries only**, no pre-aggregation: every route `POST`s SQL to Tinybird's
+  `/v0/sql` endpoint (body = SQL + ` FORMAT JSON`, `Authorization: Bearer
+{TINYBIRD_TOKEN}`). Env: `TINYBIRD_HOST`, `TINYBIRD_TOKEN`.
+- **One SQL statement per route** — multi-part panels are built with `UNION ALL` +
+  a `level` discriminator and subqueries, never multiple round-trips.
+- Every route accepts `?websiteId=&period=&granularity=`; parsing + the shared
+  `queryTinybird()` helper live in `src/lib/tinybird.ts`.
 
-- `cgd_visitor_id` cookie (365 days) — persistent visitor identifier
-- `cgd_session_id` cookie (30-min sliding) — session boundary
-- `identify` event links anonymous visitorId → app user ID via extraData
-- Cross-domain: URL params `_cgd_vid`, `_cgd_sid` carry visitor across allowed hostnames
-- Revenue correlation: visitorId in Stripe checkout `metadata` or `session_id` URL param on return
+## Routes (JWT-protected)
 
-## API Routes (all JWT-protected)
-
-| Route | Queries | Purpose |
-|-------|---------|---------|
-| `/api/analytics/main` | 5 | Overview + previous period + timeseries |
-| `/api/analytics/pages` | 2 | Top pages + entry pages |
-| `/api/analytics/sources` | 1 | Referrers + channel classification |
-| `/api/analytics/locations` | 3 | Country/region/city (drill-down filters) |
-| `/api/analytics/system` | 1 | Browser/OS/device from UA parsing |
-| `/api/analytics/events` | 2 | Custom events + conversion rates |
-| `/api/analytics/realtime` | 1 | Active visitors (last 10 min) |
-| `/api/analytics/hostnames` | 1 | Per-domain breakdown |
-| `/api/analytics/exit-links` | 1 | Outbound link clicks |
-
-All accept `?websiteId=&period=&granularity=`. Locations also accepts `?country=&region=` for drill-down.
+| Route                       | Returns                                                          |
+| --------------------------- | ---------------------------------------------------------------- |
+| `/api/analytics/main`       | Overview metrics, previous-period deltas, timeseries             |
+| `/api/analytics/pages`      | Top pages, entry pages, hostnames, exit links                    |
+| `/api/analytics/sources`    | Referrers + channel classification                               |
+| `/api/analytics/locations`  | Country / region / city (accepts `?country=&region=` drill-down) |
+| `/api/analytics/system`     | Browser / OS / device                                            |
+| `/api/analytics/events`     | Custom events + conversion rates                                 |
+| `/api/analytics/realtime`   | Active visitors (last 10 min)                                    |
+| `/api/analytics/bots`       | Crawler timeseries by category + per-bot totals                  |
+| `/api/analytics/bots/pages` | Pages hit by a single bot (`?bot=`)                              |
