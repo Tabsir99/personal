@@ -32,13 +32,14 @@ export function SourcesPanel() {
         {
           value: "channel",
           label: "Channel",
-          content: (
+          content: (revealed) => (
             <ChannelDonut
               items={(sources?.channels ?? []).map((c) => ({
                 name: c.name,
                 value: c.uv,
               }))}
               sources={channelSources}
+              revealed={revealed}
             />
           ),
         },

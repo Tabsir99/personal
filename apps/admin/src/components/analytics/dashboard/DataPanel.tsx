@@ -15,7 +15,11 @@ export interface RankedItem {
 
 export type PanelTab =
   | { value: string; label: string; items: RankedItem[] }
-  | { value: string; label: string; content: React.ReactNode };
+  | {
+      value: string;
+      label: string;
+      content: React.ReactNode | ((revealed: boolean) => React.ReactNode);
+    };
 
 type MorphWidths = Array<Record<MetricId, number>>;
 
@@ -26,7 +30,11 @@ export function DataPanel({ tabs }: { tabs: PanelTab[] }) {
   const morphRef = useRef<MorphWidths>([]);
   const { ref, revealed, enter } = useReveal<HTMLDivElement>();
 
-  const activeTab = tabs.find((t) => t.value === tab) ?? tabs[0];
+  const activeIdx = tabs.findIndex((t) => t.value === tab);
+  const activeTab = tabs[activeIdx] ?? tabs[0];
+
+  const isList = (t: PanelTab | undefined) => "items" in t;
+  const childMorphs = isList(activeTab) && isList(tabs[activeIdx - dir]);
 
   return (
     <div
@@ -44,11 +52,16 @@ export function DataPanel({ tabs }: { tabs: PanelTab[] }) {
           }}
           className="min-w-0 flex-1"
         />
-        {"items" in activeTab && (
+        <div className={"items" in activeTab ? "" : "invisible"}>
           <MetricToggle active={sortKey} setActive={setSortKey} />
-        )}
+        </div>
       </div>
-      <TabPanel tab={tab} dir={dir} className="min-h-0 flex-1 overflow-y-auto">
+      <TabPanel
+        tab={tab}
+        dir={childMorphs ? 0 : dir}
+        className="min-h-0 flex-1 overflow-y-auto"
+        {...(childMorphs ? { animation: null } : {})}
+      >
         {"items" in activeTab ? (
           <RankedList
             items={activeTab.items}
@@ -56,6 +69,8 @@ export function DataPanel({ tabs }: { tabs: PanelTab[] }) {
             morphRef={morphRef}
             revealed={revealed}
           />
+        ) : typeof activeTab.content === "function" ? (
+          activeTab.content(revealed)
         ) : (
           activeTab.content
         )}
@@ -81,6 +96,7 @@ function RankedList({
   const [morphFrom] = useState(() =>
     morphRef.current.length ? morphRef.current : null,
   );
+  const [rendered, setRendered] = useState(false);
 
   const visible = items.sort((a, b) => b.values[sortKey] - a.values[sortKey]);
 
@@ -118,22 +134,22 @@ function RankedList({
           className="group relative flex h-8 items-center gap-3 rounded-md px-2"
         >
           <div className="pointer-events-none absolute inset-0 flex items-stretch gap-0.5">
-            {METRIC_IDS.sort((a, b) => {
-              if (a === sortKey) return -1;
-              if (b === sortKey) return 1;
-              return 0;
-            }).map((id, j) => {
+            {METRIC_IDS.map((id) => {
               const from = morphFrom?.[i]?.[id];
-              const last = j === METRIC_IDS.length - 1;
+              const lead = id === sortKey;
               return (
                 <motion.div
                   key={id}
                   aria-hidden
                   initial={{ width: pct(from) }}
                   animate={{ width: pct(revealed ? widths[i][id] : 0) }}
-                  transition={UIMotion.t.layout}
-                  style={{ background: METRICS[id].color }}
-                  className={`h-full shrink-0 ${last ? "rounded-r-sm" : "rounded-none"}`}
+                  onAnimationEnd={() => setRendered(true)}
+                  transition={{
+                    ...UIMotion.t.layout,
+                    duration: rendered ? 0 : UIMotion.t.layout.duration,
+                  }}
+                  style={{ order: lead ? 0 : 1, background: METRICS[id].color }}
+                  className={`h-full shrink-0 ${lead ? "rounded-none" : "rounded-r-sm"}`}
                 />
               );
             })}

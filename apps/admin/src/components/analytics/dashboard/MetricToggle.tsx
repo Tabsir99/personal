@@ -42,11 +42,12 @@ export function MetricToggle({
     <Button
       variant="ghost"
       size="sm"
-      onClick={() =>
-        setActive(
-          METRIC_IDS[(METRIC_IDS.indexOf(active) + 1) % METRIC_IDS.length],
-        )
-      }
+      htmlProps={{
+        onClick: () =>
+          setActive(
+            METRIC_IDS[(METRIC_IDS.indexOf(active) + 1) % METRIC_IDS.length],
+          ),
+      }}
       iconRight={<ArrowsDownUp className="size-4" weight="bold" />}
       className="-mt-2"
     >

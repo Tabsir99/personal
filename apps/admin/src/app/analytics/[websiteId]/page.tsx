@@ -99,11 +99,11 @@ export default function WebsiteDetailPage() {
   return (
     <div className="mx-auto max-w-6xl animate-in duration-300 ease-out fade-in">
       <header className="flex flex-col gap-4 pb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3 h-12">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => router.push("/analytics")}
+            htmlProps={{ onClick: () => router.push("/analytics") }}
             aria-label="Back"
           >
             <ArrowLeft size={16} />
@@ -119,9 +119,9 @@ export default function WebsiteDetailPage() {
               )}
             </div>
             {siteLoading ? (
-              <div className="mt-1 h-3 w-56 animate-pulse rounded-md bg-foreground/4" />
+              <div className="mt-1 h-4 w-56 animate-pulse rounded-md bg-foreground/4" />
             ) : (
-              <p className="mt-0.5 truncate font-mono text-[12px] text-muted-foreground/70">
+              <p className="mt-0.5 truncate font-mono text-xs text-muted-foreground/70">
                 {website!.origins.filter((o) => o !== "*").join(", ") ||
                   website!.id}
               </p>

@@ -8,6 +8,7 @@ interface ChannelDonutProps {
   items: { name: string; value: number }[];
   /** channel name -> ordered representative referrer sources */
   sources?: Record<string, string[]>;
+  revealed: boolean;
 }
 
 const W = 560;
@@ -46,7 +47,11 @@ const fmt = (n: number) =>
       ? `${(n / 1e3).toFixed(1).replace(/\.0$/, "")}k`
       : n.toLocaleString();
 
-export function ChannelDonut({ items, sources = {} }: ChannelDonutProps) {
+export function ChannelDonut({
+  items,
+  sources = {},
+  revealed,
+}: ChannelDonutProps) {
   const [hover, setHover] = useState<number | null>(null);
 
   const data = items.filter((i) => i.value > 0);
@@ -98,98 +103,100 @@ export function ChannelDonut({ items, sources = {} }: ChannelDonutProps) {
 
   return (
     <div className="flex size-full items-center justify-center">
-      <svg viewBox={`0 0 ${W} ${H}`} className="size-full">
-        <defs>
-          <clipPath id="chip" clipPathUnits="objectBoundingBox">
-            <circle cx="0.5" cy="0.5" r="0.5" />
-          </clipPath>
-        </defs>
+      {revealed && (
+        <svg viewBox={`0 0 ${W} ${H}`} className="size-full">
+          <defs>
+            <clipPath id="chip" clipPathUnits="objectBoundingBox">
+              <circle cx="0.5" cy="0.5" r="0.5" />
+            </clipPath>
+          </defs>
 
-        {slices.map((s) => (
-          <path
-            key={s.name}
-            d={arc(s.t0, Math.max(s.t0, s.t1 - PAD), MID)}
-            fill="none"
-            stroke={CHART.ramp[s.i % CHART.ramp.length]}
-            strokeWidth={THICK + (hover === s.i ? GROW : 0)}
-            opacity={dimOf(s.i)}
-            pathLength={1}
-            strokeDasharray={1}
-            strokeDashoffset={1}
-            onMouseEnter={() => setHover(s.i)}
-            onMouseLeave={() => setHover(null)}
-            className={`cursor-pointer ${TW}`}
-          >
-            <animate
-              attributeName="stroke-dashoffset"
-              from="1"
-              to="0"
-              dur="0.12s"
-              begin={`${0.6 + s.i * 0.12}s`}
-              fill="freeze"
-            />
-          </path>
-        ))}
-
-        {laid.map((s) => {
-          const tx = s.right ? CX + OUTER + 24 : CX - OUTER - 24;
-          const e = polar(OUTER + 3, s.mid);
-          const k = polar(OUTER + 13, s.mid);
-          const pts = `${e.x},${e.y} ${k.x},${s.y} ${s.right ? tx - 6 : tx + 6},${s.y}`;
-          return (
-            <g
+          {slices.map((s) => (
+            <path
               key={s.name}
+              d={arc(s.t0, Math.max(s.t0, s.t1 - PAD), MID)}
+              fill="none"
+              stroke={CHART.ramp[s.i % CHART.ramp.length]}
+              strokeWidth={THICK + (hover === s.i ? GROW : 0)}
               opacity={dimOf(s.i)}
-              className="[transition:opacity_.2s]"
+              pathLength={1}
+              strokeDasharray={1}
+              strokeDashoffset={1}
+              onMouseEnter={() => setHover(s.i)}
+              onMouseLeave={() => setHover(null)}
+              className={`cursor-pointer ${TW}`}
             >
-              <polyline
-                points={pts}
-                fill="none"
-                className="stroke-muted-foreground/40"
+              <animate
+                attributeName="stroke-dashoffset"
+                from="1"
+                to="0"
+                dur="0.12s"
+                begin={`${s.i * 0.12}s`}
+                fill="freeze"
               />
-              <text
-                x={tx}
-                y={s.y + 4}
-                textAnchor={s.right ? "start" : "end"}
-                className={LBL}
+            </path>
+          ))}
+
+          {laid.map((s) => {
+            const tx = s.right ? CX + OUTER + 24 : CX - OUTER - 24;
+            const e = polar(OUTER + 3, s.mid);
+            const k = polar(OUTER + 13, s.mid);
+            const pts = `${e.x},${e.y} ${k.x},${s.y} ${s.right ? tx - 6 : tx + 6},${s.y}`;
+            return (
+              <g
+                key={s.name}
+                opacity={dimOf(s.i)}
+                className="[transition:opacity_.2s]"
               >
-                {s.name}
-              </text>
-            </g>
-          );
-        })}
-
-        <g className="pointer-events-none">
-          {slices.flatMap((s) => {
-            const list = sources[s.name] ?? [];
-            const n = Math.min(3, list.length, Math.floor(s.sweep / STEP));
-            return list.slice(0, n).map((src, k) => {
-              const p = polar(MID, s.mid + (k - (n - 1) / 2) * STEP);
-              const url = getFaviconUrl(src, 64);
-              return url ? (
-                <g key={`${s.name}-${k}`} opacity={dimOf(s.i)}>
-                  <circle cx={p.x} cy={p.y} r={11} className="fill-white" />
-                  <image
-                    href={url}
-                    x={p.x - 9}
-                    y={p.y - 9}
-                    width={18}
-                    height={18}
-                    clipPath="url(#chip)"
-                  />
-                </g>
-              ) : null;
-            });
+                <polyline
+                  points={pts}
+                  fill="none"
+                  className="stroke-muted-foreground/40"
+                />
+                <text
+                  x={tx}
+                  y={s.y + 4}
+                  textAnchor={s.right ? "start" : "end"}
+                  className={LBL}
+                >
+                  {s.name}
+                </text>
+              </g>
+            );
           })}
-        </g>
 
-        <text x={CX} y={CY - 6} textAnchor="middle" className={NUM}>
-          {big}
-        </text>
-        <text x={CX} y={CY + 15} textAnchor="middle" className={SUB}>
-          {sub}
-        </text>
-      </svg>
+          <g className="pointer-events-none">
+            {slices.flatMap((s) => {
+              const list = sources[s.name] ?? [];
+              const n = Math.min(3, list.length, Math.floor(s.sweep / STEP));
+              return list.slice(0, n).map((src, k) => {
+                const p = polar(MID, s.mid + (k - (n - 1) / 2) * STEP);
+                const url = getFaviconUrl(src, 64);
+                return url ? (
+                  <g key={`${s.name}-${k}`} opacity={dimOf(s.i)}>
+                    <circle cx={p.x} cy={p.y} r={11} className="fill-white" />
+                    <image
+                      href={url}
+                      x={p.x - 9}
+                      y={p.y - 9}
+                      width={18}
+                      height={18}
+                      clipPath="url(#chip)"
+                    />
+                  </g>
+                ) : null;
+              });
+            })}
+          </g>
+
+          <text x={CX} y={CY - 6} textAnchor="middle" className={NUM}>
+            {big}
+          </text>
+          <text x={CX} y={CY + 15} textAnchor="middle" className={SUB}>
+            {sub}
+          </text>
+        </svg>
+      )}
     </div>
   );
 }
