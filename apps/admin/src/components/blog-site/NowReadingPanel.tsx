@@ -30,10 +30,7 @@ export default function NowReadingPanel() {
     return map;
   }, [initialIds, initialRows]);
 
-  const initialIdSet = React.useMemo(
-    () => new Set(initialIds),
-    [initialIds],
-  );
+  const initialIdSet = React.useMemo(() => new Set(initialIds), [initialIds]);
 
   const [leaving, setLeaving] = React.useState<Set<string>>(new Set());
   const handleRemove = (id: string, index: number) => {
@@ -109,7 +106,9 @@ export default function NowReadingPanel() {
                       onChange={() =>
                         useSiteConfigStore.getState().toggleNowReadingDone(i)
                       }
-                      aria-label={row.done ? "Mark unfinished" : "Mark finished"}
+                      aria-label={
+                        row.done ? "Mark unfinished" : "Mark finished"
+                      }
                     />
                   </div>
                   <TextField
@@ -213,7 +212,6 @@ function IconBtn({
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      title={label}
       className={
         destructive
           ? "min-w-0 p-1 text-foreground/60 hover:bg-destructive/10 hover:text-destructive"

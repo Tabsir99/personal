@@ -29,7 +29,11 @@ const SocialLinksSection = memo(
     const updateContact = (patch: Partial<typeof contact>) =>
       updatePageData({ contact: { ...contact, ...patch } });
 
-    const updateSocial = (index: number, field: keyof SocialDraft, value: string) => {
+    const updateSocial = (
+      index: number,
+      field: keyof SocialDraft,
+      value: string,
+    ) => {
       const next = [...contact.social];
       next[index] = { ...next[index], [field]: value };
       updatePageData({ contact: { ...contact, social: next } });
@@ -109,7 +113,8 @@ const SocialLinksSection = memo(
                 Social links
               </span>
               <span className="text-xs text-muted-foreground">
-                {contact.social.length} link{contact.social.length === 1 ? "" : "s"}
+                {contact.social.length} link
+                {contact.social.length === 1 ? "" : "s"}
               </span>
             </div>
 
@@ -170,7 +175,7 @@ const SocialLinksSection = memo(
                     }
                     size="sm"
                     placeholder="LinkedIn"
-                    autoFocus
+                    htmlProps={{ autoFocus: true }}
                   />
                   <TextField
                     label="URL"
@@ -205,7 +210,11 @@ const SocialLinksSection = memo(
                   >
                     Cancel
                   </Button>
-                  <Button onClick={addSocial} size="sm" iconLeft={<Plus size={12} />}>
+                  <Button
+                    onClick={addSocial}
+                    size="sm"
+                    iconLeft={<Plus size={12} />}
+                  >
                     Add link
                   </Button>
                 </div>
@@ -231,4 +240,3 @@ const SocialLinksSection = memo(
 );
 
 export default SocialLinksSection;
-

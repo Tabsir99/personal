@@ -74,7 +74,6 @@ export default function LogIn() {
               <TextField
                 type="text"
                 id="username"
-                name="username"
                 label="Username"
                 value={username}
                 placeholder="username"
@@ -86,7 +85,6 @@ export default function LogIn() {
               <TextField
                 type="password"
                 id="password"
-                name="password"
                 label="Password"
                 value={password}
                 placeholder="••••••••"

@@ -103,7 +103,7 @@ export default function WebsiteDetailPage() {
           <Button
             variant="ghost"
             size="icon"
-            htmlProps={{ onClick: () => router.push("/analytics") }}
+            onClick={() => router.push("/analytics")}
             aria-label="Back"
           >
             <ArrowLeft size={16} />

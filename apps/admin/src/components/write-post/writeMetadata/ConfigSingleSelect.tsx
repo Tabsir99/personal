@@ -37,13 +37,11 @@ export default function ConfigSingleSelect({
 
   const trimmed = search.trim();
   const normalized = trimmed.toLowerCase();
-  const exactMatch = available.some(
-    (v) => v.toLowerCase() === normalized,
-  );
+  const exactMatch = available.some((v) => v.toLowerCase() === normalized);
   const canCreate = trimmed.length > 0 && !exactMatch;
 
   const filtered = available.filter((opt) =>
-    opt.toLowerCase().includes(normalized)
+    opt.toLowerCase().includes(normalized),
   );
 
   const handleSelect = (next: string) => {
@@ -81,14 +79,14 @@ export default function ConfigSingleSelect({
   };
 
   return (
-    <Popover 
-      open={open} 
+    <Popover
+      open={open}
       onOpenChange={setOpen}
       align="start"
       trigger={
         <Button
           variant="secondary"
-          role="combobox"
+          htmlProps={{ role: "combobox" }}
           aria-expanded={open}
           className={cn(
             "w-full justify-between font-normal",
@@ -108,7 +106,7 @@ export default function ConfigSingleSelect({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           size="sm"
-          autoFocus
+          htmlProps={{ autoFocus: true }}
         />
         <div className="max-h-48 space-y-1 overflow-y-auto">
           {isLoading ? (
@@ -171,5 +169,3 @@ export default function ConfigSingleSelect({
     </Popover>
   );
 }
-
-

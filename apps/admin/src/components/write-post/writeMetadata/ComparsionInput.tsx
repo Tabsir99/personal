@@ -1,5 +1,5 @@
 import { Button } from "premium-ds/button";
-import { TextField } from "premium-ds/text-field";
+import { TextField, TextFieldProps } from "premium-ds/text-field";
 import { Textarea } from "premium-ds/textarea";
 import { Kbd } from "@/components/ui/Kbd";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,7 @@ type PressedKey = "tab" | "esc" | null;
 
 export interface SuggestionFieldProps {
   id?: string | undefined;
-  type?: string | undefined;
+  type?: TextFieldProps["type"];
   helperText?: ReactNode;
   placeholder?: string | undefined;
   value: string | undefined;
@@ -106,13 +106,12 @@ export function SuggestionField({
     onChange(e.target.value);
   };
 
-
   const striking = activeSuggestion != null && phase === "idle";
   const applyingOrApplied = phase === "accepting" || phase === "applied";
 
   let currentHelper: ReactNode = helperText;
   let currentSuccess: ReactNode = undefined;
-  
+
   if (applyingOrApplied) {
     currentSuccess = "Applied";
   } else if (phase === "dismissed") {
@@ -127,7 +126,7 @@ export function SuggestionField({
           <Button
             variant="ghost"
             onClick={reject}
-            onMouseDown={(e) => e.preventDefault()}
+            onPointerDown={(e) => e.preventDefault()}
             className="h-6 px-1.5 py-1"
             aria-label="Dismiss suggestion"
           >
@@ -136,7 +135,7 @@ export function SuggestionField({
           <Button
             variant="ghost"
             onClick={accept}
-            onMouseDown={(e) => e.preventDefault()}
+            onPointerDown={(e) => e.preventDefault()}
             className="h-6 px-1.5 py-1"
             aria-label="Accept suggestion"
           >

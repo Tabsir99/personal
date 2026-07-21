@@ -72,7 +72,7 @@ const KeywordsSection = memo(
                   }}
                   className="w-36 text-sm [&_.fld\_\_input]:h-7"
                   placeholder="Type keyword…"
-                  autoFocus
+                  htmlProps={{ autoFocus: true }}
                   size="sm"
                 />
                 <Button onClick={handleAdd} size="sm" variant="primary">

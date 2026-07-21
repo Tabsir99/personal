@@ -104,7 +104,7 @@ export default function TagsSection({
             trigger={
               <Button
                 variant="secondary"
-                role="combobox"
+                htmlProps={{ role: "combobox" }}
                 aria-expanded={open}
                 className="w-full justify-between font-normal text-muted-foreground"
                 iconRight={<CaretUpDown size={14} className="opacity-50" />}
@@ -122,7 +122,7 @@ export default function TagsSection({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 size="sm"
-                autoFocus
+                htmlProps={{ autoFocus: true }}
               />
               <div className="max-h-48 space-y-1 overflow-y-auto">
                 {isLoading ? (

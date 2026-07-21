@@ -62,9 +62,7 @@ export function ConfigMultiSelect({
   const triggerLabel = (() => {
     if (mode === "single") return value[0] ?? placeholder;
     if (selectedLabel) return selectedLabel(value);
-    return value.length
-      ? `${value.length} selected`
-      : placeholder;
+    return value.length ? `${value.length} selected` : placeholder;
   })();
 
   const handleSelect = (item: string, close: () => void) => {
@@ -110,7 +108,7 @@ export function ConfigMultiSelect({
   const showPills = mode === "multi" && value.length > 0;
 
   const filteredUnselected = unselected.filter((item) =>
-    item.toLowerCase().includes(normalized.toLowerCase())
+    item.toLowerCase().includes(normalized.toLowerCase()),
   );
 
   return (
@@ -137,9 +135,9 @@ export function ConfigMultiSelect({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               size="sm"
-              autoFocus
+              htmlProps={{ autoFocus: true }}
             />
-            
+
             <div className="flex-1 space-y-1 overflow-y-auto pr-1">
               {loading ? (
                 <div className="space-y-1">
@@ -165,7 +163,12 @@ export function ConfigMultiSelect({
                           onClick={() => handleSelect(item, close)}
                           className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-foreground/4"
                         >
-                          {ItemIcon && <ItemIcon className="shrink-0 text-muted-foreground" size={14} />}
+                          {ItemIcon && (
+                            <ItemIcon
+                              className="shrink-0 text-muted-foreground"
+                              size={14}
+                            />
+                          )}
                           <span>{item}</span>
                         </button>
                       ))}

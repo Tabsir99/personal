@@ -75,7 +75,7 @@ export const CreateBlogModal = () => {
               handleCreateBlog();
             }
           }}
-          autoFocus
+          htmlProps={{ autoFocus: true }}
         />
       </div>
     </Dialog>
