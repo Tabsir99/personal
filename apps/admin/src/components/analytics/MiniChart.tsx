@@ -99,5 +99,7 @@ export function generateEmptyTimeseries(): TimeseriesPoint[] {
     bounceRate: 0,
     sessionDuration: 0,
     revenue: 0,
+    payingVisitors: 0,
+    conversionRate: 0,
   }));
 }

@@ -4,6 +4,9 @@ export interface OverviewMetrics {
   sessions: number;
   bounceRate: number;
   sessionDuration: number;
+  revenue: number;
+  payingVisitors: number;
+  conversionRate: number;
 }
 
 export interface TimeseriesPoint {
@@ -16,6 +19,8 @@ export interface TimeseriesPoint {
   bounceRate: number;
   sessionDuration: number;
   revenue: number;
+  payingVisitors: number;
+  conversionRate: number;
 }
 
 // New-vs-returning split. Carried only on sources, where it's an acquisition

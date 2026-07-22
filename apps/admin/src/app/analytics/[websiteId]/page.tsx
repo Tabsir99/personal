@@ -97,7 +97,7 @@ export default function WebsiteDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl animate-in duration-300 ease-out fade-in">
+    <div className="mx-auto max-w-7xl animate-in duration-300 ease-out fade-in">
       <header className="flex flex-col gap-6 pb-6 sm:flex-row sm:items-center">
         <div className="flex min-w-0 items-center gap-3 h-12">
           <Button

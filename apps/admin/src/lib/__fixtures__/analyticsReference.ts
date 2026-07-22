@@ -181,6 +181,7 @@ export function referenceMain(
   const prev = all.filter((s) => s.startTs < w.start);
 
   const revByBucket = new Map<number, number>();
+  const payVidsByBucket = new Map<number, Set<string>>();
   for (const r of rows)
     if (
       r.is_bot === 0 &&
@@ -190,6 +191,9 @@ export function referenceMain(
     ) {
       const b = Math.floor(r.timestamp / bucketMs) * bucketMs;
       revByBucket.set(b, (revByBucket.get(b) ?? 0) + r.revenue_cents);
+      let vids = payVidsByBucket.get(b);
+      if (!vids) payVidsByBucket.set(b, (vids = new Set()));
+      vids.add(r.visitor_id);
     }
 
   const buckets = new Map<number, Sess[]>();
@@ -203,6 +207,7 @@ export function referenceMain(
   const timeseries = [...buckets.entries()]
     .map(([b, ss]) => {
       const o = overview(ss);
+      const paying = payVidsByBucket.get(b)?.size ?? 0;
       return {
         timestamp: b,
         visitors: o.visitors,
@@ -213,11 +218,38 @@ export function referenceMain(
         bounceRate: o.bounceRate,
         sessionDuration: o.sessionDuration,
         revenue: round(revByBucket.get(b) ?? 0),
+        payingVisitors: paying,
+        conversionRate: o.visitors > 0 ? paying / o.visitors : 0,
       };
     })
     .sort((a, b) => a.timestamp - b.timestamp);
 
-  return { current: overview(cur), previous: overview(prev), timeseries };
+  const withRevenue = (
+    ov: ReturnType<typeof overview>,
+    from: number,
+    to: number,
+  ) => {
+    const pay = rows.filter(
+      (r) =>
+        r.is_bot === 0 &&
+        r.type === "payment" &&
+        r.timestamp >= from &&
+        r.timestamp < to,
+    );
+    const payingVisitors = uniq(pay.map((r) => r.visitor_id));
+    return {
+      ...ov,
+      revenue: round(pay.reduce((s, r) => s + r.revenue_cents, 0)),
+      payingVisitors,
+      conversionRate: ov.visitors > 0 ? payingVisitors / ov.visitors : 0,
+    };
+  };
+
+  return {
+    current: withRevenue(overview(cur), w.start, w.end),
+    previous: withRevenue(overview(prev), prevStart, w.start),
+    timeseries,
+  };
 }
 
 export function referenceSources(rows: Row[], w: Win) {

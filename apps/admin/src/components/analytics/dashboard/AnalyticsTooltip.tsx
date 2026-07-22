@@ -4,16 +4,30 @@ import { Fragment, isValidElement, type ReactNode } from "react";
 import { Tooltip } from "recharts";
 import { CHART, type ChartColors } from "./chartTheme";
 
-interface Point {
+export interface Point {
   label: number | string;
   date: string;
   get: (key?: string) => number;
+  raw: (key: string) => number;
 }
 
-type Row = { label: ReactNode; value: ReactNode; color?: ChartColors };
-type Section = Row | ReactNode;
+export type TooltipRow = {
+  label: ReactNode;
+  value: ReactNode;
+  color?: ChartColors;
+  dim?: boolean;
+};
 
-function isRow(s: Section): s is Row {
+export type TooltipMeterSegment = {
+  value: number;
+  color: ChartColors;
+  label: string;
+};
+export type TooltipMeter = { meter: TooltipMeterSegment[] };
+
+export type TooltipSection = TooltipRow | TooltipMeter | ReactNode;
+
+function isRow(s: TooltipSection): s is TooltipRow {
   return (
     typeof s === "object" &&
     s !== null &&
@@ -23,23 +37,79 @@ function isRow(s: Section): s is Row {
   );
 }
 
+function isMeter(s: TooltipSection): s is TooltipMeter {
+  return (
+    typeof s === "object" && s !== null && !isValidElement(s) && "meter" in s
+  );
+}
+
+function MeterBar({ segments }: { segments: TooltipMeterSegment[] }) {
+  const total = segments.reduce((sum, s) => sum + s.value, 0) || 1;
+  return (
+    <div className="px-3.5 pt-1 pb-3">
+      <div className="flex h-1.5 gap-0.5 overflow-hidden rounded-full">
+        {segments.map((s, i) => (
+          <span
+            key={i}
+            className="h-full first:rounded-l-full last:rounded-r-full"
+            style={{
+              width: `${(s.value / total) * 100}%`,
+              background: CHART[s.color],
+            }}
+          />
+        ))}
+      </div>
+      <div className="mt-1.5 flex justify-between text-xs text-background/55">
+        {segments.map((s, i) => (
+          <span key={i}>{s.label}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Row({ row }: { row: TooltipRow }) {
+  return (
+    <div className="flex items-center justify-between gap-8 px-3.5 py-2.5">
+      <span className="flex items-center gap-2">
+        {row.color && (
+          <span
+            className="size-2.5 shrink-0 rounded-sm"
+            style={{ background: CHART[row.color] }}
+          />
+        )}
+        <span
+          className={`text-sm ${row.dim ? "text-background/45" : "text-background/70"}`}
+        >
+          {row.label}
+        </span>
+      </span>
+      <span
+        className={`font-mono text-sm tabular-nums ${row.dim ? "text-background/65" : "font-semibold text-background"}`}
+      >
+        {row.value}
+      </span>
+    </div>
+  );
+}
+
 export function AnalyticsTooltip({
   sections,
 }: {
-  sections: (point: Point) => Section[];
+  sections: (point: Point) => TooltipSection[];
 }) {
   return (
     <Tooltip
-      animationDuration={200}
-      animationEasing="linear"
+      animationDuration={700}
+      animationEasing="ease-out"
       content={({ active, payload, label }) => {
         if (!active || !payload?.length) return null;
 
         const point: Point = {
           label: label as number | string,
           date: new Date(Number(label)).toLocaleDateString(undefined, {
-            weekday: "short",
-            month: "short",
+            weekday: "long",
+            month: "long",
             day: "numeric",
           }),
           get: (key) => {
@@ -47,6 +117,11 @@ export function AnalyticsTooltip({
               ? payload.find((p) => p.dataKey === key)
               : payload[0];
             return Number(entry?.value) || 0;
+          },
+          raw: (key) => {
+            const row = payload[0]?.payload as
+              Record<string, unknown> | undefined;
+            return Number(row?.[key]) || 0;
           },
         };
 
@@ -56,34 +131,28 @@ export function AnalyticsTooltip({
         if (!items.length) return null;
 
         return (
-          <div className="min-w-44 overflow-hidden rounded-xl border border-border bg-popover shadow-card-hover">
-            {items.map((s, i) => (
-              <Fragment key={i}>
-                {i > 0 && <div className="h-px bg-border/60" />}
-                <div className="px-3.5 py-2.5">
-                  {isRow(s) ? (
-                    <div className="flex items-center justify-between gap-8">
-                      <span className="flex items-center gap-2">
-                        {s.color && (
-                          <span
-                            className="size-3 shrink-0 rounded-sm"
-                            style={{ background: CHART[s.color] }}
-                          />
-                        )}
-                        <span className="text-sm text-foreground/70">
-                          {s.label}
-                        </span>
-                      </span>
-                      <span className="font-mono text-sm font-semibold text-foreground tabular-nums">
-                        {s.value}
-                      </span>
+          <div className="min-w-52 overflow-hidden rounded-xl bg-foreground text-background shadow-card-hover">
+            {items.map((s, i) => {
+              const divider = i > 0 && !isMeter(s);
+              return (
+                <Fragment key={i}>
+                  {divider && <div className="h-px bg-background/10" />}
+                  {isMeter(s) ? (
+                    <MeterBar segments={s.meter} />
+                  ) : isRow(s) ? (
+                    <Row row={s} />
+                  ) : i === 0 ? (
+                    <div className="px-3.5 pt-3 pb-2 text-sm font-semibold text-background">
+                      {s}
                     </div>
                   ) : (
-                    <div className="text-xs text-muted-foreground">{s}</div>
+                    <div className="px-3.5 py-2.5 text-xs text-background/45">
+                      {s}
+                    </div>
                   )}
-                </div>
-              </Fragment>
-            ))}
+                </Fragment>
+              );
+            })}
           </div>
         );
       }}

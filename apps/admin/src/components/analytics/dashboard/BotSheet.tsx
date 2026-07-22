@@ -7,16 +7,9 @@ import { TextField } from "premium-ds/text-field";
 import { MagnifyingGlass, Robot, X } from "@phosphor-icons/react";
 import { useAnalyticsStore } from "./analyticsStore";
 import { resolveBot, categoryMeta, botTint } from "./botRegistry";
+import { PERIOD_LABEL } from "./chartFormat";
 import { getFaviconUrl } from "@/components/ui/favicon";
 import type { BotMetric, BotPagesResponse } from "@/lib/analyticsTypes";
-
-const PERIOD_LABEL: Record<string, string> = {
-  today: "Today",
-  yesterday: "Yesterday",
-  last7d: "Last 7 days",
-  last30d: "Last 30 days",
-  last90d: "Last 90 days",
-};
 
 // In-card slide-over: absolutely positioned inside BotPanel's relative box and
 // clipped by its overflow-hidden, so it fits the panel rather than the page.

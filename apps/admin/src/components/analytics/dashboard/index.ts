@@ -1,6 +1,6 @@
 export { MetricsBar } from "./MetricsBar";
 export type { ChartMetric } from "./MetricsBar";
-export { MainChart } from "./MainChart";
+export { MainChart } from "./mainchart";
 export { DataPanel } from "./DataPanel";
 export { useAnalyticsStore } from "./analyticsStore";
 export { OverviewCard } from "./OverviewCard";

@@ -283,8 +283,22 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
         "bounceRate",
         "sessionDuration",
         "revenue",
+        "payingVisitors",
+        "conversionRate",
       ],
     );
+    for (const side of ["current", "previous"] as const) {
+      expect(Number(data[side].revenue), `${side}.revenue`).toBe(
+        ref[side].revenue,
+      );
+      expect(Number(data[side].payingVisitors), `${side}.payingVisitors`).toBe(
+        ref[side].payingVisitors,
+      );
+      expect(
+        Number(data[side].conversionRate),
+        `${side}.conversionRate`,
+      ).toBeCloseTo(ref[side].conversionRate, 6);
+    }
   });
 
   it("sources: referrers, channels, campaigns", async () => {

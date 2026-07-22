@@ -1,38 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { OverviewMetrics } from "@/lib/analyticsTypes";
+import {
+  formatBounce,
+  formatConversion,
+  formatCurrency,
+  formatDuration,
+} from "./chartFormat";
 
 export type ChartMetric =
-  "visitors" | "pageviews" | "sessions" | "bounceRate" | "sessionDuration";
+  | "visitors"
+  | "conversionRate"
+  | "pageviews"
+  | "sessions"
+  | "bounceRate"
+  | "sessionDuration";
 
 interface MetricsBarProps {
   current: OverviewMetrics;
   previous: OverviewMetrics;
   realtimeCount: number | null;
-  activeMetric: ChartMetric;
+  activeMetric: ChartMetric | null;
   onMetricChange: (metric: ChartMetric) => void;
 }
 
-function deltaLabel(
-  curr: number,
-  prev: number,
-): { text: string; tone: "up" | "down" | "flat" } {
+type Delta = { text: string; tone: "up" | "down" | "flat" };
+
+function deltaLabel(curr: number, prev: number): Delta {
   if (prev === 0) return { text: "", tone: "flat" };
   const pct = Math.round(((curr - prev) / prev) * 100);
   if (pct === 0) return { text: "0%", tone: "flat" };
   return { text: `${Math.abs(pct)}%`, tone: pct > 0 ? "up" : "down" };
-}
-
-function formatDuration(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`;
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}m ${s.toString().padStart(2, "0")}s`;
-}
-
-function formatBounce(rate: number): string {
-  return `${Math.round(rate * 100)}%`;
 }
 
 export function MetricsBar({
@@ -43,97 +42,160 @@ export function MetricsBar({
   onMetricChange,
 }: MetricsBarProps) {
   const [hovered, setHovered] = useState<ChartMetric | null>(null);
+  const clearHover = () => setHovered(null);
 
-  const visitors = deltaLabel(current.visitors, previous.visitors);
-  const pageviews = deltaLabel(current.pageviews, previous.pageviews);
-  const sessions = deltaLabel(current.sessions, previous.sessions);
-  const bounce = deltaLabel(current.bounceRate, previous.bounceRate);
-  const duration = deltaLabel(
-    current.sessionDuration,
-    previous.sessionDuration,
+  const delta = (curr: number, prev: number) => deltaLabel(curr, prev);
+
+  const metricCell = (
+    metric: ChartMetric,
+    label: string,
+    value: string,
+    d: Delta,
+    invertTone = false,
+    first = false,
+  ) => (
+    <MetricCell
+      metric={metric}
+      label={label}
+      value={value}
+      delta={d}
+      invertTone={invertTone}
+      showSeparator={!first}
+      active={activeMetric === metric}
+      hovered={hovered === metric}
+      muted={activeMetric !== metric && hovered !== metric}
+      onHover={setHovered}
+      onClick={onMetricChange}
+    />
   );
 
-  const cells = [
-    {
-      metric: "visitors" as const,
-      label: "Visitors",
-      value: current.visitors.toLocaleString(),
-      delta: visitors.text,
-      tone: visitors.tone,
-      invertTone: false,
-    },
-    {
-      metric: "pageviews" as const,
-      label: "Pageviews",
-      value: current.pageviews.toLocaleString(),
-      delta: pageviews.text,
-      tone: pageviews.tone,
-      invertTone: false,
-    },
-    {
-      metric: "sessions" as const,
-      label: "Sessions",
-      value: current.sessions.toLocaleString(),
-      delta: sessions.text,
-      tone: sessions.tone,
-      invertTone: false,
-    },
-    {
-      metric: "bounceRate" as const,
-      label: "Bounce rate",
-      value: formatBounce(current.bounceRate),
-      delta: bounce.text,
-      tone: bounce.tone,
-      invertTone: true,
-    },
-    {
-      metric: "sessionDuration" as const,
-      label: "Session time",
-      value: formatDuration(current.sessionDuration),
-      delta: duration.text,
-      tone: duration.tone,
-      invertTone: false,
-    },
-  ];
-
   return (
-    <div className="flex" onMouseLeave={() => setHovered(null)}>
-      {cells.map((cell, i) => (
-        <MetricCell
-          key={cell.metric}
-          metric={cell.metric}
-          label={cell.label}
-          value={cell.value}
-          delta={cell.delta}
-          tone={cell.tone}
-          invertTone={cell.invertTone}
-          active={activeMetric === cell.metric}
-          hovered={hovered === cell.metric}
-          muted={activeMetric !== cell.metric && hovered !== cell.metric}
-          onHover={setHovered}
-          onClick={onMetricChange}
-          showSeparator={i > 0}
-        />
-      ))}
-      <span
-        className="relative flex flex-col p-6"
-        onMouseEnter={() => setHovered(null)}
-      >
-        <span className="absolute inset-y-4 left-0 w-px bg-foreground/8" />
-        <span className="flex items-center gap-1.5 pb-0.5 text-xs font-medium tracking-wide text-muted-foreground capitalize">
-          Online
-          {realtimeCount !== null && realtimeCount > 0 && (
+    <div className="flex" onMouseLeave={clearHover}>
+      {metricCell(
+        "visitors",
+        "Visitors",
+        current.visitors.toLocaleString(),
+        delta(current.visitors, previous.visitors),
+        false,
+        true,
+      )}
+      <StaticCell
+        label="Revenue"
+        value={formatCurrency(current.revenue)}
+        delta={delta(current.revenue, previous.revenue)}
+        onEnter={clearHover}
+      />
+      {metricCell(
+        "conversionRate",
+        "Conversion",
+        formatConversion(current.conversionRate),
+        delta(current.conversionRate, previous.conversionRate),
+      )}
+      {metricCell(
+        "pageviews",
+        "Pageviews",
+        current.pageviews.toLocaleString(),
+        delta(current.pageviews, previous.pageviews),
+      )}
+      {metricCell(
+        "sessions",
+        "Sessions",
+        current.sessions.toLocaleString(),
+        delta(current.sessions, previous.sessions),
+      )}
+      {metricCell(
+        "bounceRate",
+        "Bounce rate",
+        formatBounce(current.bounceRate),
+        delta(current.bounceRate, previous.bounceRate),
+        true,
+      )}
+      {metricCell(
+        "sessionDuration",
+        "Session time",
+        formatDuration(current.sessionDuration),
+        delta(current.sessionDuration, previous.sessionDuration),
+      )}
+      <StaticCell
+        label="Online"
+        value={realtimeCount !== null ? realtimeCount : "–"}
+        accessory={
+          realtimeCount !== null && realtimeCount > 0 ? (
             <span className="relative flex size-1.5">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-50" />
               <span className="relative inline-flex size-1.5 rounded-full bg-success" />
             </span>
-          )}
-        </span>
-        <span className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
-          {realtimeCount !== null ? realtimeCount : "–"}
-        </span>
-      </span>
+          ) : undefined
+        }
+        onEnter={clearHover}
+      />
     </div>
+  );
+}
+
+function DeltaBadge({
+  delta,
+  invertTone,
+}: {
+  delta: Delta;
+  invertTone?: boolean;
+}) {
+  if (!delta.text) return null;
+  const { text, tone } = delta;
+  const color =
+    tone === "flat"
+      ? "text-muted-foreground"
+      : (invertTone ? tone === "down" : tone === "up")
+        ? "text-success"
+        : "text-destructive";
+  return (
+    <span
+      className={`ml-1.5 inline-flex items-center gap-0.5 text-xs font-medium ${color}`}
+    >
+      {text}
+      {tone !== "flat" && (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 16 16"
+          fill="currentColor"
+          className={`size-3 shrink-0 ${tone === "up" ? "rotate-180" : ""}`}
+        >
+          <path
+            fillRule="evenodd"
+            d="M8 2a.75.75 0 0 1 .75.75v8.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.22 3.22V2.75A.75.75 0 0 1 8 2Z"
+            clipRule="evenodd"
+          />
+        </svg>
+      )}
+    </span>
+  );
+}
+
+function StaticCell({
+  label,
+  value,
+  delta,
+  accessory,
+  onEnter,
+}: {
+  label: string;
+  value: ReactNode;
+  delta?: Delta;
+  accessory?: ReactNode;
+  onEnter: () => void;
+}) {
+  return (
+    <span className="relative flex flex-col p-6" onMouseEnter={onEnter}>
+      <span className="absolute inset-y-4 left-0 w-px bg-foreground/8" />
+      <span className="flex items-center gap-1.5 pb-0.5 text-xs font-medium tracking-wide text-muted-foreground capitalize">
+        {label}
+        {accessory}
+      </span>
+      <span className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
+        {value}
+        {delta && <DeltaBadge delta={delta} />}
+      </span>
+    </span>
   );
 }
 
@@ -142,34 +204,26 @@ function MetricCell({
   label,
   value,
   delta,
-  tone,
   invertTone,
+  showSeparator,
   active,
   hovered,
   muted,
   onHover,
   onClick,
-  showSeparator,
 }: {
   metric: ChartMetric;
   label: string;
   value: string;
-  delta?: string;
-  tone?: "up" | "down" | "flat";
+  delta: Delta;
   invertTone?: boolean;
+  showSeparator: boolean;
   active: boolean;
   hovered: boolean;
   muted: boolean;
   onHover: (m: ChartMetric) => void;
   onClick: (m: ChartMetric) => void;
-  showSeparator: boolean;
 }) {
-  const deltaColor = (() => {
-    if (!tone || tone === "flat" || !delta) return "text-muted-foreground";
-    const isGood = invertTone ? tone === "down" : tone === "up";
-    return isGood ? "text-success" : "text-destructive";
-  })();
-
   const showUnderline = active || hovered;
 
   return (
@@ -195,27 +249,7 @@ function MetricCell({
         </span>
         <span className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
           {value}
-          {delta && (
-            <span
-              className={`ml-1.5 inline-flex items-center gap-0.5 text-xs font-medium ${deltaColor}`}
-            >
-              {delta}
-              {tone !== "flat" && (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                  className={`size-3 shrink-0 ${tone === "up" ? "rotate-180" : ""}`}
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8 2a.75.75 0 0 1 .75.75v8.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.22 3.22V2.75A.75.75 0 0 1 8 2Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              )}
-            </span>
-          )}
+          <DeltaBadge delta={delta} invertTone={invertTone} />
         </span>
       </span>
     </button>

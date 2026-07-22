@@ -54,6 +54,9 @@ export async function mockFetchEndpoint<T>(
       const newVisitors = Math.floor(visitors * (0.55 + Math.random() * 0.2));
       const pageviews = Math.floor(visitors * (1.2 + Math.random() * 0.8));
       const sessions = Math.floor(visitors * (0.8 + Math.random() * 0.2));
+      const payingVisitors = Math.floor(
+        visitors * (0.003 + Math.random() * 0.007),
+      );
       timeseries.push({
         timestamp: ts,
         visitors,
@@ -64,23 +67,37 @@ export async function mockFetchEndpoint<T>(
         bounceRate: 0.35 + Math.random() * 0.25,
         sessionDuration: Math.floor(90 + Math.random() * 150),
         revenue: Math.floor(Math.random() * 600),
+        payingVisitors,
+        conversionRate: visitors > 0 ? payingVisitors / visitors : 0,
       });
     }
 
+    const sum = (f: (p: TimeseriesPoint) => number) =>
+      timeseries.reduce((acc, p) => acc + f(p), 0);
+    const curVisitors = sum((p) => p.visitors);
+    const curPaying = sum((p) => p.payingVisitors);
     const current: OverviewMetrics = {
-      visitors: timeseries.reduce((sum, p) => sum + p.visitors, 0),
-      pageviews: timeseries.reduce((sum, p) => sum + p.pageviews, 0),
-      sessions: timeseries.reduce((sum, p) => sum + p.sessions, 0),
+      visitors: curVisitors,
+      pageviews: sum((p) => p.pageviews),
+      sessions: sum((p) => p.sessions),
       bounceRate: 0.425,
       sessionDuration: 182,
+      revenue: sum((p) => p.revenue),
+      payingVisitors: curPaying,
+      conversionRate: curVisitors > 0 ? curPaying / curVisitors : 0,
     };
 
+    const prevVisitors = Math.floor(curVisitors * 0.9);
+    const prevPaying = Math.floor(curPaying * 0.82);
     const previous: OverviewMetrics = {
-      visitors: Math.floor(current.visitors * 0.9),
+      visitors: prevVisitors,
       pageviews: Math.floor(current.pageviews * 0.88),
       sessions: Math.floor(current.sessions * 0.91),
       bounceRate: 0.452,
       sessionDuration: 165,
+      revenue: Math.floor(current.revenue * 0.85),
+      payingVisitors: prevPaying,
+      conversionRate: prevVisitors > 0 ? prevPaying / prevVisitors : 0,
     };
 
     return { current, previous, timeseries } as unknown as T;
