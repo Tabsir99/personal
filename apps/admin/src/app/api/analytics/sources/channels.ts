@@ -2,7 +2,7 @@
 // domains embed a generic search-engine token (Email's mail.google/mail.yahoo,
 // AI's gemini.google) MUST precede Search, or Search's "google"/"yahoo" steals
 // them.
-const CHANNELS = [
+export const CHANNELS = [
   {
     name: "Email",
     patterns: [
