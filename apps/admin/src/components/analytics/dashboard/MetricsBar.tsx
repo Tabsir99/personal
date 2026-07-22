@@ -2,12 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import type { OverviewMetrics } from "@/lib/analyticsTypes";
-import {
-  formatBounce,
-  formatConversion,
-  formatCurrency,
-  formatDuration,
-} from "./chartFormat";
+import { formatMetric } from "./chartFormat";
 
 export type ChartMetric =
   | "visitors"
@@ -74,46 +69,46 @@ export function MetricsBar({
       {metricCell(
         "visitors",
         "Visitors",
-        current.visitors.toLocaleString(),
+        formatMetric("visitors", current.visitors),
         delta(current.visitors, previous.visitors),
         false,
         true,
       )}
       <StaticCell
         label="Revenue"
-        value={formatCurrency(current.revenue)}
+        value={formatMetric("revenue", current.revenue)}
         delta={delta(current.revenue, previous.revenue)}
         onEnter={clearHover}
       />
       {metricCell(
         "conversionRate",
         "Conversion",
-        formatConversion(current.conversionRate),
+        formatMetric("conversionRate", current.conversionRate),
         delta(current.conversionRate, previous.conversionRate),
       )}
       {metricCell(
         "pageviews",
         "Pageviews",
-        current.pageviews.toLocaleString(),
+        formatMetric("pageviews", current.pageviews),
         delta(current.pageviews, previous.pageviews),
       )}
       {metricCell(
         "sessions",
         "Sessions",
-        current.sessions.toLocaleString(),
+        formatMetric("sessions", current.sessions),
         delta(current.sessions, previous.sessions),
       )}
       {metricCell(
         "bounceRate",
         "Bounce rate",
-        formatBounce(current.bounceRate),
+        formatMetric("bounceRate", current.bounceRate),
         delta(current.bounceRate, previous.bounceRate),
         true,
       )}
       {metricCell(
         "sessionDuration",
         "Session time",
-        formatDuration(current.sessionDuration),
+        formatMetric("sessionDuration", current.sessionDuration),
         delta(current.sessionDuration, previous.sessionDuration),
       )}
       <StaticCell

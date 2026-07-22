@@ -5,6 +5,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useAnalyticsStore } from "./analyticsStore";
 import { DataPanel } from "./DataPanel";
 import { ChannelDonut } from "./ChannelDonut";
+import { formatCount } from "./chartFormat";
 import { Favicon } from "../../ui/favicon";
 import { Select } from "premium-ds/select";
 import {
@@ -14,14 +15,11 @@ import {
 
 type CampaignSelection = CampaignDimension | "all";
 
-const compact = (n: number) =>
-  n >= 1000 ? `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k` : String(n);
-
 const dimLabel = (text: string, count: number) => (
   <span className="flex w-full items-center justify-between gap-3 text-xs py-0.5">
     <span className="truncate font-semibold">{text}</span>
     <span className="shrink-0 text-muted-foreground tabular-nums font-mono">
-      ({compact(count)})
+      ({formatCount(count)})
     </span>
   </span>
 );

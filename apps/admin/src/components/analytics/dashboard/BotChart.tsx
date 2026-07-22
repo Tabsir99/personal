@@ -20,6 +20,7 @@ import { categoryMeta } from "./botRegistry";
 import { CHART } from "./chartTheme";
 import { AnalyticsTooltip } from "./AnalyticsTooltip";
 import { useReveal } from "./reveal";
+import { headroomTop } from "./chartFormat";
 
 function fmt(ts: number, granularity: string): string {
   const d = new Date(ts);
@@ -162,6 +163,7 @@ export function BotChart({
                 minTickGap={50}
               />
               <YAxis
+                domain={[0, headroomTop]}
                 tick={{ fontSize: 11, fill: CHART.muted }}
                 tickLine={false}
                 axisLine={false}

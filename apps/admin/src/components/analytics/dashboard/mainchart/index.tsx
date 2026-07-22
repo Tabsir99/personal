@@ -13,7 +13,7 @@ import type { TimeseriesPoint } from "@/lib/analyticsTypes";
 import { CHART } from "../chartTheme";
 import { AnalyticsTooltip } from "../AnalyticsTooltip";
 import { useReveal } from "../reveal";
-import { formatCurrency } from "../chartFormat";
+import { formatCurrency, headroomTop, niceStep } from "../chartFormat";
 import { renderSeries, leftAxisFormat, type Selection } from "./series";
 import { chartDefs } from "./chartDefs";
 import { tooltipSections } from "./tooltipSections";
@@ -36,12 +36,10 @@ function formatTimestamp(ts: number, granularity: string): string {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-function niceStep(raw: number): number {
-  if (raw <= 0) return 1;
-  const pow = 10 ** Math.floor(Math.log10(raw));
-  const n = raw / pow;
-  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * pow;
-}
+const BOUNCE_AXIS = {
+  domain: [0, 1] as [number, number],
+  ticks: [0, 0.25, 0.5, 0.75, 1],
+};
 
 function revenueAxis(max: number): {
   ticks: number[];
@@ -62,6 +60,7 @@ export function MainChart({
   periodLabel,
 }: MainChartProps) {
   const selection: Selection = metric;
+  const isBounce = selection === "bounceRate";
   const { ticks: revenueTicks, domain: revenueDomain } = revenueAxis(
     Math.max(0, ...data.map((d) => d.revenue)),
   );
@@ -96,6 +95,7 @@ export function MainChart({
             >
               {chartDefs(targetOffset)}
               <CartesianGrid
+                yAxisId={selection === null ? "revenue" : "left"}
                 strokeDasharray="3 3"
                 stroke={CHART.grid}
                 strokeOpacity={0.6}
@@ -119,7 +119,8 @@ export function MainChart({
               />
               <YAxis
                 yAxisId="left"
-                domain={[0, "auto"]}
+                domain={isBounce ? BOUNCE_AXIS.domain : [0, headroomTop]}
+                {...(isBounce ? { ticks: BOUNCE_AXIS.ticks } : {})}
                 tickFormatter={leftAxisFormat(selection)}
                 tick={{ fontSize: 11, fill: CHART.muted }}
                 tickLine={false}
@@ -151,7 +152,7 @@ export function MainChart({
               <AnalyticsTooltip
                 sections={tooltipSections(selection, periodLabel)}
               />
-              {renderSeries(selection, data, activeIndex)}
+              {renderSeries(selection, activeIndex)}
             </ComposedChart>
           </ResponsiveContainer>
         )}

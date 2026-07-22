@@ -1,14 +1,8 @@
 import type { ReactElement } from "react";
-import { Area, Bar, Cell } from "recharts";
-import type { TimeseriesPoint } from "@/lib/analyticsTypes";
+import { Area, Bar } from "recharts";
 import type { ChartMetric } from "../MetricsBar";
 import { CHART } from "../chartTheme";
-import {
-  formatBounce,
-  formatConversion,
-  formatCount,
-  formatDuration,
-} from "../chartFormat";
+import { formatMetric } from "../chartFormat";
 
 export type Selection = ChartMetric | null;
 
@@ -114,35 +108,42 @@ function stackedVisitors(): ReactElement[] {
   ];
 }
 
-function revenueBars(
-  data: TimeseriesPoint[],
-  activeIndex: number | null,
-): ReactElement[] {
-  const lit = (i: number) =>
-    activeIndex === null || !Number.isFinite(activeIndex) || i <= activeIndex;
+function revenueBars(activeIndex: number | null): ReactElement[] {
   return [
     <Bar
       key="revenue"
       yAxisId="revenue"
       dataKey="revenue"
-      radius={[3, 3, 0, 0]}
-      maxBarSize={32}
-      {...ANIM}
-    >
-      {data.map((_, i) => (
-        <Cell
-          key={i}
-          fill={lit(i) ? CHART.revenue : CHART.muted}
-          fillOpacity={lit(i) ? 0.5 : 0.16}
-        />
-      ))}
-    </Bar>,
+      maxBarSize={26}
+      activeBar={false}
+      animationDuration={600}
+      animationEasing="ease-out"
+      shape={({ index, x, y, width, height }) => {
+        const lit =
+          activeIndex === null ||
+          !Number.isFinite(activeIndex) ||
+          index <= activeIndex;
+
+        return (
+          <rect
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            rx={3}
+            style={{
+              fill: lit ? CHART.revenue : CHART.muted,
+              fillOpacity: lit ? 0.75 : 0.2,
+            }}
+          />
+        );
+      }}
+    />,
   ];
 }
 
 export function renderSeries(
   selection: Selection,
-  data: TimeseriesPoint[],
   activeIndex: number | null,
 ): ReactElement[] {
   switch (selection) {
@@ -159,13 +160,11 @@ export function renderSeries(
     case "sessionDuration":
       return singleArea("sessionDuration");
     case null:
-      return [...revenueBars(data, activeIndex), ...singleArea("visitors")];
+      return [...revenueBars(activeIndex), ...singleArea("visitors")];
   }
 }
 
 export function leftAxisFormat(selection: Selection): (v: number) => string {
-  if (selection === "bounceRate") return formatBounce;
-  if (selection === "conversionRate") return formatConversion;
-  if (selection === "sessionDuration") return formatDuration;
-  return formatCount;
+  const metric = selection ?? "visitors";
+  return (v) => formatMetric(metric, v);
 }

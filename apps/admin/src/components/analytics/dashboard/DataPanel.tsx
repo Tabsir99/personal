@@ -147,7 +147,7 @@ function RankedList({
           key={item.name}
           layout
           transition={UIMotion.t.layout}
-          className="group relative flex h-8 items-center gap-3 rounded-md px-2"
+          className="group relative flex h-8 items-center gap-3 rounded-md px-4 justify-between"
         >
           <div className="pointer-events-none absolute inset-0 flex items-stretch gap-0.5">
             {METRIC_IDS.map((id) => {
@@ -170,15 +170,24 @@ function RankedList({
               );
             })}
           </div>
-          <div className="relative flex min-w-0 flex-1 items-center gap-2">
+          <motion.div
+            initial={{ opacity: 0, x: -5 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={UIMotion.t.exit}
+            className="relative flex items-center gap-2 origin-left"
+          >
             {item.icon && <span className="shrink-0">{item.icon}</span>}
-            <span className="truncate text-sm text-foreground font-medium">
+            <span className="truncate text-xs text-foreground font-medium">
               {item.name}
             </span>
-          </div>
-          <span className="relative font-mono text-xs font-medium text-foreground/80 tabular-nums">
+          </motion.div>
+          <motion.span
+            initial={{ opacity: 0, x: 5 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="relative font-mono text-xs font-medium text-foreground/80 tabular-nums"
+          >
             {METRICS[sortKey].format(item.values[sortKey])}
-          </span>
+          </motion.span>
         </motion.div>
       ))}
     </div>

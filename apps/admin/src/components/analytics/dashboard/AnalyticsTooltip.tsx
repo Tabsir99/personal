@@ -100,7 +100,7 @@ export function AnalyticsTooltip({
 }) {
   return (
     <Tooltip
-      animationDuration={700}
+      animationDuration={500}
       animationEasing="ease-out"
       content={({ active, payload, label }) => {
         if (!active || !payload?.length) return null;

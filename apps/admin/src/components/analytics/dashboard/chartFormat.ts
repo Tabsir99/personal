@@ -28,6 +28,50 @@ export function formatConversion(rate: number): string {
   return `${(rate * 100).toFixed(2)}%`;
 }
 
+export type FormattableMetric =
+  | "visitors"
+  | "pageviews"
+  | "sessions"
+  | "bounceRate"
+  | "conversionRate"
+  | "sessionDuration"
+  | "revenue";
+
+/** Single source of truth for turning a metric value into display text. */
+export function formatMetric(metric: FormattableMetric, value: number): string {
+  switch (metric) {
+    case "visitors":
+    case "pageviews":
+    case "sessions":
+      return formatCount(value);
+    case "bounceRate":
+      return formatBounce(value);
+    case "conversionRate":
+      return formatConversion(value);
+    case "sessionDuration":
+      return formatDuration(value);
+    case "revenue":
+      return formatCurrency(value);
+  }
+}
+
+/** Round `raw` up to the nearest 1/2/5 × 10ⁿ — a human-friendly axis step. */
+export function niceStep(raw: number): number {
+  if (raw <= 0) return 1;
+  const pow = 10 ** Math.floor(Math.log10(raw));
+  const n = raw / pow;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * pow;
+}
+
+/**
+ * Recharts `YAxis` domain-max that adds ~10% headroom above the data peak, so
+ * the line cap / active dot never touches (and gets clipped at) the top edge.
+ * Ticks stay auto — recharts picks nice ones within the padded domain.
+ * Use as `domain={[0, headroomTop]}`.
+ */
+export const headroomTop = (dataMax: number): number =>
+  dataMax > 0 ? dataMax * 1.1 : 1;
+
 export const PERIOD_LABEL: Record<Period, string> = {
   today: "Today",
   yesterday: "Yesterday",

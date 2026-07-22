@@ -12,6 +12,7 @@ import type { TimeseriesPoint } from "@/lib/analyticsTypes";
 import { CHART } from "./dashboard/chartTheme";
 import { AnalyticsTooltip } from "./dashboard/AnalyticsTooltip";
 import { useReveal } from "./dashboard/reveal";
+import { headroomTop } from "./dashboard/chartFormat";
 
 interface MiniChartProps {
   data: TimeseriesPoint[];
@@ -54,6 +55,7 @@ export function MiniChart({ data, empty }: MiniChartProps) {
               minTickGap={40}
             />
             <YAxis
+              domain={[0, headroomTop]}
               tick={{ fontSize: 10, fill: CHART.muted }}
               tickLine={false}
               axisLine={false}
