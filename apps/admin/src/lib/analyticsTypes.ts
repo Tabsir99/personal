@@ -9,8 +9,13 @@ export interface OverviewMetrics {
 export interface TimeseriesPoint {
   timestamp: number;
   visitors: number;
+  newVisitors: number;
+  returningVisitors: number;
   pageviews: number;
   sessions: number;
+  bounceRate: number;
+  sessionDuration: number;
+  revenue: number;
 }
 
 // New-vs-returning split. Carried only on sources, where it's an acquisition

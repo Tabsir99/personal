@@ -92,7 +92,12 @@ export function generateEmptyTimeseries(): TimeseriesPoint[] {
   return Array.from({ length: 30 }, (_, i) => ({
     timestamp: now - (29 - i) * DAY,
     visitors: 0,
+    newVisitors: 0,
+    returningVisitors: 0,
     pageviews: 0,
     sessions: 0,
+    bounceRate: 0,
+    sessionDuration: 0,
+    revenue: 0,
   }));
 }

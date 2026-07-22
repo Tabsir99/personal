@@ -51,9 +51,20 @@ export async function mockFetchEndpoint<T>(
     for (let i = 0; i < pointsCount; i++) {
       const ts = start + i * step;
       const visitors = Math.floor(500 + Math.random() * 1500);
+      const newVisitors = Math.floor(visitors * (0.55 + Math.random() * 0.2));
       const pageviews = Math.floor(visitors * (1.2 + Math.random() * 0.8));
       const sessions = Math.floor(visitors * (0.8 + Math.random() * 0.2));
-      timeseries.push({ timestamp: ts, visitors, pageviews, sessions });
+      timeseries.push({
+        timestamp: ts,
+        visitors,
+        newVisitors,
+        returningVisitors: visitors - newVisitors,
+        pageviews,
+        sessions,
+        bounceRate: 0.35 + Math.random() * 0.25,
+        sessionDuration: Math.floor(90 + Math.random() * 150),
+        revenue: Math.floor(Math.random() * 600),
+      });
     }
 
     const current: OverviewMetrics = {

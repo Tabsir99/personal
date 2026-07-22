@@ -16,16 +16,20 @@ import type {
   MainResponse,
 } from "@/lib/analyticsTypes";
 
-interface PeriodRow {
-  period: "current" | "previous";
+interface MainRow {
+  kind: "ov" | "ts" | "rev";
+  k: string;
   visitors: number;
+  newVisitors: number;
+  returningVisitors: number;
   pageviews: number;
   sessions: number;
   bounces: number;
   totalDuration: number;
+  revenue: number;
 }
 
-function toMetrics(row: PeriodRow | undefined): OverviewMetrics {
+function toMetrics(row: MainRow | undefined): OverviewMetrics {
   const sessions = Number(row?.sessions ?? 0);
   const bounces = Number(row?.bounces ?? 0);
   const totalDuration = Number(row?.totalDuration ?? 0);
@@ -40,77 +44,66 @@ function toMetrics(row: PeriodRow | undefined): OverviewMetrics {
   };
 }
 
-async function fetchOverviewComparison(
+/**
+ * Overview comparison + the full timeseries in one request. The pageview slice
+ * ([prevStart, end)) is scanned once into session rows, then GROUPING SETS
+ * ((period), (bucket)) folds those into the current/previous totals and the
+ * per-bucket series in a single pass. Previous-period sessions carry a bucket
+ * sentinel of 0 so they collapse into one discarded row instead of leaking into
+ * the first current bucket. Revenue is a second small scan of payment events,
+ * bucketed by payment time and UNION'd in.
+ */
+function buildSql(
   websiteId: string,
   start: number,
-  end: number,
   prevStart: number,
-): Promise<{ current: OverviewMetrics; previous: OverviewMetrics }> {
-  const res = await queryTinybird<PeriodRow>(`
-    WITH session_stats AS (
-      SELECT
-        ${F.sessionId} as sid,
-        CASE WHEN ${F.timestamp} >= ${start} THEN 'current' ELSE 'previous' END as period,
-        any(${F.visitorId}) as vid,
-        COUNT() as pvs,
-        MAX(${F.timestamp}) - MIN(${F.timestamp}) as duration
-      FROM ${F.engine}
-      WHERE ${eventWhere("pageview", websiteId, prevStart, end)}
-      GROUP BY sid, period
-    )
-    SELECT
-      period,
-      COUNT(DISTINCT vid) as visitors,
-      SUM(pvs) as pageviews,
-      COUNT() as sessions,
-      SUM(CASE WHEN pvs = 1 THEN 1 ELSE 0 END) as bounces,
-      SUM(duration) as totalDuration
-    FROM session_stats
-    GROUP BY period
-  `);
-
-  console.log("COMPARASION", res);
-
-  const currentRow = res.data.find((r) => r.period === "current");
-  const previousRow = res.data.find((r) => r.period === "previous");
-
-  return {
-    current: toMetrics(currentRow),
-    previous: toMetrics(previousRow),
-  };
-}
-
-async function fetchTimeseries(
-  websiteId: string,
-  start: number,
   end: number,
   bucketMs: number,
-): Promise<TimeseriesPoint[]> {
-  const res = await queryTinybird<{
-    bucket: number;
-    visitors: number;
-    pageviews: number;
-    sessions: number;
-  }>(`
+): string {
+  const traffic = `
+    WITH sessions AS (
+      SELECT sid, vid, snum, startTs, durMs, pvs,
+        if(startTs >= ${start}, 'current', 'previous') AS period,
+        if(startTs >= ${start}, intDiv(startTs, ${bucketMs}) * ${bucketMs}, 0) AS bucket
+      FROM (
+        SELECT
+          ${F.sessionId} AS sid,
+          any(${F.visitorId}) AS vid,
+          any(${F.sessionNumber}) AS snum,
+          min(${F.timestamp}) AS startTs,
+          max(${F.timestamp}) - min(${F.timestamp}) AS durMs,
+          count() AS pvs
+        FROM ${F.engine}
+        WHERE ${eventWhere("pageview", websiteId, prevStart, end)}
+        GROUP BY sid
+      )
+    )
     SELECT
-      intDiv(${F.timestamp}, ${bucketMs}) * ${bucketMs} as bucket,
-      COUNT(DISTINCT ${F.visitorId}) as visitors,
-      COUNT() as pageviews,
-      COUNT(DISTINCT ${F.sessionId}) as sessions
+      multiIf(GROUPING(bucket) = 0, 'ts', 'ov') AS kind,
+      multiIf(GROUPING(bucket) = 0, toString(any(bucket)), any(period)) AS k,
+      uniqExact(vid) AS visitors,
+      uniqExactIf(vid, snum = 1) AS newVisitors,
+      uniqExactIf(vid, snum > 1) AS returningVisitors,
+      sum(pvs) AS pageviews,
+      count() AS sessions,
+      countIf(pvs = 1) AS bounces,
+      sum(durMs) AS totalDuration,
+      toFloat64(0) AS revenue
+    FROM sessions
+    GROUP BY GROUPING SETS ((period), (bucket))`;
+
+  const revenue = `
+    SELECT
+      'rev' AS kind,
+      toString(intDiv(${F.timestamp}, ${bucketMs}) * ${bucketMs}) AS k,
+      0 AS visitors, 0 AS newVisitors, 0 AS returningVisitors,
+      0 AS pageviews, 0 AS sessions, 0 AS bounces, 0 AS totalDuration,
+      round(sum(${F.revenueCents}) / 100) AS revenue
     FROM ${F.engine}
-    WHERE ${eventWhere("pageview", websiteId, start, end)}
-    GROUP BY bucket
-    ORDER BY bucket
-  `);
+    WHERE ${eventWhere("payment", websiteId, start, end)}
+    GROUP BY k`;
 
-  console.log("TIMESERIES", res);
-
-  return res.data.map((row) => ({
-    timestamp: Number(row.bucket),
-    visitors: Number(row.visitors),
-    pageviews: Number(row.pageviews),
-    sessions: Number(row.sessions),
-  }));
+  return `${traffic}\n    UNION ALL${revenue}`;
 }
 
 export const GET = wrapRoute<MainResponse>(async (req: NextRequest) => {
@@ -120,10 +113,41 @@ export const GET = wrapRoute<MainResponse>(async (req: NextRequest) => {
   const prev = previousPeriodRange(start, end);
   const bucketMs = granularityToMs(params.granularity ?? "daily");
 
-  const [{ current, previous }, timeseries] = await Promise.all([
-    fetchOverviewComparison(params.websiteId, start, end, prev.start),
-    fetchTimeseries(params.websiteId, start, end, bucketMs),
-  ]);
+  const res = await queryTinybird<MainRow>(
+    buildSql(params.websiteId, start, prev.start, end, bucketMs),
+  );
+
+  const current = toMetrics(
+    res.data.find((r) => r.kind === "ov" && r.k === "current"),
+  );
+  const previous = toMetrics(
+    res.data.find((r) => r.kind === "ov" && r.k === "previous"),
+  );
+
+  const revByBucket = new Map<number, number>();
+  for (const r of res.data)
+    if (r.kind === "rev") revByBucket.set(Number(r.k), Number(r.revenue));
+
+  const timeseries: TimeseriesPoint[] = res.data
+    .filter((r) => r.kind === "ts" && Number(r.k) > 0)
+    .map((r) => {
+      const timestamp = Number(r.k);
+      const sessions = Number(r.sessions);
+      const totalDuration = Number(r.totalDuration);
+      return {
+        timestamp,
+        visitors: Number(r.visitors),
+        newVisitors: Number(r.newVisitors),
+        returningVisitors: Number(r.returningVisitors),
+        pageviews: Number(r.pageviews),
+        sessions,
+        bounceRate: sessions > 0 ? Number(r.bounces) / sessions : 0,
+        sessionDuration:
+          sessions > 0 ? Math.round(totalDuration / sessions / 1000) : 0,
+        revenue: revByBucket.get(timestamp) ?? 0,
+      };
+    })
+    .sort((a, b) => a.timestamp - b.timestamp);
 
   return { current, previous, timeseries };
 });
