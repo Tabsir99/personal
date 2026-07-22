@@ -40,14 +40,23 @@ export const GET = wrapRoute<SourcesResponse>(async (req: NextRequest) => {
   const sql = chain
     .revenue()
     .splitVisitors()
-    .column(`multiIf(GROUPING(referrer) = 0, any(channel), '') as channel`)
+    // Aliased `chan`, not `channel`: `channel` is a grouping key here and
+    // ClickHouse rejects an aggregate aliased to a GROUP BY column. Each
+    // referrer row carries its channel; mapped back to `channel` below.
+    .column(`multiIf(GROUPING(referrer) = 0, any(channel), '') as chan`)
     .top(50)
     .build();
 
-  const res = await queryTinybird<BreakdownRow & { channel: string }>(sql);
+  const res = await queryTinybird<BreakdownRow & { chan: string }>(
+    sql,
+    "sources",
+  );
   const byLevel = partitionByLevel(res.data);
 
-  const referrers = (byLevel.referrers ?? []) as SourceMetric[];
+  const referrers = (byLevel.referrers ?? []).map(({ chan, ...r }) => ({
+    ...r,
+    channel: chan,
+  })) as SourceMetric[];
   const channels = (byLevel.channels ?? []) as ChannelMetric[];
 
   const dims = Object.fromEntries(

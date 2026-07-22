@@ -10,7 +10,7 @@ import {
   F,
 } from "@/lib/tinybird";
 import { breakdown, type UvBreakdownRow } from "@/lib/analyticsQuery";
-import type { LocationsResponse } from "@/lib/analyticsTypes";
+import type { LocationsResponse, LocationMetric } from "@/lib/analyticsTypes";
 
 export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
   await requireAuth();
@@ -26,7 +26,9 @@ export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
     .level("regions", "region", F.region)
     .level("cities", "city", F.city)
     .revenue()
-    .column(`any(country) as country`)
+    // Aliased away from the `country` grouping key: ClickHouse rejects an
+    // aggregate aliased to a GROUP BY column. Mapped back to `country` below.
+    .column(`any(${F.country}) as countryCode`)
     .top(30);
 
   if (countryFilter) chain.filter(`${F.country} = '${countryFilter}'`);
@@ -34,10 +36,18 @@ export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
   const sql = chain.build();
 
   const res = await queryTinybird<
-    UvBreakdownRow<"countries" | "regions" | "cities"> & { country: string }
-  >(sql);
+    UvBreakdownRow<"countries" | "regions" | "cities"> & { countryCode: string }
+  >(sql, "locations");
 
   const { countries, regions, cities } = partitionByLevel(res.data);
+  const withCountry = (
+    rows: (Omit<UvBreakdownRow, "level"> & { countryCode: string })[],
+  ): LocationMetric[] =>
+    rows.map(({ countryCode, ...rest }) => ({ ...rest, country: countryCode }));
 
-  return { countries, regions, cities };
+  return {
+    countries: withCountry(countries),
+    regions: withCountry(regions),
+    cities: withCountry(cities),
+  };
 });
