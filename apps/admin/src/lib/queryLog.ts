@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import chalk, { type ChalkInstance } from "chalk";
 
 /** Per-query stats Tinybird returns for free in every `/v0/sql` response. */
 export interface QueryStats {
@@ -7,8 +7,13 @@ export interface QueryStats {
   bytes_read: number;
 }
 
+interface QueryResult {
+  statistics?: QueryStats;
+  rows: number;
+}
+
 const SLOW_MS = 500;
-const LABEL_WIDTH = 16;
+const LABEL_COL = 8; // field-name column width, so values line up
 
 function fmtMs(ms: number): string {
   return ms >= 1000 ? `${(ms / 1000).toFixed(2)}s` : `${Math.round(ms)}ms`;
@@ -26,33 +31,51 @@ function fmtBytes(n: number): string {
   return `${n}B`;
 }
 
-const sep = chalk.dim("·");
-const tag = chalk.dim("tinybird");
+// A blank line above each block sets it apart from the framework's request
+// logs; the label is tinted and the fields are indented under it.
+function header(label: string, tint: ChalkInstance, badge: string): string {
+  return `\n${chalk.dim("tinybird")} ${tint.bold(label)}  ${badge}`;
+}
+
+function field(name: string, value: string): string {
+  return `  ${chalk.dim(name.padEnd(LABEL_COL))}${value}`;
+}
 
 /**
- * One structured line per Tinybird query: wall time, server time, and how much
- * the primary index actually let the engine scan (rows_read / bytes_read — the
- * cheap index-effectiveness signal). Server-side only; chalk self-disables on a
- * non-TTY so production logs stay plain text.
+ * One structured, multi-line block per Tinybird query: wall + server time and
+ * how much the primary index let the engine scan (rows_read / bytes_read — the
+ * cheap index-effectiveness signal), plus where the full SQL was dumped for
+ * copy/paste. Server-side only; chalk self-disables on a non-TTY so production
+ * logs stay plain text.
  */
 export function logQuery(
   label: string,
   wallMs: number,
-  stats: QueryStats | undefined,
-  resultRows: number,
+  result: QueryResult,
+  sqlFile?: string,
 ): void {
+  const { statistics: stats, rows } = result;
   const slow = wallMs >= SLOW_MS;
-  const name = (slow ? chalk.yellow : chalk.cyan)(label.padEnd(LABEL_WIDTH));
-  const wall = chalk.bold(fmtMs(wallMs));
-  const srv = stats ? fmtMs(stats.elapsed * 1000) : "—";
-  const scan = stats
-    ? `${fmtCount(stats.rows_read)} rows/${fmtBytes(stats.bytes_read)}`
-    : "—";
-  const mark = slow ? chalk.yellow("⚠ slow") : chalk.green("✓");
-
-  console.log(
-    `${tag} ${name} wall ${wall} ${sep} srv ${srv} ${sep} scan ${chalk.dim(scan)} ${sep} out ${resultRows} ${mark}`,
-  );
+  const lines = [
+    header(
+      label,
+      slow ? chalk.yellow : chalk.cyan,
+      slow ? chalk.yellow("⚠ slow") : chalk.green("✓"),
+    ),
+    field("wall", chalk.bold(fmtMs(wallMs))),
+  ];
+  if (stats) {
+    lines.push(field("server", fmtMs(stats.elapsed * 1000)));
+    lines.push(
+      field(
+        "scan",
+        `${fmtCount(stats.rows_read)} rows ${chalk.dim("·")} ${fmtBytes(stats.bytes_read)}`,
+      ),
+    );
+  }
+  lines.push(field("output", `${rows} rows`));
+  if (sqlFile) lines.push(field("sql", chalk.dim(sqlFile)));
+  console.log(lines.join("\n"));
 }
 
 export function logQueryError(
@@ -60,16 +83,13 @@ export function logQueryError(
   wallMs: number,
   status: number,
   detail: string,
+  sqlFile?: string,
 ): void {
-  console.error(
-    `${tag} ${chalk.red(label.padEnd(LABEL_WIDTH))} wall ${fmtMs(wallMs)} ${sep} ${chalk.red(
-      `HTTP ${status}`,
-    )} ${sep} ${detail.slice(0, 200)}`,
-  );
-}
-
-/** Renders an `EXPLAIN indexes = 1` plan (opt-in via TINYBIRD_EXPLAIN=1). */
-export function logIndexPlan(label: string, planLines: string[]): void {
-  console.log(chalk.dim(`tinybird ${label} · index plan`));
-  for (const line of planLines) console.log(chalk.dim(`  ${line}`));
+  const lines = [
+    header(label, chalk.red, chalk.red(`✗ HTTP ${status}`)),
+    field("wall", fmtMs(wallMs)),
+    field("error", chalk.red(detail.slice(0, 300))),
+  ];
+  if (sqlFile) lines.push(field("sql", chalk.dim(sqlFile)));
+  console.error(lines.join("\n"));
 }

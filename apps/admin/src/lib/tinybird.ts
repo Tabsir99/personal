@@ -6,12 +6,8 @@ import {
   ANALYTICS_TABLE,
   type AnalyticsEventRow,
 } from "@tabsircg/analytics-contract";
-import {
-  logQuery,
-  logQueryError,
-  logIndexPlan,
-  type QueryStats,
-} from "./queryLog";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { logQuery, logQueryError, type QueryStats } from "./queryLog";
 
 const TB_HOST = env.TINYBIRD_HOST;
 const TB_TOKEN = env.TINYBIRD_TOKEN;
@@ -40,6 +36,7 @@ export async function queryTinybird<T = Record<string, string | number | null>>(
   sql: string,
   label = "query",
 ): Promise<TinybirdQueryResult<T>> {
+  const sqlFile = dumpSql(label, sql);
   const startedAt = performance.now();
   const res = await fetch(`${TB_HOST}/v0/sql`, {
     method: "POST",
@@ -51,37 +48,31 @@ export async function queryTinybird<T = Record<string, string | number | null>>(
 
   if (!res.ok) {
     const text = await res.text();
-    logQueryError(label, wallMs, res.status, text);
+    logQueryError(label, wallMs, res.status, text, sqlFile);
     throw new Error(`Analytics query failed (${res.status}): ${text}`);
   }
 
   const json = (await res.json()) as TinybirdQueryResult<T>;
-  logQuery(label, wallMs, json.statistics, json.rows);
-  if (process.env.TINYBIRD_EXPLAIN === "1") await explainIndexes(sql, label);
+  logQuery(label, wallMs, json, sqlFile);
   return json;
 }
 
+const LOG_DIR = "logs";
+
 /**
- * Opt-in (TINYBIRD_EXPLAIN=1) `EXPLAIN indexes = 1` pass that logs the literal
- * index/part/granule plan. Off by default so production never pays the extra
- * round-trip; use it in dev/test to confirm the primary key is being used.
+ * Dev-only: dump the full SQL to `logs/<label>.sql` (relative to the admin
+ * root) so it can be copied straight into the Tinybird dashboard. Returns the
+ * path for the log line; best-effort, never throws.
  */
-async function explainIndexes(sql: string, label: string): Promise<void> {
+function dumpSql(label: string, sql: string): string | undefined {
+  if (process.env.NODE_ENV === "production") return undefined;
   try {
-    const res = await fetch(`${TB_HOST}/v0/sql`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${TB_TOKEN}` },
-      body: `EXPLAIN indexes = 1 ${sql} FORMAT JSON`,
-      cache: "no-cache",
-    });
-    if (!res.ok) return;
-    const json = (await res.json()) as { data: { explain: string }[] };
-    logIndexPlan(
-      label,
-      json.data.map((r) => r.explain),
-    );
+    mkdirSync(LOG_DIR, { recursive: true });
+    const file = `${LOG_DIR}/${label.replace(/[^\w.-]/g, "_")}.sql`;
+    writeFileSync(file, `${sql}\n`);
+    return file;
   } catch {
-    // Diagnostics must never break the request they're describing.
+    return undefined;
   }
 }
 
