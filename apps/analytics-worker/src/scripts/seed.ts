@@ -1,18 +1,20 @@
 /// <reference types="node" />
-// We will import Node's native crypto
 import nodeCrypto from "crypto";
+import { existsSync, readFileSync } from "fs";
+import { join, dirname } from "path";
 import { DevEventPayload } from "../schema";
+import { parseUA } from "../parseUA";
+import { detectBot } from "../detectBot";
+import {
+  ANALYTICS_TABLE,
+  type AnalyticsEventRow,
+} from "@tabsircg/analytics-contract";
 
 const WEBSITE_ID = "my-portfolio-blog";
 const DOMAIN = "tabsircg.com";
-const TOTAL_EVENTS_TARGET = 1000;
+const TOTAL_EVENTS_TARGET = Number(process.env.SEED_EVENTS ?? 100_000);
 
-const TARGET_URL =
-  "https://analytics-backend-dev.tabsirsfc.workers.dev/api/events";
-
-console.log(`🚀 Starting seed script targeting: ${TARGET_URL}`);
-console.log(`Website ID: ${WEBSITE_ID}`);
-console.log(`Domain: ${DOMAIN}\n`);
+console.log(`🚀 Seeding analytics for ${WEBSITE_ID} (${DOMAIN})\n`);
 
 // Helper: UUID generator
 function generateUUID(): string {
@@ -79,6 +81,102 @@ const SUBJECTS = [
   "Quick Question",
   "Job Opening",
   "Love your blog!",
+];
+const COFFEE_AMOUNTS_CENTS = [300, 500, 500, 500, 1000, 1000, 1500, 2500, 5000];
+
+// Acquisition sources. `referrer` drives the channel classifier (referrer-only,
+// see sources/channels.ts), so these span every bucket. `utm`/`ref` ride in the
+// landing href's query string for the future campaign breakdown.
+interface AcquisitionSource {
+  referrer: string | null;
+  weight: number;
+  utm?: {
+    source: string;
+    medium: string;
+    campaign: string;
+    content?: string;
+    term?: string;
+  };
+  ref?: string;
+}
+
+const ACQUISITION_SOURCES: AcquisitionSource[] = [
+  // Organic search
+  { referrer: "https://www.google.com/", weight: 0.26 },
+  { referrer: "https://www.bing.com/", weight: 0.05 },
+  { referrer: "https://duckduckgo.com/", weight: 0.05 },
+  // Direct
+  { referrer: null, weight: 0.18 },
+  // Social
+  { referrer: "https://www.linkedin.com/feed/", weight: 0.045 },
+  { referrer: "https://www.reddit.com/r/webdev/", weight: 0.045 },
+  { referrer: "https://x.com/", weight: 0.04 },
+  // News / community
+  { referrer: "https://news.ycombinator.com/", weight: 0.05 },
+  { referrer: "https://dev.to/", weight: 0.02 },
+  { referrer: "https://lobste.rs/", weight: 0.02 },
+  // AI assistants
+  { referrer: "https://chatgpt.com/", weight: 0.035 },
+  { referrer: "https://www.perplexity.ai/", weight: 0.02 },
+  { referrer: "https://claude.ai/", weight: 0.015 },
+  // Video
+  { referrer: "https://www.youtube.com/", weight: 0.025 },
+  // Messaging
+  { referrer: "https://t.me/", weight: 0.015 },
+  { referrer: "https://discord.com/channels/@me", weight: 0.01 },
+  // Email newsletter campaign (Proton webmail maps cleanly to Email; a Gmail
+  // referrer would hit the Search classifier first via its "google" substring)
+  {
+    referrer: "https://mail.proton.me/",
+    weight: 0.04,
+    utm: {
+      source: "newsletter",
+      medium: "email",
+      campaign: "weekly_digest",
+      content: "header_link",
+    },
+  },
+  // Referral + indie directories (?ref=)
+  { referrer: "https://github.com/tabsircg", weight: 0.02 },
+  {
+    referrer: "https://www.producthunt.com/",
+    weight: 0.012,
+    ref: "producthunt",
+  },
+  { referrer: "https://indiehackers.com/", weight: 0.008, ref: "indiehackers" },
+  // Paid campaigns (utm_*)
+  {
+    referrer: "https://www.google.com/",
+    weight: 0.018,
+    utm: {
+      source: "google",
+      medium: "cpc",
+      campaign: "blog_promo",
+      content: "text_ad_a",
+      term: "self_hosted_analytics",
+    },
+  },
+  {
+    referrer: "https://x.com/",
+    weight: 0.015,
+    utm: {
+      source: "twitter",
+      medium: "paid_social",
+      campaign: "launch_2026",
+      content: "carousel_1",
+    },
+  },
+  {
+    referrer: "https://www.reddit.com/",
+    weight: 0.007,
+    utm: {
+      source: "reddit",
+      medium: "cpc",
+      campaign: "devtools",
+      content: "promoted_post",
+      term: "privacy_analytics",
+    },
+  },
 ];
 
 // Country & timezone profiles
@@ -201,7 +299,7 @@ interface VisitorProfile {
   viewportHeight: number;
   persona: "bounce" | "explorer" | "signer" | "supporter";
   firstReferrer: string | null;
-  firstUtm: string | null;
+  firstQuery: string | null;
 }
 
 function generateVisitor(): VisitorProfile {
@@ -290,30 +388,22 @@ function generateVisitor(): VisitorProfile {
     persona = "supporter";
   }
 
-  // Acquisition channel referrers
-  const channelRand = Math.random();
-  let firstReferrer: string | null = null;
-  let firstUtm: string | null = null;
-
-  if (channelRand < 0.4) {
-    // Search Engine
-    firstReferrer = "https://www.google.com";
-  } else if (channelRand < 0.65) {
-    // Direct
-    firstReferrer = null;
-  } else if (channelRand < 0.8) {
-    // Twitter/X
-    firstReferrer = "https://t.co/";
-  } else if (channelRand < 0.9) {
-    // Hacker News
-    firstReferrer = "https://news.ycombinator.com/";
-  } else if (channelRand < 0.95) {
-    // GitHub
-    firstReferrer = "https://github.com/";
-  } else {
-    // Paid Campaign
-    firstReferrer = "https://www.google.com";
-    firstUtm = "utm_source=google&utm_medium=cpc&utm_campaign=blog_promo";
+  // Acquisition channel + campaign
+  const source = selectWeighted(ACQUISITION_SOURCES);
+  const firstReferrer = source.referrer;
+  let firstQuery: string | null = null;
+  if (source.utm) {
+    const u = source.utm;
+    const parts = [
+      `utm_source=${u.source}`,
+      `utm_medium=${u.medium}`,
+      `utm_campaign=${u.campaign}`,
+    ];
+    if (u.content) parts.push(`utm_content=${u.content}`);
+    if (u.term) parts.push(`utm_term=${u.term}`);
+    firstQuery = parts.join("&");
+  } else if (source.ref) {
+    firstQuery = `ref=${source.ref}`;
   }
 
   return {
@@ -331,7 +421,7 @@ function generateVisitor(): VisitorProfile {
     viewportHeight,
     persona,
     firstReferrer,
-    firstUtm,
+    firstQuery,
   };
 }
 
@@ -428,10 +518,9 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
       const referrer =
         sNum === 1 && currentOffset === 0 ? visitor.firstReferrer : null;
 
-      // Add query parameters for UTM campaigns
       let finalHref = url;
-      if (sNum === 1 && currentOffset === 0 && visitor.firstUtm) {
-        finalHref += `?${visitor.firstUtm}`;
+      if (sNum === 1 && currentOffset === 0 && visitor.firstQuery) {
+        finalHref += `?${visitor.firstQuery}`;
       }
 
       return {
@@ -464,6 +553,15 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
       };
     };
 
+    // Declarative goal path: the SDK fires goals as trackCustomEvent('custom',
+    // { eventName, ...data }), so type is literally 'custom' and the goal name
+    // travels in extraData.eventName (event_name in Tinybird).
+    const buildGoal = (
+      goalName: string,
+      path: string,
+      data?: Record<string, string>,
+    ) => buildPayload("custom", path, { eventName: goalName, ...data });
+
     // Simulate persona journey
     if (visitor.persona === "bounce") {
       const landPages = [
@@ -474,9 +572,35 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
       ];
       const page = landPages[Math.floor(Math.random() * landPages.length)];
       allEvents.push(buildPayload("pageview", page));
+
+      if (page.startsWith("/blog/")) {
+        if (Math.random() < 0.35) {
+          currentOffset += (Math.floor(Math.random() * 40) + 20) * 1000;
+          allEvents.push(
+            buildGoal("article_read", page, {
+              scroll_percentage: "100",
+              threshold: "0.9",
+              delay: "0",
+            }),
+          );
+        }
+        if (Math.random() < 0.2) {
+          currentOffset += 3000;
+          allEvents.push(buildGoal("code_copy", page, { language: "typescript" }));
+        }
+      }
+      if (Math.random() < 0.07) {
+        currentOffset += 2000;
+        allEvents.push(buildGoal("theme_toggle", page, { theme: "dark" }));
+      }
     } else if (visitor.persona === "explorer") {
       // Lands on Home
       allEvents.push(buildPayload("pageview", "/"));
+
+      if (Math.random() < 0.06) {
+        currentOffset += 3000;
+        allEvents.push(buildGoal("theme_toggle", "/", { theme: "dark" }));
+      }
 
       // Page 2 (about or blog)
       currentOffset += (Math.floor(Math.random() * 25) + 15) * 1000; // 15-40s reading time
@@ -484,23 +608,57 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
       const page2 = nextPages[Math.floor(Math.random() * nextPages.length)];
       allEvents.push(buildPayload("pageview", page2));
 
-      // Optional external link click
-      if (page2 === "/projects" && Math.random() < 0.3) {
-        currentOffset += 5000;
-        allEvents.push(
-          buildPayload("external_link", page2, {
-            url: "https://github.com/tabsircg/project",
-            text: "View on GitHub",
-          }),
-        );
-      } else if (page2 === "/about" && Math.random() < 0.3) {
-        currentOffset += 5000;
-        allEvents.push(
-          buildPayload("external_link", page2, {
-            url: "https://twitter.com/tabsircg",
-            text: "@tabsircg",
-          }),
-        );
+      if (page2 === "/projects") {
+        if (Math.random() < 0.4) {
+          currentOffset += 4000;
+          allEvents.push(
+            buildGoal("project_click", page2, { project: "analytics-engine" }),
+          );
+        }
+        if (Math.random() < 0.15) {
+          currentOffset += 6000;
+          allEvents.push(
+            buildGoal("demo_click", page2, { project: "analytics-engine" }),
+          );
+        }
+        if (Math.random() < 0.3) {
+          currentOffset += 5000;
+          allEvents.push(
+            buildPayload("external_link", page2, {
+              url: "https://github.com/tabsircg/project",
+              text: "View on GitHub",
+            }),
+          );
+        }
+      } else if (page2 === "/blog") {
+        if (Math.random() < 0.3) {
+          currentOffset += 5000;
+          allEvents.push(
+            buildGoal("search_performed", page2, { query: "analytics" }),
+          );
+        }
+        if (Math.random() < 0.08) {
+          currentOffset += 3000;
+          allEvents.push(buildGoal("rss_subscribe", page2, { format: "rss" }));
+        }
+      } else if (page2 === "/about") {
+        if (Math.random() < 0.25) {
+          currentOffset += 6000;
+          allEvents.push(buildGoal("cv_download", page2, { format: "pdf" }));
+        }
+        if (Math.random() < 0.3) {
+          currentOffset += 5000;
+          allEvents.push(
+            buildGoal("social_follow", page2, { network: "twitter" }),
+          );
+          currentOffset += 1500;
+          allEvents.push(
+            buildPayload("external_link", page2, {
+              url: "https://twitter.com/tabsircg",
+              text: "@tabsircg",
+            }),
+          );
+        }
       }
 
       // Page 3
@@ -511,6 +669,25 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
             ? "/blog/building-a-lightweight-analytics-engine"
             : "/contact";
         allEvents.push(buildPayload("pageview", page3));
+
+        if (page3.startsWith("/blog/")) {
+          if (Math.random() < 0.4) {
+            currentOffset += (Math.floor(Math.random() * 40) + 20) * 1000;
+            allEvents.push(
+              buildGoal("article_read", page3, {
+                scroll_percentage: "100",
+                threshold: "0.9",
+                delay: "0",
+              }),
+            );
+          }
+          if (Math.random() < 0.2) {
+            currentOffset += 3000;
+            allEvents.push(
+              buildGoal("code_copy", page3, { language: "typescript" }),
+            );
+          }
+        }
       }
     } else if (visitor.persona === "signer") {
       // Submitting newsletter or contact form
@@ -519,7 +696,6 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
       const lastName =
         LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
-      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${EMAIL_DOMAINS[Math.floor(Math.random() * EMAIL_DOMAINS.length)]}`;
 
       if (isNewsletter) {
         allEvents.push(buildPayload("pageview", "/blog"));
@@ -527,14 +703,14 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         allEvents.push(buildPayload("pageview", "/newsletter"));
         currentOffset += 15000;
 
-        // Newsletter subscription event
         allEvents.push(
-          buildPayload("newsletter_subscribed", "/newsletter", { email }),
+          buildGoal("newsletter_signup", "/newsletter", { source: "blog" }),
         );
         allEvents.push(
           buildPayload("identify", "/newsletter", {
             user_id: `sub_${visitor.visitorId.slice(0, 8)}`,
             name: `${firstName} ${lastName}`,
+            image: "",
           }),
         );
       } else {
@@ -543,18 +719,13 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         allEvents.push(buildPayload("pageview", "/contact"));
         currentOffset += 30000;
 
-        // Contact submission
         const subject = SUBJECTS[Math.floor(Math.random() * SUBJECTS.length)];
-        allEvents.push(
-          buildPayload("contact_form_submitted", "/contact", {
-            email,
-            subject,
-          }),
-        );
+        allEvents.push(buildGoal("contact_submit", "/contact", { subject }));
         allEvents.push(
           buildPayload("identify", "/contact", {
             user_id: `lead_${visitor.visitorId.slice(0, 8)}`,
             name: `${firstName} ${lastName}`,
+            image: "",
           }),
         );
         currentOffset += 2000;
@@ -575,12 +746,17 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         allEvents.push(buildPayload("pageview", "/projects"));
         currentOffset += 20000;
 
-        // Click buy me coffee
-        allEvents.push(buildPayload("buy_me_a_coffee_click", "/projects"));
+        allEvents.push(
+          buildGoal("coffee_click", "/projects", { location: "projects" }),
+        );
         currentOffset += 5000;
 
         // Redirects to Stripe success page
         const stripeSessionId = `cs_live_${generateUUID().replace(/-/g, "").slice(0, 24)}`;
+        const amountCents =
+          COFFEE_AMOUNTS_CENTS[
+            Math.floor(Math.random() * COFFEE_AMOUNTS_CENTS.length)
+          ];
         allEvents.push(
           buildPayload("pageview", `/success?session_id=${stripeSessionId}`),
         );
@@ -588,12 +764,14 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
           buildPayload("payment", `/success?session_id=${stripeSessionId}`, {
             stripe_session_id: stripeSessionId,
             email,
+            amount_cents: String(amountCents),
           }),
         );
         allEvents.push(
           buildPayload("identify", `/success?session_id=${stripeSessionId}`, {
             user_id: `supporter_${visitor.visitorId.slice(0, 8)}`,
             name: `${firstName} ${lastName}`,
+            image: "",
           }),
         );
       } else {
@@ -613,6 +791,7 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
             {
               user_id: `supporter_${visitor.visitorId.slice(0, 8)}`,
               name: `${firstName} ${lastName}`,
+              image: "",
             },
           ),
         );
@@ -635,11 +814,18 @@ const BOT_USER_AGENTS = [
 
 const botEventCount = Math.floor(TOTAL_EVENTS_TARGET * 0.05);
 for (let i = 0; i < botEventCount; i++) {
-  const botUA = BOT_USER_AGENTS[Math.floor(Math.random() * BOT_USER_AGENTS.length)];
+  const botUA =
+    BOT_USER_AGENTS[Math.floor(Math.random() * BOT_USER_AGENTS.length)];
   const botTimestamp = Math.floor(
     THIRTY_DAYS_AGO + Math.random() * (NOW - THIRTY_DAYS_AGO),
   );
-  const pages = ["/", "/blog", "/projects", "/about", "/blog/building-a-lightweight-analytics-engine"];
+  const pages = [
+    "/",
+    "/blog",
+    "/projects",
+    "/about",
+    "/blog/building-a-lightweight-analytics-engine",
+  ];
   const page = pages[Math.floor(Math.random() * pages.length)];
 
   allEvents.push({
@@ -674,101 +860,133 @@ allEvents.sort(
   (a, b) => (a.cfOverride?.timestamp ?? 0) - (b.cfOverride?.timestamp ?? 0),
 );
 
-// Slice to EXACTLY the target number of events
 const finalEvents = allEvents;
 console.log(
-  `✨ Generated exactly ${finalEvents.length} events from ${generatedVisitorCount} unique simulated visitors.`,
+  `✨ Generated ${finalEvents.length} events (incl. ~5% bot traffic) from ${generatedVisitorCount} simulated visitors.`,
 );
 console.log(
   `Timeline spans from: ${new Date(finalEvents[0].cfOverride?.timestamp ?? 0).toLocaleString()} to ${new Date(finalEvents[finalEvents.length - 1].cfOverride?.timestamp ?? 0).toLocaleString()}\n`,
 );
 
-// 2. Perform HTTP ingestion requests to backend worker with concurrency limit
-const CONCURRENCY_LIMIT = 80;
+// Build the Tinybird row exactly as the worker does (UA -> browser/os/device,
+// bot detection), attaching real revenue to payments (the worker always sends 0).
+function toRow(p: DevEventPayload): AnalyticsEventRow {
+  const cf = p.cfOverride!;
+  const { browser, os, device } = parseUA(cf.userAgent);
+  const { is_bot, bot_category, bot_name } = detectBot(cf.userAgent);
+  const extra = (p.extraData ?? {}) as Record<string, string>;
 
-async function seedIngestion() {
-  console.log(
-    `📥 Sending events in batches of ${CONCURRENCY_LIMIT} to ${TARGET_URL}...`,
-  );
-  let successCount = 0;
-  let failureCount = 0;
-
-  const progressStep = Math.max(1, Math.floor(TOTAL_EVENTS_TARGET / 10));
-
-  const tasks = finalEvents.map((event, idx) => {
-    return async () => {
-      const userAgent = event.cfOverride?.userAgent ?? "";
-
-      try {
-        const res = await fetch(TARGET_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain",
-            "User-Agent": userAgent,
-            Origin: `https://${DOMAIN}`,
-          },
-          body: JSON.stringify(event),
-        });
-
-        if (res.status === 200) {
-          successCount++;
-        } else {
-          failureCount++;
-          const text = await res.text();
-          console.warn(
-            `[Idx ${idx}] Ingestion failed with status ${res.status}: ${text.slice(0, 100)}`,
-          );
-        }
-      } catch (err: any) {
-        failureCount++;
-        if (err.code === "ECONNREFUSED") {
-          console.error(
-            `🔴 Critical Error: Local worker is not running! Run "pnpm --filter analytics-backend dev" first.`,
-          );
-          process.exit(1);
-        } else {
-          console.warn(`[Idx ${idx}] Network error: ${err.message}`);
-        }
-      }
-
-      // Log progress dynamically (e.g. every 10% of total target)
-      const totalSent = successCount + failureCount;
-      if (totalSent % progressStep === 0) {
-        console.log(
-          `Progress: ${totalSent}/${TOTAL_EVENTS_TARGET} sent (${successCount} successful, ${failureCount} failed)`,
-        );
-      }
-    };
-  });
-
-  const start = Date.now();
-  await runWithConcurrencyLimit(tasks, CONCURRENCY_LIMIT);
-  const duration = ((Date.now() - start) / 1000).toFixed(1);
-
-  console.log(`\n🎉 Seeding Completed in ${duration}s!`);
-  console.log(`   ✅ Successful Ingestions: ${successCount}`);
-  console.log(`   ❌ Failed Ingestions: ${failureCount}`);
+  return {
+    website_id: p.websiteId,
+    type: p.type,
+    domain: p.domain || "unknown",
+    href: p.href,
+    referrer: p.referrer || "",
+    visitor_id: p.visitorId,
+    session_id: p.sessionId,
+    language: p.language,
+    timezone: p.timezone,
+    event_name: extra.eventName || p.type,
+    extra_data: JSON.stringify(extra).slice(0, 4000),
+    country: cf.country,
+    region: cf.region,
+    city: cf.city,
+    browser,
+    os,
+    device,
+    is_bot,
+    bot_category,
+    bot_name,
+    ip: cf.ip,
+    viewport_w: p.viewport.width,
+    viewport_h: p.viewport.height,
+    screen_w: p.screenWidth,
+    screen_h: p.screenHeight,
+    session_number: p.visitorSessionNumber,
+    revenue_cents: p.type === "payment" ? Number(extra.amount_cents ?? 0) : 0,
+    timestamp: cf.timestamp,
+  };
 }
 
-async function runWithConcurrencyLimit(
-  tasks: (() => Promise<void>)[],
-  limit: number,
-) {
-  const active = new Set<Promise<void>>();
-  for (const task of tasks) {
-    const promise = task();
-    active.add(promise);
-    promise.finally(() => active.delete(promise));
-    if (active.size >= limit) {
-      await Promise.allSettled(active);
-      await new Promise((r) => setTimeout(r, 100));
+function findRepoRoot(start: string): string {
+  let dir = start;
+  while (dir !== dirname(dir)) {
+    if (existsSync(join(dir, "pnpm-workspace.yaml"))) return dir;
+    dir = dirname(dir);
+  }
+  return start;
+}
+
+function loadTinybirdCreds(): { host: string; token: string } {
+  if (process.env.TINYBIRD_HOST && process.env.TINYBIRD_TOKEN) {
+    return {
+      host: process.env.TINYBIRD_HOST,
+      token: process.env.TINYBIRD_TOKEN,
+    };
+  }
+  const tinyb = join(findRepoRoot(process.cwd()), "apps/admin/.tinyb");
+  if (existsSync(tinyb)) {
+    const parsed = JSON.parse(readFileSync(tinyb, "utf8"));
+    if (parsed.host && parsed.token) {
+      return { host: parsed.host, token: parsed.token };
     }
   }
-  await Promise.all(active);
+  throw new Error(
+    "Tinybird credentials not found. Set TINYBIRD_HOST + TINYBIRD_TOKEN, or provide apps/admin/.tinyb",
+  );
 }
 
-// Execute the HTTP seeding pipeline
-seedIngestion().catch((err) => {
-  console.error("Fatal execution error during seeding:", err);
+const BATCH_SIZE = 1000;
+
+async function seedTinybird() {
+  const { host, token } = loadTinybirdCreds();
+  const url = `${host}/v0/events?name=${ANALYTICS_TABLE}`;
+  const total = finalEvents.length;
+
+  console.log(`📥 Inserting ${total} rows into ${host} (${ANALYTICS_TABLE})...`);
+  let inserted = 0;
+  let quarantined = 0;
+  let failed = 0;
+
+  for (let i = 0; i < total; i += BATCH_SIZE) {
+    const batch = finalEvents.slice(i, i + BATCH_SIZE);
+    const body = batch.map((p) => JSON.stringify(toRow(p))).join("\n");
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/x-ndjson",
+      },
+      body,
+    });
+
+    if (res.ok) {
+      const result = (await res.json().catch(() => ({}))) as {
+        successful_rows?: number;
+        quarantined_rows?: number;
+      };
+      inserted += result.successful_rows ?? batch.length;
+      quarantined += result.quarantined_rows ?? 0;
+    } else {
+      failed += batch.length;
+      console.warn(
+        `Batch @${i} failed (${res.status}): ${(await res.text()).slice(0, 200)}`,
+      );
+    }
+
+    const done = Math.min(i + BATCH_SIZE, total);
+    if ((i / BATCH_SIZE) % 20 === 0 || done === total) {
+      console.log(`  ${done}/${total}`);
+    }
+  }
+
+  console.log(
+    `\n🎉 Done. ✅ ${inserted} inserted, ⚠️ ${quarantined} quarantined, ❌ ${failed} failed.`,
+  );
+}
+
+seedTinybird().catch((err) => {
+  console.error("Fatal error during seeding:", err);
   process.exit(1);
 });
