@@ -29,7 +29,12 @@ export const GET = wrapRoute<BotPagesResponse>(async (req: NextRequest) => {
   const { start, end } = periodToRange(params.period);
   const botName = escapeSQL(req.nextUrl.searchParams.get("bot") ?? "");
 
-  const res = await queryTinybird<{ name: string; category: string; cnt: number }>(`
+  const res = await queryTinybird<{
+    name: string;
+    category: string;
+    cnt: number;
+  }>(
+    `
     SELECT
       ${F.href} AS name,
       any(${F.botCategory}) AS category,
@@ -42,7 +47,9 @@ export const GET = wrapRoute<BotPagesResponse>(async (req: NextRequest) => {
     GROUP BY name
     ORDER BY cnt DESC
     LIMIT 100
-  `);
+  `,
+    "bots.pages",
+  );
 
   // Collapse hrefs to path+search and re-aggregate (same path, different origin).
   const byPath = new Map<string, number>();

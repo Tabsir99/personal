@@ -115,6 +115,7 @@ export const GET = wrapRoute<MainResponse>(async (req: NextRequest) => {
 
   const res = await queryTinybird<MainRow>(
     buildSql(params.websiteId, start, prev.start, end, bucketMs),
+    "main",
   );
 
   const current = toMetrics(

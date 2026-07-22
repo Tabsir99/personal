@@ -1,7 +1,12 @@
 import { NextRequest } from "next/server";
 import { wrapRoute } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
-import { queryTinybird, parseAnalyticsParams, periodToRange, F } from "@/lib/tinybird";
+import {
+  queryTinybird,
+  parseAnalyticsParams,
+  periodToRange,
+  F,
+} from "@/lib/tinybird";
 import type { EventsResponse } from "@/lib/analyticsTypes";
 
 export const GET = wrapRoute<EventsResponse>(async (req: NextRequest) => {
@@ -10,7 +15,8 @@ export const GET = wrapRoute<EventsResponse>(async (req: NextRequest) => {
   const { start, end } = periodToRange(params.period);
 
   const [eventsRes, totalRes] = await Promise.all([
-    queryTinybird<{ name: string; uv: number; total: number }>(`
+    queryTinybird<{ name: string; uv: number; total: number }>(
+      `
       SELECT ${F.eventName} as name, COUNT(DISTINCT ${F.visitorId}) as uv, COUNT() as total
       FROM ${F.engine}
       WHERE ${F.websiteId} = '${params.websiteId}'
@@ -20,15 +26,20 @@ export const GET = wrapRoute<EventsResponse>(async (req: NextRequest) => {
       GROUP BY name
       ORDER BY total DESC
       LIMIT 30
-    `),
-    queryTinybird<{ visitors: number }>(`
+    `,
+      "events.goals",
+    ),
+    queryTinybird<{ visitors: number }>(
+      `
       SELECT COUNT(DISTINCT ${F.visitorId}) as visitors
       FROM ${F.engine}
       WHERE ${F.websiteId} = '${params.websiteId}'
         AND ${F.type} = 'pageview'
         AND ${F.isBot} = 0
         AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
-    `),
+    `,
+      "events.visitors",
+    ),
   ]);
 
   const totalVisitors = Number(totalRes.data[0]?.visitors ?? 0);

@@ -30,7 +30,8 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
 
   const visitorRev = visitorRevenueSubquery(params.websiteId, start, end);
 
-  const res = await queryTinybird<PagesRow>(`
+  const res = await queryTinybird<PagesRow>(
+    `
     (
       SELECT 'pages' as level, name,
         uniqExact(vid) as uv, SUM(cnt) as pageviews, 0 as exits,
@@ -86,7 +87,9 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
       FROM ${F.engine} WHERE ${exitWhere}
       GROUP BY name ORDER BY uv DESC LIMIT 30
     )
-  `);
+  `,
+    "pages",
+  );
 
   const { pages, entryPages, hostnames, exitLinks } = partitionByLevel(
     res.data,

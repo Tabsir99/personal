@@ -24,8 +24,9 @@ export const GET = wrapRoute<SystemResponse>(async (req: NextRequest) => {
     .top(20)
     .build();
 
-  const res =
-    await queryTinybird<UvBreakdownRow<"browsers" | "os" | "devices">>(sql);
+  const res = await queryTinybird<
+    UvBreakdownRow<"browsers" | "os" | "devices">
+  >(sql, "system");
 
   const { browsers, os, devices } = partitionByLevel(res.data);
 

@@ -38,7 +38,8 @@ export const GET = wrapRoute<BotsResponse>(async (req: NextRequest) => {
 
   // One query: per-bucket-per-category series rows + per-bot totals, tagged by
   // `level` so JS can split them (mirrors the partitionByLevel pattern).
-  const res = await queryTinybird<Row>(`
+  const res = await queryTinybird<Row>(
+    `
     (
       SELECT
         'series' AS level,
@@ -64,7 +65,9 @@ export const GET = wrapRoute<BotsResponse>(async (req: NextRequest) => {
       ORDER BY cnt DESC
       LIMIT 100
     )
-  `);
+  `,
+    "bots",
+  );
 
   const seriesRows = res.data.filter((r) => r.level === "series");
 

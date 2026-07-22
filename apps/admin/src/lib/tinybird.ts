@@ -6,6 +6,12 @@ import {
   ANALYTICS_TABLE,
   type AnalyticsEventRow,
 } from "@tabsircg/analytics-contract";
+import {
+  logQuery,
+  logQueryError,
+  logIndexPlan,
+  type QueryStats,
+} from "./queryLog";
 
 const TB_HOST = env.TINYBIRD_HOST;
 const TB_TOKEN = env.TINYBIRD_TOKEN;
@@ -21,27 +27,62 @@ export interface TinybirdQueryResult<
   data: T[];
   meta: { name: string; type: string }[];
   rows: number;
-  rows_before_limit_at_least: number;
+  statistics?: QueryStats;
 }
 
+/**
+ * Run a query against Tinybird. `label` names it in the diagnostic log line
+ * (see queryLog). Every call logs its wall/server time and scanned rows/bytes
+ * server-side, in every environment — none of that reaches the client, which
+ * only ever sees whatever the route handler returns.
+ */
 export async function queryTinybird<T = Record<string, string | number | null>>(
   sql: string,
+  label = "query",
 ): Promise<TinybirdQueryResult<T>> {
+  const startedAt = performance.now();
   const res = await fetch(`${TB_HOST}/v0/sql`, {
     method: "POST",
     headers: { Authorization: `Bearer ${TB_TOKEN}` },
     body: `${sql} FORMAT JSON`,
     cache: "no-cache",
   });
+  const wallMs = performance.now() - startedAt;
 
   if (!res.ok) {
     const text = await res.text();
-    console.error("Tinybird query failed:", text);
+    logQueryError(label, wallMs, res.status, text);
     throw new Error(`Analytics query failed (${res.status}): ${text}`);
   }
 
-  const json = await res.json();
+  const json = (await res.json()) as TinybirdQueryResult<T>;
+  logQuery(label, wallMs, json.statistics, json.rows);
+  if (process.env.TINYBIRD_EXPLAIN === "1") await explainIndexes(sql, label);
   return json;
+}
+
+/**
+ * Opt-in (TINYBIRD_EXPLAIN=1) `EXPLAIN indexes = 1` pass that logs the literal
+ * index/part/granule plan. Off by default so production never pays the extra
+ * round-trip; use it in dev/test to confirm the primary key is being used.
+ */
+async function explainIndexes(sql: string, label: string): Promise<void> {
+  try {
+    const res = await fetch(`${TB_HOST}/v0/sql`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${TB_TOKEN}` },
+      body: `EXPLAIN indexes = 1 ${sql} FORMAT JSON`,
+      cache: "no-cache",
+    });
+    if (!res.ok) return;
+    const json = (await res.json()) as { data: { explain: string }[] };
+    logIndexPlan(
+      label,
+      json.data.map((r) => r.explain),
+    );
+  } catch {
+    // Diagnostics must never break the request they're describing.
+  }
 }
 
 export async function writePaymentEvent(row: {
