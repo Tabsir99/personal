@@ -6,6 +6,7 @@ import { UIMotion } from "premium-ds/motion-tokens";
 import { motion } from "motion/react";
 import { METRIC_IDS, MetricId, MetricToggle, METRICS } from "./MetricToggle";
 import { useReveal } from "./reveal";
+import { cn } from "@/lib/utils";
 
 export interface RankedItem {
   name: string;
@@ -14,7 +15,12 @@ export interface RankedItem {
 }
 
 export type PanelTab =
-  | { value: string; label: string; items: RankedItem[] }
+  | {
+      value: string;
+      label: string;
+      items: RankedItem[];
+      headerControl?: React.ReactNode;
+    }
   | {
       value: string;
       label: string;
@@ -36,12 +42,15 @@ export function DataPanel({ tabs }: { tabs: PanelTab[] }) {
   const isList = (t: PanelTab | undefined) => "items" in t;
   const childMorphs = isList(activeTab) && isList(tabs[activeIdx - dir]);
 
+  const activeControl =
+    "items" in activeTab ? activeTab.headerControl : undefined;
+
   return (
     <div
       ref={ref}
       className={`${enter} flex h-120 flex-col gap-2 overflow-hidden rounded-lg border border-foreground/6 bg-card`}
     >
-      <div className="flex shrink-0 items-center gap-2 border-b border-foreground/6 px-2 pt-2">
+      <div className="flex shrink-0 items-center gap-2 justify-between border-b border-foreground/6 px-2 pt-2">
         <Tabs
           label="Data view"
           items={tabs.map((t) => ({ value: t.value, label: t.label }))}
@@ -50,9 +59,15 @@ export function DataPanel({ tabs }: { tabs: PanelTab[] }) {
             setTab(v);
             setDir(d);
           }}
-          className="min-w-0 flex-1"
         />
-        <div className={"items" in activeTab ? "" : "invisible"}>
+
+        <div
+          className={cn(
+            "items" in activeTab ? "" : "invisible",
+            "flex items-center -mt-2",
+          )}
+        >
+          {activeControl}
           <MetricToggle active={sortKey} setActive={setSortKey} />
         </div>
       </div>
@@ -111,6 +126,7 @@ function RankedList({
       w[id] = (it.values[id] / maxByMetric[id]) * scale;
     return w;
   });
+  // eslint-disable-next-line react-hooks/refs
   morphRef.current = widths;
 
   const pct = (f: number) =>
@@ -156,7 +172,7 @@ function RankedList({
           </div>
           <div className="relative flex min-w-0 flex-1 items-center gap-2">
             {item.icon && <span className="shrink-0">{item.icon}</span>}
-            <span className="truncate text-sm text-foreground">
+            <span className="truncate text-sm text-foreground font-medium">
               {item.name}
             </span>
           </div>

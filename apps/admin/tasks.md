@@ -2,72 +2,73 @@
 
 ## Done
 
-- [x] Architecture decisions finalized (live AE queries, no new worker, no webhooks)
-- [x] `src/lib/analyticsEngine.ts` — AE SQL client, period parsing, input validation
-- [x] `src/config/env.server.ts` — CF_ACCOUNT_ID + CF_API_TOKEN added
-- [x] API: `/api/analytics/main` — overview metrics + previous period + timeseries
-- [x] API: `/api/analytics/pages` — top pages + entry pages
-- [x] API: `/api/analytics/sources` — referrers with channel classification
-- [x] API: `/api/analytics/locations` — country/region/city drill-down
-- [x] API: `/api/analytics/system` — browser/OS/device from UA
-- [x] API: `/api/analytics/events` — custom events + conversion rates
-- [x] API: `/api/analytics/realtime` — active visitors (10-min window)
-- [x] API: `/api/analytics/hostnames` — per-domain breakdown
-- [x] API: `/api/analytics/exit-links` — outbound link clicks
-
-## In Progress
-
-- [ ] Dashboard UI (Phase 2)
+- [x] Analytics stack — tracker SDK + Cloudflare worker + Tinybird `analytics_events` datasource
+- [x] `@tabsircg/analytics-contract` — shared column single-source-of-truth
+- [x] `src/lib/tinybird.ts` — query client (`F`), period/granularity parsing, param validation
+- [x] API routes (all on Tinybird): main, sources, pages, locations, system, events, realtime, bots, bots/pages
+- [x] Stripe webhook → Tinybird revenue ingest (`type='payment'`, dedup by event id)
+- [x] Stripe restricted key per website (dialog + store)
+- [x] Dashboard UI — overview, timeseries, breakdown panels, bot detection card, reveal animations
 
 ## Remaining
 
-### Phase 2: Dashboard UI
+### Revenue wiring (ingested, not yet queried)
 
-- [ ] Period selector + domain selector controls
-- [ ] Overview metric cards (visitors, pageviews, sessions, bounce rate, duration, realtime)
-- [ ] Timeseries area chart (recharts)
-- [ ] Breakdown tables: sources (channel/referrer tabs)
-- [ ] Breakdown tables: locations (country/region/city tabs)
-- [ ] Breakdown tables: pages (hostname/page/entry page/exit link tabs)
-- [ ] Breakdown tables: system (browser/OS/device tabs)
-- [ ] Custom events section
-- [ ] SWR hooks for data fetching
+- [x] Revenue in sources (referrers + channels)
+- [x] Revenue in pages (entry pages, top pages, hostnames)
+- [x] Revenue in locations (country / region / city)
+- [x] Revenue in system (browser / OS / device)
+- [ ] Revenue total + trend in overview (main route — deferred)
+- [x] Exclude exit links from revenue attribution
 
-### Phase 3: Missing Endpoints
+### Visitor split (new vs returning)
 
-- [ ] UTM parsing in sources route (params already in `F.href`)
-- [ ] `/api/analytics/crawlers` — categorize known bot UAs (Googlebot → search_index, GPTBot → training, ChatGPT-User → answer_fetch, ClaudeBot → ai_crawler)
-- [ ] Rename events route types from "Goal" to "Event" (it's a raw event breakdown, not configured goals)
+- [x] `new_visitors` / `returning_visitors` split — scoped to acquisition surfaces (sources referrers/channels + entry pages); other breakdowns return a single `uv`
+- [x] Shared query builder + sidecars (`src/lib/analyticsQuery.ts`)
+- [ ] Wire new/returning + revenue into breakdown panels (UI — deferred with main chart)
+- [ ] New/returning in overview + main chart (focused session)
 
-### Phase 4: Stripe Revenue
+### Campaigns (UTM)
 
-- [ ] Store restricted Stripe key per website (settings UI + Firestore config)
-- [ ] Revenue query endpoint — reads Stripe API, correlates via `cgd_visitor_id` metadata
-- [ ] Revenue cards in overview (revenue, conversion rate, revenue/visitor)
-- [ ] Revenue attribution in breakdown tables
+- [ ] Capture UTM params (source / medium / campaign / term / content)
+- [ ] Campaign breakdown — visitors + revenue per campaign
 
-### Phase 5: Funnels / Goals
+### Goals
 
-- [ ] Goal configuration CRUD (which events are goals, optional revenue value, target threshold)
-- [ ] Funnel definition CRUD (stored in Firestore)
-- [ ] Funnel computation endpoint (sequential step matching from AE data)
-- [ ] Funnel builder UI + results visualization
+- [ ] Rename events route types Goal → Event (raw breakdown, not configured goals)
+- [ ] Goal configuration — which events count as goals
+- [ ] Goal metrics — visitors completed, conversion rate, revenue
 
-### Phase 6: Materialized Views (D1)
+### Funnels
 
-- [ ] Historical retention — daily rollups for data beyond 90-day AE window
-- [ ] Pre-computed session duration / bounce rate at scale
+- [ ] Funnel definition CRUD — ordered steps
+- [ ] Funnel computation — per-step visitors, drop-off, conversion
+- [ ] Funnel builder + preview UI
 
-### Phase 7: Advanced
+### User journeys
 
-- [ ] User journey (Sankey visualization)
-- [ ] Conversion metrics (visits-to-conversion, time-to-conversion)
-- [ ] Google Search Console integration
+- [ ] Per-visitor timeline — entry, pageviews, events, payment, duration
+- [ ] Paying-visitor journeys (no signup / identify required)
+- [ ] Identified-user drill-down
+
+### Rollups / pre-aggregation (low priority)
+
+- [ ] Hourly rollup datasource (MV-fed from raw events)
+- [ ] Daily rollup datasource
+- [ ] Serve breakdowns from rollups; derive weekly/monthly by aggregating
+
+### Open decisions
+
+- [ ] Visitor-keyed storage for journeys — second datasource / MV vs. skip index on existing table
+- [ ] Cross-device identity stitching (email → multiple visitor IDs)
+- [ ] Keyword tab (low priority) — organic search queries via Google Search Console. Placeholder in the Sources panel for now; paid keywords are already available as `utm_term` under the Campaign dropdown.
 
 ## Notes
 
-- 17 AE queries total when all current routes called simultaneously
-- AE SQL API: `POST accounts/{id}/analytics_engine/sql` — reads only, writes via Worker
-- Stripe: restricted key (`rk_`), query on-demand, correlate via `metadata.cgd_visitor_id`
-- Funnels: backend-only computation, no client SDK changes needed
-- Env needed: `CF_ACCOUNT_ID`, `CF_API_TOKEN` (Account Analytics: Read scope)
+- Every analytics route = 1 Tinybird query (main/events = 2); revenue wiring must not add queries.
+- Revenue lives on `type='payment'` rows (visitor_id + optional session_id, no dimensions); attribute by joining to the visitor's pageviews.
+- Datasource sort key: `website_id, is_bot, type, timestamp`.
+- Breakdown default views use one `GROUPING SETS` scan (locations/system/sources); locations drill-down (`?country=`) scopes to that country and returns only its sub-levels. Pages stays 4 branches (heterogeneous grains + exit links use `type='external_link'`).
+- Dimension revenue is "influence": a visitor's revenue attaches to each dimension value they touched, so a column can slightly exceed total revenue; `uv` stays exact. Needs a live Tinybird run to validate the `GROUPING SETS` SQL.
+- New/returning split is scoped to the acquisition surfaces only: **sources** (referrers + channels) and **entry pages**. Every other breakdown (system, locations, top pages, hostnames, exit links) returns a single `uv`. Rationale: new-vs-returning is an acquisition signal (which channel / landing page brings first-timers); on environment dimensions like browser/OS/geo it's noise.
+- Where the split is kept, classification is once per visitor (`MIN(session_number)` in range; `=1` new, `>1` returning) so `newVisitors + returningVisitors === uv`. Derived from a window `MIN(session_number)` over the already-scanned dimension rows (no extra raw scan) via `buildGroupingSetsBreakdown({ classSplit: true })`. Entry pages are session-grained, so their split is visit-level (entry session's `session_number`). Pages route unions split + uv branches under one column set and maps each partition to its metric shape.

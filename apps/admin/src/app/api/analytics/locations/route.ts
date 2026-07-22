@@ -9,6 +9,7 @@ import {
   escapeSQL,
   F,
 } from "@/lib/tinybird";
+import { breakdown, type UvBreakdownRow } from "@/lib/analyticsQuery";
 import type { LocationsResponse } from "@/lib/analyticsTypes";
 
 export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
@@ -19,46 +20,24 @@ export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
   const countryFilter = req.nextUrl.searchParams.get("country")
     ? escapeSQL(req.nextUrl.searchParams.get("country")!)
     : null;
-  const regionFilter = req.nextUrl.searchParams.get("region")
-    ? escapeSQL(req.nextUrl.searchParams.get("region")!)
-    : null;
 
-  const baseWhere = `
-    ${F.websiteId} = '${params.websiteId}'
-    AND ${F.type} = 'pageview'
-    AND ${F.isBot} = 0
-    AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
-  `;
+  const chain = breakdown(params.websiteId, start, end)
+    .level("countries", "country", F.country)
+    .level("regions", "region", F.region)
+    .level("cities", "city", F.city)
+    .revenue()
+    .column(`any(country) as country`)
+    .top(30);
 
-  const regionWhere = `${baseWhere}${countryFilter ? ` AND ${F.country} = '${countryFilter}'` : ""}`;
-  const cityWhere = `${regionWhere}${regionFilter ? ` AND ${F.region} = '${regionFilter}'` : ""}`;
+  if (countryFilter) chain.filter(`${F.country} = '${countryFilter}'`);
 
-  const res = await queryTinybird<{
-    level: "countries" | "regions" | "cities";
-    name: string;
-    uv: number;
-    country: string | null;
-  }>(`
-    (
-      SELECT 'countries' as level, ${F.country} as name, COUNT(DISTINCT ${F.visitorId}) as uv, ${F.country} as country
-      FROM ${F.engine} WHERE ${baseWhere}
-      GROUP BY name ORDER BY uv DESC LIMIT 30
-    )
-    UNION ALL
-    (
-      SELECT 'regions' as level, ${F.region} as name, COUNT(DISTINCT ${F.visitorId}) as uv, any(${F.country}) as country
-      FROM ${F.engine} WHERE ${regionWhere}
-      GROUP BY name ORDER BY uv DESC LIMIT 30
-    )
-    UNION ALL
-    (
-      SELECT 'cities' as level, ${F.city} as name, COUNT(DISTINCT ${F.visitorId}) as uv, any(${F.country}) as country
-      FROM ${F.engine} WHERE ${cityWhere}
-      GROUP BY name ORDER BY uv DESC LIMIT 30
-    )
-  `);
+  const sql = chain.build();
 
-  const { countries = [], regions = [], cities = [] } = partitionByLevel(res.data);
+  const res = await queryTinybird<
+    UvBreakdownRow<"countries" | "regions" | "cities"> & { country: string }
+  >(sql);
+
+  const { countries, regions, cities } = partitionByLevel(res.data);
 
   return { countries, regions, cities };
 });

@@ -3,6 +3,13 @@
 @import "tw-animate-css";
 @import "@open-notion/editor/styles";
 
+/* Selected Select rows (and any DS use of --text-accent) should use our brand
+   accent, not premium-ds's teal default. --color-primary is a @theme token, so
+   fall back to the raw --accent it maps to and this resolves for plain DS CSS. */
+:root {
+  --text-accent: var(--color-primary, var(--accent));
+}
+
 @layer base {
   body {
     @apply bg-background text-foreground;
@@ -25,7 +32,7 @@
 
 @layer utilities {
   /* Fix conflict between Tailwind's visibility: collapse and premium-ds Collapse component */
-  .collapse[data-open='true'] {
+  .collapse[data-open="true"] {
     visibility: inherit;
   }
 }
@@ -73,8 +80,6 @@
   --color-border: var(--border-default);
   --color-input: var(--border-subtle);
 
-
-
   /* Radius scale */
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
@@ -96,7 +101,9 @@
   --shadow-card-rest: var(--shadow-sm);
   --shadow-card-hover: var(--shadow-md);
   --shadow-dialog: var(--shadow-xl);
-  --shadow-kbd-rest: inset 0 -1px 0 0 rgb(var(--shadow-rgb) / 0.04), 0 1px 0 0 rgb(var(--shadow-rgb) / 0.02);
+  --shadow-kbd-rest:
+    inset 0 -1px 0 0 rgb(var(--shadow-rgb) / 0.04),
+    0 1px 0 0 rgb(var(--shadow-rgb) / 0.02);
   --shadow-kbd-press: inset 0 1px 0 0 rgb(var(--shadow-rgb) / 0.06);
   --shadow-focus-ring: var(--focus-ring);
 

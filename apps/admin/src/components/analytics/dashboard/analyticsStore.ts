@@ -5,10 +5,12 @@ import type {
   SourceMetric,
   ChannelMetric,
   PageMetric,
+  EntryPageMetric,
   LocationMetric,
   SystemMetric,
   ExitLinkMetric,
   HostnameMetric,
+  CampaignsResponse,
   Period,
   Granularity,
   BotsResponse,
@@ -25,11 +27,12 @@ interface MainData {
 interface SourcesData {
   referrers: SourceMetric[];
   channels: ChannelMetric[];
+  campaigns: CampaignsResponse;
 }
 
 interface PagesData {
   pages: PageMetric[];
-  entryPages: PageMetric[];
+  entryPages: EntryPageMetric[];
   hostnames: HostnameMetric[];
   exitLinks: ExitLinkMetric[];
 }

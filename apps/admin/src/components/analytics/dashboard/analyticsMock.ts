@@ -2,7 +2,9 @@ import type {
   OverviewMetrics,
   TimeseriesPoint,
   SourceMetric,
+  ChannelMetric,
   PageMetric,
+  EntryPageMetric,
   LocationMetric,
   SystemMetric,
   ExitLinkMetric,
@@ -14,6 +16,7 @@ import type {
   BotTimeseriesPoint,
   BotPageMetric,
 } from "@/lib/analyticsTypes";
+import { rollupCampaigns } from "@/lib/analyticsTypes";
 
 interface GoalMetric {
   name: string;
@@ -107,40 +110,104 @@ export async function mockFetchEndpoint<T>(
   }
 
   if (path === "sources") {
+    const campaigns = rollupCampaigns({
+      utm_source: [
+        { name: "newsletter", uv: 11514, revenue: 4200 },
+        { name: "google", uv: 5175, revenue: 3100 },
+        { name: "twitter", uv: 4362, revenue: 2600 },
+        { name: "reddit", uv: 2062, revenue: 900 },
+        { name: "producthunt", uv: 1712, revenue: 1200 },
+      ],
+      utm_medium: [
+        { name: "email", uv: 11514, revenue: 4200 },
+        { name: "cpc", uv: 7237, revenue: 4000 },
+        { name: "paid_social", uv: 4362, revenue: 2600 },
+      ],
+      utm_campaign: [
+        { name: "weekly_digest", uv: 11514, revenue: 4200 },
+        { name: "blog_promo", uv: 5175, revenue: 3100 },
+        { name: "launch_2026", uv: 4362, revenue: 2600 },
+        { name: "devtools", uv: 2062, revenue: 900 },
+      ],
+      utm_content: [
+        { name: "hero_cta", uv: 3210, revenue: 1800 },
+        { name: "sidebar", uv: 1940, revenue: 700 },
+        { name: "footer_link", uv: 880, revenue: 300 },
+      ],
+      utm_term: [
+        { name: "self hosted analytics", uv: 2610, revenue: 1400 },
+        { name: "privacy analytics", uv: 1720, revenue: 800 },
+        { name: "plausible alternative", uv: 1130, revenue: 600 },
+      ],
+      ref: [
+        { name: "producthunt", uv: 3391, revenue: 2100 },
+        { name: "indiehackers", uv: 2313, revenue: 900 },
+      ],
+    });
     const referrers: SourceMetric[] = [
       {
         name: "https://www.google.com/",
-        uv: 12000,
+        newVisitors: 9000,
+        returningVisitors: 3000,
         channel: "Search",
         revenue: 2400,
       },
       {
         name: "Direct / None",
-        uv: 8500,
+        newVisitors: 2500,
+        returningVisitors: 6000,
         channel: "Direct / None",
         revenue: 5200,
       },
       {
         name: "https://github.com/",
-        uv: 4100,
+        newVisitors: 3200,
+        returningVisitors: 900,
         channel: "Referral",
         revenue: 900,
       },
-      { name: "https://t.co/", uv: 3200, channel: "Social", revenue: 3100 },
+      {
+        name: "https://t.co/",
+        newVisitors: 2600,
+        returningVisitors: 600,
+        channel: "Social",
+        revenue: 3100,
+      },
       {
         name: "https://www.linkedin.com/",
-        uv: 1500,
+        newVisitors: 1100,
+        returningVisitors: 400,
         channel: "Social",
         revenue: 400,
       },
     ];
-    const channels = [
-      { name: "Search", uv: 12000 },
-      { name: "Direct / None", uv: 8500 },
-      { name: "Social", uv: 4700 },
-      { name: "Referral", uv: 4100 },
+    const channels: ChannelMetric[] = [
+      {
+        name: "Search",
+        newVisitors: 9000,
+        returningVisitors: 3000,
+        revenue: 2400,
+      },
+      {
+        name: "Direct / None",
+        newVisitors: 2500,
+        returningVisitors: 6000,
+        revenue: 5200,
+      },
+      {
+        name: "Social",
+        newVisitors: 3700,
+        returningVisitors: 1000,
+        revenue: 3500,
+      },
+      {
+        name: "Referral",
+        newVisitors: 3200,
+        returningVisitors: 900,
+        revenue: 900,
+      },
     ];
-    return { referrers, channels } as unknown as T;
+    return { referrers, channels, campaigns } as unknown as T;
   }
 
   if (path === "pages") {
@@ -176,23 +243,12 @@ export async function mockFetchEndpoint<T>(
         revenue: 5400,
       },
     ];
-    const entryPages: PageMetric[] = [
-      {
-        name: "https://tabsircg.com/",
-        uv: 12000,
-        pageviews: 12000,
-        revenue: 2600,
-      },
-      {
-        name: "https://tabsircg.com/about",
-        uv: 4100,
-        pageviews: 4100,
-        revenue: 3400,
-      },
+    const entryPages: EntryPageMetric[] = [
+      { name: "https://tabsircg.com/", uv: 12000, revenue: 2600 },
+      { name: "https://tabsircg.com/about", uv: 4100, revenue: 3400 },
       {
         name: "https://tabsircg.com/blog/my-first-post",
         uv: 2500,
-        pageviews: 2500,
         revenue: 800,
       },
     ];

@@ -9,7 +9,12 @@ import {
   granularityToMs,
   F,
 } from "@/lib/tinybird";
-import type { OverviewMetrics, TimeseriesPoint, MainResponse } from "@/lib/analyticsTypes";
+import { eventWhere } from "@/lib/analyticsQuery";
+import type {
+  OverviewMetrics,
+  TimeseriesPoint,
+  MainResponse,
+} from "@/lib/analyticsTypes";
 
 interface PeriodRow {
   period: "current" | "previous";
@@ -50,11 +55,7 @@ async function fetchOverviewComparison(
         COUNT() as pvs,
         MAX(${F.timestamp}) - MIN(${F.timestamp}) as duration
       FROM ${F.engine}
-      WHERE ${F.websiteId} = '${websiteId}'
-        AND ${F.type} = 'pageview'
-        AND ${F.isBot} = 0
-        AND ${F.timestamp} >= ${prevStart}
-        AND ${F.timestamp} < ${end}
+      WHERE ${eventWhere("pageview", websiteId, prevStart, end)}
       GROUP BY sid, period
     )
     SELECT
@@ -97,11 +98,7 @@ async function fetchTimeseries(
       COUNT() as pageviews,
       COUNT(DISTINCT ${F.sessionId}) as sessions
     FROM ${F.engine}
-    WHERE ${F.websiteId} = '${websiteId}'
-      AND ${F.type} = 'pageview'
-      AND ${F.isBot} = 0
-      AND ${F.timestamp} >= ${start}
-      AND ${F.timestamp} < ${end}
+    WHERE ${eventWhere("pageview", websiteId, start, end)}
     GROUP BY bucket
     ORDER BY bucket
   `);

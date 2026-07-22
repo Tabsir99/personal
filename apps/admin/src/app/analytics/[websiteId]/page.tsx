@@ -98,7 +98,7 @@ export default function WebsiteDetailPage() {
 
   return (
     <div className="mx-auto max-w-6xl animate-in duration-300 ease-out fade-in">
-      <header className="flex flex-col gap-4 pb-6 sm:flex-row sm:items-center sm:justify-between">
+      <header className="flex flex-col gap-6 pb-6 sm:flex-row sm:items-center">
         <div className="flex min-w-0 items-center gap-3 h-12">
           <Button
             variant="ghost"
@@ -130,22 +130,21 @@ export default function WebsiteDetailPage() {
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <div className="w-[150px]">
-            <Select
-              value={period}
-              onChange={(v) => setPeriod(v as Period)}
-              options={PERIOD_OPTIONS}
-              ariaLabel="Time period"
-            />
-          </div>
-          <div className="w-[110px]">
-            <Select
-              value={granularity}
-              onChange={(v) => setGranularity(v as Granularity)}
-              options={GRANULARITY_OPTIONS}
-              ariaLabel="Granularity"
-            />
-          </div>
+          <Select
+            value={period}
+            onChange={(v) => setPeriod(v as Period)}
+            options={PERIOD_OPTIONS}
+            ariaLabel="Time period"
+            triggerProps={{ variant: "secondary" }}
+          />
+
+          <Select
+            value={granularity}
+            onChange={(v) => setGranularity(v as Granularity)}
+            options={GRANULARITY_OPTIONS}
+            ariaLabel="Granularity"
+            triggerProps={{ variant: "secondary" }}
+          />
           <Button
             variant="ghost"
             size="icon"

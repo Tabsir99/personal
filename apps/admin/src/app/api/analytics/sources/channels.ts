@@ -1,4 +1,34 @@
+// Order matters: patterns are matched top-down, first hit wins. Channels whose
+// domains embed a generic search-engine token (Email's mail.google/mail.yahoo,
+// AI's gemini.google) MUST precede Search, or Search's "google"/"yahoo" steals
+// them.
 const CHANNELS = [
+  {
+    name: "Email",
+    patterns: [
+      "mail.google",
+      "outlook.live",
+      "outlook.office",
+      "mail.yahoo",
+      "protonmail",
+      "proton.me",
+      "mail.zoho",
+    ],
+  },
+  {
+    name: "AI",
+    patterns: [
+      "chatgpt",
+      "chat.openai",
+      "perplexity",
+      "claude.ai",
+      "gemini.google",
+      "copilot.microsoft",
+      "poe.com",
+      "you.com",
+      "phind.com",
+    ],
+  },
   {
     name: "Search",
     patterns: [
@@ -43,20 +73,6 @@ const CHANNELS = [
     patterns: ["youtube", "vimeo", "twitch", "dailymotion", "rumble"],
   },
   {
-    name: "AI",
-    patterns: [
-      "chatgpt",
-      "chat.openai",
-      "perplexity",
-      "claude.ai",
-      "gemini.google",
-      "copilot.microsoft",
-      "poe.com",
-      "you.com",
-      "phind.com",
-    ],
-  },
-  {
     name: "Messaging",
     patterns: [
       "whatsapp",
@@ -66,18 +82,6 @@ const CHANNELS = [
       "slack",
       "signal",
       "messenger.com",
-    ],
-  },
-  {
-    name: "Email",
-    patterns: [
-      "mail.google",
-      "outlook.live",
-      "outlook.office",
-      "mail.yahoo",
-      "protonmail",
-      "proton.me",
-      "mail.zoho",
     ],
   },
   {

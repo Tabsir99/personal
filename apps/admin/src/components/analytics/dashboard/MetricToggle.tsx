@@ -48,7 +48,6 @@ export function MetricToggle({
         )
       }
       iconRight={<ArrowsDownUp className="size-4" weight="bold" />}
-      className="-mt-2"
     >
       <span className="relative block h-4 overflow-hidden ">
         <AnimatePresence initial={false} mode="popLayout">

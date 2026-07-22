@@ -1,0 +1,38 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`breakdown() > stable shape (snapshot) 1`] = `
+"
+    SELECT multiIf(GROUPING(country) = 0, 'countries', GROUPING(region) = 0, 'regions', 'cities') as level, multiIf(GROUPING(country) = 0, any(country), GROUPING(region) = 0, any(region), any(city)) as name,
+      uniqExact(vid) as uv,
+      round(arraySum(x -> x.2, groupUniqArray((vid, ifNull(rev, 0)))) / 100) as revenue,
+      any(country) as country
+    FROM (
+      SELECT d.country as country, d.region as region, d.city as city, d.vid as vid, pr.rev as rev
+      FROM (
+        SELECT country as country, region as region, city as city, visitor_id as vid
+        FROM analytics_events
+        WHERE 
+    website_id = 'site'
+    AND is_bot = 0
+    AND type = 'pageview'
+    AND timestamp >= 0 AND timestamp < 100
+  
+        GROUP BY country, region, city, vid
+      ) d
+      LEFT JOIN (
+    SELECT visitor_id as vid, SUM(revenue_cents) as rev
+    FROM analytics_events
+    WHERE 
+    website_id = 'site'
+    AND is_bot = 0
+    AND type = 'payment'
+    AND timestamp >= 0 AND timestamp < 100
+  
+    GROUP BY vid
+  ) pr ON d.vid = pr.vid
+    )
+    GROUP BY GROUPING SETS ((country), (region), (city))
+    ORDER BY uv DESC
+    LIMIT 30 BY level
+  "
+`;
