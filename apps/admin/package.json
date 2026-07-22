@@ -4,9 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev:server": "NODE_OPTIONS=--max-old-space-size=2048 next dev --turbopack -H 0.0.0.0 -p 5000",
     "emulators": "firebase emulators:start --import=./emulator-data --export-on-exit=./emulator-data",
-    "dev": "pnpm run \"/^(dev:server|emulators)$/\"",
+    "dev": "NODE_OPTIONS=--max-old-space-size=2048 next dev --turbopack -H 0.0.0.0 -p 5000",
     "build": "next build",
     "start": "next start -p 5000",
     "lint": "eslint src",
@@ -14,8 +13,7 @@
     "test": "vitest run",
     "prebuild": "tsc --noEmit",
     "dev:clean": "rm -rf .next .vercel && pnpm dev",
-    "cil": "rm -rf node_modules pnpm-lock.yaml && pnpm install",
-    "typecheck": "tsc -b && rm -rf dist"
+    "cil": "rm -rf node_modules pnpm-lock.yaml && pnpm install"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.138",
@@ -28,6 +26,7 @@
     "@tabsircg/analytics-contract": "workspace:*",
     "@tabsircg/schemas": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
+    "chalk": "^5.6.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "catalog:",
     "cmdk": "^1.1.1",
