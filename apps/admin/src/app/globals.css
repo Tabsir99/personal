@@ -37,12 +37,6 @@
   }
 }
 
-.recharts-bar-rectangle path {
-  transition:
-    fill 100s ease,
-    fill-opacity 100s ease;
-}
-
 @theme inline {
   /* Wipe default colors, radii, and shadows so developers can only use our design tokens */
   --color-*: initial;

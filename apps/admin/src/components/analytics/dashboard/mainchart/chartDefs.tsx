@@ -28,7 +28,7 @@ export function chartDefs(targetOffset: number): ReactElement {
           style={{
             transform: `scaleX(${targetOffset})`,
             transformOrigin: "left",
-            transition: "transform 0.2s ease-out",
+            transition: "transform 0.4s ease-out",
           }}
         />
       </mask>

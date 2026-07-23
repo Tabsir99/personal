@@ -7,7 +7,7 @@ import { formatMetric } from "../chartFormat";
 export type Selection = ChartMetric | null;
 
 const REVEAL_DOT = { r: 4, stroke: CHART.surface, strokeWidth: 2 };
-const ANIM = { animationDuration: 700, animationEasing: "ease-out" } as const;
+const ANIM = { animationDuration: 1000, animationEasing: "ease-out" } as const;
 
 function singleArea(key: string): ReactElement[] {
   return [
