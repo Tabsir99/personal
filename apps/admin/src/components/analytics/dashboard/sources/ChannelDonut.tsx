@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getFaviconUrl } from "../../ui/favicon";
-import { CHART } from "./chartTheme";
-import { formatCount } from "./chartFormat";
+import { getFaviconUrl } from "@/components/ui/favicon";
+import { CHART } from "../shared/chartTheme";
+import { formatCount } from "../shared/chartFormat";
 
 interface ChannelDonutProps {
   items: { name: string; value: number }[];
@@ -160,18 +160,13 @@ export function ChannelDonut({
             {slices.map((s) => {
               const a0 = s.t0 + PAD / 2;
               const a1 = s.t1 - PAD / 2;
-              // Corner radius fits within both the band thickness and the arc.
               const rc = Math.max(
                 0,
                 Math.min(CORNER, THICK / 2 - 1, ((a1 - a0) / 2 - 0.02) * INNER),
               );
-              // Thicken about the mid-radius: outer edge out, inner edge in, by
-              // the same amount — angular ends stay put, nothing drifts.
               const g = hover === s.i ? THICKEN : 0;
               const d = a1 > a0 ? sector(a0, a1, INNER - g, OUTER + g, rc) : "";
               return (
-                // Wrapper carries the staggered fade-in; its opacity multiplies
-                // with the slice's dim opacity so the two never fight.
                 <g key={s.name} opacity="0">
                   <animate
                     attributeName="opacity"

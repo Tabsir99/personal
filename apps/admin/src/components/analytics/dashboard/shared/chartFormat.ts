@@ -1,4 +1,4 @@
-import type { Period } from "@/lib/analyticsTypes";
+import type { Period, Granularity } from "@/lib/analyticsTypes";
 
 export function formatCount(n: number): string {
   if (n >= 1e6) return `${(n / 1e6).toFixed(1).replace(/\.0$/, "")}M`;
@@ -79,3 +79,15 @@ export const PERIOD_LABEL: Record<Period, string> = {
   last30d: "Last 30 days",
   last90d: "Last 90 days",
 };
+
+/** Axis tick label for a bucket timestamp: time for hourly, date otherwise. */
+export function formatTimestamp(ts: number, granularity: Granularity): string {
+  const d = new Date(ts);
+  if (granularity === "hourly") {
+    return d.toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  }
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}

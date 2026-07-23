@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Robot } from "@phosphor-icons/react";
-import { useAnalyticsStore } from "./analyticsStore";
+import { useAnalyticsStore } from "../../../../stores/analyticsStore";
 import { BotChart } from "./BotChart";
 import { BotSheet } from "./BotSheet";
 import { resolveBot, botTint } from "./botRegistry";
-import { useImageAccent } from "./useImageAccent";
+import { useImageAccent } from "../shared/useImageAccent";
 import { getFaviconUrl } from "@/components/ui/favicon";
 import type { BotCategory, BotMetric } from "@/lib/analyticsTypes";
 

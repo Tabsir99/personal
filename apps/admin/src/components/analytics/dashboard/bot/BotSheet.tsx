@@ -5,9 +5,9 @@ import { AnimatePresence, motion } from "motion/react";
 import { useShallow } from "zustand/react/shallow";
 import { TextField } from "premium-ds/text-field";
 import { MagnifyingGlass, Robot, X } from "@phosphor-icons/react";
-import { useAnalyticsStore } from "./analyticsStore";
+import { useAnalyticsStore } from "../../../../stores/analyticsStore";
 import { resolveBot, categoryMeta, botTint } from "./botRegistry";
-import { PERIOD_LABEL } from "./chartFormat";
+import { PERIOD_LABEL } from "../shared/chartFormat";
 import { getFaviconUrl } from "@/components/ui/favicon";
 import type { BotMetric, BotPagesResponse } from "@/lib/analyticsTypes";
 

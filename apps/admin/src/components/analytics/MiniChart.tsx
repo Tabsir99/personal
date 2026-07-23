@@ -9,10 +9,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { TimeseriesPoint } from "@/lib/analyticsTypes";
-import { CHART } from "./dashboard/chartTheme";
-import { AnalyticsTooltip } from "./dashboard/AnalyticsTooltip";
-import { useReveal } from "./dashboard/reveal";
-import { headroomTop } from "./dashboard/chartFormat";
+import { CHART } from "./dashboard/shared/chartTheme";
+import { AnalyticsTooltip } from "./dashboard/shared/AnalyticsTooltip";
+import { useReveal } from "./dashboard/shared/reveal";
+import { headroomTop } from "./dashboard/shared/chartFormat";
 
 interface MiniChartProps {
   data: TimeseriesPoint[];

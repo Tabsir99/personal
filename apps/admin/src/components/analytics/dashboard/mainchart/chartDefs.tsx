@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { CHART } from "../chartTheme";
+import { CHART } from "../shared/chartTheme";
 
 export function chartDefs(targetOffset: number): ReactElement {
   return (

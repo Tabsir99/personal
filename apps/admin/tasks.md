@@ -1,5 +1,11 @@
 # Analytics Dashboard — Tasks
 
+## Ship scope (pre-deploy)
+
+The dashboard deploys once **Goals → Funnels → User Journeys** are built, in that order. Everything under **V2 / Later** is deferred — not needed for the initial launch. The three ship as a tabbed section on the dashboard: **Goal · Funnel · User · Journey**.
+
+North-star screenshots + spec: `~/.claude/projects/-home-tabsir-ap-reactp-personal/analytics-north-star/` (Goal / Funnel / Journey tabs, funnel hovers, visitor-detail drawer).
+
 ## Done
 
 - [x] Analytics stack — tracker SDK + Cloudflare worker + Tinybird `analytics_events` datasource
@@ -16,65 +22,52 @@
 - [x] Query performance + index-usage logging — `queryLog.ts` (chalk, one structured line/query: wall/srv time, rows/bytes scanned, slow flag); opt-in `EXPLAIN indexes=1` behind `TINYBIRD_EXPLAIN=1`
 - [x] Real-Tinybird integration tests — every route driven against a seeded ~10k-row realistic dataset + an independent JS reference oracle (exact by-key value match)
 - [x] Fix `ILLEGAL_AGGREGATION` in locations/sources breakdowns (aggregate aliased to a GROUP BY key)
+- [x] **Main chart — frontend** — `AreaChart` → `ComposedChart`; per-metric render map (volume → filled area, rate/avg → line, Visitors → stacked new/returning, default → Visitors area + Revenue bars on right axis); nullable selection (re-click active metric → default); enriched per-metric tooltips + footers; `formatDuration`/`formatBounce` lifted into shared `chartFormat.ts`; revenue bars with `motion` scale-wipe on hover. (Flip to live data tracked under Pre-deploy.)
 
-## Remaining
+## Remaining — ship these three, then deploy
 
-### Main chart — frontend (next up)
+### 1. Goals (ref: `01-goal-tab.png`)
 
-Backend is done (see "Main route rework" above); this is the `MainChart` + tooltip render work. Root cause of the "broken session time": `MainChart`'s `CHART_KEYS` whitelists only `visitors|pageviews|sessions`, so Bounce and Session time silently fall back to the visitors line — and the data half only just landed.
+A goal = a tracked event elevated to a "goal" with a friendly name/category + colour. The `events` route already returns the raw event breakdown; this adds the config layer + per-goal series + the tab UI.
 
-- [ ] Render every metric's own time series (except Online) — remove the `CHART_KEYS` fallback; Session time = average session time over time
-- [ ] Swap `AreaChart` → recharts `ComposedChart`; per-metric render map:
-  - default (no selection): Visitors **area** + Revenue **bars** (right-hand axis)
-  - Visitors: two **stacked areas** — New + Returning
-  - Pageviews / Sessions: single filled **area**
-  - Bounce rate: bare **line**, `%` axis
-  - Session time: bare **line**, `m ss` axis
-  - rule: volume metrics → filled area; rate/average metrics → bare line
-- [ ] Nullable selection — default = none; re-clicking the active metric returns to default (`OverviewCard.chartMetric: ChartMetric | null`; `MetricsBar` accepts `null` via its existing all-muted path). Online stays as-is (no series)
-- [ ] Tooltip enrichment (structure unchanged) — per-metric derived rate + a one-line footer explaining the metric:
-  - Visitors → New / Returning / Total + `% new`; footer "Unique people who visited."
-  - Pageviews → value + `pages / visitor`; footer "Total page loads, repeat views included."
-  - Sessions → value + `pages / session`; footer "Visits — a session ends after 30 min idle."
-  - Bounce rate → `%`; footer "Share of sessions that left after one page."
-  - Session time → `m ss`; footer "Avg time between a session's first and last event."
-  - default → Visitors + Revenue + `revenue / visitor`; footer names the period
-- [ ] Lift `formatDuration` / `formatBounce` out of `MetricsBar` into a shared `chartFormat.ts` so bar, axis, and tooltip agree
-- [ ] Flip `USE_MOCKS` → `false` in `analyticsStore.ts` to hit the real route
+- [ ] **Goal-config store** — which events count as goals; per goal: friendly name + category (`scroll_to_problem` → "Scroll › Problem"), colour. CRUD + `+` add-goal.
+- [ ] Rename `events` route types Goal → Event (raw breakdown, not configured goals)
+- [ ] **Per-goal time series** — one coloured line per goal over the period (multi-line chart)
+- [ ] **Goal leaderboard** — ranked list right of the chart: name + completions + relative-magnitude bar; click to highlight/isolate that goal's line; search + filter
+- [ ] Goal metrics — visitors completed, conversion rate, revenue
 
-Files: `MainChart.tsx`, `OverviewCard.tsx`, `MetricsBar.tsx`, `analyticsMock.ts`, new `chartFormat.ts`.
+### 2. Funnels (ref: `02-funnel-tab.png`, `04-`/`05-` hovers)
 
-**Open UX decisions (blocking the build):**
+- [ ] **Funnel-definition store** — ordered steps (pageview and/or event steps); funnel picker/switcher + `…` manage menu
+- [ ] **Funnel computation** — per-step in-order unique visitors, step-to-step drop-off, conversion from previous + from start, headline conversion rate; **step value** = attributed revenue ÷ visitors at step. Use ClickHouse `windowFunnel()` over per-visitor event sequences (aim: one scan).
+- [ ] **Funnel flow viz** — narrowing "river" across steps; per step emoji + name + visitor count; drop-off badges between steps; headline conversion rate + period
+- [ ] **Step hover** — drop-off to next, conversion from prev + from start, step value `$/visitor`, top sources, top countries (first step: value + sources + countries only, no drop-off)
 
-1. Revenue bars — default view only, or faintly behind every metric? (lean: default-only)
-2. Deselect-to-default by re-clicking the active metric, or an explicit "Overview" state?
-3. Default headline line — Visitors, or Pageviews?
+### 3. User Journeys (ref: `03-journey-tab-goal-completers.png`, `06-visitor-detail-drawer.png`)
+
+Two tabs — **User** + **Journey** — feeding one shared visitor-detail drawer.
+
+- [ ] **Visitor-keyed storage (decide + build first — blocks the rest)** — second datasource / MV keyed by `visitor_id` vs. skip index on the existing table. The current sort key `website_id, is_bot, type, timestamp` has no `visitor_id` prefix, so per-visitor timelines scan wide. Enables the timeline + user list without full scans.
+- [ ] **Journey tab** — goal picker (`Goal: Payment 29`); list of completers: avatar, masked name, `Customer` tag, geo/device/OS/browser, source (favicon), spent, time-to-complete (first-touch → goal), completed-at + mini activity strip; searchable
+- [ ] **User tab** — broader visitor directory (all visitors, same row shape); click any row → drawer
+- [ ] **Visitor-detail drawer** — profile (masked identity from payment params: name/email/id/transaction_id + geo/device); day-grouped event timeline (pageviews + triggered events with expandable parameters + highlighted `Paid` row); oldest/newest sort + copy + `Show N next` pagination; right rail stats (pageviews / spent / time-to-completion) + activity heatmap + AI-summary placeholder
+- [ ] **Privacy masking** — PII (names/emails/params) masked by default in list + drawer
+- [ ] Paying-visitor journeys need no signup/identify (payment row carries identity); identified-user drill-down where available
+
+### Pre-deploy
+
+- [ ] Flip `USE_MOCKS → false` in `analyticsStore.ts`; validate every route against live Tinybird
+- [ ] Deploy the whole analytics dashboard
+
+## V2 / Later (deferred — not needed for a while)
 
 ### Breakdown panels — new/returning + revenue (UI)
 
-- [ ] Wire new/returning columns into Sources (referrers/channels) + entry pages, and revenue into all breakdown panels. Backend already emits these; this is panel rendering only, separate from the main chart.
+- [ ] Wire new/returning columns into Sources (referrers/channels) + entry pages, and revenue into all breakdown panels. Backend already emits these; panel rendering only.
 
 ### Revenue as an overview metric card (optional)
 
 - [ ] A dedicated Revenue cell in the metrics bar with a period-over-period trend — **superseded** by revenue-in-chart (default view + tooltip). Revisit only if you also want it in the bar; needs `OverviewMetrics.revenue` + a previous-period payment scan (currently the revenue scan is `[start, end)` only, so there's no prior-period figure for a delta).
-
-### Goals
-
-- [ ] Rename events route types Goal → Event (raw breakdown, not configured goals)
-- [ ] Goal configuration — which events count as goals
-- [ ] Goal metrics — visitors completed, conversion rate, revenue
-
-### Funnels
-
-- [ ] Funnel definition CRUD — ordered steps
-- [ ] Funnel computation — per-step visitors, drop-off, conversion
-- [ ] Funnel builder + preview UI
-
-### User journeys
-
-- [ ] Per-visitor timeline — entry, pageviews, events, payment, duration
-- [ ] Paying-visitor journeys (no signup / identify required)
-- [ ] Identified-user drill-down
 
 ### Rollups / pre-aggregation (low priority)
 
@@ -85,7 +78,6 @@ Files: `MainChart.tsx`, `OverviewCard.tsx`, `MetricsBar.tsx`, `analyticsMock.ts`
 
 ### Open decisions
 
-- [ ] Visitor-keyed storage for journeys — second datasource / MV vs. skip index on existing table
 - [ ] Cross-device identity stitching (email → multiple visitor IDs)
 - [ ] Keyword tab (low priority) — organic search queries via Google Search Console. Placeholder in the Sources panel for now; paid keywords are already available as `utm_term` under the Campaign dropdown.
 

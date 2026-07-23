@@ -1,8 +1,8 @@
 "use client";
 
 import { useShallow } from "zustand/react/shallow";
-import { useAnalyticsStore } from "./analyticsStore";
-import { DataPanel } from "./DataPanel";
+import { useAnalyticsStore } from "../../../stores/analyticsStore";
+import { DataPanel } from "./shared/DataPanel";
 
 import { Favicon } from "../../ui/favicon";
 

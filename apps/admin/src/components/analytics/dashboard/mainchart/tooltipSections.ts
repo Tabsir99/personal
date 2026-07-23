@@ -1,10 +1,10 @@
-import type { Point, TooltipSection } from "../AnalyticsTooltip";
+import type { Point, TooltipSection } from "../shared/AnalyticsTooltip";
 import {
   formatBounce,
   formatConversion,
   formatCurrency,
   formatDuration,
-} from "../chartFormat";
+} from "../shared/chartFormat";
 import type { Selection } from "./series";
 
 function visitorMeter(nw: number, rt: number): TooltipSection {

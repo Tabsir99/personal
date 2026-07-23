@@ -17,10 +17,10 @@ import type {
   BotTimeseriesPoint,
 } from "@/lib/analyticsTypes";
 import { categoryMeta } from "./botRegistry";
-import { CHART } from "./chartTheme";
-import { AnalyticsTooltip } from "./AnalyticsTooltip";
-import { useReveal } from "./reveal";
-import { headroomTop } from "./chartFormat";
+import { CHART } from "../shared/chartTheme";
+import { AnalyticsTooltip } from "../shared/AnalyticsTooltip";
+import { useReveal } from "../shared/reveal";
+import { headroomTop } from "../shared/chartFormat";
 
 function fmt(ts: number, granularity: string): string {
   const d = new Date(ts);

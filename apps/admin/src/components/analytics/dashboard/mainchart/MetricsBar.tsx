@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import type { OverviewMetrics } from "@/lib/analyticsTypes";
-import { formatMetric } from "./chartFormat";
+import { formatMetric } from "../shared/chartFormat";
 
 export type ChartMetric =
   | "visitors"

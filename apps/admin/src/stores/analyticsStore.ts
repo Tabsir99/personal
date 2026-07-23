@@ -15,8 +15,9 @@ import type {
   Granularity,
   BotsResponse,
   BotPagesResponse,
+  GoalsResponse,
 } from "@/lib/analyticsTypes";
-import { mockFetchEndpoint } from "./analyticsMock";
+import { mockFetchEndpoint } from "../utils/analyticsMock";
 
 interface MainData {
   current: OverviewMetrics;
@@ -71,6 +72,9 @@ interface AnalyticsState {
 
   bots: BotsResponse | null;
   botsLoading: boolean;
+
+  goals: GoalsResponse | null;
+  goalsLoading: boolean;
 
   realtimeCount: number | null;
   realtimeLoading: boolean;
@@ -142,6 +146,9 @@ export const useAnalyticsStore = create<AnalyticsState>((set, get) => ({
 
   bots: null,
   botsLoading: true,
+
+  goals: null,
+  goalsLoading: true,
 
   realtimeCount: null,
   realtimeLoading: true,
@@ -224,6 +231,13 @@ export const useAnalyticsStore = create<AnalyticsState>((set, get) => ({
       fetchEndpoint<BotsResponse>("bots", websiteId, period, {
         granularity,
       }).then((bots) => set({ bots, botsLoading: false }));
+    }
+
+    if (!same || !state.goalsLoading) {
+      set({ goalsLoading: true });
+      fetchEndpoint<GoalsResponse>("goals", websiteId, period, {
+        granularity,
+      }).then((goals) => set({ goals, goalsLoading: false }));
     }
 
     if (!same || !state.realtimeLoading) {

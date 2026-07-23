@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { useAnalyticsStore } from "./analyticsStore";
-import { DataPanel } from "./DataPanel";
+import { useAnalyticsStore } from "@/stores/analyticsStore";
+import { DataPanel } from "../shared/DataPanel";
 import { ChannelDonut } from "./ChannelDonut";
-import { formatCount } from "./chartFormat";
-import { Favicon } from "../../ui/favicon";
+import { formatCount } from "../shared/chartFormat";
+import { Favicon } from "@/components/ui/favicon";
 import { Select } from "premium-ds/select";
 import {
   CAMPAIGN_DIMENSIONS,

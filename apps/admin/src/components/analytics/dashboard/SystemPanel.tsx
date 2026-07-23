@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Globe, Monitor } from "@phosphor-icons/react";
-import { useAnalyticsStore } from "./analyticsStore";
-import { DataPanel } from "./DataPanel";
+import { useAnalyticsStore } from "../../../stores/analyticsStore";
+import { DataPanel } from "./shared/DataPanel";
 
 type Kind = "browser" | "os" | "device";
 

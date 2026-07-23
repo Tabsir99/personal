@@ -345,6 +345,80 @@ export async function mockFetchEndpoint<T>(
     return { goals, totalVisitors: 42500 } as unknown as T;
   }
 
+  if (path === "goals") {
+    const pointsCount =
+      period === "today" || period === "yesterday"
+        ? 24
+        : period === "last7d"
+          ? 7
+          : 30;
+    const step =
+      period === "today" || period === "yesterday"
+        ? 3600 * 1000
+        : 24 * 3600 * 1000;
+    const start = Date.now() - pointsCount * step;
+    const totalVisitors = 7500;
+
+    const GOAL_DEFS: [string, number][] = [
+      ["scroll_to_problem", 6300],
+      ["scroll_to_solution", 4300],
+      ["scroll_to_jainil_review", 3400],
+      ["scroll_to_pricing", 3300],
+      ["scroll_to_what_you_will_get", 3000],
+      ["scroll_to_adsy_review", 2600],
+      ["scroll_to_matthieu_review", 2300],
+      ["scroll_to_andrei_review", 1900],
+      ["scroll_to_faq", 1700],
+      ["scroll_to_is_this_possible", 1600],
+      ["scroll_to_story", 1300],
+      ["clicked_pricing_cta", 1100],
+      ["signup_button_clicked", 900],
+      ["clicked_get_started", 720],
+      ["newsletter_signup", 540],
+      ["clicked_demo_video", 410],
+    ];
+
+    const shape = Array.from({ length: pointsCount }, (_, i) => {
+      const x = pointsCount <= 1 ? 0 : i / (pointsCount - 1);
+      return Math.max(
+        0.08,
+        0.55 +
+          0.32 * Math.sin(x * Math.PI * 3 + 0.7) +
+          0.15 * Math.sin(x * Math.PI * 6.3 + 1.1),
+      );
+    });
+    const shapeSum = shape.reduce((a, b) => a + b, 0) || 1;
+
+    const series: ({ timestamp: number } & Record<string, number>)[] =
+      Array.from({ length: pointsCount }, (_, i) => ({
+        timestamp: start + i * step,
+      }));
+
+    const goals: GoalMetric[] = [];
+    for (const [name, target] of GOAL_DEFS) {
+      let acc = 0;
+      for (let i = 0; i < pointsCount; i++) {
+        const noise = 0.82 + Math.random() * 0.36;
+        const v = Math.max(
+          0,
+          Math.round(target * (shape[i] / shapeSum) * noise),
+        );
+        series[i][name] = v;
+        acc += v;
+      }
+      const total = Math.round(acc * (1.05 + Math.random() * 0.12));
+      goals.push({
+        name,
+        uv: acc,
+        total,
+        conversionRate: Math.min(1, acc / totalVisitors),
+      });
+    }
+    goals.sort((a, b) => b.uv - a.uv);
+
+    return { goals, series, totalVisitors } as unknown as T;
+  }
+
   if (path === "bots") {
     const pointsCount =
       period === "today" || period === "yesterday"

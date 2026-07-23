@@ -179,6 +179,15 @@ export interface EventsResponse {
   totalVisitors: number;
 }
 
+/** Wide per-bucket series: one numeric key per goal name, plus the bucket ts. */
+export type GoalSeriesPoint = { timestamp: number } & Record<string, number>;
+
+export interface GoalsResponse {
+  goals: GoalMetric[];
+  series: GoalSeriesPoint[];
+  totalVisitors: number;
+}
+
 export interface RealtimeResponse {
   count: number;
 }

@@ -1,160 +1,77 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import {
-  ComposedChart,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-} from "recharts";
-import type { MouseHandlerDataParam } from "recharts";
-import type { TimeseriesPoint } from "@/lib/analyticsTypes";
-import { CHART } from "../chartTheme";
-import { AnalyticsTooltip } from "../AnalyticsTooltip";
-import { useReveal } from "../reveal";
-import { formatCurrency, headroomTop, niceStep } from "../chartFormat";
-import { renderSeries, leftAxisFormat, type Selection } from "./series";
-import { chartDefs } from "./chartDefs";
-import { tooltipSections } from "./tooltipSections";
+import { useState } from "react";
+import { useShallow } from "zustand/react/shallow";
+import { useAnalyticsStore } from "../../../../stores/analyticsStore";
+import { MetricsBar } from "./MetricsBar";
+import { MainChart } from "./MainChartGraph";
+import { PERIOD_LABEL } from "../shared/chartFormat";
+import type { ChartMetric } from "./MetricsBar";
+import type { OverviewMetrics } from "@/lib/analyticsTypes";
 
-interface MainChartProps {
-  data: TimeseriesPoint[];
-  granularity: "hourly" | "daily" | "weekly" | "monthly";
-  metric?: Selection;
-  periodLabel: string;
-}
-
-function formatTimestamp(ts: number, granularity: string): string {
-  const d = new Date(ts);
-  if (granularity === "hourly") {
-    return d.toLocaleTimeString(undefined, {
-      hour: "numeric",
-      minute: "2-digit",
-    });
-  }
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-}
-
-const BOUNCE_AXIS = {
-  domain: [0, 1] as [number, number],
-  ticks: [0, 0.25, 0.5, 0.75, 1],
+const EMPTY_METRICS: OverviewMetrics = {
+  visitors: 0,
+  pageviews: 0,
+  sessions: 0,
+  bounceRate: 0,
+  sessionDuration: 0,
+  revenue: 0,
+  payingVisitors: 0,
+  conversionRate: 0,
 };
 
-function revenueAxis(max: number): {
-  ticks: number[];
-  domain: [number, number];
-} {
-  if (max <= 0) return { ticks: [0], domain: [0, 1] };
-  const step = niceStep(max / 3);
-  const ticks: number[] = [];
-  for (let v = 0; v <= max + step / 2; v += step) ticks.push(v);
-  const top = ticks[ticks.length - 1];
-  return { ticks, domain: [0, top / 0.6] };
-}
-
-export function MainChart({
-  data,
-  granularity,
-  metric = null,
-  periodLabel,
-}: MainChartProps) {
-  const selection: Selection = metric;
-  const isBounce = selection === "bounceRate";
-  const { ticks: revenueTicks, domain: revenueDomain } = revenueAxis(
-    Math.max(0, ...data.map((d) => d.revenue)),
-  );
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const { ref, revealed, enter } = useReveal<HTMLDivElement>();
-
-  const handleMouseMove = useCallback((state: MouseHandlerDataParam) => {
-    setActiveIndex((prev) =>
-      state.activeTooltipIndex !== prev
-        ? Number(state.activeTooltipIndex)
-        : prev,
+export function OverviewCard() {
+  const [chartMetric, setChartMetric] = useState<ChartMetric | null>(null);
+  const { main, mainLoading, realtimeCount, granularity, period, refresh } =
+    useAnalyticsStore(
+      useShallow((s) => ({
+        main: s.main,
+        mainLoading: s.mainLoading,
+        realtimeCount: s.realtimeCount,
+        granularity: s.granularity,
+        period: s.period,
+        refresh: s.refresh,
+      })),
     );
-  }, []);
 
-  const handleMouseLeave = useCallback(() => setActiveIndex(null), []);
+  // Re-clicking the active metric returns to the default overview.
+  const selectMetric = (m: ChartMetric) =>
+    setChartMetric((cur) => (cur === m ? null : m));
 
-  const targetOffset =
-    activeIndex !== null && data.length > 1
-      ? activeIndex / (data.length - 1)
-      : 1;
+  if (mainLoading) {
+    return <div className="h-135 animate-pulse rounded-lg bg-foreground/3" />;
+  }
 
   return (
-    <div ref={ref} className={`${enter} bg-card px-4 pt-2 pb-4`}>
-      <div className="h-96">
-        {revealed && (
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart
-              data={data}
-              margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
+    <div className="overflow-hidden rounded-lg border border-foreground/6 bg-card">
+      <MetricsBar
+        current={main?.current ?? EMPTY_METRICS}
+        previous={main?.previous ?? EMPTY_METRICS}
+        realtimeCount={realtimeCount}
+        activeMetric={chartMetric}
+        onMetricChange={selectMetric}
+      />
+      <div className="border-t border-foreground/6">
+        {main ? (
+          <MainChart
+            data={main.timeseries}
+            granularity={granularity}
+            metric={chartMetric}
+            periodLabel={PERIOD_LABEL[period] ?? period}
+          />
+        ) : (
+          <div className="flex h-100 flex-col items-center justify-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              Failed to load chart data
+            </p>
+            <button
+              type="button"
+              onClick={refresh}
+              className="text-xs text-primary hover:underline"
             >
-              {chartDefs(targetOffset)}
-              <CartesianGrid
-                yAxisId={selection === null ? "revenue" : "left"}
-                strokeDasharray="3 3"
-                stroke={CHART.grid}
-                strokeOpacity={0.6}
-              />
-              <XAxis
-                dataKey="timestamp"
-                type="number"
-                domain={["dataMin", "dataMax"]}
-                ticks={data.map((d) => d.timestamp)}
-                tickFormatter={(ts) => formatTimestamp(ts, granularity)}
-                tick={{ fontSize: 11, fill: CHART.muted }}
-                tickLine={false}
-                axisLine={false}
-                interval="preserveStartEnd"
-                minTickGap={50}
-                padding={
-                  selection === null
-                    ? { left: 16, right: 16 }
-                    : { left: 0, right: 0 }
-                }
-              />
-              <YAxis
-                yAxisId="left"
-                domain={isBounce ? BOUNCE_AXIS.domain : [0, headroomTop]}
-                {...(isBounce ? { ticks: BOUNCE_AXIS.ticks } : {})}
-                tickFormatter={leftAxisFormat(selection)}
-                tick={{ fontSize: 11, fill: CHART.muted }}
-                tickLine={false}
-                axisLine={false}
-                width={
-                  selection === "sessionDuration"
-                    ? 48
-                    : selection === "conversionRate"
-                      ? 44
-                      : 36
-                }
-                allowDecimals={
-                  selection === "bounceRate" || selection === "conversionRate"
-                }
-              />
-              {selection === null && (
-                <YAxis
-                  yAxisId="revenue"
-                  orientation="right"
-                  domain={revenueDomain}
-                  ticks={revenueTicks}
-                  tickFormatter={formatCurrency}
-                  tick={{ fontSize: 11, fill: CHART.revenue }}
-                  tickLine={false}
-                  axisLine={false}
-                  width={40}
-                />
-              )}
-              <AnalyticsTooltip
-                sections={tooltipSections(selection, periodLabel)}
-              />
-              {renderSeries(selection, activeIndex)}
-            </ComposedChart>
-          </ResponsiveContainer>
+              Retry
+            </button>
+          </div>
         )}
       </div>
     </div>

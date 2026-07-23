@@ -11,6 +11,7 @@ import type { AnalyticsWebsite } from "@/actions/analyticsActions";
 import {
   useAnalyticsStore,
   OverviewCard,
+  InsightsCard,
   SourcesPanel,
   LocationsPanel,
   PagesPanel,
@@ -99,7 +100,7 @@ export default function WebsiteDetailPage() {
   return (
     <div className="mx-auto max-w-7xl animate-in duration-300 ease-out fade-in">
       <header className="flex flex-col gap-6 pb-6 sm:flex-row sm:items-center">
-        <div className="flex min-w-0 items-center gap-3 h-12">
+        <div className="flex h-12 min-w-0 items-center gap-3">
           <Button
             variant="ghost"
             size="icon"
@@ -164,6 +165,8 @@ export default function WebsiteDetailPage() {
           <SourcesPanel />
           <LocationsPanel />
         </div>
+
+        <InsightsCard />
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           <PagesPanel />
