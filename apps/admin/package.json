@@ -11,6 +11,7 @@
     "lint": "eslint src",
     "tc": "tsc --noEmit",
     "test": "vitest run",
+    "test:watch": "vitest",
     "prebuild": "tsc --noEmit",
     "dev:clean": "rm -rf .next .vercel && pnpm dev",
     "cil": "rm -rf node_modules pnpm-lock.yaml && pnpm install"
