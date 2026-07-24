@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, isValidElement, type ReactNode } from "react";
+import { Fragment, isValidElement, memo, type ReactNode } from "react";
 import { Tooltip } from "recharts";
 import { CHART, type ChartColors } from "./chartTheme";
 
@@ -93,70 +93,72 @@ function Row({ row }: { row: TooltipRow }) {
   );
 }
 
-export function AnalyticsTooltip({
-  sections,
-}: {
+interface AnalyticsTooltipProps {
   sections: (point: Point) => TooltipSection[];
-}) {
-  return (
-    <Tooltip
-      animationDuration={500}
-      animationEasing="ease-out"
-      offset={50}
-      content={({ active, payload, label }) => {
-        if (!active || !payload?.length) return null;
-
-        const point: Point = {
-          label: label as number | string,
-          date: new Date(Number(label)).toLocaleDateString(undefined, {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          }),
-          get: (key) => {
-            const entry = key
-              ? payload.find((p) => p.dataKey === key)
-              : payload[0];
-            return Number(entry?.value) || 0;
-          },
-          raw: (key) => {
-            const row = payload[0]?.payload as
-              Record<string, unknown> | undefined;
-            return Number(row?.[key]) || 0;
-          },
-        };
-
-        const items = sections(point).filter(
-          (s) => s !== null && s !== undefined && s !== false,
-        );
-        if (!items.length) return null;
-
-        return (
-          <div className="min-w-52 overflow-hidden rounded-xl bg-foreground text-background shadow-card-hover">
-            {items.map((s, i) => {
-              const divider = i > 0 && !isMeter(s);
-              return (
-                <Fragment key={i}>
-                  {divider && <div className="h-px bg-background/10" />}
-                  {isMeter(s) ? (
-                    <MeterBar segments={s.meter} />
-                  ) : isRow(s) ? (
-                    <Row row={s} />
-                  ) : i === 0 ? (
-                    <div className="px-3.5 pt-3 pb-2 text-sm font-semibold text-background">
-                      {s}
-                    </div>
-                  ) : (
-                    <div className="px-3.5 py-2.5 text-xs text-background/45">
-                      {s}
-                    </div>
-                  )}
-                </Fragment>
-              );
-            })}
-          </div>
-        );
-      }}
-    />
-  );
 }
+export const AnalyticsTooltip = memo(
+  function AnalyticsTooltip({ sections }: AnalyticsTooltipProps) {
+    return (
+      <Tooltip
+        animationDuration={500}
+        animationEasing="ease-out"
+        offset={50}
+        content={({ active, payload, label }) => {
+          if (!active || !payload?.length) return null;
+
+          const point: Point = {
+            label: label as number | string,
+            date: new Date(Number(label)).toLocaleDateString(undefined, {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            }),
+            get: (key) => {
+              const entry = key
+                ? payload.find((p) => p.dataKey === key)
+                : payload[0];
+              return Number(entry?.value) || 0;
+            },
+            raw: (key) => {
+              const row = payload[0]?.payload as
+                Record<string, unknown> | undefined;
+              return Number(row?.[key]) || 0;
+            },
+          };
+
+          const items = sections(point).filter(
+            (s) => s !== null && s !== undefined && s !== false,
+          );
+          if (!items.length) return null;
+
+          return (
+            <div className="min-w-52 overflow-hidden rounded-xl bg-foreground text-background shadow-card-hover">
+              {items.map((s, i) => {
+                const divider = i > 0 && !isMeter(s);
+                return (
+                  <Fragment key={i}>
+                    {divider && <div className="h-px bg-background/10" />}
+                    {isMeter(s) ? (
+                      <MeterBar segments={s.meter} />
+                    ) : isRow(s) ? (
+                      <Row row={s} />
+                    ) : i === 0 ? (
+                      <div className="px-3.5 pt-3 pb-2 text-sm font-semibold text-background">
+                        {s}
+                      </div>
+                    ) : (
+                      <div className="px-3.5 py-2.5 text-xs text-background/45">
+                        {s}
+                      </div>
+                    )}
+                  </Fragment>
+                );
+              })}
+            </div>
+          );
+        }}
+      />
+    );
+  },
+  () => true,
+);

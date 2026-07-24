@@ -21,9 +21,13 @@ type TabId = "goal" | "funnel" | "journey";
 
 export function InsightsCard() {
   const loading = useAnalyticsStore((s) => s.goalsLoading);
+
   const [tab, setTab] = useState<TabId>("goal");
   const [dir, setDir] = useState<-1 | 0 | 1>(0);
+
   const [query, setQuery] = useState("");
+
+  const [goalEntry, setGoalEntry] = useState(0);
   const { ref, revealed, enter } = useReveal<HTMLDivElement>();
 
   if (loading) {
@@ -42,32 +46,48 @@ export function InsightsCard() {
           items={TABS}
           value={tab}
           onChange={(v, d) => {
+            if (v === "goal" && tab !== "goal") setGoalEntry((n) => n + 1);
             setTab(v as TabId);
             setDir(d);
           }}
         />
-        <div className={cn(tab === "goal" ? "" : "invisible", "-mt-2 w-56")}>
-          <TextField
-            size="sm"
-            placeholder="Search goals"
-            leadingIcon={<MagnifyingGlassIcon size={1} />}
-            clearable
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            htmlProps={{ "aria-label": "Search goals" }}
-            type="search"
-          />
+        <TextField
+          size="sm"
+          placeholder="Search goals"
+          leadingIcon={<MagnifyingGlassIcon size={1} />}
+          clearable
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          htmlProps={{ "aria-label": "Search goals" }}
+          type="search"
+          className={cn(tab === "goal" ? "" : "invisible", "-mt-2")}
+        />
+      </div>
+
+      <div className="grid">
+        {revealed && (
+          <div
+            role="tabpanel"
+            id="insights-panel-goal"
+            aria-labelledby="insights-tab-goal"
+            aria-hidden={tab !== "goal"}
+            tabIndex={tab === "goal" ? 0 : -1}
+            className={cn(
+              "[grid-area:1/1]",
+              tab !== "goal" && "pointer-events-none invisible",
+            )}
+          >
+            <GoalsTab query={query} entryKey={goalEntry} />
+          </div>
+        )}
+
+        <div className="[grid-area:1/1]">
+          <TabPanel tab={tab} dir={dir} name="insights">
+            {tab === "funnel" && <FunnelTab />}
+            {tab === "journey" && <JourneyTab />}
+          </TabPanel>
         </div>
       </div>
-      <TabPanel tab={tab} dir={dir} name="insights">
-        {tab === "goal" ? (
-          revealed && <GoalsTab query={query} />
-        ) : tab === "funnel" ? (
-          <FunnelTab />
-        ) : (
-          <JourneyTab />
-        )}
-      </TabPanel>
     </div>
   );
 }

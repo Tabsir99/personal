@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useState } from "react";
+import { memo } from "react";
 import {
   LineChart,
   Line,
@@ -21,8 +21,6 @@ import {
   headroomTop,
 } from "../shared/chartFormat";
 
-const STEP = 2;
-
 export const GoalsChart = memo(function GoalsChart({
   series,
   goals,
@@ -36,14 +34,6 @@ export const GoalsChart = memo(function GoalsChart({
   granularity: Granularity;
   yMax: number;
 }) {
-  const [visible, setVisible] = useState(STEP);
-
-  useEffect(() => {
-    if (visible >= goals.length) return;
-    const id = setTimeout(() => setVisible((v) => v + STEP), 16);
-    return () => clearTimeout(id);
-  }, [visible, goals.length]);
-
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart
@@ -76,7 +66,7 @@ export const GoalsChart = memo(function GoalsChart({
           width={36}
           tickFormatter={formatCount}
         />
-        {goals.slice(0, visible).map((g, i) => (
+        {goals.map((g, i) => (
           <Line
             key={g.name}
             className={`gl-${i}`}
@@ -86,8 +76,6 @@ export const GoalsChart = memo(function GoalsChart({
             strokeWidth={1.5}
             strokeOpacity={0.9}
             dot={false}
-            activeDot={false}
-            isAnimationActive={false}
           />
         ))}
       </LineChart>

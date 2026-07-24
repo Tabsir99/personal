@@ -9,9 +9,13 @@ import type { GoalMetric } from "@/lib/analyticsTypes";
 import { goalColor } from "./goalColors";
 import { GoalsChart } from "./GoalsChart";
 
-const CHART_STYLE = `[data-goalchart] .recharts-line{transition:opacity .16s;animation:glfade .5s ease-out}@keyframes glfade{from{opacity:0}to{opacity:1}}`;
+interface GoalsTabProps {
+  query: string;
+  entryKey: number;
+  className?: string;
+}
 
-export function GoalsTab({ query }: { query: string }) {
+export function GoalsTab({ query, entryKey, className }: GoalsTabProps) {
   const { goals, granularity } = useAnalyticsStore(
     useShallow((s) => ({
       goals: s.goals,
@@ -54,13 +58,9 @@ export function GoalsTab({ query }: { query: string }) {
     : ranked;
 
   return (
-    <div className="flex h-96 flex-col lg:flex-row">
-      <div className="min-w-0 flex-1 p-1">
-        <div
-          data-goalchart=""
-          data-dim={active ? "" : undefined}
-          className="h-full"
-        >
+    <div className={cn("flex h-96 flex-col lg:flex-row", className)}>
+      <div className="relative min-w-0 flex-1 overflow-hidden p-1">
+        <div data-dim={active ? "" : undefined} className="relative h-full">
           <GoalsChart
             series={goals.series}
             goals={ranked}
@@ -68,8 +68,13 @@ export function GoalsTab({ query }: { query: string }) {
             granularity={granularity}
             yMax={yMax}
           />
+          {/* Inset to GoalsChart's plot rect (YAxis 36, margin r12/t8, XAxis 30) so the wipe covers only the lines. */}
+          <div
+            key={entryKey}
+            aria-hidden
+            className="pointer-events-none absolute top-2 right-3 bottom-7.5 left-9 z-10 animate-goal-wipe bg-card"
+          />
         </div>
-        <style>{CHART_STYLE}</style>
         {active && activeIndex >= 0 && (
           <style>{`[data-dim] .recharts-line{opacity:.13}[data-dim] .gl-${activeIndex}{opacity:1}`}</style>
         )}

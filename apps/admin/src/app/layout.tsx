@@ -46,6 +46,10 @@ export default async function RootLayout({
     >
       <head>
         <meta name="color-scheme" content="light" />
+        {process.env.NODE_ENV === "development" && (
+          // eslint-disable-next-line @next/next/no-sync-scripts -- dev-only React instrumentation; must run before hydration
+          <script src="https://unpkg.com/react-scan/dist/auto.global.js"></script>
+        )}
       </head>
       <body className="overflow-x-hidden">{children}</body>
       <MotionDevtools />
