@@ -16,6 +16,9 @@ import type {
   BotsResponse,
   BotPagesResponse,
   GoalsResponse,
+  FunnelsListResponse,
+  FunnelDetailResponse,
+  FunnelDefinition,
 } from "@/lib/analyticsTypes";
 import { mockFetchEndpoint } from "../utils/analyticsMock";
 
@@ -76,6 +79,12 @@ interface AnalyticsState {
   goals: GoalsResponse | null;
   goalsLoading: boolean;
 
+  funnels: FunnelDefinition[] | null;
+  funnelsLoading: boolean;
+  activeFunnelId: string | null;
+  funnel: FunnelDetailResponse | null;
+  funnelLoading: boolean;
+
   realtimeCount: number | null;
   realtimeLoading: boolean;
 
@@ -83,6 +92,8 @@ interface AnalyticsState {
   setGranularity: (granularity: Granularity) => void;
   fetchAll: (websiteId: string, period: Period) => void;
   fetchBotPages: (name: string) => Promise<BotPagesResponse | null>;
+  loadFunnels: () => void;
+  setActiveFunnel: (id: string) => void;
   refresh: () => void;
 }
 
@@ -150,6 +161,12 @@ export const useAnalyticsStore = create<AnalyticsState>((set, get) => ({
   goals: null,
   goalsLoading: true,
 
+  funnels: null,
+  funnelsLoading: false,
+  activeFunnelId: null,
+  funnel: null,
+  funnelLoading: false,
+
   realtimeCount: null,
   realtimeLoading: true,
 
@@ -181,6 +198,34 @@ export const useAnalyticsStore = create<AnalyticsState>((set, get) => ({
     return fetchEndpoint<BotPagesResponse>("bots/pages", websiteId, period, {
       bot: name,
     });
+  },
+
+  loadFunnels: () => {
+    const { websiteId, period } = get();
+    if (!websiteId) return;
+    set({ funnelsLoading: true });
+    fetchEndpoint<FunnelsListResponse>("funnels", websiteId, period).then(
+      (res) => {
+        const funnels = res?.funnels ?? [];
+        const current = get().activeFunnelId;
+        const activeFunnelId =
+          current && funnels.some((f) => f.id === current)
+            ? current
+            : (funnels[0]?.id ?? null);
+        set({ funnels, funnelsLoading: false, activeFunnelId });
+        if (activeFunnelId) get().setActiveFunnel(activeFunnelId);
+        else set({ funnel: null, funnelLoading: false });
+      },
+    );
+  },
+
+  setActiveFunnel: (id) => {
+    const { websiteId, period } = get();
+    if (!websiteId) return;
+    set({ activeFunnelId: id, funnelLoading: true });
+    fetchEndpoint<FunnelDetailResponse>("funnel", websiteId, period, {
+      funnelId: id,
+    }).then((funnel) => set({ funnel, funnelLoading: false }));
   },
 
   fetchAll: (websiteId, period) => {
@@ -246,6 +291,11 @@ export const useAnalyticsStore = create<AnalyticsState>((set, get) => ({
         (data) =>
           set({ realtimeCount: data?.count ?? null, realtimeLoading: false }),
       );
+    }
+
+    const activeId = get().activeFunnelId;
+    if (get().funnels && activeId) {
+      get().setActiveFunnel(activeId);
     }
   },
 }));

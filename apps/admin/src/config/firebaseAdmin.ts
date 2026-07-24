@@ -55,6 +55,9 @@ export const Collections = {
 
   /** App-level config edited from the CMS. Docs: `blog`, `site`, `portfolio`. */
   CONFIG: "config",
+
+  /** Per-website funnel definitions (doc IDs are funnel ids). Dynamic docs. */
+  FUNNELS: "funnels",
 } as const;
 
 export type ValidCollections = keyof typeof Collections;

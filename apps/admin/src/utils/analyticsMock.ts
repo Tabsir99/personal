@@ -419,6 +419,134 @@ export async function mockFetchEndpoint<T>(
     return { goals, series, totalVisitors } as unknown as T;
   }
 
+  if (path === "funnels" || path === "funnel") {
+    const steps = [
+      {
+        id: "fs1",
+        name: "👋 Visit landing page",
+        type: "pageview",
+        url: "/",
+        urlMatchType: "equals",
+        goalCompletionType: "completed",
+      },
+      {
+        id: "fs2",
+        name: "🔽 Problem",
+        type: "goal",
+        goalName: "scroll_to_problem",
+        goalCompletionType: "completed",
+      },
+      {
+        id: "fs3",
+        name: "🔽 Solution",
+        type: "goal",
+        goalName: "scroll_to_solution",
+        goalCompletionType: "completed",
+      },
+      {
+        id: "fs4",
+        name: "🔽 What You Will Get",
+        type: "goal",
+        goalName: "scroll_to_what_you_will_get",
+        goalCompletionType: "completed",
+      },
+      {
+        id: "fs5",
+        name: "🔽 Is This Possible",
+        type: "goal",
+        goalName: "scroll_to_is_this_possible",
+        goalCompletionType: "completed",
+      },
+      {
+        id: "fs6",
+        name: "🔽 Story",
+        type: "goal",
+        goalName: "scroll_to_story",
+        goalCompletionType: "completed",
+      },
+      {
+        id: "fs7",
+        name: "🔽 Pricing",
+        type: "goal",
+        goalName: "scroll_to_pricing",
+        goalCompletionType: "completed",
+      },
+    ];
+    const funnel = {
+      id: "mock-funnel-lp-scroll",
+      websiteId: "mock",
+      name: "📜 LP Scroll",
+      slug: "-lp-scroll",
+      steps,
+      isActive: true,
+      createdAt: "2025-09-01T10:26:37.942Z",
+      updatedAt: "2025-09-01T10:39:14.694Z",
+    };
+    if (path === "funnels") return { funnels: [funnel] } as unknown as T;
+
+    const values = [7419, 4655, 3153, 2155, 992, 563, 430];
+    const revenues = [6292, 4589, 4251, 3276, 2769, 2600, 2600];
+    const total = values[0];
+    const round1 = (n: number) => Math.round(n * 10) / 10;
+    const flag = (cc: string) =>
+      `https://purecatamphetamine.github.io/country-flag-icons/3x2/${cc}.svg`;
+    const refTpl: [string, number, string][] = [
+      ["marclou.com", 0.25, "https://icons.duckduckgo.com/ip3/marclou.com.ico"],
+      [
+        "trustmrr.com",
+        0.2,
+        "https://icons.duckduckgo.com/ip3/trustmrr.com.ico",
+      ],
+      ["X", 0.13, "https://icons.duckduckgo.com/ip3/x.com.ico"],
+    ];
+    const countryTpl: [string, string, number][] = [
+      ["US", "United States", 0.18],
+      ["FR", "France", 0.1],
+      ["DE", "Germany", 0.05],
+    ];
+
+    const data = values.map((value, i) => ({
+      id: `step${i + 1}`,
+      label: `Step ${i + 1}`,
+      value,
+      revenue: revenues[i],
+      stepIndex: i,
+      stepType: steps[i].type,
+      conversionRate: round1((value / total) * 100),
+      dropoffFromPrevious:
+        i === 0 ? 0 : round1(((values[i - 1] - value) / values[i - 1]) * 100),
+      topReferrers: refTpl.map(([referrer, pct, imageUrl]) => ({
+        referrer,
+        imageUrl,
+        visitors: Math.round(value * pct),
+        percentage: Math.round(pct * 100),
+      })),
+      topCountries: countryTpl.map(([countryCode, countryName, pct]) => ({
+        countryCode,
+        countryName,
+        imageUrl: flag(countryCode),
+        visitors: Math.round(value * pct),
+        percentage: round1(pct * 100),
+      })),
+    }));
+
+    return {
+      funnel,
+      data,
+      metrics: {
+        totalVisitors: total,
+        completions: values[values.length - 1],
+        overallConversionRate: round1(
+          (values[values.length - 1] / total) * 100,
+        ),
+        overallRevenuePerVisitor: 0.35,
+        period,
+        timezone: "Europe/Paris",
+        lastUpdated: new Date().toISOString(),
+      },
+    } as unknown as T;
+  }
+
   if (path === "bots") {
     const pointsCount =
       period === "today" || period === "yesterday"

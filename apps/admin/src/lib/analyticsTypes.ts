@@ -231,3 +231,88 @@ export interface BotPagesResponse {
   total: number;
   pages: BotPageMetric[];
 }
+
+// ── Funnels ──────────────────────────────────────────────────────────────
+// A funnel is an ordered chain of goals. Each step is an independent count for
+// the period, sized against the max across steps — nothing forces a decrease.
+
+export type FunnelStepMatch = "equals" | "contains" | "startsWith" | "endsWith";
+export type GoalCompletion = "completed";
+
+interface FunnelStepBase {
+  id: string;
+  name: string;
+  goalCompletionType: GoalCompletion;
+}
+
+export interface FunnelPageviewStep extends FunnelStepBase {
+  type: "pageview";
+  url: string;
+  urlMatchType: FunnelStepMatch;
+}
+
+export interface FunnelGoalStep extends FunnelStepBase {
+  type: "goal";
+  goalName: string;
+}
+
+export type FunnelStep = FunnelPageviewStep | FunnelGoalStep;
+
+export interface FunnelDefinition {
+  id: string;
+  websiteId: string;
+  name: string;
+  slug: string;
+  steps: FunnelStep[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FunnelStepReferrer {
+  referrer: string;
+  visitors: number;
+  imageUrl: string;
+  percentage: number;
+}
+
+export interface FunnelStepCountry {
+  countryCode: string;
+  countryName: string;
+  visitors: number;
+  percentage: number;
+  imageUrl: string;
+}
+
+export interface FunnelStepData {
+  id: string;
+  label: string;
+  value: number;
+  revenue: number;
+  stepIndex: number;
+  stepType: FunnelStep["type"];
+  conversionRate: number;
+  dropoffFromPrevious: number;
+  topReferrers: FunnelStepReferrer[];
+  topCountries: FunnelStepCountry[];
+}
+
+export interface FunnelMetrics {
+  totalVisitors: number;
+  completions: number;
+  overallConversionRate: number;
+  overallRevenuePerVisitor: number;
+  period: string;
+  timezone: string;
+  lastUpdated: string;
+}
+
+export interface FunnelsListResponse {
+  funnels: FunnelDefinition[];
+}
+
+export interface FunnelDetailResponse {
+  funnel: FunnelDefinition;
+  data: FunnelStepData[];
+  metrics: FunnelMetrics;
+}

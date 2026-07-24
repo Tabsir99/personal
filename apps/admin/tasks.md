@@ -28,9 +28,17 @@ North-star screenshots + spec: `~/.claude/projects/-home-tabsir-ap-reactp-person
 
 ### 1. Goals (ref: `01-goal-tab.png`)
 
-A goal = a tracked event elevated to a "goal" with a friendly name/category + colour. The `events` route already returns the raw event breakdown; this adds the config layer + per-goal series + the tab UI.
+**What a goal is**
 
-- [ ] **Goal-config store** — which events count as goals; per goal: friendly name + category (`scroll_to_problem` → "Scroll › Problem"), colour. CRUD + `+` add-goal.
+- The **smallest unit** of the three.
+- A goal = a `type="custom"` event emitted by the site's own tracking **script** — defined at the frontend, not in the dashboard.
+- The dashboard does not create goal data; it **elevates** an existing custom event: friendly name + category (`scroll_to_problem` → "Scroll › Problem") + colour.
+- **Independent** by nature — a goal answers "how many visitors did X", nothing about order.
+- Per-goal metrics: distinct visitors who fired it (completions), conversion rate, revenue.
+
+**Tasks**
+
+- [ ] **Goal-config store** — which custom events count as goals; per goal: friendly name + category, colour. CRUD + `+` add-goal.
 - [ ] Rename `events` route types Goal → Event (raw breakdown, not configured goals)
 - [ ] **Per-goal time series** — one coloured line per goal over the period (multi-line chart)
 - [ ] **Goal leaderboard** — ranked list right of the chart: name + completions + relative-magnitude bar; click to highlight/isolate that goal's line; search + filter
@@ -38,12 +46,32 @@ A goal = a tracked event elevated to a "goal" with a friendly name/category + co
 
 ### 2. Funnels (ref: `02-funnel-tab.png`, `04-`/`05-` hovers)
 
-- [ ] **Funnel-definition store** — ordered steps (pageview and/or event steps); funnel picker/switcher + `…` manage menu
-- [ ] **Funnel computation** — per-step in-order unique visitors, step-to-step drop-off, conversion from previous + from start, headline conversion rate; **step value** = attributed revenue ÷ visitors at step. Use ClickHouse `windowFunnel()` over per-visitor event sequences (aim: one scan).
-- [ ] **Funnel flow viz** — narrowing "river" across steps; per step emoji + name + visitor count; drop-off badges between steps; headline conversion rate + period
-- [ ] **Step hover** — drop-off to next, conversion from prev + from start, step value `$/visitor`, top sources, top countries (first step: value + sources + countries only, no drop-off)
+**What a funnel is**
+
+- A dashboard-created, ordered **chain of goals**. Steps *are* goals — no new script/tracking work; you define the unit goals once (see Goals), then assemble them here.
+- Built entirely in the dashboard via a **modal**: name the funnel, add + reorder steps (pick from existing goals), save.
+- On save it pulls each step-goal's count for the period and renders the funnel graph.
+- **Sizing is computed, never forced**: each step's magnitude = its count ÷ the **max count across steps** (largest step = ceiling / full width). Steps are **not** coerced to shrink — they can be equal, or a later step larger (unrealistic but allowed). Never draw a shrink that the numbers don't support.
+- **Between steps**: relative change vs the previous step (`(next − prev) / prev`) — a drop-off badge; can be down or up.
+- **Headline**: overall conversion + period.
+- Steps are **independent goal counts**, not an in-order sequence (no `windowFunnel`). Strict in-order sequencing is a possible later variant, not V1.
+
+**Tasks**
+
+- [ ] **Funnel-definition store** — ordered list of goal steps; create/edit **modal** (name, add/reorder steps); funnel picker/switcher + `…` manage menu
+- [ ] **Funnel computation** — per-step goal count, size relative to max, step-to-step relative change, from-previous + from-start ratios, headline conversion; **step value** = attributed revenue ÷ visitors at step. Backend approach TBD — evaluating against sample API responses.
+- [ ] **Funnel flow viz** — narrowing "river" (custom SVG, width ∝ count/max); per step emoji + name + visitor count; drop-off badges between steps; headline conversion + period
+- [ ] **Step hover** — change to next, ratios from prev + from start, step value `$/visitor`, top sources, top countries (first step: value + sources + countries only, no drop-off)
 
 ### 3. User Journeys (ref: `03-journey-tab-goal-completers.png`, `06-visitor-detail-drawer.png`)
+
+**What a journey is**
+
+- One visitor's (or identified user's) **full event timeline** — from their **first event** (landing on the site) to their **last event**.
+- Everything in between, in chronological order: pageviews, triggered goals/custom events, payments — whatever they did.
+- Scope is a **single visitor**. The User + Journey tabs are entry points; selecting a visitor opens their timeline in the shared visitor-detail drawer.
+
+**Tasks**
 
 Two tabs — **User** + **Journey** — feeding one shared visitor-detail drawer.
 
