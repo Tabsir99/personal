@@ -1,15 +1,7 @@
 import type { AnalyticsEventRow } from "@tabsircg/analytics-contract";
 
-/**
- * Deterministic, realistic analytics fixture — a test-side adaptation of
- * apps/analytics-worker/src/scripts/seed.ts. Same personas, weighted
- * acquisition sources, coherent geography, goals, payments and ~5% bot traffic,
- * but: (1) returns rows in memory instead of ingesting, (2) is driven by a
- * seeded RNG so runs reproduce, (3) emits AnalyticsEventRow directly (browser /
- * os / device / bot fields chosen from tables rather than parsed from UA
- * strings), and (4) keeps every dimension's cardinality bounded so no dashboard
- * query hits its LIMIT.
- */
+/** In-memory, RNG-seeded twin of analytics-worker's seed.ts. Every dimension's
+ * cardinality stays bounded so no dashboard query hits its LIMIT. */
 
 export interface SeedOptions {
   websiteId: string;
@@ -232,10 +224,8 @@ const DEVICES = [
   },
 ] as const satisfies Device[];
 
-// Supporters pay on desktop and return on a phone that shares the Chrome
-// browser — so their pageviews fan out across the browser dimension while
-// carrying revenue, which is exactly what the breakdown revenue dedup must
-// survive (naive SUM would double-count their payment in the Chrome bucket).
+// Supporters fan out across two devices sharing Chrome, so a naive SUM would
+// double-count their payment in the Chrome bucket. Exercises the revenue dedup.
 const SUPPORTER_DESKTOP = DEVICES[0];
 const SUPPORTER_PHONE = DEVICES[5];
 
@@ -245,6 +235,8 @@ const BLOG_PAGES = [
   "/blog/my-setup-2026",
 ] as const;
 const COFFEE_CENTS = [300, 500, 500, 1000, 1500, 2500, 5000] as const;
+const SUPPORTER_FIRST = ["Andrew", "Jakub", "Alejandro", "Mykolas"] as const;
+const SUPPORTER_LAST = ["Smith", "Nowak", "Garcia", "Petrauskas"] as const;
 
 const BOTS = [
   { name: "GPTBot", category: "training", weight: 0.28 },
@@ -391,6 +383,37 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       const pageview = (path: string) => push("pageview", path);
       const goal = (name: string, path: string) =>
         push("custom", path, { event_name: name });
+
+      /** Webhook-written: every browser-derived column is empty in production. */
+      const payment = (cents: number, extra: Record<string, string>) => {
+        if (ts >= windowEnd) return;
+        rows.push({
+          ...row(dev, {}),
+          type: "payment",
+          event_name: "payment",
+          session_id: sid,
+          domain: "",
+          href: "",
+          referrer: "",
+          language: "",
+          timezone: "",
+          country: "",
+          region: "",
+          city: "",
+          browser: "",
+          os: "",
+          device: "",
+          ip: "",
+          viewport_w: 0,
+          viewport_h: 0,
+          screen_w: 0,
+          screen_h: 0,
+          session_number: 0,
+          revenue_cents: cents,
+          extra_data: JSON.stringify(extra),
+          timestamp: Math.floor(ts),
+        });
+      };
       const advance = (min: number, max: number) =>
         (ts += int(min, max) * 1000);
 
@@ -446,12 +469,24 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
         goal("coffee_click", "/projects");
         advance(3, 8);
         pageview("/success");
-        push("payment", "/success", {
-          event_name: "payment",
-          revenue_cents: pick(COFFEE_CENTS),
-          extra_data: '{"provider":"stripe"}',
+        const first = pick(SUPPORTER_FIRST);
+        const last = pick(SUPPORTER_LAST);
+        payment(pick(COFFEE_CENTS), {
+          stripe_event_id: `evt_${visitor.id}-${snum}`,
+          kind: "charge",
+          customer_name: `${first} ${last}`,
+          customer_email: `${first.toLowerCase()}.${last.toLowerCase()}@example.com`,
+          customer_id: `cus_${visitor.id}`,
+          transaction_id: `pi_${visitor.id}-${snum}`,
         });
-        push("identify", "/success", { event_name: "identify" });
+        push("identify", "/success", {
+          event_name: "identify",
+          extra_data: JSON.stringify({
+            user_id: `usr_${visitor.id}`,
+            name: `${first} ${last}`,
+            image: "",
+          }),
+        });
       }
     };
 

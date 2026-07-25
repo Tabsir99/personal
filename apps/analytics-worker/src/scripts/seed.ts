@@ -298,6 +298,12 @@ interface VisitorProfile {
   viewportWidth: number;
   viewportHeight: number;
   persona: "bounce" | "explorer" | "signer" | "supporter";
+  // Fixed per visitor: `identify()` carries a stable account id, so re-rolling
+  // it per session would produce data no real integration can generate.
+  firstName: string;
+  lastName: string;
+  email: string;
+  userId: string;
   firstReferrer: string | null;
   firstQuery: string | null;
 }
@@ -406,6 +412,11 @@ function generateVisitor(): VisitorProfile {
     firstQuery = `ref=${source.ref}`;
   }
 
+  const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
+  const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+  const emailDomain =
+    EMAIL_DOMAINS[Math.floor(Math.random() * EMAIL_DOMAINS.length)];
+
   return {
     visitorId,
     country: countryProfile.code,
@@ -420,6 +431,10 @@ function generateVisitor(): VisitorProfile {
     viewportWidth,
     viewportHeight,
     persona,
+    firstName,
+    lastName,
+    email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${emailDomain}`,
+    userId: `usr_${visitorId.slice(0, 8)}`,
     firstReferrer,
     firstQuery,
   };
@@ -692,10 +707,6 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
     } else if (visitor.persona === "signer") {
       // Submitting newsletter or contact form
       const isNewsletter = Math.random() < 0.6;
-      const firstName =
-        FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
-      const lastName =
-        LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
 
       if (isNewsletter) {
         allEvents.push(buildPayload("pageview", "/blog"));
@@ -708,8 +719,8 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         );
         allEvents.push(
           buildPayload("identify", "/newsletter", {
-            user_id: `sub_${visitor.visitorId.slice(0, 8)}`,
-            name: `${firstName} ${lastName}`,
+            user_id: visitor.userId,
+            name: `${visitor.firstName} ${visitor.lastName}`,
             image: "",
           }),
         );
@@ -723,8 +734,8 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         allEvents.push(buildGoal("contact_submit", "/contact", { subject }));
         allEvents.push(
           buildPayload("identify", "/contact", {
-            user_id: `lead_${visitor.visitorId.slice(0, 8)}`,
-            name: `${firstName} ${lastName}`,
+            user_id: visitor.userId,
+            name: `${visitor.firstName} ${visitor.lastName}`,
             image: "",
           }),
         );
@@ -733,12 +744,6 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
       }
     } else if (visitor.persona === "supporter") {
       // Buy me a coffee supporter
-      const firstName =
-        FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
-      const lastName =
-        LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
-      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${EMAIL_DOMAINS[Math.floor(Math.random() * EMAIL_DOMAINS.length)]}`;
-
       if (sNum === 1) {
         // Session 1: Makes a coffee supporter payment
         allEvents.push(buildPayload("pageview", "/"));
@@ -760,17 +765,23 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         allEvents.push(
           buildPayload("pageview", `/success?session_id=${stripeSessionId}`),
         );
+        currentOffset += 4000;
         allEvents.push(
           buildPayload("payment", `/success?session_id=${stripeSessionId}`, {
-            stripe_session_id: stripeSessionId,
-            email,
+            stripe_event_id: `evt_${generateUUID().replace(/-/g, "").slice(0, 24)}`,
+            kind: "charge",
+            customer_name: `${visitor.firstName} ${visitor.lastName}`,
+            customer_email: visitor.email,
+            customer_id: `cus_${generateUUID().replace(/-/g, "").slice(0, 14)}`,
+            transaction_id: `pi_${generateUUID().replace(/-/g, "").slice(0, 24)}`,
             amount_cents: String(amountCents),
           }),
         );
+        currentOffset += 2000;
         allEvents.push(
           buildPayload("identify", `/success?session_id=${stripeSessionId}`, {
-            user_id: `supporter_${visitor.visitorId.slice(0, 8)}`,
-            name: `${firstName} ${lastName}`,
+            user_id: visitor.userId,
+            name: `${visitor.firstName} ${visitor.lastName}`,
             image: "",
           }),
         );
@@ -789,8 +800,8 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
             "identify",
             "/blog/building-a-lightweight-analytics-engine",
             {
-              user_id: `supporter_${visitor.visitorId.slice(0, 8)}`,
-              name: `${firstName} ${lastName}`,
+              user_id: visitor.userId,
+              name: `${visitor.firstName} ${visitor.lastName}`,
               image: "",
             },
           ),
@@ -860,17 +871,92 @@ allEvents.sort(
   (a, b) => (a.cfOverride?.timestamp ?? 0) - (b.cfOverride?.timestamp ?? 0),
 );
 
-const finalEvents = allEvents;
+/** SDK throttle (`events.ts`): a repeat href within 60s never leaves the browser. */
+function applyPageviewThrottle(events: DevEventPayload[]): DevEventPayload[] {
+  const lastSeen = new Map<string, number>();
+
+  return events.filter((e) => {
+    if (e.type !== "pageview") return true;
+    const key = `${e.visitorId} ${e.href}`;
+    const at = e.cfOverride?.timestamp ?? 0;
+    const previous = lastSeen.get(key);
+    if (previous !== undefined && at - previous < 60_000) return false;
+    lastSeen.set(key, at);
+    return true;
+  });
+}
+
+const throttled = applyPageviewThrottle(allEvents);
+const droppedByThrottle = allEvents.length - throttled.length;
+const finalEvents = throttled;
 console.log(
   `✨ Generated ${finalEvents.length} events (incl. ~5% bot traffic) from ${generatedVisitorCount} simulated visitors.`,
+);
+console.log(
+  `   ${droppedByThrottle} repeat pageviews dropped by the SDK's 60s throttle.`,
 );
 console.log(
   `Timeline spans from: ${new Date(finalEvents[0].cfOverride?.timestamp ?? 0).toLocaleString()} to ${new Date(finalEvents[finalEvents.length - 1].cfOverride?.timestamp ?? 0).toLocaleString()}\n`,
 );
 
+/** Every column at its Tinybird default, so builders name only what they write. */
+function emptyRow(websiteId: string, timestamp: number): AnalyticsEventRow {
+  return {
+    website_id: websiteId,
+    type: "",
+    domain: "",
+    href: "",
+    referrer: "",
+    visitor_id: "",
+    session_id: "",
+    language: "",
+    timezone: "",
+    event_name: "",
+    extra_data: "{}",
+    country: "",
+    region: "",
+    city: "",
+    browser: "",
+    os: "",
+    device: "",
+    is_bot: 0,
+    bot_category: "",
+    bot_name: "",
+    ip: "",
+    viewport_w: 0,
+    viewport_h: 0,
+    screen_w: 0,
+    screen_h: 0,
+    session_number: 0,
+    revenue_cents: 0,
+    timestamp,
+  };
+}
+
+/** `writePaymentEvent` fills only these columns; geo, UA, viewport and href
+ * stay empty. Seeded rows must match or we test an impossible shape. */
+function toPaymentRow(p: DevEventPayload): AnalyticsEventRow {
+  const { amount_cents, ...extra } = (p.extraData ?? {}) as Record<
+    string,
+    string
+  >;
+
+  return {
+    ...emptyRow(p.websiteId, p.cfOverride!.timestamp),
+    type: "payment",
+    visitor_id: p.visitorId,
+    session_id: p.sessionId,
+    event_name: "payment",
+    extra_data: JSON.stringify(extra).slice(0, 4000),
+    revenue_cents: Number(amount_cents ?? 0),
+  };
+}
+
 // Build the Tinybird row exactly as the worker does (UA -> browser/os/device,
-// bot detection), attaching real revenue to payments (the worker always sends 0).
+// bot detection).
 function toRow(p: DevEventPayload): AnalyticsEventRow {
+  if (p.type === "payment") return toPaymentRow(p);
+
   const cf = p.cfOverride!;
   const { browser, os, device } = parseUA(cf.userAgent);
   const { is_bot, bot_category, bot_name } = detectBot(cf.userAgent);
@@ -903,7 +989,7 @@ function toRow(p: DevEventPayload): AnalyticsEventRow {
     screen_w: p.screenWidth,
     screen_h: p.screenHeight,
     session_number: p.visitorSessionNumber,
-    revenue_cents: p.type === "payment" ? Number(extra.amount_cents ?? 0) : 0,
+    revenue_cents: 0,
     timestamp: cf.timestamp,
   };
 }
@@ -924,7 +1010,10 @@ function loadTinybirdCreds(): { host: string; token: string } {
       token: process.env.TINYBIRD_TOKEN,
     };
   }
-  const tinyb = join(findRepoRoot(process.cwd()), "apps/admin/.tinyb");
+  const tinyb = join(
+    findRepoRoot(process.cwd()),
+    "apps/analytics-worker/.tinyb",
+  );
   if (existsSync(tinyb)) {
     const parsed = JSON.parse(readFileSync(tinyb, "utf8"));
     if (parsed.host && parsed.token) {
@@ -932,7 +1021,7 @@ function loadTinybirdCreds(): { host: string; token: string } {
     }
   }
   throw new Error(
-    "Tinybird credentials not found. Set TINYBIRD_HOST + TINYBIRD_TOKEN, or provide apps/admin/.tinyb",
+    "Tinybird credentials not found. Set TINYBIRD_HOST + TINYBIRD_TOKEN, or run `tb login` from apps/analytics-worker.",
   );
 }
 
