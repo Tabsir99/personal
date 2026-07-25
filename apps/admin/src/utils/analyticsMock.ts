@@ -15,8 +15,12 @@ import type {
   BotMetric,
   BotTimeseriesPoint,
   BotPageMetric,
+  JourneyEntry,
+  JourneyVisitor,
+  JourneyResponse,
 } from "@/lib/analyticsTypes";
 import { rollupCampaigns } from "@/lib/analyticsTypes";
+import { formatCountryName } from "@/lib/countryUtils";
 
 interface GoalMetric {
   name: string;
@@ -547,6 +551,10 @@ export async function mockFetchEndpoint<T>(
     } as unknown as T;
   }
 
+  if (path === "journey") {
+    return mockJourney(extra) as unknown as T;
+  }
+
   if (path === "bots") {
     const pointsCount =
       period === "today" || period === "yesterday"
@@ -651,4 +659,683 @@ export async function mockFetchEndpoint<T>(
   }
 
   return null;
+}
+
+interface MockPerson {
+  first: string;
+  last: string;
+  country: string;
+  city: string;
+  device: string;
+  os: string;
+  browser: string;
+  width: number;
+  height: number;
+}
+
+const MOCK_PEOPLE: MockPerson[] = [
+  {
+    first: "Alejandra",
+    last: "Ruiz",
+    country: "ES",
+    city: "Parla",
+    device: "mobile",
+    os: "iOS",
+    browser: "Mobile Safari",
+    width: 393,
+    height: 695,
+  },
+  {
+    first: "Mykolas",
+    last: "Petrauskas",
+    country: "LT",
+    city: "Vilnius",
+    device: "mobile",
+    os: "iOS",
+    browser: "GSA",
+    width: 390,
+    height: 844,
+  },
+  {
+    first: "Fadi",
+    last: "Haddad",
+    country: "US",
+    city: "Austin",
+    device: "mobile",
+    os: "iOS",
+    browser: "Mobile Safari",
+    width: 428,
+    height: 926,
+  },
+  {
+    first: "Dorthe",
+    last: "Nilsen",
+    country: "NO",
+    city: "Bergen",
+    device: "desktop",
+    os: "macOS",
+    browser: "Opera",
+    width: 1512,
+    height: 982,
+  },
+  {
+    first: "Johan",
+    last: "Bakker",
+    country: "US",
+    city: "Seattle",
+    device: "mobile",
+    os: "iOS",
+    browser: "Mobile Safari",
+    width: 393,
+    height: 852,
+  },
+  {
+    first: "Priya",
+    last: "Nair",
+    country: "IN",
+    city: "Bengaluru",
+    device: "desktop",
+    os: "Windows",
+    browser: "Chrome",
+    width: 1920,
+    height: 1080,
+  },
+  {
+    first: "Tomás",
+    last: "Ferreira",
+    country: "BR",
+    city: "São Paulo",
+    device: "mobile",
+    os: "Android",
+    browser: "Chrome",
+    width: 412,
+    height: 915,
+  },
+  {
+    first: "Anke",
+    last: "Schneider",
+    country: "DE",
+    city: "Leipzig",
+    device: "desktop",
+    os: "macOS",
+    browser: "Safari",
+    width: 1440,
+    height: 900,
+  },
+  {
+    first: "Yuki",
+    last: "Tanaka",
+    country: "JP",
+    city: "Osaka",
+    device: "tablet",
+    os: "iPadOS",
+    browser: "Mobile Safari",
+    width: 1024,
+    height: 1366,
+  },
+  {
+    first: "Marc",
+    last: "Lemoine",
+    country: "FR",
+    city: "Lyon",
+    device: "desktop",
+    os: "Linux",
+    browser: "Firefox",
+    width: 1680,
+    height: 1050,
+  },
+  {
+    first: "Sofia",
+    last: "Rossi",
+    country: "IT",
+    city: "Bologna",
+    device: "mobile",
+    os: "iOS",
+    browser: "Mobile Safari",
+    width: 390,
+    height: 844,
+  },
+  {
+    first: "Liam",
+    last: "O'Connor",
+    country: "IE",
+    city: "Cork",
+    device: "desktop",
+    os: "Windows",
+    browser: "Edge",
+    width: 1536,
+    height: 864,
+  },
+  {
+    first: "Nadia",
+    last: "Haqq",
+    country: "AE",
+    city: "Dubai",
+    device: "mobile",
+    os: "Android",
+    browser: "Samsung Internet",
+    width: 384,
+    height: 854,
+  },
+  {
+    first: "Kwame",
+    last: "Mensah",
+    country: "GH",
+    city: "Accra",
+    device: "mobile",
+    os: "Android",
+    browser: "Chrome",
+    width: 360,
+    height: 800,
+  },
+  {
+    first: "Elena",
+    last: "Volkova",
+    country: "PL",
+    city: "Kraków",
+    device: "desktop",
+    os: "Windows",
+    browser: "Chrome",
+    width: 1920,
+    height: 1080,
+  },
+  {
+    first: "Diego",
+    last: "Morales",
+    country: "MX",
+    city: "Guadalajara",
+    device: "mobile",
+    os: "iOS",
+    browser: "Mobile Safari",
+    width: 375,
+    height: 812,
+  },
+  {
+    first: "Ingrid",
+    last: "Larsen",
+    country: "SE",
+    city: "Malmö",
+    device: "desktop",
+    os: "macOS",
+    browser: "Chrome",
+    width: 1728,
+    height: 1117,
+  },
+  {
+    first: "Hassan",
+    last: "Karim",
+    country: "PK",
+    city: "Lahore",
+    device: "mobile",
+    os: "Android",
+    browser: "Chrome",
+    width: 393,
+    height: 873,
+  },
+  {
+    first: "Chloe",
+    last: "Dubois",
+    country: "CA",
+    city: "Montréal",
+    device: "desktop",
+    os: "macOS",
+    browser: "Safari",
+    width: 1512,
+    height: 982,
+  },
+  {
+    first: "Ravi",
+    last: "Deshmukh",
+    country: "IN",
+    city: "Pune",
+    device: "desktop",
+    os: "Linux",
+    browser: "Chrome",
+    width: 1600,
+    height: 900,
+  },
+  {
+    first: "Amara",
+    last: "Okafor",
+    country: "NG",
+    city: "Lagos",
+    device: "mobile",
+    os: "Android",
+    browser: "Opera",
+    width: 360,
+    height: 780,
+  },
+  {
+    first: "Jonas",
+    last: "Weber",
+    country: "AT",
+    city: "Graz",
+    device: "desktop",
+    os: "Windows",
+    browser: "Firefox",
+    width: 1920,
+    height: 1200,
+  },
+  {
+    first: "Mei",
+    last: "Lin",
+    country: "SG",
+    city: "Singapore",
+    device: "mobile",
+    os: "iOS",
+    browser: "Mobile Safari",
+    width: 390,
+    height: 844,
+  },
+  {
+    first: "Oliver",
+    last: "Brandt",
+    country: "GB",
+    city: "Bristol",
+    device: "desktop",
+    os: "macOS",
+    browser: "Arc",
+    width: 1512,
+    height: 945,
+  },
+  {
+    first: "Zeynep",
+    last: "Aydın",
+    country: "TR",
+    city: "İzmir",
+    device: "mobile",
+    os: "Android",
+    browser: "Chrome",
+    width: 412,
+    height: 892,
+  },
+  {
+    first: "Lucas",
+    last: "Silva",
+    country: "PT",
+    city: "Porto",
+    device: "desktop",
+    os: "Windows",
+    browser: "Chrome",
+    width: 1366,
+    height: 768,
+  },
+  {
+    first: "Hana",
+    last: "Kim",
+    country: "KR",
+    city: "Busan",
+    device: "mobile",
+    os: "Android",
+    browser: "Samsung Internet",
+    width: 384,
+    height: 854,
+  },
+  {
+    first: "Noah",
+    last: "Fischer",
+    country: "CH",
+    city: "Bern",
+    device: "desktop",
+    os: "macOS",
+    browser: "Safari",
+    width: 1440,
+    height: 900,
+  },
+  {
+    first: "Isabel",
+    last: "Castro",
+    country: "CL",
+    city: "Valparaíso",
+    device: "mobile",
+    os: "iOS",
+    browser: "Mobile Safari",
+    width: 375,
+    height: 667,
+  },
+  {
+    first: "Emil",
+    last: "Sørensen",
+    country: "DK",
+    city: "Aarhus",
+    device: "desktop",
+    os: "Linux",
+    browser: "Firefox",
+    width: 1920,
+    height: 1080,
+  },
+  {
+    first: "Farida",
+    last: "Zayed",
+    country: "EG",
+    city: "Alexandria",
+    device: "mobile",
+    os: "Android",
+    browser: "Chrome",
+    width: 393,
+    height: 851,
+  },
+  {
+    first: "Peter",
+    last: "Novak",
+    country: "CZ",
+    city: "Brno",
+    device: "desktop",
+    os: "Windows",
+    browser: "Edge",
+    width: 1600,
+    height: 900,
+  },
+  {
+    first: "Aroha",
+    last: "Ngata",
+    country: "NZ",
+    city: "Wellington",
+    device: "tablet",
+    os: "iPadOS",
+    browser: "Mobile Safari",
+    width: 834,
+    height: 1194,
+  },
+  {
+    first: "Sven",
+    last: "Janssen",
+    country: "NL",
+    city: "Utrecht",
+    device: "desktop",
+    os: "macOS",
+    browser: "Chrome",
+    width: 1728,
+    height: 1117,
+  },
+  {
+    first: "Camila",
+    last: "Reyes",
+    country: "AR",
+    city: "Rosario",
+    device: "mobile",
+    os: "Android",
+    browser: "Chrome",
+    width: 360,
+    height: 800,
+  },
+  {
+    first: "Arthur",
+    last: "Blake",
+    country: "AU",
+    city: "Adelaide",
+    device: "desktop",
+    os: "Windows",
+    browser: "Chrome",
+    width: 2560,
+    height: 1440,
+  },
+];
+
+const MOCK_SOURCES = [
+  {
+    domain: "www.google.com",
+    channel: "Search",
+    referrer: "https://www.google.com/",
+    params: {},
+  },
+  { domain: "", channel: "Direct / None", referrer: "", params: {} },
+  {
+    domain: "marclou.com",
+    channel: "Referral",
+    referrer: "https://marclou.com/blog/ship-fast",
+    params: {},
+  },
+  {
+    domain: "t.co",
+    channel: "Social",
+    referrer: "https://t.co/",
+    params: {
+      utm_source: "twitter",
+      utm_medium: "paid_social",
+      utm_campaign: "launch_2026",
+    },
+  },
+  {
+    domain: "www.producthunt.com",
+    channel: "Referral",
+    referrer: "https://www.producthunt.com/posts/tabsir",
+    params: { ref: "producthunt" },
+  },
+  {
+    domain: "news.ycombinator.com",
+    channel: "Referral",
+    referrer: "https://news.ycombinator.com/item?id=41231",
+    params: {},
+  },
+  {
+    domain: "",
+    channel: "Email",
+    referrer: "",
+    params: {
+      utm_source: "newsletter",
+      utm_medium: "email",
+      utm_campaign: "weekly_digest",
+    },
+  },
+];
+
+const MOCK_PATHS = [
+  "/",
+  "/pricing",
+  "/features",
+  "/blog/ship-fast",
+  "/docs/quickstart",
+  "/changelog",
+];
+
+const MOCK_EVENT_NAMES = [
+  "scroll_to_problem",
+  "scroll_to_solution",
+  "scroll_to_pricing",
+  "scroll_to_story",
+  "scroll_to_faq",
+  "clicked_pricing_cta",
+  "newsletter_signup",
+  "clicked_demo_video",
+];
+
+const MOCK_AMOUNTS = [169, 299, 169, 89, 169, 499, 299, 169];
+
+const HOUR = 3600 * 1000;
+const DAY = 24 * HOUR;
+
+function seededRandom(seed: number): () => number {
+  let state = seed + 0x6d2b79f5;
+  return () => {
+    state = Math.imul(state ^ (state >>> 15), state | 1);
+    state ^= state + Math.imul(state ^ (state >>> 7), state | 61);
+    return ((state ^ (state >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function buildMockVisitor(index: number, paying: boolean, now: number) {
+  const rng = seededRandom(index * 977);
+  const person = MOCK_PEOPLE[index % MOCK_PEOPLE.length];
+  const source = MOCK_SOURCES[Math.floor(rng() * MOCK_SOURCES.length)];
+  const amount = paying ? MOCK_AMOUNTS[index % MOCK_AMOUNTS.length] : 0;
+
+  const daysSinceFinished = [0.01, 0.09, 0.4, 1.1, 2.6, 5.3, 9.2, 16, 24, 41][
+    index % 10
+  ];
+  const finishedAt = Math.round(
+    now - daysSinceFinished * DAY - rng() * 5 * HOUR,
+  );
+
+  const spanDays = [0.002, 0.02, 0.9, 2.1, 14, 47, 96, 160][index % 8];
+  const firstTouch = Math.round(finishedAt - spanDays * DAY);
+
+  const entries: JourneyEntry[] = [
+    {
+      timestamp: firstTouch,
+      eventType: "referral",
+      isGoal: false,
+      data: {
+        domainName: source.domain,
+        channel: source.channel,
+        fullReferrer: source.referrer,
+        trackingParams: Object.entries(source.params).map(([type, value]) => ({
+          type,
+          value,
+        })),
+      },
+    },
+  ];
+
+  const stepCount = 4 + Math.floor(rng() * 6);
+  const stride = Math.max(
+    HOUR / 60,
+    ((finishedAt - firstTouch) * 0.92) / stepCount,
+  );
+  let cursor = firstTouch;
+  let pageviews = 0;
+
+  for (let step = 0; step < stepCount; step++) {
+    if (rng() < 0.45 || step === 0) {
+      const repeats = rng() < 0.25 ? 2 + Math.floor(rng() * 2) : 1;
+      const last = cursor + (repeats - 1) * Math.round(stride * 0.2);
+      entries.push({
+        timestamp: cursor,
+        eventType: "pageview",
+        isGoal: false,
+        data: {
+          path:
+            step === 0
+              ? "/"
+              : MOCK_PATHS[Math.floor(rng() * MOCK_PATHS.length)],
+          hostname: "tabsir.dev",
+          count: repeats,
+        },
+        lastTimestamp: last,
+      });
+      pageviews += repeats;
+      cursor = last;
+    } else {
+      const eventName =
+        MOCK_EVENT_NAMES[Math.floor(rng() * MOCK_EVENT_NAMES.length)];
+      entries.push({
+        timestamp: cursor,
+        eventType: "custom",
+        isGoal: false,
+        data: {
+          eventName,
+          metadata: {
+            scroll_percentage: Math.round(rng() * 100),
+            threshold: 0.5,
+            delay: Math.round(rng() * 2000),
+          },
+        },
+      });
+    }
+    cursor += Math.round(stride * (0.4 + rng()));
+  }
+
+  const goalCompletedAt = paying ? finishedAt : null;
+
+  if (paying && goalCompletedAt !== null) {
+    entries.push({
+      timestamp: goalCompletedAt,
+      eventType: "payment",
+      isGoal: true,
+      data: { amount },
+    });
+  }
+
+  const lastSeenAt = entries[entries.length - 1].timestamp;
+  const transactionId = `pi_3Q${(index * 7919).toString(36).toUpperCase()}`;
+  const surname =
+    MOCK_PEOPLE[(index * 7 + 3) % MOCK_PEOPLE.length]?.last ?? person.last;
+  const fullName = `${person.first} ${surname}`;
+  const email = `${person.first}.${surname}`
+    .toLowerCase()
+    .replace(/[^a-z.]/g, "")
+    .concat("@example.com");
+
+  return {
+    visitorId: `v_${(index * 6151 + 104729).toString(36)}`,
+    customerName: paying ? fullName : "",
+    customerEmail: paying ? email : "",
+    profileMetadata: paying
+      ? {
+          stripe_event_id: `evt_${transactionId.slice(3)}`,
+          kind: "charge",
+          customer_name: fullName,
+          customer_email: email,
+          customer_id: `cus_${(index * 5147).toString(36).toUpperCase()}`,
+          transaction_id: transactionId,
+        }
+      : {},
+    amount,
+    channel: source.channel,
+    sourceAttribution: {
+      timestamp: firstTouch,
+      referrer: source.referrer,
+      params: {
+        utm_source: "",
+        utm_medium: "",
+        utm_campaign: "",
+        utm_content: "",
+        utm_term: "",
+        ref: "",
+        ...source.params,
+      },
+    },
+    countryCode: person.country,
+    countryName: formatCountryName(person.country),
+    cityName: person.city,
+    browserName: person.browser,
+    osName: person.os,
+    deviceType: person.device,
+    viewport: { width: person.width, height: person.height },
+    pageviews,
+    timeBeforeGoal:
+      goalCompletedAt === null ? null : goalCompletedAt - firstTouch,
+    goalCompletedAt,
+    lastSeenAt,
+    completeJourney: entries,
+    truncated: false,
+  } satisfies JourneyVisitor;
+}
+
+function mockJourney(extra?: Record<string, string>): JourneyResponse {
+  const goal = extra?.goal ?? "payment";
+  const skip = Number(extra?.skip ?? "0");
+  const limit = Number(extra?.limit ?? "10");
+  const search = (extra?.search ?? "").trim().toLowerCase();
+
+  const now = Date.now();
+  const paying = goal !== "all";
+  const population = paying ? 29 : 214;
+
+  const all = Array.from({ length: population }, (_, i) =>
+    buildMockVisitor(i, paying || i % 4 === 0, now),
+  ).sort(
+    (a, b) =>
+      (b.goalCompletedAt ?? b.lastSeenAt) - (a.goalCompletedAt ?? a.lastSeenAt),
+  );
+
+  const matched = search
+    ? all.filter((v) =>
+        JSON.stringify(v.profileMetadata).toLowerCase().includes(search),
+      )
+    : all;
+
+  const visitors = matched.slice(skip, skip + limit);
+
+  return {
+    goal,
+    visitors,
+    uv: matched.length,
+    pagination: {
+      limit,
+      skip,
+      totalCount: matched.length,
+      hasMore: skip + visitors.length < matched.length,
+    },
+  };
 }
