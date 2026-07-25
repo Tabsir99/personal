@@ -1,0 +1,301 @@
+import { describe, expect, it } from "vitest";
+import {
+  assembleVisitor,
+  groupByVisitor,
+  MAX_ROWS_PER_VISITOR,
+  type JourneyRow,
+} from "@/app/api/analytics/journey/assemble";
+import type {
+  JourneyPageviewEntry,
+  JourneyReferralEntry,
+} from "@/lib/analyticsTypes";
+
+// Journey assembly only; the SQL feeding it has its own integration test.
+
+const T0 = 1_700_000_000_000;
+const PERIOD_START = T0 - 86_400_000;
+const PERIOD_END = T0 + 86_400_000;
+
+function row(over: Partial<JourneyRow> = {}): JourneyRow {
+  return {
+    visitor_id: "v1",
+    timestamp: T0,
+    type: "pageview",
+    event_name: "pageview",
+    href: "https://example.com/",
+    referrer: "",
+    domain: "example.com",
+    channel: "Direct",
+    extra_data: "",
+    revenue_cents: 0,
+    country: "GB",
+    city: "Chatham",
+    browser: "Chrome",
+    os: "Mac OS",
+    device: "desktop",
+    viewport_w: 1920,
+    viewport_h: 929,
+    ...over,
+  };
+}
+
+const PAYMENT_EXTRA = JSON.stringify({
+  customer_name: "Andrew Smith",
+  customer_email: "andrew.smith@gmail.com",
+  customer_id: "cus_123",
+  transaction_id: "pi_456",
+});
+
+/** Webhook-written, so every browser-derived column is empty. */
+function paymentRow(over: Partial<JourneyRow> = {}): JourneyRow {
+  return row({
+    type: "payment",
+    event_name: "payment",
+    revenue_cents: 29_900,
+    extra_data: PAYMENT_EXTRA,
+    href: "",
+    domain: "",
+    channel: "Direct",
+    country: "",
+    city: "",
+    browser: "",
+    os: "",
+    device: "",
+    viewport_w: 0,
+    viewport_h: 0,
+    ...over,
+  });
+}
+
+const assemble = (rows: JourneyRow[]) =>
+  assembleVisitor(rows, "payment", PERIOD_START, PERIOD_END);
+
+describe("journey assembly", () => {
+  it("lifts customer identity off the payment row", () => {
+    const visitor = assemble([row(), paymentRow({ timestamp: T0 + 1000 })]);
+
+    expect(visitor.customerName).toBe("Andrew Smith");
+    expect(visitor.customerEmail).toBe("andrew.smith@gmail.com");
+    expect(visitor.profileMetadata).toEqual({
+      customer_name: "Andrew Smith",
+      customer_email: "andrew.smith@gmail.com",
+      customer_id: "cus_123",
+      transaction_id: "pi_456",
+    });
+  });
+
+  it("promotes eventName out of custom event parameters", () => {
+    const visitor = assemble([
+      row({
+        type: "custom",
+        event_name: "scroll_to_pricing",
+        extra_data: JSON.stringify({
+          eventName: "scroll_to_pricing",
+          scroll_percentage: "82",
+          threshold: "0.8",
+        }),
+      }),
+    ]);
+
+    const custom = visitor.completeJourney[1];
+    expect(custom).toMatchObject({
+      eventType: "custom",
+      data: {
+        eventName: "scroll_to_pricing",
+        metadata: { scroll_percentage: "82", threshold: "0.8" },
+      },
+    });
+    expect(
+      (custom as { data: { metadata: Record<string, unknown> } }).data.metadata,
+    ).not.toHaveProperty("eventName");
+  });
+
+  it("collapses only consecutive views of the same path", () => {
+    const visitor = assemble([
+      row({ href: "https://example.com/course", timestamp: T0 }),
+      row({ href: "https://example.com/course", timestamp: T0 + 1000 }),
+      row({ href: "https://example.com/course", timestamp: T0 + 2000 }),
+      row({ href: "https://example.com/pricing", timestamp: T0 + 3000 }),
+      row({ href: "https://example.com/course", timestamp: T0 + 4000 }),
+    ]);
+
+    const pageviews = visitor.completeJourney.filter(
+      (e) => e.eventType === "pageview",
+    ) as JourneyPageviewEntry[];
+
+    expect(pageviews.map((p) => [p.data.path, p.data.count])).toEqual([
+      ["/course", 3],
+      ["/pricing", 1],
+      ["/course", 1],
+    ]);
+    expect(pageviews[0]!.lastTimestamp).toBe(T0 + 2000);
+    expect(visitor.pageviews).toBe(5);
+  });
+
+  it("synthesises a referral head entry with tracking params", () => {
+    const visitor = assemble([
+      row({
+        href: "https://example.com/?utm_source=newsletter&ref=producthunt",
+        referrer: "https://www.google.com/",
+        channel: "Search",
+      }),
+    ]);
+
+    const referral = visitor.completeJourney[0] as JourneyReferralEntry;
+    expect(referral.eventType).toBe("referral");
+    expect(referral.data.channel).toBe("Search");
+    expect(referral.data.fullReferrer).toBe("https://www.google.com/");
+    expect(referral.data.trackingParams).toEqual([
+      { type: "utm_source", value: "newsletter" },
+      { type: "ref", value: "producthunt" },
+    ]);
+    expect(visitor.channel).toBe("Search");
+    expect(visitor.sourceAttribution.params.utm_medium).toBe("");
+  });
+
+  it("measures time to goal from first touch, not from the period start", () => {
+    const firstTouch = PERIOD_START - 10 * 86_400_000;
+    const visitor = assemble([
+      row({ timestamp: firstTouch }),
+      row({ timestamp: T0 - 5000 }),
+      paymentRow({ timestamp: T0 }),
+    ]);
+
+    expect(visitor.goalCompletedAt).toBe(T0);
+    expect(visitor.timeBeforeGoal).toBe(T0 - firstTouch);
+    expect(visitor.completeJourney[0]!.timestamp).toBe(firstTouch);
+  });
+
+  it("ignores goal completions outside the period", () => {
+    const visitor = assemble([
+      row({ timestamp: PERIOD_START - 5000 }),
+      paymentRow({ timestamp: PERIOD_START - 1000 }),
+    ]);
+
+    expect(visitor.goalCompletedAt).toBeNull();
+    expect(visitor.timeBeforeGoal).toBeNull();
+    expect(visitor.completeJourney.some((e) => e.isGoal)).toBe(false);
+  });
+
+  it("takes the first goal completion when a visitor converts twice", () => {
+    const visitor = assemble([
+      row({ timestamp: T0 - 10_000 }),
+      paymentRow({ timestamp: T0 }),
+      paymentRow({ timestamp: T0 + 60_000 }),
+    ]);
+
+    expect(visitor.goalCompletedAt).toBe(T0);
+    expect(visitor.completeJourney.filter((e) => e.isGoal)).toHaveLength(1);
+    expect(visitor.amount).toBe(598);
+  });
+
+  it("skips the profile-less payment row when it is the visitor's last event", () => {
+    // Pay-and-leave: the newest row carries no geo/UA.
+    const visitor = assemble([
+      row({ timestamp: T0 - 5000, country: "ES", city: "Parla", os: "iOS" }),
+      paymentRow({ timestamp: T0 }),
+    ]);
+
+    expect(visitor.countryCode).toBe("ES");
+    expect(visitor.countryName).toBe("Spain");
+    expect(visitor.cityName).toBe("Parla");
+    expect(visitor.osName).toBe("iOS");
+    expect(visitor.browserName).toBe("Chrome");
+    expect(visitor.viewport).toEqual({ width: 1920, height: 929 });
+    // The payment is still the last thing they did.
+    expect(visitor.lastSeenAt).toBe(T0);
+  });
+
+  it("reads profile from the latest row and attribution from the first", () => {
+    const visitor = assemble([
+      row({ timestamp: T0, referrer: "https://t.co/abc", device: "mobile" }),
+      row({
+        timestamp: T0 + 5000,
+        referrer: "",
+        device: "desktop",
+        browser: "Firefox",
+        country: "ES",
+        city: "Parla",
+        viewport_w: 1440,
+        viewport_h: 900,
+      }),
+    ]);
+
+    expect(visitor.deviceType).toBe("desktop");
+    expect(visitor.browserName).toBe("Firefox");
+    expect(visitor.countryCode).toBe("ES");
+    expect(visitor.countryName).toBe("Spain");
+    expect(visitor.viewport).toEqual({ width: 1440, height: 900 });
+    expect(visitor.sourceAttribution.referrer).toBe("https://t.co/abc");
+    expect(visitor.sourceAttribution.timestamp).toBe(T0);
+  });
+
+  it("converts payment amounts from cents to major units", () => {
+    const visitor = assemble([paymentRow({ revenue_cents: 16_900 })]);
+
+    expect(visitor.completeJourney[1]).toMatchObject({
+      eventType: "payment",
+      isGoal: true,
+      data: { amount: 169 },
+    });
+    expect(visitor.amount).toBe(169);
+  });
+
+  it("drops the sentinel row and flags truncation past the cap", () => {
+    // The query fetches MAX+1 rows per visitor to make this detectable.
+    const rows = Array.from({ length: MAX_ROWS_PER_VISITOR + 1 }, (_, i) =>
+      row({ href: `https://example.com/p${i}`, timestamp: T0 + i * 1000 }),
+    );
+    const visitor = assemble(rows);
+
+    expect(visitor.truncated).toBe(true);
+    // MAX kept rows plus the referral head; oldest dropped.
+    expect(visitor.completeJourney).toHaveLength(MAX_ROWS_PER_VISITOR + 1);
+    const firstPage = visitor.completeJourney[1] as JourneyPageviewEntry;
+    expect(firstPage.data.path).toBe("/p1");
+  });
+
+  it("does not flag truncation at exactly the cap", () => {
+    const rows = Array.from({ length: MAX_ROWS_PER_VISITOR }, (_, i) =>
+      row({ href: `https://example.com/p${i}`, timestamp: T0 + i * 1000 }),
+    );
+    const visitor = assemble(rows);
+
+    expect(visitor.truncated).toBe(false);
+    expect(visitor.completeJourney).toHaveLength(MAX_ROWS_PER_VISITOR + 1);
+  });
+
+  it("skips goal detection entirely for the all-visitors listing", () => {
+    const rows = [row({ timestamp: T0 - 5000 }), paymentRow({ timestamp: T0 })];
+    const visitor = assembleVisitor(rows, null, PERIOD_START, PERIOD_END);
+
+    expect(visitor.goalCompletedAt).toBeNull();
+    expect(visitor.timeBeforeGoal).toBeNull();
+    expect(visitor.completeJourney.some((e) => e.isGoal)).toBe(false);
+    // Identity and revenue don't depend on a goal.
+    expect(visitor.customerName).toBe("Andrew Smith");
+    expect(visitor.amount).toBe(299);
+    expect(visitor.lastSeenAt).toBe(T0);
+  });
+
+  it("leaves identity blank when a visitor never paid", () => {
+    const visitor = assemble([row(), row({ timestamp: T0 + 1000 })]);
+
+    expect(visitor.customerName).toBe("");
+    expect(visitor.customerEmail).toBe("");
+    expect(visitor.profileMetadata).toEqual({});
+    expect(visitor.amount).toBe(0);
+  });
+
+  it("groups flat rows into per-visitor timelines in arrival order", () => {
+    const groups = groupByVisitor([
+      row({ visitor_id: "a", timestamp: T0 }),
+      row({ visitor_id: "a", timestamp: T0 + 1 }),
+      row({ visitor_id: "b", timestamp: T0 + 2 }),
+    ]);
+
+    expect([...groups.keys()]).toEqual(["a", "b"]);
+    expect(groups.get("a")).toHaveLength(2);
+    expect(groups.get("b")).toHaveLength(1);
+  });
+});

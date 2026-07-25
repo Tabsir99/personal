@@ -3,11 +3,11 @@
 How analytics works in this app — the data path, the identity model, and how the
 dashboard queries it.
 
-The client SDK and the ingestion Worker live in a **separate repo**, not this
-monorepo: `/home/tabsir/ap/reactp/tabsircg/analytics` — `packages/analytics` (the
-`@tabsircg/analytics` browser SDK) and `packages/backend` (the CF Worker). This
-doc describes observable behavior; the cookie/session logic is authoritative
-there.
+The client SDK and the ingestion Worker live in this monorepo:
+`packages/analytics` (the `@tabsircg/analytics` browser SDK) and
+`apps/analytics-worker` (the CF Worker, plus the Tinybird `.datasource` DDL).
+This doc describes observable behavior; the cookie/session logic is
+authoritative there.
 
 ## Stack
 
@@ -35,7 +35,24 @@ website_id  type  domain  href  referrer  visitor_id  session_id
 language  timezone  event_name  extra_data(JSON)  country  region  city
 browser  os  device  is_bot  bot_category  bot_name  ip
 viewport_w  viewport_h  screen_w  screen_h  session_number  timestamp
+revenue_cents
 ```
+
+`revenue_cents` is only ever set by the Stripe webhook path; the browser SDK
+writes zero. **Revenue is USD-only by construction** — there is no currency
+column, so charging in a second currency is a schema change, not a display fix
+(converting needs the FX rate as of the payment).
+
+> **`type='payment'` rows are sparse.** They come from `writePaymentEvent`, called
+> by the Stripe webhook, which knows the visitor but nothing about their browser.
+> `domain`, `href`, `referrer`, `language`, `timezone`, geo, UA and viewport are
+> all empty, and `session_number` is 0. Anything reading "the visitor's latest
+> row" must skip them or it will render a blank profile for every visitor who
+> paid and left. Both seed scripts reproduce this shape deliberately.
+
+The datasource also declares a `bloom_filter` skip index on `visitor_id`
+(`INDEXES` in the `.datasource`). It exists solely for the journey route's
+unbounded per-visitor lookup — see below.
 
 Server-side enrichment happens in the Worker at ingest, so these arrive as real
 columns (no query-time parsing needed):
@@ -71,7 +88,7 @@ Set by the client SDK as cookies (prefix `cgd_`):
 
 - **Live queries only**, no pre-aggregation: every route `POST`s SQL to Tinybird's
   `/v0/sql` endpoint (body = SQL + ` FORMAT JSON`, `Authorization: Bearer
-  {TINYBIRD_TOKEN}`). Env: `TINYBIRD_HOST`, `TINYBIRD_TOKEN`.
+{TINYBIRD_TOKEN}`). Env: `TINYBIRD_HOST`, `TINYBIRD_TOKEN`.
 - **One SQL statement per route** — multi-part panels are built with `UNION ALL` +
   a `level` discriminator and subqueries, never multiple round-trips.
 - Every route accepts `?websiteId=&period=&granularity=`; parsing + the shared
@@ -90,3 +107,60 @@ Set by the client SDK as cookies (prefix `cgd_`):
 | `/api/analytics/realtime`   | Active visitors (last 10 min)                                    |
 | `/api/analytics/bots`       | Crawler timeseries by category + per-bot totals                  |
 | `/api/analytics/bots/pages` | Pages hit by a single bot (`?bot=`)                              |
+| `/api/analytics/journey`    | Goal completers + their full lifetime timelines (`?goal=`)       |
+
+## Journeys
+
+`/api/analytics/journey` breaks the "period bounds the query" rule that every
+other route follows, deliberately:
+
+- The **period selects which visitors appear** — those who fired `?goal=`
+  (default `payment`) inside it, newest completion first, `?limit=`/`?skip=`
+  paged. `?goal=all` drops the goal filter and lists every visitor active in the
+  period ranked by last activity, so a journey that converted on nothing is
+  still reachable. It costs roughly 4× the scan of a goal-scoped page, because
+  there is no `type` to pin.
+- The **events returned for those visitors are unbounded** — a journey is a
+  visitor's whole lifetime, so the outer query carries no time filter. That
+  unbounded `visitor_id IN (…)` lookup is why the datasource declares a
+  `bloom_filter` skip index on `visitor_id`; the sort key
+  (`website_id, is_bot, type, timestamp`) can't serve it.
+
+Two things about that SQL are load-bearing:
+
+- **The inner select pins `type`**, not just `event_name`. `event_name` isn't in
+  the sort key, so filtering on it alone leaves `type` unconstrained and the
+  index can't reach `timestamp`. Pinning `type` (`payment` for the payment goal,
+  `custom` for every other) cut a 30-day probe from **927k scanned rows to 54k**.
+- **It stays `IN (subquery)` rather than a join**, so ClickHouse can push the
+  visitor set down to the skip index — a join would force a full scan. The total
+  visitor count rides along as a scalar subquery column, keeping the whole page
+  to one round trip.
+
+`LIMIT 501 BY visitor_id` caps each timeline **in the database**, so a runaway
+visitor never reaches the wire; the 501st row exists only to make truncation
+detectable and is dropped during assembly. Real traffic peaks near a dozen
+lifetime events per visitor, so this has never fired.
+
+There is deliberately **no index on `event_name`**. Every type but `custom` has
+exactly one `event_name` (equal to the type), so the predicate is already
+redundant once `type` is pinned; within `custom` there are ~12 names spread
+evenly, which no granule would be missing — a bloom filter would skip nothing
+and cost write throughput.
+
+Timelines are **batch-prefetched with the list** rather than fetched per visitor,
+so opening a visitor costs no round trip. Two things keep that payload sane: runs
+of repeat views of the same path collapse into one entry with a `count` and a
+`lastTimestamp`, and each visitor is capped at 500 entries (`truncated: true`
+when it bites).
+
+Source classification reuses `buildChannelSQL` from `sources/channels.ts`, so a
+journey's channel and the Sources panel agree by construction. The raw referrer
+travels too, for `<Favicon source={…}>` to render client-side — the route ships
+no icon or flag URLs.
+
+Customer identity rides on `type='payment'` rows, whose `extra_data` carries
+`customer_name` / `customer_email` / `customer_id` / `transaction_id`, written by
+the Stripe webhook. It is returned **unmasked** — the dashboard is single-owner
+and JWT-protected, so masking your own customer list would only get in the way.
+Payments written before that webhook change carry no identity and render blank.
