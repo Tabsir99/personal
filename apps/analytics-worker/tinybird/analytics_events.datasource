@@ -28,5 +28,8 @@ SCHEMA >
     revenue_cents Int64 `json:$.revenue_cents`,
     timestamp Int64 `json:$.timestamp`
 
+INDEXES >
+    INDEX idx_visitor_id visitor_id TYPE bloom_filter(0.01) GRANULARITY 4
+
 ENGINE "MergeTree"
 ENGINE_SORTING_KEY "website_id, is_bot, type, timestamp"
