@@ -10,39 +10,63 @@ import { writePaymentEvent } from "@/lib/tinybird";
 
 export const runtime = "nodejs";
 
+/** Identity on every payment row, so Journey can label a visitor with no signup. */
+interface PaymentIdentity {
+  customer_name: string;
+  customer_email: string;
+  customer_id: string;
+  transaction_id: string;
+}
+
 interface ExtractedPayment {
   visitorId: string;
   sessionId: string;
   revenueCents: number;
   kind: string;
+  identity: PaymentIdentity;
 }
 
 function fromMetadata(
   metadata: Stripe.Metadata | null | undefined,
   amountCents: number,
   kind: string,
+  identity: PaymentIdentity,
 ): ExtractedPayment | null {
   const visitorId = metadata?.visitor_id ?? "";
   const sessionId = metadata?.session_id ?? "";
   if (!visitorId) return null;
-  return { visitorId, sessionId, revenueCents: amountCents, kind };
+  return { visitorId, sessionId, revenueCents: amountCents, kind, identity };
 }
 
-async function paymentIntentMetadata(
+/** Re-fetch expanded: the inline PI has `latest_charge` as a bare id, and the
+ * billing name only exists on the charge. */
+async function retrievePaymentIntent(
   stripe: Stripe,
   ref: string | Stripe.PaymentIntent | null,
-  fallback: Stripe.Metadata | null | undefined,
-): Promise<Stripe.Metadata | null | undefined> {
-  if (ref && typeof ref === "object") return ref.metadata;
-  if (typeof ref === "string") {
-    try {
-      const pi = await stripe.paymentIntents.retrieve(ref);
-      return pi.metadata;
-    } catch {
-      return fallback;
-    }
+): Promise<Stripe.PaymentIntent | null> {
+  const id = typeof ref === "string" ? ref : ref?.id;
+  if (!id) return null;
+  try {
+    return await stripe.paymentIntents.retrieve(id, {
+      expand: ["latest_charge"],
+    });
+  } catch {
+    return typeof ref === "object" ? ref : null;
   }
-  return fallback;
+}
+
+function identityFrom(pi: Stripe.PaymentIntent | null): PaymentIdentity {
+  const charge =
+    pi?.latest_charge && typeof pi.latest_charge === "object"
+      ? pi.latest_charge
+      : null;
+
+  return {
+    customer_name: charge?.billing_details?.name ?? "",
+    customer_email: charge?.billing_details?.email ?? pi?.receipt_email ?? "",
+    customer_id: typeof pi?.customer === "string" ? pi.customer : "",
+    transaction_id: pi?.id ?? "",
+  };
 }
 
 async function extractPayment(
@@ -51,26 +75,34 @@ async function extractPayment(
 ): Promise<ExtractedPayment | null> {
   switch (event.type) {
     case "payment_intent.succeeded": {
-      const pi = event.data.object as Stripe.PaymentIntent;
-      return fromMetadata(pi.metadata, pi.amount_received ?? 0, "charge");
+      const inline = event.data.object as Stripe.PaymentIntent;
+      const pi = (await retrievePaymentIntent(stripe, inline)) ?? inline;
+      return fromMetadata(
+        pi.metadata,
+        pi.amount_received ?? 0,
+        "charge",
+        identityFrom(pi),
+      );
     }
     case "refund.created": {
       const refund = event.data.object as Stripe.Refund;
-      const metadata = await paymentIntentMetadata(
-        stripe,
-        refund.payment_intent,
-        refund.metadata,
+      const pi = await retrievePaymentIntent(stripe, refund.payment_intent);
+      return fromMetadata(
+        pi?.metadata ?? refund.metadata,
+        -(refund.amount ?? 0),
+        "refund",
+        identityFrom(pi),
       );
-      return fromMetadata(metadata, -(refund.amount ?? 0), "refund");
     }
     case "charge.dispute.created": {
       const dispute = event.data.object as Stripe.Dispute;
-      const metadata = await paymentIntentMetadata(
-        stripe,
-        dispute.payment_intent,
-        dispute.metadata,
+      const pi = await retrievePaymentIntent(stripe, dispute.payment_intent);
+      return fromMetadata(
+        pi?.metadata ?? dispute.metadata,
+        -(dispute.amount ?? 0),
+        "dispute",
+        identityFrom(pi),
       );
-      return fromMetadata(metadata, -(dispute.amount ?? 0), "dispute");
     }
     default:
       return null;
@@ -122,7 +154,11 @@ export async function POST(req: NextRequest) {
         visitorId: payment.visitorId,
         sessionId: payment.sessionId,
         revenueCents: payment.revenueCents,
-        extra: { stripe_event_id: event.id, kind: payment.kind },
+        extra: {
+          stripe_event_id: event.id,
+          kind: payment.kind,
+          ...payment.identity,
+        },
         timestamp: event.created * 1000,
       });
     }
