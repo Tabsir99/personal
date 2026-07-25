@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabPanel } from "premium-ds/tabs";
 import { TextField } from "premium-ds/text-field";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react";
@@ -9,7 +9,8 @@ import { useAnalyticsStore } from "../../../../stores/analyticsStore";
 import { useReveal } from "../shared/reveal";
 import { GoalsTab } from "./GoalsTab";
 import { FunnelTab } from "./funnel";
-import { JourneyTab } from "./JourneyTab";
+import { JourneyTab } from "./journey";
+import { GoalPicker } from "./journey/GoalPicker";
 
 const TABS = [
   { value: "goal", label: "Goal" },
@@ -19,20 +20,37 @@ const TABS = [
 
 type TabId = "goal" | "funnel" | "journey";
 
+const SEARCH_DEBOUNCE_MS = 350;
+
 export function InsightsCard() {
   const loading = useAnalyticsStore((s) => s.goalsLoading);
+  const setJourneySearch = useAnalyticsStore((s) => s.setJourneySearch);
 
   const [tab, setTab] = useState<TabId>("goal");
   const [dir, setDir] = useState<-1 | 0 | 1>(0);
 
   const [query, setQuery] = useState("");
+  const [journeyQuery, setJourneyQuery] = useState("");
 
   const [goalEntry, setGoalEntry] = useState(0);
   const { ref, revealed, enter } = useReveal<HTMLDivElement>();
 
+  useEffect(() => {
+    const id = setTimeout(
+      () => setJourneySearch(journeyQuery),
+      SEARCH_DEBOUNCE_MS,
+    );
+    return () => clearTimeout(id);
+  }, [journeyQuery, setJourneySearch]);
+
   if (loading) {
     return <div className="h-105 animate-pulse rounded-lg bg-foreground/3" />;
   }
+
+  const onJourney = tab === "journey";
+  const searchValue = onJourney ? journeyQuery : query;
+  const setSearchValue = onJourney ? setJourneyQuery : setQuery;
+  const searchLabel = onJourney ? "Search customers" : "Search goals";
 
   return (
     <div
@@ -51,20 +69,25 @@ export function InsightsCard() {
             setDir(d);
           }}
         />
-        <TextField
-          size="sm"
-          placeholder="Search goals"
-          leadingIcon={<MagnifyingGlassIcon size={1} />}
-          clearable
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          htmlProps={{ "aria-label": "Search goals" }}
-          type="search"
-          className={cn(tab === "goal" ? "" : "invisible", "-mt-2")}
-        />
+
+        <div className="flex items-center gap-2 justify-end pb-2">
+          {onJourney && <GoalPicker />}
+
+          <TextField
+            size="sm"
+            placeholder={searchLabel}
+            leadingIcon={<MagnifyingGlassIcon size={1} />}
+            clearable
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            htmlProps={{ "aria-label": searchLabel }}
+            type="search"
+            className={cn(tab === "funnel" ? "invisible" : "")}
+          />
+        </div>
       </div>
 
-      <div className="grid">
+      <div className="grid h-110">
         {revealed && (
           <div
             role="tabpanel"
