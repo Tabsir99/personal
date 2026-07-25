@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import type { Period, Granularity } from "./analyticsTypes";
 import { env } from "@/config/env.server";
 import {
   COLUMNS,
@@ -26,12 +27,8 @@ export interface TinybirdQueryResult<
   statistics?: QueryStats;
 }
 
-/**
- * Run a query against Tinybird. `label` names it in the diagnostic log line
- * (see queryLog). Every call logs its wall/server time and scanned rows/bytes
- * server-side, in every environment — none of that reaches the client, which
- * only ever sees whatever the route handler returns.
- */
+/** `label` names the query in the server-side diagnostic log; none of that
+ * logging reaches the client. */
 export async function queryTinybird<T = Record<string, string | number | null>>(
   sql: string,
   label = "query",
@@ -59,11 +56,8 @@ export async function queryTinybird<T = Record<string, string | number | null>>(
 
 const LOG_DIR = "logs";
 
-/**
- * Dev-only: dump the full SQL to `logs/<label>.sql` (relative to the admin
- * root) so it can be copied straight into the Tinybird dashboard. Returns the
- * path for the log line; best-effort, never throws.
- */
+/** Dev-only: dumps SQL to `logs/<label>.sql` for pasting into Tinybird.
+ * Best-effort, never throws. */
 function dumpSql(label: string, sql: string): string | undefined {
   if (process.env.NODE_ENV === "production") return undefined;
   try {
@@ -112,15 +106,7 @@ export async function writePaymentEvent(row: {
   }
 }
 
-export type Period =
-  | "today"
-  | "yesterday"
-  | "last7d"
-  | "last30d"
-  | "last90d"
-  | `custom:${string}:${string}`;
-
-export type Granularity = "hourly" | "daily" | "weekly" | "monthly";
+export type { Period, Granularity } from "./analyticsTypes";
 
 export function periodToRange(period: Period): { start: number; end: number } {
   const now = Date.now();
@@ -201,6 +187,27 @@ export interface AnalyticsParams {
 
 export function escapeSQL(value: string): string {
   return value.replace(/['\\]/g, "");
+}
+
+/** Splits a stored full-URL `href`, falling back to naive splitting for the
+ * malformed hrefs that arrive from the wild. */
+export function parseHref(
+  href: string,
+  keepQuery = false,
+): { path: string; params: URLSearchParams } {
+  try {
+    const url = new URL(href);
+    return {
+      path: (keepQuery ? url.pathname + url.search : url.pathname) || "/",
+      params: url.searchParams,
+    };
+  } catch {
+    const [path = "", query = ""] = href.split("?");
+    return {
+      path: (keepQuery ? href : path) || "/",
+      params: new URLSearchParams(query),
+    };
+  }
 }
 
 export function partitionByLevel<T extends { level: string }>(

@@ -6,6 +6,7 @@ import {
   parseAnalyticsParams,
   periodToRange,
   escapeSQL,
+  parseHref,
   F,
 } from "@/lib/tinybird";
 import type {
@@ -13,15 +14,6 @@ import type {
   BotPageMetric,
   BotPagesResponse,
 } from "@/lib/analyticsTypes";
-
-function toPath(href: string): string {
-  try {
-    const u = new URL(href);
-    return u.pathname + u.search || "/";
-  } catch {
-    return href || "/";
-  }
-}
 
 export const GET = wrapRoute<BotPagesResponse>(async (req: NextRequest) => {
   await requireAuth();
@@ -54,7 +46,7 @@ export const GET = wrapRoute<BotPagesResponse>(async (req: NextRequest) => {
   // Collapse hrefs to path+search and re-aggregate (same path, different origin).
   const byPath = new Map<string, number>();
   for (const r of res.data) {
-    const p = toPath(r.name);
+    const p = parseHref(r.name, true).path;
     byPath.set(p, (byPath.get(p) ?? 0) + Number(r.cnt));
   }
   const pages: BotPageMetric[] = [...byPath.entries()]
