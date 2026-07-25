@@ -1,12 +1,6 @@
-import { useEffect, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import { Area, Bar } from "recharts";
-import {
-  motion,
-  animate,
-  useMotionValue,
-  useTransform,
-  type MotionValue,
-} from "motion/react";
+import { motion, useTransform, type MotionValue } from "motion/react";
 import type { ChartMetric } from "./MetricsBar";
 import { CHART } from "../shared/chartTheme";
 import { formatMetric } from "../shared/chartFormat";
@@ -115,21 +109,53 @@ function stackedVisitors(): ReactElement[] {
   ];
 }
 
-export function useRevenueFront(
-  activeIndex: number | null,
-  count: number,
-): MotionValue<number> {
-  const front = useMotionValue(count - 1);
+interface RevenueBarShapeProps {
+  index?: number;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  front: MotionValue<number>;
+}
 
-  useEffect(() => {
-    const controls = animate(front, activeIndex ?? count - 1, {
-      duration: 0.3,
-      ease: "easeOut",
-    });
-    return () => controls.stop();
-  }, [activeIndex, count, front]);
+function RevenueBarShape({
+  index = 0,
+  x,
+  y,
+  width,
+  height,
+  front,
+}: RevenueBarShapeProps) {
+  const lit = useTransform(front, (f) =>
+    Math.max(0, Math.min(1, f - index + 1)),
+  );
+  const muted = useTransform(lit, (v) => 1 - v);
+  const shared = { x, y, width, height, rx: 3 } as const;
 
-  return front;
+  return (
+    <g>
+      <motion.rect
+        {...shared}
+        fill={CHART.muted}
+        fillOpacity={0.2}
+        style={{
+          scaleY: muted,
+          originY: 0,
+          transformBox: "fill-box",
+        }}
+      />
+      <motion.rect
+        {...shared}
+        fill={CHART.revenue}
+        fillOpacity={0.75}
+        style={{
+          scaleY: lit,
+          originY: 1,
+          transformBox: "fill-box",
+        }}
+      />
+    </g>
+  );
 }
 
 function revenueBars(front: MotionValue<number>): ReactElement[] {
@@ -142,38 +168,7 @@ function revenueBars(front: MotionValue<number>): ReactElement[] {
       activeBar={false}
       animationDuration={600}
       animationEasing="ease-out"
-      shape={({ index, x, y, width, height }) => {
-        const lit = useTransform(front, (f) =>
-          Math.max(0, Math.min(1, f - index + 1)),
-        );
-        const muted = useTransform(lit, (v) => 1 - v);
-        const shared = { x, y, width, height, rx: 3 } as const;
-
-        return (
-          <g>
-            <motion.rect
-              {...shared}
-              fill={CHART.muted}
-              fillOpacity={0.2}
-              style={{
-                scaleY: muted,
-                originY: 0,
-                transformBox: "fill-box",
-              }}
-            />
-            <motion.rect
-              {...shared}
-              fill={CHART.revenue}
-              fillOpacity={0.75}
-              style={{
-                scaleY: lit,
-                originY: 1,
-                transformBox: "fill-box",
-              }}
-            />
-          </g>
-        );
-      }}
+      shape={(props) => <RevenueBarShape {...props} front={front} />}
     />,
   ];
 }

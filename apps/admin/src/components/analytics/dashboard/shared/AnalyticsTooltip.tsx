@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, isValidElement, memo, type ReactNode } from "react";
-import { Tooltip } from "recharts";
+import { Tooltip, type TooltipContentProps } from "recharts";
 import { CHART, type ChartColors } from "./chartTheme";
 import { cn } from "@/lib/utils";
 
@@ -137,6 +137,50 @@ export function AnalyticsTooltipCard({
   );
 }
 
+type CustomTooltipContentProps = TooltipContentProps<number | string, string> & {
+  sections: (point: Point) => TooltipSection[];
+};
+
+const TooltipContent = memo(
+  function TooltipContent({ active, payload, label, sections }: CustomTooltipContentProps) {
+    if (!active || !payload?.length || label == null) return null;
+
+    const point: Point = {
+      label: label as number | string,
+      date: new Date(Number(label)).toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      }),
+      get: (key) => {
+        const entry = key
+          ? payload.find((p) => p.dataKey === key)
+          : payload[0];
+        return Number(entry?.value) || 0;
+      },
+      raw: (key) => {
+        const row = payload[0]?.payload as
+          Record<string, unknown> | undefined;
+        return Number(row?.[key]) || 0;
+      },
+    };
+
+    const items = sections(point).filter(
+      (s) => s !== null && s !== undefined && s !== false,
+    );
+    if (!items.length) return null;
+
+    return <AnalyticsTooltipCard sections={items} />;
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.active === nextProps.active &&
+      prevProps.label === nextProps.label &&
+      prevProps.sections === nextProps.sections
+    );
+  },
+);
+
 interface AnalyticsTooltipProps {
   sections: (point: Point) => TooltipSection[];
 }
@@ -148,38 +192,10 @@ export const AnalyticsTooltip = memo(
         animationDuration={500}
         animationEasing="ease-out"
         offset={50}
-        content={({ active, payload, label }) => {
-          if (!active || !payload?.length) return null;
-
-          const point: Point = {
-            label: label as number | string,
-            date: new Date(Number(label)).toLocaleDateString(undefined, {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            }),
-            get: (key) => {
-              const entry = key
-                ? payload.find((p) => p.dataKey === key)
-                : payload[0];
-              return Number(entry?.value) || 0;
-            },
-            raw: (key) => {
-              const row = payload[0]?.payload as
-                Record<string, unknown> | undefined;
-              return Number(row?.[key]) || 0;
-            },
-          };
-
-          const items = sections(point).filter(
-            (s) => s !== null && s !== undefined && s !== false,
-          );
-          if (!items.length) return null;
-
-          return <AnalyticsTooltipCard sections={items} />;
-        }}
+        content={(props) => <TooltipContent {...props} sections={sections} />}
       />
     );
   },
   () => true,
 );
+

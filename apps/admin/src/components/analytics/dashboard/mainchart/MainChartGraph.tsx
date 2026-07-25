@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useMemo, useCallback, useRef } from "react";
+import { useMotionValue, animate } from "motion/react";
 import {
   ComposedChart,
   XAxis,
@@ -14,13 +15,8 @@ import { CHART } from "../shared/chartTheme";
 import { AnalyticsTooltip } from "../shared/AnalyticsTooltip";
 import { useReveal } from "../shared/reveal";
 import { formatCurrency, headroomTop, niceStep } from "../shared/chartFormat";
-import {
-  renderSeries,
-  leftAxisFormat,
-  useRevenueFront,
-  type Selection,
-} from "./series";
-import { chartDefs } from "./chartDefs";
+import { renderSeries, leftAxisFormat, type Selection } from "./series";
+import { ChartDefs } from "./chartDefs";
 import { tooltipSections } from "./tooltipSections";
 
 interface MainChartProps {
@@ -66,30 +62,74 @@ export function MainChart({
 }: MainChartProps) {
   const selection: Selection = metric;
   const isBounce = selection === "bounceRate";
-  const { ticks: revenueTicks, domain: revenueDomain } = revenueAxis(
-    Math.max(0, ...data.map((d) => d.revenue)),
+
+  const { ticks: revenueTicks, domain: revenueDomain } = useMemo(
+    () => revenueAxis(Math.max(0, ...data.map((d) => d.revenue))),
+    [data],
   );
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const front = useRevenueFront(activeIndex, data.length);
+
+  const containerRef = useRef<HTMLDivElement>(null);
   const { ref, revealed, enter } = useReveal<HTMLDivElement>();
 
-  const handleMouseMove = useCallback((state: MouseHandlerDataParam) => {
-    setActiveIndex((prev) =>
-      state.activeTooltipIndex !== prev
-        ? Number(state.activeTooltipIndex)
-        : prev,
-    );
-  }, []);
+  const setRefs = useCallback(
+    (el: HTMLDivElement) => {
+      containerRef.current = el;
+      ref(el);
+    },
+    [ref],
+  );
 
-  const handleMouseLeave = useCallback(() => setActiveIndex(null), []);
+  const front = useMotionValue(data.length - 1);
+  const animControlRef = useRef<ReturnType<typeof animate> | null>(null);
 
-  const targetOffset =
-    activeIndex !== null && data.length > 1
-      ? activeIndex / (data.length - 1)
-      : 1;
+  const handleMouseMove = useCallback(
+    (state: MouseHandlerDataParam) => {
+      if (!state || state.activeTooltipIndex == null) return;
+      const idx = Number(state.activeTooltipIndex);
+      if (Number.isNaN(idx)) return;
+
+      if (data.length > 1) {
+        const offset = idx / (data.length - 1);
+        containerRef.current?.style.setProperty(
+          "--target-offset",
+          String(offset),
+        );
+      }
+
+      animControlRef.current?.stop();
+      animControlRef.current = animate(front, idx, {
+        duration: 0.3,
+        ease: "easeOut",
+      });
+    },
+    [data.length, front],
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    containerRef.current?.style.setProperty("--target-offset", "1");
+    animControlRef.current?.stop();
+    animControlRef.current = animate(front, data.length - 1, {
+      duration: 0.3,
+      ease: "easeOut",
+    });
+  }, [data.length, front]);
+
+  const tooltipSecs = useMemo(
+    () => tooltipSections(selection, periodLabel),
+    [selection, periodLabel],
+  );
+
+  const axisFormatter = useMemo(() => leftAxisFormat(selection), [selection]);
+
+  const series = useMemo(
+    () => renderSeries(selection, front),
+    [selection, front],
+  );
+
+  const xTicks = useMemo(() => data.map((d) => d.timestamp), [data]);
 
   return (
-    <div ref={ref} className={`${enter} bg-card px-4 pt-2 pb-4`}>
+    <div ref={setRefs} className={`${enter} bg-card px-4 pt-2 pb-4`}>
       <div className="h-96">
         {revealed && (
           <ResponsiveContainer width="100%" height="100%">
@@ -99,7 +139,7 @@ export function MainChart({
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
             >
-              {chartDefs(targetOffset)}
+              <ChartDefs />
               <CartesianGrid
                 yAxisId={selection === null ? "revenue" : "left"}
                 strokeDasharray="3 3"
@@ -110,7 +150,7 @@ export function MainChart({
                 dataKey="timestamp"
                 type="number"
                 domain={["dataMin", "dataMax"]}
-                ticks={data.map((d) => d.timestamp)}
+                ticks={xTicks}
                 tickFormatter={(ts) => formatTimestamp(ts, granularity)}
                 tick={{ fontSize: 11, fill: CHART.muted }}
                 tickLine={false}
@@ -127,7 +167,7 @@ export function MainChart({
                 yAxisId="left"
                 domain={isBounce ? BOUNCE_AXIS.domain : [0, headroomTop]}
                 {...(isBounce ? { ticks: BOUNCE_AXIS.ticks } : {})}
-                tickFormatter={leftAxisFormat(selection)}
+                tickFormatter={axisFormatter}
                 tick={{ fontSize: 11, fill: CHART.muted }}
                 tickLine={false}
                 axisLine={false}
@@ -155,10 +195,8 @@ export function MainChart({
                   width={40}
                 />
               )}
-              <AnalyticsTooltip
-                sections={tooltipSections(selection, periodLabel)}
-              />
-              {renderSeries(selection, front)}
+              <AnalyticsTooltip sections={tooltipSecs} />
+              {series}
             </ComposedChart>
           </ResponsiveContainer>
         )}

@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { CHART } from "../shared/chartTheme";
 
-export function chartDefs(targetOffset: number): ReactElement {
+export function ChartDefs(): ReactElement {
   return (
     <defs>
       <linearGradient id="active-vertical-fill" x1="0" y1="0" x2="0" y2="1">
@@ -26,7 +26,7 @@ export function chartDefs(targetOffset: number): ReactElement {
           height="1"
           fill="white"
           style={{
-            transform: `scaleX(${targetOffset})`,
+            transform: "scaleX(var(--target-offset, 1))",
             transformOrigin: "left",
             transition: "transform 0.4s ease-out",
           }}
@@ -35,3 +35,4 @@ export function chartDefs(targetOffset: number): ReactElement {
     </defs>
   );
 }
+
