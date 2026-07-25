@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { useAnalyticsStore } from "../../../../stores/analyticsStore";
 import { useReveal } from "../shared/reveal";
 import { GoalsTab } from "./GoalsTab";
-import { FunnelTab } from "./FunnelTab";
+import { FunnelTab } from "./funnel";
 import { JourneyTab } from "./JourneyTab";
 
 const TABS = [

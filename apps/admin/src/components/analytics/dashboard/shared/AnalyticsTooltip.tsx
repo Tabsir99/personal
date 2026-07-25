@@ -3,6 +3,7 @@
 import { Fragment, isValidElement, memo, type ReactNode } from "react";
 import { Tooltip } from "recharts";
 import { CHART, type ChartColors } from "./chartTheme";
+import { cn } from "@/lib/utils";
 
 export interface Point {
   label: number | string;
@@ -43,7 +44,7 @@ function isMeter(s: TooltipSection): s is TooltipMeter {
   );
 }
 
-function MeterBar({ segments }: { segments: TooltipMeterSegment[] }) {
+export function MeterBar({ segments }: { segments: TooltipMeterSegment[] }) {
   const total = segments.reduce((sum, s) => sum + s.value, 0) || 1;
   return (
     <div className="px-3.5 pt-1 pb-3">
@@ -68,7 +69,7 @@ function MeterBar({ segments }: { segments: TooltipMeterSegment[] }) {
   );
 }
 
-function Row({ row }: { row: TooltipRow }) {
+export function Row({ row }: { row: TooltipRow }) {
   return (
     <div className="flex items-center justify-between gap-8 px-3.5 py-2.5">
       <span className="flex items-center gap-2">
@@ -93,9 +94,53 @@ function Row({ row }: { row: TooltipRow }) {
   );
 }
 
+export interface AnalyticsTooltipCardProps {
+  sections: TooltipSection[];
+  className?: string;
+}
+
+export function AnalyticsTooltipCard({
+  sections,
+  className,
+}: AnalyticsTooltipCardProps) {
+  return (
+    <div
+      className={cn(
+        "min-w-52 overflow-hidden rounded-xl bg-foreground text-background shadow-card-hover",
+        className,
+      )}
+    >
+      {sections.map((s, i) => {
+        const divider = i > 0 && !isMeter(s);
+        return (
+          <Fragment key={i}>
+            {divider && <div className="h-px bg-background/10" />}
+            {isMeter(s) ? (
+              <MeterBar segments={s.meter} />
+            ) : isRow(s) ? (
+              <Row row={s} />
+            ) : isValidElement(s) ? (
+              s
+            ) : i === 0 ? (
+              <div className="px-3.5 pt-3 pb-2 text-sm font-semibold text-background">
+                {s}
+              </div>
+            ) : (
+              <div className="px-3.5 py-2.5 text-xs text-background/45">
+                {s}
+              </div>
+            )}
+          </Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
 interface AnalyticsTooltipProps {
   sections: (point: Point) => TooltipSection[];
 }
+
 export const AnalyticsTooltip = memo(
   function AnalyticsTooltip({ sections }: AnalyticsTooltipProps) {
     return (
@@ -131,31 +176,7 @@ export const AnalyticsTooltip = memo(
           );
           if (!items.length) return null;
 
-          return (
-            <div className="min-w-52 overflow-hidden rounded-xl bg-foreground text-background shadow-card-hover">
-              {items.map((s, i) => {
-                const divider = i > 0 && !isMeter(s);
-                return (
-                  <Fragment key={i}>
-                    {divider && <div className="h-px bg-background/10" />}
-                    {isMeter(s) ? (
-                      <MeterBar segments={s.meter} />
-                    ) : isRow(s) ? (
-                      <Row row={s} />
-                    ) : i === 0 ? (
-                      <div className="px-3.5 pt-3 pb-2 text-sm font-semibold text-background">
-                        {s}
-                      </div>
-                    ) : (
-                      <div className="px-3.5 py-2.5 text-xs text-background/45">
-                        {s}
-                      </div>
-                    )}
-                  </Fragment>
-                );
-              })}
-            </div>
-          );
+          return <AnalyticsTooltipCard sections={items} />;
         }}
       />
     );

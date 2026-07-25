@@ -3,24 +3,7 @@
 import { useShallow } from "zustand/react/shallow";
 import { useAnalyticsStore } from "../../../stores/analyticsStore";
 import { DataPanel } from "./shared/DataPanel";
-
-const countryNames = new Intl.DisplayNames(["en"], { type: "region" });
-
-function getCountryFlag(code: string | undefined) {
-  if (!code) return null;
-  const lower = code.toLowerCase();
-  return (
-    <img
-      src={`https://flagcdn.com/20x15/${lower}.png`}
-      alt={code}
-      className="h-3 w-4 rounded-sm object-cover ring-1 ring-foreground/10"
-    />
-  );
-}
-
-function formatCountryName(code: string) {
-  return countryNames.of(code.toUpperCase()) ?? code;
-}
+import { formatCountryName, CountryFlag } from "@/lib/countryUtils";
 
 export function LocationsPanel() {
   const { locations, loading } = useAnalyticsStore(
@@ -42,7 +25,7 @@ export function LocationsPanel() {
           label: "Country",
           items: (locations?.countries ?? []).map((l) => ({
             name: formatCountryName(l.name),
-            icon: getCountryFlag(l.country),
+            icon: <CountryFlag code={l.country} />,
             values: { visitors: l.uv, revenue: l.revenue },
           })),
         },
@@ -51,7 +34,7 @@ export function LocationsPanel() {
           label: "Region",
           items: (locations?.regions ?? []).map((l) => ({
             name: l.name,
-            icon: getCountryFlag(l.country),
+            icon: <CountryFlag code={l.country} />,
             values: { visitors: l.uv, revenue: l.revenue },
           })),
         },
@@ -60,7 +43,7 @@ export function LocationsPanel() {
           label: "City",
           items: (locations?.cities ?? []).map((l) => ({
             name: l.name,
-            icon: getCountryFlag(l.country),
+            icon: <CountryFlag code={l.country} />,
             values: { visitors: l.uv, revenue: l.revenue },
           })),
         },

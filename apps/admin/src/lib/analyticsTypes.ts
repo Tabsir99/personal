@@ -272,16 +272,13 @@ export interface FunnelDefinition {
 export interface FunnelStepReferrer {
   referrer: string;
   visitors: number;
-  imageUrl: string;
   percentage: number;
 }
 
 export interface FunnelStepCountry {
   countryCode: string;
-  countryName: string;
   visitors: number;
   percentage: number;
-  imageUrl: string;
 }
 
 export interface FunnelStepData {
