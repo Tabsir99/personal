@@ -103,7 +103,6 @@ function granularityForPeriod(period: Period): Granularity {
       return "hourly";
     case "last90d":
       return "weekly";
-    // `custom:from:to` lands here too; daily suits any range the picker allows.
     default:
       return "daily";
   }

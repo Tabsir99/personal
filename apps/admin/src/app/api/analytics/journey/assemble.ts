@@ -10,11 +10,8 @@ import type {
   JourneyVisitor,
 } from "@/lib/analyticsTypes";
 
-// Applied in SQL via `LIMIT … BY visitor_id`; newest rows win, since identity
-// and revenue sit at that end. Real traffic peaks near a dozen, so it never fires.
 export const MAX_ROWS_PER_VISITOR = 500;
 
-/** The datasource columns the journey query selects, in query order. */
 export const JOURNEY_COLUMNS = [
   "visitor_id",
   "timestamp",
@@ -34,12 +31,14 @@ export const JOURNEY_COLUMNS = [
   "viewport_h",
 ] as const satisfies readonly (keyof AnalyticsEventRow)[];
 
-// Picked from the contract so a renamed column fails to compile. `channel` is
-// computed in SQL by `buildChannelSQL`, not stored.
-export type JourneyRow = Pick<
-  AnalyticsEventRow,
-  (typeof JOURNEY_COLUMNS)[number]
-> & { channel: string };
+type StoredColumns = Pick<AnalyticsEventRow, (typeof JOURNEY_COLUMNS)[number]>;
+
+interface QueryComputedColumns {
+  channel: string;
+  goal_at: number;
+}
+
+export type JourneyRow = StoredColumns & QueryComputedColumns;
 
 function parseExtra(raw: string): Record<string, unknown> {
   if (!raw) return {};
@@ -106,12 +105,13 @@ function isPageview(entry: JourneyEntry): entry is JourneyPageviewEntry {
   return entry.eventType === "pageview";
 }
 
-/** Folds a run of repeat views of the same path into one counted entry. */
-function collapsePageviews(entries: JourneyEntry[]): JourneyEntry[] {
-  const out: JourneyEntry[] = [];
+function foldConsecutiveRepeatPageviews(
+  entries: JourneyEntry[],
+): JourneyEntry[] {
+  const folded: JourneyEntry[] = [];
 
   for (const entry of entries) {
-    const previous = out[out.length - 1];
+    const previous = folded[folded.length - 1];
     if (
       previous &&
       isPageview(previous) &&
@@ -122,95 +122,101 @@ function collapsePageviews(entries: JourneyEntry[]): JourneyEntry[] {
       previous.lastTimestamp = entry.lastTimestamp;
       continue;
     }
-    out.push(entry);
+    folded.push(entry);
   }
 
-  return out;
+  return folded;
 }
 
-/** Lifetime rows (ascending) -> the rendered shape. The period bounds only
- * *which* completion is reported, never which events. */
-export function assembleVisitor(
-  allRows: JourneyRow[],
-  goalName: string | null,
-  periodStart: number,
-  periodEnd: number,
-): JourneyVisitor {
-  // The query fetches one row past the cap so truncation is detectable.
-  const truncated = allRows.length > MAX_ROWS_PER_VISITOR;
-  const rows = truncated ? allRows.slice(1) : allRows;
+function exceedsRowCap(rows: JourneyRow[]): boolean {
+  return rows.length > MAX_ROWS_PER_VISITOR;
+}
 
-  const first = rows[0]!;
-  const last = rows[rows.length - 1]!;
+function dropOverCapSentinel(rows: JourneyRow[]): JourneyRow[] {
+  return exceedsRowCap(rows) ? rows.slice(1) : rows;
+}
 
-  // Payment rows carry no geo/UA (webhook-written), and paying then leaving is
-  // the common case — so fall back to the newest row that has a profile.
-  const profile =
-    [...rows].reverse().find((r) => r.browser !== "" || r.country !== "") ??
-    last;
+function hasBrowserDerivedFields(row: JourneyRow): boolean {
+  return row.browser !== "" || row.country !== "";
+}
 
-  const goalRow = goalName
-    ? rows.find(
-        (r) =>
-          r.event_name === goalName &&
-          r.timestamp >= periodStart &&
-          r.timestamp < periodEnd,
-      )
-    : undefined;
-  const goalCompletedAt = goalRow?.timestamp ?? null;
+function newestRowWithBrowserFields(rows: JourneyRow[]): JourneyRow {
+  return [...rows].reverse().find(hasBrowserDerivedFields) ?? rows[0]!;
+}
 
-  const paymentRow = [...rows]
+function newestRevenueRow(rows: JourneyRow[]): JourneyRow | undefined {
+  return [...rows]
     .reverse()
     .find((r) => r.type === "payment" && r.revenue_cents > 0);
-  const identity = paymentRow ? parseExtra(paymentRow.extra_data) : {};
+}
 
-  const { params: entryParams } = parseHref(first.href);
-  const entries = collapsePageviews(
-    rows.map((row) => toEntry(row, row === goalRow)),
-  );
-
-  const referral: JourneyEntry = {
-    timestamp: first.timestamp,
+function synthesiseReferralEntry(entryRow: JourneyRow): JourneyEntry {
+  return {
+    timestamp: entryRow.timestamp,
     eventType: "referral",
     isGoal: false,
     data: {
-      domainName: first.domain,
-      channel: first.channel,
-      fullReferrer: first.referrer,
-      trackingParams: trackingParamsFrom(entryParams),
+      domainName: entryRow.domain,
+      channel: entryRow.channel,
+      fullReferrer: entryRow.referrer,
+      trackingParams: trackingParamsFrom(parseHref(entryRow.href).params),
     },
   };
+}
+
+export function assembleVisitor(
+  rowsIncludingSentinel: JourneyRow[],
+  goalName: string | null,
+): JourneyVisitor {
+  const truncated = exceedsRowCap(rowsIncludingSentinel);
+  const rows = dropOverCapSentinel(rowsIncludingSentinel);
+
+  const entryRow = rows[0]!;
+  const lastRow = rows[rows.length - 1]!;
+  const profileRow = newestRowWithBrowserFields(rows);
+
+  const goalCompletedAt = entryRow.goal_at || null;
+  const goalRow = rows.find(
+    (r) => r.timestamp === goalCompletedAt && r.event_name === goalName,
+  );
+
+  const identity = parseExtra(newestRevenueRow(rows)?.extra_data ?? "");
+  const entryParams = parseHref(entryRow.href).params;
 
   return {
-    completeJourney: [referral, ...entries],
+    completeJourney: [
+      synthesiseReferralEntry(entryRow),
+      ...foldConsecutiveRepeatPageviews(
+        rows.map((row) => toEntry(row, row === goalRow)),
+      ),
+    ],
     truncated,
-    visitorId: first.visitor_id,
+    visitorId: entryRow.visitor_id,
     customerName: str(identity.customer_name),
     customerEmail: str(identity.customer_email),
     profileMetadata: identity,
     amount: rows.reduce((sum, r) => sum + r.revenue_cents, 0) / 100,
-    channel: first.channel,
+    channel: entryRow.channel,
     sourceAttribution: {
-      timestamp: first.timestamp,
-      referrer: first.referrer,
+      timestamp: entryRow.timestamp,
+      referrer: entryRow.referrer,
       params: attributionParams(entryParams),
     },
-    countryCode: profile.country,
-    countryName: formatCountryName(profile.country),
-    cityName: profile.city,
-    browserName: profile.browser,
-    osName: profile.os,
-    deviceType: profile.device,
-    viewport: { width: profile.viewport_w, height: profile.viewport_h },
+    countryCode: profileRow.country,
+    countryName: formatCountryName(profileRow.country),
+    cityName: profileRow.city,
+    browserName: profileRow.browser,
+    osName: profileRow.os,
+    deviceType: profileRow.device,
+    viewport: { width: profileRow.viewport_w, height: profileRow.viewport_h },
     pageviews: rows.filter((r) => r.type === "pageview").length,
     timeBeforeGoal:
-      goalCompletedAt === null ? null : goalCompletedAt - first.timestamp,
+      goalCompletedAt === null ? null : goalCompletedAt - entryRow.timestamp,
     goalCompletedAt,
-    lastSeenAt: last.timestamp,
+    lastSeenAt: lastRow.timestamp,
   };
 }
 
-/** Splits flat rows (ordered by visitor, then time) into per-visitor groups. */
 export function groupByVisitor(rows: JourneyRow[]): Map<string, JourneyRow[]> {
   const groups = new Map<string, JourneyRow[]>();
   for (const row of rows) {

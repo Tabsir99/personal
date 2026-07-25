@@ -20,8 +20,6 @@ import type {
 
 import { GET as journeyGET } from "@/app/api/analytics/journey/route";
 
-// Real Tinybird. Rows are hand-built so each assertion has one obvious cause.
-// Self-skips without creds. Run alone: pnpm -F admin test journey
 const describeMaybe = TINYBIRD_ENABLED ? describe : describe.skip;
 
 const DAY = 86_400_000;
@@ -29,7 +27,6 @@ const now = Date.now();
 const WID = `jtest-${now.toString(36)}`;
 const DOMAIN = "tabsircg.com";
 
-// PAYER's first touch sits well before this 7-day period.
 const periodStart = now - 7 * DAY;
 const fmt = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 const period = `custom:${fmt(periodStart)}:${fmt(now)}`;
@@ -75,7 +72,6 @@ function base(over: Partial<AnalyticsEventRow>): AnalyticsEventRow {
   };
 }
 
-/** Mirrors `writePaymentEvent`: knows the visitor, not the browser. */
 function paymentRow(over: Partial<AnalyticsEventRow>): AnalyticsEventRow {
   return base({
     type: "payment",
@@ -102,7 +98,6 @@ function paymentRow(over: Partial<AnalyticsEventRow>): AnalyticsEventRow {
 }
 
 const rows: AnalyticsEventRow[] = [
-  // Pays 2 days ago then leaves, so the newest row is the profile-less payment.
   base({
     visitor_id: PAYER,
     timestamp: FIRST_TOUCH,
@@ -140,7 +135,6 @@ const rows: AnalyticsEventRow[] = [
     }),
   }),
 
-  // SIGNER: converts on a custom goal, never pays.
   base({ visitor_id: SIGNER, timestamp: now - 4 * DAY }),
   base({
     visitor_id: SIGNER,
@@ -153,7 +147,6 @@ const rows: AnalyticsEventRow[] = [
     }),
   }),
 
-  // BROWSER: pageviews only, converts on nothing.
   base({ visitor_id: BROWSER, timestamp: now - 3 * DAY }),
   base({
     visitor_id: BROWSER,
@@ -191,7 +184,6 @@ describeMaybe("journey route — real Tinybird", () => {
     const data = await callRoute<JourneyResponse>(journeyGET, q());
     const payer = data.visitors[0]!;
 
-    // First touch is 20 days old; the period is 7.
     const timestamps = payer.completeJourney.map((e) => e.timestamp);
     expect(Math.min(...timestamps)).toBe(FIRST_TOUCH);
     expect(FIRST_TOUCH).toBeLessThan(periodStart);
@@ -260,7 +252,6 @@ describeMaybe("journey route — real Tinybird", () => {
     expect(data.visitors.map((v) => v.visitorId).sort()).toEqual(
       [BROWSER, PAYER, SIGNER].sort(),
     );
-    // Ranked by last activity, newest first.
     const seen = data.visitors.map((v) => v.lastSeenAt);
     expect([...seen]).toEqual([...seen].sort((a, b) => b - a));
 

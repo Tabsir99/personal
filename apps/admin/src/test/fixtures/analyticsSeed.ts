@@ -384,7 +384,6 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       const goal = (name: string, path: string) =>
         push("custom", path, { event_name: name });
 
-      /** Webhook-written: every browser-derived column is empty in production. */
       const payment = (cents: number, extra: Record<string, string>) => {
         if (ts >= windowEnd) return;
         rows.push({

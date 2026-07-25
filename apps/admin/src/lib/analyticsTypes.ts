@@ -104,8 +104,6 @@ export interface GoalMetric {
   conversionRate: number;
 }
 
-// Defined here, not in tinybird.ts, because that module is `server-only` and
-// these travel to client components.
 export type PresetPeriod =
   "today" | "yesterday" | "last7d" | "last30d" | "last90d";
 export type Period = PresetPeriod | `custom:${string}:${string}`;
@@ -313,9 +311,6 @@ export interface FunnelDetailResponse {
   metrics: FunnelMetrics;
 }
 
-// ── Journeys ─────────────────────────────────────────────────────────────
-// One visitor's whole lifetime timeline. The period selects *which* visitors
-// appear, never which events they carry. Timelines are prefetched with the list.
 
 export type JourneyEventType = "referral" | "pageview" | "custom" | "payment";
 
@@ -326,7 +321,6 @@ export interface JourneyTrackingParam {
 
 export interface JourneyReferralData {
   domainName: string;
-  /** Classified by the same `buildChannelSQL` the Sources panel uses. */
   channel: string;
   fullReferrer: string;
   trackingParams: JourneyTrackingParam[];
@@ -340,11 +334,9 @@ export interface JourneyPageviewData {
 
 export interface JourneyCustomData {
   eventName: string;
-  /** Raw `extra_data`, minus the `eventName` key promoted above. */
   metadata: Record<string, unknown>;
 }
 
-/** Revenue is USD-only by construction; there is no currency column. */
 export interface JourneyPaymentData {
   amount: number;
 }
@@ -359,7 +351,6 @@ export interface JourneyReferralEntry extends JourneyEntryBase {
   data: JourneyReferralData;
 }
 
-/** `count`/`lastTimestamp` collapse repeat views of the same path. */
 export interface JourneyPageviewEntry extends JourneyEntryBase {
   eventType: "pageview";
   data: JourneyPageviewData;
@@ -390,7 +381,6 @@ export interface JourneySourceAttribution {
 
 export interface JourneyVisitor {
   visitorId: string;
-  /** From the payment row's `extra_data`; empty for visitors who never paid. */
   customerName: string;
   customerEmail: string;
   profileMetadata: Record<string, unknown>;
@@ -405,13 +395,10 @@ export interface JourneyVisitor {
   deviceType: string;
   viewport: { width: number; height: number };
   pageviews: number;
-  /** First touch → goal completion, in ms. `null` when the goal never fired. */
   timeBeforeGoal: number | null;
   goalCompletedAt: number | null;
-  /** Last event of the whole lifetime; ranks the `goal=all` listing. */
   lastSeenAt: number;
   completeJourney: JourneyEntry[];
-  /** Lifetime exceeded the row cap; oldest entries dropped. */
   truncated: boolean;
 }
 

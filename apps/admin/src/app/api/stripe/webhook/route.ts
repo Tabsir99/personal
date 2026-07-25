@@ -10,7 +10,6 @@ import { writePaymentEvent } from "@/lib/tinybird";
 
 export const runtime = "nodejs";
 
-/** Identity on every payment row, so Journey can label a visitor with no signup. */
 interface PaymentIdentity {
   customer_name: string;
   customer_email: string;
@@ -38,8 +37,6 @@ function fromMetadata(
   return { visitorId, sessionId, revenueCents: amountCents, kind, identity };
 }
 
-/** Re-fetch expanded: the inline PI has `latest_charge` as a bare id, and the
- * billing name only exists on the charge. */
 async function retrievePaymentIntent(
   stripe: Stripe,
   ref: string | Stripe.PaymentIntent | null,

@@ -189,8 +189,6 @@ export function escapeSQL(value: string): string {
   return value.replace(/['\\]/g, "");
 }
 
-/** Splits a stored full-URL `href`, falling back to naive splitting for the
- * malformed hrefs that arrive from the wild. */
 export function parseHref(
   href: string,
   keepQuery = false,

@@ -10,11 +10,7 @@ import type {
   JourneyReferralEntry,
 } from "@/lib/analyticsTypes";
 
-// Journey assembly only; the SQL feeding it has its own integration test.
-
 const T0 = 1_700_000_000_000;
-const PERIOD_START = T0 - 86_400_000;
-const PERIOD_END = T0 + 86_400_000;
 
 function row(over: Partial<JourneyRow> = {}): JourneyRow {
   return {
@@ -35,6 +31,7 @@ function row(over: Partial<JourneyRow> = {}): JourneyRow {
     device: "desktop",
     viewport_w: 1920,
     viewport_h: 929,
+    goal_at: 0,
     ...over,
   };
 }
@@ -46,7 +43,6 @@ const PAYMENT_EXTRA = JSON.stringify({
   transaction_id: "pi_456",
 });
 
-/** Webhook-written, so every browser-derived column is empty. */
 function paymentRow(over: Partial<JourneyRow> = {}): JourneyRow {
   return row({
     type: "payment",
@@ -67,8 +63,11 @@ function paymentRow(over: Partial<JourneyRow> = {}): JourneyRow {
   });
 }
 
-const assemble = (rows: JourneyRow[]) =>
-  assembleVisitor(rows, "payment", PERIOD_START, PERIOD_END);
+const assemble = (rows: JourneyRow[], goalAt = 0) =>
+  assembleVisitor(
+    rows.map((r) => ({ ...r, goal_at: goalAt })),
+    "payment",
+  );
 
 describe("journey assembly", () => {
   it("lifts customer identity off the payment row", () => {
@@ -153,23 +152,23 @@ describe("journey assembly", () => {
     expect(visitor.sourceAttribution.params.utm_medium).toBe("");
   });
 
-  it("measures time to goal from first touch, not from the period start", () => {
-    const firstTouch = PERIOD_START - 10 * 86_400_000;
+  it("measures time to goal from first touch, however old", () => {
+    const firstTouch = T0 - 30 * 86_400_000;
     const visitor = assemble([
       row({ timestamp: firstTouch }),
       row({ timestamp: T0 - 5000 }),
       paymentRow({ timestamp: T0 }),
-    ]);
+    ], T0);
 
     expect(visitor.goalCompletedAt).toBe(T0);
     expect(visitor.timeBeforeGoal).toBe(T0 - firstTouch);
     expect(visitor.completeJourney[0]!.timestamp).toBe(firstTouch);
   });
 
-  it("ignores goal completions outside the period", () => {
+  it("reports no goal when the query found no completion", () => {
     const visitor = assemble([
-      row({ timestamp: PERIOD_START - 5000 }),
-      paymentRow({ timestamp: PERIOD_START - 1000 }),
+      row({ timestamp: T0 - 5000 }),
+      paymentRow({ timestamp: T0 - 1000 }),
     ]);
 
     expect(visitor.goalCompletedAt).toBeNull();
@@ -177,12 +176,12 @@ describe("journey assembly", () => {
     expect(visitor.completeJourney.some((e) => e.isGoal)).toBe(false);
   });
 
-  it("takes the first goal completion when a visitor converts twice", () => {
+  it("marks only the completion the query chose", () => {
     const visitor = assemble([
       row({ timestamp: T0 - 10_000 }),
       paymentRow({ timestamp: T0 }),
       paymentRow({ timestamp: T0 + 60_000 }),
-    ]);
+    ], T0);
 
     expect(visitor.goalCompletedAt).toBe(T0);
     expect(visitor.completeJourney.filter((e) => e.isGoal)).toHaveLength(1);
@@ -190,7 +189,6 @@ describe("journey assembly", () => {
   });
 
   it("skips the profile-less payment row when it is the visitor's last event", () => {
-    // Pay-and-leave: the newest row carries no geo/UA.
     const visitor = assemble([
       row({ timestamp: T0 - 5000, country: "ES", city: "Parla", os: "iOS" }),
       paymentRow({ timestamp: T0 }),
@@ -202,7 +200,6 @@ describe("journey assembly", () => {
     expect(visitor.osName).toBe("iOS");
     expect(visitor.browserName).toBe("Chrome");
     expect(visitor.viewport).toEqual({ width: 1920, height: 929 });
-    // The payment is still the last thing they did.
     expect(visitor.lastSeenAt).toBe(T0);
   });
 
@@ -231,7 +228,7 @@ describe("journey assembly", () => {
   });
 
   it("converts payment amounts from cents to major units", () => {
-    const visitor = assemble([paymentRow({ revenue_cents: 16_900 })]);
+    const visitor = assemble([paymentRow({ revenue_cents: 16_900 })], T0);
 
     expect(visitor.completeJourney[1]).toMatchObject({
       eventType: "payment",
@@ -242,14 +239,12 @@ describe("journey assembly", () => {
   });
 
   it("drops the sentinel row and flags truncation past the cap", () => {
-    // The query fetches MAX+1 rows per visitor to make this detectable.
     const rows = Array.from({ length: MAX_ROWS_PER_VISITOR + 1 }, (_, i) =>
       row({ href: `https://example.com/p${i}`, timestamp: T0 + i * 1000 }),
     );
     const visitor = assemble(rows);
 
     expect(visitor.truncated).toBe(true);
-    // MAX kept rows plus the referral head; oldest dropped.
     expect(visitor.completeJourney).toHaveLength(MAX_ROWS_PER_VISITOR + 1);
     const firstPage = visitor.completeJourney[1] as JourneyPageviewEntry;
     expect(firstPage.data.path).toBe("/p1");
@@ -267,12 +262,11 @@ describe("journey assembly", () => {
 
   it("skips goal detection entirely for the all-visitors listing", () => {
     const rows = [row({ timestamp: T0 - 5000 }), paymentRow({ timestamp: T0 })];
-    const visitor = assembleVisitor(rows, null, PERIOD_START, PERIOD_END);
+    const visitor = assembleVisitor(rows, null);
 
     expect(visitor.goalCompletedAt).toBeNull();
     expect(visitor.timeBeforeGoal).toBeNull();
     expect(visitor.completeJourney.some((e) => e.isGoal)).toBe(false);
-    // Identity and revenue don't depend on a goal.
     expect(visitor.customerName).toBe("Andrew Smith");
     expect(visitor.amount).toBe(299);
     expect(visitor.lastSeenAt).toBe(T0);

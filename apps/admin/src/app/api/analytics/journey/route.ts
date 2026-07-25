@@ -19,11 +19,9 @@ import {
   type JourneyRow,
 } from "./assemble";
 
-/** `?goal=all` — every visitor active in the period, converted or not. */
-const ALL_VISITORS = "all";
+const EVERY_VISITOR = "all";
 
-/** Types whose `event_name` is the type itself; anything else is `custom`. */
-const TYPED_GOALS = new Set([
+const TYPES_WHOSE_EVENT_NAME_IS_THE_TYPE = new Set([
   "payment",
   "identify",
   "external_link",
@@ -39,6 +37,9 @@ const optionsSchema = z.object({
 
 const channelExpr = buildChannelSQL(F.referrer);
 
+const sortKeyTypeFor = (goalName: string) =>
+  TYPES_WHOSE_EVENT_NAME_IS_THE_TYPE.has(goalName) ? goalName : "custom";
+
 export const GET = wrapRoute<JourneyResponse>(async (req: NextRequest) => {
   await requireAuth();
 
@@ -52,45 +53,46 @@ export const GET = wrapRoute<JourneyResponse>(async (req: NextRequest) => {
     search: search.get("search") ?? undefined,
   });
 
-  // The only way to see a journey that converted on nothing.
-  const goalName = options.goal === ALL_VISITORS ? null : options.goal;
+  const goalName = options.goal === EVERY_VISITOR ? null : options.goal;
+  const activeInPeriod = `${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}`;
 
-  // Pinning `type` (3rd sort-key column) lets the index reach `timestamp`;
-  // `event_name` alone is not in the key. Measured: 927k scanned rows -> 54k.
-  const goalFilter = goalName
-    ? `AND ${F.type} = '${escapeSQL(TYPED_GOALS.has(goalName) ? goalName : "custom")}'
-       AND ${F.eventName} = '${escapeSQL(goalName)}'`
+  const completedGoal = goalName
+    ? `${F.eventName} = '${escapeSQL(goalName)}' AND ${activeInPeriod}`
     : "";
+  const sortKeyTypePin = goalName
+    ? `AND ${F.type} = '${escapeSQL(sortKeyTypeFor(goalName))}'`
+    : "";
+  const rankVisitorsBy = goalName
+    ? `min(${F.timestamp})`
+    : `max(${F.timestamp})`;
+  const goalCompletedAt = completedGoal
+    ? `min(if(${completedGoal}, ${F.timestamp}, NULL)) OVER (PARTITION BY ${F.visitorId})`
+    : "0";
 
-  // `all` has no conversion to rank by, so it uses most recent activity.
-  const rankBy = goalName ? `min(${F.timestamp})` : `max(${F.timestamp})`;
-
-  const scope = `
+  const visitorsInScope = `
     ${F.websiteId} = '${params.websiteId}'
       AND ${F.isBot} = 0
-      ${goalFilter}
-      AND ${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}
+      ${sortKeyTypePin}
+      AND ${completedGoal || activeInPeriod}
       ${options.search ? `AND ${F.extraData} ILIKE '%${escapeSQL(options.search)}%'` : ""}
   `;
 
-  // The outer select carries no time or type bound: a journey is a whole
-  // lifetime. `IN (subquery)` not a join, so the visitor set reaches the
-  // `visitor_id` skip index; a join would force a full scan.
   const rowsRes = await queryTinybird<JourneyRow & { total: number }>(
     `
     SELECT * FROM (
       SELECT
         ${JOURNEY_COLUMNS.join(", ")},
         ${channelExpr} as channel,
-        (SELECT COUNT(DISTINCT ${F.visitorId}) FROM ${F.engine} WHERE ${scope}) as total
+        ifNull(${goalCompletedAt}, 0) as goal_at,
+        (SELECT COUNT(DISTINCT ${F.visitorId}) FROM ${F.engine} WHERE ${visitorsInScope}) as total
       FROM ${F.engine}
       WHERE ${F.websiteId} = '${params.websiteId}'
         AND ${F.isBot} = 0
         AND ${F.visitorId} IN (
           SELECT visitor_id FROM (
-            SELECT ${F.visitorId} as visitor_id, ${rankBy} as rank_at
+            SELECT ${F.visitorId} as visitor_id, ${rankVisitorsBy} as rank_at
             FROM ${F.engine}
-            WHERE ${scope}
+            WHERE ${visitorsInScope}
             GROUP BY visitor_id
             ORDER BY rank_at DESC
             LIMIT ${options.limit} OFFSET ${options.skip}
@@ -106,11 +108,11 @@ export const GET = wrapRoute<JourneyResponse>(async (req: NextRequest) => {
 
   const visitors: JourneyVisitor[] = [];
   for (const rows of groupByVisitor(rowsRes.data).values()) {
-    visitors.push(assembleVisitor(rows, goalName, start, end));
+    visitors.push(assembleVisitor(rows, goalName));
   }
-  // Restores the inner select's ranking, lost to `ORDER BY visitor_id`.
-  const rank = (v: JourneyVisitor) => v.goalCompletedAt ?? v.lastSeenAt;
-  visitors.sort((a, b) => rank(b) - rank(a));
+
+  const rankOf = (v: JourneyVisitor) => v.goalCompletedAt ?? v.lastSeenAt;
+  visitors.sort((a, b) => rankOf(b) - rankOf(a));
 
   const totalCount = Number(rowsRes.data[0]?.total ?? 0);
 

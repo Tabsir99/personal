@@ -298,8 +298,6 @@ interface VisitorProfile {
   viewportWidth: number;
   viewportHeight: number;
   persona: "bounce" | "explorer" | "signer" | "supporter";
-  // Fixed per visitor: `identify()` carries a stable account id, so re-rolling
-  // it per session would produce data no real integration can generate.
   firstName: string;
   lastName: string;
   email: string;
@@ -871,7 +869,6 @@ allEvents.sort(
   (a, b) => (a.cfOverride?.timestamp ?? 0) - (b.cfOverride?.timestamp ?? 0),
 );
 
-/** SDK throttle (`events.ts`): a repeat href within 60s never leaves the browser. */
 function applyPageviewThrottle(events: DevEventPayload[]): DevEventPayload[] {
   const lastSeen = new Map<string, number>();
 
@@ -899,7 +896,6 @@ console.log(
   `Timeline spans from: ${new Date(finalEvents[0].cfOverride?.timestamp ?? 0).toLocaleString()} to ${new Date(finalEvents[finalEvents.length - 1].cfOverride?.timestamp ?? 0).toLocaleString()}\n`,
 );
 
-/** Every column at its Tinybird default, so builders name only what they write. */
 function emptyRow(websiteId: string, timestamp: number): AnalyticsEventRow {
   return {
     website_id: websiteId,
@@ -933,8 +929,6 @@ function emptyRow(websiteId: string, timestamp: number): AnalyticsEventRow {
   };
 }
 
-/** `writePaymentEvent` fills only these columns; geo, UA, viewport and href
- * stay empty. Seeded rows must match or we test an impossible shape. */
 function toPaymentRow(p: DevEventPayload): AnalyticsEventRow {
   const { amount_cents, ...extra } = (p.extraData ?? {}) as Record<
     string,
