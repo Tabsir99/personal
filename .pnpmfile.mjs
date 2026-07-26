@@ -1,5 +1,5 @@
 const REGISTRY_VERSIONS = {
-  'premium-ds': '^0.7.1',
+  'premium-ds': '^0.8.0',
   '@tabsircg/analytics': '^1.0.1',
 };
 
