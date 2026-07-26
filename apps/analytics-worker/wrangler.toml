@@ -17,16 +17,3 @@ TINYBIRD_HOST = "https://api.ap-east-1.aws.tinybird.co"
 [[kv_namespaces]]
 binding = "ANALYTICS_DOMAINS_KV"
 id = "8b98adb285794312a168726b12abd774"
-
-# --- dev environment ---
-[env.dev]
-name = "analytics-backend-dev"
-routes = []
-
-[env.dev.vars]
-ENVIRONMENT = "dev"
-TINYBIRD_HOST = "https://api.ap-east-1.aws.tinybird.co"
-
-[[env.dev.kv_namespaces]]
-binding = "ANALYTICS_DOMAINS_KV"
-id = "8b98adb285794312a168726b12abd774"
