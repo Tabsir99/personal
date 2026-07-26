@@ -19,7 +19,9 @@ export default function LogIn() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData();
+    formData.set("username", username);
+    formData.set("password", password);
     const response = await logInAction(formData);
     if (response.status === "success") {
       router.push("/analytics");
