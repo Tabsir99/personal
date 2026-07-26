@@ -9,4 +9,6 @@ dist/
 .vercel/
 *.local.*
 .pnpm-store/
-
+.tinyb
+.wrangler/
+.dev.vars

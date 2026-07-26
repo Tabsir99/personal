@@ -66,18 +66,18 @@ const TextEditor = ({ blogFormData }: { blogFormData: BlogFormData }) => {
   if (!editor) return null;
 
   return (
-    <div className="w-full min-h-svh flex flex-col">
+    <div className="flex min-h-svh w-full flex-col">
       <EditorHeader
         saveStatus={saveStatus}
         onPreview={() => setShowPreview(true)}
         onSettings={() => setShowSettings(true)}
         onPublish={() => setShowPublishDialog(true)}
       />
-      <div className="flex-1 flex justify-center py-5 px-4">
+      <div className="flex flex-1 justify-center px-4 py-5">
         <div className="w-full max-w-4xl rounded-md border-2 border-border/70 bg-background/30 transition-all duration-200 focus-within:border-primary/20">
           <OpenNotionView
             editor={editor}
-            className="w-full min-h-svh pl-20 pr-10 py-10"
+            className="min-h-svh w-full py-10 pr-10 pl-20"
           />
         </div>
       </div>

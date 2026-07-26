@@ -14,12 +14,12 @@
     "./site": "./src/site.ts"
   },
   "dependencies": {
-    "zod": "^4.4.3"
+    "zod": "catalog:"
   },
   "peerDependencies": {
     "@open-notion/editor": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^24.12.3"
+    "@types/node": "catalog:"
   }
 }

@@ -16,7 +16,7 @@ export function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <div className="mb-4 flex items-center gap-2">
-      <Icon className="h-4 w-4 text-muted-foreground" />
+      <Icon className="size-4 text-muted-foreground" />
       <h3
         className={cn(
           "tracking-tight",
@@ -29,7 +29,7 @@ export function SectionHeader({
       </h3>
       {complete && (
         <span
-          className="h-1.5 w-1.5 rounded-full bg-primary"
+          className="size-1.5 rounded-full bg-primary"
           role="status"
           aria-label="Section complete"
         />

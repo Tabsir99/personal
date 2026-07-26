@@ -1,21 +1,17 @@
+"use client";
+
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Pencil,
-  Trash2,
+  DotsThree,
+  PencilSimple,
+  Trash,
   Power,
-  Share2,
+  ShareNetwork,
   Image,
   Star,
-  MoreHorizontal,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import useUIStore from "@/stores/UIStore";
-import { Button } from "../ui/button";
+import { Button } from "premium-ds/button";
+import { Popover } from "premium-ds/popover";
 import { useRouter } from "next/navigation";
 import { BlogStatus } from "@tabsircg/schemas/blog";
 
@@ -39,120 +35,129 @@ export default function BlogMenu({
   setFeatured?: () => void;
 }) {
   const openModal = useUIStore.getState().openModal;
-
   const router = useRouter();
   const handleBlogEdit = () => router.push(`write-blog/${blogId}`);
-
   const isDraft = status === "draft";
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Open menu"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        }
-      />
+    <Popover
+      side="bottom"
+      align="end"
+      trigger={
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label="Open menu"
+          className="min-w-0 p-1 text-muted-foreground hover:text-foreground"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DotsThree size={20} weight="bold" />
+        </Button>
+      }
+    >
+      {({ close }) => (
+        <div
+          className="flex w-48 flex-col rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-dialog"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {!isDraft && (
+            <button
+              onClick={() => {
+                close();
+                handleBlogEdit();
+              }}
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-foreground/4"
+            >
+              <PencilSimple size={16} />
+              <span>Edit Post</span>
+            </button>
+          )}
 
-      <DropdownMenuContent
-        align="end"
-        className="w-48"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {!isDraft && (
-          <DropdownMenuItem
-            onClick={handleBlogEdit}
-            className="flex items-center space-x-2"
-          >
-            <Pencil className="w-4 h-4" />
-            <span>Edit Post</span>
-          </DropdownMenuItem>
-        )}
+          {!isDraft && (
+            <button
+              onClick={() => {
+                close();
+                openModal("blogThumbnail", { data: { blogId, thumbnailUrl } });
+              }}
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-foreground/4"
+            >
+              <Image size={16} />
+              <span>Change Thumbnail</span>
+            </button>
+          )}
 
-        {isDraft || (
-          <DropdownMenuItem
-            onClick={() =>
-              openModal("blogThumbnail", { data: { blogId, thumbnailUrl } })
-            }
-            className="flex items-center space-x-2"
-          >
-            <Image className="w-4 h-4" />
-            <span>Change Thumbnail</span>
-          </DropdownMenuItem>
-        )}
+          {!isDraft && <div className="my-1 h-px bg-foreground/6" />}
 
-        {isDraft || <DropdownMenuSeparator />}
-
-        {toggleStatus &&
-          (isDraft || (
-            <DropdownMenuItem
-              onClick={() =>
+          {toggleStatus && !isDraft && (
+            <button
+              onClick={() => {
+                close();
                 openModal("confirmation", {
                   data: {
                     message: `Are you sure you want to ${status === "published" ? "unpublish" : "publish"} this post?`,
                     onConfirm: toggleStatus,
                   },
-                })
-              }
-              className="flex items-center space-x-2"
+                });
+              }}
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-foreground/4"
             >
-              <Power className="w-4 h-4" />
+              <Power size={16} />
               <span>
                 {status === "published" ? "Unpublish" : "Publish"} Post
               </span>
-            </DropdownMenuItem>
-          ))}
+            </button>
+          )}
 
-        {setFeatured && status === BlogStatus.published && (
-          <DropdownMenuItem
-            onClick={setFeatured}
-            className="flex items-center space-x-2"
-          >
-            <Star className="w-4 h-4" />
-            <span>Set as featured</span>
-          </DropdownMenuItem>
-        )}
+          {setFeatured && status === BlogStatus.published && (
+            <button
+              onClick={() => {
+                close();
+                setFeatured();
+              }}
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-foreground/4"
+            >
+              <Star size={16} />
+              <span>Set as featured</span>
+            </button>
+          )}
 
-        {isDraft || (
-          <DropdownMenuItem
-            onClick={() =>
-              openModal("blogShare", {
+          {!isDraft && (
+            <button
+              onClick={() => {
+                close();
+                openModal("blogShare", {
+                  data: {
+                    url: `${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${slug}`,
+                    title: blogName,
+                  },
+                });
+              }}
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-foreground/4"
+            >
+              <ShareNetwork size={16} />
+              <span>Share Post</span>
+            </button>
+          )}
+
+          {!isDraft && <div className="my-1 h-px bg-foreground/6" />}
+
+          <button
+            onClick={() => {
+              close();
+              openModal("confirmation", {
                 data: {
-                  url: `${process.env.NEXT_PUBLIC_BLOGSITE_HOSTNAME}/blogs/${slug}`,
-                  title: blogName,
+                  message: `Deleting "${blogName}" is irrecoverable.`,
+                  onConfirm: confirmDelete,
                 },
-              })
-            }
-            className="flex items-center space-x-2"
+              });
+            }}
+            className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-destructive transition-colors hover:bg-destructive/8"
           >
-            <Share2 className="w-4 h-4" />
-            <span>Share Post</span>
-          </DropdownMenuItem>
-        )}
-
-        {isDraft || <DropdownMenuSeparator />}
-
-        <DropdownMenuItem
-          onClick={() => {
-            openModal("confirmation", {
-              data: {
-                message: `Deleting "${blogName}" is irrecoverable.`,
-                onConfirm: confirmDelete,
-              },
-            });
-          }}
-          className="flex items-center space-x-2 text-destructive focus:text-destructive"
-        >
-          <Trash2 className="w-4 h-4" />
-          <span>Delete Post</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <Trash size={16} />
+            <span>Delete Post</span>
+          </button>
+        </div>
+      )}
+    </Popover>
   );
 }

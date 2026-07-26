@@ -15,13 +15,12 @@ export default function SiteConfigEditor({
 }: {
   initial: SiteConfig;
 }) {
-  const didInit = React.useRef(false);
-  if (!didInit.current) {
-    didInit.current = true;
+  React.useState(() => {
     if (!useSiteConfigStore.getState().hydrated) {
       useSiteConfigStore.getState().hydrate(initial);
     }
-  }
+    return true;
+  });
 
   const { isDirty, saving } = useSiteConfigStore(
     useShallow((s) => ({ isDirty: s.isDirty, saving: s.saving })),
@@ -41,17 +40,17 @@ export default function SiteConfigEditor({
 
   return (
     <div className="mx-auto max-w-4xl pb-32">
-      <div className="animate-in fade-in slide-in-from-bottom-1 duration-400 ease-out">
+      <div className="animate-in duration-400 ease-out fade-in slide-in-from-bottom-1">
         <EditorChrome />
       </div>
       <div className="mt-8 space-y-6">
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out [animation-delay:60ms] fill-mode-[both]">
+        <div className="animate-in duration-500 ease-out fill-mode-[both] [animation-delay:60ms] fade-in slide-in-from-bottom-2">
           <BlogLandingPanel />
         </div>
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out [animation-delay:140ms] fill-mode-[both]">
+        <div className="animate-in duration-500 ease-out fill-mode-[both] [animation-delay:140ms] fade-in slide-in-from-bottom-2">
           <NowReadingPanel />
         </div>
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out [animation-delay:220ms] fill-mode-[both]">
+        <div className="animate-in duration-500 ease-out fill-mode-[both] [animation-delay:220ms] fade-in slide-in-from-bottom-2">
           <CurrentlyBuildingPanel />
         </div>
       </div>

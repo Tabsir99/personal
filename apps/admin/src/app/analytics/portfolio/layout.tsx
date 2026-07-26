@@ -1,0 +1,195 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+"use client";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useShallow } from "zustand/react/shallow";
+import {
+  Certificate,
+  Briefcase,
+  Code,
+  FileText,
+  CircleNotch,
+  ChatText,
+  Package,
+  FloppyDisk,
+  type Icon as PhosphorIcon,
+} from "@phosphor-icons/react";
+
+import { Button } from "premium-ds/button";
+import { Kbd } from "@/components/ui/Kbd";
+import { usePortfolioStore } from "@/stores/PortfolioStore";
+import useUIStore from "@/stores/UIStore";
+import { cn } from "@/lib/utils";
+
+interface Section {
+  id: string;
+  label: string;
+  icon: PhosphorIcon;
+}
+
+const SECTIONS: Section[] = [
+  { id: "metadata", label: "Metadata", icon: FileText },
+  { id: "services", label: "Services", icon: Package },
+  { id: "projects", label: "Projects", icon: Briefcase },
+  { id: "testimonials", label: "Testimonials", icon: ChatText },
+  { id: "skills", label: "Skills", icon: Code },
+  { id: "credentials", label: "Credentials", icon: Certificate },
+];
+
+export default function PortfolioDashboard({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [activeSection, setActiveSection] = useState("metadata");
+  const pathname = usePathname();
+  const [saving, isDirty, loading] = usePortfolioStore(
+    useShallow((s) => [s.saving, s.isDirty, s.loading]),
+  );
+
+  useEffect(() => {
+    setActiveSection(pathname.split("/").pop() || "metadata");
+  }, [pathname]);
+
+  useEffect(() => {
+    usePortfolioStore
+      .getState()
+      .loadPageData()
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!isDirty) return;
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        usePortfolioStore.getState().savePageData();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isDirty]);
+
+  const openReset = () =>
+    useUIStore.getState().openModal("confirmation", {
+      data: {
+        headerText: "Reset Portfolio",
+        message: "Discard every unsaved edit across portfolio sections?",
+        onConfirm: () => usePortfolioStore.getState().resetChanges(),
+        confirmButtonText: "Reset",
+        confirmButtonVariant: "danger",
+        cancelButtonText: "Keep editing",
+        cancelButtonVariant: "secondary",
+      },
+    });
+
+  return (
+    <div className="absolute top-0 w-[calc(100%-6rem)] text-foreground">
+      <div className="flex">
+        <aside className="flex min-h-screen w-52 shrink-0 flex-col gap-5 border-r border-foreground/6 px-3 py-6">
+          <div className="px-2">
+            <h1 className="text-lg leading-tight font-semibold tracking-tight">
+              Portfolio
+            </h1>
+          </div>
+
+          <nav>
+            {loading ? (
+              <div className="flex flex-col gap-1">
+                {SECTIONS.map((s) => (
+                  <div key={s.id} className="h-9 w-full animate-pulse rounded-md bg-muted/50" />
+                ))}
+              </div>
+            ) : (
+              <ul className="flex flex-col gap-0.5">
+                {SECTIONS.map((section) => {
+                  const Icon = section.icon;
+                  const isActive = activeSection === section.id;
+                  return (
+                    <li key={section.id}>
+                      <Link
+                        href={`/analytics/portfolio/${section.id}`}
+                        aria-current={isActive ? "page" : undefined}
+                        className={cn(
+                          "group/nav-item relative flex h-9 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
+                          isActive
+                            ? "bg-primary/6 text-foreground"
+                            : "text-muted-foreground hover:bg-foreground/4 hover:text-foreground",
+                        )}
+                      >
+                        {isActive && (
+                          <span
+                            aria-hidden="true"
+                            className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-r-full bg-primary"
+                          />
+                        )}
+                        <Icon
+                          size={16}
+                          className={cn(
+                            "shrink-0 transition-colors",
+                            isActive
+                              ? "text-primary"
+                              : "text-muted-foreground/70 group-hover/nav-item:text-foreground",
+                          )}
+                        />
+                        <span className="flex-1 truncate">{section.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </nav>
+
+          <div className="mt-auto flex flex-col gap-1.5 px-2">
+            <Button
+              type="button"
+              size="sm"
+              disabled={saving || !isDirty}
+              loading={saving}
+              onClick={() => usePortfolioStore.getState().savePageData()}
+              className="w-full justify-between"
+              iconLeft={<FloppyDisk size={14} />}
+            >
+              <span className="flex-1 text-left">Save changes</span>
+              <Kbd
+                size="sm"
+                className="ml-1.5 shrink-0 border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground"
+              >
+                ⌘S
+              </Kbd>
+            </Button>
+            {isDirty && !saving && (
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={openReset}
+                className="w-full text-muted-foreground hover:text-destructive"
+              >
+                Discard
+              </Button>
+            )}
+          </div>
+        </aside>
+
+        <main className="max-h-screen flex-1 overflow-y-auto p-10">
+          {loading ? (
+            <div className="flex h-full items-center justify-center">
+              <div className="flex flex-col items-center gap-3">
+                <CircleNotch size={28} className="animate-spin text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  Loading portfolio…
+                </p>
+              </div>
+            </div>
+          ) : (
+            children
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
+

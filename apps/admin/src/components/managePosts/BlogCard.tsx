@@ -1,14 +1,8 @@
 import Link from "next/link";
-import { ExternalLink, Star } from "lucide-react";
+import { ArrowSquareOut, Star } from "@phosphor-icons/react";
 
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "premium-ds/badge";
+import { StatusBadge } from "premium-ds/status-badge";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { MetricNumber } from "@/components/ui/MetricNumber";
 import {
@@ -18,29 +12,6 @@ import {
 } from "@tabsircg/schemas/blog";
 import BlogMenu from "./BlogMenu";
 import { clientEnv } from "@/config/env.client";
-import { cn } from "@/lib/utils";
-
-type BadgeVariant =
-  | "success"
-  | "destructive"
-  | "neutral"
-  | "warning"
-  | "default"
-  | "accent"
-  | "outline";
-
-function statusVariant(status: BlogStatus): BadgeVariant {
-  switch (status) {
-    case BlogStatus.published:
-      return "success";
-    case BlogStatus.unpublished:
-      return "destructive";
-    case BlogStatus.draft:
-      return "neutral";
-    default:
-      return "outline";
-  }
-}
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -68,20 +39,19 @@ export default function CMSBlogCard({
   const overflowTags = blog.tags.length - visibleTags.length;
 
   return (
-    <Card className="group/blog-card tactile-lift flex flex-col justify-between border border-foreground/6 shadow-card-rest">
-      <CardHeader className="pt-5 pb-3">
+    <div className="group/blog-card flex flex-col justify-between rounded-lg border border-foreground/6 bg-card text-card-foreground shadow-card-rest tactile-lift">
+      <div className="px-6 pt-5 pb-3">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex min-w-0 flex-col gap-2">
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
             {isFeatured && (
-              <span className="inline-flex items-center gap-1.5">
-                <Star
-                  className="h-3 w-3 fill-star text-star"
-                  aria-hidden="true"
-                />
-                <Eyebrow tone="primary" size="xs" family="mono">
-                  Featured
-                </Eyebrow>
-              </span>
+              <Badge
+                tone="warning"
+                size="md"
+                icon={<Star weight="fill" />}
+                className="self-start"
+              >
+                Featured
+              </Badge>
             )}
             <h2 className="truncate text-lg leading-snug font-semibold tracking-tight text-foreground transition-colors group-hover/blog-card:text-foreground/90">
               {blog.title}
@@ -91,7 +61,7 @@ export default function CMSBlogCard({
             </p>
           </div>
 
-          <div className="flex shrink-0 items-center">
+          <div className="flex shrink-0 items-center gap-1">
             <BlogMenu
               blogName={blog.title}
               blogId={blog.blogId}
@@ -110,25 +80,28 @@ export default function CMSBlogCard({
                 href={`${clientEnv.ADMIN_ORIGIN}/blogs/${blog.slug}`}
                 target="_blank"
                 title="View Blog"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "icon-sm" }),
-                  "text-muted-foreground hover:text-foreground",
-                )}
+                className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-foreground/4 hover:text-foreground"
               >
-                <ExternalLink className="h-3.5 w-3.5" />
+                <ArrowSquareOut size={16} />
               </Link>
             )}
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="pt-1 pb-4">
+      <div className="px-6 pt-1 pb-4">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-muted-foreground">
           {!hideStatusBadge && (
             <>
-              <Badge variant={statusVariant(blog.status!)} className="font-sans">
-                {blog.status}
-              </Badge>
+              <StatusBadge
+                status={
+                  blog.status === BlogStatus.published
+                    ? "published"
+                    : blog.status === BlogStatus.unpublished
+                      ? "failed"
+                      : "draft"
+                }
+              />
               <span aria-hidden="true">·</span>
             </>
           )}
@@ -142,25 +115,27 @@ export default function CMSBlogCard({
         {visibleTags.length > 0 && (
           <div className="mt-4 flex flex-wrap items-center gap-1.5">
             {visibleTags.map((tag, index) => (
-              <Badge key={index} variant="neutral">
-                {tag}
+              <Badge key={index} tone="neutral" variant="outline">
+                #{tag}
               </Badge>
             ))}
             {overflowTags > 0 && (
-              <Badge variant="ghost">+{overflowTags}</Badge>
+              <Badge tone="neutral" variant="outline">
+                +{overflowTags}
+              </Badge>
             )}
           </div>
         )}
-      </CardContent>
+      </div>
 
       {isPublished && (
-        <CardFooter className="grid grid-cols-3 gap-4 pt-4 pb-4">
+        <div className="grid grid-cols-3 gap-4 border-t border-foreground/6 px-6 py-4">
           <Stat label="Views" value={blog.stats.views} />
           <Stat label="Score" value={blog.stats.score} />
           <Stat label="Shares" value={blog.stats.shares} />
-        </CardFooter>
+        </div>
       )}
-    </Card>
+    </div>
   );
 }
 

@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const metricNumberVariants = cva(
-  "inline-flex items-baseline gap-1 font-mono tabular-nums tracking-tight text-foreground",
+  "inline-flex items-baseline gap-1 font-mono tracking-tight text-foreground tabular-nums",
   {
     variants: {
       size: {
@@ -66,7 +66,7 @@ function MetricNumber({
           data-slot="metric-delta"
           data-tone={deltaTone}
           className={cn(
-            "ml-1 font-sans text-kbd font-medium tabular-nums",
+            "ml-1 font-sans text-xs font-medium tabular-nums",
             deltaToneClass[deltaTone],
           )}
         >

@@ -1,16 +1,35 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
+import tailwind from "eslint-plugin-tailwindcss";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+export default [
+  ...nextVitals,
+  ...nextTypescript,
+  tailwind.configs.recommended,
+  {
+    settings: {
+      tailwindcss: {
+        cssConfigPath: "src/app/globals.css",
+        whitelist: [
+          "tactile-lift",
+          "stagger-cascade",
+          "stagger-cascade-tight",
+          "inputs",
+          "shadow-card-rest",
+          "shadow-card-hover",
+          "shadow-dialog",
+          "shadow-kbd-rest",
+          "shadow-kbd-press",
+          "shadow-focus-ring",
+        ],
+      },
+    },
+    rules: {
+      "tailwindcss/classnames-order": "error",
+      "tailwindcss/enforces-shorthand": "error",
+      "tailwindcss/no-contradicting-classname": "error",
+      "tailwindcss/no-arbitrary-value": "error",
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ];
-
-export default eslintConfig;

@@ -4,16 +4,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const kbdVariants = cva(
-  "inline-flex items-center justify-center font-mono font-medium select-none whitespace-nowrap border border-border/80 bg-card text-foreground transition-shadow",
+  "inline-flex items-center justify-center border border-border/80 bg-card font-mono font-medium whitespace-nowrap text-foreground transition-shadow select-none",
   {
     variants: {
       size: {
-        sm: "h-5 min-w-5 rounded-sm px-1 text-eyebrow tracking-tight",
-        md: "h-5 min-w-5 rounded-sm px-1.5 text-kbd tracking-tight",
+        sm: "h-5 min-w-5 rounded-sm px-1 text-xs tracking-tight",
+        md: "h-5 min-w-5 rounded-sm px-1.5 text-xs tracking-tight",
       },
       tone: {
         default: "shadow-kbd-rest",
-        pressed: "shadow-kbd-press translate-y-[0.5px]",
+        pressed: "translate-y-[0.5px] shadow-kbd-press",
       },
     },
     defaultVariants: {

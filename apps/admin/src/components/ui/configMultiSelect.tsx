@@ -1,21 +1,10 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+import { Button } from "premium-ds/button";
+import { Popover } from "premium-ds/popover";
+import { TextField } from "premium-ds/text-field";
 import { useState } from "react";
-import { ChevronsUpDown, Plus, X, type LucideIcon } from "lucide-react";
+import { CaretUpDown, Plus, X } from "@phosphor-icons/react";
 import { callWithToast } from "@/lib/utils";
 import type { ApiResponse } from "@/lib/appUtils";
 
@@ -26,17 +15,14 @@ interface ConfigMultiSelectProps {
   onChange: (next: string[]) => void;
   available: string[];
   loading?: boolean;
-  /** Server action that persists a new value to Firestore and returns the new sorted list. */
   onCreate: (value: string) => Promise<ApiResponse<{ values: string[] }>>;
-  /** Called with the persisted list after a successful create; use for SWR mutate. */
   onAfterCreate?: (values: string[]) => void;
-  /** Called optimistically with `[...available, normalized].sort()` before the server replies. */
   onOptimisticCreate?: (values: string[]) => void;
   mode?: SelectionMode;
   placeholder?: string;
   searchPlaceholder?: string;
   selectedLabel?: (selected: string[]) => string;
-  itemIcon?: LucideIcon;
+  itemIcon?: any;
   toastMessages?: {
     loading: string;
     success: string;
@@ -59,7 +45,6 @@ export function ConfigMultiSelect({
   itemIcon: ItemIcon,
   toastMessages,
 }: ConfigMultiSelectProps) {
-  const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const normalized = search.trim();
@@ -77,15 +62,13 @@ export function ConfigMultiSelect({
   const triggerLabel = (() => {
     if (mode === "single") return value[0] ?? placeholder;
     if (selectedLabel) return selectedLabel(value);
-    return value.length
-      ? `${value.length} selected`
-      : placeholder;
+    return value.length ? `${value.length} selected` : placeholder;
   })();
 
-  const handleSelect = (item: string) => {
+  const handleSelect = (item: string, close: () => void) => {
     if (mode === "single") {
       onChange([item]);
-      setOpen(false);
+      close();
     } else {
       onChange([...value, item]);
     }
@@ -96,12 +79,12 @@ export function ConfigMultiSelect({
     onChange(value.filter((v) => v !== item));
   };
 
-  const handleCreate = async () => {
+  const handleCreate = async (close: () => void) => {
     if (!canCreate) return;
 
     if (mode === "single") {
       onChange([normalized]);
-      setOpen(false);
+      close();
     } else {
       onChange([...value, normalized]);
     }
@@ -124,91 +107,106 @@ export function ConfigMultiSelect({
 
   const showPills = mode === "multi" && value.length > 0;
 
+  const filteredUnselected = unselected.filter((item) =>
+    item.toLowerCase().includes(normalized.toLowerCase()),
+  );
+
   return (
     <div className="space-y-3">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger
-          render={
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className="w-full justify-between font-normal text-muted-foreground"
-            >
-              <span className={value.length ? "text-foreground" : undefined}>
-                {triggerLabel}
-              </span>
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          }
-        />
-
-        <PopoverContent className="p-0" align="start">
-          <Command>
-            <CommandInput
+      <Popover
+        side="bottom"
+        align="start"
+        trigger={
+          <Button
+            variant="secondary"
+            className="w-full justify-between font-normal text-muted-foreground"
+            iconRight={<CaretUpDown size={16} className="opacity-50" />}
+          >
+            <span className={value.length ? "text-foreground" : undefined}>
+              {triggerLabel}
+            </span>
+          </Button>
+        }
+      >
+        {({ close }) => (
+          <div className="flex max-h-80 w-64 flex-col space-y-2 overflow-hidden rounded-lg border border-border bg-popover p-2 text-popover-foreground shadow-dialog">
+            <TextField
               placeholder={searchPlaceholder}
               value={search}
-              onValueChange={setSearch}
+              onChange={(e) => setSearch(e.target.value)}
+              size="sm"
+              htmlProps={{ autoFocus: true }}
             />
-            <CommandList>
+
+            <div className="flex-1 space-y-1 overflow-y-auto pr-1">
               {loading ? (
-                <div className="p-2 space-y-1">
+                <div className="space-y-1">
                   {[0, 1, 2].map((i) => (
                     <div
                       key={i}
-                      className="h-7 rounded bg-muted/50 animate-pulse"
+                      className="h-7 animate-pulse rounded-md bg-muted/50"
                       style={{ animationDelay: `${i * 100}ms` }}
                     />
                   ))}
                 </div>
               ) : (
                 <>
-                  {unselected.length > 0 && (
-                    <CommandGroup heading="Existing">
-                      {unselected.map((item) => (
-                        <CommandItem
+                  {filteredUnselected.length > 0 ? (
+                    <div className="space-y-0.5">
+                      <div className="px-2 py-1 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+                        Existing
+                      </div>
+                      {filteredUnselected.map((item) => (
+                        <button
                           key={item}
-                          value={item}
-                          onSelect={() => handleSelect(item)}
+                          type="button"
+                          onClick={() => handleSelect(item, close)}
+                          className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-foreground/4"
                         >
-                          {ItemIcon && <ItemIcon className="mr-2 h-3 w-3" />}
-                          {item}
-                        </CommandItem>
+                          {ItemIcon && (
+                            <ItemIcon
+                              className="shrink-0 text-muted-foreground"
+                              size={14}
+                            />
+                          )}
+                          <span>{item}</span>
+                        </button>
                       ))}
-                    </CommandGroup>
+                    </div>
+                  ) : (
+                    !canCreate && (
+                      <div className="py-3 text-center text-xs text-muted-foreground">
+                        No matches.
+                      </div>
+                    )
                   )}
-                  <CommandEmpty>
-                    {canCreate ? null : "No matches."}
-                  </CommandEmpty>
                   {canCreate && (
-                    <CommandGroup>
-                      <CommandItem
-                        value={`__create__${normalized}`}
-                        onSelect={handleCreate}
-                        className="text-primary"
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Create &quot;{normalized}&quot;
-                      </CommandItem>
-                    </CommandGroup>
+                    <button
+                      type="button"
+                      onClick={() => handleCreate(close)}
+                      className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+                    >
+                      <Plus size={14} className="shrink-0" />
+                      <span>Create &quot;{normalized}&quot;</span>
+                    </button>
                   )}
                 </>
               )}
-            </CommandList>
-          </Command>
-        </PopoverContent>
+            </div>
+          </div>
+        )}
       </Popover>
 
       {showPills && (
-        <div className="flex flex-wrap gap-2 animate-in fade-in duration-200">
+        <div className="flex animate-in flex-wrap gap-2 duration-200 fade-in">
           {value.map((item) => (
             <span
               key={item}
               className="inline-flex items-stretch overflow-hidden rounded-full border border-border bg-muted text-xs font-medium text-foreground"
             >
-              <span className="flex items-center gap-1 py-1 pl-2.5 pr-1.5">
+              <span className="flex items-center gap-1 py-1 pr-1.5 pl-2.5">
                 {ItemIcon && (
-                  <ItemIcon className="h-3 w-3 text-muted-foreground" />
+                  <ItemIcon className="text-muted-foreground" size={12} />
                 )}
                 {item}
               </span>
@@ -216,9 +214,9 @@ export function ConfigMultiSelect({
                 type="button"
                 onClick={() => handleRemove(item)}
                 aria-label={`Remove ${item}`}
-                className="flex items-center px-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                className="flex cursor-pointer items-center px-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
               >
-                <X className="h-3 w-3" />
+                <X size={12} />
               </button>
             </span>
           ))}

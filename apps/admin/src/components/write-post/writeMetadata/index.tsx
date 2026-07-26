@@ -1,15 +1,10 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useTransition, useMemo, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Button } from "premium-ds/button";
+import { Sheet } from "premium-ds/sheet";
+import { X } from "@phosphor-icons/react";
 import BasicInfoSection from "./BasicInfoSection";
 import CoverImageSection from "./CoverImageSection";
 import SeoSocialSection from "./SeoSocialSection";
@@ -144,6 +139,7 @@ export default function WriteMetadataComp({
   }, [suggestion, currentValues]);
 
   useEffect(() => {
+     
     if (suggestion && changeCount === 0) {
       setSuggestion(null);
     }
@@ -181,68 +177,76 @@ export default function WriteMetadataComp({
   const handleDiscard = () => setSuggestion(null);
 
   return (
-    <Sheet open={showSidebar} onOpenChange={closeSidebar}>
-      <SheetContent side="right" className="border-border p-0 overflow-hidden">
-        <SheetHeader className="px-6 py-6 border-b border-border bg-card/40">
-          <SheetTitle className="text-lg font-semibold tracking-tight text-left">
-            Blog Metadata
-          </SheetTitle>
-          <SheetDescription className="mt-1 text-sm text-muted-foreground text-left">
-            Configure your blog's SEO and display settings
-          </SheetDescription>
-        </SheetHeader>
+    <Sheet open={showSidebar} onOpenChange={closeSidebar} side="right">
+      {({ close }) => (
+        <div className="flex size-full flex-col overflow-hidden border-l border-border bg-background sm:w-lg">
+          <div className="flex items-start justify-between border-b border-border bg-card/40 p-6">
+            <div>
+              <span className="block text-left text-lg font-semibold tracking-tight text-foreground">
+                Blog Metadata
+              </span>
+              <span className="mt-1 block text-left text-sm text-muted-foreground">
+                Configure your blog&apos;s SEO and display settings
+              </span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={close} iconLeft={<X size={14} />} />
+          </div>
 
-        <div className="flex-1 overflow-y-auto h-[calc(100vh-120px)] flex flex-col gap-4">
-          {!suggestion ? (
-            <GenerateMetadataButton
-              onClick={handleGenerate}
-              loading={isGenerating}
-              hasGenerated={!!suggestion}
-              disabled={!hasContent}
-              className="self-center"
-            />
-          ) : (
-            <SuggestionsActionBar
-              count={changeCount}
-              onApplyAll={handleApplyAll}
-              onDiscardAll={handleDiscard}
-            />
-          )}
-          <Separator className="bg-border" />
+          <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-6">
+            {!suggestion ? (
+              <GenerateMetadataButton
+                onClick={handleGenerate}
+                loading={isGenerating}
+                hasGenerated={!!suggestion}
+                disabled={!hasContent}
+                className="self-center"
+              />
+            ) : (
+              <SuggestionsActionBar
+                count={changeCount}
+                onApplyAll={handleApplyAll}
+                onDiscardAll={handleDiscard}
+              />
+            )}
+            
+            <div className="h-px w-full bg-foreground/6" />
 
-          <div className="space-y-6 p-6">
-            <BasicInfoSection
-              suggestion={suggestion}
-              onApplyField={applyField}
-              onSkipField={skipField}
-            />
-            <TagsSection
-              suggestion={suggestion}
-              onApplyTagAddition={applyTagAddition}
-              onApplyTagRemoval={applyTagRemoval}
-              onDismissTagAddition={dismissTagAddition}
-              onDismissTagRemoval={dismissTagRemoval}
-            />
-            <CoverImageSection />
-            <SeoSocialSection
-              suggestion={suggestion}
-              onApplyField={applyField}
-              onSkipField={skipField}
-            />
+            <div className="space-y-6">
+              <BasicInfoSection
+                suggestion={suggestion}
+                onApplyField={applyField}
+                onSkipField={skipField}
+              />
+              <TagsSection
+                suggestion={suggestion}
+                onApplyTagAddition={applyTagAddition}
+                onApplyTagRemoval={applyTagRemoval}
+                onDismissTagAddition={dismissTagAddition}
+                onDismissTagRemoval={dismissTagRemoval}
+              />
+              <CoverImageSection />
+              <SeoSocialSection
+                suggestion={suggestion}
+                onApplyField={applyField}
+                onSkipField={skipField}
+              />
 
-            <Separator className="bg-border" />
+              <div className="h-px w-full bg-foreground/6" />
 
-            <div className="flex justify-end">
-              <Button
-                onClick={closeSidebar}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-6"
-              >
-                Save Metadata
-              </Button>
+              <div className="flex justify-end">
+                <Button
+                  variant="primary"
+                  onClick={closeSidebar}
+                  className="px-6"
+                >
+                  Save Metadata
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </SheetContent>
+      )}
     </Sheet>
   );
 }
+

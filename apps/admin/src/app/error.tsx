@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "premium-ds/button";
 import { useEffect } from "react";
 
 export default function Error({

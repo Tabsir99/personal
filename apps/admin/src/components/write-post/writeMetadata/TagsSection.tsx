@@ -1,24 +1,13 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+import { Button } from "premium-ds/button";
+import { Popover } from "premium-ds/popover";
+import { Tag, TagGroup } from "premium-ds/tag";
+import { TextField } from "premium-ds/text-field";
 import { useBlogEditorStore } from "@/stores/BlogEditorStore";
 import { useShallow } from "zustand/shallow";
 import { useState } from "react";
-import { ChevronsUpDown, Hash, Plus, Tag, X } from "lucide-react";
+import { CaretUpDown, Hash, Plus, Tag as TagIcon } from "@phosphor-icons/react";
 import { useCustomSWR } from "@/hooks/useCustomSwr";
 import { addConfigValue, type BlogConfig } from "@/actions/configActions";
 import { callWithToast } from "@/lib/utils";
@@ -62,6 +51,10 @@ export default function TagsSection({
 
   const isComplete = (tags?.length ?? 0) > 0;
 
+  const filteredUnselected = unselected.filter((tag) =>
+    tag.toLowerCase().includes(normalized),
+  );
+
   const handleSelect = (tag: string) => {
     addTag(tag);
     setSearch("");
@@ -95,124 +88,119 @@ export default function TagsSection({
   };
 
   return (
-    <Card className="bg-card/60 border-border">
-      <CardContent className="p-6">
-        <SectionHeader
-          icon={Hash}
-          title="Tags & Categories"
-          complete={isComplete}
-        />
+    <div className="rounded-lg border border-border bg-card/60 p-6">
+      <SectionHeader
+        icon={Hash}
+        title="Tags & Categories"
+        complete={isComplete}
+      />
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger
-                render={
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full justify-between font-normal text-muted-foreground"
-                  >
-                    {tags?.length
-                      ? `${tags.length} tag${tags.length > 1 ? "s" : ""} selected`
-                      : "Select or create tags..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                }
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Popover
+            open={open}
+            onOpenChange={setOpen}
+            align="start"
+            trigger={
+              <Button
+                variant="secondary"
+                htmlProps={{ role: "combobox" }}
+                aria-expanded={open}
+                className="w-full justify-between font-normal text-muted-foreground"
+                iconRight={<CaretUpDown size={14} className="opacity-50" />}
+              >
+                {tags?.length
+                  ? `${tags.length} tag${tags.length > 1 ? "s" : ""} selected`
+                  : "Select or create tags..."}
+              </Button>
+            }
+          >
+            <div className="w-64 space-y-3 rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-card-hover">
+              <TextField
+                id="tag-search"
+                placeholder="Search or create..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                size="sm"
+                htmlProps={{ autoFocus: true }}
               />
-
-              <PopoverContent className="p-0" align="start">
-                <Command>
-                  <CommandInput
-                    placeholder="Search or create..."
-                    value={search}
-                    onValueChange={setSearch}
-                  />
-                  <CommandList>
-                    {isLoading ? (
-                      <div className="p-2 space-y-1">
-                        {[0, 1, 2].map((i) => (
-                          <div
-                            key={i}
-                            className="h-7 rounded bg-muted/50 animate-pulse"
-                            style={{ animationDelay: `${i * 100}ms` }}
-                          />
+              <div className="max-h-48 space-y-1 overflow-y-auto">
+                {isLoading ? (
+                  <div className="space-y-1">
+                    {[0, 1, 2].map((i) => (
+                      <div
+                        key={i}
+                        className="h-7 animate-pulse rounded-md bg-muted/50"
+                        style={{ animationDelay: `${i * 100}ms` }}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    {filteredUnselected.length > 0 && (
+                      <div className="space-y-1">
+                        <span className="block px-2 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+                          Existing
+                        </span>
+                        {filteredUnselected.map((tag) => (
+                          <button
+                            key={tag}
+                            type="button"
+                            className="flex w-full cursor-pointer items-center rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                            onClick={() => handleSelect(tag)}
+                          >
+                            <TagIcon className="mr-2 size-3 shrink-0 text-muted-foreground" />
+                            <span className="truncate">{tag}</span>
+                          </button>
                         ))}
                       </div>
-                    ) : (
-                      <>
-                        {unselected.length > 0 && (
-                          <CommandGroup heading="Existing">
-                            {unselected.map((tag) => (
-                              <CommandItem
-                                key={tag}
-                                value={tag}
-                                onSelect={() => handleSelect(tag)}
-                              >
-                                <Tag className="mr-2 h-3 w-3" />
-                                {tag}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        )}
-                        <CommandEmpty>
-                          {canCreate ? null : "No matching tags."}
-                        </CommandEmpty>
-                        {canCreate && (
-                          <CommandGroup>
-                            <CommandItem
-                              value={`__create__${normalized}`}
-                              onSelect={handleCreate}
-                              className="text-primary"
-                            >
-                              <Plus className="mr-2 h-4 w-4" />
-                              Create &quot;{normalized}&quot;
-                            </CommandItem>
-                          </CommandGroup>
-                        )}
-                      </>
                     )}
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {tags && tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 animate-in fade-in duration-200">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-stretch overflow-hidden rounded-full border border-border bg-muted text-xs font-medium text-foreground"
-                >
-                  <span className="flex items-center gap-1 py-1 pl-2.5 pr-1.5">
-                    <Tag className="h-3 w-3 text-muted-foreground" />
-                    {tag}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    aria-label={`Remove ${tag}`}
-                    className="flex items-center px-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              ))}
+                    {filteredUnselected.length === 0 && !canCreate && (
+                      <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                        No matching tags.
+                      </div>
+                    )}
+                    {canCreate && (
+                      <button
+                        type="button"
+                        className="flex w-full cursor-pointer items-center rounded-md px-2 py-1.5 text-left text-sm font-medium text-primary transition-colors hover:bg-accent hover:text-accent-foreground"
+                        onClick={handleCreate}
+                      >
+                        <Plus className="mr-2 size-4 shrink-0" />
+                        <span className="truncate">
+                          Create &quot;{normalized}&quot;
+                        </span>
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          )}
-
-          <TagSuggestions
-            current={tags ?? []}
-            suggested={suggestion?.tags}
-            onAdd={onApplyTagAddition}
-            onRemove={onApplyTagRemoval}
-            onDismissAddition={onDismissTagAddition}
-            onDismissRemoval={onDismissTagRemoval}
-          />
+          </Popover>
         </div>
-      </CardContent>
-    </Card>
+
+        <TagGroup label="Selected tags">
+          {tags.map((tag) => (
+            <Tag
+              key={tag}
+              icon={<TagIcon size={12} />}
+              onRemove={() => removeTag(tag)}
+              removeLabel={`Remove ${tag}`}
+            >
+              {tag}
+            </Tag>
+          ))}
+        </TagGroup>
+
+        <TagSuggestions
+          current={tags ?? []}
+          suggested={suggestion?.tags}
+          onAdd={onApplyTagAddition}
+          onRemove={onApplyTagRemoval}
+          onDismissAddition={onDismissTagAddition}
+          onDismissRemoval={onDismissTagRemoval}
+        />
+      </div>
+    </div>
   );
 }

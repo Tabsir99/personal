@@ -1,7 +1,5 @@
-import { Plus } from "lucide-react";
+import { Plus } from "@phosphor-icons/react";
 import { ReactNode } from "react";
-
-import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface AddCardProps {
@@ -12,11 +10,6 @@ interface AddCardProps {
   className?: string;
 }
 
-/**
- * Empty-slot card for portfolio grids. Solid hairline + faint surface (no
- * dashed border — wireframe pattern). Hovers to a slightly more present
- * surface; relies on Card's shadow recipe for depth.
- */
 export function AddCard({
   title,
   description,
@@ -25,16 +18,16 @@ export function AddCard({
   className = "min-h-44",
 }: AddCardProps) {
   return (
-    <Card
+    <div
       onClick={onClick}
       className={cn(
-        "group/add-card relative flex w-full cursor-pointer items-center justify-center overflow-hidden border-foreground/8 transition-colors duration-200 hover:border-foreground/[0.14] hover:bg-foreground/1",
+        "group/add-card relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-foreground/8 bg-card shadow-card-rest transition-all duration-200 hover:border-foreground/[0.14] hover:bg-foreground/1 hover:shadow-card-hover",
         className,
       )}
     >
-      <CardContent className="flex h-full flex-col items-center justify-center gap-3 p-6">
+      <div className="flex h-full flex-col items-center justify-center gap-3 p-6">
         <div className="rounded-md border border-foreground/6 bg-card p-2 text-muted-foreground transition-colors group-hover/add-card:text-foreground">
-          {icon || <Plus className="h-4 w-4" />}
+          {icon || <Plus size={16} />}
         </div>
         <div className="flex flex-col items-center gap-1 text-center">
           <span className="text-sm font-medium text-foreground">{title}</span>
@@ -44,7 +37,7 @@ export function AddCard({
             </p>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

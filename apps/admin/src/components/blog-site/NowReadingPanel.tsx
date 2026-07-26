@@ -1,14 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, X } from "@phosphor-icons/react";
 import { useShallow } from "zustand/react/shallow";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Button } from "premium-ds/button";
+import { TextField } from "premium-ds/text-field";
+import { Checkbox } from "premium-ds/checkbox";
 import { useSiteConfigStore } from "@/stores/SiteConfigStore";
 import Panel from "./Panel";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import HeightTransition from "./HeightTransition";
+import { Collapse } from "premium-ds/collapse";
 
 export default function NowReadingPanel() {
   const { draftRows, initialRows, draftIds, initialIds } = useSiteConfigStore(
@@ -29,10 +30,7 @@ export default function NowReadingPanel() {
     return map;
   }, [initialIds, initialRows]);
 
-  const initialIdSet = React.useMemo(
-    () => new Set(initialIds),
-    [initialIds],
-  );
+  const initialIdSet = React.useMemo(() => new Set(initialIds), [initialIds]);
 
   const [leaving, setLeaving] = React.useState<Set<string>>(new Set());
   const handleRemove = (id: string, index: number) => {
@@ -62,17 +60,17 @@ export default function NowReadingPanel() {
       action={
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           size="sm"
           onClick={() => useSiteConfigStore.getState().addNowReading()}
-          className="transition-transform active:scale-[0.97]"
+          className="transition-transform active:scale-95"
+          iconLeft={<Plus size={14} />}
         >
-          <Plus className="h-3.5 w-3.5" />
           Add book
         </Button>
       }
     >
-      <HeightTransition show={isEmpty}>
+      <Collapse open={isEmpty} fade>
         <div className="flex flex-col items-start gap-2 rounded-md border border-foreground/6 bg-foreground/2 px-4 py-6">
           <Eyebrow tone="muted" family="mono">
             Empty
@@ -81,8 +79,8 @@ export default function NowReadingPanel() {
             Nothing pinned. Add a book and it shows up in the /blog sticker.
           </p>
         </div>
-      </HeightTransition>
-      <HeightTransition show={!isEmpty}>
+      </Collapse>
+      <Collapse open={!isEmpty} fade>
         <ul>
           {draftRows.map((row, i) => {
             const id = draftIds[i] ?? `row-${i}`;
@@ -94,7 +92,7 @@ export default function NowReadingPanel() {
             const anyEdited = titleEdited || authorEdited;
             return (
               <RowShell key={id} isLeaving={isLeaving} isNew={isNew}>
-                <div className="group relative grid grid-cols-[auto_minmax(0,1.4fr)_minmax(0,1fr)_auto] items-center gap-3 border-b border-foreground/5 py-3 last:border-b-0 pl-2">
+                <div className="group relative grid grid-cols-[auto_minmax(0,1.4fr)_minmax(0,1fr)_auto] items-center gap-3 border-b border-foreground/5 py-3 pl-2 last:border-b-0">
                   <span
                     aria-hidden
                     className={[
@@ -103,46 +101,17 @@ export default function NowReadingPanel() {
                     ].join(" ")}
                   />
                   <div className="flex items-center pl-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() =>
+                    <Checkbox
+                      checked={row.done}
+                      onChange={() =>
                         useSiteConfigStore.getState().toggleNowReadingDone(i)
                       }
-                      aria-pressed={row.done}
-                      aria-label={row.done ? "Mark unfinished" : "Mark finished"}
-                      title={row.done ? "Finished" : "Mark finished"}
-                      className={[
-                        "relative h-4! w-4! p-0! rounded-[3px]! border transition-all",
-                        row.done
-                          ? "border-primary! bg-primary! hover:bg-primary/90!"
-                          : "border-foreground/15! bg-background! hover:border-foreground/30!",
-                      ].join(" ")}
-                      style={{
-                        boxShadow: row.done
-                          ? "inset 0 -1px 0 0 rgb(0 0 0 / 0.18)"
-                          : "0 1px 0 0 rgb(0 0 0 / 0.04), inset 0 -1px 0 0 rgb(0 0 0 / 0.04)",
-                      }}
-                    >
-                      {row.done && (
-                        <svg
-                          viewBox="0 0 16 16"
-                          className="absolute inset-0 m-auto h-2.5 w-2.5 text-primary-foreground"
-                          aria-hidden
-                        >
-                          <path
-                            d="M3 8.5l3 3 7-7"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      )}
-                    </Button>
+                      aria-label={
+                        row.done ? "Mark unfinished" : "Mark finished"
+                      }
+                    />
                   </div>
-                  <Input
+                  <TextField
                     value={row.title}
                     onChange={(e) =>
                       useSiteConfigStore.getState().updateNowReading(i, {
@@ -151,9 +120,8 @@ export default function NowReadingPanel() {
                     }
                     placeholder="Book title"
                     aria-label={`Book ${i + 1} title`}
-                    className="border-transparent bg-transparent text-sm font-normal shadow-none focus-visible:border-foreground/10 focus-visible:bg-background"
                   />
-                  <Input
+                  <TextField
                     value={row.author}
                     onChange={(e) =>
                       useSiteConfigStore.getState().updateNowReading(i, {
@@ -162,7 +130,6 @@ export default function NowReadingPanel() {
                     }
                     placeholder="Author"
                     aria-label={`Book ${i + 1} author`}
-                    className="border-transparent bg-transparent text-sm font-normal text-muted-foreground shadow-none focus-visible:border-foreground/10 focus-visible:bg-background"
                   />
                   <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
                     <IconBtn
@@ -172,7 +139,7 @@ export default function NowReadingPanel() {
                         useSiteConfigStore.getState().moveNowReading(i, -1)
                       }
                     >
-                      <ArrowUp className="h-3.5 w-3.5" />
+                      <ArrowUp size={14} />
                     </IconBtn>
                     <IconBtn
                       label="Move down"
@@ -181,14 +148,14 @@ export default function NowReadingPanel() {
                         useSiteConfigStore.getState().moveNowReading(i, 1)
                       }
                     >
-                      <ArrowDown className="h-3.5 w-3.5" />
+                      <ArrowDown size={14} />
                     </IconBtn>
                     <IconBtn
                       label="Remove"
                       destructive
                       onClick={() => handleRemove(id, i)}
                     >
-                      <X className="h-3.5 w-3.5" />
+                      <X size={14} />
                     </IconBtn>
                   </div>
                 </div>
@@ -196,7 +163,7 @@ export default function NowReadingPanel() {
             );
           })}
         </ul>
-      </HeightTransition>
+      </Collapse>
     </Panel>
   );
 }
@@ -218,17 +185,9 @@ function RowShell({
   }, [isNew]);
   const collapsed = isLeaving || !open;
   return (
-    <li
-      className="grid ease-out"
-      style={{
-        gridTemplateRows: collapsed ? "0fr" : "1fr",
-        opacity: collapsed ? 0 : 1,
-        transitionProperty: "grid-template-rows, opacity",
-        transitionDuration: "240ms",
-      }}
-    >
-      <div className="overflow-hidden">{children}</div>
-    </li>
+    <Collapse As="li" open={!collapsed} fade>
+      {children}
+    </Collapse>
   );
 }
 
@@ -249,15 +208,14 @@ function IconBtn({
     <Button
       type="button"
       variant="ghost"
-      size="icon-sm"
+      size="sm"
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      title={label}
       className={
         destructive
-          ? "text-foreground/60 hover:bg-destructive/10 hover:text-destructive"
-          : "text-foreground/60"
+          ? "min-w-0 p-1 text-foreground/60 hover:bg-destructive/10 hover:text-destructive"
+          : "min-w-0 p-1 text-foreground/60"
       }
     >
       {children}

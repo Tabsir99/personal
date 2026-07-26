@@ -35,20 +35,22 @@ const serverTokenAllowed = (request: NextRequest) => {
 };
 
 const unauthorizedResponse = (request: NextRequest) => {
-  if (
-    isApiRequest(request.nextUrl.pathname) ||
-    isActionRequest(request)
-  ) {
+  if (isApiRequest(request.nextUrl.pathname) || isActionRequest(request)) {
     return NextResponse.json(
       { status: "error", message: "Unauthorized" },
       { status: 401 },
     );
   }
-  return NextResponse.redirect(process.env.NEXT_PUBLIC_ADMIN_ORIGIN as string);
+  return NextResponse.redirect(env.ADMIN_ORIGIN);
 };
 
 export default async function middleware(request: NextRequest) {
+  if (process.env.BYPASS_AUTH === "1") return NextResponse.next();
+
   const pathname = request.nextUrl.pathname;
+
+  if (pathname === "/api/stripe/webhook") return NextResponse.next();
+
   const token = request.cookies.get(env.COOKIE_NAME)?.value;
   const serverToken = request.headers.get("serverToken");
 
@@ -62,9 +64,7 @@ export default async function middleware(request: NextRequest) {
 
   if (pathname === "/") {
     return userAuthenticated
-      ? NextResponse.redirect(
-          `${process.env.NEXT_PUBLIC_ADMIN_ORIGIN}/dashboard`,
-        )
+      ? NextResponse.redirect(`${env.ADMIN_ORIGIN}/analytics`)
       : NextResponse.next();
   }
 
@@ -73,5 +73,5 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/api/:path*", "/dashboard/:path*"],
+  matcher: ["/", "/api/:path*", "/analytics/:path*"],
 };

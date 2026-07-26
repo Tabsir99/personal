@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const eyebrowVariants = cva(
-  "inline-flex items-center font-medium uppercase whitespace-nowrap leading-none",
+  "inline-flex items-center leading-none font-medium whitespace-nowrap uppercase",
   {
     variants: {
       tone: {
@@ -16,8 +16,8 @@ const eyebrowVariants = cva(
         destructive: "text-destructive",
       },
       size: {
-        xs: "text-eyebrow tracking-widest",
-        sm: "text-kbd tracking-widest",
+        xs: "text-xs tracking-widest",
+        sm: "text-[13px] tracking-widest",
       },
       family: {
         sans: "font-sans",

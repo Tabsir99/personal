@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Geist, JetBrains_Mono } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { MotionDevtools } from "premium-ds/motion-devtools";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -44,23 +45,14 @@ export default async function RootLayout({
       lang="en"
     >
       <head>
-        <meta name="color-scheme" content="dark light" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-        (function() {
-          try {
-            var stored = localStorage.getItem('theme');
-            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            var isDark = stored ? stored === 'dark' : prefersDark;
-            if (isDark) document.documentElement.classList.add('dark');
-          } catch (e) {}
-        })();
-      `,
-          }}
-        />
+        <meta name="color-scheme" content="light" />
+        {process.env.NODE_ENV === "development" && (
+          // eslint-disable-next-line @next/next/no-sync-scripts -- dev-only React instrumentation; must run before hydration
+          <script src="https://unpkg.com/react-scan/dist/auto.global.js"></script>
+        )}
       </head>
       <body className="overflow-x-hidden">{children}</body>
+      <MotionDevtools />
     </html>
   );
 }

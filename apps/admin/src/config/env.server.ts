@@ -21,6 +21,14 @@ export const env = {
   CLOUDFLARE_R2_ENDPOINT: requireEnv("CLOUDFLARE_R2_ENDPOINT"),
 
   SERVER_TOKEN: requireEnv("SERVER_TOKEN"),
+  ADMIN_ORIGIN: requireEnv("NEXT_PUBLIC_ADMIN_ORIGIN"),
+
+  CF_ACCOUNT_ID: requireEnv("CF_ACCOUNT_ID"),
+  CF_API_TOKEN: requireEnv("CF_API_TOKEN"),
+  CF_KV_NAMESPACE_ID: requireEnv("CF_KV_NAMESPACE_ID"),
+
+  TINYBIRD_HOST: requireEnv("TINYBIRD_HOST"),
+  TINYBIRD_TOKEN: requireEnv("TINYBIRD_TOKEN"),
 } as const;
 
 // Boot-time presence check; SDK reads ANTHROPIC_AUTH_TOKEN from process.env itself.

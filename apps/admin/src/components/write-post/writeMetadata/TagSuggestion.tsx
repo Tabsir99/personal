@@ -1,4 +1,4 @@
-import { Minus, Plus, X } from "lucide-react";
+import { Minus, Plus, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 interface TagSuggestionsProps {
@@ -60,6 +60,7 @@ export function TagSuggestions({
   );
 }
 
+// Keep comments descriptive of what the code does now.
 function SuggestionRow({
   eyebrow,
   count,
@@ -76,7 +77,9 @@ function SuggestionRow({
           {eyebrow}
         </span>
         <span className="text-xs text-muted-foreground/50">·</span>
-        <span className="text-xs tabular-nums text-muted-foreground">{count}</span>
+        <span className="text-xs text-muted-foreground tabular-nums">
+          {count}
+        </span>
       </div>
       <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>
@@ -110,12 +113,12 @@ function SuggestedChip({
         type="button"
         onClick={onAccept}
         className={cn(
-          "flex items-center gap-1 py-0.5 pl-2 pr-2 transition-colors",
+          "flex items-center gap-1 px-2 py-0.5 transition-colors",
           isAdd ? "hover:bg-primary/10" : "hover:bg-destructive/10",
         )}
         aria-label={isAdd ? `Add tag: ${tag}` : `Remove tag: ${tag}`}
       >
-        <Icon className="h-3 w-3" strokeWidth={2.5} />
+        <Icon size={12} weight="bold" />
         <span
           className={cn(!isAdd && "line-through decoration-destructive/20")}
         >
@@ -133,7 +136,7 @@ function SuggestedChip({
         )}
         aria-label={isAdd ? `Skip adding ${tag}` : `Keep ${tag}`}
       >
-        <X className="h-3 w-3" strokeWidth={2} />
+        <X size={12} weight="bold" />
       </button>
     </div>
   );

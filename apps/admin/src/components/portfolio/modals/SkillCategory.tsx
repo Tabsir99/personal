@@ -1,16 +1,13 @@
-import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+ 
+import { useState } from "react";
+import { Plus } from "@phosphor-icons/react";
 
-import { Input } from "@/components/ui/input";
-import { FormField } from "@/components/ui/FormField";
+import { TextField } from "premium-ds/text-field";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { PageData } from "@tabsircg/schemas/portfolio";
 
-import {
-  ModalSection,
-  PortfolioModalActions,
-  PortfolioModalFrame,
-} from "./_shared";
+import { Dialog } from "premium-ds/dialog";
+import { Button } from "premium-ds/button";
 
 interface SkillCategoryDialogProps {
   children?: React.ReactNode;
@@ -30,30 +27,23 @@ const defaultFormData: PageData["skills"][number] = {
 export default function SkillCategoryDialog({
   children,
   category: existingCategory,
-  open: controlledOpen,
+  open,
   onOpenChange,
   categoryIndex,
 }: SkillCategoryDialogProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
-  const [formData, setFormData] = useState(defaultFormData);
+  const [formData, setFormData] = useState(existingCategory || defaultFormData);
   const skillCategory = usePortfolioStore().skills;
-
-  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  const setOpen = (next: boolean) => {
-    if (onOpenChange) onOpenChange(next);
-    else setInternalOpen(next);
-  };
 
   const isUpdating =
     existingCategory !== undefined && typeof categoryIndex === "number";
 
-  useEffect(() => {
-    if (existingCategory && typeof categoryIndex === "number") {
-      setFormData(existingCategory);
-    } else if (!open) {
-      setFormData(defaultFormData);
-    }
-  }, [existingCategory, categoryIndex, open]);
+  const resetKey = open ? (categoryIndex ?? "new") : null;
+  const [prevResetKey, setPrevResetKey] = useState(resetKey);
+
+  if (resetKey !== prevResetKey) {
+    setPrevResetKey(resetKey);
+    if (open) setFormData(existingCategory || defaultFormData);
+  }
 
   const handleSubmit = () => {
     if (isUpdating) {
@@ -65,43 +55,56 @@ export default function SkillCategoryDialog({
       skillCategory.add(formData);
     }
     setFormData(defaultFormData);
-    setOpen(false);
+    onOpenChange?.(false);
   };
 
   return (
-    <PortfolioModalFrame
+    <Dialog
       open={open}
-      onOpenChange={setOpen}
-      {...(children ? { trigger: children } : {})}
+      onOpenChange={(nextOpen) => {
+        onOpenChange?.(nextOpen);
+        if (nextOpen) {
+          setFormData(existingCategory || defaultFormData);
+        }
+      }}
+      trigger={children as React.ReactElement | null}
       size="sm"
       title={
-        isUpdating
-          ? formData.title || "Edit category"
-          : "Add skill category"
+        isUpdating ? formData.title || "Edit category" : "Add skill category"
       }
       description="Group related skills under a single header."
-      footer={
-        <PortfolioModalActions
-          onSubmit={handleSubmit}
-          submitDisabled={!formData.title}
-          submitLabel="Add category"
-          updateLabel="Save changes"
-          isUpdating={isUpdating}
-          submitIcon={<Plus className="h-3.5 w-3.5" />}
-        />
-      }
+      footer={(close) => (
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" onClick={close}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              handleSubmit();
+              close();
+            }}
+            disabled={!formData.title}
+            iconLeft={<Plus size={14} />}
+          >
+            {isUpdating ? "Save changes" : "Add category"}
+          </Button>
+        </div>
+      )}
     >
-      <ModalSection title="Basics">
-        <FormField label="Title">
-          <Input
+      <div className="space-y-5">
+        <section title="Basics" className="space-y-6">
+          <TextField
+            id="skill-category-title"
+            label="Title"
             placeholder="Front-end"
             value={formData.title}
             onChange={(e) =>
               setFormData({ ...formData, title: e.target.value })
             }
           />
-        </FormField>
-      </ModalSection>
-    </PortfolioModalFrame>
+        </section>
+      </div>
+    </Dialog>
   );
 }

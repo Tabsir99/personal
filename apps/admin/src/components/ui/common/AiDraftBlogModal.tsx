@@ -2,20 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { FormField } from "@/components/ui/FormField";
-import { StatusDot } from "@/components/ui/StatusDot";
+
+import { Dialog } from "premium-ds/dialog";
+import { Button } from "premium-ds/button";
+import { Textarea } from "premium-ds/textarea";
+
 import ConfigSingleSelect from "@/components/write-post/writeMetadata/ConfigSingleSelect";
 
 import { generateBlogDraft } from "@/actions/aiActions";
@@ -57,7 +49,7 @@ export const AiDraftBlogModal = () => {
       setBlogFormData(result.data);
       reset();
       closeAiDraftDialog();
-      router.push(`/dashboard/write-blog/${result.data.blogId}`);
+      router.push(`/analytics/write-blog/${result.data.blogId}`);
     }
   };
 
@@ -70,46 +62,12 @@ export const AiDraftBlogModal = () => {
           closeAiDraftDialog();
         }
       }}
-    >
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="text-lg font-semibold tracking-tight">
-            Draft with AI
-          </DialogTitle>
-          <DialogDescription>
-            Web research and a structured outline returned as a working draft.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4 py-2">
-          <FormField
-            label="Topic"
-            hint={`${topic.length} / 500 · be specific — angle, audience, stakes.`}
-          >
-            <Textarea
-              id="ai-topic"
-              placeholder="Why static typing won't save your codebase — the false sense of safety across module boundaries."
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              rows={4}
-              maxLength={500}
-              disabled={isSubmitting}
-            />
-          </FormField>
-
-          <FormField label="Kind">
-            <ConfigSingleSelect
-              value={kind}
-              onValueChange={setKind}
-              field="kinds"
-              placeholder="Pick or create a kind…"
-            />
-          </FormField>
-        </div>
-
-        <DialogFooter>
+      title="Draft with AI"
+      description="Web research and a structured outline returned as a working draft."
+      footer={
+        <div className="flex justify-end gap-2.5">
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={() => {
               reset();
               closeAiDraftDialog();
@@ -120,23 +78,39 @@ export const AiDraftBlogModal = () => {
           </Button>
           <Button
             onClick={handleGenerate}
-            disabled={!topic.trim() || isSubmitting}
-            className="gap-1.5"
+            disabled={!topic.trim()}
+            loading={isSubmitting}
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Generating…
-              </>
-            ) : (
-              <>
-                <StatusDot tone="primary" size="xs" />
-                Generate draft
-              </>
-            )}
+            Generate draft
           </Button>
-        </DialogFooter>
-      </DialogContent>
+        </div>
+      }
+    >
+      <div className="space-y-4 py-2">
+        <Textarea
+          id="ai-topic"
+          label="Topic"
+          placeholder="Why static typing won't save your codebase — the false sense of safety across module boundaries."
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+          minRows={4}
+          max={500}
+          disabled={isSubmitting}
+          helper="Be specific — angle, audience, stakes."
+        />
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-muted-foreground select-none">
+            Kind
+          </label>
+          <ConfigSingleSelect
+            value={kind}
+            onValueChange={setKind}
+            field="kinds"
+            placeholder="Pick or create a kind…"
+          />
+        </div>
+      </div>
     </Dialog>
   );
 };

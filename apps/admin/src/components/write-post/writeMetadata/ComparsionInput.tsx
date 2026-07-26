@@ -1,8 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "premium-ds/button";
+import { TextField, TextFieldProps } from "premium-ds/text-field";
+import { Textarea } from "premium-ds/textarea";
 import { Kbd } from "@/components/ui/Kbd";
 import { cn } from "@/lib/utils";
+
 import {
   useState,
   type ChangeEvent,
@@ -20,11 +21,8 @@ type Phase = "idle" | "accepting" | "applied" | "dismissed";
 type PressedKey = "tab" | "esc" | null;
 
 export interface SuggestionFieldProps {
-  // Each `| undefined` is explicit so this compiles cleanly under
-  // `exactOptionalPropertyTypes: true` when callers pass values coming from
-  // chains like `result?.suggestion`.
   id?: string | undefined;
-  type?: string | undefined;
+  type?: TextFieldProps["type"];
   helperText?: ReactNode;
   placeholder?: string | undefined;
   value: string | undefined;
@@ -34,14 +32,9 @@ export interface SuggestionFieldProps {
   onReject?: ((rejected: string) => void) | undefined;
   className?: string | undefined;
   multiLine?: boolean | undefined;
+  label?: string | ReactNode;
 }
 
-// SuggestionField — reusable controlled input with attached suggestion strip.
-//
-// Parent owns `value` and `suggested`. When `suggested` differs from `value`,
-// the input's text is rendered with rose tint + strikethrough to signal "this
-// will be replaced", and the strip shows the proposed replacement. Tab accepts
-// (calls onChange(suggested)); Esc dismisses until the suggested prop changes.
 export function SuggestionField({
   id,
   type = "text",
@@ -54,6 +47,7 @@ export function SuggestionField({
   onReject,
   className = "",
   multiLine = false,
+  label,
 }: SuggestionFieldProps) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [pressedKey, setPressedKey] = useState<PressedKey>(null);
@@ -112,102 +106,73 @@ export function SuggestionField({
     onChange(e.target.value);
   };
 
-  const stripVisible = phase !== "idle" || activeSuggestion != null;
   const striking = activeSuggestion != null && phase === "idle";
   const applyingOrApplied = phase === "accepting" || phase === "applied";
 
-  const As = multiLine ? Textarea : Input;
+  let currentHelper: ReactNode = helperText;
+  let currentSuccess: ReactNode = undefined;
+
+  if (applyingOrApplied) {
+    currentSuccess = "Applied";
+  } else if (phase === "dismissed") {
+    currentHelper = "Dismissed";
+  } else if (activeSuggestion != null) {
+    currentHelper = (
+      <div className="flex items-center justify-between gap-2">
+        <span className="min-w-0 truncate text-sm text-foreground">
+          {activeSuggestion}
+        </span>
+        <div className="flex shrink-0 items-center">
+          <Button
+            variant="ghost"
+            onClick={reject}
+            onPointerDown={(e) => e.preventDefault()}
+            className="h-6 px-1.5 py-1"
+            aria-label="Dismiss suggestion"
+          >
+            <Kbd pressed={pressedKey === "esc"}>esc</Kbd>
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={accept}
+            onPointerDown={(e) => e.preventDefault()}
+            className="h-6 px-1.5 py-1"
+            aria-label="Accept suggestion"
+          >
+            <Kbd pressed={pressedKey === "tab"}>tab</Kbd>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={`w-full ${className}`}>
-      <div className="bg-background ring-1 ring-border/50 focus-within:ring-border focus-within:ring-2 focus-within:ring-offset-2 rounded-lg overflow-hidden transition-all duration-200">
-        <As
+    <div className={className}>
+      {multiLine ? (
+        <Textarea
           id={id}
-          type={type}
+          label={label}
+          helper={currentHelper}
+          success={currentSuccess}
           placeholder={placeholder}
           value={value ?? ""}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          className={cn(
-            "border-none focus-visible:ring-0",
-            striking &&
-              "text-muted-foreground line-through decoration-muted-foreground/50",
-          )}
+          className={cn(striking && "line-through opacity-50")}
         />
-
-        {/* Suggestion strip — slides in/out on max-height */}
-
-        <div
-          className={cn(
-            "px-3 h-8 flex items-center justify-between text-xs transition-all duration-300 ease-out bg-muted/40 border-t border-border/50",
-            stripVisible ? "opacity-100 max-h-20" : "opacity-0 max-h-0",
-          )}
-        >
-          {applyingOrApplied ? (
-            <div className="flex items-center gap-2 py-1 text-success">
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 12 12"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="2.5 6.5 5 9 9.5 3.5" />
-              </svg>
-              <span>Applied</span>
-            </div>
-          ) : phase === "dismissed" ? (
-            <div className="flex items-center gap-2 py-1 text-muted-foreground">
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 12 12"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="3" y1="3" x2="9" y2="9" />
-                <line x1="9" y1="3" x2="3" y2="9" />
-              </svg>
-              <span>Dismissed</span>
-            </div>
-          ) : activeSuggestion != null ? (
-            <>
-              <span className="text-sm min-w-0 truncate">
-                {activeSuggestion}
-              </span>
-              <div className="flex items-center shrink-0 ml-2">
-                <Button
-                  variant="ghost"
-                  onClick={reject}
-                  onMouseDown={(e) => e.preventDefault()}
-                  className="py-2 px-1.5"
-                  aria-label="Dismiss suggestion"
-                >
-                  <Kbd pressed={pressedKey === "esc"}>esc</Kbd>
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={accept}
-                  onMouseDown={(e) => e.preventDefault()}
-                  className="py-2 px-1.5"
-                  aria-label="Accept suggestion"
-                >
-                  <Kbd pressed={pressedKey === "tab"}>tab</Kbd>
-                </Button>
-              </div>
-            </>
-          ) : null}
-        </div>
-      </div>
-
-      {helperText && (
-        <p className="mt-2 px-0.5 text-xs text-muted-foreground">{helperText}</p>
+      ) : (
+        <TextField
+          id={id}
+          type={type}
+          label={label}
+          helper={currentHelper}
+          success={currentSuccess}
+          placeholder={placeholder}
+          value={value ?? ""}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          className={cn(striking && "line-through opacity-50")}
+        />
       )}
     </div>
   );

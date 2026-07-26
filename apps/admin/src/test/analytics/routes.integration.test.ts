@@ -1,0 +1,390 @@
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+
+vi.mock("@/lib/requireAuth", () => ({
+  requireAuth: vi.fn().mockResolvedValue(undefined),
+}));
+
+import type { AnalyticsEventRow } from "@tabsircg/analytics-contract";
+import {
+  TINYBIRD_ENABLED,
+  ingestRows,
+  waitForRows,
+  cleanupRows,
+  callRoute,
+} from "@/test/support/tinybird";
+import { generateSeed } from "@/test/fixtures/analyticsSeed";
+import {
+  referenceMain,
+  referenceSources,
+  referencePages,
+  referenceLocations,
+  referenceSystem,
+  referenceEvents,
+  referenceBots,
+  referenceBotPages,
+  type Win,
+} from "@/test/fixtures/analyticsReference";
+import { CAMPAIGN_DIMENSIONS } from "@/lib/analyticsTypes";
+
+import { GET as mainGET } from "@/app/api/analytics/main/route";
+import { GET as sourcesGET } from "@/app/api/analytics/sources/route";
+import { GET as pagesGET } from "@/app/api/analytics/pages/route";
+import { GET as locationsGET } from "@/app/api/analytics/locations/route";
+import { GET as systemGET } from "@/app/api/analytics/system/route";
+import { GET as eventsGET } from "@/app/api/analytics/events/route";
+import { GET as realtimeGET } from "@/app/api/analytics/realtime/route";
+import { GET as botsGET } from "@/app/api/analytics/bots/route";
+import { GET as botPagesGET } from "@/app/api/analytics/bots/pages/route";
+
+/**
+ * Integration test for every analytics route against a REAL Tinybird workspace.
+ * Seeds ≥10k realistic rows (see analyticsSeed) under throwaway website ids,
+ * drives each real route handler, and asserts its output equals an independent
+ * JS reference (see analyticsReference) computed from the same rows. Lists are
+ * compared by key so array order / ties don't matter. Cleans up afterward.
+ *
+ * Self-skips without Tinybird credentials.
+ *
+ * Run only this suite:  pnpm -F admin test routes
+ * Run the whole suite:  pnpm -F admin test
+ */
+const describeMaybe = TINYBIRD_ENABLED ? describe : describe.skip;
+
+const DAY = 86_400_000;
+const now = Date.now();
+const D = Math.floor(now / DAY) * DAY;
+const start = D - 14 * DAY;
+const end = D;
+const prevStart = D - 28 * DAY;
+const win: Win = { start, end };
+const fmt = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+const period = `custom:${fmt(start)}:${fmt(end - DAY)}`;
+
+const WID = `itest-${now.toString(36)}`;
+const WID_RT = `${WID}-rt`;
+const BOT_NAME = "GPTBot";
+
+const rows = generateSeed({
+  websiteId: WID,
+  seed: 1234,
+  minRows: 10_000,
+  windowStart: prevStart,
+  windowEnd: end,
+});
+const realtimeRows = buildRealtimeRows();
+const allRows = [...rows, ...realtimeRows];
+
+function rtRow(over: Partial<AnalyticsEventRow>): AnalyticsEventRow {
+  return {
+    website_id: WID_RT,
+    type: "pageview",
+    domain: "tabsircg.com",
+    href: "https://tabsircg.com/",
+    referrer: "",
+    visitor_id: "",
+    session_id: "",
+    language: "en-US",
+    timezone: "UTC",
+    event_name: "pageview",
+    extra_data: "{}",
+    country: "US",
+    region: "NY",
+    city: "New York",
+    browser: "Chrome",
+    os: "Windows",
+    device: "desktop",
+    is_bot: 0,
+    bot_category: "",
+    bot_name: "",
+    ip: "1.2.3.4",
+    viewport_w: 0,
+    viewport_h: 0,
+    screen_w: 0,
+    screen_h: 0,
+    session_number: 1,
+    revenue_cents: 0,
+    timestamp: now - 2 * 60 * 1000,
+    ...over,
+  };
+}
+
+// Three distinct human visitors (one repeated) + a bot, all within the last
+// 10 minutes → realtime must count exactly 3.
+function buildRealtimeRows(): AnalyticsEventRow[] {
+  return [
+    rtRow({ visitor_id: "rt1", session_id: "rt1" }),
+    rtRow({ visitor_id: "rt1", session_id: "rt1" }),
+    rtRow({ visitor_id: "rt2", session_id: "rt2" }),
+    rtRow({ visitor_id: "rt3", session_id: "rt3" }),
+    rtRow({
+      visitor_id: "rtbot",
+      session_id: "rtbot",
+      is_bot: 1,
+      bot_name: "GPTBot",
+      bot_category: "training",
+    }),
+  ];
+}
+
+type Rowish = Record<string, unknown>;
+
+function indexBy(
+  list: Rowish[],
+  key: (r: Rowish) => string,
+): Map<string, Rowish> {
+  const m = new Map<string, Rowish>();
+  for (const r of list) {
+    const k = key(r);
+    if (m.has(k)) throw new Error(`duplicate key: ${k}`);
+    m.set(k, r);
+  }
+  return m;
+}
+
+function expectRows(
+  actual: Rowish[],
+  expected: Rowish[],
+  key: (r: Rowish) => string,
+  numFields: string[],
+  strFields: string[] = [],
+): void {
+  const a = indexBy(actual, key);
+  const e = indexBy(expected, key);
+  expect([...a.keys()].sort()).toEqual([...e.keys()].sort());
+  for (const [k, ev] of e) {
+    const av = a.get(k)!;
+    for (const f of numFields)
+      expect(Number(av[f]), `${k}.${f}`).toBeCloseTo(Number(ev[f]), 6);
+    for (const f of strFields) expect(av[f], `${k}.${f}`).toBe(ev[f]);
+  }
+}
+
+function expectMetrics(actual: Rowish, expected: Rowish): void {
+  for (const f of [
+    "visitors",
+    "pageviews",
+    "sessions",
+    "bounceRate",
+    "sessionDuration",
+  ])
+    expect(Number(actual[f]), f).toBeCloseTo(Number(expected[f]), 6);
+}
+
+const q = { websiteId: WID, period, granularity: "daily" };
+
+describeMaybe("analytics routes — real Tinybird, every route", () => {
+  beforeAll(async () => {
+    await ingestRows(allRows);
+    await waitForRows([WID, WID_RT], allRows.length);
+  }, 150_000);
+
+  afterAll(() => cleanupRows([WID, WID_RT]), 90_000);
+
+  it("main: overview + timeseries + revenue", async () => {
+    const data = await callRoute<Record<string, Rowish>>(mainGET, q);
+    const ref = referenceMain(rows, win, prevStart, DAY);
+    expectMetrics(data.current, ref.current);
+    expectMetrics(data.previous, ref.previous);
+    expectRows(
+      data.timeseries as unknown as Rowish[],
+      ref.timeseries as unknown as Rowish[],
+      (p) => String(p.timestamp),
+      [
+        "visitors",
+        "newVisitors",
+        "returningVisitors",
+        "pageviews",
+        "sessions",
+        "bounceRate",
+        "sessionDuration",
+        "revenue",
+        "payingVisitors",
+        "conversionRate",
+      ],
+    );
+    for (const side of ["current", "previous"] as const) {
+      expect(Number(data[side].revenue), `${side}.revenue`).toBe(
+        ref[side].revenue,
+      );
+      expect(Number(data[side].payingVisitors), `${side}.payingVisitors`).toBe(
+        ref[side].payingVisitors,
+      );
+      expect(
+        Number(data[side].conversionRate),
+        `${side}.conversionRate`,
+      ).toBeCloseTo(ref[side].conversionRate, 6);
+    }
+  });
+
+  it("sources: referrers, channels, campaigns", async () => {
+    const data = await callRoute<Record<string, Rowish[] & Rowish>>(
+      sourcesGET,
+      q,
+    );
+    const ref = referenceSources(rows, win);
+    expectRows(
+      data.referrers as Rowish[],
+      ref.referrers,
+      (r) => String(r.name),
+      ["newVisitors", "returningVisitors", "revenue"],
+      ["channel"],
+    );
+    expectRows(data.channels as Rowish[], ref.channels, (r) => String(r.name), [
+      "newVisitors",
+      "returningVisitors",
+      "revenue",
+    ]);
+
+    const campaigns = data.campaigns as unknown as {
+      dims: Record<string, Rowish[]>;
+      totals: Record<string, number>;
+      all: Rowish[];
+      allTotal: number;
+    };
+    for (const dim of CAMPAIGN_DIMENSIONS)
+      expectRows(
+        campaigns.dims[dim],
+        ref.campaigns.dims[dim] as unknown as Rowish[],
+        (r) => String(r.name),
+        ["uv", "revenue"],
+      );
+    expect(campaigns.totals).toEqual(ref.campaigns.totals);
+    expect(Number(campaigns.allTotal)).toBe(ref.campaigns.allTotal);
+    expectRows(
+      campaigns.all,
+      ref.campaigns.all as unknown as Rowish[],
+      (r) => String(r.name),
+      ["uv", "revenue"],
+    );
+  });
+
+  it("pages: pages, entry pages, hostnames, exit links", async () => {
+    const data = await callRoute<Record<string, Rowish[]>>(pagesGET, q);
+    const ref = referencePages(rows, win);
+    expectRows(data.pages, ref.pages, (r) => String(r.name), [
+      "uv",
+      "pageviews",
+      "revenue",
+    ]);
+    expectRows(data.entryPages, ref.entryPages, (r) => String(r.name), [
+      "uv",
+      "revenue",
+    ]);
+    expectRows(data.hostnames, ref.hostnames, (r) => String(r.name), [
+      "uv",
+      "revenue",
+    ]);
+    expectRows(data.exitLinks, ref.exitLinks, (r) => String(r.name), [
+      "uv",
+      "exits",
+      "revenue",
+    ]);
+  });
+
+  it("locations: countries, regions, cities", async () => {
+    const data = await callRoute<Record<string, Rowish[]>>(locationsGET, q);
+    const ref = referenceLocations(rows, win);
+    expectRows(data.countries, ref.countries, (r) => String(r.name), [
+      "uv",
+      "revenue",
+    ]);
+    expectRows(data.regions, ref.regions, (r) => String(r.name), [
+      "uv",
+      "revenue",
+    ]);
+    expectRows(data.cities, ref.cities, (r) => String(r.name), [
+      "uv",
+      "revenue",
+    ]);
+  });
+
+  it("system: browsers, os, devices (revenue dedup across a fan-out)", async () => {
+    const data = await callRoute<Record<string, Rowish[]>>(systemGET, q);
+    const ref = referenceSystem(rows, win);
+    expectRows(data.browsers, ref.browsers, (r) => String(r.name), [
+      "uv",
+      "revenue",
+    ]);
+    expectRows(data.os, ref.os, (r) => String(r.name), ["uv", "revenue"]);
+    expectRows(data.devices, ref.devices, (r) => String(r.name), [
+      "uv",
+      "revenue",
+    ]);
+  });
+
+  it("events: goals + conversion", async () => {
+    const data = await callRoute<{ goals: Rowish[]; totalVisitors: number }>(
+      eventsGET,
+      q,
+    );
+    const ref = referenceEvents(rows, win);
+    expect(Number(data.totalVisitors)).toBe(ref.totalVisitors);
+    expectRows(data.goals, ref.goals, (r) => String(r.name), [
+      "uv",
+      "total",
+      "conversionRate",
+    ]);
+  });
+
+  it("bots: totals, categories, per-bot, timeseries", async () => {
+    const data = await callRoute<{
+      total: number;
+      categories: Rowish[];
+      bots: Rowish[];
+      timeseries: Rowish[];
+    }>(botsGET, q);
+    const ref = referenceBots(rows, win, DAY);
+
+    expect(Number(data.total)).toBe(ref.total);
+    expectRows(data.categories, ref.categories, (r) => String(r.category), [
+      "count",
+    ]);
+    expectRows(
+      data.bots,
+      ref.bots,
+      (r) => String(r.name),
+      ["count"],
+      ["category"],
+    );
+
+    const at = indexBy(data.timeseries, (p) => String(p.timestamp));
+    const et = indexBy(ref.timeseries, (p) => String(p.timestamp));
+    expect([...at.keys()].sort()).toEqual([...et.keys()].sort());
+    for (const [k, ep] of et) {
+      const ap = at.get(k)!;
+      for (const cat of ref.activeCats)
+        expect(Number(ap[cat] ?? 0), `${k}.${cat}`).toBe(Number(ep[cat] ?? 0));
+    }
+  });
+
+  it("bots/pages: one bot's page hits", async () => {
+    const ref = referenceBotPages(rows, win, BOT_NAME);
+    expect(ref.total).toBeGreaterThan(0);
+    const data = await callRoute<{
+      bot: string;
+      category: string;
+      total: number;
+      pages: Rowish[];
+    }>(botPagesGET, { websiteId: WID, period, bot: BOT_NAME });
+    expect(data.bot).toBe(ref.bot);
+    expect(data.category).toBe(ref.category);
+    expect(Number(data.total)).toBe(ref.total);
+    expectRows(data.pages, ref.pages, (r) => String(r.name), ["count"]);
+  });
+
+  it("realtime: distinct human visitors in the last 10 minutes", async () => {
+    const data = await callRoute<{ count: number }>(realtimeGET, {
+      websiteId: WID_RT,
+    });
+    expect(Number(data.count)).toBe(3);
+  });
+});
+
+describe.skipIf(TINYBIRD_ENABLED)(
+  "analytics routes — skipped without Tinybird creds",
+  () => {
+    it("is skipped because TINYBIRD_HOST/TINYBIRD_TOKEN are unset", () => {
+      expect(true).toBe(true);
+    });
+  },
+);

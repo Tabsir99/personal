@@ -1,25 +1,17 @@
-import { useEffect, useState } from "react";
-import { Plus, Star } from "lucide-react";
+ 
+import { useState } from "react";
+import { Plus, Star } from "@phosphor-icons/react";
 
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { FormField } from "@/components/ui/FormField";
+import { TextField } from "premium-ds/text-field";
+import { Textarea } from "premium-ds/textarea";
+import { Select } from "premium-ds/select";
+
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { PageData } from "@tabsircg/schemas/portfolio";
 import { cn } from "@/lib/utils";
 
-import {
-  ModalSection,
-  PortfolioModalActions,
-  PortfolioModalFrame,
-} from "./_shared";
+import { Dialog } from "premium-ds/dialog";
+import { Button } from "premium-ds/button";
 import { VideoSourcesEditor } from "./VideoSourcesEditor";
 
 interface TestimonialDialogProps {
@@ -32,6 +24,12 @@ interface TestimonialDialogProps {
 
 type Testimonial = PageData["testimonials"][number];
 type DisplaySlot = Testimonial["displaySlot"];
+
+const DISPLAY_SLOT_OPTIONS = [
+  { value: "none", label: "Hidden" },
+  { value: "endorsement", label: "Endorsement" },
+  { value: "voices", label: "Voices" },
+];
 
 const defaultFormData: Testimonial = {
   name: "",
@@ -53,21 +51,23 @@ export default function TestimonialDialog({
   onOpenChange,
   testimonialIndex,
 }: TestimonialDialogProps) {
-  const [formData, setFormData] = useState(
-    existingTestimonial || defaultFormData,
-  );
-  const [isUpdating, setIsUpdating] = useState(false);
+  const isUpdating =
+    existingTestimonial !== undefined && typeof testimonialIndex === "number";
+
+  const [formData, setFormData] = useState(existingTestimonial || defaultFormData);
   const [hoverRating, setHoverRating] = useState(0);
 
-  useEffect(() => {
-    if (existingTestimonial && typeof testimonialIndex === "number") {
-      setFormData(existingTestimonial);
-      setIsUpdating(true);
-    } else {
-      setFormData(defaultFormData);
-      setIsUpdating(false);
+  // Synchronously adjust state during render when dialog opens
+  const [prevOpen, setPrevOpen] = useState(open);
+  const [prevTestimonial, setPrevTestimonial] = useState(existingTestimonial);
+
+  if (open !== prevOpen || existingTestimonial !== prevTestimonial) {
+    setPrevOpen(open);
+    setPrevTestimonial(existingTestimonial);
+    if (open) {
+      setFormData(existingTestimonial || defaultFormData);
     }
-  }, [existingTestimonial, testimonialIndex]);
+  }
 
   const testimonial = usePortfolioStore().testimonials;
 
@@ -77,146 +77,163 @@ export default function TestimonialDialog({
   };
 
   return (
-    <PortfolioModalFrame
+    <Dialog
       open={open}
-      onOpenChange={onOpenChange}
-      {...(children ? { trigger: children } : {})}
+      onOpenChange={(nextOpen) => {
+        onOpenChange?.(nextOpen);
+        if (nextOpen) {
+          setFormData(existingTestimonial || defaultFormData);
+        }
+      }}
+      trigger={children as React.ReactElement | null}
       size="lg"
       title={
         isUpdating ? formData.name || "Edit testimonial" : "Add testimonial"
       }
       description="Client quote, optional video, and where it surfaces on the home page."
-      footer={
-        <PortfolioModalActions
-          onSubmit={handleSubmit}
-          submitDisabled={
-            !formData.name || (!formData.text && !formData.video.length)
-          }
-          submitLabel="Add testimonial"
-          updateLabel="Update testimonial"
-          isUpdating={isUpdating}
-          submitIcon={<Plus className="h-3.5 w-3.5" />}
-        />
-      }
+      footer={(close) => (
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" onClick={close}>Cancel</Button>
+          <Button 
+            variant="primary" 
+            onClick={() => {
+              handleSubmit();
+              close();
+            }} 
+            disabled={
+              !formData.name || (!formData.text && !formData.video.length)
+            }
+            iconLeft={<Plus size={14} />}
+          >
+            {isUpdating ? "Update testimonial" : "Add testimonial"}
+          </Button>
+        </div>
+      )}
     >
-      <ModalSection title="Client">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <FormField label="Name">
-            <Input
+      <div className="space-y-5">
+        <section title="Client" className="space-y-6">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <TextField
+              id="testimonial-name"
+              label="Name"
               placeholder="Zohaib"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
             />
-          </FormField>
-          <FormField label="Company">
-            <Input
+            <TextField
+              id="testimonial-company"
+              label="Company"
               placeholder="DataZoro"
               value={formData.company}
               onChange={(e) =>
                 setFormData({ ...formData, company: e.target.value })
               }
             />
-          </FormField>
-          <FormField label="Period" hint="e.g. Mar — Jul 2025">
-            <Input
+            <TextField
+              id="testimonial-period"
+              label="Period"
+              helper="e.g. Mar — Jul 2025"
               placeholder="Mar — Jul 2025"
               value={formData.period}
               onChange={(e) =>
                 setFormData({ ...formData, period: e.target.value })
               }
             />
-          </FormField>
-          <FormField label="Avatar URL">
-            <Input
+            <TextField
+              id="testimonial-avatar"
+              label="Avatar URL"
               placeholder="https://…"
               value={formData.avatar}
               onChange={(e) =>
                 setFormData({ ...formData, avatar: e.target.value })
               }
-              className="font-mono text-xs"
+              size="sm"
+              className="font-mono"
             />
-          </FormField>
-        </div>
-      </ModalSection>
-
-      <ModalSection title="Placement">
-        <FormField
-          label="Display slot"
-          hint="Endorsement = quote-only card. Voices = video testimonial slot."
-        >
-          <Select
-            value={formData.displaySlot}
-            onValueChange={(value: DisplaySlot) =>
-              setFormData({ ...formData, displaySlot: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Hidden</SelectItem>
-              <SelectItem value="endorsement">Endorsement</SelectItem>
-              <SelectItem value="voices">Voices</SelectItem>
-            </SelectContent>
-          </Select>
-        </FormField>
-      </ModalSection>
-
-      <ModalSection title="Rating & quote">
-        <FormField label="Rating">
-          <div className="flex items-center gap-1.5">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onClick={() => setFormData({ ...formData, rating: star })}
-                onMouseEnter={() => setHoverRating(star)}
-                onMouseLeave={() => setHoverRating(0)}
-                className="transition-colors"
-                aria-label={`Set rating to ${star}`}
-              >
-                <Star
-                  className={cn(
-                    "h-6 w-6 transition-colors duration-150",
-                    star <= (hoverRating || formData.rating)
-                      ? "fill-star text-star"
-                      : "text-foreground/15",
-                  )}
-                />
-              </button>
-            ))}
-            <span className="ml-3 font-mono text-xs tabular-nums text-muted-foreground">
-              {formData.rating} / 5
-            </span>
           </div>
-        </FormField>
+        </section>
 
-        <FormField
-          label="Quote"
-          hint="Optional — leave blank if using a video testimonial."
-        >
+        <section title="Placement" className="space-y-6">
+          <div className="space-y-1.5">
+            <label className="text-sm leading-none font-medium">Display slot</label>
+            <Select
+              options={DISPLAY_SLOT_OPTIONS}
+              value={formData.displaySlot}
+              onChange={(value) =>
+                setFormData({ ...formData, displaySlot: value as DisplaySlot })
+              }
+              placeholder="Choose placement"
+              ariaLabel="Display slot"
+            />
+            <p className="mt-1 text-[13px] text-muted-foreground">
+              Endorsement = quote-only card. Voices = video testimonial slot.
+            </p>
+          </div>
+        </section>
+
+        <section title="Rating & quote" className="space-y-6">
+          <div className="space-y-1.5">
+            <label className="text-sm leading-none font-medium">
+              Rating
+            </label>
+            <div className="flex items-center gap-1.5">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, rating: star })}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  className="transition-colors"
+                  aria-label={`Set rating to ${star}`}
+                >
+                  <Star
+                    size={24}
+                    weight={star <= (hoverRating || formData.rating) ? "fill" : "regular"}
+                    className={cn(
+                      "transition-colors duration-150",
+                      star <= (hoverRating || formData.rating)
+                        ? "text-warning"
+                        : "text-foreground/15",
+                    )}
+                  />
+                </button>
+              ))}
+              <span className="ml-3 font-mono text-xs text-muted-foreground tabular-nums">
+                {formData.rating} / 5
+              </span>
+            </div>
+          </div>
+
           <Textarea
+            id="testimonial-quote"
+            label="Quote"
+            helper="Optional — leave blank if using a video testimonial."
             placeholder="Excellent work — professional and delivered on time…"
             value={formData.text}
             onChange={(e) => setFormData({ ...formData, text: e.target.value })}
-            rows={5}
+            minRows={5}
           />
-        </FormField>
-      </ModalSection>
+        </section>
 
-      <ModalSection title="Video">
-        <FormField
-          label="Video sources"
-          hint="Upload or paste one or more encoded files (webm/mp4/…). The browser plays the most efficient codec it supports."
-        >
-          <VideoSourcesEditor
-            value={formData.video}
-            onChange={(video) => setFormData({ ...formData, video })}
-          />
-        </FormField>
-      </ModalSection>
-    </PortfolioModalFrame>
+        <section title="Video" className="space-y-6">
+          <div className="space-y-1.5">
+            <label className="text-sm leading-none font-medium">
+              Video sources
+            </label>
+            <VideoSourcesEditor
+              value={formData.video}
+              onChange={(video) => setFormData({ ...formData, video })}
+            />
+            <p className="text-xs text-muted-foreground">
+              Upload or paste one or more encoded files (webm/mp4/…). The browser plays the most efficient codec it supports.
+            </p>
+          </div>
+        </section>
+      </div>
+    </Dialog>
   );
 }
+

@@ -1,14 +1,16 @@
+@import "premium-ds/styles.css";
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 @import "@open-notion/editor/styles";
 
-@custom-variant dark (&:is(.dark *));
+/* Selected Select rows (and any DS use of --text-accent) should use our brand
+   accent, not premium-ds's teal default. --color-primary is a @theme token, so
+   fall back to the raw --accent it maps to and this resolves for plain DS CSS. */
+:root {
+  --text-accent: var(--color-primary, var(--accent));
+}
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
   body {
     @apply bg-background text-foreground;
     /* Geist stylistic alternates — sharper a/g, deliberate-looking */
@@ -28,69 +30,62 @@
   }
 }
 
+@layer utilities {
+  /* Fix conflict between Tailwind's visibility: collapse and premium-ds Collapse component */
+  .collapse[data-open="true"] {
+    visibility: inherit;
+  }
+}
+
 @theme inline {
+  /* Wipe default colors, radii, and shadows so developers can only use our design tokens */
+  --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 
-  /* Sidebar */
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-
-  /* Charts */
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-chart-positive: var(--chart-positive);
-  --color-chart-negative: var(--chart-negative);
-  --color-chart-grid: var(--chart-grid);
-
   /* Core surface + neutral */
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
-  --color-background: var(--background);
+  --color-background: var(--bg-app);
+  --color-foreground: var(--text-strong);
+  --color-card: var(--bg-surface);
+  --color-card-foreground: var(--text-strong);
+  --color-popover: var(--bg-surface-raised);
+  --color-popover-foreground: var(--text-strong);
 
-  /* New semantic colors */
+  /* Brand / Interactive */
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--text-on-accent);
+  --color-ring: var(--focus-ring);
+
+  /* Secondary / Muted / Hover */
+  --color-secondary: var(--bg-subtle);
+  --color-secondary-foreground: var(--text-secondary);
+  --color-muted: var(--bg-muted);
+  --color-muted-foreground: var(--text-muted);
+  --color-accent: var(--bg-subtle);
+  --color-accent-foreground: var(--text-strong);
+
+  /* Status */
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--text-inverse);
   --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
+  --color-success-foreground: var(--text-inverse);
   --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
-  --color-star: var(--star);
+  --color-warning-foreground: var(--text-inverse);
 
-  /* Editorial text-size tokens — the 10/11px design language */
-  --text-eyebrow: 10px;
-  --text-kbd: 11px;
+  /* Borders */
+  --color-border: var(--border-default);
+  --color-input: var(--border-subtle);
 
-  /* Radius scale (3xl/4xl removed — temptation gone) */
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
+  /* Radius scale */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
 
   /* Editor surface tokens */
   --color-editor-border: var(--editor-border);
@@ -102,157 +97,31 @@
   --color-editor-surface-hover: var(--editor-surface-hover);
   --color-editor-surface: var(--editor-surface);
 
-  /* Tactile shadow recipes — values inline so v4 can compile them.
-     Dark overrides happen via :is(.dark) below. */
-  --shadow-card-rest:
-    0 1px 2px 0 rgb(0 0 0 / 0.04), 0 8px 24px -8px rgb(0 0 0 / 0.06);
-  --shadow-card-hover:
-    0 1px 2px 0 rgb(0 0 0 / 0.06), 0 12px 32px -10px rgb(0 0 0 / 0.1);
-  --shadow-dialog:
-    0 24px 56px -16px rgb(0 0 0 / 0.2), 0 2px 6px 0 rgb(0 0 0 / 0.04);
+  /* Tactile shadow recipes mapped to elevation tokens where possible */
+  --shadow-card-rest: var(--shadow-sm);
+  --shadow-card-hover: var(--shadow-md);
+  --shadow-dialog: var(--shadow-xl);
   --shadow-kbd-rest:
-    inset 0 -1px 0 0 rgb(0 0 0 / 0.04), 0 1px 0 0 rgb(0 0 0 / 0.02);
-  --shadow-kbd-press: inset 0 1px 0 0 rgb(0 0 0 / 0.06);
-  --shadow-focus-ring: 0 0 0 3px
-    color-mix(in oklch, var(--ring) 18%, transparent);
+    inset 0 -1px 0 0 rgb(var(--shadow-rgb) / 0.04),
+    0 1px 0 0 rgb(var(--shadow-rgb) / 0.02);
+  --shadow-kbd-press: inset 0 1px 0 0 rgb(var(--shadow-rgb) / 0.06);
+  --shadow-focus-ring: var(--focus-ring);
 
-  /* Motion budget — one slow breathe */
+  /* Motion budget */
   --animate-breathe: breathe 2400ms ease-in-out infinite;
+  --animate-goal-wipe: goal-wipe 700ms ease-out forwards;
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  /* Slightly deeper indigo for stronger contrast on white surfaces */
-  --primary: oklch(0.42 0.22 255);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(21% 0.006 285.885);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  /* --accent repurposed: faint primary tint instead of duplicating --muted */
-  --accent: color-mix(in oklch, var(--primary) 8%, var(--background));
-  --accent-foreground: var(--primary);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --success: oklch(0.66 0.15 162);
-  --success-foreground: oklch(0.985 0 0);
-  --warning: oklch(0.78 0.16 80);
-  --warning-foreground: oklch(0.145 0 0);
-  --star: oklch(0.83 0.16 87);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  /* Focus ring takes brand accent — was neutral gray */
-  --ring: var(--primary);
-
-  /* Charts */
-  --chart-1: oklch(0.6 0.19 258);
-  --chart-2: oklch(0.7 0.13 215);
-  --chart-3: oklch(0.6 0.21 295);
-  --chart-4: oklch(0.66 0.15 162);
-  --chart-5: oklch(0.62 0.21 18);
-  --chart-positive: var(--chart-4);
-  --chart-negative: var(--chart-5);
-  --chart-grid: oklch(0.92 0.005 260);
-
-  --radius: 0.625rem;
-
-  /* Sidebar */
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(21% 0.006 285.885);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(21% 0.006 285.885);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-
-  /* Editor */
-  --editor-surface: #f4f4f5;
-  --editor-surface-hover: #e4e4e7;
-  --editor-border: #d4d4d8;
-  --editor-text: #09090b;
-  --editor-text-secondary: #52525b;
-  --editor-text-muted: #a1a1aa;
-  --editor-accent: #3b82f6;
-  --editor-selected: #21bab225;
-}
-
-.dark {
-  /* Warmer + slightly lifted background, clearer card separation */
-  --background: oklch(0.14 0.005 285);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.18 0.006 285);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.18 0.006 285);
-  --popover-foreground: oklch(0.985 0 0);
-  /* Soften so it doesn't fight the deep background */
-  --primary: oklch(0.66 0.18 259);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: color-mix(in oklch, var(--primary) 12%, var(--background));
-  --accent-foreground: var(--primary);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.145 0 0);
-  --success: oklch(0.78 0.13 162);
-  --success-foreground: oklch(0.145 0 0);
-  --warning: oklch(0.85 0.15 80);
-  --warning-foreground: oklch(0.145 0 0);
-  --star: oklch(0.87 0.15 87);
-  /* Down from 10% — half-step lighter hairline */
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: var(--primary);
-
-  /* Charts (unchanged from prior dark tuning) */
-  --chart-1: oklch(0.72 0.16 258);
-  --chart-2: oklch(0.8 0.11 215);
-  --chart-3: oklch(0.74 0.17 295);
-  --chart-4: oklch(0.78 0.13 162);
-  --chart-5: oklch(0.74 0.17 18);
-  --chart-positive: var(--chart-4);
-  --chart-negative: var(--chart-5);
-  --chart-grid: oklch(1 0 0 / 8%);
-
-  /* Sidebar matches new card for unified panel feel */
-  --sidebar: oklch(0.18 0.006 285);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.556 0 0);
-
-  /* Editor */
-  --editor-surface: #18181b;
-  --editor-surface-hover: #27272a;
-  --editor-border: #27272a;
-  --editor-text: #fafafa;
-  --editor-text-secondary: #a1a1aa;
-  --editor-text-muted: #52525b;
-  --editor-accent: #3b82f6;
-  --editor-selected: #21bab225;
-
-  /* Heavier ambient, lighter contact for dark surfaces */
-  --shadow-card-rest:
-    0 1px 2px 0 rgb(0 0 0 / 0.16), 0 8px 24px -8px rgb(0 0 0 / 0.4);
-  --shadow-card-hover:
-    0 1px 2px 0 rgb(0 0 0 / 0.2), 0 12px 32px -10px rgb(0 0 0 / 0.5);
-  --shadow-dialog:
-    0 24px 56px -16px rgb(0 0 0 / 0.5), 0 2px 6px 0 rgb(0 0 0 / 0.2);
-  --shadow-kbd-rest:
-    inset 0 -1px 0 0 rgb(255 255 255 / 0.06), 0 1px 0 0 rgb(0 0 0 / 0.2);
-  --shadow-kbd-press: inset 0 1px 0 0 rgb(255 255 255 / 0.1);
-  --shadow-focus-ring: 0 0 0 3px
-    color-mix(in oklch, var(--ring) 22%, transparent);
+  /* Editor mapped to semantics and primitives */
+  --editor-surface: var(--gray-25);
+  --editor-surface-hover: var(--gray-50);
+  --editor-border: var(--border-default);
+  --editor-text: var(--text-strong);
+  --editor-text-secondary: var(--text-secondary);
+  --editor-text-muted: var(--text-muted);
+  --editor-accent: var(--accent);
+  --editor-selected: var(--accent-wash);
 }
 
 @keyframes breathe {
@@ -268,6 +137,12 @@
 @keyframes skeleton-shimmer {
   100% {
     transform: translateX(100%);
+  }
+}
+
+@keyframes goal-wipe {
+  to {
+    transform: translateX(101%);
   }
 }
 
@@ -296,28 +171,32 @@
   }
 }
 
-.stagger-cascade > * {
-  opacity: 0;
-  animation: stagger-in 480ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: calc(var(--stagger-index, 0) * 60ms + 80ms);
+@utility stagger-cascade {
+  & > * {
+    opacity: 0;
+    animation: stagger-in 480ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(var(--stagger-index, 0) * 60ms + 80ms);
+  }
 }
 
-.stagger-cascade-tight > * {
-  opacity: 0;
-  animation: stagger-in 360ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: calc(var(--stagger-index, 0) * 40ms + 40ms);
+@utility stagger-cascade-tight {
+  & > * {
+    opacity: 0;
+    animation: stagger-in 360ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(var(--stagger-index, 0) * 40ms + 40ms);
+  }
 }
 
 /* Explicit rest shadow matches the hover shadow's layer structure, so the
    two interpolate smoothly. (A bare ring-1 composite can't tween into a
    2-layer shadow — CSS falls back to discrete interpolation and snaps.) */
-.tactile-lift {
+@utility tactile-lift {
   box-shadow: var(--shadow-card-rest);
   transition: box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1);
-}
 
-.tactile-lift:hover {
-  box-shadow: var(--shadow-card-hover);
+  &:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
 }
 
 /* Root-level view transition crossfade for route changes — kicks in

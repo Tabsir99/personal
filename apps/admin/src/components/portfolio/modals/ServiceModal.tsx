@@ -1,18 +1,14 @@
-import { useEffect, useState } from "react";
-import { Plus, X } from "lucide-react";
+ 
+import { useState } from "react";
+import { Plus, X } from "@phosphor-icons/react";
 
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { FormField } from "@/components/ui/FormField";
+import { TextField } from "premium-ds/text-field";
+import { Textarea } from "premium-ds/textarea";
+import { Button } from "premium-ds/button";
 import { usePortfolioStore } from "@/stores/PortfolioStore";
 import { PageData } from "@tabsircg/schemas/portfolio";
 
-import {
-  ModalSection,
-  PortfolioModalActions,
-  PortfolioModalFrame,
-} from "./_shared";
+import { Dialog } from "premium-ds/dialog";
 
 interface ServiceDialogProps {
   children?: React.ReactNode;
@@ -38,32 +34,29 @@ const defaultFormData: Service = {
 export default function ServiceDialog({
   children,
   service: existingService,
-  open: controlledOpen,
+  open,
   onOpenChange,
   serviceIndex,
 }: ServiceDialogProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
-  const [formData, setFormData] = useState(defaultFormData);
+  const [formData, setFormData] = useState(existingService || defaultFormData);
   const [newItem, setNewItem] = useState("");
   const services = usePortfolioStore().services;
-
-  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  const setOpen = (next: boolean) => {
-    if (onOpenChange) onOpenChange(next);
-    else setInternalOpen(next);
-  };
 
   const isUpdating =
     existingService !== undefined && typeof serviceIndex === "number";
 
-  useEffect(() => {
-    if (existingService && typeof serviceIndex === "number") {
-      setFormData(existingService);
-    } else if (!open) {
-      setFormData(defaultFormData);
+  // Synchronously adjust state during render when dialog opens
+  const [prevOpen, setPrevOpen] = useState(open);
+  const [prevService, setPrevService] = useState(existingService);
+
+  if (open !== prevOpen || existingService !== prevService) {
+    setPrevOpen(open);
+    setPrevService(existingService);
+    if (open) {
+      setFormData(existingService || defaultFormData);
       setNewItem("");
     }
-  }, [existingService, serviceIndex, open]);
+  }
 
   const handleAddItem = () => {
     const trimmed = newItem.trim();
@@ -85,127 +78,147 @@ export default function ServiceDialog({
       services.add(formData);
     }
     setFormData(defaultFormData);
-    setOpen(false);
+    onOpenChange?.(false);
   };
 
   return (
-    <PortfolioModalFrame
+    <Dialog
       open={open}
-      onOpenChange={setOpen}
-      {...(children ? { trigger: children } : {})}
+      onOpenChange={(nextOpen) => {
+        onOpenChange?.(nextOpen);
+        if (nextOpen) {
+          setFormData(existingService || defaultFormData);
+          setNewItem("");
+        }
+      }}
+      trigger={children as React.ReactElement}
       size="md"
       title={isUpdating ? formData.title || "Edit service" : "Add service"}
       description="A framed offering shown on the portfolio landing page."
-      footer={
-        <PortfolioModalActions
-          onSubmit={handleSubmit}
-          submitDisabled={!formData.title}
-          submitLabel="Add service"
-          updateLabel="Save changes"
-          isUpdating={isUpdating}
-          submitIcon={<Plus className="h-3.5 w-3.5" />}
-        />
-      }
+      footer={(close) => (
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" onClick={close}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              handleSubmit();
+              close();
+            }}
+            disabled={!formData.title}
+            iconLeft={<Plus size={14} />}
+          >
+            {isUpdating ? "Save changes" : "Add service"}
+          </Button>
+        </div>
+      )}
     >
-      <ModalSection title="Basics">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <FormField label="Label" hint="Short eyebrow above the title.">
-            <Input
+      <div className="space-y-5">
+        <section title="Basics" className="space-y-6">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <TextField
+              id="service-label"
+              label="Label"
+              helper="Short eyebrow above the title."
               placeholder="Build"
               value={formData.label}
               onChange={(e) =>
                 setFormData({ ...formData, label: e.target.value })
               }
             />
-          </FormField>
-          <FormField label="Title" hint="Multi-line with \n.">
-            <Input
+            <TextField
+              id="service-title"
+              label="Title"
+              helper="Multi-line with \n."
               placeholder="Full-stack delivery"
               value={formData.title}
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
             />
-          </FormField>
-        </div>
-        <FormField label="Description">
+          </div>
           <Textarea
+            id="service-desc"
+            label="Description"
             placeholder="What you do here, in one paragraph."
             value={formData.desc}
             onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
-            rows={4}
+            minRows={4}
           />
-        </FormField>
-      </ModalSection>
+        </section>
 
-      <ModalSection title="Frame">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <FormField label="Frame label">
-            <Input
+        <section title="Frame" className="space-y-6">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <TextField
+              id="service-frame-label"
+              label="Frame label"
               placeholder="Full-stack delivery"
               value={formData.frameLabel}
               onChange={(e) =>
                 setFormData({ ...formData, frameLabel: e.target.value })
               }
             />
-          </FormField>
-          <FormField label="Frame title">
-            <Input
+            <TextField
+              id="service-frame-title"
+              label="Frame title"
               placeholder="Build"
               value={formData.frameTitle}
               onChange={(e) =>
                 setFormData({ ...formData, frameTitle: e.target.value })
               }
             />
-          </FormField>
-        </div>
-      </ModalSection>
+          </div>
+        </section>
 
-      <ModalSection title="Deliverables">
-        {formData.items.length > 0 && (
-          <ul className="flex flex-col gap-1.5">
-            {formData.items.map((item, i) => (
-              <li
-                key={i}
-                className="group/item flex items-center gap-2 rounded-md border border-foreground/6 bg-foreground/2 px-3 py-2"
-              >
-                <span className="flex-1 text-sm">{item}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => handleRemoveItem(i)}
-                  className="text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/8 hover:text-destructive group-hover/item:opacity-100 focus-visible:opacity-100"
-                  aria-label={`Remove ${item}`}
+        <section title="Deliverables" className="space-y-6">
+          {formData.items.length > 0 && (
+            <ul className="mb-3 flex flex-col gap-1.5">
+              {formData.items.map((item, i) => (
+                <li
+                  key={i}
+                  className="group/item flex items-center gap-2 rounded-md border border-foreground/6 bg-foreground/2 px-3 py-2"
                 >
-                  <X className="h-3.5 w-3.5" />
-                </Button>
-              </li>
-            ))}
-          </ul>
-        )}
-        <div className="flex gap-2">
-          <Input
-            placeholder="Add a deliverable…"
-            value={newItem}
-            onChange={(e) => setNewItem(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleAddItem();
-              }
-            }}
-          />
-          <Button
-            type="button"
-            onClick={handleAddItem}
-            disabled={!newItem.trim()}
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Add
-          </Button>
-        </div>
-      </ModalSection>
-    </PortfolioModalFrame>
+                  <span className="flex-1 text-sm">{item}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveItem(i)}
+                    className="text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100 hover:bg-destructive/8 hover:text-destructive focus-visible:opacity-100"
+                    aria-label={`Remove ${item}`}
+                    iconLeft={<X size={14} />}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex gap-2">
+            <TextField
+              id="service-new-deliverable"
+              placeholder="Add a deliverable…"
+              value={newItem}
+              onChange={(e) => setNewItem(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddItem();
+                }
+              }}
+              className="flex-1"
+            />
+            <Button
+              type="button"
+              onClick={handleAddItem}
+              disabled={!newItem.trim()}
+              iconLeft={<Plus size={14} />}
+              variant="secondary"
+            >
+              Add
+            </Button>
+          </div>
+        </section>
+      </div>
+    </Dialog>
   );
 }

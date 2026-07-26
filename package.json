@@ -10,10 +10,14 @@
     "tc": "pnpm -r tc",
     "test": "pnpm -r test",
     "seed:firestore": "cd apps/admin && tsx src/scripts/seed/index.ts",
-    "clean:pnpm": "rm -rf node_modules apps/*/node_modules packages/*/node_modules pnpm-lock.yaml apps/*/pnpm-lock.yaml packages/*/pnpm-lock.yaml && pnpm install"
+    "seed:analytics": "cd apps/analytics-worker && tsx src/scripts/seed.ts",
+    "clean:pnpm": "rm -rf node_modules apps/*/node_modules packages/*/node_modules pnpm-lock.yaml apps/*/pnpm-lock.yaml packages/*/pnpm-lock.yaml"
   },
   "devDependencies": {
     "typescript": "^5.9.3",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "puppeteer-core": "^25.3.0"
   }
 }

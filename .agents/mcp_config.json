@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "premium-ds": {
+      "command": "node",
+      "args": [
+        "/home/tabsir/ap/reactp/premium-ds/dist/mcp.js"
+      ]
+    }
+  }
+}

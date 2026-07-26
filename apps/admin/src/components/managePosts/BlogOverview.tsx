@@ -9,7 +9,7 @@ import { useCustomSWR } from "@/hooks/useCustomSwr";
 import { BlogCardSkeletonGrid } from "../ui/Skeletons/BlogCardSkeleton";
 import { callWithToast } from "@/lib/utils";
 import { deleteBlog, featureBlog, toggleBlogStatus } from "@/actions/blogActions";
-import { Button } from "../ui/button";
+import { Button } from "premium-ds/button";
 
 const DEFAULT_FILTERS: BlogFilters = {
   status: "all",
@@ -114,7 +114,7 @@ const BlogOverview = () => {
       />
 
       <div className="mx-auto w-full max-w-full py-5">
-        <div className="stagger-cascade-tight grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid stagger-cascade-tight grid-cols-1 gap-4 md:grid-cols-2">
           {isLoading ? (
             <BlogCardSkeletonGrid />
           ) : filteredPosts.length > 0 ? (
@@ -166,7 +166,7 @@ function EmptyFilters({ onClear }: { onClear: () => void }) {
         Try adjusting status, kind, or schema — or clear all filters to see
         everything you&apos;ve published.
       </p>
-      <Button variant="outline" size="sm" onClick={onClear} className="mt-1">
+      <Button variant="secondary" size="sm" onClick={onClear} className="mt-1">
         Clear filters
       </Button>
     </div>
