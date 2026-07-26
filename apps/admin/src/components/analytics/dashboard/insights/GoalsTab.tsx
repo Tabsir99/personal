@@ -58,7 +58,7 @@ export function GoalsTab({ query, entryKey, className }: GoalsTabProps) {
     : ranked;
 
   return (
-    <div className={cn("flex h-96 flex-col lg:flex-row", className)}>
+    <div className={cn("flex h-110 flex-col lg:flex-row", className)}>
       <div className="relative min-w-0 flex-1 overflow-hidden p-1">
         <div data-dim={active ? "" : undefined} className="relative h-full">
           <GoalsChart

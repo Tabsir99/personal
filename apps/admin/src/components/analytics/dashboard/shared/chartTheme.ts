@@ -1,6 +1,4 @@
-// Every analytics chart colour lives here. Reference a CHART role — never inline
-// a colour in a chart. Teal for traffic, washed danger for money, amber as an
-// accent; green is deliberately absent (collides with teal at low opacity).
+// Every analytics chart colour lives here — reference a CHART role, never inline one.
 
 const teal = "var(--color-primary)";
 
@@ -14,12 +12,32 @@ export const CHART = {
   muted: "var(--color-muted-foreground)",
   grid: "var(--color-border)",
   surface: "var(--color-card)",
-  ramp: [0.36, 0.27, 0.21, 0.16, 0.13, 0.1].map(
-    (a) => `oklch(0.76 0.085 198 / ${a})`,
-  ),
 } as const;
 
-export type ChartColors = Exclude<keyof typeof CHART, "ramp">;
+export type ChartColors = keyof typeof CHART;
+
+// Donut ramp anchored on each metric's role colour: teal for traffic, danger for money.
+const DONUT_RAMP = {
+  visitors: { hue: 198, chroma: 0.084 },
+  revenue: { hue: 27, chroma: 0.11 },
+} as const;
+
+/** Fill + 1px edge for the slice at `rank` (0 = largest) of `count`. */
+export function donutBand(
+  rank: number,
+  count: number,
+  metric: keyof typeof DONUT_RAMP,
+) {
+  const { hue, chroma } = DONUT_RAMP[metric];
+  const t =
+    count > 1 ? Math.min(Math.max(rank, 0), count - 1) / (count - 1) : 0.5;
+  const l = 0.955 - t * 0.2;
+  const c = 0.022 + t * chroma;
+  return {
+    fill: `oklch(${l} ${c} ${hue})`,
+    edge: `oklch(${l - 0.055} ${c * 0.94} ${hue})`,
+  };
+}
 
 export function alpha(color: string, a: number): string {
   return `color-mix(in oklab, ${color} ${Math.round(a * 100)}%, transparent)`;

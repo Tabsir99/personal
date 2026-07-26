@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useAnalyticsStore } from "@/stores/analyticsStore";
-import { DataPanel } from "../shared/DataPanel";
+import { DataPanel, PANEL_HEIGHT } from "../shared/DataPanel";
 import { ChannelDonut } from "./ChannelDonut";
 import { formatCount } from "../shared/chartFormat";
 import { Favicon } from "@/components/ui/favicon";
@@ -32,17 +32,35 @@ export function SourcesPanel() {
     })),
   );
   const [dim, setDim] = useState<CampaignSelection>("all");
+  const [channel, setChannel] = useState("all");
 
   if (loading) {
-    return <div className="h-105 animate-pulse rounded-lg bg-foreground/3" />;
+    return (
+      <div
+        className={`${PANEL_HEIGHT} animate-pulse rounded-lg bg-foreground/3`}
+      />
+    );
   }
 
-  // Group referrers by channel to place representative source logos on the ring.
-  const channelSources: Record<string, string[]> = {};
-  for (const r of sources?.referrers ?? []) {
-    if (!r.name || !r.channel) continue;
-    (channelSources[r.channel] ??= []).push(r.name);
-  }
+  const channels = sources?.channels ?? [];
+  const uvOf = (c: { newVisitors: number; returningVisitors: number }) =>
+    c.newVisitors + c.returningVisitors;
+  // A channel can vanish when the range changes; don't leave the trigger empty.
+  const picked = channels.some((c) => c.name === channel) ? channel : "all";
+
+  const channelOptions = [
+    {
+      value: "all",
+      label: dimLabel(
+        "All",
+        channels.reduce((s, c) => s + uvOf(c), 0),
+      ),
+    },
+    ...channels.map((c) => ({
+      value: c.name,
+      label: dimLabel(c.name, uvOf(c)),
+    })),
+  ];
 
   const camp = sources?.campaigns;
   const campaignItems = (
@@ -66,13 +84,23 @@ export function SourcesPanel() {
         {
           value: "channel",
           label: "Channel",
-          content: (revealed) => (
+          sortable: true,
+          headerControl: (
+            <Select
+              ariaLabel="Channel breakdown"
+              value={picked}
+              onChange={setChannel}
+              options={channelOptions}
+              triggerProps={{ size: "sm" }}
+              showCheck={false}
+            />
+          ),
+          content: (revealed, metric) => (
             <ChannelDonut
-              items={(sources?.channels ?? []).map((c) => ({
-                name: c.name,
-                value: c.newVisitors + c.returningVisitors,
-              }))}
-              sources={channelSources}
+              channels={channels}
+              referrers={sources?.referrers ?? []}
+              channel={picked}
+              metric={metric}
               revealed={revealed}
             />
           ),
@@ -86,6 +114,10 @@ export function SourcesPanel() {
             values: {
               visitors: r.newVisitors + r.returningVisitors,
               revenue: r.revenue,
+            },
+            raw: {
+              newVisitors: r.newVisitors,
+              returningVisitors: r.returningVisitors,
             },
           })),
         },

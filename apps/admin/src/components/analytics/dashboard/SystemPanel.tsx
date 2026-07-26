@@ -2,7 +2,7 @@
 
 import { useShallow } from "zustand/react/shallow";
 import { useAnalyticsStore } from "../../../stores/analyticsStore";
-import { DataPanel } from "./shared/DataPanel";
+import { DataPanel, PANEL_HEIGHT } from "./shared/DataPanel";
 import { SystemIcon } from "./shared/SystemIcon";
 
 export function SystemPanel() {
@@ -14,7 +14,11 @@ export function SystemPanel() {
   );
 
   if (loading) {
-    return <div className="h-105 animate-pulse rounded-lg bg-foreground/3" />;
+    return (
+      <div
+        className={`${PANEL_HEIGHT} animate-pulse rounded-lg bg-foreground/3`}
+      />
+    );
   }
 
   return (

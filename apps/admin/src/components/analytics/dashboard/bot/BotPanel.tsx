@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Robot } from "@phosphor-icons/react";
 import { useAnalyticsStore } from "../../../../stores/analyticsStore";
 import { BotChart } from "./BotChart";
 import { BotSheet } from "./BotSheet";
-import { resolveBot, botTint } from "./botRegistry";
+import { resolveBot, botTint, categoryMeta } from "./botRegistry";
 import { useImageAccent } from "../shared/useImageAccent";
 import { getFaviconUrl } from "@/components/ui/favicon";
 import type { BotCategory, BotMetric } from "@/lib/analyticsTypes";
+import {
+  FloatingTooltipPortal,
+  type TooltipSection,
+} from "../shared/AnalyticsTooltip";
 
 export function BotPanel() {
   const { bots, loading, granularity } = useAnalyticsStore(
@@ -21,6 +25,41 @@ export function BotPanel() {
   );
   const [selected, setSelected] = useState<BotMetric | null>(null);
   const [picked, setPicked] = useState<BotCategory | null>(null);
+  const [hoveredBot, setHoveredBot] = useState<BotMetric | null>(null);
+
+  const handleLeave = useCallback(() => {
+    setHoveredBot(null);
+  }, []);
+
+  const buildBotTooltip = (bot: BotMetric): TooltipSection[] => {
+    const meta = resolveBot(bot.name);
+    const catMeta = categoryMeta(bot.category);
+    const faviconUrl = meta.domain ? getFaviconUrl(meta.domain, 64) : null;
+    return [
+      <div
+        key="hdr"
+        className="flex items-center gap-2 px-3.5 pt-3 pb-2 text-sm font-semibold text-background"
+      >
+        {faviconUrl ? (
+          <img src={faviconUrl} alt="" className="size-4 object-contain" />
+        ) : (
+          <Robot className="size-4" weight="fill" />
+        )}
+        <span>{meta.label}</span>
+      </div>,
+      {
+        label: "Crawl hits",
+        value: bot.count.toLocaleString(),
+        color: "series",
+      },
+      {
+        label: "Category",
+        value: catMeta.label,
+        dim: true,
+      },
+      "Click row to view top requested pages",
+    ];
+  };
 
   if (loading) {
     return <div className="h-105 animate-pulse rounded-lg bg-foreground/3" />;
@@ -38,8 +77,8 @@ export function BotPanel() {
   );
 
   return (
-    <div className="relative overflow-hidden rounded-lg border border-foreground/6 bg-card">
-      <div className="flex h-105 flex-col lg:flex-row">
+    <div className="relative h-105 overflow-hidden rounded-lg border border-foreground/6 bg-card">
+      <div className="flex h-full flex-col lg:flex-row">
         <div className="min-w-0 flex-1 border-b border-foreground/6 lg:border-r lg:border-b-0">
           <BotChart
             data={bots?.timeseries ?? []}
@@ -56,7 +95,10 @@ export function BotPanel() {
               Crawlers
             </span>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto p-2">
+          <div
+            className="min-h-0 flex-1 overflow-y-auto p-2"
+            onMouseLeave={handleLeave}
+          >
             {list.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground/50">
                 No bot activity
@@ -66,6 +108,8 @@ export function BotPanel() {
                 <BotRow
                   key={bot.name}
                   bot={bot}
+                  isHovered={hoveredBot?.name === bot.name}
+                  onMouseEnter={() => setHoveredBot(bot)}
                   onClick={() => setSelected(bot)}
                 />
               ))
@@ -74,24 +118,36 @@ export function BotPanel() {
         </div>
       </div>
 
+      <FloatingTooltipPortal
+        sections={hoveredBot ? buildBotTooltip(hoveredBot) : null}
+      />
+
       <BotSheet bot={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }
 
-function BotRow({ bot, onClick }: { bot: BotMetric; onClick: () => void }) {
+function BotRow({
+  bot,
+  isHovered,
+  onMouseEnter,
+  onClick,
+}: {
+  bot: BotMetric;
+  isHovered: boolean;
+  onMouseEnter: () => void;
+  onClick: () => void;
+}) {
   const meta = resolveBot(bot.name);
   const faviconUrl = meta.domain ? getFaviconUrl(meta.domain, 64) : null;
   const accent = useImageAccent(faviconUrl) ?? meta.color;
-  const [hover, setHover] = useState(false);
 
   return (
     <button
       type="button"
       onClick={onClick}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{ background: hover ? botTint(accent, 0.1) : undefined }}
+      onMouseEnter={onMouseEnter}
+      style={{ background: isHovered ? botTint(accent, 0.1) : undefined }}
       className="flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-left transition-colors"
     >
       <span

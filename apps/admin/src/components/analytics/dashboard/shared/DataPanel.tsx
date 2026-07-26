@@ -1,91 +1,83 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Tabs, TabPanel } from "premium-ds/tabs";
 import { UIMotion } from "premium-ds/motion-tokens";
 import { motion } from "motion/react";
 import { METRIC_IDS, MetricId, MetricToggle, METRICS } from "./MetricToggle";
 import { useReveal } from "./reveal";
-import { cn } from "@/lib/utils";
+import { FloatingTooltipPortal } from "./AnalyticsTooltip";
+import { buildRankedItemTooltip } from "./tooltipBuilders";
 
 export interface RankedItem {
   name: string;
   icon?: React.ReactNode;
   values: Record<MetricId, number>;
+  raw?: Record<string, unknown>;
 }
 
-export type PanelTab =
+export type PanelTab = {
+  value: string;
+  label: string;
+  headerControl?: React.ReactNode;
+  sortable?: boolean;
+} & (
+  | { items: RankedItem[] }
   | {
-      value: string;
-      label: string;
-      items: RankedItem[];
-      headerControl?: React.ReactNode;
+      content:
+        | React.ReactNode
+        | ((revealed: boolean, sortKey: MetricId) => React.ReactNode);
     }
-  | {
-      value: string;
-      label: string;
-      content: React.ReactNode | ((revealed: boolean) => React.ReactNode);
-    };
+);
 
-type MorphWidths = Array<Record<MetricId, number>>;
+export const PANEL_HEIGHT = "h-120";
+
+const SCALE = 0.92 / METRIC_IDS.length;
 
 export function DataPanel({ tabs }: { tabs: PanelTab[] }) {
   const [tab, setTab] = useState(tabs[0].value);
-  const [dir, setDir] = useState<-1 | 0 | 1>(0);
   const [sortKey, setSortKey] = useState<MetricId>("visitors");
-  const morphRef = useRef<MorphWidths>([]);
   const { ref, revealed, enter } = useReveal<HTMLDivElement>();
-
-  const activeIdx = tabs.findIndex((t) => t.value === tab);
-  const activeTab = tabs[activeIdx] ?? tabs[0];
-
-  const isList = (t: PanelTab | undefined) => "items" in t;
-  const childMorphs = isList(activeTab) && isList(tabs[activeIdx - dir]);
-
-  const activeControl =
-    "items" in activeTab ? activeTab.headerControl : undefined;
+  const activeTab = tabs.find((t) => t.value === tab) ?? tabs[0];
 
   return (
     <div
       ref={ref}
-      className={`${enter} flex h-120 flex-col gap-2 overflow-hidden rounded-lg border border-foreground/6 bg-card`}
+      className={`${enter} ${PANEL_HEIGHT} flex flex-col gap-2 overflow-hidden rounded-lg border border-foreground/6 bg-card`}
     >
-      <div className="flex shrink-0 items-center gap-2 justify-between border-b border-foreground/6 px-2 pt-2">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-foreground/6 px-2 pt-2">
         <Tabs
           label="Data view"
           items={tabs.map((t) => ({ value: t.value, label: t.label }))}
           value={tab}
-          onChange={(v, d) => {
-            setTab(v);
-            setDir(d);
-          }}
+          onChange={setTab}
         />
-
-        <div
-          className={cn(
-            "items" in activeTab ? "" : "invisible",
-            "flex items-center -mt-2",
-          )}
-        >
-          {activeControl}
-          <MetricToggle active={sortKey} setActive={setSortKey} />
+        <div className="-mt-2 flex items-center">
+          {activeTab.headerControl}
+          <div
+            className={
+              "items" in activeTab || activeTab.sortable
+                ? undefined
+                : "invisible"
+            }
+          >
+            <MetricToggle active={sortKey} setActive={setSortKey} />
+          </div>
         </div>
       </div>
       <TabPanel
         tab={tab}
-        dir={childMorphs ? 0 : dir}
         className="min-h-0 flex-1 overflow-y-auto"
-        {...(childMorphs ? { animation: null } : {})}
+        animation={null}
       >
         {"items" in activeTab ? (
           <RankedList
             items={activeTab.items}
             sortKey={sortKey}
-            morphRef={morphRef}
             revealed={revealed}
           />
         ) : typeof activeTab.content === "function" ? (
-          activeTab.content(revealed)
+          activeTab.content(revealed, sortKey)
         ) : (
           activeTab.content
         )}
@@ -97,40 +89,25 @@ export function DataPanel({ tabs }: { tabs: PanelTab[] }) {
 function RankedList({
   items,
   sortKey,
-  morphRef,
   revealed,
 }: {
   items: RankedItem[];
   sortKey: MetricId;
-  morphRef: React.RefObject<MorphWidths>;
   revealed: boolean;
 }) {
-  // Snapshot the outgoing tab's bar widths (published before TabPanel remounts
-  // this list) so the incoming bars animate from them — the tab-change morph.
-  // eslint-disable-next-line react-hooks/refs
-  const [morphFrom] = useState(() =>
-    morphRef.current.length ? morphRef.current : null,
+  const [hovered, setHovered] = useState<string | null>(null);
+
+  const visible = useMemo(
+    () => [...items].sort((a, b) => b.values[sortKey] - a.values[sortKey]),
+    [items, sortKey],
   );
-  const [rendered, setRendered] = useState(false);
 
-  const visible = items.sort((a, b) => b.values[sortKey] - a.values[sortKey]);
-
-  const maxByMetric = {} as Record<MetricId, number>;
-  for (const id of METRIC_IDS) {
-    maxByMetric[id] = Math.max(1, ...visible.map((it) => it.values[id]));
-  }
-  const scale = 0.92 / METRIC_IDS.length;
-  const widths: MorphWidths = visible.map((it) => {
-    const w = {} as Record<MetricId, number>;
+  const max = useMemo(() => {
+    const m = {} as Record<MetricId, number>;
     for (const id of METRIC_IDS)
-      w[id] = (it.values[id] / maxByMetric[id]) * scale;
-    return w;
-  });
-  // eslint-disable-next-line react-hooks/refs
-  morphRef.current = widths;
-
-  const pct = (f: number) =>
-    `${Math.max(0, Math.min(1, Number.isFinite(f) ? f : 0)) * 100}%`;
+      m[id] = Math.max(1, ...visible.map((it) => it.values[id]));
+    return m;
+  }, [visible]);
 
   if (visible.length === 0) {
     return (
@@ -140,44 +117,46 @@ function RankedList({
     );
   }
 
+  const total = visible.reduce((s, it) => s + it.values.visitors, 0) || 1;
+  const active = visible.find((it) => it.name === hovered);
+
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col [&:hover>*:not(:hover)]:opacity-40">
       {visible.map((item, i) => (
-        <motion.div
-          key={item.name}
-          layout
-          transition={UIMotion.t.layout}
-          className="group relative flex h-8 items-center gap-3 rounded-md px-4 justify-between"
+        <div
+          key={i}
+          onMouseEnter={() => setHovered(item.name)}
+          onMouseLeave={() => setHovered(null)}
+          className="group relative flex h-9 cursor-pointer items-center justify-between gap-3 rounded-md px-4 transition-opacity duration-200"
         >
-          <div className="pointer-events-none absolute inset-0 flex items-stretch gap-0.5">
-            {METRIC_IDS.map((id) => {
-              const from = morphFrom?.[i]?.[id];
-              const lead = id === sortKey;
-              return (
-                <motion.div
-                  key={id}
-                  aria-hidden
-                  initial={{ width: pct(from) }}
-                  animate={{ width: pct(revealed ? widths[i][id] : 0) }}
-                  onAnimationEnd={() => setRendered(true)}
-                  transition={{
-                    ...UIMotion.t.layout,
-                    duration: rendered ? 0 : UIMotion.t.layout.duration,
-                  }}
-                  style={{ order: lead ? 0 : 1, background: METRICS[id].color }}
-                  className={`h-full shrink-0 ${lead ? "rounded-none" : "rounded-r-sm"}`}
-                />
-              );
-            })}
+          <div className="pointer-events-none absolute inset-x-0 inset-y-0.5 flex items-stretch gap-0.5">
+            {METRIC_IDS.map((id) => (
+              <motion.div
+                key={id}
+                aria-hidden
+                initial={{ width: 0 }}
+                animate={{
+                  width: revealed
+                    ? `${(item.values[id] / max[id]) * SCALE * 100}%`
+                    : 0,
+                }}
+                transition={UIMotion.t.layout}
+                style={{
+                  order: id === sortKey ? 0 : 1,
+                  background: METRICS[id].color,
+                }}
+                className={`h-full shrink-0 ${id === sortKey ? "rounded-none" : "rounded-r-sm"}`}
+              />
+            ))}
           </div>
           <motion.div
             initial={{ opacity: 0, x: -5 }}
             animate={{ opacity: 1, x: 0 }}
             transition={UIMotion.t.exit}
-            className="relative flex items-center gap-2 origin-left"
+            className="relative flex origin-left items-center gap-2"
           >
             {item.icon && <span className="shrink-0">{item.icon}</span>}
-            <span className="truncate text-xs text-foreground font-medium">
+            <span className="truncate text-xs font-medium text-foreground">
               {item.name}
             </span>
           </motion.div>
@@ -188,8 +167,11 @@ function RankedList({
           >
             {METRICS[sortKey].format(item.values[sortKey])}
           </motion.span>
-        </motion.div>
+        </div>
       ))}
+      <FloatingTooltipPortal
+        sections={active ? buildRankedItemTooltip(active, total) : null}
+      />
     </div>
   );
 }

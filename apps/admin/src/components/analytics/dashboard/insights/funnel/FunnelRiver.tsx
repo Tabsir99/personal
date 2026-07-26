@@ -19,8 +19,8 @@ export interface RiverStep extends FunnelStepData {
   kind: FunnelStep["type"];
 }
 
-const RIVER_H = 384;
-const FOOT_H = 64;
+const RIVER_H = 375;
+const FOOT_H = 74;
 const CY = RIVER_H / 2;
 const MARGIN = 24;
 const MAX_HALF = CY - MARGIN;
@@ -64,7 +64,10 @@ export function FunnelRiver({ steps }: { steps: RiverStep[] }) {
     const vw = typeof window !== "undefined" ? window.innerWidth : 0;
     const vh = typeof window !== "undefined" ? window.innerHeight : 0;
     const cardH = cardRef.current?.offsetHeight || 280;
-    const cardLeft = Math.max(8, Math.min(clientX - CARD_W / 2, vw - CARD_W - 8));
+    const cardLeft = Math.max(
+      8,
+      Math.min(clientX - CARD_W / 2, vw - CARD_W - 8),
+    );
     let cardTop = clientY - cardH - 12;
     if (cardTop < 8) {
       cardTop = Math.min(clientY + 18, vh - cardH - 8);

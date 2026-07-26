@@ -2,7 +2,7 @@
 
 import { useShallow } from "zustand/react/shallow";
 import { useAnalyticsStore } from "../../../stores/analyticsStore";
-import { DataPanel } from "./shared/DataPanel";
+import { DataPanel, PANEL_HEIGHT } from "./shared/DataPanel";
 
 import { Favicon } from "../../ui/favicon";
 
@@ -15,7 +15,11 @@ export function PagesPanel() {
   );
 
   if (loading) {
-    return <div className="h-105 animate-pulse rounded-lg bg-foreground/3" />;
+    return (
+      <div
+        className={`${PANEL_HEIGHT} animate-pulse rounded-lg bg-foreground/3`}
+      />
+    );
   }
 
   return (
@@ -36,6 +40,7 @@ export function PagesPanel() {
           items: (pages?.pages ?? []).map((p) => ({
             name: p.name,
             values: { visitors: p.uv, revenue: p.revenue },
+            raw: { pageviews: p.pageviews },
           })),
         },
         {
@@ -53,6 +58,7 @@ export function PagesPanel() {
             name: l.name,
             icon: <Favicon source={l.name} />,
             values: { visitors: l.uv, revenue: l.revenue },
+            raw: { exits: l.exits },
           })),
         },
       ]}

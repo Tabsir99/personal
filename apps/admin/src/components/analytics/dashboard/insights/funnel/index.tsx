@@ -33,7 +33,7 @@ export function FunnelTab() {
 
   if (funnels === null || (funnelsLoading && funnels.length === 0)) {
     return (
-      <div className="h-112 p-3">
+      <div className="h-full p-3">
         <div className="h-full animate-pulse rounded-lg bg-foreground/3" />
       </div>
     );
@@ -41,7 +41,7 @@ export function FunnelTab() {
 
   if (funnels.length === 0) {
     return (
-      <div className="flex h-112 flex-col items-center justify-center gap-3 text-center">
+      <div className="flex flex-col items-center justify-center gap-3 text-center">
         <div>
           <p className="text-sm font-medium text-foreground/80">
             No funnels yet
@@ -73,7 +73,7 @@ export function FunnelTab() {
   const conv = funnel?.metrics.overallConversionRate ?? 0;
 
   return (
-    <div className="relative h-112 overflow-hidden">
+    <div className="relative h-110 overflow-hidden">
       {funnelLoading && !funnel ? (
         <div className="absolute inset-3 animate-pulse rounded-lg bg-foreground/3" />
       ) : steps.length ? (

@@ -1,6 +1,14 @@
 "use client";
 
-import { Fragment, isValidElement, memo, type ReactNode } from "react";
+import {
+  Fragment,
+  isValidElement,
+  memo,
+  useEffect,
+  useRef,
+  type ReactNode,
+} from "react";
+import { createPortal } from "react-dom";
 import { Tooltip, type TooltipContentProps } from "recharts";
 import { CHART, type ChartColors } from "./chartTheme";
 import { cn } from "@/lib/utils";
@@ -126,7 +134,7 @@ export function AnalyticsTooltipCard({
                 {s}
               </div>
             ) : (
-              <div className="px-3.5 py-2.5 text-xs text-background/45">
+              <div className="px-3.5 py-2.5 text-xs text-background/50">
                 {s}
               </div>
             )}
@@ -198,4 +206,63 @@ export const AnalyticsTooltip = memo(
   },
   () => true,
 );
+
+export function FloatingTooltipPortal({
+  sections,
+  className,
+}: {
+  sections: TooltipSection[] | null;
+  className?: string;
+}) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!sections || sections.length === 0) return;
+
+    const el = containerRef.current;
+    if (!el) return;
+
+    const updatePosition = (clientX: number, clientY: number) => {
+      const w = el.offsetWidth || 230;
+      const h = el.offsetHeight || 130;
+      const left =
+        clientX + w + 24 > window.innerWidth
+          ? Math.max(12, clientX - w - 14)
+          : clientX + 14;
+      const top =
+        clientY + h + 24 > window.innerHeight
+          ? Math.max(12, clientY - h - 14)
+          : clientY + 14;
+
+      el.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+      el.style.opacity = "1";
+    };
+
+    const handlePointerMove = (e: PointerEvent) => {
+      updatePosition(e.clientX, e.clientY);
+    };
+
+    window.addEventListener("pointermove", handlePointerMove, {
+      passive: true,
+    });
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+    };
+  }, [sections]);
+
+  if (typeof document === "undefined" || !sections || !sections.length)
+    return null;
+
+  return createPortal(
+    <div
+      ref={containerRef}
+      className="pointer-events-none fixed top-0 left-0 z-50 opacity-0 transition-opacity duration-150 ease-out"
+      style={{ transform: "translate3d(-9999px, -9999px, 0)" }}
+    >
+      <AnalyticsTooltipCard sections={sections} className={className} />
+    </div>,
+    document.body,
+  );
+}
+
 

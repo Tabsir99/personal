@@ -15,6 +15,7 @@ import type {
   Granularity,
 } from "@/lib/analyticsTypes";
 import { CHART } from "../shared/chartTheme";
+import { AnalyticsTooltip, type TooltipSection } from "../shared/AnalyticsTooltip";
 import {
   formatCount,
   formatTimestamp,
@@ -65,6 +66,35 @@ export const GoalsChart = memo(function GoalsChart({
           axisLine={false}
           width={36}
           tickFormatter={formatCount}
+        />
+        <AnalyticsTooltip
+          sections={(p) => {
+            const activeGoals = goals.filter((g) => p.raw(g.name) > 0);
+            const sections: TooltipSection[] = [
+              p.date,
+              ...activeGoals.map((g) => ({
+                label: (
+                  <span className="flex items-center gap-1.5">
+                    <span
+                      className="size-2 shrink-0 rounded-full"
+                      style={{ background: colors[g.name] || CHART.series }}
+                    />
+                    <span>{g.name}</span>
+                  </span>
+                ),
+                value: formatCount(p.raw(g.name)),
+              })),
+            ];
+            if (activeGoals.length > 1) {
+              const sum = activeGoals.reduce((s, g) => s + p.raw(g.name), 0);
+              sections.push({
+                label: "Total completions",
+                value: formatCount(sum),
+                dim: true,
+              });
+            }
+            return sections;
+          }}
         />
         {goals.map((g, i) => (
           <Line

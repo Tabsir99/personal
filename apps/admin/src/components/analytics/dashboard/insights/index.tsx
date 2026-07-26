@@ -44,7 +44,12 @@ export function InsightsCard() {
   }, [journeyQuery, setJourneySearch]);
 
   if (loading) {
-    return <div className="h-105 animate-pulse rounded-lg bg-foreground/3" />;
+    return (
+      <div className="overflow-hidden rounded-lg border border-foreground/6 bg-card">
+        <div className="h-11 border-b border-foreground/6" />
+        <div className="h-110 animate-pulse bg-foreground/3" />
+      </div>
+    );
   }
 
   const onJourney = tab === "journey";
