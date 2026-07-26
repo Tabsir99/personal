@@ -1,19 +1,26 @@
+const REGISTRY_VERSIONS = {
+  'premium-ds': '^0.7.1',
+  '@tabsircg/analytics': '^1.0.1',
+};
+
+const LOCAL_LINKS = {
+  'premium-ds': 'link:/home/tabsir/ap/reactp/premium-ds',
+  '@tabsircg/analytics':
+    'link:/home/tabsir/ap/reactp/tabsircg/analytics/packages/analytics',
+};
+
+const resolveFromRegistry =
+  process.env.NODE_ENV === 'production' ||
+  process.env.VERCEL === '1' ||
+  process.env.CI === 'true';
+
 export const hooks = {
-  readPackage(pkg, context) {
-    if (pkg.dependencies && pkg.dependencies['premium-ds']) {
-      if (process.env.NODE_ENV === 'production') {
-        pkg.dependencies['premium-ds'] = '^0.7.1';
-      } else {
-        pkg.dependencies['premium-ds'] = 'link:/home/tabsir/ap/reactp/premium-ds';
-      }
-    }
-    if (pkg.dependencies && pkg.dependencies['@tabsircg/analytics']) {
-      if (process.env.NODE_ENV === 'production') {
-        pkg.dependencies['@tabsircg/analytics'] = '^1.0.1';
-      } else {
-        pkg.dependencies['@tabsircg/analytics'] = 'link:/home/tabsir/ap/reactp/tabsircg/analytics/packages/analytics';
-      }
+  readPackage(pkg) {
+    if (!pkg.dependencies) return pkg;
+    const source = resolveFromRegistry ? REGISTRY_VERSIONS : LOCAL_LINKS;
+    for (const name of Object.keys(REGISTRY_VERSIONS)) {
+      if (pkg.dependencies[name]) pkg.dependencies[name] = source[name];
     }
     return pkg;
-  }
+  },
 };
