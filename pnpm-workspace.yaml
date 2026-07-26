@@ -27,3 +27,6 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
   workerd: true
+
+minimumReleaseAgeExclude:
+  - premium-ds@0.8.0
