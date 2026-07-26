@@ -10,7 +10,7 @@ import type {
   JourneyVisitor,
 } from "@/lib/analyticsTypes";
 
-export const MAX_ROWS_PER_VISITOR = 500;
+export const MAX_ROWS_PER_VISITOR = 100;
 
 export const JOURNEY_COLUMNS = [
   "visitor_id",
