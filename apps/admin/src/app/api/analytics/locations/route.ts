@@ -39,7 +39,11 @@ export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
     UvBreakdownRow<"countries" | "regions" | "cities"> & { countryCode: string }
   >(sql, "locations");
 
-  const { countries, regions, cities } = partitionByLevel(res.data);
+  const { countries, regions, cities } = partitionByLevel(res.data, [
+    "countries",
+    "regions",
+    "cities",
+  ]);
   const withCountry = (
     rows: (Omit<UvBreakdownRow, "level"> & { countryCode: string })[],
   ): LocationMetric[] =>

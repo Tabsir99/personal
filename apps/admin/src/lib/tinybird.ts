@@ -210,10 +210,13 @@ export function parseHref(
 
 export function partitionByLevel<T extends { level: string }>(
   rows: T[],
-): Record<string, Omit<T, "level">[]> {
-  const result: Record<string, Omit<T, "level">[]> = {};
+  levels: readonly T["level"][],
+): Record<T["level"], Omit<T, "level">[]> {
+  const result = Object.fromEntries(
+    levels.map((level) => [level, [] as Omit<T, "level">[]]),
+  ) as Record<T["level"], Omit<T, "level">[]>;
   for (const { level, ...rest } of rows) {
-    (result[level] ??= []).push(rest as Omit<T, "level">);
+    result[level]?.push(rest as Omit<T, "level">);
   }
   return result;
 }

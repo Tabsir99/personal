@@ -28,7 +28,11 @@ export const GET = wrapRoute<SystemResponse>(async (req: NextRequest) => {
     UvBreakdownRow<"browsers" | "os" | "devices">
   >(sql, "system");
 
-  const { browsers, os, devices } = partitionByLevel(res.data);
+  const { browsers, os, devices } = partitionByLevel(res.data, [
+    "browsers",
+    "os",
+    "devices",
+  ]);
 
   return { browsers, os, devices };
 });

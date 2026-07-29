@@ -4,7 +4,6 @@ vi.mock("@/lib/requireAuth", () => ({
   requireAuth: vi.fn().mockResolvedValue(undefined),
 }));
 
-import type { AnalyticsEventRow } from "@tabsircg/analytics-contract";
 import {
   TINYBIRD_ENABLED,
   ingestRows,
@@ -32,7 +31,6 @@ import { GET as pagesGET } from "@/app/api/analytics/pages/route";
 import { GET as locationsGET } from "@/app/api/analytics/locations/route";
 import { GET as systemGET } from "@/app/api/analytics/system/route";
 import { GET as eventsGET } from "@/app/api/analytics/events/route";
-import { GET as realtimeGET } from "@/app/api/analytics/realtime/route";
 import { GET as botsGET } from "@/app/api/analytics/bots/route";
 import { GET as botPagesGET } from "@/app/api/analytics/bots/pages/route";
 
@@ -61,7 +59,6 @@ const fmt = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 const period = `custom:${fmt(start)}:${fmt(end - DAY)}`;
 
 const WID = `itest-${now.toString(36)}`;
-const WID_RT = `${WID}-rt`;
 const BOT_NAME = "GPTBot";
 
 const rows = generateSeed({
@@ -71,60 +68,6 @@ const rows = generateSeed({
   windowStart: prevStart,
   windowEnd: end,
 });
-const realtimeRows = buildRealtimeRows();
-const allRows = [...rows, ...realtimeRows];
-
-function rtRow(over: Partial<AnalyticsEventRow>): AnalyticsEventRow {
-  return {
-    website_id: WID_RT,
-    type: "pageview",
-    domain: "tabsircg.com",
-    href: "https://tabsircg.com/",
-    referrer: "",
-    visitor_id: "",
-    session_id: "",
-    language: "en-US",
-    timezone: "UTC",
-    event_name: "pageview",
-    extra_data: "{}",
-    country: "US",
-    region: "NY",
-    city: "New York",
-    browser: "Chrome",
-    os: "Windows",
-    device: "desktop",
-    is_bot: 0,
-    bot_category: "",
-    bot_name: "",
-    ip: "1.2.3.4",
-    viewport_w: 0,
-    viewport_h: 0,
-    screen_w: 0,
-    screen_h: 0,
-    session_number: 1,
-    revenue_cents: 0,
-    timestamp: now - 2 * 60 * 1000,
-    ...over,
-  };
-}
-
-// Three distinct human visitors (one repeated) + a bot, all within the last
-// 10 minutes → realtime must count exactly 3.
-function buildRealtimeRows(): AnalyticsEventRow[] {
-  return [
-    rtRow({ visitor_id: "rt1", session_id: "rt1" }),
-    rtRow({ visitor_id: "rt1", session_id: "rt1" }),
-    rtRow({ visitor_id: "rt2", session_id: "rt2" }),
-    rtRow({ visitor_id: "rt3", session_id: "rt3" }),
-    rtRow({
-      visitor_id: "rtbot",
-      session_id: "rtbot",
-      is_bot: 1,
-      bot_name: "GPTBot",
-      bot_category: "training",
-    }),
-  ];
-}
 
 type Rowish = Record<string, unknown>;
 
@@ -174,11 +117,11 @@ const q = { websiteId: WID, period, granularity: "daily" };
 
 describeMaybe("analytics routes — real Tinybird, every route", () => {
   beforeAll(async () => {
-    await ingestRows(allRows);
-    await waitForRows([WID, WID_RT], allRows.length);
+    await ingestRows(rows);
+    await waitForRows([WID], rows.length);
   }, 150_000);
 
-  afterAll(() => cleanupRows([WID, WID_RT]), 90_000);
+  afterAll(() => cleanupRows([WID]), 90_000);
 
   it("main: overview + timeseries + revenue", async () => {
     const data = await callRoute<Record<string, Rowish>>(mainGET, q);
@@ -370,13 +313,6 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
     expect(data.category).toBe(ref.category);
     expect(Number(data.total)).toBe(ref.total);
     expectRows(data.pages, ref.pages, (r) => String(r.name), ["count"]);
-  });
-
-  it("realtime: distinct human visitors in the last 10 minutes", async () => {
-    const data = await callRoute<{ count: number }>(realtimeGET, {
-      websiteId: WID_RT,
-    });
-    expect(Number(data.count)).toBe(3);
   });
 });
 

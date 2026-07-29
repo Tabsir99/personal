@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
   Globe,
@@ -14,7 +14,6 @@ import {
   Package,
 } from "@phosphor-icons/react";
 import { Button } from "premium-ds/button";
-import { Badge } from "premium-ds/badge";
 import { Tag, TagGroup } from "premium-ds/tag";
 import { Tabs, TabPanel } from "premium-ds/tabs";
 import { toast } from "premium-ds/toast";
@@ -22,8 +21,6 @@ import { Dialog } from "premium-ds/dialog";
 import type { AnalyticsWebsite } from "@/actions/analyticsActions";
 import { deleteAnalyticsWebsite } from "@/actions/analyticsActions";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { MiniChart, generateEmptyTimeseries } from "./MiniChart";
-import type { TimeseriesPoint } from "@/lib/analyticsTypes";
 import { getFaviconUrl } from "../ui/favicon";
 
 interface WebsitePanelProps {
@@ -39,29 +36,6 @@ export function WebsitePanel({ site, onEdit, onMutate }: WebsitePanelProps) {
   const [snippetCopied, setSnippetCopied] = useState(false);
   const [snippetTab, setSnippetTab] = useState("script");
   const [snippetDir, setSnippetDir] = useState<-1 | 0 | 1>(0);
-  const [timeseries, setTimeseries] = useState<TimeseriesPoint[]>([]);
-  const [chartLoading, setChartLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch(
-      `/api/analytics/main?websiteId=${site.id}&period=30d&granularity=daily`,
-    )
-      .then((res) => (res.ok ? res.json() : null))
-      .then((json) => {
-        if (cancelled || !json) return;
-        if (json.status === "success") {
-          setTimeseries(json.data.timeseries ?? []);
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setChartLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [site.id]);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -180,60 +154,31 @@ init({ websiteId: '${site.id}' })`;
         </div>
       </div>
 
-      {/* Chart + Info grid */}
-      <div className="flex flex-col divide-y divide-foreground/6 lg:flex-row lg:divide-x lg:divide-y-0">
-        {/* Chart */}
-        <div className="p-5 lg:flex-1">
-          <div className="mb-3 flex items-center justify-between">
-            <Eyebrow tone="muted" size="xs">
-              Visitors · 30 days
-            </Eyebrow>
-            {!chartLoading && timeseries.length > 0 && (
-              <Badge tone="success" size="sm" dot>
-                Active
-              </Badge>
-            )}
-          </div>
-          <div className="h-35">
-            {chartLoading ? (
-              <div className="size-full animate-pulse rounded-md bg-foreground/[0.03]" />
+      {/* Info grid */}
+      <div className="flex flex-col divide-y divide-foreground/6 sm:flex-row sm:divide-x sm:divide-y-0">
+        <InfoCell icon={<Fingerprint size={13} />} label="Website ID">
+          <button
+            type="button"
+            onClick={copyId}
+            className="inline-flex items-center gap-1.5 font-mono text-xs text-foreground/80 transition-colors hover:text-foreground"
+          >
+            {site.id}
+            {copied ? (
+              <Check size={10} weight="bold" className="text-success" />
             ) : (
-              <MiniChart
-                data={
-                  timeseries.length > 0 ? timeseries : generateEmptyTimeseries()
-                }
-                empty={timeseries.length === 0}
-              />
+              <Copy size={10} className="text-muted-foreground/60" />
             )}
-          </div>
-        </div>
-
-        {/* Sidebar info */}
-        <div className="flex flex-col divide-y divide-foreground/6 lg:w-70 lg:shrink-0">
-          <InfoCell icon={<Fingerprint size={13} />} label="Website ID">
-            <button
-              type="button"
-              onClick={copyId}
-              className="inline-flex items-center gap-1.5 font-mono text-xs text-foreground/80 transition-colors hover:text-foreground"
-            >
-              {site.id}
-              {copied ? (
-                <Check size={10} weight="bold" className="text-success" />
-              ) : (
-                <Copy size={10} className="text-muted-foreground/60" />
-              )}
-            </button>
-          </InfoCell>
-          <InfoCell icon={<LinkIcon size={13} />} label="Origins">
-            <TagGroup label={`Origins for ${site.name}`}>
-              {site.origins.map((origin) => (
-                <Tag key={origin} size="sm">
-                  {origin}
-                </Tag>
-              ))}
-            </TagGroup>
-          </InfoCell>
-        </div>
+          </button>
+        </InfoCell>
+        <InfoCell icon={<LinkIcon size={13} />} label="Origins">
+          <TagGroup label={`Origins for ${site.name}`}>
+            {site.origins.map((origin) => (
+              <Tag key={origin} size="sm">
+                {origin}
+              </Tag>
+            ))}
+          </TagGroup>
+        </InfoCell>
       </div>
 
       {/* Tracking snippet */}
@@ -295,7 +240,7 @@ function InfoCell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="px-5 py-3.5">
+    <div className="min-w-0 px-5 py-3.5 sm:flex-1">
       <div className="mb-1.5 flex items-center gap-1.5">
         <span className="text-muted-foreground/50">{icon}</span>
         <Eyebrow tone="muted" size="xs">

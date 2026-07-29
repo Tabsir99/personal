@@ -654,10 +654,6 @@ export async function mockFetchEndpoint<T>(
     return { bot, category, total, pages } as unknown as T;
   }
 
-  if (path === "realtime") {
-    return { count: Math.floor(15 + Math.random() * 40) } as unknown as T;
-  }
-
   return null;
 }
 

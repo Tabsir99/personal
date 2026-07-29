@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import type { OverviewMetrics } from "@/lib/analyticsTypes";
 import { formatMetric } from "../shared/chartFormat";
 
@@ -15,7 +15,6 @@ export type ChartMetric =
 interface MetricsBarProps {
   current: OverviewMetrics;
   previous: OverviewMetrics;
-  realtimeCount: number | null;
   activeMetric: ChartMetric | null;
   onMetricChange: (metric: ChartMetric) => void;
 }
@@ -32,7 +31,6 @@ function deltaLabel(curr: number, prev: number): Delta {
 export function MetricsBar({
   current,
   previous,
-  realtimeCount,
   activeMetric,
   onMetricChange,
 }: MetricsBarProps) {
@@ -111,19 +109,6 @@ export function MetricsBar({
         formatMetric("sessionDuration", current.sessionDuration),
         delta(current.sessionDuration, previous.sessionDuration),
       )}
-      <StaticCell
-        label="Online"
-        value={realtimeCount !== null ? realtimeCount : "–"}
-        accessory={
-          realtimeCount !== null && realtimeCount > 0 ? (
-            <span className="relative flex size-1.5">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-50" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-success" />
-            </span>
-          ) : undefined
-        }
-        onEnter={clearHover}
-      />
     </div>
   );
 }
@@ -170,13 +155,11 @@ function StaticCell({
   label,
   value,
   delta,
-  accessory,
   onEnter,
 }: {
   label: string;
-  value: ReactNode;
+  value: string;
   delta?: Delta;
-  accessory?: ReactNode;
   onEnter: () => void;
 }) {
   return (
@@ -184,7 +167,6 @@ function StaticCell({
       <span className="absolute inset-y-4 left-0 w-px bg-foreground/8" />
       <span className="flex items-center gap-1.5 pb-0.5 text-xs font-medium tracking-wide text-muted-foreground capitalize">
         {label}
-        {accessory}
       </span>
       <span className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
         {value}

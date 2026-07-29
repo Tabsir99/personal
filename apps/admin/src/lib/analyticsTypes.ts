@@ -185,10 +185,6 @@ export interface GoalsResponse {
   totalVisitors: number;
 }
 
-export interface RealtimeResponse {
-  count: number;
-}
-
 export type BotCategory =
   "answer_fetch" | "search_index" | "training" | "ai_crawler" | "generic";
 
@@ -310,7 +306,6 @@ export interface FunnelDetailResponse {
   data: FunnelStepData[];
   metrics: FunnelMetrics;
 }
-
 
 export type JourneyEventType = "referral" | "pageview" | "custom" | "payment";
 

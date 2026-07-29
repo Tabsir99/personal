@@ -58,7 +58,6 @@ export default function WebsiteDetailPage() {
       setGranularity: s.setGranularity,
       fetchAll: s.fetchAll,
       refresh: s.refresh,
-      realtimeCount: s.realtimeCount,
       mainLoading: s.mainLoading,
     })),
   );

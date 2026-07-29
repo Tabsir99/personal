@@ -20,6 +20,8 @@ import {
 } from "@/lib/analyticsTypes";
 import { buildChannelSQL } from "./channels";
 
+type SourceLevel = "referrers" | "channels" | CampaignDimension;
+
 const channelExpr = buildChannelSQL(F.referrer);
 const paramExpr = (dim: CampaignDimension) =>
   `extractURLParameter(${F.href}, '${dim}')`;
@@ -47,22 +49,26 @@ export const GET = wrapRoute<SourcesResponse>(async (req: NextRequest) => {
     .top(50)
     .build();
 
-  const res = await queryTinybird<BreakdownRow & { chan: string }>(
+  const res = await queryTinybird<BreakdownRow<SourceLevel> & { chan: string }>(
     sql,
     "sources",
   );
-  const byLevel = partitionByLevel(res.data);
+  const byLevel = partitionByLevel(res.data, [
+    "referrers",
+    "channels",
+    ...CAMPAIGN_DIMENSIONS,
+  ]);
 
-  const referrers = (byLevel.referrers ?? []).map(({ chan, ...r }) => ({
+  const referrers = byLevel.referrers.map(({ chan, ...r }) => ({
     ...r,
     channel: chan,
   })) as SourceMetric[];
-  const channels = (byLevel.channels ?? []) as ChannelMetric[];
+  const channels = byLevel.channels as ChannelMetric[];
 
   const dims = Object.fromEntries(
     CAMPAIGN_DIMENSIONS.map((dim) => [
       dim,
-      (byLevel[dim] ?? [])
+      byLevel[dim]
         .filter((r) => r.name !== "")
         .map((r) => ({
           name: r.name,

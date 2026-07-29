@@ -22,17 +22,15 @@ const EMPTY_METRICS: OverviewMetrics = {
 
 export function OverviewCard() {
   const [chartMetric, setChartMetric] = useState<ChartMetric | null>(null);
-  const { main, mainLoading, realtimeCount, granularity, period, refresh } =
-    useAnalyticsStore(
-      useShallow((s) => ({
-        main: s.main,
-        mainLoading: s.mainLoading,
-        realtimeCount: s.realtimeCount,
-        granularity: s.granularity,
-        period: s.period,
-        refresh: s.refresh,
-      })),
-    );
+  const { main, mainLoading, granularity, period, refresh } = useAnalyticsStore(
+    useShallow((s) => ({
+      main: s.main,
+      mainLoading: s.mainLoading,
+      granularity: s.granularity,
+      period: s.period,
+      refresh: s.refresh,
+    })),
+  );
 
   // Re-clicking the active metric returns to the default overview.
   const selectMetric = (m: ChartMetric) =>
@@ -47,7 +45,6 @@ export function OverviewCard() {
       <MetricsBar
         current={main?.current ?? EMPTY_METRICS}
         previous={main?.previous ?? EMPTY_METRICS}
-        realtimeCount={realtimeCount}
         activeMetric={chartMetric}
         onMetricChange={selectMetric}
       />

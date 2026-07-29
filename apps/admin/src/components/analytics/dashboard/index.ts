@@ -1,7 +1,3 @@
-export { MetricsBar } from "./mainchart/MetricsBar";
-export type { ChartMetric } from "./mainchart/MetricsBar";
-export { MainChart } from "./mainchart/MainChartGraph";
-export { DataPanel } from "./shared/DataPanel";
 export { useAnalyticsStore } from "../../../stores/analyticsStore";
 export { OverviewCard } from "./mainchart";
 export { SourcesPanel } from "./sources";

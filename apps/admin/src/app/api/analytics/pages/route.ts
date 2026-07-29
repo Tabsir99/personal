@@ -83,6 +83,7 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
 
   const { pages, entryPages, hostnames, exitLinks } = partitionByLevel(
     res.data,
+    ["pages", "entryPages", "hostnames", "exitLinks"],
   );
 
   return {
