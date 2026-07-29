@@ -58,21 +58,19 @@ export function FunnelMenu({
                   : "text-foreground/80 hover:bg-foreground/5",
               )}
             >
-              <Button
-                variant="ghost"
-                size="sm"
-                fullWidth
+              <button
+                type="button"
                 onClick={() => {
                   onSelect(f.id);
                   close();
                 }}
-                className="min-w-0 flex-1 justify-between! px-2! text-left! font-normal!"
-                {...(f.id === activeId
-                  ? { iconRight: <CheckIcon size={14} weight="bold" /> }
-                  : {})}
+                className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm"
               >
                 <span className="min-w-0 truncate">{f.name}</span>
-              </Button>
+                {f.id === activeId && (
+                  <CheckIcon size={14} className="shrink-0" weight="bold" />
+                )}
+              </button>
               <span className="flex shrink-0 items-center opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100">
                 <Button
                   variant="ghost"
@@ -82,6 +80,7 @@ export function FunnelMenu({
                     onEdit(f.id);
                     close();
                   }}
+                  className="text-muted-foreground hover:text-foreground!"
                 >
                   <PencilSimpleIcon size={13} />
                 </Button>
@@ -93,7 +92,7 @@ export function FunnelMenu({
                     onDelete(f.id);
                     close();
                   }}
-                  className="hover:text-destructive!"
+                  className="text-muted-foreground hover:text-destructive!"
                 >
                   <TrashIcon size={13} />
                 </Button>
@@ -101,19 +100,16 @@ export function FunnelMenu({
             </div>
           ))}
           <div className="my-1 h-px bg-foreground/6" />
-          <Button
-            variant="ghost"
-            size="sm"
-            fullWidth
+          <button
+            type="button"
             onClick={() => {
               onCreate();
               close();
             }}
-            className="justify-start! px-2! text-primary!"
-            iconLeft={<PlusIcon size={15} weight="bold" />}
+            className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-sm font-medium text-primary hover:bg-primary/8"
           >
-            New funnel
-          </Button>
+            <PlusIcon size={15} weight="bold" /> New funnel
+          </button>
         </div>
       )}
     </Popover>
