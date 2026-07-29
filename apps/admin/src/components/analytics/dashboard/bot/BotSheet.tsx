@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useShallow } from "zustand/react/shallow";
 import { TextField } from "premium-ds/text-field";
+import { Button } from "premium-ds/button";
 import { MagnifyingGlass, Robot, X } from "@phosphor-icons/react";
 import { useAnalyticsStore } from "../../../../stores/analyticsStore";
 import { resolveBot, categoryMeta, botTint } from "./botRegistry";
@@ -121,14 +122,15 @@ function BotSheetBody({
             <span>{cat.label}</span>
           </div>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onClose}
-          aria-label="Close"
-          className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-foreground/6 hover:text-foreground"
+          htmlProps={{ "aria-label": "Close" }}
+          className="shrink-0 text-muted-foreground hover:text-foreground!"
         >
           <X className="size-4" />
-        </button>
+        </Button>
       </div>
 
       <div className="px-4 pb-2">

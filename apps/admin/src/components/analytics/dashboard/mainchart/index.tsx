@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { Button } from "premium-ds/button";
 import { useAnalyticsStore } from "../../../../stores/analyticsStore";
 import { MetricsBar } from "./MetricsBar";
 import { MainChart } from "./MainChartGraph";
@@ -61,13 +62,9 @@ export function OverviewCard() {
             <p className="text-sm text-muted-foreground">
               Failed to load chart data
             </p>
-            <button
-              type="button"
-              onClick={refresh}
-              className="text-xs text-primary hover:underline"
-            >
+            <Button variant="link" size="sm" onClick={refresh}>
               Retry
-            </button>
+            </Button>
           </div>
         )}
       </div>

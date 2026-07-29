@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import { Collapse } from "premium-ds/collapse";
+import { Button } from "premium-ds/button";
 import {
   ArrowsDownUpIcon,
   CaretDownIcon,
@@ -211,26 +212,30 @@ export function JourneyTimeline({ entries }: { entries: JourneyEntry[] }) {
   return (
     <div className="flex min-h-0 flex-col">
       <div className="mx-auto flex w-3/4 shrink-0 items-center justify-end gap-1 px-4 pb-2">
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setOldestFirst((value) => !value)}
-          className="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-xs tracking-wide text-muted-foreground uppercase transition-colors hover:bg-foreground/6 hover:text-foreground"
+          className="px-2! tracking-wide text-muted-foreground uppercase"
+          iconLeft={<ArrowsDownUpIcon className="size-3.5" />}
         >
-          <ArrowsDownUpIcon className="size-3.5" />
           {oldestFirst ? "Oldest first" : "Newest first"}
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={copy}
-          className="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-xs tracking-wide text-muted-foreground uppercase transition-colors hover:bg-foreground/6 hover:text-foreground"
+          className="px-2! tracking-wide text-muted-foreground uppercase"
+          iconLeft={
+            copied ? (
+              <CheckIcon className="size-3.5" />
+            ) : (
+              <CopyIcon className="size-3.5" />
+            )
+          }
         >
-          {copied ? (
-            <CheckIcon className="size-3.5" />
-          ) : (
-            <CopyIcon className="size-3.5" />
-          )}
           {copied ? "Copied" : "Copy"}
-        </button>
+        </Button>
       </div>
 
       <div className="mx-auto min-h-0 w-3/4 flex-1 overflow-y-auto pb-6">
@@ -255,16 +260,17 @@ export function JourneyTimeline({ entries }: { entries: JourneyEntry[] }) {
 
         {remaining > 0 && (
           <div className="flex justify-center pt-4">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() =>
                 setVisibleCount((count) => count + TIMELINE_WINDOW)
               }
-              className="flex cursor-pointer items-center gap-1.5 rounded-full border border-foreground/10 bg-card px-3.5 py-1.5 text-xs font-medium text-foreground/80 shadow-card-rest transition-colors hover:bg-foreground/4"
+              className="rounded-full!"
+              iconLeft={<CaretDownIcon className="size-3.5" />}
             >
-              <CaretDownIcon className="size-3.5" />
               Show ({remaining}) next event{remaining === 1 ? "" : "s"}
-            </button>
+            </Button>
           </div>
         )}
       </div>

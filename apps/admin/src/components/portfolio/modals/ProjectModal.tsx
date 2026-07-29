@@ -1,4 +1,3 @@
- 
 import { useRef, useState } from "react";
 import {
   X,
@@ -752,8 +751,9 @@ export default function ProjectDialog({
                       key={i}
                       className="group/metric relative flex flex-col gap-1 rounded-md border border-foreground/6 bg-foreground/2 px-3 py-2.5"
                     >
-                      <button
-                        type="button"
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() =>
                           setFormData({
                             ...formData,
@@ -762,11 +762,11 @@ export default function ProjectDialog({
                             ),
                           })
                         }
-                        aria-label={`Remove ${metric.label}`}
-                        className="absolute top-1.5 right-1.5 cursor-pointer rounded-sm p-1 text-muted-foreground opacity-0 transition-opacity group-hover/metric:opacity-100 hover:bg-destructive/8 hover:text-destructive focus-visible:opacity-100"
+                        htmlProps={{ "aria-label": `Remove ${metric.label}` }}
+                        className="absolute top-1.5 right-1.5 size-6! text-muted-foreground opacity-0 transition-opacity group-hover/metric:opacity-100 hover:text-destructive! focus-visible:opacity-100"
                       >
                         <X size={12} />
-                      </button>
+                      </Button>
                       <Eyebrow tone="muted">{metric.label}</Eyebrow>
                       <span className="font-mono text-base font-semibold text-foreground tabular-nums">
                         {metric.value}
