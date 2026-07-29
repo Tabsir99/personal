@@ -11,6 +11,7 @@ export default [
       tailwindcss: {
         cssConfigPath: "src/app/globals.css",
         whitelist: [
+          "field-label",
           "tactile-lift",
           "stagger-cascade",
           "stagger-cascade-tight",

@@ -1,6 +1,12 @@
 "use client";
 
-import { ListDashesIcon, PlusIcon, CheckIcon } from "@phosphor-icons/react";
+import {
+  ListDashesIcon,
+  PlusIcon,
+  CheckIcon,
+  PencilSimpleIcon,
+  TrashIcon,
+} from "@phosphor-icons/react";
 import { Popover } from "premium-ds/popover";
 import { Button } from "premium-ds/button";
 import { cn } from "@/lib/utils";
@@ -11,6 +17,8 @@ interface FunnelMenuProps {
   activeId: string | null;
   onSelect: (id: string) => void;
   onCreate: () => void;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
 export function FunnelMenu({
@@ -18,13 +26,19 @@ export function FunnelMenu({
   activeId,
   onSelect,
   onCreate,
+  onEdit,
+  onDelete,
 }: FunnelMenuProps) {
   return (
     <Popover
       side="bottom"
       align="end"
       trigger={
-        <Button variant="secondary" size="icon" aria-label="Funnels">
+        <Button
+          variant="secondary"
+          size="icon"
+          htmlProps={{ "aria-label": "Funnels" }}
+        >
           <ListDashesIcon size={16} />
         </Button>
       }
@@ -35,25 +49,53 @@ export function FunnelMenu({
             Funnels
           </div>
           {funnels.map((f) => (
-            <button
+            <div
               key={f.id}
-              type="button"
-              onClick={() => {
-                onSelect(f.id);
-                close();
-              }}
               className={cn(
-                "flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm",
+                "group/row flex items-center gap-1 rounded-md pr-1",
                 f.id === activeId
                   ? "bg-primary/10 text-primary"
                   : "text-foreground/80 hover:bg-foreground/5",
               )}
             >
-              <span className="min-w-0 truncate">{f.name}</span>
-              {f.id === activeId && (
-                <CheckIcon size={14} className="shrink-0" weight="bold" />
-              )}
-            </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onSelect(f.id);
+                  close();
+                }}
+                className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm"
+              >
+                <span className="min-w-0 truncate">{f.name}</span>
+                {f.id === activeId && (
+                  <CheckIcon size={14} className="shrink-0" weight="bold" />
+                )}
+              </button>
+              <span className="flex shrink-0 items-center opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100">
+                <button
+                  type="button"
+                  aria-label={`Edit ${f.name}`}
+                  onClick={() => {
+                    onEdit(f.id);
+                    close();
+                  }}
+                  className="rounded-md p-1 text-muted-foreground hover:text-foreground"
+                >
+                  <PencilSimpleIcon size={13} />
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Delete ${f.name}`}
+                  onClick={() => {
+                    onDelete(f.id);
+                    close();
+                  }}
+                  className="rounded-md p-1 text-muted-foreground hover:text-destructive"
+                >
+                  <TrashIcon size={13} />
+                </button>
+              </span>
+            </div>
           ))}
           <div className="my-1 h-px bg-foreground/6" />
           <button

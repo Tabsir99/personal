@@ -181,6 +181,15 @@
   }
 }
 
+@utility field-label {
+  display: block;
+  font: var(--type-caption);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  color: var(--text-body);
+  margin-bottom: var(--space-2);
+}
+
 @utility stagger-cascade {
   & > * {
     opacity: 0;

@@ -1,12 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { PlusIcon } from "@phosphor-icons/react";
 import { useShallow } from "zustand/react/shallow";
+import { Button } from "premium-ds/button";
+import { Dialog } from "premium-ds/dialog";
+import { toast } from "premium-ds/toast";
 import { useAnalyticsStore } from "@/stores/analyticsStore";
 import { PERIOD_LABEL } from "@/components/analytics/dashboard/shared/chartFormat";
 import { cn } from "@/lib/utils";
+import { deleteFunnel } from "@/actions/funnelActions";
 import { FunnelRiver, type RiverStep } from "./FunnelRiver";
 import { FunnelMenu } from "./FunnelMenu";
+import { FunnelDialog } from "./FunnelDialog";
 
 export function FunnelTab() {
   const {
@@ -16,7 +22,9 @@ export function FunnelTab() {
     funnel,
     funnelLoading,
     period,
+    websiteId,
     setActiveFunnel,
+    reloadFunnels,
   } = useAnalyticsStore(
     useShallow((s) => ({
       funnels: s.funnels,
@@ -25,11 +33,79 @@ export function FunnelTab() {
       funnel: s.funnel,
       funnelLoading: s.funnelLoading,
       period: s.period,
+      websiteId: s.websiteId,
       setActiveFunnel: s.setActiveFunnel,
+      reloadFunnels: s.reloadFunnels,
     })),
   );
 
-  const createFunnel = () => {};
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const editing = funnels?.find((f) => f.id === editingId) ?? null;
+  const pendingDelete = funnels?.find((f) => f.id === deletingId) ?? null;
+
+  const openCreate = () => {
+    setEditingId(null);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (id: string) => {
+    setEditingId(id);
+    setDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    const res = await deleteFunnel(pendingDelete.id);
+    setDeleting(false);
+
+    if (res.status === "error") {
+      toast.error(res.message);
+      return;
+    }
+
+    toast.success(`"${pendingDelete.name}" deleted`);
+    setDeletingId(null);
+    reloadFunnels();
+  };
+
+  const funnelDialog = websiteId ? (
+    <FunnelDialog
+      open={dialogOpen}
+      onOpenChange={setDialogOpen}
+      websiteId={websiteId}
+      editing={editing}
+      onSuccess={(id) => reloadFunnels(id)}
+    />
+  ) : null;
+
+  const deleteDialog = (
+    <Dialog
+      open={pendingDelete !== null}
+      onOpenChange={(o) => !o && setDeletingId(null)}
+      tone="danger"
+      title="Delete funnel?"
+      description={
+        pendingDelete
+          ? `"${pendingDelete.name}" and its step configuration will be permanently removed. Collected analytics events are not affected.`
+          : ""
+      }
+      footer={(close) => (
+        <div className="flex gap-2">
+          <Button variant="ghost" onClick={close}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDelete} loading={deleting}>
+            Delete
+          </Button>
+        </div>
+      )}
+    />
+  );
 
   if (funnels === null || (funnelsLoading && funnels.length === 0)) {
     return (
@@ -53,11 +129,12 @@ export function FunnelTab() {
         </div>
         <button
           type="button"
-          onClick={createFunnel}
+          onClick={openCreate}
           className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           <PlusIcon size={15} weight="bold" /> Create funnel
         </button>
+        {funnelDialog}
       </div>
     );
   }
@@ -100,9 +177,14 @@ export function FunnelTab() {
           funnels={funnels}
           activeId={activeFunnelId}
           onSelect={setActiveFunnel}
-          onCreate={createFunnel}
+          onCreate={openCreate}
+          onEdit={openEdit}
+          onDelete={setDeletingId}
         />
       </div>
+
+      {funnelDialog}
+      {deleteDialog}
     </div>
   );
 }
