@@ -77,43 +77,99 @@ export async function waitForRows(
   }
 }
 
-async function waitForJob(jobUrl: string, timeoutMs = 60_000): Promise<void> {
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function waitForJob(
+  jobUrl: string,
+  timeoutMs = 60_000,
+): Promise<"done" | "error" | "timeout"> {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const job = (await (
       await fetch(jobUrl, { headers: { Authorization: `Bearer ${TOKEN}` } })
     ).json()) as { status?: string };
-    if (job.status === "done" || job.status === "error") return;
-    if (Date.now() > deadline) return;
-    await new Promise((r) => setTimeout(r, 1000));
+    if (job.status === "done") return "done";
+    if (job.status === "error") return "error";
+    if (Date.now() > deadline) return "timeout";
+    await sleep(1000);
   }
+}
+
+const DELETE_ATTEMPTS = 10;
+const DELETE_BACKOFF_MS = 2000;
+const DELETE_BACKOFF_CAP_MS = 15_000;
+
+let deleteQueue: Promise<unknown> = Promise.resolve();
+
+function serializeDelete<T>(task: () => Promise<T>): Promise<T> {
+  const run = deleteQueue.then(task, task);
+  deleteQueue = run.catch(() => undefined);
+  return run;
+}
+
+async function requestDelete(websiteIds: string[]): Promise<Response> {
+  return fetch(`${HOST}/v0/datasources/${ANALYTICS_TABLE}/delete`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${TOKEN}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: `delete_condition=${encodeURIComponent(
+      `website_id IN (${quoted(websiteIds)})`,
+    )}`,
+  });
 }
 
 /**
  * Delete a run's rows and WAIT for the async delete job to finish, so nothing
- * lingers after the process exits. Best-effort: a failed cleanup never fails
- * the suite, and throwaway website ids keep any leftovers harmless.
+ * lingers after the process exits.
+ *
+ * Tinybird permits exactly ONE delete job per workspace at a time and answers
+ * 429 for any overlap. Calls are serialized in-process and retried with
+ * backoff so a parallel worker holding the slot can't silently strand rows.
+ * A cleanup that ultimately fails warns loudly rather than failing the suite.
  */
 export async function cleanupRows(websiteIds: string[]): Promise<void> {
-  try {
-    const res = await fetch(
-      `${HOST}/v0/datasources/${ANALYTICS_TABLE}/delete`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: `delete_condition=${encodeURIComponent(
-          `website_id IN (${quoted(websiteIds)})`,
-        )}`,
-      },
+  return serializeDelete(async () => {
+    let reason = "unknown";
+    for (let attempt = 0; attempt < DELETE_ATTEMPTS; attempt++) {
+      try {
+        const res = await requestDelete(websiteIds);
+
+        if (res.status === 429) {
+          reason = "delete slot busy (429)";
+          await sleep(
+            Math.min(DELETE_BACKOFF_MS * 2 ** attempt, DELETE_BACKOFF_CAP_MS),
+          );
+          continue;
+        }
+
+        const job = (await res.json()) as {
+          job_url?: string;
+          error?: string;
+        };
+
+        if (!res.ok || !job.job_url) {
+          reason = job.error ?? `HTTP ${res.status}`;
+          await sleep(DELETE_BACKOFF_MS);
+          continue;
+        }
+
+        const status = await waitForJob(job.job_url);
+        if (status === "done") return;
+
+        reason = `delete job ${status}`;
+        await sleep(DELETE_BACKOFF_MS);
+      } catch (error) {
+        reason = error instanceof Error ? error.message : String(error);
+        await sleep(DELETE_BACKOFF_MS);
+      }
+    }
+
+    console.warn(
+      `[tinybird] cleanup FAILED for ${quoted(websiteIds)} after ${DELETE_ATTEMPTS} attempts (${reason}). Rows are still in the workspace.`,
     );
-    const job = (await res.json()) as { job_url?: string };
-    if (res.ok && job.job_url) await waitForJob(job.job_url);
-  } catch {
-    // cleanup is best-effort
-  }
+  });
 }
 
 type Handler = (req: NextRequest, ctx: unknown) => Promise<Response>;
