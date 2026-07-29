@@ -83,7 +83,10 @@ export function FunnelStepCard({
     </div>,
 
     prev && (
-      <div key="conversion" className="flex items-start justify-between px-3.5 py-2.5">
+      <div
+        key="conversion"
+        className="flex items-start justify-between px-3.5 py-2.5"
+      >
         <div className="text-sm leading-tight">
           <div className="text-background/70">Conversion</div>
           <div className="text-xs text-background/40">from start</div>
@@ -112,7 +115,10 @@ export function FunnelStepCard({
     },
 
     hasBreakdown && (
-      <div key="breakdown" className="grid grid-cols-2 gap-x-4 px-3.5 pt-2.5 pb-3">
+      <div
+        key="breakdown"
+        className="grid grid-cols-2 gap-x-4 px-3.5 pt-2.5 pb-3"
+      >
         {step.topReferrers.length > 0 && (
           <SourceList
             title="Top sources"
