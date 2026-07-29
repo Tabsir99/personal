@@ -127,13 +127,12 @@ export function FunnelTab() {
             visitors drop off.
           </p>
         </div>
-        <button
-          type="button"
+        <Button
           onClick={openCreate}
-          className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          iconLeft={<PlusIcon size={15} weight="bold" />}
         >
-          <PlusIcon size={15} weight="bold" /> Create funnel
-        </button>
+          Create funnel
+        </Button>
         {funnelDialog}
       </div>
     );

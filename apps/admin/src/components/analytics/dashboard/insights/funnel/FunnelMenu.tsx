@@ -58,56 +58,62 @@ export function FunnelMenu({
                   : "text-foreground/80 hover:bg-foreground/5",
               )}
             >
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
+                fullWidth
                 onClick={() => {
                   onSelect(f.id);
                   close();
                 }}
-                className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm"
+                className="min-w-0 flex-1 justify-between! px-2! text-left! font-normal!"
+                {...(f.id === activeId
+                  ? { iconRight: <CheckIcon size={14} weight="bold" /> }
+                  : {})}
               >
                 <span className="min-w-0 truncate">{f.name}</span>
-                {f.id === activeId && (
-                  <CheckIcon size={14} className="shrink-0" weight="bold" />
-                )}
-              </button>
+              </Button>
               <span className="flex shrink-0 items-center opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100">
-                <button
-                  type="button"
-                  aria-label={`Edit ${f.name}`}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  htmlProps={{ "aria-label": `Edit ${f.name}` }}
                   onClick={() => {
                     onEdit(f.id);
                     close();
                   }}
-                  className="rounded-md p-1 text-muted-foreground hover:text-foreground"
                 >
                   <PencilSimpleIcon size={13} />
-                </button>
-                <button
-                  type="button"
-                  aria-label={`Delete ${f.name}`}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  htmlProps={{ "aria-label": `Delete ${f.name}` }}
                   onClick={() => {
                     onDelete(f.id);
                     close();
                   }}
-                  className="rounded-md p-1 text-muted-foreground hover:text-destructive"
+                  className="hover:text-destructive!"
                 >
                   <TrashIcon size={13} />
-                </button>
+                </Button>
               </span>
             </div>
           ))}
           <div className="my-1 h-px bg-foreground/6" />
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
+            fullWidth
             onClick={() => {
               onCreate();
               close();
             }}
-            className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-sm font-medium text-primary hover:bg-primary/8"
+            className="justify-start! px-2! text-primary!"
+            iconLeft={<PlusIcon size={15} weight="bold" />}
           >
-            <PlusIcon size={15} weight="bold" /> New funnel
-          </button>
+            New funnel
+          </Button>
         </div>
       )}
     </Popover>
