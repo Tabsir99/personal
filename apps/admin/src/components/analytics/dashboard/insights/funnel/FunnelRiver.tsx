@@ -139,7 +139,7 @@ export function FunnelRiver({ steps }: { steps: RiverStep[] }) {
   return (
     <div
       ref={ref}
-      className="relative size-full"
+      className="relative size-full animate-funnel-reveal"
       onMouseMove={onMove}
       onMouseLeave={() => setHover(null)}
     >
@@ -167,7 +167,7 @@ export function FunnelRiver({ steps }: { steps: RiverStep[] }) {
           );
         })}
 
-        <g className="animate-funnel-wipe">
+        <g>
           {steps.map((_, i) => {
             const on = hover === i;
             const { edges, fill } = slicePaths(i, on ? GROW : 0);

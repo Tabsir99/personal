@@ -110,6 +110,7 @@
   /* Motion budget */
   --animate-breathe: breathe 2400ms ease-in-out infinite;
   --animate-goal-wipe: goal-wipe 700ms ease-out forwards;
+  --animate-funnel-reveal: funnel-reveal 450ms ease-out;
 }
 
 :root {
@@ -143,6 +144,15 @@
 @keyframes goal-wipe {
   to {
     transform: translateX(101%);
+  }
+}
+
+@keyframes funnel-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
   }
 }
 
