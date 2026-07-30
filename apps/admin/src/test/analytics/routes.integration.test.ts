@@ -18,7 +18,7 @@ import {
   referencePages,
   referenceLocations,
   referenceSystem,
-  referenceEvents,
+  referenceGoals,
   referenceBots,
   referenceBotPages,
   type Win,
@@ -30,7 +30,7 @@ import { GET as sourcesGET } from "@/app/api/analytics/sources/route";
 import { GET as pagesGET } from "@/app/api/analytics/pages/route";
 import { GET as locationsGET } from "@/app/api/analytics/locations/route";
 import { GET as systemGET } from "@/app/api/analytics/system/route";
-import { GET as eventsGET } from "@/app/api/analytics/events/route";
+import { GET as goalsGET } from "@/app/api/analytics/goals/route";
 import { GET as botsGET } from "@/app/api/analytics/bots/route";
 import { GET as botPagesGET } from "@/app/api/analytics/bots/pages/route";
 
@@ -255,17 +255,32 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
     ]);
   });
 
-  it("events: goals + conversion", async () => {
-    const data = await callRoute<{ goals: Rowish[]; totalVisitors: number }>(
-      eventsGET,
-      q,
-    );
-    const ref = referenceEvents(rows, win);
+  it("goals: metrics, series, catalog + conversion", async () => {
+    const data = await callRoute<{
+      goals: Rowish[];
+      series: Rowish[];
+      catalog: string[];
+      totalVisitors: number;
+    }>(goalsGET, q);
+    const ref = referenceGoals(rows, win, DAY);
+
     expect(Number(data.totalVisitors)).toBe(ref.totalVisitors);
     expectRows(data.goals, ref.goals, (r) => String(r.name), [
       "uv",
       "total",
       "conversionRate",
+    ]);
+
+    expect(data.goals.map((g) => String(g.name))).toEqual(
+      ref.goals.map((g) => g.name),
+    );
+    expect(data.catalog).toEqual(ref.catalog);
+
+    expect(data.series.map((p) => Number(p.timestamp))).toEqual(
+      ref.series.map((p) => p.timestamp),
+    );
+    expectRows(data.series, ref.series, (r) => String(r.timestamp), [
+      ...ref.goals.map((g) => g.name),
     ]);
   });
 

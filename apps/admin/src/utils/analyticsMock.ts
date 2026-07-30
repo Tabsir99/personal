@@ -334,21 +334,6 @@ export async function mockFetchEndpoint<T>(
     return { browsers, os, devices } as unknown as T;
   }
 
-  if (path === "events") {
-    const goals: GoalMetric[] = [
-      { name: "payment", uv: 850, total: 910, conversionRate: 0.02 },
-      { name: "identify", uv: 1200, total: 1250, conversionRate: 0.028 },
-      { name: "external_link", uv: 3200, total: 4100, conversionRate: 0.075 },
-      {
-        name: "signup_button_clicked",
-        uv: 1500,
-        total: 1800,
-        conversionRate: 0.035,
-      },
-    ];
-    return { goals, totalVisitors: 42500 } as unknown as T;
-  }
-
   if (path === "goals") {
     const pointsCount =
       period === "today" || period === "yesterday"
@@ -420,7 +405,11 @@ export async function mockFetchEndpoint<T>(
     }
     goals.sort((a, b) => b.uv - a.uv);
 
-    return { goals, series, totalVisitors } as unknown as T;
+    const catalog = GOAL_DEFS.map(([name]) => name).sort((a, b) =>
+      a.localeCompare(b),
+    );
+
+    return { goals, series, catalog, totalVisitors } as unknown as T;
   }
 
   if (path === "funnels" || path === "funnel") {

@@ -375,7 +375,9 @@ export function referenceSystem(rows: Row[], w: Win) {
   };
 }
 
-export function referenceEvents(rows: Row[], w: Win) {
+const MAX_GOALS = 30;
+
+export function referenceGoals(rows: Row[], w: Win, bucketMs: number) {
   const totalVisitors = uniq(
     human(rows, "pageview", w).map((r) => r.visitor_id),
   );
@@ -393,13 +395,56 @@ export function referenceEvents(rows: Row[], w: Win) {
     e.vids.add(r.visitor_id);
     e.total++;
   }
-  const goals = [...g].map(([name, e]) => ({
-    name,
-    uv: e.vids.size,
-    total: e.total,
-    conversionRate: totalVisitors ? e.vids.size / totalVisitors : 0,
-  }));
-  return { goals, totalVisitors };
+  const goals = [...g]
+    .map(([name, e]) => ({
+      name,
+      uv: e.vids.size,
+      total: e.total,
+      conversionRate: totalVisitors ? e.vids.size / totalVisitors : 0,
+    }))
+    .sort((a, b) => b.uv - a.uv || a.name.localeCompare(b.name))
+    .slice(0, MAX_GOALS);
+
+  const names = goals.map((x) => x.name);
+  const kept = new Set(names);
+
+  const byBucket = new Map<number, Record<string, number>>();
+  for (const r of nonPv) {
+    if (!kept.has(r.event_name)) continue;
+    const b = Math.floor(r.timestamp / bucketMs) * bucketMs;
+    let point = byBucket.get(b);
+    if (!point) {
+      byBucket.set(b, (point = { timestamp: b }));
+      for (const n of names) point[n] = 0;
+    }
+    point[r.event_name] += 1;
+  }
+
+  const series: Record<string, number>[] = [];
+  for (
+    let b = Math.floor(w.start / bucketMs) * bucketMs;
+    b < w.end;
+    b += bucketMs
+  ) {
+    const point = byBucket.get(b);
+    if (point) {
+      series.push(point);
+    } else {
+      const empty: Record<string, number> = { timestamp: b };
+      for (const n of names) empty[n] = 0;
+      series.push(empty);
+    }
+  }
+
+  const catalog = [
+    ...new Set(
+      rows
+        .filter((r) => r.is_bot === 0 && r.type === "custom")
+        .map((r) => r.event_name),
+    ),
+  ].sort((a, b) => a.localeCompare(b));
+
+  return { goals, series, catalog, totalVisitors };
 }
 
 export function referenceBots(rows: Row[], w: Win, bucketMs: number) {

@@ -171,17 +171,21 @@ export interface SystemResponse {
   devices: SystemMetric[];
 }
 
-export interface EventsResponse {
-  goals: GoalMetric[];
-  totalVisitors: number;
-}
-
 /** Wide per-bucket series: one numeric key per goal name, plus the bucket ts. */
 export type GoalSeriesPoint = { timestamp: number } & Record<string, number>;
+
+export const CUSTOM_EVENT_TYPE = "custom";
+
+export const RESERVED_GOALS = [
+  { name: "payment", label: "Payment" },
+  { name: "identify", label: "Identify" },
+  { name: "external_link", label: "External link" },
+] as const;
 
 export interface GoalsResponse {
   goals: GoalMetric[];
   series: GoalSeriesPoint[];
+  catalog: string[];
   totalVisitors: number;
 }
 
