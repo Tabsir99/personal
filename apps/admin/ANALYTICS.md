@@ -103,11 +103,36 @@ Set by the client SDK as cookies (prefix `cgd_`):
 | `/api/analytics/sources`    | Referrers + channel classification                               |
 | `/api/analytics/locations`  | Country / region / city (accepts `?country=&region=` drill-down) |
 | `/api/analytics/system`     | Browser / OS / device                                            |
-| `/api/analytics/events`     | Custom events + conversion rates                                 |
-| `/api/analytics/realtime`   | Active visitors (last 10 min)                                    |
+| `/api/analytics/goals`      | Goal metrics + per-bucket series + the goal catalog              |
 | `/api/analytics/bots`       | Crawler timeseries by category + per-bot totals                  |
 | `/api/analytics/bots/pages` | Pages hit by a single bot (`?bot=`)                              |
+| `/api/analytics/funnels`    | Funnel definitions for the site                                  |
+| `/api/analytics/funnel`     | One funnel's per-step counts + metrics (`?funnelId=`)            |
 | `/api/analytics/journey`    | Goal completers + their full lifetime timelines (`?goal=`)       |
+
+## Goals
+
+`/api/analytics/goals` answers two different questions in one Tinybird call,
+because the pickers and the charts need different things:
+
+- **Metrics** (`goals`, `series`) — period-scoped, capped at the top 30 by
+  unique visitors. Drives the Goals tab chart and its aside.
+- **Catalog** (`catalog`) — every distinct `event_name` where `type = 'custom'`,
+  with **no period filter**. Drives the goal pickers in the journey tab and the
+  funnel builder, so the options don't shift when the date range changes.
+
+The catalog branch pins `type = 'custom'` so it prunes on the
+`(website_id, is_bot, type)` sorting-key prefix. That works because the tracker
+writes attribute-driven goals (`data-*-goal`, `data-*-scroll`) as
+`type='custom'` with the real name in `event_name`. Goals every site has without
+firing a custom event — `payment`, `identify`, `external_link` — are unioned in
+client-side from `RESERVED_GOALS`, not discovered by the query.
+
+The query is three UNION branches, not four: `goals` and `series` read an
+identical row set and differ only in grouping, so they share one scan via
+`GROUP BY GROUPING SETS ((bucket, name), (name))`. `catalog` (all-time) and the
+pageview visitor total (key-pruned on `type='pageview'`) stay separate — merging
+either would cost more than it saves.
 
 ## Journeys
 
