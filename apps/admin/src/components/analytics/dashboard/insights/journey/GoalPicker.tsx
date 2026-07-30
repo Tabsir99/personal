@@ -1,14 +1,20 @@
 "use client";
 
+import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Select, type SelectOption } from "premium-ds/select";
 import {
   useAnalyticsStore,
   JOURNEY_EVERY_VISITOR,
 } from "@/stores/analyticsStore";
+import { useGoalList } from "../useGoalList";
 import { formatCount } from "../../shared/chartFormat";
 
-const PAYMENT_GOAL = "payment";
+const RESERVED_DESCRIPTION: Record<string, string> = {
+  payment: "Paying visitors",
+  identify: "Identified visitors",
+  external_link: "Visitors who followed an outbound link",
+};
 
 export function GoalPicker() {
   const { goals, goal, setGoal } = useAnalyticsStore(
@@ -19,19 +25,30 @@ export function GoalPicker() {
     })),
   );
 
-  const options: SelectOption[] = [
-    { value: PAYMENT_GOAL, label: "Payment", description: "Paying visitors" },
-    {
-      value: JOURNEY_EVERY_VISITOR,
-      label: "All visitors",
-      description: "Everyone active in this period",
-    },
-    ...(goals?.goals ?? []).map((g) => ({
-      value: g.name,
-      label: g.name,
-      description: `${formatCount(g.uv)} visitors`,
-    })),
-  ];
+  const goalList = useGoalList();
+
+  const options = useMemo<SelectOption[]>(() => {
+    const uvByName = new Map(
+      (goals?.goals ?? []).map((g) => [g.name, g.uv] as const),
+    );
+
+    return [
+      {
+        value: JOURNEY_EVERY_VISITOR,
+        label: "All visitors",
+        description: "Everyone active in this period",
+      },
+      ...goalList.map(({ name, label }) => {
+        const uv = uvByName.get(name);
+        const description =
+          uv === undefined
+            ? RESERVED_DESCRIPTION[name]
+            : `${formatCount(uv)} visitors`;
+
+        return { value: name, label, ...(description ? { description } : {}) };
+      }),
+    ];
+  }, [goals, goalList]);
 
   return (
     <Select

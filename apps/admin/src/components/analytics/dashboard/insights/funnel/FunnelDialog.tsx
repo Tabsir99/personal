@@ -1,14 +1,15 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import { Dialog } from "premium-ds/dialog";
 import { TextField } from "premium-ds/text-field";
 import { Button } from "premium-ds/button";
-import { Select } from "premium-ds/select";
+import { Select, type SelectOption } from "premium-ds/select";
 import { toast } from "premium-ds/toast";
 import { createFunnel, updateFunnel } from "@/actions/funnelActions";
+import { useGoalList } from "../useGoalList";
 import type {
   FunnelDefinition,
   FunnelStep,
@@ -105,6 +106,17 @@ export function FunnelDialog({
   const [name, setName] = useState("");
   const [steps, setSteps] = useState<DraftStep[]>([]);
   const [saving, setSaving] = useState(false);
+  const goalList = useGoalList();
+
+  const goalOptions = useMemo<SelectOption[]>(
+    () => goalList.map(({ name, label }) => ({ value: name, label })),
+    [goalList],
+  );
+
+  const optionsFor = (goalName: string): SelectOption[] =>
+    !goalName || goalOptions.some((o) => o.value === goalName)
+      ? goalOptions
+      : [...goalOptions, { value: goalName, label: goalName }];
 
   useEffect(() => {
     if (!open) return;
@@ -281,15 +293,23 @@ export function FunnelDialog({
                   </div>
                 </div>
               ) : (
-                <TextField
-                  label="Event name"
-                  helper="The event_name sent by the tracker, e.g. signup."
-                  placeholder="signup"
-                  value={step.goalName}
-                  onChange={(e) =>
-                    patchStep(step.id, { goalName: e.target.value })
-                  }
-                />
+                <div>
+                  <span className="field-label">Event name</span>
+                  <Select
+                    ariaLabel={`Step ${i + 1} event name`}
+                    searchable
+                    searchPlaceholder="Filter goals"
+                    placeholder="Select a goal"
+                    triggerProps={{
+                      variant: "secondary",
+                      fullWidth: true,
+                      className: "justify-between! px-3! text-left!",
+                    }}
+                    options={optionsFor(step.goalName)}
+                    value={step.goalName || null}
+                    onChange={(v) => patchStep(step.id, { goalName: v })}
+                  />
+                </div>
               )}
             </div>
           ))}
