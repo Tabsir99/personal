@@ -291,6 +291,9 @@ importers:
 
   packages/analytics:
     devDependencies:
+      '@tabsircg/schemas':
+        specifier: workspace:*
+        version: link:../schemas
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.43

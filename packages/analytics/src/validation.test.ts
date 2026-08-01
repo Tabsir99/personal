@@ -1,44 +1,95 @@
 import { describe, expect, it } from 'vitest';
-import { sanitizeCustomData } from './validation';
+import * as contract from '@tabsircg/schemas/analytics';
+import { sanitizeEventData } from './validation';
 import { isLocalhost, isValidDateStr, parseValidInt } from './utils';
 import { getBaseDomain } from './dom';
+import { routeKey } from './spa';
+import * as constants from './constants';
+import { GOAL_PROP_PREFIX, SCROLL_PROP_PREFIX } from './constants';
 
-describe('sanitizeCustomData', () => {
+describe('sanitizeEventData', () => {
   it('rejects non-objects rather than degrading to empty data', () => {
-    expect(sanitizeCustomData(null as never)).toBeNull();
-    expect(sanitizeCustomData([1] as never)).toBeNull();
-    expect(sanitizeCustomData('x' as never)).toBeNull();
+    expect(sanitizeEventData(null as never)).toBeNull();
+    expect(sanitizeEventData([1] as never)).toBeNull();
+    expect(sanitizeEventData('x' as never)).toBeNull();
   });
 
   it('accepts an empty object', () => {
-    expect(sanitizeCustomData({})).toEqual({});
+    expect(sanitizeEventData({})).toEqual({});
   });
 
   it('lowercases keys and stringifies values', () => {
-    expect(sanitizeCustomData({ Plan: 'pro', count: 3 })).toEqual({ plan: 'pro', count: '3' });
+    expect(sanitizeEventData({ Plan: 'pro', count: 3 })).toEqual({ plan: 'pro', count: '3' });
   });
 
-  it('strips injection-ish characters', () => {
-    expect(sanitizeCustomData({ a: '<script>x</script>' })).toEqual({ a: 'scriptx/script' });
+  it('leaves URLs and markup characters untouched', () => {
+    const url = 'https://cdn.example.com/a.jpg?w=64&h=64';
+    expect(sanitizeEventData({ url })).toEqual({ url });
+    expect(sanitizeEventData({ a: '<b>' })).toEqual({ a: '<b>' });
   });
 
-  it('caps values at 255 characters', () => {
-    expect(sanitizeCustomData({ a: 'x'.repeat(400) })?.a).toHaveLength(255);
+  it('caps values at the shared wire limit', () => {
+    expect(sanitizeEventData({ a: 'x'.repeat(5000) })?.a).toHaveLength(constants.EXTRA_DATA_MAX_VALUE_LENGTH);
   });
 
   it('rejects invalid key names', () => {
-    expect(sanitizeCustomData({ 'bad key': '1' })).toBeNull();
-    expect(sanitizeCustomData({ ['k'.repeat(33)]: '1' })).toBeNull();
+    expect(sanitizeEventData({ 'bad key': '1' })).toBeNull();
+    expect(sanitizeEventData({ ['k'.repeat(33)]: '1' })).toBeNull();
   });
 
   it('rejects more than ten properties', () => {
     const many = Object.fromEntries(Array.from({ length: 11 }, (_, i) => [`k${i}`, '1']));
-    expect(sanitizeCustomData(many)).toBeNull();
+    expect(sanitizeEventData(many)).toBeNull();
   });
 
   it('exempts eventName from the property budget', () => {
     const ten = Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`k${i}`, '1']));
-    expect(sanitizeCustomData({ eventName: 'signup', ...ten })).not.toBeNull();
+    expect(sanitizeEventData({ eventName: 'signup', ...ten })).not.toBeNull();
+  });
+
+  it('rejects a payload that serialises past the byte budget', () => {
+    const big = Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`k${i}`, 'x'.repeat(1000)]));
+    expect(sanitizeEventData(big)).toBeNull();
+  });
+});
+
+describe('wire rules match the shared contract', () => {
+  it('mirrors every extra_data limit the worker enforces', () => {
+    expect(constants.EXTRA_DATA_MAX_PROPERTIES).toBe(contract.EXTRA_DATA_MAX_PROPERTIES);
+    expect(constants.EXTRA_DATA_MAX_KEY_LENGTH).toBe(contract.EXTRA_DATA_MAX_KEY_LENGTH);
+    expect(constants.EXTRA_DATA_MAX_VALUE_LENGTH).toBe(contract.EXTRA_DATA_MAX_VALUE_LENGTH);
+    expect(constants.EXTRA_DATA_MAX_BYTES).toBe(contract.EXTRA_DATA_MAX_BYTES);
+    expect(constants.EXTRA_DATA_KEY_PATTERN.source).toBe(contract.EXTRA_DATA_KEY_PATTERN.source);
+    expect(constants.EVENT_NAME_KEY).toBe(contract.EVENT_NAME_KEY);
+  });
+
+  it('produces data the worker schema accepts', () => {
+    const sanitized = sanitizeEventData({ eventName: 'signup', Plan: 'pro', url: 'https://x.com/?a=1&b=2' });
+    expect(contract.extraDataSchema.safeParse(sanitized).success).toBe(true);
+  });
+});
+
+describe('goal attribute prefixes', () => {
+  it('slices the whole prefix off, leaving the first character of the property', () => {
+    expect(GOAL_PROP_PREFIX).toBe('data-cgd-goal-');
+    expect(SCROLL_PROP_PREFIX).toBe('data-cgd-scroll-');
+    expect('data-cgd-goal-source'.substring(GOAL_PROP_PREFIX.length)).toBe('source');
+    expect('data-cgd-scroll-variant'.substring(SCROLL_PROP_PREFIX.length)).toBe('variant');
+  });
+});
+
+describe('routeKey', () => {
+  it('does not treat a query change as a new route', () => {
+    expect(routeKey('https://x.com/p?tab=a')).toBe(routeKey('https://x.com/p?tab=b'));
+    expect(routeKey('https://x.com/p?tab=a')).toBe(routeKey('https://x.com/p'));
+  });
+
+  it('distinguishes paths', () => {
+    expect(routeKey('https://x.com/p')).not.toBe(routeKey('https://x.com/q'));
+  });
+
+  it('ignores the cross-domain handoff params so stripping them is not a pageview', () => {
+    expect(routeKey('https://x.com/p?_cgd_vid=v&_cgd_sid=s&_cgd_vfs=f&_cgd_vsn=2')).toBe('/p');
   });
 });
 

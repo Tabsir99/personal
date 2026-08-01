@@ -1,10 +1,12 @@
 import { config } from './config';
 import { log } from './logger';
 import { apiUrl } from './state';
-import { STORAGE_PREFIX, URL_PARAM_PREFIX, MAX_HREF_LENGTH } from './constants';
+import { STORAGE_PREFIX, MAX_HREF_LENGTH, HANDOFF_PARAMS } from './constants';
 import { getVisitorId, getSessionId, getVisitorFirstSeenAt, getVisitorSessionNumber, setCookie } from './storage';
 import { isBot } from './bot';
 import { EventPayload, EventCallback } from './types';
+
+const SESSION_COOKIE_LIFETIME_DAYS = 30 / (60 * 24);
 
 export function buildEventPayload(type: string): EventPayload | undefined {
   const href = window.location.href;
@@ -36,16 +38,9 @@ export function buildEventPayload(type: string): EventPayload | undefined {
 
   try {
     const u = new URL(window.location.href);
-    if (
-      u.searchParams.has(`${URL_PARAM_PREFIX}vid`) ||
-      u.searchParams.has(`${URL_PARAM_PREFIX}sid`) ||
-      u.searchParams.has(`${URL_PARAM_PREFIX}vfs`) ||
-      u.searchParams.has(`${URL_PARAM_PREFIX}vsn`)
-    ) {
-      u.searchParams.delete(`${URL_PARAM_PREFIX}vid`);
-      u.searchParams.delete(`${URL_PARAM_PREFIX}sid`);
-      u.searchParams.delete(`${URL_PARAM_PREFIX}vfs`);
-      u.searchParams.delete(`${URL_PARAM_PREFIX}vsn`);
+    const handoffPresent = HANDOFF_PARAMS.filter((param) => u.searchParams.has(param));
+    if (handoffPresent.length > 0) {
+      for (const param of handoffPresent) u.searchParams.delete(param);
       window.history.replaceState({}, '', u.toString());
     }
   } catch {}
@@ -65,6 +60,8 @@ export function sendEvent(payload: EventPayload, callback?: EventCallback) {
     return;
   }
 
+  setCookie(`${STORAGE_PREFIX}session_id`, getSessionId(), SESSION_COOKIE_LIFETIME_DAYS);
+
   const xhr = new XMLHttpRequest();
   xhr.open('POST', apiUrl, true);
   xhr.setRequestHeader('Content-Type', 'text/plain');
@@ -72,7 +69,6 @@ export function sendEvent(payload: EventPayload, callback?: EventCallback) {
     if (xhr.readyState === XMLHttpRequest.DONE) {
       if (xhr.status === 200) {
         log('info', `${payload.type || 'Event'} tracked successfully`);
-        setCookie(`${STORAGE_PREFIX}session_id`, getSessionId(), 1 / 48);
       } else {
         log('error', `Failed to track ${payload.type || 'event'} - HTTP ${xhr.status}`);
       }

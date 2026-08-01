@@ -1,9 +1,16 @@
 import { config } from './config';
 import { trackCustomEvent } from './events';
-import { sanitizeCustomData } from './validation';
 import { getVisitorId, getSessionId, getVisitorFirstSeenAt, getVisitorSessionNumber } from './storage';
 import { log } from './logger';
-import { ATTR_PREFIX, URL_PARAM_PREFIX } from './constants';
+import {
+  GOAL_ATTR,
+  GOAL_PROP_PREFIX,
+  SCROLL_ATTR,
+  SCROLL_PROP_PREFIX,
+  SCROLL_THRESHOLD_ATTR,
+  SCROLL_DELAY_ATTR,
+  URL_PARAM_PREFIX,
+} from './constants';
 
 export function getBaseDomain(hostname: string | null) {
   if (!hostname) return null;
@@ -53,22 +60,19 @@ export function handleOutboundLink(el: HTMLAnchorElement | null) {
 
 export function handleGoalElement(el: Element | null) {
   if (!el) return;
-  const goalName = el.getAttribute(`${ATTR_PREFIX}-goal`);
+  const goalName = el.getAttribute(GOAL_ATTR);
   if (goalName && goalName.trim()) {
     const customData: Record<string, string> = { eventName: goalName.trim() };
     for (let i = 0; i < el.attributes.length; i++) {
       const attr = el.attributes[i];
-      if (attr.name.startsWith(`${ATTR_PREFIX}-goal-`) && attr.name !== `${ATTR_PREFIX}-goal`) {
-        const propName = attr.name.substring(15);
+      if (attr.name.startsWith(GOAL_PROP_PREFIX)) {
+        const propName = attr.name.substring(GOAL_PROP_PREFIX.length);
         if (propName) {
           customData[propName.replace(/-/g, '_')] = attr.value;
         }
       }
     }
-    const sanitized = sanitizeCustomData(customData);
-    if (sanitized !== null) {
-      trackCustomEvent('custom', sanitized);
-    }
+    trackCustomEvent('custom', customData);
   }
 }
 
@@ -76,7 +80,7 @@ export function setupDomListeners() {
   document.addEventListener('click', function (e) {
     const target = e.target as Element;
     if (target.closest) {
-      const goalEl = target.closest(`[${ATTR_PREFIX}-goal]`);
+      const goalEl = target.closest(`[${GOAL_ATTR}]`);
       if (goalEl) handleGoalElement(goalEl);
       handleOutboundLink(target.closest('a') as HTMLAnchorElement | null);
     }
@@ -86,7 +90,7 @@ export function setupDomListeners() {
     if (e.key === 'Enter' || e.key === ' ') {
       const target = e.target as Element;
       if (target.closest) {
-        const goalEl = target.closest(`[${ATTR_PREFIX}-goal]`);
+        const goalEl = target.closest(`[${GOAL_ATTR}]`);
         if (goalEl) handleGoalElement(goalEl);
         handleOutboundLink(target.closest('a') as HTMLAnchorElement | null);
       }
@@ -99,7 +103,7 @@ const observerMap = new Map<number, IntersectionObserver>();
 const scrollStateMap = new WeakMap();
 
 function handleScrollTrigger(el: Element, isIntersecting: boolean) {
-  const goalName = el.getAttribute(`${ATTR_PREFIX}-scroll`);
+  const goalName = el.getAttribute(SCROLL_ATTR);
   if (!goalName || !goalName.trim()) return;
 
   let state = scrollStateMap.get(el);
@@ -119,7 +123,7 @@ function handleScrollTrigger(el: Element, isIntersecting: boolean) {
 
   if (state.fired || state.pendingTimeout !== null) return;
 
-  const delayAttr = el.getAttribute(`${ATTR_PREFIX}-scroll-delay`);
+  const delayAttr = el.getAttribute(SCROLL_DELAY_ATTR);
   let delay = 0;
   if (delayAttr !== null) {
     const d = parseInt(delayAttr, 10);
@@ -147,7 +151,7 @@ function handleScrollTrigger(el: Element, isIntersecting: boolean) {
       return diff <= 0 ? 100 : Math.min(100, Math.round((py / diff) * 100));
     })();
 
-    const thresholdAttr = el.getAttribute(`${ATTR_PREFIX}-scroll-threshold`);
+    const thresholdAttr = el.getAttribute(SCROLL_THRESHOLD_ATTR);
     let threshold = 0.5;
     if (thresholdAttr !== null) {
       const t = parseFloat(thresholdAttr);
@@ -164,22 +168,18 @@ function handleScrollTrigger(el: Element, isIntersecting: boolean) {
     for (let i = 0; i < el.attributes.length; i++) {
       const attr = el.attributes[i];
       if (
-        attr.name.startsWith(`${ATTR_PREFIX}-scroll-`) &&
-        attr.name !== `${ATTR_PREFIX}-scroll` &&
-        attr.name !== `${ATTR_PREFIX}-scroll-threshold` &&
-        attr.name !== `${ATTR_PREFIX}-scroll-delay`
+        attr.name.startsWith(SCROLL_PROP_PREFIX) &&
+        attr.name !== SCROLL_THRESHOLD_ATTR &&
+        attr.name !== SCROLL_DELAY_ATTR
       ) {
-        const propName = attr.name.substring(17);
+        const propName = attr.name.substring(SCROLL_PROP_PREFIX.length);
         if (propName) {
           customData[propName.replace(/-/g, '_')] = attr.value;
         }
       }
     }
 
-    const sanitized = sanitizeCustomData(customData);
-    if (sanitized !== null) {
-      trackCustomEvent('custom', sanitized);
-    }
+    trackCustomEvent('custom', customData);
   };
 
   if (delay > 0) {
@@ -194,7 +194,7 @@ function observeScrollElements(elements: NodeListOf<Element>) {
   elements.forEach((el) => {
     if (observedElements.has(el)) return;
 
-    const thresholdAttr = el.getAttribute(`${ATTR_PREFIX}-scroll-threshold`);
+    const thresholdAttr = el.getAttribute(SCROLL_THRESHOLD_ATTR);
     let threshold = 0.5;
     if (thresholdAttr !== null) {
       const t = parseFloat(thresholdAttr);
@@ -231,7 +231,7 @@ export function setupScrollTracking() {
     return;
   }
 
-  observeScrollElements(document.querySelectorAll(`[${ATTR_PREFIX}-scroll]`));
+  observeScrollElements(document.querySelectorAll(`[${SCROLL_ATTR}]`));
 
   if (window.MutationObserver) {
     new MutationObserver((mutations) => {
@@ -239,19 +239,19 @@ export function setupScrollTracking() {
       mutations.forEach((m) => {
         if (
           (m.type === 'childList' && m.addedNodes.length > 0) ||
-          (m.type === 'attributes' && m.attributeName === `${ATTR_PREFIX}-scroll`)
+          (m.type === 'attributes' && m.attributeName === SCROLL_ATTR)
         ) {
           shouldReobserve = true;
         }
       });
       if (shouldReobserve) {
-        observeScrollElements(document.querySelectorAll(`[${ATTR_PREFIX}-scroll]`));
+        observeScrollElements(document.querySelectorAll(`[${SCROLL_ATTR}]`));
       }
     }).observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: [`${ATTR_PREFIX}-scroll`],
+      attributeFilter: [SCROLL_ATTR],
     });
   }
 }

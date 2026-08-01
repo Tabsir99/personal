@@ -42,6 +42,7 @@
     }
   },
   "devDependencies": {
+    "@tabsircg/schemas": "workspace:*",
     "@types/node": "^20.0.0",
     "@types/react": "^19.2.17",
     "prettier": "^3.0.0",

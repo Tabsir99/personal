@@ -1,7 +1,7 @@
 import { log } from './logger';
 import { trackingEnabled, disableReason } from './state';
 import { buildEventPayload, sendEvent } from './tracker';
-import { sanitizeCustomData } from './validation';
+import { sanitizeEventData } from './validation';
 import { STORAGE_PREFIX } from './constants';
 import { EventCallback, IdentifyData } from './types';
 
@@ -32,17 +32,26 @@ export function trackPageview(callback?: EventCallback) {
   if (payload) sendEvent(payload, callback);
 }
 
-export function trackCustomEvent(eventName: string, extraData?: Record<string, string>, callback?: EventCallback) {
+export function trackCustomEvent(
+  eventName: string,
+  extraData?: Record<string, unknown>,
+  callback?: EventCallback
+) {
   if (!trackingEnabled) {
     log('info', `Custom event '${eventName}' ignored - ${disableReason}`);
     if (callback) callback({ status: 200 });
     return;
   }
-  const payload = buildEventPayload(eventName);
-  if (payload) {
-    if (extraData) payload.extraData = extraData;
-    sendEvent(payload, callback);
+  const sanitized = sanitizeEventData(extraData ?? {});
+  if (sanitized === null) {
+    log('error', `Custom event '${eventName}' rejected due to validation errors`);
+    return;
   }
+  const payload = buildEventPayload(eventName);
+  if (!payload) return;
+
+  payload.extraData = sanitized;
+  sendEvent(payload, callback);
 }
 
 export function trackIdentify(userId: string, data: IdentifyData, callback?: EventCallback) {
@@ -51,16 +60,16 @@ export function trackIdentify(userId: string, data: IdentifyData, callback?: Eve
     if (callback) callback({ status: 200 });
     return;
   }
-  const payload = buildEventPayload('identify');
-  if (payload) {
-    const identity: Record<string, string> = { name: '', image: '' };
-    for (const [key, value] of Object.entries(data)) {
-      if (typeof value === 'string') identity[key] = value;
-    }
-    identity.user_id = userId;
-    payload.extraData = identity;
-    sendEvent(payload, callback);
+  const identity = sanitizeEventData({ name: '', image: '', ...data, user_id: userId });
+  if (identity === null) {
+    log('error', 'Identify event rejected due to validation errors');
+    return;
   }
+  const payload = buildEventPayload('identify');
+  if (!payload) return;
+
+  payload.extraData = identity;
+  sendEvent(payload, callback);
 }
 
 export function datafastGlobalHandler(eventName: string, data?: Record<string, unknown>) {
@@ -80,12 +89,7 @@ export function datafastGlobalHandler(eventName: string, data?: Record<string, u
     }
     trackIdentify(data.user_id as string, data as unknown as IdentifyData);
   } else {
-    const sanitized = sanitizeCustomData(data || {});
-    if (sanitized === null) {
-      log('error', 'Custom event rejected due to validation errors');
-      return;
-    }
-    trackCustomEvent('custom', { eventName, ...sanitized });
+    trackCustomEvent('custom', { ...(data ?? {}), eventName });
   }
 }
 

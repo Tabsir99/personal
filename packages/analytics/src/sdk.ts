@@ -1,5 +1,5 @@
 import { setConfig } from './config';
-import { initConfigState } from './state';
+import { initConfigState, trackingEnabled } from './state';
 import {
   trackPageview as _trackPageview,
   trackCustomEvent as _trackCustomEvent,
@@ -84,6 +84,10 @@ export function init(options: AnalyticsConfig): AnalyticsInstance {
   });
 
   initConfigState();
+  initialized = true;
+
+  if (!trackingEnabled) return methods;
+
   initPageviewState();
 
   if (typeof document !== 'undefined') {
@@ -94,7 +98,6 @@ export function init(options: AnalyticsConfig): AnalyticsInstance {
     setupSpaRouting();
   }
 
-  initialized = true;
   return methods;
 }
 
