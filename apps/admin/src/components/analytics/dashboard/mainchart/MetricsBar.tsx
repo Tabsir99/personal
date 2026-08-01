@@ -36,6 +36,7 @@ export function MetricsBar({
 }: MetricsBarProps) {
   const [hovered, setHovered] = useState<ChartMetric | null>(null);
   const clearHover = () => setHovered(null);
+  const anyFocused = activeMetric !== null || hovered !== null;
 
   const delta = (curr: number, prev: number) => deltaLabel(curr, prev);
 
@@ -56,7 +57,7 @@ export function MetricsBar({
       showSeparator={!first}
       active={activeMetric === metric}
       hovered={hovered === metric}
-      muted={activeMetric !== metric && hovered !== metric}
+      muted={anyFocused && activeMetric !== metric && hovered !== metric}
       onHover={setHovered}
       onClick={onMetricChange}
     />
