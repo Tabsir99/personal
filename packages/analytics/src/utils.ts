@@ -14,11 +14,13 @@ export function isValidDateStr(str: string | null | undefined): boolean {
   return !Number.isNaN(parsed) && parsed > 0;
 }
 
+const MAX_SESSION_NUMBER = 65535;
+
 export function parseValidInt(str: string | null | undefined): number | null {
   if (!str) return null;
   const num = parseInt(str, 10);
   if (!Number.isFinite(num) || num < 1) return null;
-  return Math.min(num, 1000000);
+  return Math.min(num, MAX_SESSION_NUMBER);
 }
 
 export function generateUUID(): string {

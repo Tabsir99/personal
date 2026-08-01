@@ -28,11 +28,8 @@ export function trackPageview(callback?: EventCallback) {
     sessionStorage.setItem(`${STORAGE_PREFIX}pageview_state`, JSON.stringify({ time: now, url: href }));
   } catch (e) {}
 
-  const payload = buildEventPayload();
-  if (payload) {
-    payload.type = 'pageview';
-    sendEvent(payload, callback);
-  }
+  const payload = buildEventPayload('pageview');
+  if (payload) sendEvent(payload, callback);
 }
 
 export function trackCustomEvent(eventName: string, extraData?: Record<string, string>, callback?: EventCallback) {
@@ -41,9 +38,8 @@ export function trackCustomEvent(eventName: string, extraData?: Record<string, s
     if (callback) callback({ status: 200 });
     return;
   }
-  const payload = buildEventPayload();
+  const payload = buildEventPayload(eventName);
   if (payload) {
-    payload.type = eventName;
     if (extraData) payload.extraData = extraData;
     sendEvent(payload, callback);
   }
@@ -55,15 +51,14 @@ export function trackIdentify(userId: string, data: IdentifyData, callback?: Eve
     if (callback) callback({ status: 200 });
     return;
   }
-  const payload = buildEventPayload();
+  const payload = buildEventPayload('identify');
   if (payload) {
-    payload.type = 'identify';
-    payload.extraData = {
-      user_id: userId,
-      name: data.name || '',
-      image: data.image || '',
-      ...data,
-    };
+    const identity: Record<string, string> = { name: '', image: '' };
+    for (const [key, value] of Object.entries(data)) {
+      if (typeof value === 'string') identity[key] = value;
+    }
+    identity.user_id = userId;
+    payload.extraData = identity;
     sendEvent(payload, callback);
   }
 }

@@ -1,21 +1,27 @@
 import { config } from './config';
 import { log } from './logger';
 import { apiUrl } from './state';
-import { STORAGE_PREFIX, URL_PARAM_PREFIX } from './constants';
+import { STORAGE_PREFIX, URL_PARAM_PREFIX, MAX_HREF_LENGTH } from './constants';
 import { getVisitorId, getSessionId, getVisitorFirstSeenAt, getVisitorSessionNumber, setCookie } from './storage';
 import { isBot } from './bot';
 import { EventPayload, EventCallback } from './types';
 
-export function buildEventPayload(): EventPayload | undefined {
+export function buildEventPayload(type: string): EventPayload | undefined {
   const href = window.location.href;
   if (!href) {
     log('warn', 'Unable to collect href. This may indicate incorrect script implementation or browser issues.');
     return;
   }
+  const { websiteId, domain } = config;
+  if (!websiteId || !domain) {
+    log('warn', 'Unable to build an event payload without a website ID and domain.');
+    return;
+  }
   const payload: EventPayload = {
-    websiteId: config.websiteId,
-    domain: config.domain,
-    href: href,
+    websiteId,
+    domain,
+    type,
+    href: href.slice(0, MAX_HREF_LENGTH),
     referrer: document.referrer || null,
     viewport: { width: window.innerWidth, height: window.innerHeight },
     visitorId: getVisitorId(),

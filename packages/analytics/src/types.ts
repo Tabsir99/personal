@@ -1,6 +1,6 @@
 export interface EventPayload {
-  websiteId: string | null;
-  domain: string | null;
+  websiteId: string;
+  domain: string;
   href: string;
   referrer: string | null;
   viewport: { width: number; height: number };
@@ -12,7 +12,7 @@ export interface EventPayload {
   timezone: string;
   screenWidth: number;
   screenHeight: number;
-  type?: string;
+  type: string;
   extraData?: Record<string, string>;
 }
 

@@ -4,7 +4,7 @@
   "description": "Analytics tracker",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
     "build": "tsup",
     "typecheck": "tsc --noEmit"
   },
@@ -17,15 +17,19 @@
     "src"
   ],
   "exports": {
-    ".": "./dist/cgd.js",
+    ".": {
+      "types": "./global.d.ts",
+      "default": "./dist/cgd.js"
+    },
     "./sdk": {
+      "types": "./dist/sdk.d.ts",
       "source": "./src/sdk.ts",
-      "import": "./dist/sdk.js",
-      "types": "./dist/sdk.d.ts"
+      "import": "./dist/sdk.js"
     },
     "./react": {
-      "import": "./dist/react.js",
-      "types": "./dist/react.d.ts"
+      "types": "./dist/react.d.ts",
+      "source": "./src/react.tsx",
+      "import": "./dist/react.js"
     },
     "./global": "./global.d.ts"
   },
@@ -43,6 +47,7 @@
     "prettier": "^3.0.0",
     "react": "^19.2.7",
     "tsup": "^8.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.10"
   }
 }

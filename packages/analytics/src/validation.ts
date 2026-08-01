@@ -2,8 +2,8 @@ import { log } from './logger';
 
 export function sanitizeCustomData(data: Record<string, unknown>): Record<string, string> | null {
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
-    log('warn', 'customData must be a non-null object');
-    return {};
+    log('error', 'customData must be a non-null object');
+    return null;
   }
   const result: Record<string, string> = {};
   let count: number = 0;
