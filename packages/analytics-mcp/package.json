@@ -1,6 +1,6 @@
 {
   "name": "@tabsircg/analytics-mcp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "MCP server for instrumenting a site with @tabsircg/analytics",
   "type": "module",
   "bin": {
@@ -12,8 +12,7 @@
   "scripts": {
     "build": "tsc && chmod +x dist/index.js",
     "test": "vitest run",
-    "tc": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "tc": "tsc --noEmit"
   },
   "license": "ISC",
   "dependencies": {

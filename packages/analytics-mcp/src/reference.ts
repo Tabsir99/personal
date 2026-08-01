@@ -91,8 +91,16 @@ Two things that will surprise you:
 - A scroll event automatically carries scroll_percentage, threshold and delay.
   That is 3 of your 10 properties spent before you add any of your own.
 
+The threshold is a fraction of **the element's own height**, not of the screen.
+An element taller than the viewport can never reach a high ratio - a section at
+twice the viewport height tops out near 0.5 - so a threshold above what the
+element can physically reach never fires. For long sections use a low threshold,
+or mark a short child element instead.
+
 Scroll goals re-arm: leaving the viewport resets the element, so scrolling back
-fires again. Elements added to the DOM later are picked up automatically.
+fires again. Dropping below the threshold cancels a pending delay but does not
+re-arm, so jitter around the line cannot fire the goal twice. Elements added to
+the DOM later are picked up automatically.
 
 ## Outbound links (script tag only)
 
