@@ -6,7 +6,7 @@ import { formatReport, validateEvent } from "./validate.js";
 import { inspectSetup } from "./inspect.js";
 import { REFERENCE } from "./reference.js";
 
-const server = new McpServer({ name: "tabsircg-analytics", version: "0.1.0" });
+const server = new McpServer({ name: "tabsircg-analytics", version: "0.2.0" });
 
 server.registerResource(
   "reference",

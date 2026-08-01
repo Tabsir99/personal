@@ -1,6 +1,6 @@
 {
   "name": "@tabsircg/analytics-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for instrumenting a site with @tabsircg/analytics",
   "type": "module",
   "bin": {
