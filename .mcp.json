@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "tabsircg-analytics": {
+      "command": "node",
+      "args": ["./packages/analytics-mcp/dist/index.js"]
+    }
+  }
+}
