@@ -17,6 +17,23 @@ import { z } from "zod";
 /** Tinybird datasource (table) name. */
 export const ANALYTICS_TABLE = "analytics_events";
 
+export const CUSTOM_EVENT_TYPE = "custom";
+
+export const BOT_CATEGORY_NAMES = [
+  "search_index",
+  "answer_fetch",
+  "training",
+  "ai_crawler",
+  "seo",
+  "social",
+  "monitoring",
+  "tooling",
+  "archive",
+  "generic",
+] as const;
+
+export type BotCategory = (typeof BOT_CATEGORY_NAMES)[number];
+
 export const EXTRA_DATA_MAX_PROPERTIES = 10;
 export const EXTRA_DATA_MAX_KEY_LENGTH = 32;
 export const EXTRA_DATA_MAX_VALUE_LENGTH = 1000;
