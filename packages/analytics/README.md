@@ -445,7 +445,7 @@ new website starts accepting events within ~10 s.
 
 ```bash
 pnpm build       # tsup → dist/ (cgd.js IIFE, sdk.js, react.js)
-pnpm typecheck   # tsc --noEmit
+pnpm tc          # tsc --noEmit
 ```
 
 | File         | Role                                                       |

@@ -1,12 +1,12 @@
 {
   "name": "@tabsircg/analytics",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Analytics tracker",
   "type": "module",
   "scripts": {
     "test": "vitest run",
     "build": "tsup",
-    "typecheck": "tsc --noEmit"
+    "tc": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",

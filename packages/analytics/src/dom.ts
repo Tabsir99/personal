@@ -79,6 +79,13 @@ export function handleGoalElement(el: Element | null) {
   }
 }
 
+const NATIVELY_CLICKABLE = ['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA', 'SUMMARY'];
+
+function emitsSyntheticClick(target: Element): boolean {
+  const el = target.closest(NATIVELY_CLICKABLE.join(','));
+  return Boolean(el) && !(el as HTMLElement).isContentEditable;
+}
+
 export function setupDomListeners() {
   document.addEventListener('click', function (e) {
     const target = e.target as Element;
@@ -90,14 +97,13 @@ export function setupDomListeners() {
   });
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' || e.key === ' ') {
-      const target = e.target as Element;
-      if (target.closest) {
-        const goalEl = target.closest(`[${GOAL_ATTR}]`);
-        if (goalEl) handleGoalElement(goalEl);
-        handleOutboundLink(target.closest('a') as HTMLAnchorElement | null);
-      }
-    }
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const target = e.target as Element;
+    if (!target.closest || emitsSyntheticClick(target)) return;
+
+    const goalEl = target.closest(`[${GOAL_ATTR}]`);
+    if (goalEl) handleGoalElement(goalEl);
+    handleOutboundLink(target.closest('a') as HTMLAnchorElement | null);
   });
 }
 
@@ -105,7 +111,17 @@ const observedElements = new WeakSet();
 const observerMap = new Map<number, IntersectionObserver>();
 const scrollStateMap = new WeakMap();
 
-function handleScrollTrigger(el: Element, isIntersecting: boolean) {
+const DEFAULT_SCROLL_THRESHOLD = 0.5;
+
+function thresholdFor(el: Element): number {
+  const raw = el.getAttribute(SCROLL_THRESHOLD_ATTR);
+  if (raw === null) return DEFAULT_SCROLL_THRESHOLD;
+  const parsed = parseFloat(raw);
+  if (isNaN(parsed) || parsed < 0 || parsed > 1) return DEFAULT_SCROLL_THRESHOLD;
+  return parsed;
+}
+
+function handleScrollTrigger(el: Element, isIntersecting: boolean, meetsThreshold: boolean) {
   const goalName = el.getAttribute(SCROLL_ATTR);
   if (!goalName || !goalName.trim()) return;
 
@@ -115,12 +131,12 @@ function handleScrollTrigger(el: Element, isIntersecting: boolean) {
     scrollStateMap.set(el, state);
   }
 
-  if (!isIntersecting) {
+  if (!isIntersecting || !meetsThreshold) {
     if (state.pendingTimeout !== null) {
       clearTimeout(state.pendingTimeout);
       state.pendingTimeout = null;
     }
-    state.fired = false;
+    if (!isIntersecting) state.fired = false;
     return;
   }
 
@@ -135,9 +151,6 @@ function handleScrollTrigger(el: Element, isIntersecting: boolean) {
 
   const fire = () => {
     state.pendingTimeout = null;
-    const rect = el.getBoundingClientRect();
-    if (!(rect.bottom > 0 && rect.top < window.innerHeight)) return;
-
     state.fired = true;
 
     const currentScroll = (function () {
@@ -154,17 +167,10 @@ function handleScrollTrigger(el: Element, isIntersecting: boolean) {
       return diff <= 0 ? 100 : Math.min(100, Math.round((py / diff) * 100));
     })();
 
-    const thresholdAttr = el.getAttribute(SCROLL_THRESHOLD_ATTR);
-    let threshold = 0.5;
-    if (thresholdAttr !== null) {
-      const t = parseFloat(thresholdAttr);
-      if (!isNaN(t) && t >= 0 && t <= 1) threshold = t;
-    }
-
     const customData: Record<string, string> = {
       eventName: goalName.trim(),
       scroll_percentage: currentScroll.toString(),
-      threshold: threshold.toString(),
+      threshold: thresholdFor(el).toString(),
       delay: delay.toString(),
     };
 
@@ -198,14 +204,12 @@ function observeScrollElements(elements: NodeListOf<Element>) {
     if (observedElements.has(el)) return;
 
     const thresholdAttr = el.getAttribute(SCROLL_THRESHOLD_ATTR);
-    let threshold = 0.5;
-    if (thresholdAttr !== null) {
-      const t = parseFloat(thresholdAttr);
-      if (!isNaN(t) && t >= 0 && t <= 1) {
-        threshold = t;
-      } else {
-        log('warn', `Invalid threshold value "${thresholdAttr}" for element. Using default 0.5.`);
-      }
+    const threshold = thresholdFor(el);
+    if (thresholdAttr !== null && parseFloat(thresholdAttr) !== threshold) {
+      log(
+        'warn',
+        `Invalid threshold "${thresholdAttr}". Use a fraction between 0 and 1; falling back to ${DEFAULT_SCROLL_THRESHOLD}.`
+      );
     }
 
     const getObserver = (t: number) => {
@@ -213,7 +217,7 @@ function observeScrollElements(elements: NodeListOf<Element>) {
       const obs = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            handleScrollTrigger(entry.target, entry.isIntersecting);
+            handleScrollTrigger(entry.target, entry.isIntersecting, entry.intersectionRatio >= t);
           });
         },
         { root: null, rootMargin: '0px', threshold: [0, t] }
