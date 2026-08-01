@@ -71,10 +71,10 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
     )
     UNION ALL
     (
-      SELECT 'exitLinks' AS level, ${F.href} AS name,
+      SELECT 'exitLinks' AS level, JSONExtractString(${F.extraData}, 'url') AS name,
         uniqExact(${F.visitorId}) AS uv, 0 AS pageviews, COUNT() AS exits,
         0 AS revenue
-      FROM ${F.engine} WHERE ${exitWhere}
+      FROM ${F.engine} WHERE ${exitWhere} AND JSONExtractString(${F.extraData}, 'url') != ''
       GROUP BY name ORDER BY uv DESC LIMIT 20
     )
   `,

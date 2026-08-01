@@ -186,7 +186,7 @@ export interface AnalyticsParams {
 }
 
 export function escapeSQL(value: string): string {
-  return value.replace(/['\\]/g, "");
+  return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 }
 
 export function parseHref(

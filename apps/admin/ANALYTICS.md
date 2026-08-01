@@ -194,10 +194,13 @@ Two things about that SQL are load-bearing:
   visitor count rides along as a scalar subquery column, keeping the whole page
   to one round trip.
 
-`LIMIT 501 BY visitor_id` caps each timeline **in the database**, so a runaway
-visitor never reaches the wire; the 501st row exists only to make truncation
-detectable and is dropped during assembly. Real traffic peaks near a dozen
-lifetime events per visitor, so this has never fired.
+`LIMIT 101 BY visitor_id` caps each timeline **in the database**, so a runaway
+visitor never reaches the wire; the 101st row exists only to make truncation
+detectable and is dropped during assembly (`MAX_ROWS_PER_VISITOR` in
+`journey/assemble.ts`). Real traffic peaks near a dozen lifetime events per
+visitor. When it does bite, the query keeps the **newest** 100 rows, so `rows[0]`
+is no longer the visitor's first touch and `sourceAttribution` and
+`timeBeforeGoal` are derived from the oldest surviving row instead.
 
 There is deliberately **no index on `event_name`**. Every type but `custom` has
 exactly one `event_name` (equal to the type), so the predicate is already
@@ -208,7 +211,7 @@ and cost write throughput.
 Timelines are **batch-prefetched with the list** rather than fetched per visitor,
 so opening a visitor costs no round trip. Two things keep that payload sane: runs
 of repeat views of the same path collapse into one entry with a `count` and a
-`lastTimestamp`, and each visitor is capped at 500 entries (`truncated: true`
+`lastTimestamp`, and each visitor is capped at 100 entries (`truncated: true`
 when it bites).
 
 Source classification reuses `buildChannelSQL` from `sources/channels.ts`, so a

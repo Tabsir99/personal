@@ -30,7 +30,7 @@ export function tooltipSections(selection: Selection, periodLabel: string) {
           p.date,
           {
             label: "Visitors",
-            value: (nw + rt).toLocaleString(),
+            value: p.raw("visitors").toLocaleString(),
             color: "newVisitors",
           },
           visitorMeter(nw, rt),

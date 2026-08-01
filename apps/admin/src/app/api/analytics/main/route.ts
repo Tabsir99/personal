@@ -92,7 +92,7 @@ function buildSql(
       multiIf(GROUPING(bucket) = 0, toString(any(bucket)), any(period)) AS k,
       uniqExact(vid) AS visitors,
       uniqExactIf(vid, snum = 1) AS newVisitors,
-      uniqExactIf(vid, snum > 1) AS returningVisitors,
+      uniqExact(vid) - uniqExactIf(vid, snum = 1) AS returningVisitors,
       sum(pvs) AS pageviews,
       count() AS sessions,
       countIf(pvs = 1) AS bounces,

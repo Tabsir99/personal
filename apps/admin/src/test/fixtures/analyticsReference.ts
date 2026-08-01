@@ -212,7 +212,7 @@ export function referenceMain(
         timestamp: b,
         visitors: o.visitors,
         newVisitors: uniq(ss.filter((s) => s.snum === 1).map((s) => s.vid)),
-        returningVisitors: uniq(ss.filter((s) => s.snum > 1).map((s) => s.vid)),
+        returningVisitors: o.visitors - uniq(ss.filter((s) => s.snum === 1).map((s) => s.vid)),
         pageviews: o.pageviews,
         sessions: o.sessions,
         bounceRate: o.bounceRate,
@@ -338,8 +338,15 @@ export function referencePages(rows: Row[], w: Win) {
 
   const exitG = new Map<string, { vids: Set<string>; count: number }>();
   for (const r of human(rows, "external_link", w)) {
-    let g = exitG.get(r.href);
-    if (!g) exitG.set(r.href, (g = { vids: new Set(), count: 0 }));
+    let destination = "";
+    try {
+      destination = String(JSON.parse(r.extra_data || "{}").url ?? "");
+    } catch {
+      destination = "";
+    }
+    if (!destination) continue;
+    let g = exitG.get(destination);
+    if (!g) exitG.set(destination, (g = { vids: new Set(), count: 0 }));
     g.vids.add(r.visitor_id);
     g.count++;
   }

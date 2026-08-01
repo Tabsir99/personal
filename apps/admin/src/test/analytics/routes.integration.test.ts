@@ -145,6 +145,13 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
         "conversionRate",
       ],
     );
+    for (const b of data.timeseries as unknown as Rowish[]) {
+      expect(
+        Number(b.newVisitors) + Number(b.returningVisitors),
+        `bucket ${b.timestamp}: newVisitors + returningVisitors must equal visitors`,
+      ).toBe(Number(b.visitors));
+    }
+
     for (const side of ["current", "previous"] as const) {
       expect(Number(data[side].revenue), `${side}.revenue`).toBe(
         ref[side].revenue,
