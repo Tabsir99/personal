@@ -136,6 +136,22 @@ const UNNAMED_BOT_SIGNALS = [
   "scan",
 ] as const;
 
+const BROWSER_ENGINE_MARKERS = [
+  /chrome\/\d/,
+  /crios\/\d/,
+  /safari\/\d/,
+  /firefox\/\d/,
+  /fxios\/\d/,
+  /gecko\/\d/,
+  /edg[ae]?\/\d/,
+  /opr\/\d/,
+  /samsungbrowser\/\d/,
+];
+
+function looksLikeBrowser(lower: string): boolean {
+  return BROWSER_ENGINE_MARKERS.some((marker) => marker.test(lower));
+}
+
 const BOT_NAME_LIMIT = 64;
 const AGENT_TOKEN_SEPARATORS = /[\s;,()]+/;
 
@@ -161,13 +177,15 @@ export function detectBot(ua: string): BotResult {
     }
   }
 
-  for (const signal of UNNAMED_BOT_SIGNALS) {
-    if (lower.includes(signal)) {
-      return {
-        is_bot: 1,
-        bot_category: "generic",
-        bot_name: namedAgentFor(ua, signal),
-      };
+  if (!looksLikeBrowser(lower)) {
+    for (const signal of UNNAMED_BOT_SIGNALS) {
+      if (lower.includes(signal)) {
+        return {
+          is_bot: 1,
+          bot_category: "generic",
+          bot_name: namedAgentFor(ua, signal),
+        };
+      }
     }
   }
 

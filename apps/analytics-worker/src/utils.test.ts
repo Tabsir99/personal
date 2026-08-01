@@ -146,6 +146,29 @@ describe("detectBot", () => {
     }
   });
 
+  it("does not read a bot signal out of a device name in a browser UA", () => {
+    const devices = [
+      "Mozilla/5.0 (Linux; Android 11; CUBOT NOTE 20 Build/RP1A.200720.011) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36",
+      "Mozilla/5.0 (Linux; Android 10; CUBOT_X30) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Mobile Safari/537.36",
+      "Mozilla/5.0 (Linux; Android 12; Robot X1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Mobile Safari/537.36",
+      "Mozilla/5.0 (Linux; Android 13; SM-A546B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/23.0 Chrome/115.0.0.0 Mobile Safari/537.36",
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/120.0.0.0 Mobile/15E148 Safari/604.1",
+    ];
+    for (const ua of devices) {
+      expect([ua, detectBot(ua).is_bot]).toEqual([ua, 0]);
+    }
+  });
+
+  it("still catches an unknown crawler that carries no browser engine", () => {
+    for (const ua of [
+      "Mozilla/5.0 (compatible; SomeNewBot/3.1; +http://example.com)",
+      "TotallyNewCrawler/1.0",
+      "uptime-checker/2.3 (+https://example.com)",
+    ]) {
+      expect([ua, detectBot(ua).is_bot]).toEqual([ua, 1]);
+    }
+  });
+
   it("keeps java/ from matching javascript in a browser string", () => {
     expect(detectBot("Mozilla/5.0 JavaScript/1.0 Chrome/120").is_bot).toBe(0);
     expect(detectBot("Java/1.8.0_181").bot_name).toBe("Java");
