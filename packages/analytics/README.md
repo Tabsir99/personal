@@ -214,22 +214,39 @@ ingest. Session recency is derived from `session_number` instead.
 
 ### Wire limits
 
-Exceeding a limit never costs you the event — the value is clamped or trimmed on
-whichever side owns it, rather than 400ing the whole payload.
+The `extraData` rules live in one place — `EXTRA_DATA_*` in
+`@tabsircg/schemas/analytics` — and are applied twice. The Worker's
+`extraDataSchema` is the boundary that actually holds: violate it and the whole
+payload 400s. The tracker mirrors the same numbers in `sanitizeEventData` so a
+mistake surfaces as a console error at the call site instead of a silent
+rejection you never see. The tracker's copy is a convenience, not a control;
+anything posting straight to the Worker still has to satisfy the schema.
 
-| Field                              | Limit         | Enforced by                                  |
-| ---------------------------------- | ------------- | -------------------------------------------- |
-| `href`                             | 2000 chars    | tracker trims before sending; Worker rejects beyond |
-| `type` (custom events)             | 64 chars      | Worker schema (rejects)                      |
-| derived `event_name`               | 255 chars     | Worker trims                                 |
-| `extraData` — value                | 1000 chars    | Worker trims (tracker already caps at 255)   |
-| `extraData` — whole object         | 4000 chars    | Worker drops whole trailing keys, so what is stored is **always valid JSON** |
-| `extraData` — key count / name     | 10 / 32 chars | tracker (`sanitizeCustomData`)               |
-| viewport, screen, session number   | 0–65535       | Worker clamps (columns are `UInt16`)         |
+The SDK's copy of the numbers is asserted equal to the shared contract in its
+test suite, so the two cannot drift.
 
-A custom-event payload that isn't a plain object is rejected outright by
-`sanitizeCustomData` and **the event is not sent** — it no longer degrades into
-an event with empty data.
+| Field                            | Limit         | Enforced by                                                          |
+| -------------------------------- | ------------- | -------------------------------------------------------------------- |
+| `href`                           | 2000 chars    | tracker trims before sending; Worker rejects beyond                   |
+| `type` (custom events)           | 64 chars      | Worker schema (rejects)                                               |
+| derived `event_name`             | 255 chars     | Worker trims                                                          |
+| `extraData` — value              | 1000 chars    | tracker trims; Worker rejects beyond                                  |
+| `extraData` — whole object       | 4000 chars    | both reject beyond; Worker also drops trailing keys as a backstop, so what is stored is **always valid JSON** |
+| `extraData` — key count          | 10            | both reject (`eventName` is exempt)                                   |
+| `extraData` — key name           | 32 chars, `[a-z0-9_-]` | tracker lowercases then rejects; Worker rejects              |
+| `extraData` — value type         | string        | both reject numbers, objects and arrays                               |
+| viewport, screen, session number | 0–65535       | Worker clamps (columns are `UInt16`)                                  |
+
+Every tracking entry point routes through `sanitizeEventData` — `cgd()`,
+`analytics.trackEvent()`, `identify()`, `data-cgd-goal`, `data-cgd-scroll` and
+the automatic `external_link` event. A payload that violates any rule above is
+**not sent**, and the reason is logged to the console.
+
+Values are trimmed and length-bounded but otherwise passed through verbatim.
+The tracker does **not** strip markup or URL schemes from your values: it would
+corrupt legitimate data (`?w=64&h=64` losing its `&`) while protecting nothing,
+since anything bypassing the script skips it anyway. Escape on render, as the
+dashboard does.
 
 ---
 
