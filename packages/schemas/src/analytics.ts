@@ -12,8 +12,42 @@
  * with this file when adding or renaming a column.
  */
 
+import { z } from "zod";
+
 /** Tinybird datasource (table) name. */
 export const ANALYTICS_TABLE = "analytics_events";
+
+export const EXTRA_DATA_MAX_PROPERTIES = 10;
+export const EXTRA_DATA_MAX_KEY_LENGTH = 32;
+export const EXTRA_DATA_MAX_VALUE_LENGTH = 1000;
+export const EXTRA_DATA_MAX_BYTES = 4000;
+export const EXTRA_DATA_KEY_PATTERN = /^[a-z0-9_-]+$/;
+export const EVENT_NAME_KEY = "eventName";
+
+export const extraDataSchema = z
+  .record(z.string(), z.string().max(EXTRA_DATA_MAX_VALUE_LENGTH))
+  .refine(
+    (data) =>
+      Object.keys(data).filter((key) => key !== EVENT_NAME_KEY).length <=
+      EXTRA_DATA_MAX_PROPERTIES,
+    { message: `At most ${EXTRA_DATA_MAX_PROPERTIES} properties are allowed` },
+  )
+  .refine(
+    (data) =>
+      Object.keys(data).every(
+        (key) =>
+          key === EVENT_NAME_KEY ||
+          (key.length > 0 &&
+            key.length <= EXTRA_DATA_MAX_KEY_LENGTH &&
+            EXTRA_DATA_KEY_PATTERN.test(key)),
+      ),
+    {
+      message: `Property names must match ${EXTRA_DATA_KEY_PATTERN.source} and be at most ${EXTRA_DATA_MAX_KEY_LENGTH} characters`,
+    },
+  )
+  .refine((data) => JSON.stringify(data).length <= EXTRA_DATA_MAX_BYTES, {
+    message: `Serialised properties must not exceed ${EXTRA_DATA_MAX_BYTES} characters`,
+  });
 
 /**
  * camelCase handle -> snake_case column name. Values must match
