@@ -73,17 +73,22 @@ Same actions, called from code. Use whichever matches how you loaded the tracker
 
 Identify links the current anonymous visitor to a known user; call it after login.
 
-> **These two custom-event columns are not interchangeable on the wire.**
-> `cgd(name, data)` and the §2a attributes send `type: "custom"` with the real
-> name in `extraData.eventName`. `analytics.trackEvent(name, data)` sends
-> `type: name` instead, with no `eventName`. Both land a row whose `event_name`
-> is correct, so **funnels** (which match `event_name` alone) see either — but
-> the dashboard's **goal catalog and journey filter both pin `type = 'custom'`**
-> to hit the sort key, so `trackEvent()`-shaped rows never populate the goal
-> pickers and never show under a journey goal filter. Until that is
-> reconciled, prefer `cgd()` / attributes for anything you want to appear as a
-> goal. Reserved types (`pageview`, `identify`, `payment`) are rejected by the
-> endpoint with a 400 if passed to `trackEvent()`.
+All four routes to a custom event — `cgd(name, data)`, `analytics.trackEvent(name, data)`,
+the §2a attributes and the §2c `<Track>` helper — send the identical wire shape:
+`type: "custom"` with the real name in `extraData.eventName`. Pick whichever
+suits how you loaded the tracker; the stored row is the same either way, and the
+event appears everywhere in the dashboard — goal pickers, journey filters,
+funnels and the goals chart.
+
+> `type` is the third column of the Tinybird sorting key, so it deliberately
+> holds a small fixed set of values (`pageview`, `custom`, `identify`,
+> `external_link`, `payment`) rather than your event names. That is why the name
+> travels in `extraData.eventName` and lands in the `event_name` column.
+>
+> **Rows written before this was unified keep `type: <your event name>`.** They
+> still appear in the goals chart, which matches `type != 'pageview'`, but not in
+> the goal catalog or journey filter, which pin `type = 'custom'`. Only a
+> backfill fixes those; new events are correct.
 
 Pageviews are throttled: the same URL is not re-sent within 60 seconds
 (persisted in `sessionStorage`, so it survives reloads).
@@ -163,12 +168,13 @@ For refunds and disputes the webhook follows the charge/dispute back to its Paym
 | `data-allowed-hostnames`   | Comma-separated extra hosts (cross-domain) | ``                                      |
 | `data-allow-localhost`     | Track on localhost                         | `false`                                 |
 | `data-allow-file-protocol` | Track on `file://`                         | `false`                                 |
+| `data-allow-iframe`        | Track when the page is framed              | `false`                                 |
 | `data-debug`               | Verbose logging                            | `false`                                 |
 | `data-disable-console`     | Silence all tracker logs                   | `false`                                 |
 
 ### SDK `init(options)` (§1B)
 
-Same fields, camelCased: `websiteId` (req), `domain` (req), `apiUrl?`, `allowedHostnames?: string[]`, `allowLocalhost?`, `debug?`, `disableConsole?`.
+Same fields, camelCased: `websiteId` (req), `domain` (req), `apiUrl?`, `allowedHostnames?: string[]`, `allowLocalhost?`, `allowIframe?`, `debug?`, `disableConsole?`.
 
 ### Cookies
 
@@ -176,10 +182,9 @@ Same fields, camelCased: `websiteId` (req), `domain` (req), `apiUrl?`, `allowedH
 | --------------------------- | ------------------- | ------ |
 | `cgd_visitor_id`            | Stable visitor id   | 365d   |
 | `cgd_session_id`            | Session id          | 30 min |
-| `cgd_visitor_first_seen_at` | First-seen ISO date | 365d   |
 | `cgd_visitor_session_count` | Session counter     | 365d   |
 
-Cross-domain: these travel via URL params `_cgd_vid`, `_cgd_sid`, `_cgd_vfs`, `_cgd_vsn` — see §7.
+Cross-domain: these travel via URL params `_cgd_vid`, `_cgd_sid`, `_cgd_vsn` — see §7.
 
 The cookie `domain` attribute is set to `.<data-domain>` when the current
 hostname is that domain or a subdomain of it, otherwise to `.<current
@@ -197,7 +202,6 @@ free; unrelated hostnames do not, which is what §7 exists to bridge.
   "referrer": "...",
   "visitorId": "...",
   "sessionId": "...",
-  "visitorFirstSeenAt": "ISO",
   "visitorSessionNumber": 1,
   "viewport": { "width": 1920, "height": 1080 },
   "screenWidth": 1920,
@@ -208,9 +212,10 @@ free; unrelated hostnames do not, which is what §7 exists to bridge.
 }
 ```
 
-`visitorFirstSeenAt` is sent and validated by the ingest Worker but has **no
-column** in the `analytics_events` datasource — it is currently dropped at
-ingest. Session recency is derived from `session_number` instead.
+New versus returning is derived from `session_number` — a visitor whose minimum
+session number in the window is `1` is new. There is no separate first-seen
+field; it duplicated the `cgd_visitor_id` cookie's lifetime without answering a
+question the dashboard asks.
 
 ### Wire limits
 
@@ -262,7 +267,7 @@ actually exist, in the order they apply.
 | **Your own browser**    | `localStorage['cgd_ignore'] === 'true'`    | off     | set it per browser/profile (see below)                |
 | Localhost               | tracker refuses to boot                    | blocked | `data-allow-localhost="true"` / `allowLocalhost: true` |
 | `file://`               | tracker refuses to boot                    | blocked | `data-allow-file-protocol="true"`                     |
-| Inside an iframe        | tracker refuses to boot                    | blocked | `data-debug="true"`                                   |
+| Inside an iframe        | tracker refuses to boot                    | blocked | `data-allow-iframe="true"` / `allowIframe: true`      |
 | Headless / automation   | `bot.ts` heuristics, before the request     | blocked | —                                                     |
 | Unregistered `Origin`   | Worker KV allowlist → 403 (see §8)          | blocked | register the origin on the website in admin           |
 | Crawlers & bot UAs      | Worker tags `is_bot=1`; **row is still stored** | stored | dashboard queries filter `is_bot = 0`             |
@@ -313,11 +318,11 @@ how you link.
 
    | Target host                              | What happens                                                        |
    | ---------------------------------------- | ------------------------------------------------------------------- |
-   | same host, or same registrable domain    | left alone — cookies already cover it                                |
-   | listed in `allowedHostnames` (or `domain`) | `href` is **rewritten in place** with `_cgd_vid`, `_cgd_sid`, `_cgd_vfs`, `_cgd_vsn` |
+   | same host, a sub/parent domain, or both under a declared host | left alone — cookies already cover it            |
+   | listed in `allowedHostnames` (or `domain`) | `href` is **rewritten in place** with `_cgd_vid`, `_cgd_sid`, `_cgd_vsn` |
    | anything else                            | recorded as an `external_link` goal, no params added                 |
 
-3. **The landing page adopts the identity.** The tracker there reads those four
+3. **The landing page adopts the identity.** The tracker there reads those three
    params ahead of its own cookies, writes them to its cookies, then strips them
    from the URL via `history.replaceState` so they never reach your analytics
    `href` or get shared/bookmarked.

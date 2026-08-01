@@ -59,10 +59,21 @@ columns (no query-time parsing needed):
 
 - **geo** — `country` / `region` / `city` / `ip` from the request.
 - **UA parse** — `browser` / `os` / `device` via `parseUA`.
-- **bot detect** — `is_bot` / `bot_category` / `bot_name` via `detectBot`
-  (categories: `search_index` / `answer_fetch` / `training` / `ai_crawler`, plus
-  `generic` for the UA substring list). Real crawlers are recorded, not dropped;
-  only automation tools (Selenium/curl) are blocked upstream by the SDK.
+- **bot detect** — `is_bot` / `bot_category` / `bot_name` via `detectBot`, a
+  self-contained signature table in the Worker (no third-party dependency).
+  Categories are declared once in `@tabsircg/schemas/analytics`
+  (`BOT_CATEGORY_NAMES`) and consumed by both the Worker and `botRegistry.ts`:
+  `search_index`, `answer_fetch`, `training`, `ai_crawler`, `seo`, `social`,
+  `monitoring`, `tooling`, `archive`, and `generic`. A match yields a canonical
+  name (`AhrefsBot`, not the substring that matched) so the bots panel groups
+  cleanly. Anything that only trips a bare bot signal falls to `generic` and is
+  named from its own UA token, never from the signal. Real crawlers are
+  recorded, not dropped; only automation tools are blocked upstream by the SDK.
+
+> **`bot_category` values changed.** Rows ingested before the table existed
+> classified everything outside the AI/search set as `generic` — SEO crawlers,
+> link unfurlers and uptime monitors all landed there, most of them named `bot`.
+> Historical rows keep those values; only new rows get the finer categories.
 
 `ip` is written on every row and **read by nothing** — no ingest path and no
 dashboard query filters on it. There is no IP-based exclusion of your own
@@ -86,7 +97,7 @@ Set by the client SDK as cookies (prefix `cgd_`):
 - **`identify` event** — `analytics.identify(userId, …)` links the anonymous
   visitorId to your app's `user_id` via `extra_data` (does not replace the
   visitorId; attaches to it).
-- **Cross-domain** — `_cgd_vid` / `_cgd_sid` (+ `_cgd_vfs`, `_cgd_vsn`) URL params
+- **Cross-domain** — `_cgd_vid` / `_cgd_sid` (+ `_cgd_vsn`) URL params
   carry the identity across allowed hostnames; the tracker strips them after read.
 
 ## Query model
@@ -133,17 +144,21 @@ writes attribute-driven goals (`data-*-goal`, `data-*-scroll`) as
 firing a custom event — `payment`, `identify`, `external_link` — are unioned in
 client-side from `RESERVED_GOALS`, not discovered by the query.
 
-> **That pin assumes one of the SDK's two custom-event shapes.** `cgd(name,…)`
-> and the `data-cgd-*` attributes send `type='custom'` + `extraData.eventName`,
-> which is what the catalog matches. The bundled SDK's
-> `analytics.trackEvent(name,…)` instead sends `type=name`, so its rows land
-> with the right `event_name` but the wrong `type`: they are **counted by the
-> goals/series branch** (which only excludes `type='pageview'`) yet **never
-> appear in the catalog**, so a goal can show up in the chart while missing from
-> every picker. `journey/route.ts` has the same assumption via `sortKeyTypeFor`.
-> Funnels are unaffected — a goal step matches `event_name` alone. Reconciling
-> this means either normalising `trackEvent` to `type='custom'` in the SDK or
-> dropping the `type` pin and paying the full scan.
+Every SDK entry point now writes that shape — `cgd(name,…)`, the `data-cgd-*`
+attributes, `<Track>` and `analytics.trackEvent(name,…)` all send
+`type='custom'` + `extraData.eventName`. `CUSTOM_EVENT_TYPE` lives in
+`@tabsircg/schemas/analytics`; admin re-exports it and the tracker mirrors it
+under a test that asserts the two are equal, so the pin and the producer cannot
+drift apart again.
+
+> **Rows written before that unification keep `type=<event name>`.**
+> `trackEvent` used to send the name as the `type`, so those rows carry the
+> right `event_name` and the wrong `type`: **counted by the goals/series
+> branch** (which only excludes `type='pageview'`) yet **absent from the
+> catalog**, so an old goal can show in the chart while missing from every
+> picker. `journey/route.ts` has the same pin via `sortKeyTypeFor`. Funnels were
+> never affected — a goal step matches `event_name` alone. Only a backfill
+> rewriting `type` to `custom` clears the historical rows.
 
 The query is three UNION branches, not four: `goals` and `series` read an
 identical row set and differ only in grouping, so they share one scan via
