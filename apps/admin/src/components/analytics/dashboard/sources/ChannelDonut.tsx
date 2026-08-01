@@ -16,6 +16,7 @@ interface ChannelDonutProps {
   channel: string;
   metric: MetricId;
   revealed: boolean;
+  onSelectChannel: (channel: string) => void;
 }
 
 const MAX_SLICES = 8;
@@ -36,6 +37,7 @@ const hostLabel = (raw: string) =>
   /^(?:https?:\/\/)?(?:www\.)?([^/\s]+\.[^/\s]+)/i.exec(raw)?.[1] ?? raw;
 
 const toRow = (v: ChannelMetric | SourceMetric) => ({
+  id: v.name,
   name: hostLabel(v.name),
   visitors: uv(v),
   revenue: v.revenue,
@@ -46,6 +48,7 @@ const toRow = (v: ChannelMetric | SourceMetric) => ({
 type Row = ReturnType<typeof toRow>;
 
 const splitRow = (name: string, n: number, back: boolean): Row => ({
+  id: name,
   name,
   visitors: n,
   revenue: 0,
@@ -86,12 +89,34 @@ function useSize<T extends HTMLElement>() {
   return [ref, size] as const;
 }
 
+function SourcelessGlyph({
+  x,
+  y,
+  size,
+}: {
+  x: number;
+  y: number;
+  size: number;
+}) {
+  const cx = x + size / 2;
+  const cy = y + size / 2;
+  const r = size * 0.3;
+  return (
+    <g fill="none" strokeWidth={1.1} className="stroke-foreground/45">
+      <circle cx={cx} cy={cy} r={r} />
+      <ellipse cx={cx} cy={cy} rx={r * 0.48} ry={r} />
+      <line x1={cx - r} y1={cy} x2={cx + r} y2={cy} />
+    </g>
+  );
+}
+
 export function ChannelDonut({
   channels,
   referrers,
   channel,
   metric,
   revealed,
+  onSelectChannel,
 }: ChannelDonutProps) {
   const [containerRef, { w }] = useSize<HTMLDivElement>();
   const [hover, setHover] = useState<number | null>(null);
@@ -274,7 +299,7 @@ export function ChannelDonut({
                 const band = bandOf(s);
                 return (
                   <path
-                    key={s.name}
+                    key={s.id}
                     d={d}
                     fill={band.fill}
                     stroke={band.edge}
@@ -293,11 +318,14 @@ export function ChannelDonut({
             >
               {slices.map((s) => (
                 <path
-                  key={`hit-${s.name}`}
+                  key={`hit-${s.id}`}
                   d={sector(s.t0, s.t1, INNER - THICKEN, OUTER + THICKEN, 0)}
                   fill="transparent"
                   className="cursor-pointer"
                   onMouseEnter={() => setHover(s.i)}
+                  onClick={() =>
+                    onSelectChannel(channel === "all" ? s.id : "all")
+                  }
                 />
               ))}
             </g>
@@ -309,7 +337,7 @@ export function ChannelDonut({
               const pts = `${e.x},${e.y} ${k.x},${s.y} ${s.right ? tx - 6 : tx + 6},${s.y}`;
               return (
                 <g
-                  key={s.name}
+                  key={s.id}
                   opacity={dimOf(s.i)}
                   className="[transition:opacity_.2s]"
                 >
@@ -332,43 +360,58 @@ export function ChannelDonut({
             })}
 
             <g className="pointer-events-none" mask="url(#donut-sweep)">
-              {slices.flatMap((s) => {
+              {slices.map((s) => {
                 const room =
                   chipRoom && s.sweep * INNER >= PITCH * 2 + 8 ? 3 : 1;
-                const list = chipsFor(s.name).slice(0, room);
+                const urls = chipsFor(s.id)
+                  .map((src) => getFaviconUrl(src, 64))
+                  .filter((url) => url !== null)
+                  .slice(0, room);
                 const anchor = polar(MID, s.mid);
-                return list.map((src, k) => {
-                  const url = getFaviconUrl(src, 64);
-                  if (!url) return null;
-                  const [dx, dy] = chipOffset(k, list.length);
-                  const x = anchor.x + dx - CHIP / 2;
-                  const y = anchor.y + dy - CHIP / 2;
-                  return (
-                    <g
-                      key={`${s.name}-${k}`}
-                      opacity={dimOf(s.i)}
-                      className="[transition:opacity_.25s]"
-                    >
-                      <rect
-                        x={x}
-                        y={y}
-                        width={CHIP}
-                        height={CHIP}
-                        rx={CHIP * 0.18}
-                        className="fill-card stroke-foreground/10"
-                        filter="url(#chip-shadow)"
-                      />
-                      <image
-                        href={url}
-                        x={x + 1}
-                        y={y + 1}
-                        width={CHIP - 2}
-                        height={CHIP - 2}
-                        clipPath="url(#chip)"
-                      />
-                    </g>
-                  );
-                });
+                const chipBox = (k: number, n: number) => {
+                  const [dx, dy] = chipOffset(k, n);
+                  return {
+                    x: anchor.x + dx - CHIP / 2,
+                    y: anchor.y + dy - CHIP / 2,
+                  };
+                };
+                if (urls.length === 0 && channel !== "all") return null;
+                return (
+                  <g
+                    key={`chips-${s.id}`}
+                    opacity={dimOf(s.i)}
+                    className="[transition:opacity_.25s]"
+                  >
+                    {(urls.length === 0 ? [null] : urls).map((url, k) => {
+                      const { x, y } = chipBox(k, Math.max(urls.length, 1));
+                      return (
+                        <g key={k}>
+                          <rect
+                            x={x}
+                            y={y}
+                            width={CHIP}
+                            height={CHIP}
+                            rx={CHIP * 0.18}
+                            className="fill-card stroke-foreground/10"
+                            filter="url(#chip-shadow)"
+                          />
+                          {url ? (
+                            <image
+                              href={url}
+                              x={x + 1}
+                              y={y + 1}
+                              width={CHIP - 2}
+                              height={CHIP - 2}
+                              clipPath="url(#chip)"
+                            />
+                          ) : (
+                            <SourcelessGlyph x={x} y={y} size={CHIP} />
+                          )}
+                        </g>
+                      );
+                    })}
+                  </g>
+                );
               })}
             </g>
           </svg>

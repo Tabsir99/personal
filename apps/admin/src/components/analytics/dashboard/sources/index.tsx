@@ -102,6 +102,7 @@ export function SourcesPanel() {
               channel={picked}
               metric={metric}
               revealed={revealed}
+              onSelectChannel={setChannel}
             />
           ),
         },
@@ -109,7 +110,7 @@ export function SourcesPanel() {
           value: "referrer",
           label: "Referrer",
           items: (sources?.referrers ?? []).map((r) => ({
-            name: r.name ?? r.channel,
+            name: r.name || r.channel,
             icon: <Favicon source={r.name} />,
             values: {
               visitors: r.newVisitors + r.returningVisitors,
