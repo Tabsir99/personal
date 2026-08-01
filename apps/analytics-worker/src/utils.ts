@@ -1,6 +1,9 @@
+import {
+  EXTRA_DATA_MAX_BYTES,
+  EXTRA_DATA_MAX_VALUE_LENGTH,
+} from "@tabsircg/schemas/analytics";
+
 const UINT16_MAX = 65535;
-const EXTRA_DATA_LIMIT = 4000;
-const EXTRA_DATA_VALUE_LIMIT = 1000;
 const EVENT_NAME_LIMIT = 255;
 
 export function toUint16(value: number): number {
@@ -25,15 +28,15 @@ export function encodeExtraData(extraData: unknown): string {
   const capped: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(extraData)) {
     capped[key] =
-      typeof value === "string" ? value.slice(0, EXTRA_DATA_VALUE_LIMIT) : value;
+      typeof value === "string" ? value.slice(0, EXTRA_DATA_MAX_VALUE_LENGTH) : value;
   }
 
   const full = JSON.stringify(capped);
-  if (full.length <= EXTRA_DATA_LIMIT) return full;
+  if (full.length <= EXTRA_DATA_MAX_BYTES) return full;
 
   const kept: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(capped)) {
-    if (JSON.stringify({ ...kept, [key]: value }).length > EXTRA_DATA_LIMIT) {
+    if (JSON.stringify({ ...kept, [key]: value }).length > EXTRA_DATA_MAX_BYTES) {
       break;
     }
     kept[key] = value;

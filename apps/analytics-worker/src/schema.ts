@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { extraDataSchema } from "@tabsircg/schemas/analytics";
 
 const basePayloadSchema = z.object({
   websiteId: z.string().min(1).max(96), // Max 96 bytes for index id limit
@@ -25,17 +26,14 @@ export const payloadSchema = z.intersection(
     .discriminatedUnion("type", [
       z.object({
         type: z.literal("pageview"),
-        extraData: z.record(z.string(), z.any()).optional(),
+        extraData: extraDataSchema.optional(),
       }),
       z.object({
         type: z.literal("identify"),
-        extraData: z
-          .object({
-            user_id: z.string().min(1),
-            name: z.string().optional(),
-            image: z.string().optional(),
-          })
-          .catchall(z.any()),
+        extraData: extraDataSchema.refine(
+          (data) => typeof data.user_id === "string" && data.user_id.length > 0,
+          { message: "identify requires a non-empty user_id" },
+        ),
       }),
     ])
     .or(
@@ -47,7 +45,7 @@ export const payloadSchema = z.intersection(
           .refine((t) => !["pageview", "payment", "identify"].includes(t), {
             message: "Reserved event type used as custom",
           }),
-        extraData: z.record(z.string(), z.any()).optional(),
+        extraData: extraDataSchema.optional(),
       }),
     ),
 );

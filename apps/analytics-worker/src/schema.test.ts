@@ -57,6 +57,68 @@ describe("payloadSchema", () => {
     expect(parse({ type: "pageview", websiteId: "" }).success).toBe(false);
   });
 
+  it("enforces the same extra_data property budget as the browser SDK", () => {
+    const ten = Object.fromEntries(
+      Array.from({ length: 10 }, (_, i) => [`k${i}`, "1"]),
+    );
+    expect(parse({ type: "custom", extraData: ten }).success).toBe(true);
+    expect(
+      parse({ type: "custom", extraData: { ...ten, k10: "1" } }).success,
+    ).toBe(false);
+  });
+
+  it("exempts eventName from the property budget, as the SDK does", () => {
+    const ten = Object.fromEntries(
+      Array.from({ length: 10 }, (_, i) => [`k${i}`, "1"]),
+    );
+    expect(
+      parse({ type: "custom", extraData: { eventName: "signup", ...ten } })
+        .success,
+    ).toBe(true);
+  });
+
+  it("rejects property names the SDK would have refused", () => {
+    expect(parse({ type: "custom", extraData: { "bad key": "1" } }).success).toBe(
+      false,
+    );
+    expect(
+      parse({ type: "custom", extraData: { Plan: "pro" } }).success,
+    ).toBe(false);
+    expect(
+      parse({ type: "custom", extraData: { ["k".repeat(33)]: "1" } }).success,
+    ).toBe(false);
+  });
+
+  it("bounds a single value and the serialised whole", () => {
+    expect(
+      parse({ type: "custom", extraData: { a: "x".repeat(1001) } }).success,
+    ).toBe(false);
+    const big = Object.fromEntries(
+      Array.from({ length: 10 }, (_, i) => [`k${i}`, "x".repeat(1000)]),
+    );
+    expect(parse({ type: "custom", extraData: big }).success).toBe(false);
+  });
+
+  it("rejects non-string property values", () => {
+    expect(parse({ type: "custom", extraData: { a: 1 } }).success).toBe(false);
+    expect(parse({ type: "custom", extraData: { a: { b: 1 } } }).success).toBe(
+      false,
+    );
+  });
+
+  it("applies the same rules to identify profile data", () => {
+    expect(
+      parse({ type: "identify", extraData: { user_id: "u1", "bad key": "x" } })
+        .success,
+    ).toBe(false);
+    expect(
+      parse({
+        type: "identify",
+        extraData: { user_id: "u1", image: "https://x.com/a.jpg?w=64&h=64" },
+      }).success,
+    ).toBe(true);
+  });
+
   it("no longer accepts a cfOverride block as a known field", () => {
     const result = parse({ type: "pageview", cfOverride: { ip: "1.2.3.4" } });
     expect(result.success).toBe(true);
