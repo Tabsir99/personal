@@ -52,7 +52,7 @@ export default async function RootLayout({
         )}
       </head>
       <body className="overflow-x-hidden">{children}</body>
-      <MotionDevtools />
+      {process.env.NODE_ENV === "development" && <MotionDevtools />}
     </html>
   );
 }
