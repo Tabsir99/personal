@@ -4,9 +4,14 @@ import {
   GraduationCap,
   Robot,
   Bug,
+  ChartLineUp,
+  ShareNetwork,
+  Heartbeat,
+  Terminal,
+  Archive as ArchiveIcon,
   type Icon,
 } from "@phosphor-icons/react";
-import type { BotCategory } from "@/lib/analyticsTypes";
+import type { BotCategory } from "@tabsircg/schemas/analytics";
 
 export interface CategoryMeta {
   label: string;
@@ -15,10 +20,15 @@ export interface CategoryMeta {
 
 export const BOT_CATEGORIES: Record<BotCategory, CategoryMeta> = {
   search_index: { label: "Indexing", icon: MagnifyingGlass },
-  answer_fetch: { label: "AI answers", icon: ChatCircleDots },
+  answer_fetch: { label: "Answers", icon: ChatCircleDots },
   training: { label: "Training", icon: GraduationCap },
-  ai_crawler: { label: "AI crawlers", icon: Robot },
-  generic: { label: "Other bots", icon: Bug },
+  ai_crawler: { label: "AI", icon: Robot },
+  seo: { label: "SEO", icon: ChartLineUp },
+  social: { label: "Previews", icon: ShareNetwork },
+  monitoring: { label: "Monitors", icon: Heartbeat },
+  tooling: { label: "Scripts", icon: Terminal },
+  archive: { label: "Archives", icon: ArchiveIcon },
+  generic: { label: "Other", icon: Bug },
 };
 
 export function categoryMeta(category: BotCategory): CategoryMeta {

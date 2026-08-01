@@ -9,10 +9,10 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
+import type { BotCategory } from "@tabsircg/schemas/analytics";
 import type { MouseHandlerDataParam } from "recharts";
 import { Tabs } from "premium-ds/tabs";
 import type {
-  BotCategory,
   BotCategoryTotal,
   BotTimeseriesPoint,
 } from "@/lib/analyticsTypes";

@@ -1,3 +1,5 @@
+import type { BotCategory } from "@tabsircg/schemas/analytics";
+
 export interface OverviewMetrics {
   visitors: number;
   pageviews: number;
@@ -174,7 +176,7 @@ export interface SystemResponse {
 /** Wide per-bucket series: one numeric key per goal name, plus the bucket ts. */
 export type GoalSeriesPoint = { timestamp: number } & Record<string, number>;
 
-export const CUSTOM_EVENT_TYPE = "custom";
+export { CUSTOM_EVENT_TYPE } from "@tabsircg/schemas/analytics";
 
 export const RESERVED_GOALS = [
   { name: "payment", label: "Payment" },
@@ -188,9 +190,6 @@ export interface GoalsResponse {
   catalog: string[];
   totalVisitors: number;
 }
-
-export type BotCategory =
-  "answer_fetch" | "search_index" | "training" | "ai_crawler" | "generic";
 
 /** One time bucket; carries a visit count per category present in the range. */
 export type BotTimeseriesPoint = { timestamp: number } & Partial<

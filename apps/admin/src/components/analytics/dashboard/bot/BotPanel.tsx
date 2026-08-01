@@ -9,7 +9,8 @@ import { BotSheet } from "./BotSheet";
 import { resolveBot, botTint, categoryMeta } from "./botRegistry";
 import { useImageAccent } from "../shared/useImageAccent";
 import { getFaviconUrl } from "@/components/ui/favicon";
-import type { BotCategory, BotMetric } from "@/lib/analyticsTypes";
+import type { BotCategory } from "@tabsircg/schemas/analytics";
+import type { BotMetric } from "@/lib/analyticsTypes";
 import {
   FloatingTooltipPortal,
   type TooltipSection,

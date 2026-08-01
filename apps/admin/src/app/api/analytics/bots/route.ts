@@ -8,8 +8,8 @@ import {
   granularityToMs,
   F,
 } from "@/lib/tinybird";
+import type { BotCategory } from "@tabsircg/schemas/analytics";
 import type {
-  BotCategory,
   BotCategoryTotal,
   BotMetric,
   BotTimeseriesPoint,

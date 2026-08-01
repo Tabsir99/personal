@@ -1,3 +1,4 @@
+import type { BotCategory } from "@tabsircg/schemas/analytics";
 import type {
   OverviewMetrics,
   TimeseriesPoint,
@@ -10,7 +11,6 @@ import type {
   ExitLinkMetric,
   HostnameMetric,
   Period,
-  BotCategory,
   BotCategoryTotal,
   BotMetric,
   BotTimeseriesPoint,

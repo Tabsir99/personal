@@ -9,8 +9,8 @@ import {
   parseHref,
   F,
 } from "@/lib/tinybird";
+import type { BotCategory } from "@tabsircg/schemas/analytics";
 import type {
-  BotCategory,
   BotPageMetric,
   BotPagesResponse,
 } from "@/lib/analyticsTypes";
