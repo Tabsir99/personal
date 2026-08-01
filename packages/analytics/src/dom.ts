@@ -1,6 +1,6 @@
 import { config } from './config';
 import { trackCustomEvent } from './events';
-import { getVisitorId, getSessionId, getVisitorFirstSeenAt, getVisitorSessionNumber } from './storage';
+import { getVisitorId, getSessionId, getVisitorSessionNumber } from './storage';
 import { log } from './logger';
 import {
   GOAL_ATTR,
@@ -10,21 +10,26 @@ import {
   SCROLL_THRESHOLD_ATTR,
   SCROLL_DELAY_ATTR,
   URL_PARAM_PREFIX,
+  CUSTOM_EVENT_TYPE,
 } from './constants';
 
-export function getBaseDomain(hostname: string | null) {
-  if (!hostname) return null;
-  const parts = hostname.replace(/^www\./, '').split('.');
-  return parts.length >= 2 ? parts.slice(-2).join('.') : hostname;
+function isWithin(hostname: string, root: string): boolean {
+  return hostname === root || hostname.endsWith(`.${root}`);
+}
+
+export function declaredHostnames(): string[] {
+  return [config.domain, ...config.allowedHostnames].filter((host): host is string => Boolean(host));
+}
+
+export function isSameSite(targetHost: string, currentHost: string): boolean {
+  if (targetHost === currentHost) return true;
+  if (isWithin(targetHost, currentHost) || isWithin(currentHost, targetHost)) return true;
+  return declaredHostnames().some((root) => isWithin(targetHost, root) && isWithin(currentHost, root));
 }
 
 export function isInternalDomain(hostname: string | null): boolean {
   if (!hostname) return false;
-  if (hostname === config.domain) return true;
-  for (const allowed of config.allowedHostnames) {
-    if (hostname === allowed) return true;
-  }
-  return false;
+  return declaredHostnames().some((root) => isWithin(hostname, root));
 }
 
 export function handleOutboundLink(el: HTMLAnchorElement | null) {
@@ -36,8 +41,7 @@ export function handleOutboundLink(el: HTMLAnchorElement | null) {
     const targetHost = url.hostname;
     const currentHost = window.location.hostname;
 
-    if (targetHost === currentHost) return;
-    if (getBaseDomain(targetHost) === getBaseDomain(currentHost)) return;
+    if (isSameSite(targetHost, currentHost)) return;
 
     if (!isInternalDomain(targetHost)) {
       trackCustomEvent('external_link', { url: el.href, text: el.textContent?.trim() || '' });
@@ -47,7 +51,6 @@ export function handleOutboundLink(el: HTMLAnchorElement | null) {
           const u = new URL(href);
           u.searchParams.set(`${URL_PARAM_PREFIX}vid`, getVisitorId());
           u.searchParams.set(`${URL_PARAM_PREFIX}sid`, getSessionId());
-          u.searchParams.set(`${URL_PARAM_PREFIX}vfs`, getVisitorFirstSeenAt());
           u.searchParams.set(`${URL_PARAM_PREFIX}vsn`, getVisitorSessionNumber().toString());
           return u.toString();
         } catch {
@@ -72,7 +75,7 @@ export function handleGoalElement(el: Element | null) {
         }
       }
     }
-    trackCustomEvent('custom', customData);
+    trackCustomEvent(CUSTOM_EVENT_TYPE, customData);
   }
 }
 
@@ -179,7 +182,7 @@ function handleScrollTrigger(el: Element, isIntersecting: boolean) {
       }
     }
 
-    trackCustomEvent('custom', customData);
+    trackCustomEvent(CUSTOM_EVENT_TYPE, customData);
   };
 
   if (delay > 0) {

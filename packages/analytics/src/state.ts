@@ -40,9 +40,9 @@ export function initConfigState() {
         : "Tracking disabled on localhost (use data-allow-localhost='true' to enable)";
   }
 
-  if (trackingEnabled && window !== window.parent && !config.debug) {
+  if (trackingEnabled && window !== window.parent && !(config.allowIframe || config.debug)) {
     trackingEnabled = false;
-    disableReason = 'Tracking disabled inside an iframe';
+    disableReason = "Tracking disabled inside an iframe (use data-allow-iframe='true' to enable)";
   }
 
   if (trackingEnabled && !(config.websiteId && config.domain)) {

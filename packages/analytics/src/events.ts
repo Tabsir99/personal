@@ -2,7 +2,7 @@ import { log } from './logger';
 import { trackingEnabled, disableReason } from './state';
 import { buildEventPayload, sendEvent } from './tracker';
 import { sanitizeEventData } from './validation';
-import { STORAGE_PREFIX } from './constants';
+import { STORAGE_PREFIX, CUSTOM_EVENT_TYPE } from './constants';
 import { EventCallback, IdentifyData } from './types';
 
 let lastPageviewTime = 0;
@@ -32,22 +32,18 @@ export function trackPageview(callback?: EventCallback) {
   if (payload) sendEvent(payload, callback);
 }
 
-export function trackCustomEvent(
-  eventName: string,
-  extraData?: Record<string, unknown>,
-  callback?: EventCallback
-) {
+export function trackCustomEvent(type: string, extraData?: Record<string, unknown>, callback?: EventCallback) {
   if (!trackingEnabled) {
-    log('info', `Custom event '${eventName}' ignored - ${disableReason}`);
+    log('info', `Custom event '${type}' ignored - ${disableReason}`);
     if (callback) callback({ status: 200 });
     return;
   }
   const sanitized = sanitizeEventData(extraData ?? {});
   if (sanitized === null) {
-    log('error', `Custom event '${eventName}' rejected due to validation errors`);
+    log('error', `Custom event '${type}' rejected due to validation errors`);
     return;
   }
-  const payload = buildEventPayload(eventName);
+  const payload = buildEventPayload(type);
   if (!payload) return;
 
   payload.extraData = sanitized;
@@ -89,7 +85,7 @@ export function datafastGlobalHandler(eventName: string, data?: Record<string, u
     }
     trackIdentify(data.user_id as string, data as unknown as IdentifyData);
   } else {
-    trackCustomEvent('custom', { ...(data ?? {}), eventName });
+    trackCustomEvent(CUSTOM_EVENT_TYPE, { ...(data ?? {}), eventName });
   }
 }
 

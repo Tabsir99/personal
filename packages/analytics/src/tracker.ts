@@ -2,7 +2,7 @@ import { config } from './config';
 import { log } from './logger';
 import { apiUrl } from './state';
 import { STORAGE_PREFIX, MAX_HREF_LENGTH, HANDOFF_PARAMS } from './constants';
-import { getVisitorId, getSessionId, getVisitorFirstSeenAt, getVisitorSessionNumber, setCookie } from './storage';
+import { getVisitorId, getSessionId, getVisitorSessionNumber, setCookie } from './storage';
 import { isBot } from './bot';
 import { EventPayload, EventCallback } from './types';
 
@@ -28,7 +28,6 @@ export function buildEventPayload(type: string): EventPayload | undefined {
     viewport: { width: window.innerWidth, height: window.innerHeight },
     visitorId: getVisitorId(),
     sessionId: getSessionId(),
-    visitorFirstSeenAt: getVisitorFirstSeenAt(),
     visitorSessionNumber: getVisitorSessionNumber(),
     language: navigator.language || '',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',

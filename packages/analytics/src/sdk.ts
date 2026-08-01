@@ -1,4 +1,5 @@
 import { setConfig } from './config';
+import { CUSTOM_EVENT_TYPE } from './constants';
 import { initConfigState, trackingEnabled } from './state';
 import {
   trackPageview as _trackPageview,
@@ -44,7 +45,7 @@ const methods: AnalyticsInstance = {
     _trackPageview(callback);
   },
   trackEvent(name: string, data?: Record<string, string>, callback?: EventCallback): void {
-    _trackCustomEvent(name, data, callback);
+    _trackCustomEvent(CUSTOM_EVENT_TYPE, { ...data, eventName: name }, callback);
   },
   identify(userId: string, data?: IdentifyData, callback?: EventCallback): void {
     _trackIdentify(userId, data ?? {}, callback);
@@ -79,6 +80,7 @@ export function init(options: AnalyticsConfig): AnalyticsInstance {
     debug: options.debug ?? false,
     disableConsole: options.disableConsole ?? false,
     allowLocalhost: options.allowLocalhost ?? false,
+    allowIframe: options.allowIframe ?? false,
     allowedHostnames: options.allowedHostnames ?? [],
     allowFileProtocol: false,
   });

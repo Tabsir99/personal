@@ -1,6 +1,6 @@
 import { config } from './config';
 import { STORAGE_PREFIX, URL_PARAM_PREFIX } from './constants';
-import { isLocalhost, isValidDateStr, parseValidInt, generateUUID } from './utils';
+import { isLocalhost, parseValidInt, generateUUID } from './utils';
 
 function getUrlParam(name: string): string | null {
   try {
@@ -53,23 +53,8 @@ export function getVisitorId(): string {
   if (!vid) {
     vid = generateUUID();
     setCookie(`${STORAGE_PREFIX}visitor_id`, vid, 365);
-    getVisitorFirstSeenAt();
   }
   return vid;
-}
-
-export function getVisitorFirstSeenAt(): string {
-  let vfs = getUrlParam('vfs');
-  if (isValidDateStr(vfs)) {
-    setCookie(`${STORAGE_PREFIX}visitor_first_seen_at`, vfs!, 365);
-    return vfs!;
-  }
-  vfs = getCookie(`${STORAGE_PREFIX}visitor_first_seen_at`);
-  if (!isValidDateStr(vfs)) {
-    vfs = new Date().toISOString();
-    setCookie(`${STORAGE_PREFIX}visitor_first_seen_at`, vfs, 365);
-  }
-  return vfs!;
 }
 
 export function getVisitorSessionNumber(): number {

@@ -6,7 +6,6 @@ export interface EventPayload {
   viewport: { width: number; height: number };
   visitorId: string;
   sessionId: string;
-  visitorFirstSeenAt: string;
   visitorSessionNumber: number;
   language: string;
   timezone: string;
@@ -43,6 +42,7 @@ export interface AnalyticsConfig {
   disableConsole?: boolean;
   /** Allow tracking on localhost (disabled by default). */
   allowLocalhost?: boolean;
+  allowIframe?: boolean;
   /** Additional hostnames treated as internal (cross-domain tracking). */
   allowedHostnames?: string[];
 }

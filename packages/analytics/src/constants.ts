@@ -12,7 +12,9 @@ export const SCROLL_PROP_PREFIX = `${SCROLL_ATTR}-`;
 export const SCROLL_THRESHOLD_ATTR = `${SCROLL_ATTR}-threshold`;
 export const SCROLL_DELAY_ATTR = `${SCROLL_ATTR}-delay`;
 
-export const HANDOFF_PARAMS = ['vid', 'sid', 'vfs', 'vsn'].map((key) => `${URL_PARAM_PREFIX}${key}`);
+export const HANDOFF_PARAMS = ['vid', 'sid', 'vsn'].map((key) => `${URL_PARAM_PREFIX}${key}`);
+
+export const CUSTOM_EVENT_TYPE = 'custom';
 
 export const EXTRA_DATA_MAX_PROPERTIES = 10;
 export const EXTRA_DATA_MAX_KEY_LENGTH = 32;

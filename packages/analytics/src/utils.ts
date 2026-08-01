@@ -8,12 +8,6 @@ export function isLocalhost(hostname: string): boolean {
   return false;
 }
 
-export function isValidDateStr(str: string | null | undefined): boolean {
-  if (!str || typeof str !== 'string') return false;
-  const parsed = Date.parse(str);
-  return !Number.isNaN(parsed) && parsed > 0;
-}
-
 const MAX_SESSION_NUMBER = 65535;
 
 export function parseValidInt(str: string | null | undefined): number | null {

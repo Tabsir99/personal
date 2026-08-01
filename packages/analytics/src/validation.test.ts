@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import * as contract from '@tabsircg/schemas/analytics';
 import { sanitizeEventData } from './validation';
-import { isLocalhost, isValidDateStr, parseValidInt } from './utils';
-import { getBaseDomain } from './dom';
+import { isLocalhost, parseValidInt } from './utils';
+import { isSameSite, isInternalDomain } from './dom';
+import { setConfig } from './config';
 import { routeKey } from './spa';
 import * as constants from './constants';
 import { GOAL_PROP_PREFIX, SCROLL_PROP_PREFIX } from './constants';
@@ -54,6 +55,10 @@ describe('sanitizeEventData', () => {
 });
 
 describe('wire rules match the shared contract', () => {
+  it('agrees with the dashboard on what a custom event type is', () => {
+    expect(constants.CUSTOM_EVENT_TYPE).toBe(contract.CUSTOM_EVENT_TYPE);
+  });
+
   it('mirrors every extra_data limit the worker enforces', () => {
     expect(constants.EXTRA_DATA_MAX_PROPERTIES).toBe(contract.EXTRA_DATA_MAX_PROPERTIES);
     expect(constants.EXTRA_DATA_MAX_KEY_LENGTH).toBe(contract.EXTRA_DATA_MAX_KEY_LENGTH);
@@ -89,7 +94,7 @@ describe('routeKey', () => {
   });
 
   it('ignores the cross-domain handoff params so stripping them is not a pageview', () => {
-    expect(routeKey('https://x.com/p?_cgd_vid=v&_cgd_sid=s&_cgd_vfs=f&_cgd_vsn=2')).toBe('/p');
+    expect(routeKey('https://x.com/p?_cgd_vid=v&_cgd_sid=s&_cgd_vsn=2')).toBe('/p');
   });
 });
 
@@ -123,24 +128,32 @@ describe('isLocalhost', () => {
   });
 });
 
-describe('isValidDateStr', () => {
-  it('accepts an ISO timestamp', () => {
-    expect(isValidDateStr(new Date().toISOString())).toBe(true);
+describe('isSameSite', () => {
+  it('treats a parent and its subdomain as one site without any config', () => {
+    setConfig({ domain: null, allowedHostnames: [] });
+    expect(isSameSite('www.example.com', 'example.com')).toBe(true);
+    expect(isSameSite('example.com', 'www.example.com')).toBe(true);
   });
 
-  it('rejects junk and empties', () => {
-    expect(isValidDateStr('not-a-date')).toBe(false);
-    expect(isValidDateStr(null)).toBe(false);
-  });
-});
-
-describe('getBaseDomain', () => {
-  it('reduces a subdomain to its registrable pair', () => {
-    expect(getBaseDomain('app.example.com')).toBe('example.com');
-    expect(getBaseDomain('www.example.com')).toBe('example.com');
+  it('joins sibling subdomains under the declared domain', () => {
+    setConfig({ domain: 'example.com', allowedHostnames: [] });
+    expect(isSameSite('app.example.com', 'blog.example.com')).toBe(true);
   });
 
-  it('passes single labels through', () => {
-    expect(getBaseDomain('localhost')).toBe('localhost');
+  it('no longer collapses unrelated hosts that share a multi-label suffix', () => {
+    setConfig({ domain: 'foo.co.uk', allowedHostnames: [] });
+    expect(isSameSite('bar.co.uk', 'foo.co.uk')).toBe(false);
+  });
+
+  it('keeps a declared cross-domain host separate so it gets decorated, not skipped', () => {
+    setConfig({ domain: 'foo.co.uk', allowedHostnames: ['bar.co.uk'] });
+    expect(isSameSite('bar.co.uk', 'foo.co.uk')).toBe(false);
+    expect(isInternalDomain('bar.co.uk')).toBe(true);
+  });
+
+  it('does not treat a suffix collision as internal', () => {
+    setConfig({ domain: 'example.com', allowedHostnames: [] });
+    expect(isInternalDomain('notexample.com')).toBe(false);
+    expect(isSameSite('notexample.com', 'example.com')).toBe(false);
   });
 });
