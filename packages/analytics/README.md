@@ -346,10 +346,48 @@ Consequences worth knowing:
 
 ## 8. Endpoint and authorization
 
-Events are `POST`ed as `Content-Type: text/plain` via `XMLHttpRequest`. That
-content type is deliberate and load-bearing: it keeps the request CORS-simple so
-no preflight is sent — the ingest Worker answers `POST` only and returns **405
-for `OPTIONS`**, so switching to `application/json` would break ingest outright.
+Events are `POST`ed as `Content-Type: text/plain`. That content type is
+deliberate and load-bearing: it keeps the request CORS-simple so no preflight is
+sent — the ingest Worker answers `POST` only and returns **405 for `OPTIONS`**,
+so switching to `application/json` would break ingest outright.
+
+The transport is `fetch(…, { keepalive: true })`. Keepalive requests are handed
+to the browser process and complete even if the document is torn down mid-flight,
+so an event fired on a click that navigates away is not lost — which a plain
+`XMLHttpRequest` would drop. `sendBeacon` gives the same unload guarantee but
+returns only a queued/not-queued boolean, so keepalive is used instead: the
+response status is what `EventCallback` reports and what distinguishes a rejected
+payload from a delivered one.
+
+There is no fallback transport. Keepalive shipped in Chrome 66 (2018), Safari 13
+(2019) and Firefox 90 (2021), so every engine has had it since July 2021, and
+the bundle already targets ES2020.
+
+Two constraints come with keepalive: all in-flight keepalive requests share a
+**64 KB body budget** per document, and `credentials` is `omit`, so no cookies
+travel with the request. Neither binds here — payloads are a few hundred bytes
+and identity is read client-side into the body — but a much larger `extraData`
+budget would need rechecking against the 64 KB limit.
+
+### Event callbacks
+
+`trackPageview`, `trackEvent` and `identify` each take an optional callback. It
+fires **exactly once on every path**, including the ones where nothing is sent,
+so it is safe to await before navigating.
+
+| `outcome`   | Meaning                                                       | `status` |
+| ----------- | ------------------------------------------------------------- | -------- |
+| `delivered` | Worker accepted it                                            | `200`    |
+| `rejected`  | Worker refused it — validation, unknown site, bad origin       | the HTTP status |
+| `failed`    | Request never completed (offline, DNS, blocked)               | `0`      |
+| `disabled`  | Not sent: bot, localhost, iframe, or the `cgd_ignore` flag    | `0`      |
+| `throttled` | Not sent: same URL already recorded within 60s                 | `0`      |
+| `invalid`   | Not sent: `extraData` failed validation, or config incomplete  | `0`      |
+
+Only `delivered` means the event reached Tinybird. Earlier versions reported
+`{ status: 200 }` for events that were deliberately never sent and reported
+nothing at all when validation rejected a payload, so a callback-then-navigate
+flow could hang.
 
 Resolution order for the endpoint, from `state.ts`:
 

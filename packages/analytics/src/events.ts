@@ -1,9 +1,11 @@
 import { log } from './logger';
 import { trackingEnabled, disableReason } from './state';
-import { buildEventPayload, sendEvent } from './tracker';
+import { buildEventPayload, sendEvent, reportOutcome } from './tracker';
 import { sanitizeEventData } from './validation';
 import { STORAGE_PREFIX, CUSTOM_EVENT_TYPE } from './constants';
 import { EventCallback, IdentifyData } from './types';
+
+const PAGEVIEW_THROTTLE_MS = 60000;
 
 let lastPageviewTime = 0;
 let lastPageviewUrl = '';
@@ -11,15 +13,13 @@ let lastPageviewUrl = '';
 export function trackPageview(callback?: EventCallback) {
   if (!trackingEnabled) {
     log('info', `Pageview ignored - ${disableReason}`);
-    if (callback) callback({ status: 200 });
-    return;
+    return reportOutcome(callback, 'disabled');
   }
   const now = Date.now();
   const href = window.location.href;
-  if (href === lastPageviewUrl && now - lastPageviewTime < 60000) {
+  if (href === lastPageviewUrl && now - lastPageviewTime < PAGEVIEW_THROTTLE_MS) {
     log('info', 'Pageview ignored - throttled (same URL within 1 minute)');
-    if (callback) callback({ status: 200 });
-    return;
+    return reportOutcome(callback, 'throttled');
   }
   lastPageviewTime = now;
   lastPageviewUrl = href;
@@ -29,22 +29,22 @@ export function trackPageview(callback?: EventCallback) {
   } catch (e) {}
 
   const payload = buildEventPayload('pageview');
-  if (payload) sendEvent(payload, callback);
+  if (!payload) return reportOutcome(callback, 'invalid');
+  sendEvent(payload, callback);
 }
 
 export function trackCustomEvent(type: string, extraData?: Record<string, unknown>, callback?: EventCallback) {
   if (!trackingEnabled) {
     log('info', `Custom event '${type}' ignored - ${disableReason}`);
-    if (callback) callback({ status: 200 });
-    return;
+    return reportOutcome(callback, 'disabled');
   }
   const sanitized = sanitizeEventData(extraData ?? {});
   if (sanitized === null) {
     log('error', `Custom event '${type}' rejected due to validation errors`);
-    return;
+    return reportOutcome(callback, 'invalid');
   }
   const payload = buildEventPayload(type);
-  if (!payload) return;
+  if (!payload) return reportOutcome(callback, 'invalid');
 
   payload.extraData = sanitized;
   sendEvent(payload, callback);
@@ -53,16 +53,15 @@ export function trackCustomEvent(type: string, extraData?: Record<string, unknow
 export function trackIdentify(userId: string, data: IdentifyData, callback?: EventCallback) {
   if (!trackingEnabled) {
     log('info', `Identify event ignored - ${disableReason}`);
-    if (callback) callback({ status: 200 });
-    return;
+    return reportOutcome(callback, 'disabled');
   }
   const identity = sanitizeEventData({ name: '', image: '', ...data, user_id: userId });
   if (identity === null) {
     log('error', 'Identify event rejected due to validation errors');
-    return;
+    return reportOutcome(callback, 'invalid');
   }
   const payload = buildEventPayload('identify');
-  if (!payload) return;
+  if (!payload) return reportOutcome(callback, 'invalid');
 
   payload.extraData = identity;
   sendEvent(payload, callback);

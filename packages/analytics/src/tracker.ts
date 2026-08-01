@@ -4,9 +4,26 @@ import { apiUrl } from './state';
 import { STORAGE_PREFIX, MAX_HREF_LENGTH, HANDOFF_PARAMS } from './constants';
 import { getVisitorId, getSessionId, getVisitorSessionNumber, setCookie } from './storage';
 import { isBot } from './bot';
-import { EventPayload, EventCallback } from './types';
+import { EventPayload, EventCallback, EventOutcome } from './types';
 
 const SESSION_COOKIE_LIFETIME_DAYS = 30 / (60 * 24);
+
+export function reportOutcome(callback: EventCallback | undefined, outcome: EventOutcome, status = 0) {
+  if (!callback) return;
+  try {
+    callback({ outcome, status });
+  } catch (error) {
+    log('error', 'Event callback threw', error);
+  }
+}
+
+function ignoreFlagSet(): boolean {
+  try {
+    return localStorage.getItem(`${STORAGE_PREFIX}ignore`) === 'true';
+  } catch {
+    return false;
+  }
+}
 
 export function buildEventPayload(type: string): EventPayload | undefined {
   const href = window.location.href;
@@ -48,31 +65,37 @@ export function buildEventPayload(type: string): EventPayload | undefined {
 }
 
 export function sendEvent(payload: EventPayload, callback?: EventCallback) {
-  if (localStorage.getItem(`${STORAGE_PREFIX}ignore`) === 'true') {
+  if (ignoreFlagSet()) {
     log('info', 'Event ignored - tracking disabled via localStorage flag');
-    if (callback) callback({ status: 200 });
-    return;
+    return reportOutcome(callback, 'disabled');
   }
   if (isBot()) {
     log('info', 'Event ignored - bot detected');
-    if (callback) callback({ status: 200 });
-    return;
+    return reportOutcome(callback, 'disabled');
   }
 
   setCookie(`${STORAGE_PREFIX}session_id`, getSessionId(), SESSION_COOKIE_LIFETIME_DAYS);
 
-  const xhr = new XMLHttpRequest();
-  xhr.open('POST', apiUrl, true);
-  xhr.setRequestHeader('Content-Type', 'text/plain');
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === XMLHttpRequest.DONE) {
-      if (xhr.status === 200) {
-        log('info', `${payload.type || 'Event'} tracked successfully`);
+  fetch(apiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload),
+    keepalive: true,
+    credentials: 'omit',
+    mode: 'cors',
+  }).then(
+    (response) => {
+      if (response.status === 200) {
+        log('info', `${payload.type} tracked successfully`);
+        reportOutcome(callback, 'delivered', response.status);
       } else {
-        log('error', `Failed to track ${payload.type || 'event'} - HTTP ${xhr.status}`);
+        log('error', `Failed to track ${payload.type} - HTTP ${response.status}`);
+        reportOutcome(callback, 'rejected', response.status);
       }
-      if (callback) callback({ status: xhr.status });
+    },
+    () => {
+      log('error', `Failed to track ${payload.type} - request could not be sent`);
+      reportOutcome(callback, 'failed');
     }
-  };
-  xhr.send(JSON.stringify(payload));
+  );
 }

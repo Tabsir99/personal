@@ -9,7 +9,7 @@ import {
 } from './events';
 import { initDom } from './dom';
 import { setupSpaRouting } from './spa';
-import type { AnalyticsConfig, IdentifyData, EventCallback } from './types';
+import type { AnalyticsConfig, IdentifyData, EventCallback, EventResult, EventOutcome } from './types';
 
 let initialized = false;
 
@@ -103,5 +103,5 @@ export function init(options: AnalyticsConfig): AnalyticsInstance {
   return methods;
 }
 
-export type { AnalyticsConfig, IdentifyData, EventCallback, AnalyticsInstance };
+export type { AnalyticsConfig, IdentifyData, EventCallback, EventResult, EventOutcome, AnalyticsInstance };
 export * from './constants';

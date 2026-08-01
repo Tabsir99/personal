@@ -22,8 +22,15 @@ export interface IdentifyData {
   [key: string]: string | undefined;
 }
 
+export type EventOutcome = 'delivered' | 'rejected' | 'failed' | 'disabled' | 'throttled' | 'invalid';
+
+export interface EventResult {
+  outcome: EventOutcome;
+  status: number;
+}
+
 export interface EventCallback {
-  (res: { status: number }): void;
+  (result: EventResult): void;
 }
 
 export type LogLevel = 'info' | 'warn' | 'error';
