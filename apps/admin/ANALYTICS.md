@@ -60,9 +60,14 @@ columns (no query-time parsing needed):
 - **geo** — `country` / `region` / `city` / `ip` from the request.
 - **UA parse** — `browser` / `os` / `device` via `parseUA`.
 - **bot detect** — `is_bot` / `bot_category` / `bot_name` via `detectBot`
-  (categories: `search_index` / `answer_fetch` / `training` / `ai_crawler`). Real
-  crawlers are recorded, not dropped; only automation tools (Selenium/curl) are
-  blocked upstream by the SDK.
+  (categories: `search_index` / `answer_fetch` / `training` / `ai_crawler`, plus
+  `generic` for the UA substring list). Real crawlers are recorded, not dropped;
+  only automation tools (Selenium/curl) are blocked upstream by the SDK.
+
+`ip` is written on every row and **read by nothing** — no ingest path and no
+dashboard query filters on it. There is no IP-based exclusion of your own
+traffic; the only self-exclusion is the browser-local `cgd_ignore` flag
+documented in `packages/analytics/README.md` §6.
 
 Where data still hides:
 
@@ -127,6 +132,18 @@ writes attribute-driven goals (`data-*-goal`, `data-*-scroll`) as
 `type='custom'` with the real name in `event_name`. Goals every site has without
 firing a custom event — `payment`, `identify`, `external_link` — are unioned in
 client-side from `RESERVED_GOALS`, not discovered by the query.
+
+> **That pin assumes one of the SDK's two custom-event shapes.** `cgd(name,…)`
+> and the `data-cgd-*` attributes send `type='custom'` + `extraData.eventName`,
+> which is what the catalog matches. The bundled SDK's
+> `analytics.trackEvent(name,…)` instead sends `type=name`, so its rows land
+> with the right `event_name` but the wrong `type`: they are **counted by the
+> goals/series branch** (which only excludes `type='pageview'`) yet **never
+> appear in the catalog**, so a goal can show up in the chart while missing from
+> every picker. `journey/route.ts` has the same assumption via `sortKeyTypeFor`.
+> Funnels are unaffected — a goal step matches `event_name` alone. Reconciling
+> this means either normalising `trackEvent` to `type='custom'` in the SDK or
+> dropping the `type` pin and paying the full scan.
 
 The query is three UNION branches, not four: `goals` and `series` read an
 identical row set and differ only in grouping, so they share one scan via
