@@ -6,7 +6,7 @@ import {
   COLUMNS,
   ANALYTICS_TABLE,
   type AnalyticsEventRow,
-} from "@tabsircg/analytics-contract";
+} from "@tabsircg/schemas/analytics";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { logQuery, logQueryError, type QueryStats } from "./queryLog";
 

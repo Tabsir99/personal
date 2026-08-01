@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./analytics": "./src/analytics.ts",
     "./blog": "./src/blog.ts",
     "./portfolio": "./src/portfolio.ts",
     "./user": "./src/user.ts",

@@ -4,11 +4,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve, relative } from "node:path";
 
 const nextConfig: NextConfig = {
-  transpilePackages: [
-    "@tabsircg/schemas",
-    "@tabsircg/analytics",
-    "@tabsircg/analytics-contract",
-  ],
+  transpilePackages: ["@tabsircg/schemas", "@tabsircg/analytics"],
   logging: { serverFunctions: false },
   devIndicators: false,
   reactStrictMode: true,

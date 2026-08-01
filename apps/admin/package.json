@@ -24,7 +24,6 @@
     "@open-notion/editor": "catalog:",
     "@phosphor-icons/react": "catalog:",
     "@tabsircg/analytics": "workspace:*",
-    "@tabsircg/analytics-contract": "workspace:*",
     "@tabsircg/schemas": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
     "chalk": "^5.6.2",

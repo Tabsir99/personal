@@ -1,4 +1,4 @@
-import type { AnalyticsEventRow } from "@tabsircg/analytics-contract";
+import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
 import { CHANNELS } from "@/app/api/analytics/sources/channels";
 import {
   CAMPAIGN_DIMENSIONS,

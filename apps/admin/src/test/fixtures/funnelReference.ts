@@ -1,4 +1,4 @@
-import type { AnalyticsEventRow } from "@tabsircg/analytics-contract";
+import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
 import type {
   FunnelDefinition,
   FunnelDetailResponse,

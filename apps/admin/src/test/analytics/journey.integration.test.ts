@@ -4,7 +4,7 @@ vi.mock("@/lib/requireAuth", () => ({
   requireAuth: vi.fn().mockResolvedValue(undefined),
 }));
 
-import type { AnalyticsEventRow } from "@tabsircg/analytics-contract";
+import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
 import {
   TINYBIRD_ENABLED,
   ingestRows,

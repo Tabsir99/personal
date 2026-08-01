@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import type { AnalyticsEventRow } from "@tabsircg/analytics-contract";
-import { ANALYTICS_TABLE } from "@tabsircg/analytics-contract";
+import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
+import { ANALYTICS_TABLE } from "@tabsircg/schemas/analytics";
 
 /**
  * Shared plumbing for analytics integration tests that run against a REAL

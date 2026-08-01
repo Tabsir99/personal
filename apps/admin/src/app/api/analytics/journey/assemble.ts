@@ -1,5 +1,5 @@
 import "server-only";
-import type { AnalyticsEventRow } from "@tabsircg/analytics-contract";
+import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
 import { formatCountryName } from "@/lib/countryUtils";
 import { parseHref } from "@/lib/tinybird";
 import { CAMPAIGN_DIMENSIONS } from "@/lib/analyticsTypes";

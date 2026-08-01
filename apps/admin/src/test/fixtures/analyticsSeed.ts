@@ -1,4 +1,4 @@
-import type { AnalyticsEventRow } from "@tabsircg/analytics-contract";
+import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
 
 /** In-memory, RNG-seeded twin of analytics-worker's seed.ts. Every dimension's
  * cardinality stays bounded so no dashboard query hits its LIMIT. */
