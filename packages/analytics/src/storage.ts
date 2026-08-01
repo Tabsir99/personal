@@ -1,6 +1,6 @@
 import { config } from './config';
 import { STORAGE_PREFIX, URL_PARAM_PREFIX } from './constants';
-import { isLocalhost, parseValidInt, generateUUID } from './utils';
+import { isLocalhost, parseValidInt, generateUUID, usableHandoffId } from './utils';
 
 function getUrlParam(name: string): string | null {
   try {
@@ -44,12 +44,12 @@ export function getCookie(name: string): string | null {
 }
 
 export function getVisitorId(): string {
-  let vid = getUrlParam('vid');
+  let vid = usableHandoffId(getUrlParam('vid'));
   if (vid) {
     setCookie(`${STORAGE_PREFIX}visitor_id`, vid, 365);
     return vid;
   }
-  vid = getCookie(`${STORAGE_PREFIX}visitor_id`);
+  vid = usableHandoffId(getCookie(`${STORAGE_PREFIX}visitor_id`));
   if (!vid) {
     vid = generateUUID();
     setCookie(`${STORAGE_PREFIX}visitor_id`, vid, 365);
@@ -71,12 +71,12 @@ export function getVisitorSessionNumber(): number {
 }
 
 export function getSessionId(): string {
-  let sid = getUrlParam('sid');
+  let sid = usableHandoffId(getUrlParam('sid'));
   if (sid) {
     setCookie(`${STORAGE_PREFIX}session_id`, sid, 1 / 48);
     return sid;
   }
-  sid = getCookie(`${STORAGE_PREFIX}session_id`);
+  sid = usableHandoffId(getCookie(`${STORAGE_PREFIX}session_id`));
   if (sid) {
     setCookie(`${STORAGE_PREFIX}session_id`, sid, 1 / 48);
   } else {

@@ -34,6 +34,8 @@ export const BOT_CATEGORY_NAMES = [
 
 export type BotCategory = (typeof BOT_CATEGORY_NAMES)[number];
 
+export const VISITOR_ID_MAX_LENGTH = 100;
+
 export const EXTRA_DATA_MAX_PROPERTIES = 10;
 export const EXTRA_DATA_MAX_KEY_LENGTH = 32;
 export const EXTRA_DATA_MAX_VALUE_LENGTH = 1000;

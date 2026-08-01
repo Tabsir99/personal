@@ -149,10 +149,10 @@ await stripe.paymentIntents.create({
 | Stripe event               | Effect              | Amount from | Attribution                           |
 | -------------------------- | ------------------- | ----------- | ------------------------------------- |
 | `payment_intent.succeeded` | `+ amount_received` | the event   | PaymentIntent metadata (direct)       |
-| `charge.refunded`          | `− amount_refunded` | the event   | resolved from charge → PaymentIntent  |
+| `refund.created`           | `− refund.amount`   | the event   | resolved from refund → PaymentIntent  |
 | `charge.dispute.created`   | `− amount`          | the event   | resolved from dispute → PaymentIntent |
 
-For refunds and disputes the webhook follows the charge/dispute back to its PaymentIntent and reads that metadata, so you never stamp the charge or dispute yourself. `visitor_id` is required, `session_id` optional; a missing `visitor_id` skips the row. Events are deduplicated by Stripe event id.
+For refunds and disputes the webhook follows the refund/dispute back to its PaymentIntent and reads that metadata, so you never stamp the refund or dispute yourself. `visitor_id` is required, `session_id` optional; a missing `visitor_id` skips the row. Events are deduplicated by Stripe event id.
 
 ---
 
@@ -220,38 +220,51 @@ question the dashboard asks.
 ### Wire limits
 
 The `extraData` rules live in one place — `EXTRA_DATA_*` in
-`@tabsircg/schemas/analytics` — and are applied twice. The Worker's
-`extraDataSchema` is the boundary that actually holds: violate it and the whole
-payload 400s. The tracker mirrors the same numbers in `sanitizeEventData` so a
-mistake surfaces as a console error at the call site instead of a silent
-rejection you never see. The tracker's copy is a convenience, not a control;
-anything posting straight to the Worker still has to satisfy the schema.
+`@tabsircg/schemas/analytics` — and are enforced in exactly one place: the
+Worker's `extraDataSchema`. Violate it and the whole payload 400s, and the
+event callback reports `rejected` with that status.
 
-The SDK's copy of the numbers is asserted equal to the shared contract in its
-test suite, so the two cannot drift.
+**The tracker does not validate.** It marshals — `toEventData` lowercases keys,
+stringifies values and bounds their length so the object matches the wire type —
+and then sends whatever you gave it. It never refuses an event on your behalf,
+because a rule the browser enforces is a rule anyone can skip by posting to the
+Worker directly. One authority, not two.
+
+The SDK still publishes the numbers as constants so you can check against them
+yourself, and its test suite asserts they equal the shared contract, so the
+published limits cannot drift from the enforced ones.
 
 | Field                            | Limit         | Enforced by                                                          |
 | -------------------------------- | ------------- | -------------------------------------------------------------------- |
 | `href`                           | 2000 chars    | tracker trims before sending; Worker rejects beyond                   |
 | `type` (custom events)           | 64 chars      | Worker schema (rejects)                                               |
 | derived `event_name`             | 255 chars     | Worker trims                                                          |
-| `extraData` — value              | 1000 chars    | tracker trims; Worker rejects beyond                                  |
-| `extraData` — whole object       | 4000 chars    | both reject beyond; Worker also drops trailing keys as a backstop, so what is stored is **always valid JSON** |
-| `extraData` — key count          | 10            | both reject (`eventName` is exempt)                                   |
-| `extraData` — key name           | 32 chars, `[a-z0-9_-]` | tracker lowercases then rejects; Worker rejects              |
-| `extraData` — value type         | string        | both reject numbers, objects and arrays                               |
+| `extraData` — value              | 1000 chars    | tracker trims to fit; Worker rejects beyond                           |
+| `extraData` — whole object       | 4000 chars    | Worker rejects beyond, and drops trailing keys as a backstop, so what is stored is **always valid JSON** |
+| `extraData` — key count          | 10            | Worker rejects (`eventName` is exempt)                                |
+| `extraData` — key name           | 32 chars, `[a-z0-9_-]` | tracker lowercases; Worker rejects                           |
+| `extraData` — value type         | string        | tracker stringifies; Worker rejects non-strings                       |
+| `visitorId`, `sessionId`         | 100 chars     | Worker rejects beyond; tracker drops an over-length handoff id instead of storing it |
 | viewport, screen, session number | 0–65535       | Worker clamps (columns are `UInt16`)                                  |
 
-Every tracking entry point routes through `sanitizeEventData` — `cgd()`,
+Every tracking entry point routes through `toEventData` — `cgd()`,
 `analytics.trackEvent()`, `identify()`, `data-cgd-goal`, `data-cgd-scroll` and
-the automatic `external_link` event. A payload that violates any rule above is
-**not sent**, and the reason is logged to the console.
+the automatic `external_link` event — so they all put the same shape on the
+wire. None of them can reject your event; only the Worker can.
 
 Values are trimmed and length-bounded but otherwise passed through verbatim.
 The tracker does **not** strip markup or URL schemes from your values: it would
 corrupt legitimate data (`?w=64&h=64` losing its `&`) while protecting nothing,
 since anything bypassing the script skips it anyway. Escape on render, as the
 dashboard does.
+
+The one thing the tracker does refuse is an over-length `_cgd_vid` / `_cgd_sid`
+handoff parameter, and it is not a security check. The handoff writes the id
+straight into a 365-day cookie, so a single bad link would make every event from
+that browser 400 for a year — long after the parameter is gone. Rejecting it on
+the way in, and again when reading the cookie back, keeps one malformed link
+from costing a visitor permanently. The Worker still bounds the same field; this
+only stops the tracker caching a value it knows will be refused.
 
 ---
 
@@ -382,12 +395,11 @@ so it is safe to await before navigating.
 | `failed`    | Request never completed (offline, DNS, blocked)               | `0`      |
 | `disabled`  | Not sent: bot, localhost, iframe, or the `cgd_ignore` flag    | `0`      |
 | `throttled` | Not sent: same URL already recorded within 60s                 | `0`      |
-| `invalid`   | Not sent: `extraData` failed validation, or config incomplete  | `0`      |
+| `invalid`   | Not sent: no `websiteId`/`domain`, so no payload could be built | `0`      |
 
-Only `delivered` means the event reached Tinybird. Earlier versions reported
-`{ status: 200 }` for events that were deliberately never sent and reported
-nothing at all when validation rejected a payload, so a callback-then-navigate
-flow could hang.
+Only `delivered` means the event reached Tinybird. A malformed `extraData`
+comes back as `rejected` with the Worker's status, not as `invalid` — the
+tracker sends it and lets the Worker rule.
 
 Resolution order for the endpoint, from `state.ts`:
 

@@ -1,7 +1,7 @@
 import { log } from './logger';
 import { trackingEnabled, disableReason } from './state';
 import { buildEventPayload, sendEvent, reportOutcome } from './tracker';
-import { sanitizeEventData } from './validation';
+import { toEventData } from './eventData';
 import { STORAGE_PREFIX, CUSTOM_EVENT_TYPE } from './constants';
 import { EventCallback, IdentifyData } from './types';
 
@@ -38,15 +38,10 @@ export function trackCustomEvent(type: string, extraData?: Record<string, unknow
     log('info', `Custom event '${type}' ignored - ${disableReason}`);
     return reportOutcome(callback, 'disabled');
   }
-  const sanitized = sanitizeEventData(extraData ?? {});
-  if (sanitized === null) {
-    log('error', `Custom event '${type}' rejected due to validation errors`);
-    return reportOutcome(callback, 'invalid');
-  }
   const payload = buildEventPayload(type);
   if (!payload) return reportOutcome(callback, 'invalid');
 
-  payload.extraData = sanitized;
+  payload.extraData = toEventData(extraData ?? {});
   sendEvent(payload, callback);
 }
 
@@ -55,15 +50,10 @@ export function trackIdentify(userId: string, data: IdentifyData, callback?: Eve
     log('info', `Identify event ignored - ${disableReason}`);
     return reportOutcome(callback, 'disabled');
   }
-  const identity = sanitizeEventData({ name: '', image: '', ...data, user_id: userId });
-  if (identity === null) {
-    log('error', 'Identify event rejected due to validation errors');
-    return reportOutcome(callback, 'invalid');
-  }
   const payload = buildEventPayload('identify');
   if (!payload) return reportOutcome(callback, 'invalid');
 
-  payload.extraData = identity;
+  payload.extraData = toEventData({ name: '', image: '', ...data, user_id: userId });
   sendEvent(payload, callback);
 }
 

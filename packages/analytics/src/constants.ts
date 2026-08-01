@@ -16,6 +16,8 @@ export const HANDOFF_PARAMS = ['vid', 'sid', 'vsn'].map((key) => `${URL_PARAM_PR
 
 export const CUSTOM_EVENT_TYPE = 'custom';
 
+export const VISITOR_ID_MAX_LENGTH = 100;
+
 export const EXTRA_DATA_MAX_PROPERTIES = 10;
 export const EXTRA_DATA_MAX_KEY_LENGTH = 32;
 export const EXTRA_DATA_MAX_VALUE_LENGTH = 1000;

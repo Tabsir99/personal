@@ -1,3 +1,5 @@
+import { VISITOR_ID_MAX_LENGTH } from './constants';
+
 export function isLocalhost(hostname: string): boolean {
   if (!hostname) return false;
   const lower = hostname.toLowerCase();
@@ -6,6 +8,11 @@ export function isLocalhost(hostname: string): boolean {
   if (/^(\[)?::1?\]?$/.test(lower)) return true;
   if (lower.endsWith('.local') || lower.endsWith('.localhost')) return true;
   return false;
+}
+
+export function usableHandoffId(value: string | null | undefined): string | null {
+  if (!value) return null;
+  return value.length > VISITOR_ID_MAX_LENGTH ? null : value;
 }
 
 const MAX_SESSION_NUMBER = 65535;

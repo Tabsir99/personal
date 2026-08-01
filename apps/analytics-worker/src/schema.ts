@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { extraDataSchema } from "@tabsircg/schemas/analytics";
+import { extraDataSchema, VISITOR_ID_MAX_LENGTH } from "@tabsircg/schemas/analytics";
 
 const basePayloadSchema = z.object({
   websiteId: z.string().min(1).max(96), // Max 96 bytes for index id limit
@@ -10,8 +10,8 @@ const basePayloadSchema = z.object({
     width: z.number(),
     height: z.number(),
   }),
-  visitorId: z.string().max(100),
-  sessionId: z.string().max(100),
+  visitorId: z.string().max(VISITOR_ID_MAX_LENGTH),
+  sessionId: z.string().max(VISITOR_ID_MAX_LENGTH),
   visitorSessionNumber: z.number(),
   language: z.string().max(50),
   timezone: z.string().max(100),

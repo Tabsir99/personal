@@ -25,6 +25,20 @@ function ignoreFlagSet(): boolean {
   }
 }
 
+export function consumeHandoffParams(href: string): string {
+  try {
+    const url = new URL(href);
+    const present = HANDOFF_PARAMS.filter((param) => url.searchParams.has(param));
+    if (present.length === 0) return href;
+    for (const param of present) url.searchParams.delete(param);
+    const cleaned = url.toString();
+    window.history.replaceState({}, '', cleaned);
+    return cleaned;
+  } catch {
+    return href;
+  }
+}
+
 export function buildEventPayload(type: string): EventPayload | undefined {
   const href = window.location.href;
   if (!href) {
@@ -36,32 +50,26 @@ export function buildEventPayload(type: string): EventPayload | undefined {
     log('warn', 'Unable to build an event payload without a website ID and domain.');
     return;
   }
-  const payload: EventPayload = {
+
+  const visitorId = getVisitorId();
+  const sessionId = getSessionId();
+  const visitorSessionNumber = getVisitorSessionNumber();
+
+  return {
     websiteId,
     domain,
     type,
-    href: href.slice(0, MAX_HREF_LENGTH),
+    href: consumeHandoffParams(href).slice(0, MAX_HREF_LENGTH),
     referrer: document.referrer || null,
     viewport: { width: window.innerWidth, height: window.innerHeight },
-    visitorId: getVisitorId(),
-    sessionId: getSessionId(),
-    visitorSessionNumber: getVisitorSessionNumber(),
+    visitorId,
+    sessionId,
+    visitorSessionNumber,
     language: navigator.language || '',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
     screenWidth: screen.width || 0,
     screenHeight: screen.height || 0,
   };
-
-  try {
-    const u = new URL(window.location.href);
-    const handoffPresent = HANDOFF_PARAMS.filter((param) => u.searchParams.has(param));
-    if (handoffPresent.length > 0) {
-      for (const param of handoffPresent) u.searchParams.delete(param);
-      window.history.replaceState({}, '', u.toString());
-    }
-  } catch {}
-
-  return payload;
 }
 
 export function sendEvent(payload: EventPayload, callback?: EventCallback) {

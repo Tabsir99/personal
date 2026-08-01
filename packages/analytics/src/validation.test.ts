@@ -1,56 +1,50 @@
 import { describe, expect, it } from 'vitest';
 import * as contract from '@tabsircg/schemas/analytics';
-import { sanitizeEventData } from './validation';
-import { isLocalhost, parseValidInt } from './utils';
+import { toEventData } from './eventData';
+import { isLocalhost, parseValidInt, usableHandoffId } from './utils';
 import { isSameSite, isInternalDomain } from './dom';
 import { setConfig } from './config';
 import { routeKey } from './spa';
 import * as constants from './constants';
 import { GOAL_PROP_PREFIX, SCROLL_PROP_PREFIX } from './constants';
 
-describe('sanitizeEventData', () => {
-  it('rejects non-objects rather than degrading to empty data', () => {
-    expect(sanitizeEventData(null as never)).toBeNull();
-    expect(sanitizeEventData([1] as never)).toBeNull();
-    expect(sanitizeEventData('x' as never)).toBeNull();
+describe('toEventData', () => {
+  it('marshals to the string map the wire requires', () => {
+    expect(toEventData({ Plan: 'pro', count: 3 })).toEqual({ plan: 'pro', count: '3' });
   });
 
   it('accepts an empty object', () => {
-    expect(sanitizeEventData({})).toEqual({});
-  });
-
-  it('lowercases keys and stringifies values', () => {
-    expect(sanitizeEventData({ Plan: 'pro', count: 3 })).toEqual({ plan: 'pro', count: '3' });
+    expect(toEventData({})).toEqual({});
   });
 
   it('leaves URLs and markup characters untouched', () => {
     const url = 'https://cdn.example.com/a.jpg?w=64&h=64';
-    expect(sanitizeEventData({ url })).toEqual({ url });
-    expect(sanitizeEventData({ a: '<b>' })).toEqual({ a: '<b>' });
+    expect(toEventData({ url })).toEqual({ url });
+    expect(toEventData({ a: '<b>' })).toEqual({ a: '<b>' });
   });
 
-  it('caps values at the shared wire limit', () => {
-    expect(sanitizeEventData({ a: 'x'.repeat(5000) })?.a).toHaveLength(constants.EXTRA_DATA_MAX_VALUE_LENGTH);
+  it('leaves eventName cased as the caller wrote it', () => {
+    expect(toEventData({ eventName: 'signUp', Plan: 'pro' })).toEqual({ eventName: 'signUp', plan: 'pro' });
   });
 
-  it('rejects invalid key names', () => {
-    expect(sanitizeEventData({ 'bad key': '1' })).toBeNull();
-    expect(sanitizeEventData({ ['k'.repeat(33)]: '1' })).toBeNull();
+  it('truncates a long value so one field cannot cost the whole event', () => {
+    expect(toEventData({ a: 'x'.repeat(5000) }).a).toHaveLength(constants.EXTRA_DATA_MAX_VALUE_LENGTH);
   });
 
-  it('rejects more than ten properties', () => {
-    const many = Object.fromEntries(Array.from({ length: 11 }, (_, i) => [`k${i}`, '1']));
-    expect(sanitizeEventData(many)).toBeNull();
+  it('degrades to empty data rather than throwing on a non-object', () => {
+    expect(toEventData(null as never)).toEqual({});
+    expect(toEventData([1] as never)).toEqual({});
+    expect(toEventData('x' as never)).toEqual({});
   });
 
-  it('exempts eventName from the property budget', () => {
-    const ten = Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`k${i}`, '1']));
-    expect(sanitizeEventData({ eventName: 'signup', ...ten })).not.toBeNull();
-  });
+  it('does not gatekeep - it hands the worker the data and lets the worker rule', () => {
+    const tooMany = Object.fromEntries(Array.from({ length: 11 }, (_, i) => [`k${i}`, '1']));
+    expect(Object.keys(toEventData(tooMany))).toHaveLength(11);
+    expect(contract.extraDataSchema.safeParse(toEventData(tooMany)).success).toBe(false);
 
-  it('rejects a payload that serialises past the byte budget', () => {
-    const big = Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`k${i}`, 'x'.repeat(1000)]));
-    expect(sanitizeEventData(big)).toBeNull();
+    const badKey = toEventData({ 'bad key': '1' });
+    expect(badKey).toEqual({ 'bad key': '1' });
+    expect(contract.extraDataSchema.safeParse(badKey).success).toBe(false);
   });
 });
 
@@ -65,12 +59,17 @@ describe('wire rules match the shared contract', () => {
     expect(constants.EXTRA_DATA_MAX_VALUE_LENGTH).toBe(contract.EXTRA_DATA_MAX_VALUE_LENGTH);
     expect(constants.EXTRA_DATA_MAX_BYTES).toBe(contract.EXTRA_DATA_MAX_BYTES);
     expect(constants.EXTRA_DATA_KEY_PATTERN.source).toBe(contract.EXTRA_DATA_KEY_PATTERN.source);
+    expect(constants.EXTRA_DATA_KEY_PATTERN.flags).toBe(contract.EXTRA_DATA_KEY_PATTERN.flags);
     expect(constants.EVENT_NAME_KEY).toBe(contract.EVENT_NAME_KEY);
   });
 
+  it('mirrors the visitor id length the worker enforces', () => {
+    expect(constants.VISITOR_ID_MAX_LENGTH).toBe(contract.VISITOR_ID_MAX_LENGTH);
+  });
+
   it('produces data the worker schema accepts', () => {
-    const sanitized = sanitizeEventData({ eventName: 'signup', Plan: 'pro', url: 'https://x.com/?a=1&b=2' });
-    expect(contract.extraDataSchema.safeParse(sanitized).success).toBe(true);
+    const marshalled = toEventData({ eventName: 'signup', Plan: 'pro', url: 'https://x.com/?a=1&b=2' });
+    expect(contract.extraDataSchema.safeParse(marshalled).success).toBe(true);
   });
 });
 
@@ -95,6 +94,23 @@ describe('routeKey', () => {
 
   it('ignores the cross-domain handoff params so stripping them is not a pageview', () => {
     expect(routeKey('https://x.com/p?_cgd_vid=v&_cgd_sid=s&_cgd_vsn=2')).toBe('/p');
+  });
+});
+
+describe('usableHandoffId', () => {
+  it('passes ordinary ids through', () => {
+    expect(usableHandoffId('3f2504e0-4f89-41d3-9a0c-0305e82c3301')).toBe('3f2504e0-4f89-41d3-9a0c-0305e82c3301');
+    expect(usableHandoffId('a'.repeat(constants.VISITOR_ID_MAX_LENGTH))).toBeTruthy();
+  });
+
+  it('drops an id the worker will always reject, so no cookie stores it', () => {
+    expect(usableHandoffId('a'.repeat(constants.VISITOR_ID_MAX_LENGTH + 1))).toBeNull();
+  });
+
+  it('treats empty and missing as no handoff', () => {
+    expect(usableHandoffId('')).toBeNull();
+    expect(usableHandoffId(null)).toBeNull();
+    expect(usableHandoffId(undefined)).toBeNull();
   });
 });
 

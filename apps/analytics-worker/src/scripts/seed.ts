@@ -513,7 +513,6 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
 
   // Determine visitor's first seen date
   const baseTimestamp = getRandomTimestamp(visitor.timezone);
-  const firstSeenStr = new Date(baseTimestamp).toISOString();
 
   // Simulate one or more sessions
   const numSessions =
@@ -558,7 +557,6 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         },
         visitorId: visitor.visitorId,
         sessionId,
-        visitorFirstSeenAt: firstSeenStr,
         visitorSessionNumber: sNum,
         language: visitor.language,
         timezone: visitor.timezone,

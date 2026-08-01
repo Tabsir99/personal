@@ -37,6 +37,12 @@ describe("payloadSchema", () => {
     ).toBe(true);
   });
 
+  it("bounds the ids so a crafted handoff link cannot be stored", () => {
+    expect(parse({ type: "pageview", visitorId: "a".repeat(100) }).success).toBe(true);
+    expect(parse({ type: "pageview", visitorId: "a".repeat(101) }).success).toBe(false);
+    expect(parse({ type: "pageview", sessionId: "a".repeat(101) }).success).toBe(false);
+  });
+
   it("rejects reserved types used as custom", () => {
     expect(parse({ type: "payment" }).success).toBe(false);
   });

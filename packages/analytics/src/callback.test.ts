@@ -46,6 +46,7 @@ beforeEach(() => {
   });
   localStorage.clear();
   sessionStorage.clear();
+  window.history.replaceState({}, '', '/');
   initPageviewState();
   vi.stubGlobal('fetch', respondWith(200));
 });
@@ -92,23 +93,29 @@ describe('the callback fires exactly once, with the truth', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('reports invalid when extraData fails validation, and sends nothing', async () => {
-    const fetchMock = respondWith(200);
+  it('sends data the worker will refuse and reports the worker verdict, not its own', async () => {
+    const fetchMock = respondWith(400);
     vi.stubGlobal('fetch', fetchMock);
 
     const seen: EventResult[] = [];
     trackCustomEvent('custom', { 'bad key': 'x' }, (r) => seen.push(r));
     await settled();
 
-    expect(seen).toEqual([{ outcome: 'invalid', status: 0 }]);
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(seen).toEqual([{ outcome: 'rejected', status: 400 }]);
   });
 
-  it('reports invalid for an identify the worker would refuse', async () => {
+  it('lets the worker rule on an empty user id', async () => {
+    const fetchMock = respondWith(400);
+    vi.stubGlobal('fetch', fetchMock);
+
     const seen: EventResult[] = [];
-    trackIdentify('u1', { 'Bad Key': 'x' }, (r) => seen.push(r));
+    trackIdentify('', { name: 'Nobody' }, (r) => seen.push(r));
     await settled();
-    expect(seen).toEqual([{ outcome: 'invalid', status: 0 }]);
+
+    const [, init] = fetchMock.mock.calls[0];
+    expect(JSON.parse(init.body as string).extraData.user_id).toBe('');
+    expect(seen).toEqual([{ outcome: 'rejected', status: 400 }]);
   });
 
   it('reports throttled for a repeat pageview inside the window', async () => {
@@ -163,5 +170,37 @@ describe('the request the worker actually receives', () => {
     expect(init.credentials).toBe('omit');
     expect(init.headers).toEqual({ 'Content-Type': 'text/plain' });
     expect(JSON.parse(init.body as string)).toEqual(payload);
+  });
+
+  it('adopts the handoff ids but never puts them on the wire', async () => {
+    const fetchMock = respondWith(200);
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.replaceState({}, '', '/landing?utm_source=x&_cgd_vid=v-abc&_cgd_sid=s-abc&_cgd_vsn=4');
+
+    trackPageview();
+    await settled();
+
+    const [, init] = fetchMock.mock.calls[0];
+    const sent = JSON.parse(init.body as string);
+    expect(sent.visitorId).toBe('v-abc');
+    expect(sent.sessionId).toBe('s-abc');
+    expect(sent.visitorSessionNumber).toBe(4);
+    expect(sent.href).toBe('https://example.com/landing?utm_source=x');
+    expect(window.location.href).toBe('https://example.com/landing?utm_source=x');
+  });
+
+  it('ignores a handoff id that the worker would reject', async () => {
+    const fetchMock = respondWith(200);
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.replaceState({}, '', `/?_cgd_vid=${'a'.repeat(101)}`);
+
+    trackPageview();
+    await settled();
+
+    const [, init] = fetchMock.mock.calls[0];
+    const sent = JSON.parse(init.body as string);
+    expect(sent.visitorId).not.toContain('aaaa');
+    expect(sent.visitorId.length).toBeLessThanOrEqual(100);
+    expect(document.cookie).not.toContain('aaaa');
   });
 });
