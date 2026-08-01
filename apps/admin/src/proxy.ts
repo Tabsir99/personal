@@ -25,8 +25,7 @@ const serverTokenAllowed = (request: NextRequest) => {
   if (
     pathname.startsWith("/api/blogs") || // list, featured, [slug], score
     pathname.startsWith("/api/config") || // blog config (tags / kinds)
-    pathname === "/api/site-config" ||
-    pathname === "/api/event" // analytics ingest
+    pathname === "/api/site-config"
   ) {
     return true;
   }

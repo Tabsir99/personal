@@ -29,6 +29,16 @@ interface WebsitePanelProps {
   onMutate: () => void;
 }
 
+function trackedDomain(origins: string[]): string {
+  const explicit = origins.find((origin) => origin !== "*");
+  if (!explicit) return "yourdomain.com";
+  try {
+    return new URL(explicit).hostname;
+  } catch {
+    return explicit;
+  }
+}
+
 export function WebsitePanel({ site, onEdit, onMutate }: WebsitePanelProps) {
   const [openDelete, setOpenDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -56,10 +66,11 @@ export function WebsitePanel({ site, onEdit, onMutate }: WebsitePanelProps) {
     setTimeout(() => setCopied(false), 1500);
   };
 
-  const scriptSnippet = `<script defer src="https://analytics.tabsircg.com/script.js" data-website-id="${site.id}"></script>`;
+  const domain = trackedDomain(site.origins);
+  const scriptSnippet = `<script defer src="https://unpkg.com/@tabsircg/analytics@1/dist/cgd.js" data-website-id="${site.id}" data-domain="${domain}"></script>`;
   const sdkSnippet = `import { init } from '@tabsircg/analytics/sdk'
 
-init({ websiteId: '${site.id}' })`;
+init({ websiteId: '${site.id}', domain: '${domain}' })`;
 
   const activeSnippet = snippetTab === "script" ? scriptSnippet : sdkSnippet;
 

@@ -1,8 +1,8 @@
-import { config, scriptTag } from './config';
+import { config } from './config';
 import { isLocalhost } from './utils';
 import { isBot } from './bot';
 import { log } from './logger';
-import { API_URL, SCRIPT_DOMAIN } from './constants';
+import { API_URL } from './constants';
 
 export let trackingEnabled = true;
 export let disableReason = '';
@@ -18,13 +18,9 @@ export function initConfigState() {
       try {
         apiUrl = new URL(config.apiUrlRaw, window.location.origin).href;
       } catch (e) {
-        // Fallback handled in logic flow
         apiUrl = defaultApiUrl;
       }
     }
-  } else if (scriptTag) {
-    const isCustomSrc = !scriptTag.src.includes(SCRIPT_DOMAIN);
-    apiUrl = isCustomSrc ? new URL('/api/events', window.location.origin).href : apiUrl;
   }
 
   if (trackingEnabled && isBot()) {
