@@ -1,16 +1,5 @@
 import { z } from "zod";
 
-export const cfOverrideSchema = z
-  .object({
-    country: z.string(),
-    region: z.string(),
-    city: z.string(),
-    ip: z.string(),
-    timestamp: z.number(),
-    userAgent: z.string(),
-  })
-  .optional();
-
 const basePayloadSchema = z.object({
   websiteId: z.string().min(1).max(96), // Max 96 bytes for index id limit
   domain: z.string().nullable(),
@@ -54,6 +43,7 @@ export const payloadSchema = z.intersection(
         type: z
           .string()
           .min(1)
+          .max(64)
           .refine((t) => !["pageview", "payment", "identify"].includes(t), {
             message: "Reserved event type used as custom",
           }),
@@ -62,12 +52,4 @@ export const payloadSchema = z.intersection(
     ),
 );
 
-export const devPayloadSchema = z.intersection(
-  payloadSchema,
-  z.object({
-    cfOverride: cfOverrideSchema,
-  })
-);
-
 export type EventPayload = z.infer<typeof payloadSchema>;
-export type DevEventPayload = z.infer<typeof devPayloadSchema>;

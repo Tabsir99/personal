@@ -1,3 +1,46 @@
+const UINT16_MAX = 65535;
+const EXTRA_DATA_LIMIT = 4000;
+const EXTRA_DATA_VALUE_LIMIT = 1000;
+const EVENT_NAME_LIMIT = 255;
+
+export function toUint16(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.min(UINT16_MAX, Math.max(0, Math.round(value)));
+}
+
+export function toEventName(extraData: unknown, type: string): string {
+  const named =
+    extraData && typeof extraData === "object"
+      ? (extraData as Record<string, unknown>).eventName
+      : undefined;
+  const name = typeof named === "string" && named ? named : type;
+  return name.slice(0, EVENT_NAME_LIMIT);
+}
+
+export function encodeExtraData(extraData: unknown): string {
+  if (!extraData || typeof extraData !== "object" || Array.isArray(extraData)) {
+    return "{}";
+  }
+
+  const capped: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(extraData)) {
+    capped[key] =
+      typeof value === "string" ? value.slice(0, EXTRA_DATA_VALUE_LIMIT) : value;
+  }
+
+  const full = JSON.stringify(capped);
+  if (full.length <= EXTRA_DATA_LIMIT) return full;
+
+  const kept: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(capped)) {
+    if (JSON.stringify({ ...kept, [key]: value }).length > EXTRA_DATA_LIMIT) {
+      break;
+    }
+    kept[key] = value;
+  }
+  return JSON.stringify(kept);
+}
+
 export interface EventMetadata {
   country: string;
   region: string;
@@ -11,26 +54,14 @@ export function getEventMetadata(
   request: Request,
   defaultIp: string,
   defaultUserAgent: string,
-  payload: any,
-  environment?: string
 ): EventMetadata {
-  const cf = request.cf || {};
-  let country = (cf.country as string) || "Unknown";
-  let region = (cf.region as string) || "Unknown";
-  let city = (cf.city as string) || "Unknown";
-  let ipAddress = defaultIp;
-  let timestamp = Date.now();
-  let userAgent = defaultUserAgent;
-
-  if (environment === "dev" && payload?.cfOverride) {
-    const override = payload.cfOverride;
-    if (override.country) country = override.country;
-    if (override.region) region = override.region;
-    if (override.city) city = override.city;
-    if (override.ip) ipAddress = override.ip;
-    if (override.timestamp) timestamp = override.timestamp;
-    if (override.userAgent) userAgent = override.userAgent;
-  }
-
-  return { country, region, city, ipAddress, timestamp, userAgent };
+  const cf = request.cf ?? {};
+  return {
+    country: (cf.country as string) || "Unknown",
+    region: (cf.region as string) || "Unknown",
+    city: (cf.city as string) || "Unknown",
+    ipAddress: defaultIp,
+    timestamp: Date.now(),
+    userAgent: defaultUserAgent,
+  };
 }

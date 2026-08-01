@@ -1,4 +1,4 @@
-import { ANALYTICS_TABLE } from "@tabsircg/analytics-contract";
+import { ANALYTICS_TABLE } from "@tabsircg/schemas/analytics";
 
 export async function sendToTinybirdWithRetry(
   tbHost: string,

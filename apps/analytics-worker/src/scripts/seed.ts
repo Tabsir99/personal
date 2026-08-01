@@ -2,17 +2,28 @@
 import nodeCrypto from "crypto";
 import { existsSync, readFileSync } from "fs";
 import { join, dirname } from "path";
-import { DevEventPayload } from "../schema";
+import { type EventPayload } from "../schema";
 import { parseUA } from "../parseUA";
 import { detectBot } from "../detectBot";
 import {
   ANALYTICS_TABLE,
   type AnalyticsEventRow,
-} from "@tabsircg/analytics-contract";
+} from "@tabsircg/schemas/analytics";
 
-const WEBSITE_ID = "my-portfolio-blog";
+type SeedEvent = EventPayload & {
+  cfOverride?: {
+    country: string;
+    region: string;
+    city: string;
+    ip: string;
+    timestamp: number;
+    userAgent: string;
+  };
+};
+
+const WEBSITE_ID = "portfolio-and-blog";
 const DOMAIN = "tabsircg.com";
-const TOTAL_EVENTS_TARGET = Number(process.env.SEED_EVENTS ?? 100_000);
+const TOTAL_EVENTS_TARGET = Number(process.env.SEED_EVENTS ?? 100_00);
 
 console.log(`🚀 Seeding analytics for ${WEBSITE_ID} (${DOMAIN})\n`);
 
@@ -492,7 +503,7 @@ function getRandomTimestamp(timezone: string): number {
 
 // Generate the full pool of events
 console.log("🎨 Simulating realistic visitor sessions...");
-const allEvents: DevEventPayload[] = [];
+const allEvents: SeedEvent[] = [];
 let generatedVisitorCount = 0;
 
 // Continue generating visitors until we have safely exceeded the target, then sort and slice.
@@ -599,7 +610,9 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         }
         if (Math.random() < 0.2) {
           currentOffset += 3000;
-          allEvents.push(buildGoal("code_copy", page, { language: "typescript" }));
+          allEvents.push(
+            buildGoal("code_copy", page, { language: "typescript" }),
+          );
         }
       }
       if (Math.random() < 0.07) {
@@ -869,7 +882,7 @@ allEvents.sort(
   (a, b) => (a.cfOverride?.timestamp ?? 0) - (b.cfOverride?.timestamp ?? 0),
 );
 
-function applyPageviewThrottle(events: DevEventPayload[]): DevEventPayload[] {
+function applyPageviewThrottle(events: SeedEvent[]): SeedEvent[] {
   const lastSeen = new Map<string, number>();
 
   return events.filter((e) => {
@@ -929,7 +942,7 @@ function emptyRow(websiteId: string, timestamp: number): AnalyticsEventRow {
   };
 }
 
-function toPaymentRow(p: DevEventPayload): AnalyticsEventRow {
+function toPaymentRow(p: SeedEvent): AnalyticsEventRow {
   const { amount_cents, ...extra } = (p.extraData ?? {}) as Record<
     string,
     string
@@ -948,7 +961,7 @@ function toPaymentRow(p: DevEventPayload): AnalyticsEventRow {
 
 // Build the Tinybird row exactly as the worker does (UA -> browser/os/device,
 // bot detection).
-function toRow(p: DevEventPayload): AnalyticsEventRow {
+function toRow(p: SeedEvent): AnalyticsEventRow {
   if (p.type === "payment") return toPaymentRow(p);
 
   const cf = p.cfOverride!;
@@ -1026,7 +1039,9 @@ async function seedTinybird() {
   const url = `${host}/v0/events?name=${ANALYTICS_TABLE}`;
   const total = finalEvents.length;
 
-  console.log(`📥 Inserting ${total} rows into ${host} (${ANALYTICS_TABLE})...`);
+  console.log(
+    `📥 Inserting ${total} rows into ${host} (${ANALYTICS_TABLE})...`,
+  );
   let inserted = 0;
   let quarantined = 0;
   let failed = 0;

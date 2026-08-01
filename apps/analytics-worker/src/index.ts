@@ -1,16 +1,20 @@
-import { payloadSchema, devPayloadSchema, EventPayload } from "./schema";
+import { payloadSchema } from "./schema";
 import { validateAccess } from "./requestGuard";
-import { getEventMetadata } from "./utils";
+import {
+  getEventMetadata,
+  toUint16,
+  toEventName,
+  encodeExtraData,
+} from "./utils";
 import { sendToTinybirdWithRetry } from "./tinybird";
 import { parseUA } from "./parseUA";
 import { detectBot } from "./detectBot";
-import type { AnalyticsEventRow } from "@tabsircg/analytics-contract";
+import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
 
 interface Env {
   ANALYTICS_DOMAINS_KV: KVNamespace;
   TINYBIRD_TOKEN: string;
   TINYBIRD_HOST: string;
-  ENVIRONMENT?: string;
 }
 
 export default {
@@ -26,9 +30,7 @@ export default {
     try {
       const rawBody = await request.text();
 
-      const isDev = env.ENVIRONMENT === "dev";
-      const schema = isDev ? devPayloadSchema : payloadSchema;
-      const validationResult = schema.safeParse(JSON.parse(rawBody));
+      const validationResult = payloadSchema.safeParse(JSON.parse(rawBody));
 
       if (!validationResult.success) {
         // Validation failed (we use static wildcard here just so error can be read, or echo origin)
@@ -48,7 +50,7 @@ export default {
         );
       }
 
-      const payload = validationResult.data as EventPayload;
+      const payload = validationResult.data;
 
       // KV Edge Validation with In-Memory Caching & Origin Checking
       const accessGuard = await validateAccess(
@@ -67,19 +69,14 @@ export default {
         );
       }
 
-      // Extract geo information, IP address, user agent, and timestamp (handling overrides in dev environment)
       const { country, region, city, ipAddress, timestamp, userAgent } =
         getEventMetadata(
           request,
           accessGuard.ipAddress,
           accessGuard.rawUserAgent,
-          payload,
-          env.ENVIRONMENT,
         );
 
-      const extraDataJson = payload.extraData
-        ? JSON.stringify(payload.extraData).slice(0, 4000)
-        : "{}";
+      const extraDataJson = encodeExtraData(payload.extraData);
 
       const { browser, os, device } = parseUA(userAgent);
       const { is_bot, bot_category, bot_name } = detectBot(userAgent);
@@ -94,7 +91,7 @@ export default {
         session_id: payload.sessionId,
         language: payload.language,
         timezone: payload.timezone,
-        event_name: (payload.extraData as any)?.eventName || payload.type,
+        event_name: toEventName(payload.extraData, payload.type),
         extra_data: extraDataJson,
         country,
         region,
@@ -106,11 +103,11 @@ export default {
         bot_category,
         bot_name,
         ip: ipAddress,
-        viewport_w: payload.viewport.width,
-        viewport_h: payload.viewport.height,
-        screen_w: payload.screenWidth,
-        screen_h: payload.screenHeight,
-        session_number: payload.visitorSessionNumber,
+        viewport_w: toUint16(payload.viewport.width),
+        viewport_h: toUint16(payload.viewport.height),
+        screen_w: toUint16(payload.screenWidth),
+        screen_h: toUint16(payload.screenHeight),
+        session_number: toUint16(payload.visitorSessionNumber),
         revenue_cents: 0,
         timestamp,
       } satisfies AnalyticsEventRow;
@@ -120,15 +117,24 @@ export default {
       const tbHost =
         env.TINYBIRD_HOST || "https://api.ap-east-1.aws.tinybird.co";
       ctx.waitUntil(
-        sendToTinybirdWithRetry(tbHost, env.TINYBIRD_TOKEN, tbPayload),
+        sendToTinybirdWithRetry(tbHost, env.TINYBIRD_TOKEN, tbPayload).catch(
+          (err: unknown) => {
+            console.error("Tinybird ingest dropped after retries", {
+              websiteId: payload.websiteId,
+              type: payload.type,
+              error: err instanceof Error ? err.message : String(err),
+            });
+          },
+        ),
       );
 
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
         headers: accessGuard.corsHeaders,
       });
-    } catch (err: any) {
-      return new Response(JSON.stringify({ error: err.message }), {
+    } catch (err: unknown) {
+      console.error("Ingest request failed", err);
+      return new Response(JSON.stringify({ error: "Internal error" }), {
         status: 500,
         headers: {
           "Content-Type": "application/json",

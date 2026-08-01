@@ -5,16 +5,18 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240305.0",
     "@types/node": "^20.19.43",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^4.1.10"
   },
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "tc": "tsc --noEmit"
+    "tc": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@datafast/ai-crawl": "^1.0.9",
-    "@tabsircg/analytics-contract": "workspace:*",
+    "@tabsircg/schemas": "workspace:*",
     "ua-parser-js": "^2.0.10",
     "zod": "^4.4.3"
   }

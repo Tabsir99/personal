@@ -1,6 +1,33 @@
-type CacheValue = { allowedOrigins: string[]; timestamp: number };
-const validWebsitesCache = new Map<string, CacheValue>();
-const CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
+type CacheEntry = { allowedOrigins: string[]; expiresAt: number };
+
+const validWebsitesCache = new Map<string, CacheEntry>();
+
+const KNOWN_TTL_MS = 60_000;
+const UNKNOWN_TTL_MS = 10_000;
+const MAX_CACHE_ENTRIES = 1000;
+
+function readCache(cacheKey: string, now: number): string[] | undefined {
+  const entry = validWebsitesCache.get(cacheKey);
+  if (!entry) return undefined;
+  if (entry.expiresAt <= now) {
+    validWebsitesCache.delete(cacheKey);
+    return undefined;
+  }
+  return entry.allowedOrigins;
+}
+
+function writeCache(cacheKey: string, allowedOrigins: string[], now: number) {
+  if (validWebsitesCache.size >= MAX_CACHE_ENTRIES) {
+    const oldest = validWebsitesCache.keys().next();
+    if (!oldest.done) validWebsitesCache.delete(oldest.value);
+  }
+  const ttl = allowedOrigins.length > 0 ? KNOWN_TTL_MS : UNKNOWN_TTL_MS;
+  validWebsitesCache.set(cacheKey, { allowedOrigins, expiresAt: now + ttl });
+}
+
+export function resetOriginCache() {
+  validWebsitesCache.clear();
+}
 
 export async function validateAccess(
   request: Request,
@@ -10,36 +37,25 @@ export async function validateAccess(
   const origin = request.headers.get("Origin") || "";
   const cacheKey = `website_${websiteId}`;
   const now = Date.now();
-  const cached = validWebsitesCache.get(cacheKey);
 
-  let allowedOrigins: string[] = [];
+  let allowedOrigins = readCache(cacheKey, now);
 
-  if (cached && now - cached.timestamp < CACHE_TTL_MS) {
-    allowedOrigins = cached.allowedOrigins;
-  } else {
-    // Cache miss or expired, fetch from KV
+  if (allowedOrigins === undefined) {
+    // KV holds a JSON array like ["https://myportfolio.com", "http://localhost:3000"],
+    // falling back to a bare string for hand-written records.
     const kvRecord = await kvNamespace.get(cacheKey);
+    allowedOrigins = [];
 
     if (kvRecord) {
       try {
-        // We expect a JSON array like: ["https://myportfolio.com", "http://localhost:3000"]
         const parsed = JSON.parse(kvRecord);
-        if (Array.isArray(parsed)) {
-          allowedOrigins = parsed;
-        } else {
-          allowedOrigins = [kvRecord];
-        }
+        allowedOrigins = Array.isArray(parsed) ? parsed : [kvRecord];
       } catch (e) {
-        // Fallback if it's just a raw string domain
         allowedOrigins = [kvRecord];
       }
     }
 
-    // Update cache if we found allowed origins, avoiding caching negative lookups indefinitely during configuration
-    if (allowedOrigins.length > 0) {
-      if (validWebsitesCache.size > 1000) validWebsitesCache.clear();
-      validWebsitesCache.set(cacheKey, { allowedOrigins, timestamp: now });
-    }
+    writeCache(cacheKey, allowedOrigins, now);
   }
 
   const isAuthorized =
