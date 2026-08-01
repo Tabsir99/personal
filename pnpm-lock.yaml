@@ -205,9 +205,6 @@ importers:
 
   apps/analytics-worker:
     dependencies:
-      '@datafast/ai-crawl':
-        specifier: ^1.0.9
-        version: 1.0.9
       '@tabsircg/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
@@ -570,9 +567,6 @@ packages:
 
   '@cloudflare/workers-types@4.20260702.1':
     resolution: {integrity: sha512-mOhf5TUEB1m2vPrxtqoIGfz0fUC9xyxRDx5gWHy5s+OCo6dcV+g7wI1R7gYCMFohhqF/2y2xeKVwMwCJjfn/WA==}
-
-  '@datafast/ai-crawl@1.0.9':
-    resolution: {integrity: sha512-S+EUH3l2jpJMXdaxTEtL84PTv1WiOsA61tSnI4Y8QT+NWDUHVFpNZtDiLiO7Nw+GtuK71XB5PzhxHgoDGI66hA==}
 
   '@devicon/react@0.0.3':
     resolution: {integrity: sha512-r8Td7z0hyC8Y1PSgZs9NBGDcEosmFjSLWlhbez/8nOR+5HNXFpaFryc7OkKk6F2J+WXEpyxKx81CjXcCW3qO7A==}
@@ -5760,8 +5754,6 @@ snapshots:
       '@types/react': 19.2.17
 
   '@cloudflare/workers-types@4.20260702.1': {}
-
-  '@datafast/ai-crawl@1.0.9': {}
 
   '@devicon/react@0.0.3': {}
 

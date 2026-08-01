@@ -9,7 +9,6 @@ const base = {
   viewport: { width: 1920, height: 1080 },
   visitorId: "v1",
   sessionId: "s1",
-  visitorFirstSeenAt: new Date().toISOString(),
   visitorSessionNumber: 1,
   language: "en-US",
   timezone: "UTC",

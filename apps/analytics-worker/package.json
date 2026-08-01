@@ -15,7 +15,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@datafast/ai-crawl": "^1.0.9",
     "@tabsircg/schemas": "workspace:*",
     "ua-parser-js": "^2.0.10",
     "zod": "^4.4.3"

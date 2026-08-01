@@ -12,7 +12,6 @@ const basePayloadSchema = z.object({
   }),
   visitorId: z.string().max(100),
   sessionId: z.string().max(100),
-  visitorFirstSeenAt: z.string().max(100),
   visitorSessionNumber: z.number(),
   language: z.string().max(50),
   timezone: z.string().max(100),

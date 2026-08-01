@@ -858,7 +858,6 @@ for (let i = 0; i < botEventCount; i++) {
     viewport: { width: 0, height: 0 },
     visitorId: generateUUID(),
     sessionId: generateUUID(),
-    visitorFirstSeenAt: new Date(botTimestamp).toISOString(),
     visitorSessionNumber: 1,
     language: "en-US",
     timezone: "UTC",
