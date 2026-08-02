@@ -212,7 +212,8 @@ export function referenceMain(
         timestamp: b,
         visitors: o.visitors,
         newVisitors: uniq(ss.filter((s) => s.snum === 1).map((s) => s.vid)),
-        returningVisitors: o.visitors - uniq(ss.filter((s) => s.snum === 1).map((s) => s.vid)),
+        returningVisitors:
+          o.visitors - uniq(ss.filter((s) => s.snum === 1).map((s) => s.vid)),
         pageviews: o.pageviews,
         sessions: o.sessions,
         bounceRate: o.bounceRate,
@@ -362,13 +363,36 @@ export function referencePages(rows: Row[], w: Win) {
 
 const toUv = (b: BreakRow) => ({ name: b.name, uv: b.uv, revenue: b.revenue });
 
+// Geo is a hierarchy: a region or city name is only unique under its parents.
+// Keying on the bare name would merge London GB with London CA and let the
+// reference agree with the very bug the locations query had.
+const GEO_SEP = "\u0000";
+
+const toGeo = (b: BreakRow) => {
+  const parts = b.name.split(GEO_SEP);
+  return {
+    name: parts[parts.length - 1],
+    country: parts[0],
+    uv: b.uv,
+    revenue: b.revenue,
+  };
+};
+
 export function referenceLocations(rows: Row[], w: Win) {
   const pv = human(rows, "pageview", w);
   const rev = visitorRevenue(rows, w);
   return {
-    countries: breakdownRef(pv, (r) => r.country, rev).map(toUv),
-    regions: breakdownRef(pv, (r) => r.region, rev).map(toUv),
-    cities: breakdownRef(pv, (r) => r.city, rev).map(toUv),
+    countries: breakdownRef(pv, (r) => r.country, rev).map(toGeo),
+    regions: breakdownRef(
+      pv,
+      (r) => [r.country, r.region].join(GEO_SEP),
+      rev,
+    ).map(toGeo),
+    cities: breakdownRef(
+      pv,
+      (r) => [r.country, r.region, r.city].join(GEO_SEP),
+      rev,
+    ).map(toGeo),
   };
 }
 

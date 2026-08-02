@@ -1,7 +1,29 @@
 import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
 
 /** In-memory, RNG-seeded twin of analytics-worker's seed.ts. Every dimension's
- * cardinality stays bounded so no dashboard query hits its LIMIT. */
+ * cardinality stays bounded so no dashboard query hits its LIMIT.
+ *
+ * Rows are byte-identical to what actually lands in Tinybird, because a fixture
+ * that is merely plausible can hide the bugs it exists to catch. What that
+ * pins, and where each value comes from:
+ *
+ * - `visitor_id` is a v4 UUID and `session_id` is `'s' + uuid.slice(1)`, per the
+ *   SDK's `generateUUID` / `getSessionId` (packages/analytics/src/storage.ts).
+ *   Short ids like `v0` understate every per-visitor aggregate's memory.
+ * - `region` / `city` are full Cloudflare `cf.*` names, not ISO codes — and
+ *   London appears under both GB/England and CA/Ontario, which is the collision
+ *   the locations breakdown has to keep apart.
+ * - `bot_category` is `'generic'` on human rows: `detectBot` returns it for
+ *   `is_bot: 0` too. Payment rows keep `''` — that path never calls detectBot.
+ * - `extra_data` carries what the SDK really sends, key order included, since
+ *   it is stored as an opaque string: `{"eventName":…}` for attribute goals
+ *   (dom.ts `handleGoalElement`), `{"url":…,"text":…}` for outbound links,
+ *   `{"name":…,"image":…,"user_id":…}` for identify (events.ts `trackIdentify`).
+ * - Payment rows mirror `writePaymentEvent`, which sends 8 fields and lets the
+ *   datasource default the rest, with Stripe-shaped base62 ids.
+ * - Bot `browser` / `os` / `device` are what `parseUA` actually returns for each
+ *   crawler UA — never `''`; it falls back to `Unknown` / `Unknown` / `desktop`.
+ */
 
 export interface SeedOptions {
   websiteId: string;
@@ -82,15 +104,18 @@ const SOURCES: Source[] = [
   },
 ];
 
+// `cf.region` / `cf.city` are full names, never ISO codes. London is here twice
+// on purpose — GB/England and CA/Ontario — so a breakdown that keys on the bare
+// city name merges two real cities and the test notices.
 const COUNTRIES: Country[] = [
   {
     code: "US",
     tz: "America/New_York",
     lang: "en-US",
     regions: [
-      ["NY", "New York"],
-      ["CA", "San Francisco"],
-      ["TX", "Austin"],
+      ["New York", "New York City"],
+      ["California", "San Francisco"],
+      ["Texas", "Austin"],
     ],
     weight: 0.5,
   },
@@ -99,8 +124,8 @@ const COUNTRIES: Country[] = [
     tz: "Europe/London",
     lang: "en-GB",
     regions: [
-      ["ENG", "London"],
-      ["SCT", "Edinburgh"],
+      ["England", "London"],
+      ["Scotland", "Edinburgh"],
     ],
     weight: 0.15,
   },
@@ -109,8 +134,8 @@ const COUNTRIES: Country[] = [
     tz: "Europe/Berlin",
     lang: "de-DE",
     regions: [
-      ["BE", "Berlin"],
-      ["BY", "Munich"],
+      ["Berlin", "Berlin"],
+      ["Bavaria", "Munich"],
     ],
     weight: 0.1,
   },
@@ -119,8 +144,8 @@ const COUNTRIES: Country[] = [
     tz: "Europe/Paris",
     lang: "fr-FR",
     regions: [
-      ["IDF", "Paris"],
-      ["ARA", "Lyon"],
+      ["Île-de-France", "Paris"],
+      ["Auvergne-Rhône-Alpes", "Lyon"],
     ],
     weight: 0.08,
   },
@@ -129,8 +154,8 @@ const COUNTRIES: Country[] = [
     tz: "Asia/Tokyo",
     lang: "ja-JP",
     regions: [
-      ["13", "Tokyo"],
-      ["27", "Osaka"],
+      ["Tokyo", "Tokyo"],
+      ["Osaka", "Osaka"],
     ],
     weight: 0.07,
   },
@@ -139,8 +164,9 @@ const COUNTRIES: Country[] = [
     tz: "America/Toronto",
     lang: "en-CA",
     regions: [
-      ["ON", "Toronto"],
-      ["BC", "Vancouver"],
+      ["Ontario", "Toronto"],
+      ["Ontario", "London"],
+      ["British Columbia", "Vancouver"],
     ],
     weight: 0.05,
   },
@@ -149,8 +175,8 @@ const COUNTRIES: Country[] = [
     tz: "Asia/Kolkata",
     lang: "en-IN",
     regions: [
-      ["MH", "Mumbai"],
-      ["KA", "Bengaluru"],
+      ["Maharashtra", "Mumbai"],
+      ["Karnataka", "Bengaluru"],
     ],
     weight: 0.05,
   },
@@ -238,15 +264,67 @@ const COFFEE_CENTS = [300, 500, 500, 1000, 1500, 2500, 5000] as const;
 const SUPPORTER_FIRST = ["Andrew", "Jakub", "Alejandro", "Mykolas"] as const;
 const SUPPORTER_LAST = ["Smith", "Nowak", "Garcia", "Petrauskas"] as const;
 
+// `browser` / `os` are what parseUA returns for each crawler's real UA — the two
+// WebKit tokens parse, the rest fall back to "Unknown". `device` is always
+// "desktop" because parseUA defaults it when getDevice().type is undefined.
+// Nothing here is ever "", which is what the worker would have to write for the
+// row to look like this fixture's old shape.
 const BOTS = [
-  { name: "GPTBot", category: "training", weight: 0.28 },
-  { name: "ClaudeBot", category: "training", weight: 0.12 },
-  { name: "Googlebot", category: "search_index", weight: 0.2 },
-  { name: "bingbot", category: "search_index", weight: 0.1 },
-  { name: "PerplexityBot", category: "answer_fetch", weight: 0.12 },
-  { name: "ChatGPT-User", category: "answer_fetch", weight: 0.08 },
-  { name: "Bytespider", category: "ai_crawler", weight: 0.1 },
-] as const satisfies (Weighted & { name: string; category: string })[];
+  {
+    name: "GPTBot",
+    category: "training",
+    browser: "Unknown",
+    os: "Unknown",
+    weight: 0.28,
+  },
+  {
+    name: "ClaudeBot",
+    category: "training",
+    browser: "WebKit",
+    os: "Unknown",
+    weight: 0.12,
+  },
+  {
+    name: "Googlebot",
+    category: "search_index",
+    browser: "Unknown",
+    os: "Unknown",
+    weight: 0.2,
+  },
+  {
+    name: "bingbot",
+    category: "search_index",
+    browser: "Unknown",
+    os: "Unknown",
+    weight: 0.1,
+  },
+  {
+    name: "PerplexityBot",
+    category: "answer_fetch",
+    browser: "Unknown",
+    os: "Unknown",
+    weight: 0.12,
+  },
+  {
+    name: "ChatGPT-User",
+    category: "answer_fetch",
+    browser: "WebKit",
+    os: "Unknown",
+    weight: 0.08,
+  },
+  {
+    name: "Bytespider",
+    category: "ai_crawler",
+    browser: "Unknown",
+    os: "Unknown",
+    weight: 0.1,
+  },
+] as const satisfies (Weighted & {
+  name: string;
+  category: string;
+  browser: string;
+  os: string;
+})[];
 
 type Persona = "bounce" | "reader" | "signer" | "supporter";
 
@@ -278,10 +356,29 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
     return arr[arr.length - 1];
   };
 
-  let visitorSeq = 0;
+  // Same shape as the SDK's generateUUID fallback, drawn from the seeded RNG so
+  // a run stays reproducible: 16 bytes with the v4 version and variant bits set.
+  const uuid = () => {
+    const b = new Uint8Array(16);
+    for (let i = 0; i < 16; i++) b[i] = Math.floor(rng() * 256);
+    b[6] = (b[6] & 0x0f) | 0x40;
+    b[8] = (b[8] & 0x3f) | 0x80;
+    const hex = Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  };
+
+  // getSessionId(): 's' + generateUUID().substring(1) — still 36 chars.
+  const sessionId = () => `s${uuid().slice(1)}`;
+
+  // Stripe object ids are base62 after the prefix: 24 chars for events and
+  // payment intents, 14 for customers.
+  const B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const stripeId = (prefix: string, len: number) =>
+    prefix +
+    Array.from({ length: len }, () => B62[Math.floor(rng() * 62)]).join("");
 
   const emitVisitor = () => {
-    const id = `v${visitorSeq++}`;
+    const id = uuid();
     const geo = weighted(COUNTRIES);
     const [region, city] = pick(geo.regions);
     const ip = `${int(1, 223)}.${int(0, 254)}.${int(0, 254)}.${int(1, 254)}`;
@@ -307,6 +404,11 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       ip,
     };
 
+    // trackIdentify sends { name: '', image: '', ...data, user_id } — user_id is
+    // appended last, so it lands last in the stored JSON.
+    const identifyData = (name: string) =>
+      JSON.stringify({ name, image: "", user_id: `usr_${id}` });
+
     const row = (
       dev: Device,
       over: Partial<AnalyticsEventRow>,
@@ -329,7 +431,8 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       os: dev.os,
       device: dev.device,
       is_bot: 0,
-      bot_category: "",
+      // detectBot returns "generic" for humans too, not "".
+      bot_category: "generic",
       bot_name: "",
       ip: visitor.ip,
       viewport_w: Math.floor(dev.sw * 0.95),
@@ -350,7 +453,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       startTs: number,
       landing: boolean,
     ) => {
-      const sid = `${visitor.id}-s${snum}`;
+      const sid = sessionId();
       let ts = startTs;
       let first = true;
 
@@ -381,8 +484,14 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       };
 
       const pageview = (path: string) => push("pageview", path);
+      // handleGoalElement sends { eventName } (plus any data-*-prop-* attrs),
+      // and the worker stores that object verbatim while lifting eventName out
+      // into the event_name column.
       const goal = (name: string, path: string) =>
-        push("custom", path, { event_name: name });
+        push("custom", path, {
+          event_name: name,
+          extra_data: JSON.stringify({ eventName: name }),
+        });
 
       const payment = (cents: number, extra: Record<string, string>) => {
         if (ts >= windowEnd) return;
@@ -402,6 +511,9 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
           browser: "",
           os: "",
           device: "",
+          // writePaymentEvent omits bot_category, so it defaults to "" — the
+          // Stripe path never runs detectBot and never sees "generic".
+          bot_category: "",
           ip: "",
           viewport_w: 0,
           viewport_h: 0,
@@ -438,9 +550,14 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
         }
         if (rng() < 0.3) {
           advance(4, 8);
+          // handleOutboundLink sends { url, text } — text is the anchor's
+          // trimmed textContent.
           push("external_link", "/projects", {
             event_name: "external_link",
-            extra_data: '{"url":"https://github.com/tabsircg"}',
+            extra_data: JSON.stringify({
+              url: "https://github.com/tabsircg",
+              text: "GitHub",
+            }),
           });
         }
       } else if (persona === "signer") {
@@ -458,6 +575,9 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
         }
         push("identify", newsletter ? "/newsletter" : "/contact", {
           event_name: "identify",
+          extra_data: identifyData(
+            `${pick(SUPPORTER_FIRST)} ${pick(SUPPORTER_LAST)}`,
+          ),
         });
       } else {
         // supporter — pays in session 1
@@ -470,21 +590,18 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
         pageview("/success");
         const first = pick(SUPPORTER_FIRST);
         const last = pick(SUPPORTER_LAST);
+        // Key order matches the webhook's { stripe_event_id, kind, ...identity }.
         payment(pick(COFFEE_CENTS), {
-          stripe_event_id: `evt_${visitor.id}-${snum}`,
+          stripe_event_id: stripeId("evt_", 24),
           kind: "charge",
           customer_name: `${first} ${last}`,
           customer_email: `${first.toLowerCase()}.${last.toLowerCase()}@example.com`,
-          customer_id: `cus_${visitor.id}`,
-          transaction_id: `pi_${visitor.id}-${snum}`,
+          customer_id: stripeId("cus_", 14),
+          transaction_id: stripeId("pi_", 24),
         });
         push("identify", "/success", {
           event_name: "identify",
-          extra_data: JSON.stringify({
-            user_id: `usr_${visitor.id}`,
-            name: `${first} ${last}`,
-            image: "",
-          }),
+          extra_data: identifyData(`${first} ${last}`),
         });
       }
     };
@@ -515,24 +632,28 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
     const bot = weighted(BOTS);
     const path = rng() < 0.5 ? pick(BLOG_PAGES) : pick(PAGES);
     const ts = windowStart + rng() * (windowEnd - windowStart);
+    // A crawler keeps no cookies, so every hit mints a fresh visitor and
+    // session. Geo is real — Cloudflare resolves crawler IPs like any other.
+    const geo = weighted(COUNTRIES);
+    const [region, city] = pick(geo.regions);
     rows.push({
       website_id: websiteId,
       type: "pageview",
       domain: DOMAIN,
       href: `https://${DOMAIN}${path}`,
       referrer: "",
-      visitor_id: `bot${i}`,
-      session_id: `bot${i}`,
+      visitor_id: uuid(),
+      session_id: sessionId(),
       language: "en-US",
       timezone: "UTC",
       event_name: "pageview",
       extra_data: "{}",
-      country: "US",
-      region: "Unknown",
-      city: "Unknown",
-      browser: "",
-      os: "",
-      device: "",
+      country: geo.code,
+      region,
+      city,
+      browser: bot.browser,
+      os: bot.os,
+      device: "desktop",
       is_bot: 1,
       bot_category: bot.category,
       bot_name: bot.name,

@@ -52,23 +52,33 @@ export function visitorRevenueSubquery(
 // rev is a per-visitor total repeated on every inner row, so a plain SUM
 // over-counts once a visitor fans out across multiple dimension combos in the
 // scan. Dedup to one (vid, rev) pair per visitor within each group, then sum.
+//
+// The vid is hashed because the array only answers "already counted this
+// visitor here?" — nothing reads the id back out, arraySum touches x.2 alone.
+// Holding 36-char UUIDs made this the query's memory ceiling: the state spans
+// every visitor with a pageview (ifNull puts non-payers in it too, so the cost
+// is independent of payment volume) and GROUPING SETS keeps one state per
+// level — 8 of them on the sources route.
 const REVENUE_METRIC =
-  "round(arraySum(x -> x.2, groupUniqArray((vid, ifNull(rev, 0)))) / 100) as revenue";
+  "round(arraySum(x -> x.2, groupUniqArray((cityHash64(vid), ifNull(rev, 0)))) / 100) as revenue";
 
-const SPLIT_METRICS = `
+const NO_REVENUE_METRIC = "toFloat64(0) as revenue";
+
+const splitMetrics = (revenue: string) => `
       uniqExactIf(vid, minSess = 1) as newVisitors,
       uniqExactIf(vid, minSess > 1) as returningVisitors,
-      ${REVENUE_METRIC}`;
+      ${revenue}`;
 
-const UV_METRICS = `
+const uvMetrics = (revenue: string) => `
       uniqExact(vid) as uv,
-      ${REVENUE_METRIC}`;
+      ${revenue}`;
 
 export interface BreakdownChain {
   level(level: string, alias: string, expr: string): BreakdownChain;
   filter(predicate: string): BreakdownChain;
   revenue(): BreakdownChain;
   splitVisitors(): BreakdownChain;
+  nested(): BreakdownChain;
   column(expr: string): BreakdownChain;
   top(n: number): BreakdownChain;
   build(): string;
@@ -85,6 +95,7 @@ export interface BreakdownChain {
  *     .filter(predicate)         // extra WHERE conjunct (e.g. scope to a parent dim)
  *     .revenue()                 // LEFT JOIN per-visitor revenue
  *     .splitVisitors()           // new/returning columns instead of a single uv
+ *     .nested()                  // each level keys on every level before it
  *     .column(expr)              // extra output column (e.g. a carried dimension)
  *     .top(n)                    // top N rows per level
  *     .build();                  // -> SQL string
@@ -92,6 +103,14 @@ export interface BreakdownChain {
  * Visitors are counted once per (dimension, visitor). splitVisitors classifies each
  * visitor new/returning via a window MIN(session_number) over that same scan, so it
  * costs no extra scan and newVisitors + returningVisitors === uv.
+ *
+ * Levels are independent by default — a browser is not scoped by an OS. `.nested()`
+ * is for hierarchies (country -> region -> city), where a bare name is ambiguous:
+ * keyed on `city` alone, London GB and London CA are one group whose visitor counts
+ * add up and whose carried `any(country)` picks a winner arbitrarily. Nesting keys
+ * each level on the prefix above it, which both separates them and makes the
+ * carried parent deterministic. The level test then has to run most-specific
+ * first, since the outermost key is present in every set.
  */
 export function breakdown(
   websiteId: string,
@@ -103,6 +122,7 @@ export function breakdown(
   let filterExpr: string | null = null;
   let withRevenue = false;
   let split = false;
+  let isNested = false;
   let extra: string | null = null;
   let perLevel = 50;
 
@@ -123,6 +143,10 @@ export function breakdown(
       split = true;
       return chain;
     },
+    nested() {
+      isNested = true;
+      return chain;
+    },
     column(expr) {
       extra = expr;
       return chain;
@@ -132,9 +156,13 @@ export function breakdown(
       return chain;
     },
     build() {
+      // Nested levels share their parents' keys, so GROUPING(outermost) = 0 in
+      // every set. Test the innermost level first or every row reads as the
+      // outermost one.
       const byLevel = (value: (l: Level) => string) => {
-        const last = levels.length - 1;
-        const arms = levels.map((l, i) =>
+        const ordered = isNested ? [...levels].reverse() : levels;
+        const last = ordered.length - 1;
+        const arms = ordered.map((l, i) =>
           i < last ? `GROUPING(${l.alias}) = 0, ${value(l)}` : value(l),
         );
         return `multiIf(${arms.join(", ")})`;
@@ -147,9 +175,18 @@ export function breakdown(
         .map((l) => `d.${l.alias} as ${l.alias}`)
         .join(", ");
       const groupBy = levels.map((l) => l.alias).join(", ");
-      const groupingSets = levels.map((l) => `(${l.alias})`).join(", ");
+      const groupingSets = (
+        isNested
+          ? levels.map((_, i) => levels.slice(0, i + 1))
+          : levels.map((l) => [l])
+      )
+        .map((keys) => `(${keys.map((l) => l.alias).join(", ")})`)
+        .join(", ");
 
-      const metrics = split ? SPLIT_METRICS : UV_METRICS;
+      const revenueMetric = withRevenue ? REVENUE_METRIC : NO_REVENUE_METRIC;
+      const metrics = split
+        ? splitMetrics(revenueMetric)
+        : uvMetrics(revenueMetric);
       const orderBy = split ? "newVisitors + returningVisitors" : "uv";
       const scopeFilter = filterExpr ? ` AND ${filterExpr}` : "";
       const extraCol = extra ? `,\n      ${extra}` : "";
