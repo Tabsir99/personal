@@ -6,7 +6,7 @@ import {
 } from "@tabsircg/schemas/analytics";
 
 const basePayloadSchema = z.object({
-  websiteId: z.string().min(1).max(96), // Max 96 bytes for index id limit
+  websiteId: z.string().min(1).max(96),
   domain: z.string().nullable(),
   href: z.string().max(2000),
   referrer: z.string().nullable(),
@@ -14,10 +14,9 @@ const basePayloadSchema = z.object({
     width: z.number(),
     height: z.number(),
   }),
-  // visitor_id is a UUID column and a row it cannot parse is quarantined
-  // silently, so a malformed id has to fail loudly here instead.
+
   visitorId: z.string().max(VISITOR_ID_MAX_LENGTH).regex(UUID_PATTERN),
-  sessionId: z.string().max(VISITOR_ID_MAX_LENGTH),
+  sessionId: z.string().max(VISITOR_ID_MAX_LENGTH).regex(UUID_PATTERN),
   visitorSessionNumber: z.number(),
   language: z.string().max(50),
   timezone: z.string().max(100),

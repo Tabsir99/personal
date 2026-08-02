@@ -31,7 +31,6 @@ const periodStart = now - 7 * DAY;
 const fmt = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 const period = `custom:${fmt(periodStart)}:${fmt(now)}`;
 
-// Must stay real uuids — ClickHouse quarantines anything else on ingest.
 const PAYER = "a8457e01-2caf-4631-b6df-6b893fd7655f";
 const SIGNER = "470d8fc9-245b-468d-96b1-a32b1bdb3464";
 const BROWSER = "2fe836d8-3b03-4a98-b2d6-9c3576b17b0c";
@@ -47,7 +46,7 @@ function base(over: Partial<AnalyticsEventRow>): AnalyticsEventRow {
     href: `https://${DOMAIN}/`,
     referrer: "",
     visitor_id: "",
-    session_id: "s1",
+    session_id: "3f2504e0-4f89-41d3-9a0c-0305e82c3399",
     language: "en-US",
     timezone: "UTC",
     event_name: "pageview",

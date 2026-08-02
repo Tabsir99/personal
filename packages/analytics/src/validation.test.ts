@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as contract from '@tabsircg/schemas/analytics';
 import { toEventData } from './eventData';
-import { generateUUID, isLocalhost, parseValidInt, usableSessionId, usableVisitorId } from './utils';
+import { generateUUID, isLocalhost, parseValidInt, usableUuid } from './utils';
 import { isSameSite, isInternalDomain } from './dom';
 import { setConfig } from './config';
 import { routeKey } from './spa';
@@ -105,46 +105,45 @@ describe('routeKey', () => {
 const UUID = '3f2504e0-4f89-41d3-9a0c-0305e82c3301';
 const SID = 'sf2504e0-4f89-41d3-9a0c-0305e82c3301';
 
-describe('usableVisitorId', () => {
+describe('usableUuid on visitor ids', () => {
   it('passes a uuid through', () => {
-    expect(usableVisitorId(UUID)).toBe(UUID);
+    expect(usableUuid(UUID)).toBe(UUID);
   });
 
   it('rejects a session-shaped id, which the worker would 400 for a year', () => {
-    expect(usableVisitorId(SID)).toBeNull();
+    expect(usableUuid(SID)).toBeNull();
   });
 
   it('drops an id the worker will always reject, so no cookie stores it', () => {
-    expect(usableVisitorId('a'.repeat(constants.VISITOR_ID_MAX_LENGTH + 1))).toBeNull();
-    expect(usableVisitorId('a'.repeat(constants.VISITOR_ID_MAX_LENGTH))).toBeNull();
-    expect(usableVisitorId('v-abc')).toBeNull();
-    expect(usableVisitorId('3f2504e0-4f89-41d3-9a0c-0305e82c330')).toBeNull();
+    expect(usableUuid('a'.repeat(constants.VISITOR_ID_MAX_LENGTH + 1))).toBeNull();
+    expect(usableUuid('a'.repeat(constants.VISITOR_ID_MAX_LENGTH))).toBeNull();
+    expect(usableUuid('v-abc')).toBeNull();
+    expect(usableUuid('3f2504e0-4f89-41d3-9a0c-0305e82c330')).toBeNull();
   });
 
   it('treats empty and missing as no handoff', () => {
-    expect(usableVisitorId('')).toBeNull();
-    expect(usableVisitorId(null)).toBeNull();
-    expect(usableVisitorId(undefined)).toBeNull();
+    expect(usableUuid('')).toBeNull();
+    expect(usableUuid(null)).toBeNull();
+    expect(usableUuid(undefined)).toBeNull();
   });
 });
 
-describe('usableSessionId', () => {
-  it("accepts the 's'+uuid shape getSessionId writes", () => {
-    expect(usableSessionId(SID)).toBe(SID);
+describe('usableUuid on session ids', () => {
+  it('accepts the bare uuid getSessionId now writes', () => {
+    expect(usableUuid(UUID)).toBe(UUID);
   });
 
-  it('rejects a bare uuid and anything else', () => {
-    expect(usableSessionId(UUID)).toBeNull();
-    expect(usableSessionId('s-abc')).toBeNull();
-    expect(usableSessionId('a'.repeat(constants.VISITOR_ID_MAX_LENGTH))).toBeNull();
-    expect(usableSessionId('')).toBeNull();
-    expect(usableSessionId(null)).toBeNull();
+  it("rejects the retired 's'+uuid shape and anything else", () => {
+    expect(usableUuid(SID)).toBeNull();
+    expect(usableUuid('s-abc')).toBeNull();
+    expect(usableUuid('a'.repeat(constants.VISITOR_ID_MAX_LENGTH))).toBeNull();
+    expect(usableUuid('')).toBeNull();
+    expect(usableUuid(null)).toBeNull();
   });
 
   it('round-trips what the SDK actually generates', () => {
-    const generated = 's' + generateUUID().substring(1);
-    expect(usableSessionId(generated)).toBe(generated);
-    expect(usableVisitorId(generated)).toBeNull();
+    const generated = generateUUID();
+    expect(usableUuid(generated)).toBe(generated);
   });
 });
 

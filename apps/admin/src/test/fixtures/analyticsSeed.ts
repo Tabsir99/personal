@@ -1,8 +1,5 @@
 import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
 
-/** RNG-seeded twin of analytics-worker's seed.ts, bounded so no query hits its
- * LIMIT. Rows match what the worker and webhook write, field for field. */
-
 export interface SeedOptions {
   websiteId: string;
   seed: number;
@@ -82,8 +79,6 @@ const SOURCES: Source[] = [
   },
 ];
 
-// cf.region/cf.city are full names, never ISO codes. London is here twice on
-// purpose so a breakdown keyed on the bare city name merges two real cities.
 const COUNTRIES: Country[] = [
   {
     code: "US",
@@ -227,8 +222,6 @@ const DEVICES = [
   },
 ] as const satisfies Device[];
 
-// Supporters fan out across two devices sharing Chrome, so a naive SUM would
-// double-count their payment in the Chrome bucket. Exercises the revenue dedup.
 const SUPPORTER_DESKTOP = DEVICES[0];
 const SUPPORTER_PHONE = DEVICES[5];
 
@@ -241,8 +234,6 @@ const COFFEE_CENTS = [300, 500, 500, 1000, 1500, 2500, 5000] as const;
 const SUPPORTER_FIRST = ["Andrew", "Jakub", "Alejandro", "Mykolas"] as const;
 const SUPPORTER_LAST = ["Smith", "Nowak", "Garcia", "Petrauskas"] as const;
 
-// Every field is detectBot()/parseUA() output for that crawler's real UA — name
-// casing and category included. Do not hand-edit; re-derive.
 const BOTS = [
   { name: "GPTBot", category: "training", browser: "Unknown", weight: 0.28 },
   { name: "ClaudeBot", category: "training", browser: "WebKit", weight: 0.12 },
@@ -307,7 +298,6 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
     return arr[arr.length - 1];
   };
 
-  // SDK generateUUID, drawn from the seeded RNG so runs stay reproducible.
   const uuid = () => {
     const b = new Uint8Array(16);
     for (let i = 0; i < 16; i++) b[i] = Math.floor(rng() * 256);
@@ -317,7 +307,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
   };
 
-  const sessionId = () => `s${uuid().slice(1)}`;
+  const sessionId = () => uuid();
 
   const B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   const stripeId = (prefix: string, len: number) =>
@@ -351,7 +341,6 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       ip,
     };
 
-    // trackIdentify appends user_id last, so it lands last in the JSON.
     const identifyData = (name: string) =>
       JSON.stringify({ name, image: "", user_id: `usr_${id}` });
 
@@ -390,8 +379,6 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       ...over,
     });
 
-    // One session: `snum` is the session ordinal, `landing` true only when this
-    // is a fresh (snum === 1) arrival that carries the referrer + campaign query.
     const emitSession = (
       dev: Device,
       snum: number,
@@ -419,8 +406,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
             session_id: sid,
             session_number: snum,
             href,
-            // document.referrer does not change on client-side navigation, so
-            // the SDK sends the arrival referrer on every event of the session.
+
             referrer: landing ? source.referrer : "",
             event_name: type,
             timestamp: Math.floor(ts),
@@ -431,7 +417,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       };
 
       const pageview = (path: string) => push("pageview", path);
-      // handleGoalElement sends { eventName }; the worker stores it verbatim.
+
       const goal = (name: string, path: string) =>
         push("custom", path, {
           event_name: name,
@@ -456,7 +442,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
           browser: "",
           os: "",
           device: "",
-          // writePaymentEvent omits it, so it defaults to "" not "generic".
+
           bot_category: "",
           ip: "",
           viewport_w: 0,
@@ -522,7 +508,6 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
           ),
         });
       } else {
-        // supporter — pays in session 1
         pageview("/");
         advance(15, 30);
         pageview("/projects");
@@ -555,8 +540,6 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       return;
     }
 
-    // 25% are returning: their first in-window session is already snum > 1 and
-    // carries no referrer, which keeps the new/returning split meaningful.
     const returning = rng() < 0.25;
     const snum = returning ? int(2, 4) : 1;
     const start = windowStart + rng() * (windowEnd - windowStart - DAY);
@@ -571,7 +554,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
     const bot = weighted(BOTS);
     const path = rng() < 0.5 ? pick(BLOG_PAGES) : pick(PAGES);
     const ts = windowStart + rng() * (windowEnd - windowStart);
-    // A crawler keeps no cookies, so every hit is a fresh visitor.
+
     const geo = weighted(COUNTRIES);
     const [region, city] = pick(geo.regions);
     rows.push({

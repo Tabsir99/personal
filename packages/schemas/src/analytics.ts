@@ -1,9 +1,7 @@
-/** Source of truth for the analytics_events columns, shared by both ingest paths
- * and admin. The .datasource DDL is a hand-kept mirror — keep it aligned. */
+
 
 import { z } from "zod";
 
-/** Tinybird datasource (table) name. */
 export const ANALYTICS_TABLE = "analytics_events";
 
 export const CUSTOM_EVENT_TYPE = "custom";
@@ -25,8 +23,6 @@ export type BotCategory = (typeof BOT_CATEGORY_NAMES)[number];
 
 export const VISITOR_ID_MAX_LENGTH = 100;
 
-/** visitor_id is a UUID column and arrives from a visitor-editable cookie, so
- * every ingest path validates it. session_id stays a String. */
 export const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -66,8 +62,6 @@ export const extraDataSchema = z
     message: `Serialised properties must not exceed ${EXTRA_DATA_MAX_BYTES} characters`,
   });
 
-/** camelCase handle -> column name. Must match the .datasource and the ingested
- * JSON keys exactly. */
 export const COLUMNS = {
   websiteId: "website_id",
   type: "type",
@@ -99,7 +93,6 @@ export const COLUMNS = {
   timestamp: "timestamp",
 } as const;
 
-/** A single row as ingested into Tinybird (snake_case keys = COLUMNS values). */
 export interface AnalyticsEventRow {
   website_id: string;
   type: string;

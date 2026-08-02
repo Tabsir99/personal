@@ -57,7 +57,7 @@ export function trackIdentify(userId: string, data: IdentifyData, callback?: Eve
   sendEvent(payload, callback);
 }
 
-export function datafastGlobalHandler(eventName: string, data?: Record<string, unknown>) {
+export function cgdGlobalHandler(eventName: string, data?: Record<string, unknown>) {
   if (!trackingEnabled) {
     log('info', `Event '${eventName}' ignored - ${disableReason}`);
     return;

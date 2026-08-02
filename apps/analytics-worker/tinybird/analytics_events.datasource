@@ -5,7 +5,7 @@ SCHEMA >
     href String `json:$.href`,
     referrer String `json:$.referrer`,
     visitor_id UUID `json:$.visitor_id`,
-    session_id String `json:$.session_id`,
+    session_id UUID `json:$.session_id`,
     language String `json:$.language`,
     timezone String `json:$.timezone`,
     event_name String `json:$.event_name`,

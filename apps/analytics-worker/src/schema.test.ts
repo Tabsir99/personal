@@ -7,9 +7,9 @@ const base = {
   href: "https://example.com/",
   referrer: null,
   viewport: { width: 1920, height: 1080 },
-  // Only visitor_id has to parse as a UUID; session_id stays a String.
+
   visitorId: "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
-  sessionId: "sf2504e0-4f89-41d3-9a0c-0305e82c3302",
+  sessionId: "3f2504e0-4f89-41d3-9a0c-0305e82c3302",
   visitorSessionNumber: 1,
   language: "en-US",
   timezone: "UTC",
@@ -60,7 +60,7 @@ describe("payloadSchema", () => {
       }).success,
     ).toBe(true);
     expect(parse({ type: "pageview", sessionId: "s-anything" }).success).toBe(
-      true,
+      false,
     );
   });
 

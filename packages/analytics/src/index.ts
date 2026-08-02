@@ -1,6 +1,6 @@
 import { initConfigState, trackingEnabled, disableReason } from './state';
 import { log } from './logger';
-import { datafastGlobalHandler, initPageviewState } from './events';
+import { cgdGlobalHandler, initPageviewState } from './events';
 import { initDom } from './dom';
 import { setupSpaRouting } from './spa';
 import { APP_NAME } from './constants';
@@ -16,7 +16,7 @@ import { APP_NAME } from './constants';
 
   initConfigState();
 
-  (window as any)[APP_NAME] = datafastGlobalHandler;
+  (window as any)[APP_NAME] = cgdGlobalHandler;
   if ((window as any)[APP_NAME].q) {
     delete (window as any)[APP_NAME].q;
   }
@@ -25,7 +25,7 @@ import { APP_NAME } from './constants';
     const item = queue.shift();
     if (Array.isArray(item) && item.length > 0) {
       try {
-        (datafastGlobalHandler as any).apply(null, item as any);
+        (cgdGlobalHandler as any).apply(null, item as any);
       } catch (e) {
         log('error', 'Error processing queued call:', e, item);
       }

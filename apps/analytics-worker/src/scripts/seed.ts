@@ -1,3 +1,4 @@
+
 /// <reference types="node" />
 import nodeCrypto from "crypto";
 import { existsSync, readFileSync } from "fs";
@@ -7,6 +8,7 @@ import { parseUA } from "../parseUA";
 import { detectBot } from "../detectBot";
 import {
   ANALYTICS_TABLE,
+
   type AnalyticsEventRow,
 } from "@tabsircg/schemas/analytics";
 
@@ -93,8 +95,6 @@ const SUBJECTS = [
 ];
 const COFFEE_AMOUNTS_CENTS = [300, 500, 500, 500, 1000, 1000, 1500, 2500, 5000];
 
-// `referrer` drives the channel classifier, so these span every bucket.
-// `utm`/`ref` ride in the landing href's query string.
 interface AcquisitionSource {
   referrer: string | null;
   weight: number;
@@ -125,8 +125,7 @@ const ACQUISITION_SOURCES: AcquisitionSource[] = [
   { referrer: "https://www.youtube.com/", weight: 0.025 },
   { referrer: "https://t.me/", weight: 0.015 },
   { referrer: "https://discord.com/channels/@me", weight: 0.01 },
-  // Email newsletter campaign (Proton webmail maps cleanly to Email; a Gmail
-  // referrer would hit the Search classifier first via its "google" substring)
+
   {
     referrer: "https://mail.proton.me/",
     weight: 0.04,
@@ -350,8 +349,8 @@ function generateVisitor(): VisitorProfile {
     userAgent = uas[Math.floor(Math.random() * uas.length)];
   } else if (deviceType === "mobile") {
     const resolutions = [
-      { w: 390, h: 844 }, // iPhone 13/14
-      { w: 412, h: 915 }, // Pixel 7
+      { w: 390, h: 844 },
+      { w: 412, h: 915 },
     ];
     const res = resolutions[Math.floor(Math.random() * resolutions.length)];
     screenWidth = res.w;
@@ -429,7 +428,6 @@ function generateVisitor(): VisitorProfile {
   };
 }
 
-// Rejection sampling for Diurnal & Weekly traffic curves
 function getTrafficWeight(timeMs: number, timezone: string): number {
   const date = new Date(timeMs);
 
@@ -445,17 +443,15 @@ function getTrafficWeight(timeMs: number, timezone: string): number {
     day = date.getUTCDay();
   }
 
-  // Hour curve (high traffic at 10-12 and 14-17, low at 2-4 AM)
   let hourWeight = 0.2;
   if (hour >= 9 && hour <= 18) {
-    hourWeight = 0.8 + 0.2 * Math.sin(((hour - 9) * Math.PI) / 9); // Peaks around 13-14 (1.0)
+    hourWeight = 0.8 + 0.2 * Math.sin(((hour - 9) * Math.PI) / 9);
   } else if (hour > 18 && hour <= 23) {
-    hourWeight = 0.8 - 0.6 * ((hour - 18) / 5); // Drops to 0.2
+    hourWeight = 0.8 - 0.6 * ((hour - 18) / 5);
   } else {
-    hourWeight = 0.2 - 0.1 * (hour / 8); // Very low in early morning
+    hourWeight = 0.2 - 0.1 * (hour / 8);
   }
 
-  // Weekly curve (weekend traffic drops by ~45%)
   const isWeekend = day === 0 || day === 6;
   const dayWeight = isWeekend ? 0.55 : 1.0;
 
@@ -481,7 +477,6 @@ console.log("🎨 Simulating realistic visitor sessions...");
 const allEvents: SeedEvent[] = [];
 let generatedVisitorCount = 0;
 
-// Overshoot the target, then sort and slice.
 while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
   const visitor = generateVisitor();
   generatedVisitorCount++;
@@ -497,10 +492,10 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
     if (sNum > 1) {
       sessionTime +=
         (Math.floor(Math.random() * 5) + 1) * 24 * 60 * 60 * 1000 +
-        Math.random() * 4 * 60 * 60 * 1000; // 1 to 5 days later
+        Math.random() * 4 * 60 * 60 * 1000;
     }
 
-    if (sessionTime > NOW) continue; // Don't generate events in the future
+    if (sessionTime > NOW) continue;
 
     let currentOffset = 0;
 
@@ -547,8 +542,6 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
       };
     };
 
-    // The SDK fires goals as type 'custom' with the name in
-    // extraData.eventName, so the seed has to match.
     const buildGoal = (
       goalName: string,
       path: string,
@@ -595,7 +588,7 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         allEvents.push(buildGoal("theme_toggle", "/", { theme: "dark" }));
       }
 
-      currentOffset += (Math.floor(Math.random() * 25) + 15) * 1000; // 15-40s reading time
+      currentOffset += (Math.floor(Math.random() * 25) + 15) * 1000;
       const nextPages = ["/blog", "/projects", "/about"];
       const page2 = nextPages[Math.floor(Math.random() * nextPages.length)];
       allEvents.push(buildPayload("pageview", page2));
@@ -782,7 +775,6 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
   }
 }
 
-// Simulate bot traffic (~5% of total)
 const BOT_USER_AGENTS = [
   "Mozilla/5.0 (compatible; GPTBot/1.0; +https://openai.com/gptbot)",
   "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; ClaudeBot/1.0; +claudebot@anthropic.com)",
@@ -917,8 +909,6 @@ function toPaymentRow(p: SeedEvent): AnalyticsEventRow {
   };
 }
 
-// Build the Tinybird row exactly as the worker does (UA -> browser/os/device,
-// bot detection).
 function toRow(p: SeedEvent): AnalyticsEventRow {
   if (p.type === "payment") return toPaymentRow(p);
 

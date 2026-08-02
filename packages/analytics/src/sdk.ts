@@ -13,13 +13,13 @@ import type { AnalyticsConfig, IdentifyData, EventCallback, EventResult, EventOu
 
 let initialized = false;
 
+function inBrowser(): boolean {
+  return typeof window !== 'undefined' && typeof document !== 'undefined';
+}
+
 interface AnalyticsInstance {
-  /** Track a pageview. Called automatically on route changes after `init()`. */
   trackPageview: (callback?: EventCallback) => void;
-  /** Track a custom event: trackEvent('signup', { plan: 'pro' }). */
   trackEvent: (name: string, data?: Record<string, string>, callback?: EventCallback) => void;
-  /** Link the anonymous visitor to a known user:
-   * identify('user-123', { name: 'Jane' }). */
   identify: (userId: string, data?: IdentifyData, callback?: EventCallback) => void;
 }
 
@@ -35,10 +35,9 @@ const methods: AnalyticsInstance = {
   },
 };
 
-/** Initialize the tracker. Call once at startup, before any tracking call;
- * returns the tracking methods. */
 export function init(options: AnalyticsConfig): AnalyticsInstance {
   if (initialized) return methods;
+  if (!inBrowser()) return methods;
 
   setConfig({
     websiteId: options.websiteId,
@@ -58,14 +57,8 @@ export function init(options: AnalyticsConfig): AnalyticsInstance {
   if (!trackingEnabled) return methods;
 
   initPageviewState();
-
-  if (typeof document !== 'undefined') {
-    initDom();
-  }
-
-  if (typeof window !== 'undefined') {
-    setupSpaRouting();
-  }
+  initDom();
+  setupSpaRouting();
 
   return methods;
 }

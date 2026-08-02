@@ -28,8 +28,6 @@ export interface TinybirdQueryResult<
   statistics?: QueryStats;
 }
 
-/** `label` names the query in the server-side diagnostic log; none of that
- * logging reaches the client. */
 export async function queryTinybird<T = Record<string, string | number | null>>(
   sql: string,
   label = "query",
@@ -57,8 +55,6 @@ export async function queryTinybird<T = Record<string, string | number | null>>(
 
 const LOG_DIR = "logs";
 
-/** Dev-only: dumps SQL to `logs/<label>.sql` for pasting into Tinybird.
- * Best-effort, never throws. */
 function dumpSql(label: string, sql: string): string | undefined {
   if (process.env.NODE_ENV === "production") return undefined;
   try {
@@ -82,6 +78,9 @@ export async function writePaymentEvent(row: {
 }): Promise<void> {
   if (!isUuid(row.visitorId)) {
     throw new Error("Payment event visitorId is not a UUID");
+  }
+  if (!isUuid(row.sessionId)) {
+    throw new Error("Payment event sessionId is not a UUID");
   }
 
   const payload: Partial<AnalyticsEventRow> = {

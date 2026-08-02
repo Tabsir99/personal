@@ -13,7 +13,7 @@ const payload: EventPayload = {
   referrer: null,
   viewport: { width: 1024, height: 768 },
   visitorId: 'v1',
-  sessionId: 's1',
+  sessionId: '3f2504e0-4f89-41d3-9a0c-0305e82c3302',
   visitorSessionNumber: 1,
   language: 'en-US',
   timezone: 'UTC',
@@ -176,7 +176,7 @@ describe('the request the worker actually receives', () => {
     const fetchMock = respondWith(200);
     vi.stubGlobal('fetch', fetchMock);
     const vid = '3f2504e0-4f89-41d3-9a0c-0305e82c3301';
-    const sid = 'sf2504e0-4f89-41d3-9a0c-0305e82c3302';
+    const sid = '3f2504e0-4f89-41d3-9a0c-0305e82c3302';
     window.history.replaceState({}, '', `/landing?utm_source=x&_cgd_vid=${vid}&_cgd_sid=${sid}&_cgd_vsn=4`);
 
     trackPageview();
