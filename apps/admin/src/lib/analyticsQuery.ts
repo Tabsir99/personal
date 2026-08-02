@@ -53,14 +53,14 @@ export function visitorRevenueSubquery(
 // over-counts once a visitor fans out across multiple dimension combos in the
 // scan. Dedup to one (vid, rev) pair per visitor within each group, then sum.
 //
-// The vid is hashed because the array only answers "already counted this
-// visitor here?" — nothing reads the id back out, arraySum touches x.2 alone.
-// Holding 36-char UUIDs made this the query's memory ceiling: the state spans
-// every visitor with a pageview (ifNull puts non-payers in it too, so the cost
-// is independent of payment volume) and GROUPING SETS keeps one state per
-// level — 8 of them on the sources route.
+// This array is the heaviest state in the query: it spans every visitor with a
+// pageview, not just payers (ifNull puts the rest in at 0), and GROUPING SETS
+// keeps one per level — 8 of them on the sources route. It stays affordable
+// because `visitor_id` is a native UUID column, 16 bytes rather than a 36-char
+// String. Keep it that way; widening the column back to String puts ~50 bytes
+// per visitor per level in memory here.
 const REVENUE_METRIC =
-  "round(arraySum(x -> x.2, groupUniqArray((cityHash64(vid), ifNull(rev, 0)))) / 100) as revenue";
+  "round(arraySum(x -> x.2, groupUniqArray((vid, ifNull(rev, 0)))) / 100) as revenue";
 
 const NO_REVENUE_METRIC = "toFloat64(0) as revenue";
 

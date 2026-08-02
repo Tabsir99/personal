@@ -1,4 +1,4 @@
-import { VISITOR_ID_MAX_LENGTH } from './constants';
+import { VISITOR_ID_MAX_LENGTH, UUID_PATTERN } from './constants';
 
 export function isLocalhost(hostname: string): boolean {
   if (!hostname) return false;
@@ -10,9 +10,20 @@ export function isLocalhost(hostname: string): boolean {
   return false;
 }
 
+/**
+ * Accepts a stored or handed-off id only if it is a UUID. `visitor_id` is a UUID
+ * column in the datasource and ClickHouse silently quarantines a row it cannot
+ * parse, so a tampered `cgd_visitor_id` cookie or a hand-written `_cgd_vid` URL
+ * param must not reach it — both are visitor-editable. A rejected value is
+ * treated as absent, so the caller mints a fresh id rather than dropping events.
+ *
+ * Session ids are `'s' + uuid.slice(1)`, so they are validated on that shape.
+ */
 export function usableHandoffId(value: string | null | undefined): string | null {
   if (!value) return null;
-  return value.length > VISITOR_ID_MAX_LENGTH ? null : value;
+  if (value.length > VISITOR_ID_MAX_LENGTH) return null;
+  const candidate = value.charAt(0) === 's' ? '0' + value.slice(1) : value;
+  return UUID_PATTERN.test(candidate) ? value : null;
 }
 
 const MAX_SESSION_NUMBER = 65535;

@@ -36,6 +36,26 @@ export type BotCategory = (typeof BOT_CATEGORY_NAMES)[number];
 
 export const VISITOR_ID_MAX_LENGTH = 100;
 
+/**
+ * `visitor_id` is a **UUID column** in the datasource, not a String — it is held
+ * per-visitor in memory by every breakdown (16 bytes instead of 36 chars), and
+ * it backs the journey route's bloom filter.
+ *
+ * ClickHouse quarantines a row whose UUID it cannot parse, and quarantine is
+ * silent, so anything that can reach the column has to be checked first. The id
+ * is not trustworthy input: it arrives from the `cgd_visitor_id` cookie and the
+ * `_cgd_vid` cross-domain param, both of which a visitor can edit.
+ *
+ * `session_id` is deliberately NOT a UUID — `getSessionId` builds it as
+ * `'s' + uuid.slice(1)`, so it stays a String.
+ */
+export const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function isUuid(value: unknown): value is string {
+  return typeof value === "string" && UUID_PATTERN.test(value);
+}
+
 export const EXTRA_DATA_MAX_PROPERTIES = 10;
 export const EXTRA_DATA_MAX_KEY_LENGTH = 32;
 export const EXTRA_DATA_MAX_VALUE_LENGTH = 1000;

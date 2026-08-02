@@ -53,6 +53,11 @@ describe('wire rules match the shared contract', () => {
     expect(constants.CUSTOM_EVENT_TYPE).toBe(contract.CUSTOM_EVENT_TYPE);
   });
 
+  it('mirrors the uuid pattern the datasource column requires', () => {
+    expect(constants.UUID_PATTERN.source).toBe(contract.UUID_PATTERN.source);
+    expect(constants.UUID_PATTERN.flags).toBe(contract.UUID_PATTERN.flags);
+  });
+
   it('mirrors every extra_data limit the worker enforces', () => {
     expect(constants.EXTRA_DATA_MAX_PROPERTIES).toBe(contract.EXTRA_DATA_MAX_PROPERTIES);
     expect(constants.EXTRA_DATA_MAX_KEY_LENGTH).toBe(contract.EXTRA_DATA_MAX_KEY_LENGTH);
@@ -98,13 +103,20 @@ describe('routeKey', () => {
 });
 
 describe('usableHandoffId', () => {
-  it('passes ordinary ids through', () => {
+  it('passes uuids through, visitor and session alike', () => {
     expect(usableHandoffId('3f2504e0-4f89-41d3-9a0c-0305e82c3301')).toBe('3f2504e0-4f89-41d3-9a0c-0305e82c3301');
-    expect(usableHandoffId('a'.repeat(constants.VISITOR_ID_MAX_LENGTH))).toBeTruthy();
+    // getSessionId stores 's' + uuid.slice(1), so that shape has to survive too.
+    expect(usableHandoffId('sf2504e0-4f89-41d3-9a0c-0305e82c3301')).toBe('sf2504e0-4f89-41d3-9a0c-0305e82c3301');
   });
 
   it('drops an id the worker will always reject, so no cookie stores it', () => {
     expect(usableHandoffId('a'.repeat(constants.VISITOR_ID_MAX_LENGTH + 1))).toBeNull();
+    // Within the length cap but not a uuid: visitor_id is a UUID column, so the
+    // worker rejects it and ClickHouse would quarantine the row anyway. Both the
+    // cookie and the _cgd_vid param are visitor-editable, so neither is trusted.
+    expect(usableHandoffId('a'.repeat(constants.VISITOR_ID_MAX_LENGTH))).toBeNull();
+    expect(usableHandoffId('v-abc')).toBeNull();
+    expect(usableHandoffId('3f2504e0-4f89-41d3-9a0c-0305e82c330')).toBeNull();
   });
 
   it('treats empty and missing as no handoff', () => {

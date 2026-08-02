@@ -4,7 +4,7 @@ SCHEMA >
     domain String `json:$.domain`,
     href String `json:$.href`,
     referrer String `json:$.referrer`,
-    visitor_id String `json:$.visitor_id`,
+    visitor_id UUID `json:$.visitor_id`,
     session_id String `json:$.session_id`,
     language String `json:$.language`,
     timezone String `json:$.timezone`,
