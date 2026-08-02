@@ -49,11 +49,8 @@ function IntroInner({ onDone }: { onDone: () => void }) {
   const wordWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    /* FLIP morph: just before the backdrop fades, measure the live source
-       and the header brand ([data-brand]) and translate+scale the word onto
-       it. Measuring at morph time (not mount) keeps it correct at any
-       viewport, so it's responsive by construction. The word then sits on the
-       brand as the overlay unmounts — one TabsirCG, no double. */
+    /* FLIP morph onto [data-brand]. Measuring at morph time rather than at
+       mount keeps it correct at any viewport. */
     const morph = setTimeout(() => {
       const brand = document.querySelector<HTMLElement>("[data-brand]");
       const src = wordWrapRef.current;
@@ -121,8 +118,7 @@ export function Intro() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
     if (document.documentElement.dataset.skipIntro === "1" || reduced) {
-      /* Skip the intro entirely. Setting data-skip-intro zeroes --hero-stagger
-         (hero animates immediately) and un-hides the header brand, so a
+      /* data-skip-intro zeroes --hero-stagger and un-hides the brand, so a
          reduced-motion user never sees the word stuck at center. */
       document.documentElement.dataset.skipIntro = "1";
       setShow(false);
@@ -131,15 +127,12 @@ export function Intro() {
 
   const handleDone = useCallback(() => {
     localStorage.setItem("intro-played", String(Date.now()));
-    /* Reveal the header brand in the SAME commit that unmounts the overlay, so
-       the landed word and the real brand swap on a single frame — they're never
-       both visible. */
+    /* Reveal the brand in the SAME commit that unmounts the overlay, so the
+       two swap on one frame and are never both visible. */
     document.documentElement.dataset.introDone = "1";
     setShow(false);
-    /* Defer the skip flag until the hero entrance has finished. Flipping
-       --hero-stagger to 0ms mid-handoff would recompute the hero animation
-       delays into the past and snap them in; flipping it after they've played
-       is invisible, and lets later in-session remounts skip the intro. */
+    /* Deferred: flipping --hero-stagger to 0ms mid-handoff would recompute the
+       hero delays into the past and snap them in. */
     window.setTimeout(() => {
       document.documentElement.dataset.skipIntro = "1";
     }, 2000);

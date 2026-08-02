@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 
-// Sample an average accent colour from an image via a canvas (skipping
-// transparent, near-white and near-black pixels so the brand hue survives).
-// Returns an `rgb(...)` string once decoded for the current src, or null when
-// the image can't be read — a cross-origin taint or a load error — so callers
-// fall back to a known brand colour.
+// Average accent colour sampled via canvas, skipping transparent and near-
+// white/black pixels. Null on a cross-origin taint or load error.
 export function useImageAccent(src: string | null | undefined): string | null {
   const [result, setResult] = useState<{ src: string; color: string } | null>(
     null,

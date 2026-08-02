@@ -25,9 +25,8 @@ export interface TimeseriesPoint {
   conversionRate: number;
 }
 
-// New-vs-returning split. Carried only on sources, where it's an acquisition
-// signal (which channels bring new vs returning traffic). Every other breakdown
-// carries a single `uv` total; uv = newVisitors + returningVisitors.
+// Carried only on sources, as an acquisition signal. Every other breakdown
+// carries a single `uv`, where uv = newVisitors + returningVisitors.
 interface VisitorSplit {
   newVisitors: number;
   returningVisitors: number;
@@ -107,7 +106,11 @@ export interface GoalMetric {
 }
 
 export type PresetPeriod =
-  "today" | "yesterday" | "last7d" | "last30d" | "last90d";
+  | "today"
+  | "yesterday"
+  | "last7d"
+  | "last30d"
+  | "last90d";
 export type Period = PresetPeriod | `custom:${string}:${string}`;
 export type Granularity = "hourly" | "daily" | "weekly" | "monthly";
 
@@ -228,9 +231,8 @@ export interface BotPagesResponse {
   pages: BotPageMetric[];
 }
 
-// ── Funnels ──────────────────────────────────────────────────────────────
-// A funnel is an ordered chain of goals. Each step is an independent count for
-// the period, sized against the max across steps — nothing forces a decrease.
+// Each step is an independent count for the period, sized against the max
+// across steps — nothing forces a decrease.
 
 export type FunnelStepMatch = "equals" | "contains" | "startsWith" | "endsWith";
 export type GoalCompletion = "completed";

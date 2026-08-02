@@ -1,11 +1,7 @@
 import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
 
-/** In-memory, RNG-seeded twin of analytics-worker's seed.ts. Every dimension's
- * cardinality stays bounded so no dashboard query hits its LIMIT.
- *
- * Rows match what the worker and the Stripe webhook actually write, field for
- * field — ids, geo names, bot_category, extra_data key order. A fixture that is
- * only plausible hides the bugs it exists to catch. */
+/** RNG-seeded twin of analytics-worker's seed.ts, bounded so no query hits its
+ * LIMIT. Rows match what the worker and webhook write, field for field. */
 
 export interface SeedOptions {
   websiteId: string;
@@ -328,7 +324,6 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
 
   const sessionId = () => `s${uuid().slice(1)}`;
 
-  // Stripe ids: base62, 24 chars for evt_/pi_, 14 for cus_.
   const B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   const stripeId = (prefix: string, len: number) =>
     prefix +
@@ -540,7 +535,6 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
         pageview("/success");
         const first = pick(SUPPORTER_FIRST);
         const last = pick(SUPPORTER_LAST);
-        // Key order matches the webhook's { stripe_event_id, kind, ...identity }.
         payment(pick(COFFEE_CENTS), {
           stripe_event_id: stripeId("evt_", 24),
           kind: "charge",
@@ -564,9 +558,8 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       return;
     }
 
-    // 25% of ordinary visitors are returning: their first in-window session is
-    // already snum > 1 (their acquisition predates the window), so they carry no
-    // referrer — which is what keeps new/returning splits meaningful.
+    // 25% are returning: their first in-window session is already snum > 1 and
+    // carries no referrer, which keeps the new/returning split meaningful.
     const returning = rng() < 0.25;
     const snum = returning ? int(2, 4) : 1;
     const start = windowStart + rng() * (windowEnd - windowStart - DAY);
@@ -576,7 +569,6 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
   const targetVisitorRows = Math.floor(minRows * 0.95);
   while (rows.length < targetVisitorRows) emitVisitor();
 
-  // ~5% bot traffic, spread across the window.
   const botCount = Math.max(1, Math.floor(rows.length * 0.05));
   for (let i = 0; i < botCount; i++) {
     const bot = weighted(BOTS);

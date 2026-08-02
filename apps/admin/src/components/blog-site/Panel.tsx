@@ -3,12 +3,8 @@ import * as React from "react";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { cn } from "@/lib/utils";
 
-/**
- * Editorial section card for the blog-site config pages.
- *
- * Composes the chrome shared by SectionCard but keeps the count separator
- * inline with the eyebrow for the “EDITING · 3” pattern these panels use.
- */
+/** SectionCard's chrome, but with the count inline with the eyebrow for the
+ * "EDITING · 3" pattern these panels use. */
 export default function Panel({
   eyebrow,
   title,

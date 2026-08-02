@@ -76,9 +76,8 @@ export const readSingleBlog = async <T>({
 }: ReadSingleBlogParams<T>): Promise<T | null> => {
   const docRef = db.collection(Collections.BLOGS).doc(docId);
 
-  // Project at the database level with a field mask so large fields (e.g. the
-  // serialized blog `content`) aren't read off the wire when only a few small
-  // fields are needed.
+  // Field mask at the database level, so large fields like the serialized
+  // `content` are never read off the wire.
   if (fieldsToRead) {
     const fields = Object.entries(fieldsToRead)
       .filter(([, include]) => include)

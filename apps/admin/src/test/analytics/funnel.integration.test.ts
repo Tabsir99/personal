@@ -9,7 +9,7 @@ vi.mock("@/lib/requireAuth", () => ({
   requireAuth: vi.fn().mockResolvedValue(undefined),
 }));
 
-// getFunnel() reads Firestore; a hoisted in-memory stub keeps the test on the Tinybird compute only.
+// getFunnel() reads Firestore; a hoisted stub keeps this on Tinybird compute.
 const { WID, FUNNEL } = vi.hoisted(() => {
   const wid = `ftest-${Date.now().toString(36)}`;
   const iso = new Date().toISOString();
@@ -96,7 +96,8 @@ import {
 } from "@/test/support/tinybird";
 import { GET as funnelGET } from "@/app/api/analytics/funnel/route";
 
-// Funnel route vs an independent JS oracle over the same seeded rows, on real Tinybird; self-skips without creds. Run alone: pnpm -F admin test funnel
+// Funnel route vs an independent JS oracle over the same rows, on real
+// Tinybird. Skips without creds. `pnpm -F admin test funnel`
 const DAY = 86_400_000;
 const now = Date.now();
 const D = Math.floor(now / DAY) * DAY;
@@ -136,7 +137,6 @@ describeMaybe("analytics funnel route — real Tinybird", () => {
 
     expect(data.funnel).toEqual(FUNNEL);
 
-    // Fixture sanity: every step matched a visitor, the funnel is non-monotonic, and the enrichment is populated.
     expect(ref.data.every((d) => d.value > 0)).toBe(true);
     expect(
       ref.data.some((d, i) => i > 0 && d.value > ref.data[i - 1].value),

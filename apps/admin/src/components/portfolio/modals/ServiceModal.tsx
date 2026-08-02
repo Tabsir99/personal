@@ -1,4 +1,3 @@
- 
 import { useState } from "react";
 import { Plus, X } from "@phosphor-icons/react";
 
@@ -45,7 +44,6 @@ export default function ServiceDialog({
   const isUpdating =
     existingService !== undefined && typeof serviceIndex === "number";
 
-  // Synchronously adjust state during render when dialog opens
   const [prevOpen, setPrevOpen] = useState(open);
   const [prevService, setPrevService] = useState(existingService);
 

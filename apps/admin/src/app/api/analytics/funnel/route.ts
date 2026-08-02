@@ -43,7 +43,10 @@ function topReferrers(
   value: number,
 ): FunnelStepReferrer[] {
   return rows
-    .map((r) => ({ ref: String(r.ref ?? ""), visitors: Number(r[`s${step}`] ?? 0) }))
+    .map((r) => ({
+      ref: String(r.ref ?? ""),
+      visitors: Number(r[`s${step}`] ?? 0),
+    }))
     .filter((r) => r.visitors > 0)
     .sort((a, b) => b.visitors - a.visitors || a.ref.localeCompare(b.ref))
     .slice(0, 3)
@@ -60,7 +63,10 @@ function topCountries(
   value: number,
 ): FunnelStepCountry[] {
   return rows
-    .map((r) => ({ cty: String(r.cty ?? ""), visitors: Number(r[`s${step}`] ?? 0) }))
+    .map((r) => ({
+      cty: String(r.cty ?? ""),
+      visitors: Number(r[`s${step}`] ?? 0),
+    }))
     .filter((r) => r.visitors > 0)
     .sort((a, b) => b.visitors - a.visitors || a.cty.localeCompare(b.cty))
     .slice(0, 3)
@@ -71,7 +77,8 @@ function topCountries(
     }));
 }
 
-// One grouped-by-visitor scan: the total set gives per-step count + revenue; the (referrer)/(country) sets give per-step breakdowns.
+// One grouped-by-visitor scan: the () set gives per-step counts and revenue,
+// the (ref)/(cty) sets give the same per breakdown.
 export const GET = wrapRoute<FunnelDetailResponse>(async (req: NextRequest) => {
   await requireAuth();
   const sp = req.nextUrl.searchParams;
@@ -83,9 +90,13 @@ export const GET = wrapRoute<FunnelDetailResponse>(async (req: NextRequest) => {
   const funnel = await getFunnel(funnelId);
 
   const preds = funnel.steps.map(stepPredicate);
-  const reached = preds.map((p, i) => `maxIf(1, ${p}) AS r${i}`).join(",\n          ");
+  const reached = preds
+    .map((p, i) => `maxIf(1, ${p}) AS r${i}`)
+    .join(",\n          ");
   const counts = preds.map((_, i) => `countIf(r${i} = 1) AS s${i}`).join(", ");
-  const revenues = preds.map((_, i) => `sumIf(vrev, r${i} = 1) AS rev${i}`).join(", ");
+  const revenues = preds
+    .map((_, i) => `sumIf(vrev, r${i} = 1) AS rev${i}`)
+    .join(", ");
 
   const res = await queryTinybird<BreakdownRow>(
     `

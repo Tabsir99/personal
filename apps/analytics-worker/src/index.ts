@@ -33,7 +33,7 @@ export default {
       const validationResult = payloadSchema.safeParse(JSON.parse(rawBody));
 
       if (!validationResult.success) {
-        // Validation failed (we use static wildcard here just so error can be read, or echo origin)
+        // Static wildcard so the error body is readable cross-origin.
         return new Response(
           JSON.stringify({
             error: "Validation failed",
@@ -52,7 +52,6 @@ export default {
 
       const payload = validationResult.data;
 
-      // KV Edge Validation with In-Memory Caching & Origin Checking
       const accessGuard = await validateAccess(
         request,
         payload.websiteId,

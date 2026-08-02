@@ -49,11 +49,8 @@ export function visitorRevenueSubquery(
   `;
 }
 
-// rev is a per-visitor total repeated on every inner row, so a plain SUM
-// over-counts once a visitor fans out across multiple dimension combos in the
-// scan. Dedup to one (vid, rev) pair per visitor within each group, then sum.
-// Holds one entry per visitor per level, so it depends on visitor_id being a
-// UUID column rather than a String.
+// rev repeats on every row a visitor fans out to, so a plain SUM over-counts.
+// Holds one entry per visitor per level; visitor_id is a UUID column for that.
 const REVENUE_METRIC =
   "round(arraySum(x -> x.2, groupUniqArray((vid, ifNull(rev, 0)))) / 100) as revenue";
 
@@ -79,30 +76,8 @@ export interface BreakdownChain {
   build(): string;
 }
 
-/**
- * Top-N visitor breakdown of the pageview slice, grouped by one or more dimension
- * levels in a single GROUPING SETS scan. Use for dimension breakdowns only
- * (sources, system, locations); not for heterogeneous UNION shapes like the pages
- * route, which stays hand-written.
- *
- *   breakdown(websiteId, start, end)
- *     .level(name, alias, expr)  // one dimension per call; call order = drill order
- *     .filter(predicate)         // extra WHERE conjunct (e.g. scope to a parent dim)
- *     .revenue()                 // LEFT JOIN per-visitor revenue
- *     .splitVisitors()           // new/returning columns instead of a single uv
- *     .nested()                  // each level keys on every level before it
- *     .column(expr)              // extra output column (e.g. a carried dimension)
- *     .top(n)                    // top N rows per level
- *     .build();                  // -> SQL string
- *
- * Visitors are counted once per (dimension, visitor). splitVisitors classifies each
- * visitor new/returning via a window MIN(session_number) over that same scan, so it
- * costs no extra scan and newVisitors + returningVisitors === uv.
- *
- * Levels are independent by default. `.nested()` keys each level on the prefix
- * above it, for hierarchies like country -> region -> city where a bare name is
- * not unique.
- */
+/** Top-N visitor breakdown, one GROUPING SETS scan per level. Levels are
+ * independent unless `.nested()`, which keys each on the prefix above it. */
 export function breakdown(
   websiteId: string,
   start: number,

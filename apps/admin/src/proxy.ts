@@ -17,9 +17,8 @@ const isApiRequest = (pathname: string) => pathname.startsWith("/api/");
 const isActionRequest = (request: NextRequest) =>
   request.headers.get("next-action") != null;
 
-// serverToken (portfolio → admin) may only reach public, portfolio-facing
-// reads — never the analytics dashboard, content writes, or the upload
-// presigner, which all require a real admin login.
+// serverToken reaches public portfolio-facing reads only — never the dashboard,
+// content writes, or the upload presigner, which need a real admin login.
 const serverTokenAllowed = (request: NextRequest) => {
   const { pathname } = request.nextUrl;
   if (

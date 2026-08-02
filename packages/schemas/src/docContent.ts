@@ -64,12 +64,8 @@ const inlineNodeSchema = z.discriminatedUnion("type", [
 
 type BlockNode = DocContent["content"][number];
 
-// We can't directly annotate `z.ZodType<BlockNode>` because downstream
-// (apps/admin) uses `exactOptionalPropertyTypes: true`, under which Zod's
-// `.optional()` (producing `T | undefined`) is not assignable to DocContent's
-// EOPT-style `attrs?: T`. Cast through unknown — structural identity is
-// asserted by the discriminator-set check at the bottom of this file and by
-// Zod parse failures at runtime.
+// Can't annotate z.ZodType<BlockNode>: under EOPT, Zod's `.optional()` is not
+// assignable to `attrs?: T`. The discriminator check below guards the cast.
 const blockNodeSchema = z.lazy(() =>
   z.discriminatedUnion("type", [
     paragraphNodeSchema,
@@ -180,7 +176,10 @@ const tableRowNodeSchema = z.object({
   type: z.literal("tableRow"),
   content: z
     .array(
-      z.discriminatedUnion("type", [tableCellNodeSchema, tableHeaderNodeSchema]),
+      z.discriminatedUnion("type", [
+        tableCellNodeSchema,
+        tableHeaderNodeSchema,
+      ]),
     )
     .optional(),
 });
@@ -195,13 +194,8 @@ export const docContentSchema = z.object({
   content: z.array(blockNodeSchema),
 });
 
-// Compile-time drift check.
-// Under EOPT (apps/admin), strict structural `satisfies` between Zod's output
-// (`attrs?: T | undefined`) and DocContent's `attrs?: T` is impossible. We
-// instead check that the SET of discriminator literals on block, inline, and
-// mark types matches exactly — this catches the most likely drift (a node
-// type added or removed in @open-notion/editor). Attr-shape changes surface
-// as Zod parse failures at runtime.
+// Drift check. A structural `satisfies` is impossible under EOPT, so compare
+// the discriminator sets instead; attr changes surface as Zod parse failures.
 
 type _Tag<T> = T extends { type: infer U } ? U : never;
 type _SetEq<A, B> = [Exclude<A, B>] extends [never]

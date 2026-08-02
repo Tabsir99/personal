@@ -31,8 +31,8 @@ function fmtBytes(n: number): string {
   return `${n}B`;
 }
 
-// A blank line above each block sets it apart from the framework's request
-// logs; the label is tinted and the fields are indented under it.
+// The leading blank line sets each block apart from the framework's own
+// request logs.
 function header(label: string, tint: ChalkInstance, badge: string): string {
   return `\n${chalk.dim("tinybird")} ${tint.bold(label)}  ${badge}`;
 }
@@ -41,13 +41,8 @@ function field(name: string, value: string): string {
   return `  ${chalk.dim(name.padEnd(LABEL_COL))}${value}`;
 }
 
-/**
- * One structured, multi-line block per Tinybird query: wall + server time and
- * how much the primary index let the engine scan (rows_read / bytes_read — the
- * cheap index-effectiveness signal), plus where the full SQL was dumped for
- * copy/paste. Server-side only; chalk self-disables on a non-TTY so production
- * logs stay plain text.
- */
+/** Wall + server time and rows_read/bytes_read, the cheap index-effectiveness
+ * signal. Server-side only; chalk self-disables off a TTY. */
 export function logQuery(
   label: string,
   wallMs: number,

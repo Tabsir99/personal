@@ -35,9 +35,8 @@ export const getImageUploadSignedUrl = wrap(
   },
 );
 
-// Resume / CV upload. Stored as a public PDF under a UUID key so re-uploads bust
-// the immutable cache. Content type is fixed to application/pdf; the original
-// filename rides along in pageData for the portfolio's download link.
+// Public PDF under a UUID key so re-uploads bust the immutable cache. The
+// original filename rides along in pageData for the download link.
 export const getResumeUploadSignedUrl = wrap(async (contentLength: number) => {
   const key = `portfolio/resume/${randomUUID()}.pdf`;
 

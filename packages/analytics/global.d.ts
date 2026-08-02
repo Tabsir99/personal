@@ -1,26 +1,7 @@
-/**
- * Global type declarations for the analytics script when loaded via `<script>` tag.
- *
- * Usage:
- * 1. Add a `/// <reference path="global.d.ts" />` directive, or
- * 2. Include this file in your tsconfig `include` array.
- *
- * @example
- * ```html
- * <script
- *   src="https://admin.tabsircg.com/js/cgd.js"
- *   data-website-id="your-id"
- *   data-domain="example.com"
- * ></script>
- * ```
- *
- * ```ts
- * // Now typed globally:
- * window.cgd('signup', { plan: 'pro' });
- * ```
- */
+/** Global types for the `<script>` tag build. Reference this file or add it to
+ * your tsconfig `include` to type `window.cgd`. */
 
-/** Custom event data — flat string key-value pairs, max 10 keys, max 32-char keys, max 255-char values. */
+/** Flat string pairs: max 10 keys, 32-char keys, 255-char values. */
 interface CgdEventData {
   [key: string]: string;
 }
@@ -37,24 +18,8 @@ interface CgdIdentifyData extends CgdEventData {
   image?: string;
 }
 
-/**
- * Global analytics handler exposed by the tracking script.
- *
- * @param event - The event name. Reserved names: `"payment"`, `"identify"`.
- * @param data - Optional key-value data attached to the event.
- *
- * @example
- * ```ts
- * // Custom event
- * cgd('signup', { plan: 'pro', source: 'hero' });
- *
- * // Payment tracking
- * cgd('payment', { email: 'user@example.com' });
- *
- * // User identification
- * cgd('identify', { user_id: 'u_123', name: 'Jane' });
- * ```
- */
+/** Global handler exposed by the tracking script. `payment` and `identify` are
+ * reserved event names. */
 declare function cgd(event: 'payment', data: CgdPaymentData): void;
 declare function cgd(event: 'identify', data: CgdIdentifyData): void;
 declare function cgd(event: string, data?: CgdEventData): void;

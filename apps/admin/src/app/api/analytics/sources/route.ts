@@ -31,9 +31,8 @@ export const GET = wrapRoute<SourcesResponse>(async (req: NextRequest) => {
   const params = parseAnalyticsParams(req.nextUrl.searchParams);
   const { start, end } = periodToRange(params.period);
 
-  // Referrers, channels and every campaign dimension are one GROUPING SETS scan:
-  // the campaign levels ride the scan referrers/channels already pay for. Empty
-  // buckets (untagged traffic) fall out as name === '' below.
+  // One GROUPING SETS scan: campaign levels ride the one referrers/channels
+  // already pays for. Untagged traffic falls out as name === '' below.
   const chain = breakdown(params.websiteId, start, end)
     .level("referrers", "referrer", F.referrer)
     .level("channels", "channel", channelExpr);
@@ -42,9 +41,8 @@ export const GET = wrapRoute<SourcesResponse>(async (req: NextRequest) => {
   const sql = chain
     .revenue()
     .splitVisitors()
-    // Aliased `chan`, not `channel`: `channel` is a grouping key here and
-    // ClickHouse rejects an aggregate aliased to a GROUP BY column. Each
-    // referrer row carries its channel; mapped back to `channel` below.
+    // Aliased `chan`: ClickHouse rejects an aggregate aliased to a GROUP BY
+    // column. Mapped back to `channel` below.
     .column(`multiIf(GROUPING(referrer) = 0, any(channel), '') as chan`)
     .top(50)
     .build();

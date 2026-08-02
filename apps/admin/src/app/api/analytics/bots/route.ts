@@ -79,7 +79,6 @@ export const GET = wrapRoute<BotsResponse>(async (req: NextRequest) => {
       count: Number(r.cnt),
     }));
 
-  // Category totals from the series rows (every bot hit carries a category).
   const totals = new Map<BotCategory, number>();
   for (const s of seriesRows) {
     const cat = (s.category || "generic") as BotCategory;

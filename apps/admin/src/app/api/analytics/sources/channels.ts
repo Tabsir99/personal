@@ -1,7 +1,5 @@
-// Order matters: patterns are matched top-down, first hit wins. Channels whose
-// domains embed a generic search-engine token (Email's mail.google/mail.yahoo,
-// AI's gemini.google) MUST precede Search, or Search's "google"/"yahoo" steals
-// them.
+// Matched top-down, first hit wins. Email and AI MUST precede Search, or
+// Search's "google"/"yahoo" steals mail.google and gemini.google.
 export const CHANNELS = [
   {
     name: "Email",

@@ -8,10 +8,8 @@ const hex8 = () => randomBytes(4).toString("hex");
 type BlockNode = DocContent["content"][number];
 type AIBlock = AIDocContent["content"][number];
 
-// Zod's `.optional()` outputs `T | undefined`, which clashes with DocContent's
-// `attrs?: T` under apps/admin's `exactOptionalPropertyTypes: true`. The values
-// constructed below ARE structurally valid `BlockNode`s at runtime — the cast
-// per return bridges the type-system mismatch.
+// Zod's `.optional()` gives `T | undefined`, which clashes with `attrs?: T`
+// under exactOptionalPropertyTypes. The casts bridge that; runtime is valid.
 function finalizeBlock(block: AIBlock): BlockNode {
   switch (block.type) {
     case "paragraph":
@@ -39,9 +37,7 @@ function finalizeBlock(block: AIBlock): BlockNode {
       return {
         type: "blockquote",
         ...(block.attrs ? { attrs: block.attrs } : {}),
-        ...(block.content
-          ? { content: block.content.map(finalizeBlock) }
-          : {}),
+        ...(block.content ? { content: block.content.map(finalizeBlock) } : {}),
       } as BlockNode;
 
     case "codeBlock":
@@ -61,9 +57,7 @@ function finalizeBlock(block: AIBlock): BlockNode {
           ...block.attrs,
           hexId: block.attrs.hexId?.trim() || hex8(),
         },
-        ...(block.content
-          ? { content: block.content.map(finalizeBlock) }
-          : {}),
+        ...(block.content ? { content: block.content.map(finalizeBlock) } : {}),
       } as BlockNode;
 
     case "bulletList":

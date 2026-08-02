@@ -1,12 +1,7 @@
 import { Fragment, type ReactNode } from "react";
 
-// Inline highlighting for CMS-authored copy. Wrap a phrase in ::double colons::
-// to render it in the accent color:
-//
-//   "Built a ::custom scheduler:: from scratch."
-//
-// Single colons pass through untouched (times like 00:42, ratios like 50/req,
-// versions like v25.0), so authors only opt in with the doubled marker.
+// ::double colons:: render in the accent color. Single colons pass through, so
+// times and versions are untouched and authors opt in with the doubled marker.
 const ACCENT_RE = /::(.+?)::/g;
 
 // Low-level split into plain / accented segments. Use when the caller needs its

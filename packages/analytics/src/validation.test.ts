@@ -110,7 +110,6 @@ describe('usableHandoffId', () => {
 
   it('drops an id the worker will always reject, so no cookie stores it', () => {
     expect(usableHandoffId('a'.repeat(constants.VISITOR_ID_MAX_LENGTH + 1))).toBeNull();
-    // Within the length cap but not a uuid.
     expect(usableHandoffId('a'.repeat(constants.VISITOR_ID_MAX_LENGTH))).toBeNull();
     expect(usableHandoffId('v-abc')).toBeNull();
     expect(usableHandoffId('3f2504e0-4f89-41d3-9a0c-0305e82c330')).toBeNull();

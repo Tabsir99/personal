@@ -34,18 +34,8 @@ import { GET as goalsGET } from "@/app/api/analytics/goals/route";
 import { GET as botsGET } from "@/app/api/analytics/bots/route";
 import { GET as botPagesGET } from "@/app/api/analytics/bots/pages/route";
 
-/**
- * Integration test for every analytics route against a REAL Tinybird workspace.
- * Seeds ≥10k realistic rows (see analyticsSeed) under throwaway website ids,
- * drives each real route handler, and asserts its output equals an independent
- * JS reference (see analyticsReference) computed from the same rows. Lists are
- * compared by key so array order / ties don't matter. Cleans up afterward.
- *
- * Self-skips without Tinybird credentials.
- *
- * Run only this suite:  pnpm -F admin test routes
- * Run the whole suite:  pnpm -F admin test
- */
+/** Every analytics route against real Tinybird, asserted against an independent
+ * JS reference over the same rows. Skips without creds. `test routes` */
 const describeMaybe = TINYBIRD_ENABLED ? describe : describe.skip;
 
 const DAY = 86_400_000;

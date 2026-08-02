@@ -53,15 +53,8 @@ function toMetrics(
   };
 }
 
-/**
- * Overview comparison + the full timeseries in one request. The pageview slice
- * ([prevStart, end)) is scanned once into session rows, then GROUPING SETS
- * ((period), (bucket)) folds those into the current/previous totals and the
- * per-bucket series in a single pass. Previous-period sessions carry a bucket
- * sentinel of 0 so they collapse into one discarded row instead of leaking into
- * the first current bucket. Revenue is a second small scan of payment events,
- * bucketed by payment time and UNION'd in.
- */
+/** One scan of [prevStart, end) into session rows; GROUPING SETS folds it into
+ * both grains. Previous-period rows carry bucket 0 so they collapse and drop. */
 function buildSql(
   websiteId: string,
   start: number,

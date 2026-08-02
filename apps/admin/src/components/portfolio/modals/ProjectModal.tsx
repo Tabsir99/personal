@@ -138,7 +138,6 @@ export default function ProjectDialog({
   const isUpdating =
     existingProject !== undefined && typeof projectIndex === "number";
 
-  // Synchronously adjust state during render when dialog opens
   const [prevOpen, setPrevOpen] = useState(open);
   const [prevProject, setPrevProject] = useState(existingProject);
 

@@ -72,9 +72,8 @@ export function formatDate(iso: string): string {
 
 const ADMIN_HEADERS = { serverToken: env.SERVER_TOKEN } as const;
 
-// ISR: responses are stored in the data cache (force-cache) and revalidated
-// on-demand by tag. Admin POSTs the matching tags to /api/revalidate after a
-// mutation (see apps/admin/src/lib/blogUtils.ts → revalidateBlog).
+// ISR via force-cache, revalidated by tag. Admin POSTs the tags to
+// /api/revalidate after a mutation (blogUtils.ts revalidateBlog).
 async function fetchJson<T>(path: string, tags: string[]): Promise<T | null> {
   try {
     const res = await fetch(`${env.ADMIN_ORIGIN}${path}`, {

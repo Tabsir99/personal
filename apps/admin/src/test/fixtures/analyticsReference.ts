@@ -7,14 +7,8 @@ import {
   type CampaignMetric,
 } from "@/lib/analyticsTypes";
 
-/**
- * Independent JS reference for the analytics queries. Every function is a plain
- * loop over the seeded rows — "obviously correct" — so agreement with the
- * ClickHouse output validates the SQL (GROUPING SETS, the per-visitor revenue
- * dedup, argMin entries, channel classification, …). Both sides are scoped to
- * the same query window, so window-relative facts (a visitor's min session
- * number, entry page) line up.
- */
+/** Independent JS reference for the analytics queries: plain loops over the
+ * seeded rows, so agreement with ClickHouse validates the SQL. */
 
 type Row = AnalyticsEventRow;
 export interface Win {

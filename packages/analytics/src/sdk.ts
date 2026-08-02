@@ -14,29 +14,12 @@ import type { AnalyticsConfig, IdentifyData, EventCallback, EventResult, EventOu
 let initialized = false;
 
 interface AnalyticsInstance {
-  /**
-   * Track a pageview. Automatically called on route changes
-   * after `init()`, but can be called manually if needed.
-   */
+  /** Track a pageview. Called automatically on route changes after `init()`. */
   trackPageview: (callback?: EventCallback) => void;
-  /**
-   * Track a custom event with optional key-value data.
-   *
-   * @example
-   * ```ts
-   * analytics.trackEvent('signup', { plan: 'pro', source: 'hero_cta' });
-   * ```
-   */
+  /** Track a custom event: trackEvent('signup', { plan: 'pro' }). */
   trackEvent: (name: string, data?: Record<string, string>, callback?: EventCallback) => void;
-  /**
-   * Identify a visitor with a user ID and profile data.
-   * Links anonymous visitor sessions to a known user.
-   *
-   * @example
-   * ```ts
-   * analytics.identify('user-123', { name: 'Jane', image: 'https://...' });
-   * ```
-   */
+  /** Link the anonymous visitor to a known user:
+   * identify('user-123', { name: 'Jane' }). */
   identify: (userId: string, data?: IdentifyData, callback?: EventCallback) => void;
 }
 
@@ -52,24 +35,8 @@ const methods: AnalyticsInstance = {
   },
 };
 
-/**
- * Initialize the analytics tracker programmatically.
- * Call once at app startup before any tracking calls.
- * Returns the tracking methods.
- *
- * @example
- * ```ts
- * import { init } from '@tabsircg/analytics/sdk';
- *
- * const analytics = init({
- *   websiteId: 'your-website-id',
- *   domain: 'example.com',
- *   apiUrl: '/api/events',
- * });
- *
- * analytics.trackEvent('signup');
- * ```
- */
+/** Initialize the tracker. Call once at startup, before any tracking call;
+ * returns the tracking methods. */
 export function init(options: AnalyticsConfig): AnalyticsInstance {
   if (initialized) return methods;
 

@@ -10,10 +10,8 @@ export function isLocalhost(hostname: string): boolean {
   return false;
 }
 
-/** visitor_id is a UUID column and ClickHouse quarantines rows it cannot parse,
- * so a tampered cookie or _cgd_vid param must not reach it. A rejected value is
- * treated as absent and the caller mints a fresh id. Session ids are
- * 's' + uuid.slice(1). */
+/** visitor_id is a UUID column; a tampered cookie or _cgd_vid param must not
+ * reach it. Rejected reads as absent, so the caller mints a fresh id. */
 export function usableHandoffId(value: string | null | undefined): string | null {
   if (!value) return null;
   if (value.length > VISITOR_ID_MAX_LENGTH) return null;

@@ -63,12 +63,8 @@ export function niceStep(raw: number): number {
   return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * pow;
 }
 
-/**
- * Recharts `YAxis` domain-max that adds ~10% headroom above the data peak, so
- * the line cap / active dot never touches (and gets clipped at) the top edge.
- * Ticks stay auto — recharts picks nice ones within the padded domain.
- * Use as `domain={[0, headroomTop]}`.
- */
+/** YAxis domain-max with ~10% headroom, so the line cap and active dot are
+ * never clipped at the top edge. Use as `domain={[0, headroomTop]}`. */
 export const headroomTop = (dataMax: number): number =>
   dataMax > 0 ? dataMax * 1.1 : 1;
 

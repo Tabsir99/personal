@@ -37,19 +37,15 @@ const FALLBACK_TITLE =
 const FALLBACK_DESCRIPTION =
   "Full-stack developer in React, Next.js and Node. I build production web apps for agencies and startups, solo and end to end. Two years shipping, including a SaaS in production.";
 
-// Metadata is sourced from the CMS (config/portfolio) and falls back to the
-// constants above when the admin API is unreachable. getPageData() is cached
-// and shares the request-level fetch with the Footer.
+// Sourced from the CMS, falling back to the constants above when the admin API
+// is unreachable. getPageData() is cached and shared with the Footer.
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description, keywords } = await getPageData();
 
   const metaTitle = title || FALLBACK_TITLE;
   const metaDescription = description || FALLBACK_DESCRIPTION;
-  // Static 1200x630 social card (a screenshot of the hero) served from public/.
-  // Resolved against metadataBase, so it goes out as an absolute URL.
-  // Keep this to a SINGLE og:image. Discord/Slack/etc. render every og:image
-  // tag as a multi-image grid, so adding the square profilePicture as a second
-  // entry made the preview tile in half and crop the card.
+  // Keep this to a SINGLE og:image: Discord/Slack render multiple og:image
+  // tags as a grid, which tiles the card in half and crops it.
   const images = [{ url: "/og.jpg", width: 1200, height: 630, alt: metaTitle }];
 
   return {

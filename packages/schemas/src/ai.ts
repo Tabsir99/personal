@@ -14,9 +14,8 @@ export const aiBlogMetadataSchema = z.object({
 
 export type AIBlogMetadata = z.infer<typeof aiBlogMetadataSchema>;
 
-// AI emits a DocContent-shaped JSON that's MOSTLY strict; only auto-derivable
-// required attrs are made optional. The normalizer in apps/admin fills them
-// in and returns a value that satisfies the strict `DocContent`.
+// Only auto-derivable required attrs are optional here; the normalizer in
+// apps/admin fills them in to satisfy the strict DocContent.
 
 const aiBlockAttrsSchema = z.object({
   backgroundColor: z.string().optional(),
@@ -36,7 +35,8 @@ const aiAnyMarkSchema = z.discriminatedUnion("type", [
       href: z
         .string()
         .refine(
-          (s) => /^https?:\/\//i.test(s) || s.startsWith("/") || s.startsWith("#"),
+          (s) =>
+            /^https?:\/\//i.test(s) || s.startsWith("/") || s.startsWith("#"),
           "Link href must be http(s), root-relative, or anchor",
         ),
       target: z.string().default("_blank"),
