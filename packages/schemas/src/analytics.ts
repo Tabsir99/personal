@@ -1,16 +1,5 @@
-/**
- * Single source of truth for the `analytics_events` Tinybird datasource columns.
- *
- * Consumed by both ingest paths — the analytics worker's pageview ingest and the
- * admin Stripe webhook's payment ingest — and by admin's query builder (`F`), so
- * the column names live in exactly one place instead of three. Imported as
- * `@tabsircg/schemas/analytics`.
- *
- * The physical schema is the Tinybird DDL in
- * `apps/analytics-worker/tinybird/analytics_events.datasource`. A `.datasource`
- * file cannot import TypeScript, so it stays a hand-kept mirror; keep it aligned
- * with this file when adding or renaming a column.
- */
+/** Source of truth for the analytics_events columns, shared by both ingest paths
+ * and admin. The .datasource DDL is a hand-kept mirror — keep it aligned. */
 
 import { z } from "zod";
 
@@ -35,6 +24,15 @@ export const BOT_CATEGORY_NAMES = [
 export type BotCategory = (typeof BOT_CATEGORY_NAMES)[number];
 
 export const VISITOR_ID_MAX_LENGTH = 100;
+
+/** visitor_id is a UUID column and arrives from a visitor-editable cookie, so
+ * every ingest path validates it. session_id stays a String. */
+export const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function isUuid(value: unknown): value is string {
+  return typeof value === "string" && UUID_PATTERN.test(value);
+}
 
 export const EXTRA_DATA_MAX_PROPERTIES = 10;
 export const EXTRA_DATA_MAX_KEY_LENGTH = 32;
@@ -68,10 +66,8 @@ export const extraDataSchema = z
     message: `Serialised properties must not exceed ${EXTRA_DATA_MAX_BYTES} characters`,
   });
 
-/**
- * camelCase handle -> snake_case column name. Values must match
- * `analytics_events.datasource` and the ingested JSON keys exactly.
- */
+/** camelCase handle -> column name. Must match the .datasource and the ingested
+ * JSON keys exactly. */
 export const COLUMNS = {
   websiteId: "website_id",
   type: "type",

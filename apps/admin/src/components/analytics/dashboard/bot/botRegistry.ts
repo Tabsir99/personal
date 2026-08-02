@@ -41,9 +41,8 @@ interface Provider {
   color: string;
 }
 
-// A stored bot_name (agent) is matched to a favicon domain + brand colour. The
-// label stays the raw agent name — accurate when categories are mixed in one
-// list. First match wins; unknown agents fall back to their category colour.
+// bot_name -> favicon domain + brand colour, first match wins. Unknown agents
+// fall back to their category colour.
 const PROVIDERS: Provider[] = [
   {
     match: /gptbot|chatgpt|oai-|openai/i,

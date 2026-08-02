@@ -27,23 +27,8 @@ type TrackScrollProps = {
 
 export type TrackProps = TrackGoalProps | TrackScrollProps;
 
-/**
- * Headless wrapper that injects tracking `data-cgd-*` attributes
- * onto its child element. Does not render any extra DOM node.
- *
- * @example
- * ```tsx
- * // Goal tracking (fires on click)
- * <Track type="goal" name="signup" data={{ source: 'hero' }}>
- *   <button>Sign Up</button>
- * </Track>
- *
- * // Scroll tracking (fires when 50% visible)
- * <Track type="scroll" name="pricing_seen" threshold={0.5}>
- *   <section id="pricing">...</section>
- * </Track>
- * ```
- */
+/** Headless wrapper that injects `data-cgd-*` attributes onto its child.
+ * Renders no extra DOM node. */
 export function Track(props: TrackProps): ReactElement {
   if (!isValidElement(props.children)) {
     return props.children;

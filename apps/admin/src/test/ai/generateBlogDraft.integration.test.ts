@@ -2,17 +2,8 @@ import { describe, expect, it } from "vitest";
 import { generateBlogDraftContent } from "@/actions/aiActions";
 import { finalizeAiDoc } from "@/lib/finalizeAiDoc";
 
-/**
- * Integration test for the AI draft generator. Hits the real Anthropic API
- * via `sendPrompt` — uses the actual `DRAFT_SYSTEM_PROMPT`, the actual
- * `aiBlogDraftSchema`, the actual finalize step. NOT end-to-end: skips
- * auth and Firestore writes (those happen in the server-action wrapper).
- *
- * Self-skips when `ANTHROPIC_AUTH_TOKEN` is not present.
- *
- * Run only this suite:  pnpm -F admin test generateBlogDraft
- * Run the whole suite:  pnpm -F admin test
- */
+/** Hits the real Anthropic API with the real prompt, schema and finalize step;
+ * skips auth and Firestore. Needs ANTHROPIC_AUTH_TOKEN. */
 const RUN = Boolean(process.env.ANTHROPIC_AUTH_TOKEN);
 
 const describeMaybe = RUN ? describe : describe.skip;
@@ -103,7 +94,8 @@ describeMaybe("generateBlogDraftContent — real Anthropic call", () => {
     // First block must be a heading at level 2 (title is rendered as H1
     // by the page; body opens at H2).
     const first = ai.doc.content[0] as
-      { type: string; attrs?: { level?: number } } | undefined;
+      | { type: string; attrs?: { level?: number } }
+      | undefined;
     expect(first?.type).toBe("heading");
     expect(first?.attrs?.level).toBe(2);
 

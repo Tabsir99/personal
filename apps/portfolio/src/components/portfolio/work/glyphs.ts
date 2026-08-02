@@ -1,7 +1,5 @@
-// Glyph + style tables for the Work section. The glyph itself is intentionally
-// not part of the CMS schema — it's purely a visual decorator. We pick one
-// deterministically per project based on its `tag`, falling back to a rotation
-// by position so untagged projects still get a varied look.
+// Purely decorative, so deliberately not in the CMS schema. Picked per project
+// by `tag`, falling back to a rotation by position.
 
 const TAG_GLYPHS: Record<string, string> = {
   Operations: "◢",
@@ -17,9 +15,7 @@ const TAG_GLYPHS: Record<string, string> = {
 const FALLBACK_GLYPHS = ["◢", "◇", "◐", "◉", "◔"];
 
 export function glyphFor(tag: string, index: number): string {
-  return (
-    TAG_GLYPHS[tag] ?? FALLBACK_GLYPHS[index % FALLBACK_GLYPHS.length]
-  );
+  return TAG_GLYPHS[tag] ?? FALLBACK_GLYPHS[index % FALLBACK_GLYPHS.length];
 }
 
 export const GLYPH_TINTS: Record<string, { tint: string; tint2: string }> = {

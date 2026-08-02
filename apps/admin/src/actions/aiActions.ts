@@ -198,19 +198,11 @@ const draftTopicSchema = z
 
 const draftKindSchema = z.string().trim().max(60).optional();
 
-// NOTE: the kind whitelist enumerated in DRAFT_SYSTEM_PROMPT is static. The
-// blog-metadata flow reads kinds from config/blog at request time
-// (configActions.readConfigFields). If/when that diverges from the prompt,
-// surface the dynamic list here too.
+// The kind whitelist in DRAFT_SYSTEM_PROMPT is static, while the metadata flow
+// reads kinds from config/blog at request time. They can drift.
 
-/**
- * Pure AI call: validates inputs, hits Claude with the draft prompt, returns
- * the parsed (relaxed) AI output plus the cleaned kind for downstream use.
- * No auth check, no Firestore read/write — exists so integration tests can
- * hit the real prompt path without requiring a session or a live database.
- * Produces only `{ title, doc }`; all other metadata (dek/tags/SEO/social) is
- * the job of `generateBlogMetadata`, which runs against the finalized body.
- */
+/** Pure AI call, no auth or Firestore, so tests can hit the real prompt path.
+ * Produces `{ title, doc }` only; the rest is generateBlogMetadata's job. */
 export async function generateBlogDraftContent(
   topic: string,
   kind: string | undefined,

@@ -79,9 +79,8 @@ export async function readPortfolioPageData(): Promise<PageData | null> {
 }
 
 export async function writePortfolioPageData(data: PageData): Promise<void> {
-  // mergeFields: only the `pageData` field is touched; sibling fields
-  // (skillCatalog) are preserved. The `pageData` object itself is replaced
-  // wholesale — no deep merge — so removed keys do not linger.
+  // mergeFields keeps siblings like skillCatalog; `pageData` itself is
+  // replaced wholesale, so removed keys do not linger.
   await PORTFOLIO_DOC_REF.set(
     { pageData: data },
     { mergeFields: ["pageData"] },

@@ -2,15 +2,8 @@ import { NextRequest } from "next/server";
 import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
 import { ANALYTICS_TABLE } from "@tabsircg/schemas/analytics";
 
-/**
- * Shared plumbing for analytics integration tests that run against a REAL
- * Tinybird workspace: ingest seeded rows, wait for async ingestion to become
- * queryable, drive a route handler, and delete the rows afterward.
- *
- * Reads TINYBIRD_HOST / TINYBIRD_TOKEN from the environment (loaded by
- * vitest/setup.ts). `TINYBIRD_ENABLED` is false when either is missing, so a
- * suite can self-skip instead of failing.
- */
+/** Plumbing for tests against a REAL Tinybird workspace: ingest, wait, drive a
+ * route, clean up. TINYBIRD_ENABLED is false without creds, so suites skip. */
 const HOST = process.env.TINYBIRD_HOST;
 const TOKEN = process.env.TINYBIRD_TOKEN;
 
@@ -42,11 +35,8 @@ export async function ingestRows(
   }
 }
 
-/**
- * Poll until at least `expected` rows are visible for the given website ids.
- * Async ingest isn't queryable for a few seconds, so we skip the polls that
- * would always see 0 rows.
- */
+/** Poll until `expected` rows are visible. Async ingest isn't queryable for a
+ * few seconds, so the first polls that would see 0 are skipped. */
 export async function waitForRows(
   websiteIds: string[],
   expected: number,
@@ -120,15 +110,8 @@ async function requestDelete(websiteIds: string[]): Promise<Response> {
   });
 }
 
-/**
- * Delete a run's rows and WAIT for the async delete job to finish, so nothing
- * lingers after the process exits.
- *
- * Tinybird permits exactly ONE delete job per workspace at a time and answers
- * 429 for any overlap. Calls are serialized in-process and retried with
- * backoff so a parallel worker holding the slot can't silently strand rows.
- * A cleanup that ultimately fails warns loudly rather than failing the suite.
- */
+/** Tinybird allows ONE delete job per workspace and 429s any overlap, so calls
+ * are serialized and retried. Waits for the job so nothing lingers on exit. */
 export async function cleanupRows(websiteIds: string[]): Promise<void> {
   return serializeDelete(async () => {
     let reason = "unknown";
@@ -182,7 +165,8 @@ export async function callRoute<T>(
   const url = `http://localhost/api/analytics?${new URLSearchParams(qs)}`;
   const res = await handler(new NextRequest(url), {});
   const body = (await res.json()) as
-    { status: "success"; data: T } | { status: "error"; message: string };
+    | { status: "success"; data: T }
+    | { status: "error"; message: string };
   if (body.status !== "success")
     throw new Error(`route error: ${body.message}`);
   return body.data;

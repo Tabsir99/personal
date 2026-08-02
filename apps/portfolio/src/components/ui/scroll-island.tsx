@@ -64,10 +64,8 @@ export function ScrollIsland() {
     };
   }, [pathname]);
 
-  // Lazy-load <video> sources. VoicesPlayer renders <source data-src> with no
-  // real src, so nothing offscreen downloads on load. Work stills are stacked +
-  // only opacity-toggled, so they all intersect at once — load just the active
-  // (non-inert) one here; switching projects loads the rest (WorkStateIsland).
+  // Work stills are stacked and only opacity-toggled, so they all intersect at
+  // once — load just the active one; WorkStateIsland loads the rest.
   useEffect(() => {
     const io = new IntersectionObserver(
       (entries) => {

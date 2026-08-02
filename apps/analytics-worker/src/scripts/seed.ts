@@ -27,12 +27,10 @@ const TOTAL_EVENTS_TARGET = Number(process.env.SEED_EVENTS ?? 100_00);
 
 console.log(`🚀 Seeding analytics for ${WEBSITE_ID} (${DOMAIN})\n`);
 
-// Helper: UUID generator
 function generateUUID(): string {
   return nodeCrypto.randomUUID();
 }
 
-// Data Lists for realism
 const FIRST_NAMES = [
   "Alex",
   "Jordan",
@@ -95,9 +93,8 @@ const SUBJECTS = [
 ];
 const COFFEE_AMOUNTS_CENTS = [300, 500, 500, 500, 1000, 1000, 1500, 2500, 5000];
 
-// Acquisition sources. `referrer` drives the channel classifier (referrer-only,
-// see sources/channels.ts), so these span every bucket. `utm`/`ref` ride in the
-// landing href's query string for the future campaign breakdown.
+// `referrer` drives the channel classifier, so these span every bucket.
+// `utm`/`ref` ride in the landing href's query string.
 interface AcquisitionSource {
   referrer: string | null;
   weight: number;
@@ -112,27 +109,20 @@ interface AcquisitionSource {
 }
 
 const ACQUISITION_SOURCES: AcquisitionSource[] = [
-  // Organic search
   { referrer: "https://www.google.com/", weight: 0.26 },
   { referrer: "https://www.bing.com/", weight: 0.05 },
   { referrer: "https://duckduckgo.com/", weight: 0.05 },
-  // Direct
   { referrer: null, weight: 0.18 },
-  // Social
   { referrer: "https://www.linkedin.com/feed/", weight: 0.045 },
   { referrer: "https://www.reddit.com/r/webdev/", weight: 0.045 },
   { referrer: "https://x.com/", weight: 0.04 },
-  // News / community
   { referrer: "https://news.ycombinator.com/", weight: 0.05 },
   { referrer: "https://dev.to/", weight: 0.02 },
   { referrer: "https://lobste.rs/", weight: 0.02 },
-  // AI assistants
   { referrer: "https://chatgpt.com/", weight: 0.035 },
   { referrer: "https://www.perplexity.ai/", weight: 0.02 },
   { referrer: "https://claude.ai/", weight: 0.015 },
-  // Video
   { referrer: "https://www.youtube.com/", weight: 0.025 },
-  // Messaging
   { referrer: "https://t.me/", weight: 0.015 },
   { referrer: "https://discord.com/channels/@me", weight: 0.01 },
   // Email newsletter campaign (Proton webmail maps cleanly to Email; a Gmail
@@ -147,7 +137,6 @@ const ACQUISITION_SOURCES: AcquisitionSource[] = [
       content: "header_link",
     },
   },
-  // Referral + indie directories (?ref=)
   { referrer: "https://github.com/tabsircg", weight: 0.02 },
   {
     referrer: "https://www.producthunt.com/",
@@ -155,7 +144,6 @@ const ACQUISITION_SOURCES: AcquisitionSource[] = [
     ref: "producthunt",
   },
   { referrer: "https://indiehackers.com/", weight: 0.008, ref: "indiehackers" },
-  // Paid campaigns (utm_*)
   {
     referrer: "https://www.google.com/",
     weight: 0.018,
@@ -190,7 +178,6 @@ const ACQUISITION_SOURCES: AcquisitionSource[] = [
   },
 ];
 
-// Country & timezone profiles
 interface CountryProfile {
   code: string;
   timezone: string[];
@@ -283,7 +270,6 @@ const COUNTRIES: CountryProfile[] = [
   },
 ];
 
-// Helper to choose item from weighted array
 function selectWeighted<T extends { weight: number }>(items: T[]): T {
   const r = Math.random();
   let sum = 0;
@@ -294,7 +280,6 @@ function selectWeighted<T extends { weight: number }>(items: T[]): T {
   return items[items.length - 1];
 }
 
-// Helper to generate a coherent visitor
 interface VisitorProfile {
   visitorId: string;
   country: string;
@@ -320,7 +305,6 @@ interface VisitorProfile {
 function generateVisitor(): VisitorProfile {
   const visitorId = generateUUID();
 
-  // Coherent location
   const countryProfile = selectWeighted(COUNTRIES);
   const regionProfile =
     countryProfile.regions[
@@ -335,10 +319,8 @@ function generateVisitor(): VisitorProfile {
       Math.floor(Math.random() * countryProfile.language.length)
     ];
 
-  // Realistic IP mock
   const ip = `${Math.floor(Math.random() * 223) + 1}.${Math.floor(Math.random() * 254) + 1}.${Math.floor(Math.random() * 254) + 1}.${Math.floor(Math.random() * 254) + 1}`;
 
-  // Coherent device type
   const deviceType =
     Math.random() < 0.7
       ? "desktop"
@@ -390,7 +372,6 @@ function generateVisitor(): VisitorProfile {
   const viewportWidth = Math.floor(screenWidth * 0.95);
   const viewportHeight = Math.floor(screenHeight * 0.88);
 
-  // Persona
   const personaRand = Math.random();
   let persona: "bounce" | "explorer" | "signer" | "supporter" = "bounce";
   if (personaRand < 0.4) {
@@ -403,7 +384,6 @@ function generateVisitor(): VisitorProfile {
     persona = "supporter";
   }
 
-  // Acquisition channel + campaign
   const source = selectWeighted(ACQUISITION_SOURCES);
   const firstReferrer = source.referrer;
   let firstQuery: string | null = null;
@@ -453,7 +433,6 @@ function generateVisitor(): VisitorProfile {
 function getTrafficWeight(timeMs: number, timezone: string): number {
   const date = new Date(timeMs);
 
-  // Calculate hour and day in visitor's local timezone
   let hour = 12;
   let day = 3;
   try {
@@ -462,7 +441,6 @@ function getTrafficWeight(timeMs: number, timezone: string): number {
     hour = localDate.getHours();
     day = localDate.getDay();
   } catch {
-    // Fallback if timezone is invalid
     hour = date.getUTCHours();
     day = date.getUTCDay();
   }
@@ -484,12 +462,10 @@ function getTrafficWeight(timeMs: number, timezone: string): number {
   return hourWeight * dayWeight;
 }
 
-// Timeline configs
 const NOW = Date.now();
 const THIRTY_DAYS_AGO = NOW - 30 * 24 * 60 * 60 * 1000;
 
 function getRandomTimestamp(timezone: string): number {
-  // Rejection sampling loop
   while (true) {
     const randomTime = Math.floor(
       THIRTY_DAYS_AGO + Math.random() * (NOW - THIRTY_DAYS_AGO),
@@ -501,26 +477,22 @@ function getRandomTimestamp(timezone: string): number {
   }
 }
 
-// Generate the full pool of events
 console.log("🎨 Simulating realistic visitor sessions...");
 const allEvents: SeedEvent[] = [];
 let generatedVisitorCount = 0;
 
-// Continue generating visitors until we have safely exceeded the target, then sort and slice.
+// Overshoot the target, then sort and slice.
 while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
   const visitor = generateVisitor();
   generatedVisitorCount++;
 
-  // Determine visitor's first seen date
   const baseTimestamp = getRandomTimestamp(visitor.timezone);
 
-  // Simulate one or more sessions
   const numSessions =
     visitor.persona === "supporter" ? 2 : Math.random() < 0.2 ? 2 : 1;
   let sessionTime = baseTimestamp;
 
   for (let sNum = 1; sNum <= numSessions; sNum++) {
-    // Regenerate session ID and advance time if it's a returning session
     const sessionId = generateUUID();
     if (sNum > 1) {
       sessionTime +=
@@ -575,16 +547,14 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
       };
     };
 
-    // Declarative goal path: the SDK fires goals as trackCustomEvent('custom',
-    // { eventName, ...data }), so type is literally 'custom' and the goal name
-    // travels in extraData.eventName (event_name in Tinybird).
+    // The SDK fires goals as type 'custom' with the name in
+    // extraData.eventName, so the seed has to match.
     const buildGoal = (
       goalName: string,
       path: string,
       data?: Record<string, string>,
     ) => buildPayload("custom", path, { eventName: goalName, ...data });
 
-    // Simulate persona journey
     if (visitor.persona === "bounce") {
       const landPages = [
         "/",
@@ -618,7 +588,6 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         allEvents.push(buildGoal("theme_toggle", page, { theme: "dark" }));
       }
     } else if (visitor.persona === "explorer") {
-      // Lands on Home
       allEvents.push(buildPayload("pageview", "/"));
 
       if (Math.random() < 0.06) {
@@ -626,7 +595,6 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         allEvents.push(buildGoal("theme_toggle", "/", { theme: "dark" }));
       }
 
-      // Page 2 (about or blog)
       currentOffset += (Math.floor(Math.random() * 25) + 15) * 1000; // 15-40s reading time
       const nextPages = ["/blog", "/projects", "/about"];
       const page2 = nextPages[Math.floor(Math.random() * nextPages.length)];
@@ -685,7 +653,6 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         }
       }
 
-      // Page 3
       if (Math.random() < 0.5) {
         currentOffset += (Math.floor(Math.random() * 30) + 15) * 1000;
         const page3 =
@@ -714,7 +681,6 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         }
       }
     } else if (visitor.persona === "signer") {
-      // Submitting newsletter or contact form
       const isNewsletter = Math.random() < 0.6;
 
       if (isNewsletter) {
@@ -752,9 +718,7 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         allEvents.push(buildPayload("pageview", "/thank-you"));
       }
     } else if (visitor.persona === "supporter") {
-      // Buy me a coffee supporter
       if (sNum === 1) {
-        // Session 1: Makes a coffee supporter payment
         allEvents.push(buildPayload("pageview", "/"));
         currentOffset += 15000;
         allEvents.push(buildPayload("pageview", "/projects"));
@@ -765,7 +729,6 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         );
         currentOffset += 5000;
 
-        // Redirects to Stripe success page
         const stripeSessionId = `cs_live_${generateUUID().replace(/-/g, "").slice(0, 24)}`;
         const amountCents =
           COFFEE_AMOUNTS_CENTS[
@@ -795,7 +758,6 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
           }),
         );
       } else {
-        // Session 2: Just returns to read blogs
         allEvents.push(buildPayload("pageview", "/"));
         currentOffset += 15000;
         allEvents.push(
@@ -873,7 +835,6 @@ for (let i = 0; i < botEventCount; i++) {
   });
 }
 
-// Chronologically sort all events
 console.log("🧹 Sorting events chronologically...");
 allEvents.sort(
   (a, b) => (a.cfOverride?.timestamp ?? 0) - (b.cfOverride?.timestamp ?? 0),

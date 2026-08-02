@@ -60,9 +60,8 @@ export function GenerateMetadataButton({
   );
 }
 
-// A three-dot ellipsis with staggered fade — calmer than "Generating..." text
-// because the dots animate independently, signaling work without flashing the
-// whole label.
+// Staggered-fade dots rather than "Generating..." text, so the label doesn't
+// flash on every frame.
 function Ellipsis() {
   return (
     <span className="ml-px inline-flex items-baseline gap-px" aria-hidden>
@@ -164,4 +163,3 @@ export function SuggestionsActionBar({
     </div>
   );
 }
-

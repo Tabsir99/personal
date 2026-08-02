@@ -1,4 +1,3 @@
- 
 import { useState } from "react";
 import { Plus, Star } from "@phosphor-icons/react";
 
@@ -54,10 +53,11 @@ export default function TestimonialDialog({
   const isUpdating =
     existingTestimonial !== undefined && typeof testimonialIndex === "number";
 
-  const [formData, setFormData] = useState(existingTestimonial || defaultFormData);
+  const [formData, setFormData] = useState(
+    existingTestimonial || defaultFormData,
+  );
   const [hoverRating, setHoverRating] = useState(0);
 
-  // Synchronously adjust state during render when dialog opens
   const [prevOpen, setPrevOpen] = useState(open);
   const [prevTestimonial, setPrevTestimonial] = useState(existingTestimonial);
 
@@ -93,13 +93,15 @@ export default function TestimonialDialog({
       description="Client quote, optional video, and where it surfaces on the home page."
       footer={(close) => (
         <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={close}>Cancel</Button>
-          <Button 
-            variant="primary" 
+          <Button variant="secondary" onClick={close}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
             onClick={() => {
               handleSubmit();
               close();
-            }} 
+            }}
             disabled={
               !formData.name || (!formData.text && !formData.video.length)
             }
@@ -157,7 +159,9 @@ export default function TestimonialDialog({
 
         <section title="Placement" className="space-y-6">
           <div className="space-y-1.5">
-            <label className="text-sm leading-none font-medium">Display slot</label>
+            <label className="text-sm leading-none font-medium">
+              Display slot
+            </label>
             <Select
               options={DISPLAY_SLOT_OPTIONS}
               value={formData.displaySlot}
@@ -175,9 +179,7 @@ export default function TestimonialDialog({
 
         <section title="Rating & quote" className="space-y-6">
           <div className="space-y-1.5">
-            <label className="text-sm leading-none font-medium">
-              Rating
-            </label>
+            <label className="text-sm leading-none font-medium">Rating</label>
             <div className="flex items-center gap-1.5">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -191,7 +193,11 @@ export default function TestimonialDialog({
                 >
                   <Star
                     size={24}
-                    weight={star <= (hoverRating || formData.rating) ? "fill" : "regular"}
+                    weight={
+                      star <= (hoverRating || formData.rating)
+                        ? "fill"
+                        : "regular"
+                    }
                     className={cn(
                       "transition-colors duration-150",
                       star <= (hoverRating || formData.rating)
@@ -228,7 +234,8 @@ export default function TestimonialDialog({
               onChange={(video) => setFormData({ ...formData, video })}
             />
             <p className="text-xs text-muted-foreground">
-              Upload or paste one or more encoded files (webm/mp4/…). The browser plays the most efficient codec it supports.
+              Upload or paste one or more encoded files (webm/mp4/…). The
+              browser plays the most efficient codec it supports.
             </p>
           </div>
         </section>
@@ -236,4 +243,3 @@ export default function TestimonialDialog({
     </Dialog>
   );
 }
-

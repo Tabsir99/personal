@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { extraDataSchema, VISITOR_ID_MAX_LENGTH } from "@tabsircg/schemas/analytics";
+import {
+  extraDataSchema,
+  UUID_PATTERN,
+  VISITOR_ID_MAX_LENGTH,
+} from "@tabsircg/schemas/analytics";
 
 const basePayloadSchema = z.object({
   websiteId: z.string().min(1).max(96), // Max 96 bytes for index id limit
@@ -10,7 +14,9 @@ const basePayloadSchema = z.object({
     width: z.number(),
     height: z.number(),
   }),
-  visitorId: z.string().max(VISITOR_ID_MAX_LENGTH),
+  // visitor_id is a UUID column and a row it cannot parse is quarantined
+  // silently, so a malformed id has to fail loudly here instead.
+  visitorId: z.string().max(VISITOR_ID_MAX_LENGTH).regex(UUID_PATTERN),
   sessionId: z.string().max(VISITOR_ID_MAX_LENGTH),
   visitorSessionNumber: z.number(),
   language: z.string().max(50),

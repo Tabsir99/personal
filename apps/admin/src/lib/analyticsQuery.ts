@@ -49,50 +49,35 @@ export function visitorRevenueSubquery(
   `;
 }
 
-// rev is a per-visitor total repeated on every inner row, so a plain SUM
-// over-counts once a visitor fans out across multiple dimension combos in the
-// scan. Dedup to one (vid, rev) pair per visitor within each group, then sum.
+// rev repeats on every row a visitor fans out to, so a plain SUM over-counts.
+// Holds one entry per visitor per level; visitor_id is a UUID column for that.
 const REVENUE_METRIC =
-  "round(arraySum(x -> x.2, groupUniqArray((vid, ifNull(rev, 0)))) / 100) as revenue";
+  "arraySum(x -> x.2, groupUniqArray((vid, ifNull(rev, 0)))) / 100 as revenue";
 
-const SPLIT_METRICS = `
+const NO_REVENUE_METRIC = "toFloat64(0) as revenue";
+
+const splitMetrics = (revenue: string) => `
       uniqExactIf(vid, minSess = 1) as newVisitors,
       uniqExactIf(vid, minSess > 1) as returningVisitors,
-      ${REVENUE_METRIC}`;
+      ${revenue}`;
 
-const UV_METRICS = `
+const uvMetrics = (revenue: string) => `
       uniqExact(vid) as uv,
-      ${REVENUE_METRIC}`;
+      ${revenue}`;
 
 export interface BreakdownChain {
   level(level: string, alias: string, expr: string): BreakdownChain;
   filter(predicate: string): BreakdownChain;
   revenue(): BreakdownChain;
   splitVisitors(): BreakdownChain;
+  nested(): BreakdownChain;
   column(expr: string): BreakdownChain;
   top(n: number): BreakdownChain;
   build(): string;
 }
 
-/**
- * Top-N visitor breakdown of the pageview slice, grouped by one or more dimension
- * levels in a single GROUPING SETS scan. Use for dimension breakdowns only
- * (sources, system, locations); not for heterogeneous UNION shapes like the pages
- * route, which stays hand-written.
- *
- *   breakdown(websiteId, start, end)
- *     .level(name, alias, expr)  // one dimension per call; call order = drill order
- *     .filter(predicate)         // extra WHERE conjunct (e.g. scope to a parent dim)
- *     .revenue()                 // LEFT JOIN per-visitor revenue
- *     .splitVisitors()           // new/returning columns instead of a single uv
- *     .column(expr)              // extra output column (e.g. a carried dimension)
- *     .top(n)                    // top N rows per level
- *     .build();                  // -> SQL string
- *
- * Visitors are counted once per (dimension, visitor). splitVisitors classifies each
- * visitor new/returning via a window MIN(session_number) over that same scan, so it
- * costs no extra scan and newVisitors + returningVisitors === uv.
- */
+/** Top-N visitor breakdown, one GROUPING SETS scan per level. Levels are
+ * independent unless `.nested()`, which keys each on the prefix above it. */
 export function breakdown(
   websiteId: string,
   start: number,
@@ -103,7 +88,8 @@ export function breakdown(
   let filterExpr: string | null = null;
   let withRevenue = false;
   let split = false;
-  let extra: string | null = null;
+  let isNested = false;
+  const extras: string[] = [];
   let perLevel = 50;
 
   const chain: BreakdownChain = {
@@ -123,8 +109,12 @@ export function breakdown(
       split = true;
       return chain;
     },
+    nested() {
+      isNested = true;
+      return chain;
+    },
     column(expr) {
-      extra = expr;
+      extras.push(expr);
       return chain;
     },
     top(n) {
@@ -132,9 +122,12 @@ export function breakdown(
       return chain;
     },
     build() {
+      // Nested levels share their parents' keys, so the innermost must be
+      // tested first or every row reads as the outermost.
       const byLevel = (value: (l: Level) => string) => {
-        const last = levels.length - 1;
-        const arms = levels.map((l, i) =>
+        const ordered = isNested ? [...levels].reverse() : levels;
+        const last = ordered.length - 1;
+        const arms = ordered.map((l, i) =>
           i < last ? `GROUPING(${l.alias}) = 0, ${value(l)}` : value(l),
         );
         return `multiIf(${arms.join(", ")})`;
@@ -147,12 +140,21 @@ export function breakdown(
         .map((l) => `d.${l.alias} as ${l.alias}`)
         .join(", ");
       const groupBy = levels.map((l) => l.alias).join(", ");
-      const groupingSets = levels.map((l) => `(${l.alias})`).join(", ");
+      const groupingSets = (
+        isNested
+          ? levels.map((_, i) => levels.slice(0, i + 1))
+          : levels.map((l) => [l])
+      )
+        .map((keys) => `(${keys.map((l) => l.alias).join(", ")})`)
+        .join(", ");
 
-      const metrics = split ? SPLIT_METRICS : UV_METRICS;
+      const revenueMetric = withRevenue ? REVENUE_METRIC : NO_REVENUE_METRIC;
+      const metrics = split
+        ? splitMetrics(revenueMetric)
+        : uvMetrics(revenueMetric);
       const orderBy = split ? "newVisitors + returningVisitors" : "uv";
       const scopeFilter = filterExpr ? ` AND ${filterExpr}` : "";
-      const extraCol = extra ? `,\n      ${extra}` : "";
+      const extraCol = extras.map((e) => `,\n      ${e}`).join("");
 
       const bucketMinCol = split
         ? `, min(${F.sessionNumber}) as bucketMin`

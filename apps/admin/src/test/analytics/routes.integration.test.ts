@@ -34,18 +34,8 @@ import { GET as goalsGET } from "@/app/api/analytics/goals/route";
 import { GET as botsGET } from "@/app/api/analytics/bots/route";
 import { GET as botPagesGET } from "@/app/api/analytics/bots/pages/route";
 
-/**
- * Integration test for every analytics route against a REAL Tinybird workspace.
- * Seeds ≥10k realistic rows (see analyticsSeed) under throwaway website ids,
- * drives each real route handler, and asserts its output equals an independent
- * JS reference (see analyticsReference) computed from the same rows. Lists are
- * compared by key so array order / ties don't matter. Cleans up afterward.
- *
- * Self-skips without Tinybird credentials.
- *
- * Run only this suite:  pnpm -F admin test routes
- * Run the whole suite:  pnpm -F admin test
- */
+/** Every analytics route against real Tinybird, asserted against an independent
+ * JS reference over the same rows. Skips without creds. `test routes` */
 const describeMaybe = TINYBIRD_ENABLED ? describe : describe.skip;
 
 const DAY = 86_400_000;
@@ -234,18 +224,30 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
   it("locations: countries, regions, cities", async () => {
     const data = await callRoute<Record<string, Rowish[]>>(locationsGET, q);
     const ref = referenceLocations(rows, win);
-    expectRows(data.countries, ref.countries, (r) => String(r.name), [
-      "uv",
-      "revenue",
-    ]);
-    expectRows(data.regions, ref.regions, (r) => String(r.name), [
-      "uv",
-      "revenue",
-    ]);
-    expectRows(data.cities, ref.cities, (r) => String(r.name), [
-      "uv",
-      "revenue",
-    ]);
+    const countryKey = (r: Rowish) => String(r.country);
+    const regionKey = (r: Rowish) => `${r.country}/${r.name}`;
+    const cityKey = (r: Rowish) => `${r.country}/${r.region}/${r.name}`;
+    expectRows(data.countries, ref.countries, countryKey, ["uv", "revenue"]);
+    expectRows(
+      data.regions,
+      ref.regions,
+      regionKey,
+      ["uv", "revenue"],
+      ["country"],
+    );
+    expectRows(
+      data.cities,
+      ref.cities,
+      cityKey,
+      ["uv", "revenue"],
+      ["country", "region"],
+    );
+  });
+
+  it("locations: same city name in two countries stays two rows", async () => {
+    const data = await callRoute<Record<string, Rowish[]>>(locationsGET, q);
+    const londons = data.cities.filter((c) => c.name === "London");
+    expect(londons.map((c) => String(c.country)).sort()).toEqual(["CA", "GB"]);
   });
 
   it("system: browsers, os, devices (revenue dedup across a fan-out)", async () => {

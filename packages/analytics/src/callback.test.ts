@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { sendEvent } from './tracker';
 import { initPageviewState, trackCustomEvent, trackIdentify, trackPageview } from './events';
 import { setConfig } from './config';
-import { STORAGE_PREFIX } from './constants';
+import { STORAGE_PREFIX, UUID_PATTERN } from './constants';
 import type { EventPayload, EventResult } from './types';
 
 const payload: EventPayload = {
@@ -175,18 +175,33 @@ describe('the request the worker actually receives', () => {
   it('adopts the handoff ids but never puts them on the wire', async () => {
     const fetchMock = respondWith(200);
     vi.stubGlobal('fetch', fetchMock);
-    window.history.replaceState({}, '', '/landing?utm_source=x&_cgd_vid=v-abc&_cgd_sid=s-abc&_cgd_vsn=4');
+    const vid = '3f2504e0-4f89-41d3-9a0c-0305e82c3301';
+    const sid = 'sf2504e0-4f89-41d3-9a0c-0305e82c3302';
+    window.history.replaceState({}, '', `/landing?utm_source=x&_cgd_vid=${vid}&_cgd_sid=${sid}&_cgd_vsn=4`);
 
     trackPageview();
     await settled();
 
     const [, init] = fetchMock.mock.calls[0];
     const sent = JSON.parse(init.body as string);
-    expect(sent.visitorId).toBe('v-abc');
-    expect(sent.sessionId).toBe('s-abc');
+    expect(sent.visitorId).toBe(vid);
+    expect(sent.sessionId).toBe(sid);
     expect(sent.visitorSessionNumber).toBe(4);
     expect(sent.href).toBe('https://example.com/landing?utm_source=x');
     expect(window.location.href).toBe('https://example.com/landing?utm_source=x');
+  });
+
+  it('mints its own id when the handoff one is not a uuid', async () => {
+    const fetchMock = respondWith(200);
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.replaceState({}, '', '/landing?_cgd_vid=v-abc&_cgd_sid=s-abc');
+
+    trackPageview();
+    await settled();
+
+    const sent = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+    expect(sent.visitorId).not.toBe('v-abc');
+    expect(sent.visitorId).toMatch(UUID_PATTERN);
   });
 
   it('ignores a handoff id that the worker would reject', async () => {

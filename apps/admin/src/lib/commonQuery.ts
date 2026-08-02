@@ -114,9 +114,8 @@ export const readNDocs = async <T>({
   }
 
   if (cursorValue) {
-    // Cursor is `${orderByValue}__${docId}` (see callers). Decode and coerce the
-    // value back to a number when it is numeric, so startAfter compares against
-    // numeric fields correctly instead of as a string.
+    // Cursor is `${orderByValue}__${docId}`. Coerce numerics back so startAfter
+    // compares against numeric fields as numbers, not strings.
     const sep = cursorValue.indexOf("__");
     if (orderBy && sep !== -1) {
       const rawValue = cursorValue.slice(0, sep);

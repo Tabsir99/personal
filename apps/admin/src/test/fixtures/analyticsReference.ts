@@ -7,14 +7,8 @@ import {
   type CampaignMetric,
 } from "@/lib/analyticsTypes";
 
-/**
- * Independent JS reference for the analytics queries. Every function is a plain
- * loop over the seeded rows — "obviously correct" — so agreement with the
- * ClickHouse output validates the SQL (GROUPING SETS, the per-visitor revenue
- * dedup, argMin entries, channel classification, …). Both sides are scoped to
- * the same query window, so window-relative facts (a visitor's min session
- * number, entry page) line up.
- */
+/** Independent JS reference for the analytics queries: plain loops over the
+ * seeded rows, so agreement with ClickHouse validates the SQL. */
 
 type Row = AnalyticsEventRow;
 export interface Win {
@@ -22,7 +16,7 @@ export interface Win {
   end: number;
 }
 
-const round = (cents: number) => Math.round(cents / 100);
+const round = (cents: number) => cents / 100;
 const uniq = (xs: string[]) => new Set(xs).size;
 
 function human(rows: Row[], type: string, w: Win): Row[] {
@@ -212,7 +206,8 @@ export function referenceMain(
         timestamp: b,
         visitors: o.visitors,
         newVisitors: uniq(ss.filter((s) => s.snum === 1).map((s) => s.vid)),
-        returningVisitors: o.visitors - uniq(ss.filter((s) => s.snum === 1).map((s) => s.vid)),
+        returningVisitors:
+          o.visitors - uniq(ss.filter((s) => s.snum === 1).map((s) => s.vid)),
         pageviews: o.pageviews,
         sessions: o.sessions,
         bounceRate: o.bounceRate,
@@ -362,13 +357,36 @@ export function referencePages(rows: Row[], w: Win) {
 
 const toUv = (b: BreakRow) => ({ name: b.name, uv: b.uv, revenue: b.revenue });
 
+// A region or city name is only unique under its parents; keying on the bare
+// name would let the reference agree with the bug it exists to catch.
+const GEO_SEP = "\u0000";
+
+const toGeo = (b: BreakRow) => {
+  const parts = b.name.split(GEO_SEP);
+  return {
+    name: parts[parts.length - 1],
+    country: parts[0],
+    region: parts.length > 2 ? parts[1] : undefined,
+    uv: b.uv,
+    revenue: b.revenue,
+  };
+};
+
 export function referenceLocations(rows: Row[], w: Win) {
   const pv = human(rows, "pageview", w);
   const rev = visitorRevenue(rows, w);
   return {
-    countries: breakdownRef(pv, (r) => r.country, rev).map(toUv),
-    regions: breakdownRef(pv, (r) => r.region, rev).map(toUv),
-    cities: breakdownRef(pv, (r) => r.city, rev).map(toUv),
+    countries: breakdownRef(pv, (r) => r.country, rev).map(toGeo),
+    regions: breakdownRef(
+      pv,
+      (r) => [r.country, r.region].join(GEO_SEP),
+      rev,
+    ).map(toGeo),
+    cities: breakdownRef(
+      pv,
+      (r) => [r.country, r.region, r.city].join(GEO_SEP),
+      rev,
+    ).map(toGeo),
   };
 }
 

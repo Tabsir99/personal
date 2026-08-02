@@ -5,6 +5,7 @@ import { env } from "@/config/env.server";
 import {
   COLUMNS,
   ANALYTICS_TABLE,
+  isUuid,
   type AnalyticsEventRow,
 } from "@tabsircg/schemas/analytics";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -79,6 +80,10 @@ export async function writePaymentEvent(row: {
   extra?: Record<string, unknown>;
   timestamp: number;
 }): Promise<void> {
+  if (!isUuid(row.visitorId)) {
+    throw new Error("Payment event visitorId is not a UUID");
+  }
+
   const payload: Partial<AnalyticsEventRow> = {
     website_id: row.websiteId,
     type: "payment",

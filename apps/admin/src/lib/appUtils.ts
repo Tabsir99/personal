@@ -16,12 +16,10 @@ export function slugify(text: string): string {
     .replace(/\-\-+/g, "-");
 }
 
-const toMessage = (e: unknown) =>
-  e instanceof Error ? e.message : String(e);
+const toMessage = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
-// Throw from a route handler to return a specific HTTP status (e.g. 404)
-// instead of a generic 500. The message is sent to the client verbatim, so
-// keep it safe/intentional.
+// Throw from a route handler for a specific status instead of a 500. The
+// message reaches the client verbatim, so keep it safe.
 export class HttpError extends Error {
   constructor(
     public readonly status: number,

@@ -1,7 +1,7 @@
 import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
 
-/** In-memory, RNG-seeded twin of analytics-worker's seed.ts. Every dimension's
- * cardinality stays bounded so no dashboard query hits its LIMIT. */
+/** RNG-seeded twin of analytics-worker's seed.ts, bounded so no query hits its
+ * LIMIT. Rows match what the worker and webhook write, field for field. */
 
 export interface SeedOptions {
   websiteId: string;
@@ -82,15 +82,17 @@ const SOURCES: Source[] = [
   },
 ];
 
+// cf.region/cf.city are full names, never ISO codes. London is here twice on
+// purpose so a breakdown keyed on the bare city name merges two real cities.
 const COUNTRIES: Country[] = [
   {
     code: "US",
     tz: "America/New_York",
     lang: "en-US",
     regions: [
-      ["NY", "New York"],
-      ["CA", "San Francisco"],
-      ["TX", "Austin"],
+      ["New York", "New York City"],
+      ["California", "San Francisco"],
+      ["Texas", "Austin"],
     ],
     weight: 0.5,
   },
@@ -99,8 +101,8 @@ const COUNTRIES: Country[] = [
     tz: "Europe/London",
     lang: "en-GB",
     regions: [
-      ["ENG", "London"],
-      ["SCT", "Edinburgh"],
+      ["England", "London"],
+      ["Scotland", "Edinburgh"],
     ],
     weight: 0.15,
   },
@@ -109,8 +111,8 @@ const COUNTRIES: Country[] = [
     tz: "Europe/Berlin",
     lang: "de-DE",
     regions: [
-      ["BE", "Berlin"],
-      ["BY", "Munich"],
+      ["Berlin", "Berlin"],
+      ["Bavaria", "Munich"],
     ],
     weight: 0.1,
   },
@@ -119,8 +121,8 @@ const COUNTRIES: Country[] = [
     tz: "Europe/Paris",
     lang: "fr-FR",
     regions: [
-      ["IDF", "Paris"],
-      ["ARA", "Lyon"],
+      ["Île-de-France", "Paris"],
+      ["Auvergne-Rhône-Alpes", "Lyon"],
     ],
     weight: 0.08,
   },
@@ -129,8 +131,8 @@ const COUNTRIES: Country[] = [
     tz: "Asia/Tokyo",
     lang: "ja-JP",
     regions: [
-      ["13", "Tokyo"],
-      ["27", "Osaka"],
+      ["Tokyo", "Tokyo"],
+      ["Osaka", "Osaka"],
     ],
     weight: 0.07,
   },
@@ -139,8 +141,9 @@ const COUNTRIES: Country[] = [
     tz: "America/Toronto",
     lang: "en-CA",
     regions: [
-      ["ON", "Toronto"],
-      ["BC", "Vancouver"],
+      ["Ontario", "Toronto"],
+      ["Ontario", "London"],
+      ["British Columbia", "Vancouver"],
     ],
     weight: 0.05,
   },
@@ -149,8 +152,8 @@ const COUNTRIES: Country[] = [
     tz: "Asia/Kolkata",
     lang: "en-IN",
     regions: [
-      ["MH", "Mumbai"],
-      ["KA", "Bengaluru"],
+      ["Maharashtra", "Mumbai"],
+      ["Karnataka", "Bengaluru"],
     ],
     weight: 0.05,
   },
@@ -238,15 +241,41 @@ const COFFEE_CENTS = [300, 500, 500, 1000, 1500, 2500, 5000] as const;
 const SUPPORTER_FIRST = ["Andrew", "Jakub", "Alejandro", "Mykolas"] as const;
 const SUPPORTER_LAST = ["Smith", "Nowak", "Garcia", "Petrauskas"] as const;
 
+// Every field is detectBot()/parseUA() output for that crawler's real UA — name
+// casing and category included. Do not hand-edit; re-derive.
 const BOTS = [
-  { name: "GPTBot", category: "training", weight: 0.28 },
-  { name: "ClaudeBot", category: "training", weight: 0.12 },
-  { name: "Googlebot", category: "search_index", weight: 0.2 },
-  { name: "bingbot", category: "search_index", weight: 0.1 },
-  { name: "PerplexityBot", category: "answer_fetch", weight: 0.12 },
-  { name: "ChatGPT-User", category: "answer_fetch", weight: 0.08 },
-  { name: "Bytespider", category: "ai_crawler", weight: 0.1 },
-] as const satisfies (Weighted & { name: string; category: string })[];
+  { name: "GPTBot", category: "training", browser: "Unknown", weight: 0.28 },
+  { name: "ClaudeBot", category: "training", browser: "WebKit", weight: 0.12 },
+  {
+    name: "Googlebot",
+    category: "search_index",
+    browser: "Unknown",
+    weight: 0.2,
+  },
+  {
+    name: "Bingbot",
+    category: "search_index",
+    browser: "Unknown",
+    weight: 0.1,
+  },
+  {
+    name: "PerplexityBot",
+    category: "ai_crawler",
+    browser: "Unknown",
+    weight: 0.12,
+  },
+  {
+    name: "ChatGPT-User",
+    category: "answer_fetch",
+    browser: "WebKit",
+    weight: 0.08,
+  },
+  { name: "Bytespider", category: "training", browser: "Unknown", weight: 0.1 },
+] as const satisfies (Weighted & {
+  name: string;
+  category: string;
+  browser: string;
+})[];
 
 type Persona = "bounce" | "reader" | "signer" | "supporter";
 
@@ -278,10 +307,25 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
     return arr[arr.length - 1];
   };
 
-  let visitorSeq = 0;
+  // SDK generateUUID, drawn from the seeded RNG so runs stay reproducible.
+  const uuid = () => {
+    const b = new Uint8Array(16);
+    for (let i = 0; i < 16; i++) b[i] = Math.floor(rng() * 256);
+    b[6] = (b[6] & 0x0f) | 0x40;
+    b[8] = (b[8] & 0x3f) | 0x80;
+    const hex = Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  };
+
+  const sessionId = () => `s${uuid().slice(1)}`;
+
+  const B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const stripeId = (prefix: string, len: number) =>
+    prefix +
+    Array.from({ length: len }, () => B62[Math.floor(rng() * 62)]).join("");
 
   const emitVisitor = () => {
-    const id = `v${visitorSeq++}`;
+    const id = uuid();
     const geo = weighted(COUNTRIES);
     const [region, city] = pick(geo.regions);
     const ip = `${int(1, 223)}.${int(0, 254)}.${int(0, 254)}.${int(1, 254)}`;
@@ -307,6 +351,10 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       ip,
     };
 
+    // trackIdentify appends user_id last, so it lands last in the JSON.
+    const identifyData = (name: string) =>
+      JSON.stringify({ name, image: "", user_id: `usr_${id}` });
+
     const row = (
       dev: Device,
       over: Partial<AnalyticsEventRow>,
@@ -329,7 +377,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       os: dev.os,
       device: dev.device,
       is_bot: 0,
-      bot_category: "",
+      bot_category: "generic",
       bot_name: "",
       ip: visitor.ip,
       viewport_w: Math.floor(dev.sw * 0.95),
@@ -350,7 +398,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       startTs: number,
       landing: boolean,
     ) => {
-      const sid = `${visitor.id}-s${snum}`;
+      const sid = sessionId();
       let ts = startTs;
       let first = true;
 
@@ -371,7 +419,9 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
             session_id: sid,
             session_number: snum,
             href,
-            referrer: isEntry ? source.referrer : "",
+            // document.referrer does not change on client-side navigation, so
+            // the SDK sends the arrival referrer on every event of the session.
+            referrer: landing ? source.referrer : "",
             event_name: type,
             timestamp: Math.floor(ts),
             ...over,
@@ -381,8 +431,12 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       };
 
       const pageview = (path: string) => push("pageview", path);
+      // handleGoalElement sends { eventName }; the worker stores it verbatim.
       const goal = (name: string, path: string) =>
-        push("custom", path, { event_name: name });
+        push("custom", path, {
+          event_name: name,
+          extra_data: JSON.stringify({ eventName: name }),
+        });
 
       const payment = (cents: number, extra: Record<string, string>) => {
         if (ts >= windowEnd) return;
@@ -402,6 +456,8 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
           browser: "",
           os: "",
           device: "",
+          // writePaymentEvent omits it, so it defaults to "" not "generic".
+          bot_category: "",
           ip: "",
           viewport_w: 0,
           viewport_h: 0,
@@ -440,7 +496,10 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
           advance(4, 8);
           push("external_link", "/projects", {
             event_name: "external_link",
-            extra_data: '{"url":"https://github.com/tabsircg"}',
+            extra_data: JSON.stringify({
+              url: "https://github.com/tabsircg",
+              text: "GitHub",
+            }),
           });
         }
       } else if (persona === "signer") {
@@ -458,6 +517,9 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
         }
         push("identify", newsletter ? "/newsletter" : "/contact", {
           event_name: "identify",
+          extra_data: identifyData(
+            `${pick(SUPPORTER_FIRST)} ${pick(SUPPORTER_LAST)}`,
+          ),
         });
       } else {
         // supporter — pays in session 1
@@ -471,20 +533,16 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
         const first = pick(SUPPORTER_FIRST);
         const last = pick(SUPPORTER_LAST);
         payment(pick(COFFEE_CENTS), {
-          stripe_event_id: `evt_${visitor.id}-${snum}`,
+          stripe_event_id: stripeId("evt_", 24),
           kind: "charge",
           customer_name: `${first} ${last}`,
           customer_email: `${first.toLowerCase()}.${last.toLowerCase()}@example.com`,
-          customer_id: `cus_${visitor.id}`,
-          transaction_id: `pi_${visitor.id}-${snum}`,
+          customer_id: stripeId("cus_", 14),
+          transaction_id: stripeId("pi_", 24),
         });
         push("identify", "/success", {
           event_name: "identify",
-          extra_data: JSON.stringify({
-            user_id: `usr_${visitor.id}`,
-            name: `${first} ${last}`,
-            image: "",
-          }),
+          extra_data: identifyData(`${first} ${last}`),
         });
       }
     };
@@ -497,9 +555,8 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       return;
     }
 
-    // 25% of ordinary visitors are returning: their first in-window session is
-    // already snum > 1 (their acquisition predates the window), so they carry no
-    // referrer — which is what keeps new/returning splits meaningful.
+    // 25% are returning: their first in-window session is already snum > 1 and
+    // carries no referrer, which keeps the new/returning split meaningful.
     const returning = rng() < 0.25;
     const snum = returning ? int(2, 4) : 1;
     const start = windowStart + rng() * (windowEnd - windowStart - DAY);
@@ -509,30 +566,32 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
   const targetVisitorRows = Math.floor(minRows * 0.95);
   while (rows.length < targetVisitorRows) emitVisitor();
 
-  // ~5% bot traffic, spread across the window.
   const botCount = Math.max(1, Math.floor(rows.length * 0.05));
   for (let i = 0; i < botCount; i++) {
     const bot = weighted(BOTS);
     const path = rng() < 0.5 ? pick(BLOG_PAGES) : pick(PAGES);
     const ts = windowStart + rng() * (windowEnd - windowStart);
+    // A crawler keeps no cookies, so every hit is a fresh visitor.
+    const geo = weighted(COUNTRIES);
+    const [region, city] = pick(geo.regions);
     rows.push({
       website_id: websiteId,
       type: "pageview",
       domain: DOMAIN,
       href: `https://${DOMAIN}${path}`,
       referrer: "",
-      visitor_id: `bot${i}`,
-      session_id: `bot${i}`,
+      visitor_id: uuid(),
+      session_id: sessionId(),
       language: "en-US",
       timezone: "UTC",
       event_name: "pageview",
       extra_data: "{}",
-      country: "US",
-      region: "Unknown",
-      city: "Unknown",
-      browser: "",
-      os: "",
-      device: "",
+      country: geo.code,
+      region,
+      city,
+      browser: bot.browser,
+      os: "Unknown",
+      device: "desktop",
       is_bot: 1,
       bot_category: bot.category,
       bot_name: bot.name,

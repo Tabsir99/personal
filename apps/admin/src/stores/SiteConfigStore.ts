@@ -21,9 +21,8 @@ interface SiteConfigStore {
   initial: SiteConfig;
   draft: SiteConfig;
 
-  // Parallel arrays of stable ids aligned with `initial.nowReading` /
-  // `draft.nowReading`. An entry in draftIds with no match in initialIds is
-  // a brand-new row.
+  // Stable ids aligned with initial/draft.nowReading. A draftId with no match
+  // in initialIds is a brand-new row.
   initialIds: string[];
   draftIds: string[];
 
@@ -36,7 +35,9 @@ interface SiteConfigStore {
   save: () => Promise<void>;
 
   setBlogLanding: (patch: Partial<SiteConfig["blogLanding"]>) => void;
-  setCurrentlyBuilding: (patch: Partial<SiteConfig["currentlyBuilding"]>) => void;
+  setCurrentlyBuilding: (
+    patch: Partial<SiteConfig["currentlyBuilding"]>,
+  ) => void;
 
   addNowReading: () => void;
   updateNowReading: (index: number, patch: Partial<NowReadingItem>) => void;

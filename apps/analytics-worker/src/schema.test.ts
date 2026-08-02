@@ -7,8 +7,9 @@ const base = {
   href: "https://example.com/",
   referrer: null,
   viewport: { width: 1920, height: 1080 },
-  visitorId: "v1",
-  sessionId: "s1",
+  // Only visitor_id has to parse as a UUID; session_id stays a String.
+  visitorId: "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+  sessionId: "sf2504e0-4f89-41d3-9a0c-0305e82c3302",
   visitorSessionNumber: 1,
   language: "en-US",
   timezone: "UTC",
@@ -38,9 +39,29 @@ describe("payloadSchema", () => {
   });
 
   it("bounds the ids so a crafted handoff link cannot be stored", () => {
-    expect(parse({ type: "pageview", visitorId: "a".repeat(100) }).success).toBe(true);
-    expect(parse({ type: "pageview", visitorId: "a".repeat(101) }).success).toBe(false);
-    expect(parse({ type: "pageview", sessionId: "a".repeat(101) }).success).toBe(false);
+    expect(
+      parse({ type: "pageview", visitorId: "a".repeat(101) }).success,
+    ).toBe(false);
+    expect(
+      parse({ type: "pageview", sessionId: "a".repeat(101) }).success,
+    ).toBe(false);
+  });
+
+  it("requires a uuid visitorId, because the column is one", () => {
+    expect(
+      parse({ type: "pageview", visitorId: "a".repeat(100) }).success,
+    ).toBe(false);
+    expect(parse({ type: "pageview", visitorId: "v1" }).success).toBe(false);
+    expect(parse({ type: "pageview", visitorId: "" }).success).toBe(false);
+    expect(
+      parse({
+        type: "pageview",
+        visitorId: "3F2504E0-4F89-41D3-9A0C-0305E82C3301",
+      }).success,
+    ).toBe(true);
+    expect(parse({ type: "pageview", sessionId: "s-anything" }).success).toBe(
+      true,
+    );
   });
 
   it("rejects reserved types used as custom", () => {
@@ -83,12 +104,12 @@ describe("payloadSchema", () => {
   });
 
   it("rejects property names the SDK would have refused", () => {
-    expect(parse({ type: "custom", extraData: { "bad key": "1" } }).success).toBe(
+    expect(
+      parse({ type: "custom", extraData: { "bad key": "1" } }).success,
+    ).toBe(false);
+    expect(parse({ type: "custom", extraData: { Plan: "pro" } }).success).toBe(
       false,
     );
-    expect(
-      parse({ type: "custom", extraData: { Plan: "pro" } }).success,
-    ).toBe(false);
     expect(
       parse({ type: "custom", extraData: { ["k".repeat(33)]: "1" } }).success,
     ).toBe(false);

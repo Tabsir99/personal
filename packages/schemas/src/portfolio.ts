@@ -3,13 +3,8 @@ import { z } from "zod";
 // Optional URL field that also accepts empty string
 const optionalUrl = z.url().or(z.literal("")).default("");
 
-// One encoded variant of a video.
-// - `type` is the container MIME for the <source type> attribute, e.g.
-//   "video/webm" or "video/mp4".
-// - `codec` is the optional `codecs=` parameter, e.g. 'avc1.42E01E, mp4a.40.2'
-//   (H.264/AAC), "vp9", or "av01.0.05M.08". Splitting it out keeps the UI
-//   simple; `videoSourceType` recombines the two into the real attribute.
-// The browser reads the combined value to download only a source it can decode.
+// One encoded variant. `type` is the container MIME, `codec` the optional
+// codecs= parameter; videoSourceType recombines them for <source type>.
 const videoSourceSchema = z.object({
   url: optionalUrl,
   type: z.string().default(""),
@@ -20,9 +15,8 @@ const videoSourceSchema = z.object({
 });
 export type VideoSource = z.infer<typeof videoSourceSchema>;
 
-// Build the value for a <source type> attribute from a VideoSource: the
-// container MIME plus an optional codecs clause. Returns "" when no MIME is
-// set (so callers can fall back to `undefined` and let the browser sniff).
+// Container MIME plus an optional codecs clause. Returns "" with no MIME, so
+// callers can fall back to undefined and let the browser sniff.
 export function videoSourceType(s: VideoSource): string {
   if (!s.type) return "";
   const codec = s.codec.trim();

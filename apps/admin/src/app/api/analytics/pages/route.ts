@@ -31,11 +31,8 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
   const exitWhere = eventWhere("external_link", params.websiteId, start, end);
   const visitorRev = visitorRevenueSubquery(params.websiteId, start, end);
 
-  // pages / entryPages / hostnames all read the same pageview slice, so they
-  // share one scan: aggregate the slice once per (href, host, visitor), tag each
-  // visitor's entry href with a window, then let GROUPING SETS roll the three
-  // breakdowns out of that single pass — with revenue joined once. exitLinks is
-  // a different event type (external_link) and stays its own scan.
+  // pages/entryPages/hostnames share one pageview scan via GROUPING SETS;
+  // exitLinks is a different event type and stays its own.
   const res = await queryTinybird<PagesRow>(
     `
     (
@@ -45,7 +42,7 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
         uniqExact(vid) AS uv,
         if(GROUPING(href) = 0, sum(cnt), 0) AS pageviews,
         0 AS exits,
-        round(arraySum(x -> x.2, groupUniqArray((vid, ifNull(rev, 0)))) / 100) AS revenue
+        arraySum(x -> x.2, groupUniqArray((vid, ifNull(rev, 0)))) / 100 AS revenue
       FROM (
         SELECT d.href AS href, d.host AS host, d.vid AS vid, d.cnt AS cnt,
           d.entryHref AS entryHref, pr.rev AS rev

@@ -50,6 +50,48 @@ column, so charging in a second currency is a schema change, not a display fix
 > row" must skip them or it will render a blank profile for every visitor who
 > paid and left. Both seed scripts reproduce this shape deliberately.
 
+`visitor_id` is a **`UUID` column**, not a String. Every breakdown holds one
+entry per visitor in memory — `uniqExact`, and the `groupUniqArray` that dedups
+per-visitor revenue — and `GROUPING SETS` keeps one such state per level, eight
+of them on the sources route. At 16 bytes that is affordable; at 36 characters it
+was the first thing to hit a memory ceiling. It also shrinks the bloom filter and
+every join on the column.
+
+The cost is that **ClickHouse quarantines a row whose UUID it cannot parse, and
+says nothing**. The id is not trustworthy input — it comes from the
+`cgd_visitor_id` cookie and the `_cgd_vid` cross-domain param, both of which a
+visitor can edit — so three gates keep malformed ids away from the column:
+
+- `usableHandoffId` (SDK) treats a non-UUID cookie or handoff param as absent, so
+  the tracker mints a fresh id instead of forwarding junk.
+- `payloadSchema` (Worker) rejects a non-UUID `visitorId` outright. The SDK only
+  ever sends `generateUUID()` output, so anything else is tampering or a direct
+  POST, and failing at the boundary beats vanishing later.
+- `writePaymentEvent` (admin) throws rather than write one. Stripe metadata is
+  only as good as what checkout put there, and a quarantined payment row is
+  revenue disappearing with no error anywhere; the webhook turns the throw into a
+  500 and releases the event for Stripe to retry.
+
+`UUID_PATTERN` / `isUuid` live in `@tabsircg/schemas/analytics`; the tracker
+mirrors the pattern in its own `constants.ts` under a test asserting the two are
+equal, the same arrangement `CUSTOM_EVENT_TYPE` uses.
+
+> **`session_id` is deliberately still a String.** `getSessionId` builds it as
+> `'s' + uuid.slice(1)`, which is not a parseable UUID. Nothing aggregates per
+> session the way the breakdowns aggregate per visitor, so there is no similar
+> win to chase.
+
+> **Changing the column type needs a migration; the `.datasource` file is a
+> mirror, not the live table.** Tinybird cannot alter a column type in place on a
+> populated datasource. The move is: create `analytics_events_v2` with the new
+> schema, backfill with
+> `INSERT INTO analytics_events_v2 SELECT * REPLACE (toUUID(visitor_id) AS visitor_id) FROM analytics_events`,
+> point the Worker and admin at it, then drop the old one. **Check for
+> unconvertible rows first** —
+> `SELECT count() FROM analytics_events WHERE toUUIDOrNull(visitor_id) IS NULL` —
+> because those rows are the ones the backfill will drop, and any row written
+> before the three gates above existed could be among them.
+
 The datasource also declares a `bloom_filter` skip index on `visitor_id`
 (`INDEXES` in the `.datasource`). It exists solely for the journey route's
 unbounded per-visitor lookup — see below.

@@ -8,7 +8,8 @@ import type {
   FunnelStepCountry,
 } from "@/lib/analyticsTypes";
 
-// Independent JS oracle for funnel/route.ts: a plain loop over the rows, mirroring its counting, revenue and breakdown logic so agreement validates the SQL.
+// Independent JS oracle for funnel/route.ts: a plain loop over the rows, so
+// agreement validates the SQL.
 
 export interface Win {
   start: number;
@@ -120,7 +121,8 @@ export function referenceFunnel(
   };
 
   const revenueFor = (i: number): number =>
-    all.filter((v) => v.reached[i]).reduce((s, v) => s + v.revenueCents, 0) / 100;
+    all.filter((v) => v.reached[i]).reduce((s, v) => s + v.revenueCents, 0) /
+    100;
 
   const data: FunnelStepData[] = funnel.steps.map((step, i) => {
     const value = counts[i];
