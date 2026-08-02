@@ -10,13 +10,22 @@ export function isLocalhost(hostname: string): boolean {
   return false;
 }
 
-/** visitor_id is a UUID column; a tampered cookie or _cgd_vid param must not
- * reach it. Rejected reads as absent, so the caller mints a fresh id. */
-export function usableHandoffId(value: string | null | undefined): string | null {
-  if (!value) return null;
-  if (value.length > VISITOR_ID_MAX_LENGTH) return null;
-  const candidate = value.charAt(0) === 's' ? '0' + value.slice(1) : value;
-  return UUID_PATTERN.test(candidate) ? value : null;
+function withinLength(value: string | null | undefined): value is string {
+  return Boolean(value) && (value as string).length <= VISITOR_ID_MAX_LENGTH;
+}
+
+export function usableVisitorId(value: string | null | undefined): string | null {
+  if (!withinLength(value)) return null;
+  return UUID_PATTERN.test(value) ? value : null;
+}
+
+/** getSessionId builds 's' + uuid.slice(1), so the 's' is swapped back out
+ * before testing. Never accept this shape as a visitor id — that column is a
+ * real UUID. */
+export function usableSessionId(value: string | null | undefined): string | null {
+  if (!withinLength(value)) return null;
+  if (value.charAt(0) !== 's') return null;
+  return UUID_PATTERN.test(`0${value.slice(1)}`) ? value : null;
 }
 
 const MAX_SESSION_NUMBER = 65535;

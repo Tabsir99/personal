@@ -46,7 +46,7 @@ export function LocationsPanel() {
           value: "city",
           label: "City",
           items: (locations?.cities ?? []).map((l) => ({
-            name: l.name,
+            name: l.region ? `${l.name}, ${l.region}` : l.name,
             icon: <CountryFlag code={l.country} />,
             values: { visitors: l.uv, revenue: l.revenue },
           })),

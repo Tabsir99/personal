@@ -102,7 +102,7 @@ function buildSql(
       0 AS visitors, 0 AS newVisitors, 0 AS returningVisitors,
       0 AS pageviews, 0 AS sessions, 0 AS bounces, 0 AS totalDuration,
       uniqExact(vid) AS payingVisitors,
-      round(sum(rev) / 100) AS revenue
+      sum(rev) / 100 AS revenue
     FROM (
       SELECT
         ${F.visitorId} AS vid,

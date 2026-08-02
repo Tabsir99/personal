@@ -224,20 +224,24 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
   it("locations: countries, regions, cities", async () => {
     const data = await callRoute<Record<string, Rowish[]>>(locationsGET, q);
     const ref = referenceLocations(rows, win);
-    // The seed puts London in both GB and CA, so name alone is not a key.
-    const geoKey = (r: Rowish) => `${String(r.country)}/${String(r.name)}`;
-    expectRows(data.countries, ref.countries, (r) => String(r.name), [
-      "uv",
-      "revenue",
-    ]);
+    const countryKey = (r: Rowish) => String(r.country);
+    const regionKey = (r: Rowish) => `${r.country}/${r.name}`;
+    const cityKey = (r: Rowish) => `${r.country}/${r.region}/${r.name}`;
+    expectRows(data.countries, ref.countries, countryKey, ["uv", "revenue"]);
     expectRows(
       data.regions,
       ref.regions,
-      geoKey,
+      regionKey,
       ["uv", "revenue"],
       ["country"],
     );
-    expectRows(data.cities, ref.cities, geoKey, ["uv", "revenue"], ["country"]);
+    expectRows(
+      data.cities,
+      ref.cities,
+      cityKey,
+      ["uv", "revenue"],
+      ["country", "region"],
+    );
   });
 
   it("locations: same city name in two countries stays two rows", async () => {

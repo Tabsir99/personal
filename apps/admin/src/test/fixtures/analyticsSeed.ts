@@ -241,8 +241,8 @@ const COFFEE_CENTS = [300, 500, 500, 1000, 1500, 2500, 5000] as const;
 const SUPPORTER_FIRST = ["Andrew", "Jakub", "Alejandro", "Mykolas"] as const;
 const SUPPORTER_LAST = ["Smith", "Nowak", "Garcia", "Petrauskas"] as const;
 
-// browser/os are parseUA's output for each crawler's real UA; it falls back to
-// "Unknown" and never to "".
+// Every field is detectBot()/parseUA() output for that crawler's real UA — name
+// casing and category included. Do not hand-edit; re-derive.
 const BOTS = [
   { name: "GPTBot", category: "training", browser: "Unknown", weight: 0.28 },
   { name: "ClaudeBot", category: "training", browser: "WebKit", weight: 0.12 },
@@ -253,14 +253,14 @@ const BOTS = [
     weight: 0.2,
   },
   {
-    name: "bingbot",
+    name: "Bingbot",
     category: "search_index",
     browser: "Unknown",
     weight: 0.1,
   },
   {
     name: "PerplexityBot",
-    category: "answer_fetch",
+    category: "ai_crawler",
     browser: "Unknown",
     weight: 0.12,
   },
@@ -270,12 +270,7 @@ const BOTS = [
     browser: "WebKit",
     weight: 0.08,
   },
-  {
-    name: "Bytespider",
-    category: "ai_crawler",
-    browser: "Unknown",
-    weight: 0.1,
-  },
+  { name: "Bytespider", category: "training", browser: "Unknown", weight: 0.1 },
 ] as const satisfies (Weighted & {
   name: string;
   category: string;
@@ -424,7 +419,9 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
             session_id: sid,
             session_number: snum,
             href,
-            referrer: isEntry ? source.referrer : "",
+            // document.referrer does not change on client-side navigation, so
+            // the SDK sends the arrival referrer on every event of the session.
+            referrer: landing ? source.referrer : "",
             event_name: type,
             timestamp: Math.floor(ts),
             ...over,

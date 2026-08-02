@@ -52,7 +52,7 @@ export function visitorRevenueSubquery(
 // rev repeats on every row a visitor fans out to, so a plain SUM over-counts.
 // Holds one entry per visitor per level; visitor_id is a UUID column for that.
 const REVENUE_METRIC =
-  "round(arraySum(x -> x.2, groupUniqArray((vid, ifNull(rev, 0)))) / 100) as revenue";
+  "arraySum(x -> x.2, groupUniqArray((vid, ifNull(rev, 0)))) / 100 as revenue";
 
 const NO_REVENUE_METRIC = "toFloat64(0) as revenue";
 
@@ -89,7 +89,7 @@ export function breakdown(
   let withRevenue = false;
   let split = false;
   let isNested = false;
-  let extra: string | null = null;
+  const extras: string[] = [];
   let perLevel = 50;
 
   const chain: BreakdownChain = {
@@ -114,7 +114,7 @@ export function breakdown(
       return chain;
     },
     column(expr) {
-      extra = expr;
+      extras.push(expr);
       return chain;
     },
     top(n) {
@@ -154,7 +154,7 @@ export function breakdown(
         : uvMetrics(revenueMetric);
       const orderBy = split ? "newVisitors + returningVisitors" : "uv";
       const scopeFilter = filterExpr ? ` AND ${filterExpr}` : "";
-      const extraCol = extra ? `,\n      ${extra}` : "";
+      const extraCol = extras.map((e) => `,\n      ${e}`).join("");
 
       const bucketMinCol = split
         ? `, min(${F.sessionNumber}) as bucketMin`

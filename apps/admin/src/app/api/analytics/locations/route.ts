@@ -26,35 +26,44 @@ export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
     .level("regions", "region", F.region)
     .level("cities", "city", F.city)
     .revenue()
-    // Region and city names repeat across countries (London GB/CA), so keying
-    // on the bare name merges them into one row.
+    // Region and city names repeat across countries (London GB/CA), so a bare
+    // name is not a key and the parents have to ride along on every row.
     .nested()
-    // Aliased away from the `country` grouping key: ClickHouse rejects an
-    // aggregate aliased to a GROUP BY column. Mapped back to `country` below.
+    // ClickHouse rejects an aggregate aliased to a GROUP BY column, hence the
+    // renames. Both are mapped back below.
     .column(`any(${F.country}) as countryCode`)
+    .column(`any(${F.region}) as regionName`)
     .top(30);
 
   if (countryFilter) chain.filter(`${F.country} = '${countryFilter}'`);
 
   const sql = chain.build();
 
-  const res = await queryTinybird<
-    UvBreakdownRow<"countries" | "regions" | "cities"> & { countryCode: string }
-  >(sql, "locations");
+  type Row = UvBreakdownRow<"countries" | "regions" | "cities"> & {
+    countryCode: string;
+    regionName: string;
+  };
+  const res = await queryTinybird<Row>(sql, "locations");
 
   const { countries, regions, cities } = partitionByLevel(res.data, [
     "countries",
     "regions",
     "cities",
   ]);
-  const withCountry = (
-    rows: (Omit<UvBreakdownRow, "level"> & { countryCode: string })[],
-  ): LocationMetric[] =>
-    rows.map(({ countryCode, ...rest }) => ({ ...rest, country: countryCode }));
+  // `regionName` is only meaningful on a city row. On a country row it is an
+  // arbitrary pick from that country, and on a region row it repeats `name`.
+  const toMetric =
+    (withRegion: boolean) =>
+    (rows: Omit<Row, "level">[]): LocationMetric[] =>
+      rows.map(({ countryCode, regionName, ...rest }) => ({
+        ...rest,
+        country: countryCode,
+        ...(withRegion ? { region: regionName } : {}),
+      }));
 
   return {
-    countries: withCountry(countries),
-    regions: withCountry(regions),
-    cities: withCountry(cities),
+    countries: toMetric(false)(countries),
+    regions: toMetric(false)(regions),
+    cities: toMetric(true)(cities),
   };
 });

@@ -16,7 +16,7 @@ export interface Win {
   end: number;
 }
 
-const round = (cents: number) => Math.round(cents / 100);
+const round = (cents: number) => cents / 100;
 const uniq = (xs: string[]) => new Set(xs).size;
 
 function human(rows: Row[], type: string, w: Win): Row[] {
@@ -366,6 +366,7 @@ const toGeo = (b: BreakRow) => {
   return {
     name: parts[parts.length - 1],
     country: parts[0],
+    region: parts.length > 2 ? parts[1] : undefined,
     uv: b.uv,
     revenue: b.revenue,
   };

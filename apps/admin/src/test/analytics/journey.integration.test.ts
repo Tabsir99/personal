@@ -31,9 +31,10 @@ const periodStart = now - 7 * DAY;
 const fmt = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 const period = `custom:${fmt(periodStart)}:${fmt(now)}`;
 
-const PAYER = "v-payer";
-const SIGNER = "v-signer";
-const BROWSER = "v-browser";
+// Must stay real uuids — ClickHouse quarantines anything else on ingest.
+const PAYER = "a8457e01-2caf-4631-b6df-6b893fd7655f";
+const SIGNER = "470d8fc9-245b-468d-96b1-a32b1bdb3464";
+const BROWSER = "2fe836d8-3b03-4a98-b2d6-9c3576b17b0c";
 
 const FIRST_TOUCH = now - 20 * DAY;
 const PAID_AT = now - 2 * DAY;

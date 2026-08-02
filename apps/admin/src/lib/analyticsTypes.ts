@@ -77,6 +77,7 @@ export interface LocationMetric {
   uv: number;
   revenue: number;
   country?: string;
+  region?: string;
 }
 
 export interface SystemMetric {
