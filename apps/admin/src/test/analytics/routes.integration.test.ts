@@ -234,9 +234,7 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
   it("locations: countries, regions, cities", async () => {
     const data = await callRoute<Record<string, Rowish[]>>(locationsGET, q);
     const ref = referenceLocations(rows, win);
-    // Keyed by country too: the seed puts London in both GB and CA, so a bare
-    // name is not unique below the country level. Asserting `country` as a
-    // string field is what catches an arbitrary `any()` winner.
+    // The seed puts London in both GB and CA, so name alone is not a key.
     const geoKey = (r: Rowish) => `${String(r.country)}/${String(r.name)}`;
     expectRows(data.countries, ref.countries, (r) => String(r.name), [
       "uv",

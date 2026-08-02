@@ -175,8 +175,6 @@ describe('the request the worker actually receives', () => {
   it('adopts the handoff ids but never puts them on the wire', async () => {
     const fetchMock = respondWith(200);
     vi.stubGlobal('fetch', fetchMock);
-    // Handoff ids have to be uuid-shaped now that visitor_id is a UUID column —
-    // a session id is 's' + uuid.slice(1).
     const vid = '3f2504e0-4f89-41d3-9a0c-0305e82c3301';
     const sid = 'sf2504e0-4f89-41d3-9a0c-0305e82c3302';
     window.history.replaceState({}, '', `/landing?utm_source=x&_cgd_vid=${vid}&_cgd_sid=${sid}&_cgd_vsn=4`);
@@ -202,8 +200,6 @@ describe('the request the worker actually receives', () => {
     await settled();
 
     const sent = JSON.parse(fetchMock.mock.calls[0][1].body as string);
-    // Dropped rather than forwarded: ClickHouse would quarantine the row, and
-    // losing the event outright is worse than starting a new visitor.
     expect(sent.visitorId).not.toBe('v-abc');
     expect(sent.visitorId).toMatch(UUID_PATTERN);
   });

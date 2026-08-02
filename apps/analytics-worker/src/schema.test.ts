@@ -7,8 +7,7 @@ const base = {
   href: "https://example.com/",
   referrer: null,
   viewport: { width: 1920, height: 1080 },
-  // visitor_id is a UUID column; session_id is 's' + uuid.slice(1) and stays a
-  // String, so only the first has to parse as a UUID.
+  // Only visitor_id has to parse as a UUID; session_id stays a String.
   visitorId: "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
   sessionId: "sf2504e0-4f89-41d3-9a0c-0305e82c3302",
   visitorSessionNumber: 1,
@@ -49,10 +48,6 @@ describe("payloadSchema", () => {
   });
 
   it("requires a uuid visitorId, because the column is one", () => {
-    // ClickHouse quarantines a row whose UUID it cannot parse, and says nothing
-    // about it — so a malformed id has to be refused here, at the boundary.
-    // The SDK only sends generateUUID() output; anything else is a tampered
-    // cookie, a hand-written _cgd_vid param, or a direct POST.
     expect(
       parse({ type: "pageview", visitorId: "a".repeat(100) }).success,
     ).toBe(false);
@@ -64,7 +59,6 @@ describe("payloadSchema", () => {
         visitorId: "3F2504E0-4F89-41D3-9A0C-0305E82C3301",
       }).success,
     ).toBe(true);
-    // session_id is not a UUID and must stay unconstrained beyond its length.
     expect(parse({ type: "pageview", sessionId: "s-anything" }).success).toBe(
       true,
     );

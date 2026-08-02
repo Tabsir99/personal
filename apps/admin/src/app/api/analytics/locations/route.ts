@@ -26,13 +26,11 @@ export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
     .level("regions", "region", F.region)
     .level("cities", "city", F.city)
     .revenue()
-    // Geo is a hierarchy, not three independent dimensions: region and city
-    // names repeat across countries (London GB/CA, Springfield in a dozen US
-    // states), so keying on the bare name merges them into one row.
+    // Region and city names repeat across countries (London GB/CA), so keying
+    // on the bare name merges them into one row.
     .nested()
     // Aliased away from the `country` grouping key: ClickHouse rejects an
     // aggregate aliased to a GROUP BY column. Mapped back to `country` below.
-    // Deterministic under `.nested()` — country keys every grouping set.
     .column(`any(${F.country}) as countryCode`)
     .top(30);
 

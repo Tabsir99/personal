@@ -10,15 +10,10 @@ export function isLocalhost(hostname: string): boolean {
   return false;
 }
 
-/**
- * Accepts a stored or handed-off id only if it is a UUID. `visitor_id` is a UUID
- * column in the datasource and ClickHouse silently quarantines a row it cannot
- * parse, so a tampered `cgd_visitor_id` cookie or a hand-written `_cgd_vid` URL
- * param must not reach it — both are visitor-editable. A rejected value is
- * treated as absent, so the caller mints a fresh id rather than dropping events.
- *
- * Session ids are `'s' + uuid.slice(1)`, so they are validated on that shape.
- */
+/** visitor_id is a UUID column and ClickHouse quarantines rows it cannot parse,
+ * so a tampered cookie or _cgd_vid param must not reach it. A rejected value is
+ * treated as absent and the caller mints a fresh id. Session ids are
+ * 's' + uuid.slice(1). */
 export function usableHandoffId(value: string | null | undefined): string | null {
   if (!value) return null;
   if (value.length > VISITOR_ID_MAX_LENGTH) return null;

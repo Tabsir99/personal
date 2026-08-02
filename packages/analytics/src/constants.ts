@@ -18,9 +18,8 @@ export const CUSTOM_EVENT_TYPE = 'custom';
 
 export const VISITOR_ID_MAX_LENGTH = 100;
 
-// Mirrors UUID_PATTERN in @tabsircg/schemas/analytics; validation.test.ts asserts
-// the two stay equal. visitor_id is a UUID column, and ClickHouse quarantines a
-// row it cannot parse, so an id that fails this never leaves the browser.
+// Mirrors UUID_PATTERN in @tabsircg/schemas/analytics; validation.test.ts
+// asserts the two stay equal.
 export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export const EXTRA_DATA_MAX_PROPERTIES = 10;

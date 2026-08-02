@@ -14,12 +14,9 @@ const basePayloadSchema = z.object({
     width: z.number(),
     height: z.number(),
   }),
-  // visitor_id is a UUID column. ClickHouse quarantines a row it cannot parse
-  // and says nothing, so a malformed id has to fail loudly here instead — the
-  // SDK only ever sends generateUUID() output, so anything else is a tampered
-  // cookie, a hand-written _cgd_vid param, or a direct POST.
+  // visitor_id is a UUID column and a row it cannot parse is quarantined
+  // silently, so a malformed id has to fail loudly here instead.
   visitorId: z.string().max(VISITOR_ID_MAX_LENGTH).regex(UUID_PATTERN),
-  // session_id stays a String column: getSessionId builds 's' + uuid.slice(1).
   sessionId: z.string().max(VISITOR_ID_MAX_LENGTH),
   visitorSessionNumber: z.number(),
   language: z.string().max(50),

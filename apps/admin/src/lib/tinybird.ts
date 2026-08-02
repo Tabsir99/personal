@@ -80,11 +80,9 @@ export async function writePaymentEvent(row: {
   extra?: Record<string, unknown>;
   timestamp: number;
 }): Promise<void> {
-  // visitor_id is a UUID column and a row it cannot parse is quarantined
-  // silently — on this path that would be a payment vanishing from revenue with
-  // no error anywhere. The id comes from Stripe metadata, which is only as good
-  // as whatever the checkout flow put there, so check it before the write. The
-  // webhook turns a throw into a 500 and releases the event for Stripe to retry.
+  // A quarantined row here is a payment vanishing from revenue with no error
+  // anywhere, and the id is only as good as what checkout put in Stripe
+  // metadata. The webhook turns this throw into a 500 and Stripe retries.
   if (!isUuid(row.visitorId)) {
     throw new Error(
       `Refusing to write payment event: visitorId is not a UUID (${JSON.stringify(row.visitorId)})`,

@@ -52,13 +52,8 @@ export function visitorRevenueSubquery(
 // rev is a per-visitor total repeated on every inner row, so a plain SUM
 // over-counts once a visitor fans out across multiple dimension combos in the
 // scan. Dedup to one (vid, rev) pair per visitor within each group, then sum.
-//
-// This array is the heaviest state in the query: it spans every visitor with a
-// pageview, not just payers (ifNull puts the rest in at 0), and GROUPING SETS
-// keeps one per level — 8 of them on the sources route. It stays affordable
-// because `visitor_id` is a native UUID column, 16 bytes rather than a 36-char
-// String. Keep it that way; widening the column back to String puts ~50 bytes
-// per visitor per level in memory here.
+// Holds one entry per visitor per level, so it depends on visitor_id being a
+// UUID column rather than a String.
 const REVENUE_METRIC =
   "round(arraySum(x -> x.2, groupUniqArray((vid, ifNull(rev, 0)))) / 100) as revenue";
 
@@ -104,13 +99,9 @@ export interface BreakdownChain {
  * visitor new/returning via a window MIN(session_number) over that same scan, so it
  * costs no extra scan and newVisitors + returningVisitors === uv.
  *
- * Levels are independent by default — a browser is not scoped by an OS. `.nested()`
- * is for hierarchies (country -> region -> city), where a bare name is ambiguous:
- * keyed on `city` alone, London GB and London CA are one group whose visitor counts
- * add up and whose carried `any(country)` picks a winner arbitrarily. Nesting keys
- * each level on the prefix above it, which both separates them and makes the
- * carried parent deterministic. The level test then has to run most-specific
- * first, since the outermost key is present in every set.
+ * Levels are independent by default. `.nested()` keys each level on the prefix
+ * above it, for hierarchies like country -> region -> city where a bare name is
+ * not unique.
  */
 export function breakdown(
   websiteId: string,
@@ -156,9 +147,8 @@ export function breakdown(
       return chain;
     },
     build() {
-      // Nested levels share their parents' keys, so GROUPING(outermost) = 0 in
-      // every set. Test the innermost level first or every row reads as the
-      // outermost one.
+      // Nested levels share their parents' keys, so the innermost must be
+      // tested first or every row reads as the outermost.
       const byLevel = (value: (l: Level) => string) => {
         const ordered = isNested ? [...levels].reverse() : levels;
         const last = ordered.length - 1;

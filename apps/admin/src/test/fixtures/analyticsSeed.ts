@@ -3,27 +3,9 @@ import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
 /** In-memory, RNG-seeded twin of analytics-worker's seed.ts. Every dimension's
  * cardinality stays bounded so no dashboard query hits its LIMIT.
  *
- * Rows are byte-identical to what actually lands in Tinybird, because a fixture
- * that is merely plausible can hide the bugs it exists to catch. What that
- * pins, and where each value comes from:
- *
- * - `visitor_id` is a v4 UUID and `session_id` is `'s' + uuid.slice(1)`, per the
- *   SDK's `generateUUID` / `getSessionId` (packages/analytics/src/storage.ts).
- *   Short ids like `v0` understate every per-visitor aggregate's memory.
- * - `region` / `city` are full Cloudflare `cf.*` names, not ISO codes — and
- *   London appears under both GB/England and CA/Ontario, which is the collision
- *   the locations breakdown has to keep apart.
- * - `bot_category` is `'generic'` on human rows: `detectBot` returns it for
- *   `is_bot: 0` too. Payment rows keep `''` — that path never calls detectBot.
- * - `extra_data` carries what the SDK really sends, key order included, since
- *   it is stored as an opaque string: `{"eventName":…}` for attribute goals
- *   (dom.ts `handleGoalElement`), `{"url":…,"text":…}` for outbound links,
- *   `{"name":…,"image":…,"user_id":…}` for identify (events.ts `trackIdentify`).
- * - Payment rows mirror `writePaymentEvent`, which sends 8 fields and lets the
- *   datasource default the rest, with Stripe-shaped base62 ids.
- * - Bot `browser` / `os` / `device` are what `parseUA` actually returns for each
- *   crawler UA — never `''`; it falls back to `Unknown` / `Unknown` / `desktop`.
- */
+ * Rows match what the worker and the Stripe webhook actually write, field for
+ * field — ids, geo names, bot_category, extra_data key order. A fixture that is
+ * only plausible hides the bugs it exists to catch. */
 
 export interface SeedOptions {
   websiteId: string;
@@ -104,9 +86,8 @@ const SOURCES: Source[] = [
   },
 ];
 
-// `cf.region` / `cf.city` are full names, never ISO codes. London is here twice
-// on purpose — GB/England and CA/Ontario — so a breakdown that keys on the bare
-// city name merges two real cities and the test notices.
+// cf.region/cf.city are full names, never ISO codes. London is here twice on
+// purpose so a breakdown keyed on the bare city name merges two real cities.
 const COUNTRIES: Country[] = [
   {
     code: "US",
@@ -264,66 +245,45 @@ const COFFEE_CENTS = [300, 500, 500, 1000, 1500, 2500, 5000] as const;
 const SUPPORTER_FIRST = ["Andrew", "Jakub", "Alejandro", "Mykolas"] as const;
 const SUPPORTER_LAST = ["Smith", "Nowak", "Garcia", "Petrauskas"] as const;
 
-// `browser` / `os` are what parseUA returns for each crawler's real UA — the two
-// WebKit tokens parse, the rest fall back to "Unknown". `device` is always
-// "desktop" because parseUA defaults it when getDevice().type is undefined.
-// Nothing here is ever "", which is what the worker would have to write for the
-// row to look like this fixture's old shape.
+// browser/os are parseUA's output for each crawler's real UA; it falls back to
+// "Unknown" and never to "".
 const BOTS = [
-  {
-    name: "GPTBot",
-    category: "training",
-    browser: "Unknown",
-    os: "Unknown",
-    weight: 0.28,
-  },
-  {
-    name: "ClaudeBot",
-    category: "training",
-    browser: "WebKit",
-    os: "Unknown",
-    weight: 0.12,
-  },
+  { name: "GPTBot", category: "training", browser: "Unknown", weight: 0.28 },
+  { name: "ClaudeBot", category: "training", browser: "WebKit", weight: 0.12 },
   {
     name: "Googlebot",
     category: "search_index",
     browser: "Unknown",
-    os: "Unknown",
     weight: 0.2,
   },
   {
     name: "bingbot",
     category: "search_index",
     browser: "Unknown",
-    os: "Unknown",
     weight: 0.1,
   },
   {
     name: "PerplexityBot",
     category: "answer_fetch",
     browser: "Unknown",
-    os: "Unknown",
     weight: 0.12,
   },
   {
     name: "ChatGPT-User",
     category: "answer_fetch",
     browser: "WebKit",
-    os: "Unknown",
     weight: 0.08,
   },
   {
     name: "Bytespider",
     category: "ai_crawler",
     browser: "Unknown",
-    os: "Unknown",
     weight: 0.1,
   },
 ] as const satisfies (Weighted & {
   name: string;
   category: string;
   browser: string;
-  os: string;
 })[];
 
 type Persona = "bounce" | "reader" | "signer" | "supporter";
@@ -356,8 +316,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
     return arr[arr.length - 1];
   };
 
-  // Same shape as the SDK's generateUUID fallback, drawn from the seeded RNG so
-  // a run stays reproducible: 16 bytes with the v4 version and variant bits set.
+  // SDK generateUUID, drawn from the seeded RNG so runs stay reproducible.
   const uuid = () => {
     const b = new Uint8Array(16);
     for (let i = 0; i < 16; i++) b[i] = Math.floor(rng() * 256);
@@ -367,11 +326,9 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
   };
 
-  // getSessionId(): 's' + generateUUID().substring(1) — still 36 chars.
   const sessionId = () => `s${uuid().slice(1)}`;
 
-  // Stripe object ids are base62 after the prefix: 24 chars for events and
-  // payment intents, 14 for customers.
+  // Stripe ids: base62, 24 chars for evt_/pi_, 14 for cus_.
   const B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   const stripeId = (prefix: string, len: number) =>
     prefix +
@@ -404,8 +361,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       ip,
     };
 
-    // trackIdentify sends { name: '', image: '', ...data, user_id } — user_id is
-    // appended last, so it lands last in the stored JSON.
+    // trackIdentify appends user_id last, so it lands last in the JSON.
     const identifyData = (name: string) =>
       JSON.stringify({ name, image: "", user_id: `usr_${id}` });
 
@@ -431,7 +387,6 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       os: dev.os,
       device: dev.device,
       is_bot: 0,
-      // detectBot returns "generic" for humans too, not "".
       bot_category: "generic",
       bot_name: "",
       ip: visitor.ip,
@@ -484,9 +439,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       };
 
       const pageview = (path: string) => push("pageview", path);
-      // handleGoalElement sends { eventName } (plus any data-*-prop-* attrs),
-      // and the worker stores that object verbatim while lifting eventName out
-      // into the event_name column.
+      // handleGoalElement sends { eventName }; the worker stores it verbatim.
       const goal = (name: string, path: string) =>
         push("custom", path, {
           event_name: name,
@@ -511,8 +464,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
           browser: "",
           os: "",
           device: "",
-          // writePaymentEvent omits bot_category, so it defaults to "" — the
-          // Stripe path never runs detectBot and never sees "generic".
+          // writePaymentEvent omits it, so it defaults to "" not "generic".
           bot_category: "",
           ip: "",
           viewport_w: 0,
@@ -550,8 +502,6 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
         }
         if (rng() < 0.3) {
           advance(4, 8);
-          // handleOutboundLink sends { url, text } — text is the anchor's
-          // trimmed textContent.
           push("external_link", "/projects", {
             event_name: "external_link",
             extra_data: JSON.stringify({
@@ -632,8 +582,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
     const bot = weighted(BOTS);
     const path = rng() < 0.5 ? pick(BLOG_PAGES) : pick(PAGES);
     const ts = windowStart + rng() * (windowEnd - windowStart);
-    // A crawler keeps no cookies, so every hit mints a fresh visitor and
-    // session. Geo is real — Cloudflare resolves crawler IPs like any other.
+    // A crawler keeps no cookies, so every hit is a fresh visitor.
     const geo = weighted(COUNTRIES);
     const [region, city] = pick(geo.regions);
     rows.push({
@@ -652,7 +601,7 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
       region,
       city,
       browser: bot.browser,
-      os: bot.os,
+      os: "Unknown",
       device: "desktop",
       is_bot: 1,
       bot_category: bot.category,

@@ -363,9 +363,8 @@ export function referencePages(rows: Row[], w: Win) {
 
 const toUv = (b: BreakRow) => ({ name: b.name, uv: b.uv, revenue: b.revenue });
 
-// Geo is a hierarchy: a region or city name is only unique under its parents.
-// Keying on the bare name would merge London GB with London CA and let the
-// reference agree with the very bug the locations query had.
+// A region or city name is only unique under its parents; keying on the bare
+// name would let the reference agree with the bug it exists to catch.
 const GEO_SEP = "\u0000";
 
 const toGeo = (b: BreakRow) => {
