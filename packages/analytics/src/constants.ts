@@ -20,7 +20,7 @@ export const VISITOR_ID_MAX_LENGTH = 100;
 
 // Mirrors UUID_PATTERN in @tabsircg/schemas/analytics; validation.test.ts
 // asserts the two stay equal.
-export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export const EXTRA_DATA_MAX_PROPERTIES = 10;
 export const EXTRA_DATA_MAX_KEY_LENGTH = 32;

@@ -28,7 +28,7 @@ export const VISITOR_ID_MAX_LENGTH = 100;
 /** visitor_id is a UUID column and arrives from a visitor-editable cookie, so
  * every ingest path validates it. session_id stays a String. */
 export const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function isUuid(value: unknown): value is string {
   return typeof value === "string" && UUID_PATTERN.test(value);

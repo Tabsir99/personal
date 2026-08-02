@@ -71,8 +71,6 @@ function dumpSql(label: string, sql: string): string | undefined {
   }
 }
 
-const NIL_UUID = "00000000-0000-0000-0000-000000000000";
-
 export async function writePaymentEvent(row: {
   websiteId: string;
   visitorId: string;
@@ -82,28 +80,18 @@ export async function writePaymentEvent(row: {
   extra?: Record<string, unknown>;
   timestamp: number;
 }): Promise<void> {
-  // A malformed id is permanent, so throwing would only make Stripe retry a
-  // doomed event for days and lose the money anyway. Bank it under nil instead.
-  const usable = isUuid(row.visitorId);
-  if (!usable) {
-    console.error("payment event has a non-UUID visitorId; filing under nil", {
-      websiteId: row.websiteId,
-      visitorId: row.visitorId,
-    });
+  if (!isUuid(row.visitorId)) {
+    throw new Error("Payment event visitorId is not a UUID");
   }
 
   const payload: Partial<AnalyticsEventRow> = {
     website_id: row.websiteId,
     type: "payment",
-    visitor_id: usable ? row.visitorId : NIL_UUID,
+    visitor_id: row.visitorId,
     session_id: row.sessionId,
     revenue_cents: row.revenueCents,
     event_name: row.eventName ?? "payment",
-    extra_data: JSON.stringify(
-      usable
-        ? (row.extra ?? {})
-        : { ...row.extra, unmapped_visitor_id: row.visitorId },
-    ),
+    extra_data: JSON.stringify(row.extra ?? {}),
     timestamp: row.timestamp,
   };
   const body = JSON.stringify(payload);
