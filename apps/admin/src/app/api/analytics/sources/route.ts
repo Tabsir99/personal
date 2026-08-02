@@ -8,7 +8,12 @@ import {
   partitionByLevel,
   F,
 } from "@/lib/tinybird";
-import { breakdown, type BreakdownRow } from "@/lib/analyticsQuery";
+import {
+  eventWhere,
+  visitorRevenueSubquery,
+  revenueDedupedByVisitor,
+  type BreakdownRow,
+} from "@/lib/analyticsQuery";
 import {
   CAMPAIGN_DIMENSIONS,
   rollupCampaigns,
@@ -22,8 +27,25 @@ import { buildChannelSQL } from "./channels";
 
 type SourceLevel = "referrers" | "channels" | CampaignDimension;
 
-const channelExpr = buildChannelSQL(F.referrer);
-const paramExpr = (dim: CampaignDimension) =>
+const PER_LEVEL = 50;
+
+const LEVELS: { level: SourceLevel; key: string }[] = [
+  { level: "referrers", key: "referrer" },
+  { level: "channels", key: "chn" },
+  ...CAMPAIGN_DIMENSIONS.map((dim) => ({ level: dim, key: dim })),
+];
+
+type SourceLevelSpec = (typeof LEVELS)[number];
+
+const perLevel = (value: (spec: SourceLevelSpec) => string): string => {
+  const last = LEVELS.length - 1;
+  const arms = LEVELS.map((spec, i) =>
+    i < last ? `GROUPING(s.${spec.key}) = 0, ${value(spec)}` : value(spec),
+  );
+  return `multiIf(${arms.join(", ")})`;
+};
+
+const campaignParam = (dim: CampaignDimension) =>
   `extractURLParameter(${F.href}, '${dim}')`;
 
 export const GET = wrapRoute<SourcesResponse>(async (req: NextRequest) => {
@@ -31,37 +53,50 @@ export const GET = wrapRoute<SourcesResponse>(async (req: NextRequest) => {
   const params = parseAnalyticsParams(req.nextUrl.searchParams);
   const { start, end } = periodToRange(params.period);
 
-  // One GROUPING SETS scan: campaign levels ride the one referrers/channels
-  // already pays for. Untagged traffic falls out as name === '' below.
-  const chain = breakdown(params.websiteId, start, end)
-    .level("referrers", "referrer", F.referrer)
-    .level("channels", "channel", channelExpr);
-  for (const dim of CAMPAIGN_DIMENSIONS) chain.level(dim, dim, paramExpr(dim));
+  const scanned = ["referrer", ...CAMPAIGN_DIMENSIONS];
+  const groupingSets = LEVELS.map(({ key }) => `(s.${key})`).join(", ");
 
-  const sql = chain
-    .revenue()
-    .splitVisitors()
-    // Aliased `chan`: ClickHouse rejects an aggregate aliased to a GROUP BY
-    // column. Mapped back to `channel` below.
-    .column(`multiIf(GROUPING(referrer) = 0, any(channel), '') as chan`)
-    .top(50)
-    .build();
+  const sql = `
+    SELECT
+      ${perLevel((spec) => `'${spec.level}'`)} as level,
+      ${perLevel((spec) => `s.${spec.key}`)} as name,
+      if(GROUPING(s.referrer) = 0, any(s.chn), '') as channel,
+      uniqExactIf(s.vid, s.minSess = 1) as newVisitors,
+      uniqExactIf(s.vid, s.minSess > 1) as returningVisitors,
+      ${revenueDedupedByVisitor("s.vid", "pr.rev")}
+    FROM (
+      SELECT
+        ${scanned.join(", ")},
+        vid,
+        ${buildChannelSQL("referrer")} as chn,
+        min(firstSession) OVER (PARTITION BY vid) as minSess
+      FROM (
+        SELECT
+          ${F.referrer} as referrer,
+          ${CAMPAIGN_DIMENSIONS.map((dim) => `${campaignParam(dim)} as ${dim}`).join(",\n          ")},
+          ${F.visitorId} as vid,
+          min(${F.sessionNumber}) as firstSession
+        FROM ${F.engine}
+        WHERE ${eventWhere("pageview", params.websiteId, start, end)}
+        GROUP BY ${scanned.join(", ")}, vid
+      )
+    ) s
+    LEFT JOIN (${visitorRevenueSubquery(params.websiteId, start, end)}) pr
+      ON s.vid = pr.vid
+    GROUP BY GROUPING SETS (${groupingSets})
+    ORDER BY newVisitors + returningVisitors DESC
+    LIMIT ${PER_LEVEL} BY level
+  `;
 
-  const res = await queryTinybird<BreakdownRow<SourceLevel> & { chan: string }>(
-    sql,
-    "sources",
-  );
+  const res = await queryTinybird<
+    BreakdownRow<SourceLevel> & { channel: string }
+  >(sql, "sources");
+
   const byLevel = partitionByLevel(res.data, [
     "referrers",
     "channels",
     ...CAMPAIGN_DIMENSIONS,
   ]);
-
-  const referrers = byLevel.referrers.map(({ chan, ...r }) => ({
-    ...r,
-    channel: chan,
-  })) as SourceMetric[];
-  const channels = byLevel.channels as ChannelMetric[];
 
   const dims = Object.fromEntries(
     CAMPAIGN_DIMENSIONS.map((dim) => [
@@ -76,5 +111,9 @@ export const GET = wrapRoute<SourcesResponse>(async (req: NextRequest) => {
     ]),
   ) as Record<CampaignDimension, CampaignMetric[]>;
 
-  return { referrers, channels, campaigns: rollupCampaigns(dims) };
+  return {
+    referrers: byLevel.referrers as SourceMetric[],
+    channels: byLevel.channels as ChannelMetric[],
+    campaigns: rollupCampaigns(dims),
+  };
 });

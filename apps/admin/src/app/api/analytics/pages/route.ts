@@ -8,7 +8,11 @@ import {
   partitionByLevel,
   F,
 } from "@/lib/tinybird";
-import { visitorRevenueSubquery, eventWhere } from "@/lib/analyticsQuery";
+import {
+  visitorRevenueSubquery,
+  eventWhere,
+  revenueDedupedByVisitor,
+} from "@/lib/analyticsQuery";
 import type { PagesResponse } from "@/lib/analyticsTypes";
 
 interface PagesRow {
@@ -42,7 +46,7 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
         uniqExact(vid) AS uv,
         if(GROUPING(href) = 0, sum(cnt), 0) AS pageviews,
         0 AS exits,
-        arraySum(x -> x.2, groupUniqArray((vid, ifNull(rev, 0)))) / 100 AS revenue
+        ${revenueDedupedByVisitor("vid", "rev")}
       FROM (
         SELECT d.href AS href, d.host AS host, d.vid AS vid, d.cnt AS cnt,
           d.entryHref AS entryHref, pr.rev AS rev
