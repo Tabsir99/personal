@@ -96,26 +96,42 @@ The datasource also declares a `bloom_filter` skip index on `visitor_id`
 (`INDEXES` in the `.datasource`). It exists solely for the journey route's
 unbounded per-visitor lookup — see below.
 
-Server-side enrichment happens in the Worker at ingest, so these arrive as real
-columns (no query-time parsing needed):
+Server-side enrichment happens in the Worker at ingest on browser rows, so
+these arrive as real columns (no query-time parsing needed):
 
 - **geo** — `country` / `region` / `city` / `ip` from the request.
 - **UA parse** — `browser` / `os` / `device` via `parseUA`.
-- **bot detect** — `is_bot` / `bot_category` / `bot_name` via `detectBot`, a
-  self-contained signature table in the Worker (no third-party dependency).
-  Categories are declared once in `@tabsircg/schemas/analytics`
-  (`BOT_CATEGORY_NAMES`) and consumed by both the Worker and `botRegistry.ts`:
-  `search_index`, `answer_fetch`, `training`, `ai_crawler`, `seo`, `social`,
-  `monitoring`, `tooling`, `archive`, and `generic`. A match yields a canonical
-  name (`AhrefsBot`, not the substring that matched) so the bots panel groups
-  cleanly. Anything that only trips a bare bot signal falls to `generic` and is
-  named from its own UA token, never from the signal. Real crawlers are
-  recorded, not dropped; only automation tools are blocked upstream by the SDK.
 
-> **`bot_category` values changed.** Rows ingested before the table existed
-> classified everything outside the AI/search set as `generic` — SEO crawlers,
-> link unfurlers and uptime monitors all landed there, most of them named `bot`.
-> Historical rows keep those values; only new rows get the finer categories.
+**The Worker does not classify bots.** `is_bot` / `bot_category` / `bot_name`
+arrive already decided, in the request body, from
+`@tabsircg/analytics/middleware` running in the tracked app's own middleware.
+A payload carrying a `bot` object is a crawl row: `is_bot = 1`, geo `Unknown`,
+nil-UUID visitor and session, and the crawler's real UA and IP taken from the
+body rather than from the calling request's headers. Every other payload is a
+browser row and is written with `is_bot = 0`.
+
+The reason it lives there and not here: the Worker only ever sees requests that
+executed JavaScript, so a UA check at ingest can only catch crawlers that
+render — Googlebot's WRS, Bingbot, Lighthouse. GPTBot, ClaudeBot, CCBot and
+every social unfurler fetch HTML and leave, and would never appear. Middleware
+sees the fetch itself, so it sees all of them. Because the Worker classifies
+nothing, exactly one pipeline writes `is_bot = 1` and there is no double count
+for the crawlers that do both.
+
+Categories are still declared once in `@tabsircg/schemas/analytics`
+(`BOT_CATEGORY_NAMES`) and consumed by the ingest schema, the middleware and
+`botRegistry.ts`: `search_index`, `answer_fetch`, `training`, `ai_crawler`,
+`seo`, `social`, `monitoring`, `tooling`, `archive`, and `generic`. A match
+yields a canonical name (`AhrefsBot`, not the substring that matched) so the
+bots panel groups cleanly. Anything that only trips a bare bot signal falls to
+`generic` and is named from its own UA token, never from the signal.
+
+> **`bot_category` values changed twice.** Rows ingested before the signature
+> table existed classified everything outside the AI/search set as `generic` —
+> SEO crawlers, link unfurlers and uptime monitors all landed there, most of
+> them named `bot`. Rows ingested while the Worker still classified cover only
+> JavaScript-rendering crawlers. Historical rows keep whatever they were given;
+> only rows written by the middleware have full crawler coverage.
 
 `ip` is written on every row and **read by nothing** — no ingest path and no
 dashboard query filters on it. There is no IP-based exclusion of your own

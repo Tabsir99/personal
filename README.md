@@ -192,7 +192,7 @@ personal/
     └── schemas/                @tabsircg/schemas — Zod sources, no build
 ```
 
-`CLAUDE.local.md` has the deeper notes: gotchas, schema migration policy, open work. Read it before changing the wire format or the dev story.
+`CLAUDE.md` has the deeper notes: gotchas, schema migration policy, open work. Read it before changing the wire format or the dev story.
 
 ---
 

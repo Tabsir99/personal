@@ -160,17 +160,17 @@ For refunds and disputes the webhook follows the refund/dispute back to its Paym
 
 ### Script `data-*` attributes (§1A)
 
-| Attribute                  | Description                                | Default                                 |
-| -------------------------- | ------------------------------------------ | --------------------------------------- |
-| `data-website-id`          | Site id — **required**                     | —                                       |
-| `data-domain`              | Primary tracked domain — **required**      | —                                       |
-| `data-api-url`             | Override the event endpoint                | `https://analytics.tabsircg.com`        |
-| `data-allowed-hostnames`   | Comma-separated extra hosts (cross-domain) | ``                                      |
-| `data-allow-localhost`     | Track on localhost                         | `false`                                 |
-| `data-allow-file-protocol` | Track on `file://`                         | `false`                                 |
-| `data-allow-iframe`        | Track when the page is framed              | `false`                                 |
-| `data-debug`               | Verbose logging                            | `false`                                 |
-| `data-disable-console`     | Silence all tracker logs                   | `false`                                 |
+| Attribute                  | Description                                | Default                          |
+| -------------------------- | ------------------------------------------ | -------------------------------- |
+| `data-website-id`          | Site id — **required**                     | —                                |
+| `data-domain`              | Primary tracked domain — **required**      | —                                |
+| `data-api-url`             | Override the event endpoint                | `https://analytics.tabsircg.com` |
+| `data-allowed-hostnames`   | Comma-separated extra hosts (cross-domain) | ``                               |
+| `data-allow-localhost`     | Track on localhost                         | `false`                          |
+| `data-allow-file-protocol` | Track on `file://`                         | `false`                          |
+| `data-allow-iframe`        | Track when the page is framed              | `false`                          |
+| `data-debug`               | Verbose logging                            | `false`                          |
+| `data-disable-console`     | Silence all tracker logs                   | `false`                          |
 
 ### SDK `init(options)` (§1B)
 
@@ -178,11 +178,11 @@ Same fields, camelCased: `websiteId` (req), `domain` (req), `apiUrl?`, `allowedH
 
 ### Cookies
 
-| Cookie                      | Purpose             | TTL    |
-| --------------------------- | ------------------- | ------ |
-| `cgd_visitor_id`            | Stable visitor id   | 365d   |
-| `cgd_session_id`            | Session id          | 30 min |
-| `cgd_visitor_session_count` | Session counter     | 365d   |
+| Cookie                      | Purpose           | TTL    |
+| --------------------------- | ----------------- | ------ |
+| `cgd_visitor_id`            | Stable visitor id | 365d   |
+| `cgd_session_id`            | Session id        | 30 min |
+| `cgd_visitor_session_count` | Session counter   | 365d   |
 
 Cross-domain: these travel via URL params `_cgd_vid`, `_cgd_sid`, `_cgd_vsn` — see §7.
 
@@ -234,18 +234,18 @@ The SDK still publishes the numbers as constants so you can check against them
 yourself, and its test suite asserts they equal the shared contract, so the
 published limits cannot drift from the enforced ones.
 
-| Field                            | Limit         | Enforced by                                                          |
-| -------------------------------- | ------------- | -------------------------------------------------------------------- |
-| `href`                           | 2000 chars    | tracker trims before sending; Worker rejects beyond                   |
-| `type` (custom events)           | 64 chars      | Worker schema (rejects)                                               |
-| derived `event_name`             | 255 chars     | Worker trims                                                          |
-| `extraData` — value              | 1000 chars    | tracker trims to fit; Worker rejects beyond                           |
-| `extraData` — whole object       | 4000 chars    | Worker rejects beyond, and drops trailing keys as a backstop, so what is stored is **always valid JSON** |
-| `extraData` — key count          | 10            | Worker rejects (`eventName` is exempt)                                |
-| `extraData` — key name           | 32 chars, `[a-z0-9_-]` | tracker lowercases; Worker rejects                           |
-| `extraData` — value type         | string        | tracker stringifies; Worker rejects non-strings                       |
-| `visitorId`, `sessionId`         | 100 chars     | Worker rejects beyond; tracker drops an over-length handoff id instead of storing it |
-| viewport, screen, session number | 0–65535       | Worker clamps (columns are `UInt16`)                                  |
+| Field                            | Limit                  | Enforced by                                                                                              |
+| -------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| `href`                           | 2000 chars             | tracker trims before sending; Worker rejects beyond                                                      |
+| `type` (custom events)           | 64 chars               | Worker schema (rejects)                                                                                  |
+| derived `event_name`             | 255 chars              | Worker trims                                                                                             |
+| `extraData` — value              | 1000 chars             | tracker trims to fit; Worker rejects beyond                                                              |
+| `extraData` — whole object       | 4000 chars             | Worker rejects beyond, and drops trailing keys as a backstop, so what is stored is **always valid JSON** |
+| `extraData` — key count          | 10                     | Worker rejects (`eventName` is exempt)                                                                   |
+| `extraData` — key name           | 32 chars, `[a-z0-9_-]` | tracker lowercases; Worker rejects                                                                       |
+| `extraData` — value type         | string                 | tracker stringifies; Worker rejects non-strings                                                          |
+| `visitorId`, `sessionId`         | 100 chars              | Worker rejects beyond; tracker drops an over-length handoff id instead of storing it                     |
+| viewport, screen, session number | 0–65535                | Worker clamps (columns are `UInt16`)                                                                     |
 
 Every tracking entry point routes through `toEventData` — `cgd()`,
 `analytics.trackEvent()`, `identify()`, `data-cgd-goal`, `data-cgd-scroll` and
@@ -275,21 +275,21 @@ There is **no IP-based exclusion anywhere in this system.** The Worker records
 query ever filters on it. Everything below is the full set of exclusions that
 actually exist, in the order they apply.
 
-| Exclusion               | Where                                      | Default | Override                                              |
-| ----------------------- | ------------------------------------------ | ------- | ----------------------------------------------------- |
-| **Your own browser**    | `localStorage['cgd_ignore'] === 'true'`    | off     | set it per browser/profile (see below)                |
-| Localhost               | tracker refuses to boot                    | blocked | `data-allow-localhost="true"` / `allowLocalhost: true` |
-| `file://`               | tracker refuses to boot                    | blocked | `data-allow-file-protocol="true"`                     |
-| Inside an iframe        | tracker refuses to boot                    | blocked | `data-allow-iframe="true"` / `allowIframe: true`      |
-| Headless / automation   | `bot.ts` heuristics, before the request     | blocked | —                                                     |
-| Unregistered `Origin`   | Worker KV allowlist → 403 (see §8)          | blocked | register the origin on the website in admin           |
-| Crawlers & bot UAs      | Worker tags `is_bot=1`; **row is still stored** | stored | dashboard queries filter `is_bot = 0`             |
+| Exclusion             | Where                                                             | Default | Override                                               |
+| --------------------- | ----------------------------------------------------------------- | ------- | ------------------------------------------------------ |
+| **Your own browser**  | `localStorage['cgd_ignore'] === 'true'`                           | off     | set it per browser/profile (see below)                 |
+| Localhost             | tracker refuses to boot                                           | blocked | `data-allow-localhost="true"` / `allowLocalhost: true` |
+| `file://`             | tracker refuses to boot                                           | blocked | `data-allow-file-protocol="true"`                      |
+| Inside an iframe      | tracker refuses to boot                                           | blocked | `data-allow-iframe="true"` / `allowIframe: true`       |
+| Headless / automation | `bot.ts` heuristics, before the request                           | blocked | —                                                      |
+| Unregistered `Origin` | Worker KV allowlist → 403 (see §8)                                | blocked | register the origin on the website in admin            |
+| Crawlers & bot UAs    | tagged `is_bot=1` by the middleware (§9); **row is still stored** | stored  | dashboard queries filter `is_bot = 0`                  |
 
 **To stop recording your own visits**, run this once in the devtools console on
 each browser profile and device you browse from:
 
 ```js
-localStorage.setItem('cgd_ignore', 'true');   // re-enable: localStorage.removeItem('cgd_ignore')
+localStorage.setItem('cgd_ignore', 'true'); // re-enable: localStorage.removeItem('cgd_ignore')
 ```
 
 It is checked in `sendEvent`, so it suppresses **every** event type — pageviews,
@@ -317,23 +317,27 @@ how you link.
 1. **List the other host** on every site involved:
 
    ```html
-   <script defer src="…" data-website-id="…" data-domain="example.com"
-           data-allowed-hostnames="app.other.com,shop.other.com"></script>
+   <script
+     defer
+     src="…"
+     data-website-id="…"
+     data-domain="example.com"
+     data-allowed-hostnames="app.other.com,shop.other.com"
+   ></script>
    ```
 
    ```ts
-   init({ websiteId: '…', domain: 'example.com',
-          allowedHostnames: ['app.other.com', 'shop.other.com'] });
+   init({ websiteId: '…', domain: 'example.com', allowedHostnames: ['app.other.com', 'shop.other.com'] });
    ```
 
 2. **Navigate by clicking a real `<a href>`.** On click (or Enter/Space) the
    tracker inspects the anchor and branches:
 
-   | Target host                              | What happens                                                        |
-   | ---------------------------------------- | ------------------------------------------------------------------- |
-   | same host, a sub/parent domain, or both under a declared host | left alone — cookies already cover it            |
-   | listed in `allowedHostnames` (or `domain`) | `href` is **rewritten in place** with `_cgd_vid`, `_cgd_sid`, `_cgd_vsn` |
-   | anything else                            | recorded as an `external_link` goal, no params added                 |
+   | Target host                                                   | What happens                                                             |
+   | ------------------------------------------------------------- | ------------------------------------------------------------------------ |
+   | same host, a sub/parent domain, or both under a declared host | left alone — cookies already cover it                                    |
+   | listed in `allowedHostnames` (or `domain`)                    | `href` is **rewritten in place** with `_cgd_vid`, `_cgd_sid`, `_cgd_vsn` |
+   | anything else                                                 | recorded as an `external_link` goal, no params added                     |
 
 3. **The landing page adopts the identity.** The tracker there reads those three
    params ahead of its own cookies, writes them to its cookies, then strips them
@@ -388,14 +392,14 @@ budget would need rechecking against the 64 KB limit.
 fires **exactly once on every path**, including the ones where nothing is sent,
 so it is safe to await before navigating.
 
-| `outcome`   | Meaning                                                       | `status` |
-| ----------- | ------------------------------------------------------------- | -------- |
-| `delivered` | Worker accepted it                                            | `200`    |
-| `rejected`  | Worker refused it — validation, unknown site, bad origin       | the HTTP status |
-| `failed`    | Request never completed (offline, DNS, blocked)               | `0`      |
-| `disabled`  | Not sent: bot, localhost, iframe, or the `cgd_ignore` flag    | `0`      |
-| `throttled` | Not sent: same URL already recorded within 60s                 | `0`      |
-| `invalid`   | Not sent: no `websiteId`/`domain`, so no payload could be built | `0`      |
+| `outcome`   | Meaning                                                         | `status`        |
+| ----------- | --------------------------------------------------------------- | --------------- |
+| `delivered` | Worker accepted it                                              | `200`           |
+| `rejected`  | Worker refused it — validation, unknown site, bad origin        | the HTTP status |
+| `failed`    | Request never completed (offline, DNS, blocked)                 | `0`             |
+| `disabled`  | Not sent: bot, localhost, iframe, or the `cgd_ignore` flag      | `0`             |
+| `throttled` | Not sent: same URL already recorded within 60s                  | `0`             |
+| `invalid`   | Not sent: no `websiteId`/`domain`, so no payload could be built | `0`             |
 
 Only `delivered` means the event reached Tinybird. A malformed `extraData`
 comes back as `rejected` with the Worker's status, not as `invalid` — the
@@ -403,10 +407,10 @@ tracker sends it and lets the Worker rule.
 
 Resolution order for the endpoint, from `state.ts`:
 
-| Condition                         | Endpoint used                                             |
-| --------------------------------- | --------------------------------------------------------- |
-| `data-api-url` / `apiUrl` set     | that value (relative is resolved against the page origin) |
-| anything else                     | the built-in `API_URL`                                    |
+| Condition                     | Endpoint used                                             |
+| ----------------------------- | --------------------------------------------------------- |
+| `data-api-url` / `apiUrl` set | that value (relative is resolved against the page origin) |
+| anything else                 | the built-in `API_URL`                                    |
 
 `API_URL` is `https://analytics.tabsircg.com/api/events` — the ingest Worker.
 The Worker itself routes on method, not path, and would accept `POST` anywhere
@@ -431,32 +435,124 @@ billed KV read per analytics event. That memo is **not** a single global cache �
 each isolate (roughly, each colo, more under load) keeps its own and expires it
 independently, so propagation is eventual:
 
-| Lookup result       | Memo TTL | Why                                                    |
-| ------------------- | -------- | ------------------------------------------------------ |
-| website found       | 60 s     | matches KV's own edge-cache TTL, so nothing is staler than KV already is |
-| website not found   | 10 s     | still collapses a flood of bogus IDs into one read, without making a newly-created site wait |
+| Lookup result     | Memo TTL | Why                                                                                          |
+| ----------------- | -------- | -------------------------------------------------------------------------------------------- |
+| website found     | 60 s     | matches KV's own edge-cache TTL, so nothing is staler than KV already is                     |
+| website not found | 10 s     | still collapses a flood of bogus IDs into one read, without making a newly-created site wait |
 
 So an origin edit in admin takes up to ~60 s to apply everywhere, and a brand
 new website starts accepting events within ~10 s.
 
 ---
 
-## 9. Development
+## 9. Crawler tracking (`@tabsircg/analytics/middleware`)
+
+The browser tracker cannot see crawlers. GPTBot, ClaudeBot, CCBot, PerplexityBot
+and every social unfurler request the HTML and leave — no JavaScript runs, so no
+event is ever sent. Only crawlers that render (Googlebot's WRS, Bingbot,
+Lighthouse) would ever reach the ingest endpoint through the tracker.
+
+`@tabsircg/analytics/middleware` closes that gap from the server. It reads the
+`User-Agent` of the incoming request, and when it matches a known crawler it
+posts one event to the same ingest endpoint with `is_bot = 1`. Human traffic
+costs one lowercased substring scan and **no network call at all**.
+
+This is the only thing that writes `is_bot = 1`. The ingest Worker does no bot
+classification, so a crawler that both fetches and renders is counted once.
+
+### Next.js
+
+```ts
+// proxy.ts
+import { NextResponse, type NextFetchEvent, type NextRequest } from 'next/server';
+import { trackCrawler } from '@tabsircg/analytics/middleware';
+
+export function proxy(request: NextRequest, event: NextFetchEvent) {
+  trackCrawler(request, event, { websiteId: 'your-website-id' });
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+};
+```
+
+Do **not** `await` it. Passing `event` schedules the POST with `event.waitUntil`
+and returns synchronously, so the page response never waits on ingest. To wrap
+a proxy you already have, use `withCrawlerTracking(handler, config)` instead.
+
+### Express
+
+```ts
+import { expressCrawlerMiddleware } from '@tabsircg/analytics/middleware';
+
+app.use(expressCrawlerMiddleware({ websiteId: 'your-website-id' }));
+```
+
+Calls `next()` immediately; the POST is left in flight.
+
+### Hono
+
+```ts
+import { honoCrawlerMiddleware } from '@tabsircg/analytics/middleware';
+
+app.use('*', honoCrawlerMiddleware({ websiteId: 'your-website-id' }));
+```
+
+Uses `c.executionCtx.waitUntil` when the runtime provides one.
+
+### What gets skipped before any network call
+
+Non-`GET`/`HEAD` methods, unrecognised user agents, subresource requests
+(`Sec-Fetch-Dest` of `image`, `script`, `style`, …), framework and asset path
+prefixes (`/api`, `/_next`, `/static`, …), and ~32 static file extensions.
+`/robots.txt`, `/llms.txt`, `/llms-full.txt` and `sitemap*.xml` are explicitly
+exempt from the path and extension filters, so crawler hits on those still
+register.
+
+### Config
+
+| Option                                                  | Default                     | Purpose                                                    |
+| ------------------------------------------------------- | --------------------------- | ---------------------------------------------------------- |
+| `websiteId`                                             | required                    | Same id the browser tracker uses                           |
+| `apiUrl`                                                | the shared ingest endpoint  | Override for self-hosted ingest                            |
+| `domain`                                                | request hostname            | Value written to the `domain` column                       |
+| `publicOrigin`                                          | —                           | Rebuild URLs when the runtime exposes an internal hostname |
+| `enabled`                                               | `true`                      | Kill switch without touching middleware code               |
+| `excludeCategories`                                     | —                           | Drop whole categories, e.g. `['tooling', 'monitoring']`    |
+| `methods`                                               | `['GET', 'HEAD']`           | Methods worth recording                                    |
+| `ignoredPathPrefixes` / `additionalIgnoredPathPrefixes` | the defaults above          | Replace or extend the path filter                          |
+| `ignoredExtensions` / `additionalIgnoredExtensions`     | the defaults above          | Replace or extend the extension filter                     |
+| `shouldTrack(url, crawler)`                             | —                           | Final override after every built-in check                  |
+| `getIp(request)`                                        | standard forwarding headers | Override crawler IP extraction                             |
+| `timeoutMs`                                             | `1500`                      | Abort the ingest POST                                      |
+| `debug`                                                 | `false`                     | Log dropped events                                         |
+
+`classifyCrawler(userAgent)` is exported on its own if you want the
+`{ name, category }` verdict without sending anything.
+
+The middleware sends its own `Origin` header, so the website's origin must be
+registered in the Worker allowlist exactly as it is for browser events (§8).
+
+---
+
+## 10. Development
 
 ```bash
-pnpm build       # tsup → dist/ (cgd.js IIFE, sdk.js, react.js)
+pnpm build       # tsup → dist/ (cgd.js IIFE, sdk.js, react.js, middleware.js)
 pnpm tc          # tsc --noEmit
 ```
 
-| File         | Role                                                       |
-| ------------ | ---------------------------------------------------------- |
-| `index.ts`   | Script-tag entry; installs `window.cgd`, boots the tracker |
-| `sdk.ts`     | `init()` entry for bundled apps                            |
-| `react.tsx`  | `<Track>` attribute helper                                 |
-| `config.ts`  | Reads `data-*` / SDK overrides                             |
-| `events.ts`  | `trackPageview` / `trackCustomEvent` / `trackIdentify`     |
-| `tracker.ts` | Builds and POSTs the payload                               |
-| `storage.ts` | Cookie state + cross-domain URL params                     |
-| `dom.ts`     | Goal + scroll attribute observers                          |
-| `spa.ts`     | `pushState` / `popstate` pageview hijack                   |
-| `bot.ts`     | Headless / bot filtering                                   |
+| File          | Role                                                       |
+| ------------- | ---------------------------------------------------------- |
+| `index.ts`    | Script-tag entry; installs `window.cgd`, boots the tracker |
+| `sdk.ts`      | `init()` entry for bundled apps                            |
+| `react.tsx`   | `<Track>` attribute helper                                 |
+| `config.ts`   | Reads `data-*` / SDK overrides                             |
+| `events.ts`   | `trackPageview` / `trackCustomEvent` / `trackIdentify`     |
+| `tracker.ts`  | Builds and POSTs the payload                               |
+| `storage.ts`  | Cookie state + cross-domain URL params                     |
+| `dom.ts`      | Goal + scroll attribute observers                          |
+| `spa.ts`      | `pushState` / `popstate` pageview hijack                   |
+| `bot.ts`      | Headless / automation filtering, browser-side              |
+| `middleware/` | Server-side crawler tracking (§9); no browser code         |

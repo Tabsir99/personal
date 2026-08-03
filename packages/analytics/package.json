@@ -31,6 +31,11 @@
       "source": "./src/react.tsx",
       "import": "./dist/react.js"
     },
+    "./middleware": {
+      "types": "./dist/middleware.d.ts",
+      "source": "./src/middleware/index.ts",
+      "import": "./dist/middleware.js"
+    },
     "./global": "./global.d.ts"
   },
   "peerDependencies": {

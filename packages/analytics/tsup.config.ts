@@ -11,7 +11,7 @@ export default defineConfig([
     outExtension: () => ({ js: '.js' }),
   },
   {
-    entry: { sdk: 'src/sdk.ts', react: 'src/react.tsx' },
+    entry: { sdk: 'src/sdk.ts', react: 'src/react.tsx', middleware: 'src/middleware/index.ts' },
     format: ['esm'],
     outDir: 'dist',
     dts: true,

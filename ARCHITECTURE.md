@@ -260,7 +260,7 @@ Client sets a `felt-id` UUID cookie, debounces taps (600 ms), POSTs `{ slug, cou
 
 ## Stuff that isn't in the README
 
-The big-ticket gotchas (content stored as a string, no-build trick, prev/next ceiling, featured-not-boolean) are in [README.md](README.md) and [CLAUDE.local.md](CLAUDE.local.md). Not duplicating them here.
+The big-ticket gotchas (content stored as a string, no-build trick, prev/next ceiling, featured-not-boolean) are in [README.md](README.md) and [CLAUDE.md](CLAUDE.md). Not duplicating them here.
 
 What's only here:
 

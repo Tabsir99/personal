@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { payloadSchema } from "./schema";
+import { isCrawlPayload, payloadSchema } from "./schema";
 
 const base = {
   websiteId: "my-site",
@@ -149,5 +149,49 @@ describe("payloadSchema", () => {
     const result = parse({ type: "pageview", cfOverride: { ip: "1.2.3.4" } });
     expect(result.success).toBe(true);
     expect(result.success && "cfOverride" in result.data).toBe(false);
+  });
+});
+
+describe("crawl payloads", () => {
+  const crawl = {
+    websiteId: "my-site",
+    domain: "example.com",
+    href: "https://example.com/blog/foo",
+    referrer: null,
+    type: "pageview",
+    bot: {
+      name: "Googlebot",
+      category: "search_index",
+      userAgent:
+        "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      ip: "66.249.66.1",
+    },
+  };
+
+  it("accepts what the middleware sends, with none of the browser fields", () => {
+    const result = payloadSchema.safeParse(crawl);
+    expect(result.success).toBe(true);
+    expect(result.success && isCrawlPayload(result.data)).toBe(true);
+  });
+
+  it("rejects a category outside the shared contract", () => {
+    expect(
+      payloadSchema.safeParse({
+        ...crawl,
+        bot: { ...crawl.bot, category: "spaceship" },
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects an unnamed crawler", () => {
+    expect(
+      payloadSchema.safeParse({ ...crawl, bot: { ...crawl.bot, name: "" } })
+        .success,
+    ).toBe(false);
+  });
+
+  it("keeps browser payloads on the browser branch", () => {
+    const result = parse({ type: "pageview" });
+    expect(result.success && isCrawlPayload(result.data)).toBe(false);
   });
 });

@@ -3,16 +3,19 @@
 import nodeCrypto from "crypto";
 import { existsSync, readFileSync } from "fs";
 import { join, dirname } from "path";
-import { type EventPayload } from "../schema";
+import { type BrowserPayload } from "../schema";
 import { parseUA } from "../parseUA";
-import { detectBot } from "../detectBot";
 import {
   ANALYTICS_TABLE,
-
+  type BotCategory,
   type AnalyticsEventRow,
 } from "@tabsircg/schemas/analytics";
 
-type SeedEvent = EventPayload & {
+type SeedEvent = BrowserPayload & {
+  crawler?: {
+    name: string;
+    category: BotCategory;
+  };
   cfOverride?: {
     country: string;
     region: string;
@@ -775,21 +778,59 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
   }
 }
 
-const BOT_USER_AGENTS = [
-  "Mozilla/5.0 (compatible; GPTBot/1.0; +https://openai.com/gptbot)",
-  "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; ClaudeBot/1.0; +claudebot@anthropic.com)",
-  "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
-  "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
-  "Mozilla/5.0 (compatible; PerplexityBot/1.0; +https://perplexity.ai/perplexitybot)",
-  "Mozilla/5.0 (compatible; Bytespider; spider-feedback@bytedance.com)",
-  "CCBot/2.0 (https://commoncrawl.org/faq/)",
-  "ChatGPT-User Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko)",
+const SEED_CRAWLERS: Array<{
+  userAgent: string;
+  name: string;
+  category: BotCategory;
+}> = [
+  {
+    userAgent: "Mozilla/5.0 (compatible; GPTBot/1.0; +https://openai.com/gptbot)",
+    name: "GPTBot",
+    category: "training",
+  },
+  {
+    userAgent:
+      "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; ClaudeBot/1.0; +claudebot@anthropic.com)",
+    name: "ClaudeBot",
+    category: "training",
+  },
+  {
+    userAgent: "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+    name: "Googlebot",
+    category: "search_index",
+  },
+  {
+    userAgent: "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
+    name: "Bingbot",
+    category: "search_index",
+  },
+  {
+    userAgent:
+      "Mozilla/5.0 (compatible; PerplexityBot/1.0; +https://perplexity.ai/perplexitybot)",
+    name: "PerplexityBot",
+    category: "ai_crawler",
+  },
+  {
+    userAgent: "Mozilla/5.0 (compatible; Bytespider; spider-feedback@bytedance.com)",
+    name: "Bytespider",
+    category: "training",
+  },
+  {
+    userAgent: "CCBot/2.0 (https://commoncrawl.org/faq/)",
+    name: "CCBot",
+    category: "training",
+  },
+  {
+    userAgent: "ChatGPT-User Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko)",
+    name: "ChatGPT-User",
+    category: "answer_fetch",
+  },
 ];
 
 const botEventCount = Math.floor(TOTAL_EVENTS_TARGET * 0.05);
 for (let i = 0; i < botEventCount; i++) {
-  const botUA =
-    BOT_USER_AGENTS[Math.floor(Math.random() * BOT_USER_AGENTS.length)];
+  const crawler =
+    SEED_CRAWLERS[Math.floor(Math.random() * SEED_CRAWLERS.length)];
   const botTimestamp = Math.floor(
     THIRTY_DAYS_AGO + Math.random() * (NOW - THIRTY_DAYS_AGO),
   );
@@ -816,13 +857,14 @@ for (let i = 0; i < botEventCount; i++) {
     screenWidth: 0,
     screenHeight: 0,
     type: "pageview",
+    crawler: { name: crawler.name, category: crawler.category },
     cfOverride: {
       country: "US",
       region: "Unknown",
       city: "Unknown",
       ip: `10.0.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
       timestamp: botTimestamp,
-      userAgent: botUA,
+      userAgent: crawler.userAgent,
     },
   });
 }
@@ -914,7 +956,6 @@ function toRow(p: SeedEvent): AnalyticsEventRow {
 
   const cf = p.cfOverride!;
   const { browser, os, device } = parseUA(cf.userAgent);
-  const { is_bot, bot_category, bot_name } = detectBot(cf.userAgent);
   const extra = (p.extraData ?? {}) as Record<string, string>;
 
   return {
@@ -935,9 +976,9 @@ function toRow(p: SeedEvent): AnalyticsEventRow {
     browser,
     os,
     device,
-    is_bot,
-    bot_category,
-    bot_name,
+    is_bot: p.crawler ? 1 : 0,
+    bot_category: p.crawler?.category ?? "",
+    bot_name: p.crawler?.name ?? "",
     ip: cf.ip,
     viewport_w: p.viewport.width,
     viewport_h: p.viewport.height,
