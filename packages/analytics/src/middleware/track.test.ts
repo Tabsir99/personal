@@ -31,13 +31,8 @@ describe('inspectCrawlerRequest', () => {
     expect(decision.crawler).toBeUndefined();
   });
 
-  it('skips framework internals and static assets', () => {
-    expect(inspectCrawlerRequest(requestFor('/_next/static/chunk.js'), config).reason).toBe('ignored_path_prefix');
-    expect(inspectCrawlerRequest(requestFor('/og/cover.png'), config).reason).toBe('ignored_file_extension');
-  });
-
-  it('keeps crawler-facing files that the extension filter would otherwise drop', () => {
-    for (const path of ['/robots.txt', '/llms.txt', '/sitemap.xml', '/blog/sitemap-0.xml']) {
+  it('tracks every path until a hook opts out', () => {
+    for (const path of ['/_next/static/chunk.js', '/og/cover.png']) {
       expect([path, inspectCrawlerRequest(requestFor(path), config).reason]).toEqual([path, undefined]);
     }
   });

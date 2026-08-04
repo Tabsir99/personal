@@ -1,5 +1,6 @@
 export { classifyCrawler, type Crawler } from './classify';
 export { CRAWLER_CATEGORIES, type CrawlerCategory } from './signatures';
+export { ignoreStaticPaths } from './filters';
 export {
   inspectCrawlerRequest,
   trackCrawler,
