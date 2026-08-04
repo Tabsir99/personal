@@ -1,19 +1,17 @@
 # @tabsircg/analytics
 
-Cookie-based, self-hosted web analytics. A small browser tracker sends pageviews, custom events, and identify calls to your own endpoint. Revenue is tracked separately, server-side, from Stripe.
+Cookie-based, self-hosted web analytics. A browser tracker sends pageviews, custom events and identify calls to your own endpoint. Revenue is tracked server-side from Stripe.
 
-The whole model is two steps:
-
-1. **Load the tracker once.** From then on, pageviews are tracked automatically.
-2. **Record events** using any of the methods in §2 — all of them require step 1.
+1. **Load the tracker once** — pageviews are then automatic.
+2. **Record events** with any method in §2.
 
 ---
 
 ## 1. Load the tracker
 
-Do exactly one of these. Both boot the same tracker and start auto-tracking pageviews (initial load + SPA navigation).
+Do one of these. Both boot the same tracker and auto-track pageviews (initial load + SPA navigation).
 
-**A. Script tag** — plain HTML, no build step. Served straight off npm:
+**A. Script tag** — no build step:
 
 ```html
 <script
@@ -24,78 +22,50 @@ Do exactly one of these. Both boot the same tracker and start auto-tracking page
 ></script>
 ```
 
-Self-hosting the file instead is fine — copy `dist/cgd.js` anywhere you like.
-Where the script is served from no longer affects where events are sent; only
-`data-api-url` does (§8).
-
-**B. Bundled app** — import and init from npm:
+**B. Bundled app**:
 
 ```ts
 import { init } from '@tabsircg/analytics/sdk';
 
-export const analytics = init({
-  websiteId: 'your-site-id',
-  domain: 'yourdomain.com',
-});
+export const analytics = init({ websiteId: 'your-site-id', domain: 'yourdomain.com' });
 ```
 
-`data-website-id` / `websiteId` and `data-domain` / `domain` are required. Full option list in §5.
+Website id and domain are required; full options in §5. Self-hosting `dist/cgd.js` is fine — where the script is served from does not affect where events go, only `data-api-url` does (§8).
 
 ---
 
 ## 2. Record events
 
-Everything below assumes the tracker from §1 is loaded.
+Requires the tracker from §1.
 
-### 2a. HTML attributes (no JavaScript)
-
-Add attributes to any element. Fires on click:
+### 2a. HTML attributes
 
 ```html
 <button data-cgd-goal="signup" data-cgd-goal-source="hero">Sign up</button>
-```
-
-Fires when the element scrolls into view:
-
-```html
 <section data-cgd-scroll="pricing_seen" data-cgd-scroll-threshold="0.5"></section>
 ```
 
-### 2b. JavaScript calls
+Goals fire on click, scroll events when the element enters the viewport.
 
-Same actions, called from code. Use whichever matches how you loaded the tracker:
+### 2b. JavaScript
 
 | Action        | Script tag (§1A)                               | Bundled app (§1B)                                 |
 | ------------- | ---------------------------------------------- | ------------------------------------------------- |
 | Custom event  | `cgd('signup', { plan: 'pro' })`               | `analytics.trackEvent('signup', { plan: 'pro' })` |
 | Identify user | `cgd('identify', { user_id: 'usr_1', email })` | `analytics.identify('usr_1', { email })`          |
-| Pageview      | fires automatically                            | `analytics.trackPageview()` (also automatic)      |
+| Pageview      | automatic                                      | `analytics.trackPageview()` (also automatic)      |
 
-Identify links the current anonymous visitor to a known user; call it after login.
+All four routes to a custom event — `cgd()`, `trackEvent()`, §2a attributes, §2c `<Track>` — send the identical wire shape: `type: "custom"` with the name in `extraData.eventName`. The stored row is the same either way.
 
-All four routes to a custom event — `cgd(name, data)`, `analytics.trackEvent(name, data)`,
-the §2a attributes and the §2c `<Track>` helper — send the identical wire shape:
-`type: "custom"` with the real name in `extraData.eventName`. Pick whichever
-suits how you loaded the tracker; the stored row is the same either way, and the
-event appears everywhere in the dashboard — goal pickers, journey filters,
-funnels and the goals chart.
-
-> `type` is the third column of the Tinybird sorting key, so it deliberately
-> holds a small fixed set of values (`pageview`, `custom`, `identify`,
-> `external_link`, `payment`) rather than your event names. That is why the name
-> travels in `extraData.eventName` and lands in the `event_name` column.
+> `type` is the third column of the Tinybird sorting key, so it holds a fixed set (`pageview`, `custom`, `identify`, `external_link`, `payment`) rather than your event names — hence the name travels in `extraData.eventName` and lands in `event_name`.
 >
-> **Rows written before this was unified keep `type: <your event name>`.** They
-> still appear in the goals chart, which matches `type != 'pageview'`, but not in
-> the goal catalog or journey filter, which pin `type = 'custom'`. Only a
-> backfill fixes those; new events are correct.
+> **Rows written before this was unified keep `type: <event name>`.** They appear in the goals chart (`type != 'pageview'`) but not the goal catalog or journey filter (`type = 'custom'`). Only a backfill fixes those.
 
-Pageviews are throttled: the same URL is not re-sent within 60 seconds
-(persisted in `sessionStorage`, so it survives reloads).
+Pageviews are throttled: the same URL is not re-sent within 60s (persisted in `sessionStorage`).
 
-### 2c. React helper (optional)
+### 2c. React helper
 
-`<Track>` is **only sugar for §2a** — it writes the same `data-cgd-*` attributes onto its child and renders no DOM of its own. It still needs the tracker from §1 loaded; alone it does nothing.
+`<Track>` is sugar for §2a — it writes `data-cgd-*` onto its child and renders no DOM of its own.
 
 ```tsx
 import { Track } from '@tabsircg/analytics/react';
@@ -111,54 +81,45 @@ import { Track } from '@tabsircg/analytics/react';
 
 ---
 
-## 3. Identify users (optional)
+## 3. Identify users
 
-`identify` attaches a user id and profile to the visitor so later events are tied to a known person. Fields: `user_id` (required), plus any of `email`, `name`, `image`, and arbitrary string keys.
+Attaches a user id and profile so later events tie to a known person. `user_id` required; `email`, `name`, `image` and arbitrary string keys optional. Call it after login.
 
 ```ts
 cgd('identify', { user_id: 'usr_1', email: 'a@b.com', name: 'Jane' });
-// bundled: analytics.identify('usr_1', { email: 'a@b.com', name: 'Jane' });
 ```
 
 ---
 
-## 4. Revenue attribution (optional, server-side)
+## 4. Revenue attribution (server-side)
 
-Revenue is **not** sent by the browser. Your server creates the payment in Stripe; the admin Stripe webhook writes the revenue row. A payment is attributed to a visitor when its **PaymentIntent** carries `visitor_id` in `metadata`.
+Revenue is **not** sent by the browser. Your server creates the payment; the admin Stripe webhook writes the row. A payment is attributed when its **PaymentIntent** carries `visitor_id` in `metadata`.
 
-The visitor id is the cookie **`cgd_visitor_id`** (and session **`cgd_session_id`**), set by the tracker in §1. Read them from the incoming request on your server when you create the payment.
+The ids live in cookies `cgd_visitor_id` and `cgd_session_id` — read them from the incoming request when you create the payment.
 
-**One-time setup:** in the admin dashboard, add or edit the website and paste a Stripe **restricted key** (`rk_...`) with **Webhook Endpoints (write)** and **PaymentIntents (read)** permissions. The webhook is created for you.
-
-**Per payment:** stamp the PaymentIntent's metadata once — that single stamp covers income, refunds, and disputes.
+**Setup once:** in admin, add a Stripe **restricted key** (`rk_...`) with **Webhook Endpoints (write)** and **PaymentIntents (read)**. The webhook is created for you.
 
 ```ts
-// Checkout Session — propagates to the PaymentIntent
 await stripe.checkout.sessions.create({
-  /* line_items, mode, ... */
   payment_intent_data: { metadata: { visitor_id, session_id } },
 });
 
-// or a raw PaymentIntent
-await stripe.paymentIntents.create({
-  /* amount, currency, ... */
-  metadata: { visitor_id, session_id },
-});
+await stripe.paymentIntents.create({ metadata: { visitor_id, session_id } });
 ```
 
-| Stripe event               | Effect              | Amount from | Attribution                           |
-| -------------------------- | ------------------- | ----------- | ------------------------------------- |
-| `payment_intent.succeeded` | `+ amount_received` | the event   | PaymentIntent metadata (direct)       |
-| `refund.created`           | `− refund.amount`   | the event   | resolved from refund → PaymentIntent  |
-| `charge.dispute.created`   | `− amount`          | the event   | resolved from dispute → PaymentIntent |
+| Stripe event               | Effect              | Attribution                           |
+| -------------------------- | ------------------- | ------------------------------------- |
+| `payment_intent.succeeded` | `+ amount_received` | PaymentIntent metadata (direct)       |
+| `refund.created`           | `− refund.amount`   | resolved from refund → PaymentIntent  |
+| `charge.dispute.created`   | `− amount`          | resolved from dispute → PaymentIntent |
 
-For refunds and disputes the webhook follows the refund/dispute back to its PaymentIntent and reads that metadata, so you never stamp the refund or dispute yourself. `visitor_id` is required, `session_id` optional; a missing `visitor_id` skips the row. Events are deduplicated by Stripe event id.
+Refunds and disputes resolve back to their PaymentIntent, so you never stamp them yourself. Missing `visitor_id` skips the row; `session_id` is optional. Deduplicated by Stripe event id.
 
 ---
 
 ## 5. Configuration reference
 
-### Script `data-*` attributes (§1A)
+### Script `data-*` attributes
 
 | Attribute                  | Description                                | Default                          |
 | -------------------------- | ------------------------------------------ | -------------------------------- |
@@ -168,13 +129,11 @@ For refunds and disputes the webhook follows the refund/dispute back to its Paym
 | `data-allowed-hostnames`   | Comma-separated extra hosts (cross-domain) | ``                               |
 | `data-allow-localhost`     | Track on localhost                         | `false`                          |
 | `data-allow-file-protocol` | Track on `file://`                         | `false`                          |
-| `data-allow-iframe`        | Track when the page is framed              | `false`                          |
+| `data-allow-iframe`        | Track when framed                          | `false`                          |
 | `data-debug`               | Verbose logging                            | `false`                          |
 | `data-disable-console`     | Silence all tracker logs                   | `false`                          |
 
-### SDK `init(options)` (§1B)
-
-Same fields, camelCased: `websiteId` (req), `domain` (req), `apiUrl?`, `allowedHostnames?: string[]`, `allowLocalhost?`, `allowIframe?`, `debug?`, `disableConsole?`.
+SDK `init(options)` takes the same fields camelCased, with `allowedHostnames` as `string[]`.
 
 ### Cookies
 
@@ -184,14 +143,9 @@ Same fields, camelCased: `websiteId` (req), `domain` (req), `apiUrl?`, `allowedH
 | `cgd_session_id`            | Session id        | 30 min |
 | `cgd_visitor_session_count` | Session counter   | 365d   |
 
-Cross-domain: these travel via URL params `_cgd_vid`, `_cgd_sid`, `_cgd_vsn` — see §7.
+The cookie `domain` is `.<data-domain>` when the current hostname is that domain or a subdomain, otherwise `.<current hostname>`. Subdomains share one visitor id for free; unrelated hostnames need §7.
 
-The cookie `domain` attribute is set to `.<data-domain>` when the current
-hostname is that domain or a subdomain of it, otherwise to `.<current
-hostname>`. So subdomains of the configured domain share one visitor id for
-free; unrelated hostnames do not, which is what §7 exists to bridge.
-
-### Event payload (POSTed to the endpoint)
+### Event payload
 
 ```jsonc
 {
@@ -212,126 +166,75 @@ free; unrelated hostnames do not, which is what §7 exists to bridge.
 }
 ```
 
-New versus returning is derived from `session_number` — a visitor whose minimum
-session number in the window is `1` is new. There is no separate first-seen
-field; it duplicated the `cgd_visitor_id` cookie's lifetime without answering a
-question the dashboard asks.
+New versus returning is derived from `session_number` — a visitor whose minimum session number in the window is `1` is new. There is no separate first-seen field.
 
 ### Wire limits
 
-The `extraData` rules live in one place — `EXTRA_DATA_*` in
-`@tabsircg/schemas/analytics` — and are enforced in exactly one place: the
-Worker's `extraDataSchema`. Violate it and the whole payload 400s, and the
-event callback reports `rejected` with that status.
+The `extraData` rules live in `EXTRA_DATA_*` in `@tabsircg/schemas/analytics` and are enforced in exactly one place: the Worker's `extraDataSchema`. Violate it and the whole payload 400s; the event callback reports `rejected`.
 
-**The tracker does not validate.** It marshals — `toEventData` lowercases keys,
-stringifies values and bounds their length so the object matches the wire type —
-and then sends whatever you gave it. It never refuses an event on your behalf,
-because a rule the browser enforces is a rule anyone can skip by posting to the
-Worker directly. One authority, not two.
+**The tracker does not validate — it marshals.** `toEventData` lowercases keys, stringifies values and bounds their length, then sends whatever you gave it. A rule the browser enforces is a rule anyone can skip by posting to the Worker directly. The SDK publishes the numbers as constants and its tests assert they equal the shared contract, so published limits cannot drift from enforced ones.
 
-The SDK still publishes the numbers as constants so you can check against them
-yourself, and its test suite asserts they equal the shared contract, so the
-published limits cannot drift from the enforced ones.
+| Field                            | Limit                  | Enforced by                                                       |
+| -------------------------------- | ---------------------- | ----------------------------------------------------------------- |
+| `href`                           | 2000 chars             | tracker trims; Worker rejects beyond                              |
+| `type` (custom events)           | 64 chars               | Worker rejects                                                    |
+| derived `event_name`             | 255 chars              | Worker trims                                                      |
+| `extraData` — value              | 1000 chars             | tracker trims; Worker rejects beyond                              |
+| `extraData` — whole object       | 4000 chars             | Worker rejects, drops trailing keys as a backstop (always valid JSON) |
+| `extraData` — key count          | 10                     | Worker rejects (`eventName` exempt)                               |
+| `extraData` — key name           | 32 chars, `[a-z0-9_-]` | tracker lowercases; Worker rejects                                |
+| `extraData` — value type         | string                 | tracker stringifies; Worker rejects non-strings                   |
+| `visitorId`, `sessionId`         | 100 chars              | Worker rejects; tracker drops an over-length handoff id           |
+| viewport, screen, session number | 0–65535                | Worker clamps (`UInt16` columns)                                  |
 
-| Field                            | Limit                  | Enforced by                                                                                              |
-| -------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
-| `href`                           | 2000 chars             | tracker trims before sending; Worker rejects beyond                                                      |
-| `type` (custom events)           | 64 chars               | Worker schema (rejects)                                                                                  |
-| derived `event_name`             | 255 chars              | Worker trims                                                                                             |
-| `extraData` — value              | 1000 chars             | tracker trims to fit; Worker rejects beyond                                                              |
-| `extraData` — whole object       | 4000 chars             | Worker rejects beyond, and drops trailing keys as a backstop, so what is stored is **always valid JSON** |
-| `extraData` — key count          | 10                     | Worker rejects (`eventName` is exempt)                                                                   |
-| `extraData` — key name           | 32 chars, `[a-z0-9_-]` | tracker lowercases; Worker rejects                                                                       |
-| `extraData` — value type         | string                 | tracker stringifies; Worker rejects non-strings                                                          |
-| `visitorId`, `sessionId`         | 100 chars              | Worker rejects beyond; tracker drops an over-length handoff id instead of storing it                     |
-| viewport, screen, session number | 0–65535                | Worker clamps (columns are `UInt16`)                                                                     |
+Every entry point routes through `toEventData`, so they all put the same shape on the wire. Values are trimmed and length-bounded but otherwise passed through verbatim — the tracker does **not** strip markup or URL schemes, which would corrupt legitimate data (`?w=64&h=64` losing its `&`) while protecting nothing. Escape on render, as the dashboard does.
 
-Every tracking entry point routes through `toEventData` — `cgd()`,
-`analytics.trackEvent()`, `identify()`, `data-cgd-goal`, `data-cgd-scroll` and
-the automatic `external_link` event — so they all put the same shape on the
-wire. None of them can reject your event; only the Worker can.
-
-Values are trimmed and length-bounded but otherwise passed through verbatim.
-The tracker does **not** strip markup or URL schemes from your values: it would
-corrupt legitimate data (`?w=64&h=64` losing its `&`) while protecting nothing,
-since anything bypassing the script skips it anyway. Escape on render, as the
-dashboard does.
-
-The one thing the tracker does refuse is an over-length `_cgd_vid` / `_cgd_sid`
-handoff parameter, and it is not a security check. The handoff writes the id
-straight into a 365-day cookie, so a single bad link would make every event from
-that browser 400 for a year — long after the parameter is gone. Rejecting it on
-the way in, and again when reading the cookie back, keeps one malformed link
-from costing a visitor permanently. The Worker still bounds the same field; this
-only stops the tracker caching a value it knows will be refused.
+The one thing the tracker refuses is an over-length `_cgd_vid` / `_cgd_sid` handoff param, and it is not a security check: the handoff writes straight into a 365-day cookie, so one bad link would 400 every event from that browser for a year. It is rejected on the way in and again when reading the cookie back.
 
 ---
 
-## 6. Excluding traffic (yourself, localhost, bots)
+## 6. Excluding traffic
 
-There is **no IP-based exclusion anywhere in this system.** The Worker records
-`CF-Connecting-IP` into the `ip` column but no ingest path and no dashboard
-query ever filters on it. Everything below is the full set of exclusions that
-actually exist, in the order they apply.
+There is **no IP-based exclusion anywhere in this system.** The Worker records `CF-Connecting-IP` but no ingest path or dashboard query filters on it. The full set of exclusions, in order:
 
 | Exclusion             | Where                                                             | Default | Override                                               |
 | --------------------- | ----------------------------------------------------------------- | ------- | ------------------------------------------------------ |
-| **Your own browser**  | `localStorage['cgd_ignore'] === 'true'`                           | off     | set it per browser/profile (see below)                 |
+| **Your own browser**  | `localStorage['cgd_ignore'] === 'true'`                           | off     | set per browser/profile (below)                        |
 | Localhost             | tracker refuses to boot                                           | blocked | `data-allow-localhost="true"` / `allowLocalhost: true` |
 | `file://`             | tracker refuses to boot                                           | blocked | `data-allow-file-protocol="true"`                      |
 | Inside an iframe      | tracker refuses to boot                                           | blocked | `data-allow-iframe="true"` / `allowIframe: true`       |
 | Headless / automation | `bot.ts` heuristics, before the request                           | blocked | —                                                      |
-| Unregistered `Origin` | Worker KV allowlist → 403 (see §8)                                | blocked | register the origin on the website in admin            |
+| Unregistered `Origin` | Worker KV allowlist → 403 (§8)                                    | blocked | register the origin in admin                           |
 | Crawlers & bot UAs    | tagged `is_bot=1` by the middleware (§9); **row is still stored** | stored  | dashboard queries filter `is_bot = 0`                  |
 
-**To stop recording your own visits**, run this once in the devtools console on
-each browser profile and device you browse from:
+To stop recording your own visits, run this once per browser profile and device:
 
 ```js
 localStorage.setItem('cgd_ignore', 'true'); // re-enable: localStorage.removeItem('cgd_ignore')
 ```
 
-It is checked in `sendEvent`, so it suppresses **every** event type — pageviews,
-goals, and identify — before any network request is made. Caveats worth knowing:
-it is per-origin and per-browser-profile (incognito, a second browser, and your
-phone each need their own), and clearing site data clears it. There is no admin
-UI for this flag and nothing in the codebase sets it.
+Checked in `sendEvent`, so it suppresses every event type before any network request. It is per-origin and per-profile (incognito, a second browser and your phone each need their own), and clearing site data clears it. There is no admin UI for it. It does not remove rows already recorded, and being client-side it is a convenience, not a security control.
 
-Two things this does **not** do: it does not remove rows already recorded
-(delete those in Tinybird), and because the check is client-side, it is a
-convenience, not a security control.
-
-If you ever want true IP exclusion, the place for it is `requestGuard.ts` in the
-Worker — it already reads `CF-Connecting-IP` before anything is written, so an
-allowlist check there would drop the event at ingest rather than at query time.
+For true IP exclusion the place is `requestGuard.ts` in the Worker — it already reads `CF-Connecting-IP` before anything is written.
 
 ---
 
 ## 7. Cross-domain tracking
 
-Cookies cannot cross a registrable domain, so the tracker hands the identity
-over **in the link itself**. The trick is one config field plus one rule about
-how you link.
+Cookies cannot cross a registrable domain, so the tracker hands identity over **in the link itself**.
 
 1. **List the other host** on every site involved:
 
    ```html
-   <script
-     defer
-     src="…"
-     data-website-id="…"
-     data-domain="example.com"
-     data-allowed-hostnames="app.other.com,shop.other.com"
-   ></script>
+   <script defer src="…" data-website-id="…" data-domain="example.com"
+     data-allowed-hostnames="app.other.com,shop.other.com"></script>
    ```
 
    ```ts
    init({ websiteId: '…', domain: 'example.com', allowedHostnames: ['app.other.com', 'shop.other.com'] });
    ```
 
-2. **Navigate by clicking a real `<a href>`.** On click (or Enter/Space) the
-   tracker inspects the anchor and branches:
+2. **Navigate by clicking a real `<a href>`.** On click (or Enter/Space) the tracker inspects the anchor:
 
    | Target host                                                   | What happens                                                             |
    | ------------------------------------------------------------- | ------------------------------------------------------------------------ |
@@ -339,126 +242,67 @@ how you link.
    | listed in `allowedHostnames` (or `domain`)                    | `href` is **rewritten in place** with `_cgd_vid`, `_cgd_sid`, `_cgd_vsn` |
    | anything else                                                 | recorded as an `external_link` goal, no params added                     |
 
-3. **The landing page adopts the identity.** The tracker there reads those three
-   params ahead of its own cookies, writes them to its cookies, then strips them
-   from the URL via `history.replaceState` so they never reach your analytics
-   `href` or get shared/bookmarked.
+3. **The landing page adopts the identity** — reads those params ahead of its own cookies, writes them to cookies, then strips them via `history.replaceState`.
 
-Consequences worth knowing:
+Consequences:
 
-- **It only works through anchor clicks.** A `window.location = …`, a form POST,
-  a server redirect, or a QR code carries no params — the visitor is new on the
-  other side. For those, append the four params yourself.
-- **The allowlist is what flips the branch.** A host you forget to list is not
-  merely un-stitched, it is actively logged as an outbound `external_link`.
-- **Hostnames must match exactly** — `isInternalDomain` is a string equality
-  check against `domain` and each `allowedHostnames` entry. No wildcards, and
-  `app.other.com` does not cover `other.com`.
-- Both sites must use the **same `websiteId`**, and both origins must be
-  registered on that website in admin (§8), or the far side 403s.
-- Subdomains of `data-domain` need no setup at all — the cookie is already
-  written to `.<domain>`.
+- **Only anchor clicks work.** `window.location = …`, form POSTs, server redirects and QR codes carry no params; append them yourself.
+- **A host you forget to list** is not merely un-stitched — it is logged as an outbound `external_link`.
+- **Hostnames match exactly.** `isInternalDomain` is string equality. No wildcards; `app.other.com` does not cover `other.com`.
+- Both sites need the **same `websiteId`**, and both origins registered in admin (§8), or the far side 403s.
+- Subdomains of `data-domain` need no setup.
 
 ---
 
 ## 8. Endpoint and authorization
 
-Events are `POST`ed as `Content-Type: text/plain`. That content type is
-deliberate and load-bearing: it keeps the request CORS-simple so no preflight is
-sent — the ingest Worker answers `POST` only and returns **405 for `OPTIONS`**,
-so switching to `application/json` would break ingest outright.
+Events are `POST`ed as `Content-Type: text/plain`. That is load-bearing: it keeps the request CORS-simple so no preflight is sent — the Worker answers `POST` only and returns **405 for `OPTIONS`**, so `application/json` would break ingest outright.
 
-The transport is `fetch(…, { keepalive: true })`. Keepalive requests are handed
-to the browser process and complete even if the document is torn down mid-flight,
-so an event fired on a click that navigates away is not lost — which a plain
-`XMLHttpRequest` would drop. `sendBeacon` gives the same unload guarantee but
-returns only a queued/not-queued boolean, so keepalive is used instead: the
-response status is what `EventCallback` reports and what distinguishes a rejected
-payload from a delivered one.
+Transport is `fetch(…, { keepalive: true })`, which completes even if the document is torn down mid-flight, so an event fired on a click that navigates away is not lost. `sendBeacon` gives the same guarantee but returns only a queued boolean, and the response status is what `EventCallback` reports. There is no fallback transport — keepalive has shipped in every engine since July 2021, and the bundle targets ES2020.
 
-There is no fallback transport. Keepalive shipped in Chrome 66 (2018), Safari 13
-(2019) and Firefox 90 (2021), so every engine has had it since July 2021, and
-the bundle already targets ES2020.
-
-Two constraints come with keepalive: all in-flight keepalive requests share a
-**64 KB body budget** per document, and `credentials` is `omit`, so no cookies
-travel with the request. Neither binds here — payloads are a few hundred bytes
-and identity is read client-side into the body — but a much larger `extraData`
-budget would need rechecking against the 64 KB limit.
+Two keepalive constraints: all in-flight keepalive requests share a **64 KB body budget** per document, and `credentials` is `omit` so no cookies travel. Neither binds here, but a much larger `extraData` budget would need rechecking.
 
 ### Event callbacks
 
-`trackPageview`, `trackEvent` and `identify` each take an optional callback. It
-fires **exactly once on every path**, including the ones where nothing is sent,
-so it is safe to await before navigating.
+`trackPageview`, `trackEvent` and `identify` each take an optional callback that fires **exactly once on every path**, including those where nothing is sent, so it is safe to await before navigating.
 
 | `outcome`   | Meaning                                                         | `status`        |
 | ----------- | --------------------------------------------------------------- | --------------- |
 | `delivered` | Worker accepted it                                              | `200`           |
 | `rejected`  | Worker refused it — validation, unknown site, bad origin        | the HTTP status |
 | `failed`    | Request never completed (offline, DNS, blocked)                 | `0`             |
-| `disabled`  | Not sent: bot, localhost, iframe, or the `cgd_ignore` flag      | `0`             |
-| `throttled` | Not sent: same URL already recorded within 60s                  | `0`             |
+| `disabled`  | Not sent: bot, localhost, iframe, or `cgd_ignore`               | `0`             |
+| `throttled` | Not sent: same URL within 60s                                   | `0`             |
 | `invalid`   | Not sent: no `websiteId`/`domain`, so no payload could be built | `0`             |
 
-Only `delivered` means the event reached Tinybird. A malformed `extraData`
-comes back as `rejected` with the Worker's status, not as `invalid` — the
-tracker sends it and lets the Worker rule.
+Only `delivered` means the event reached Tinybird. Malformed `extraData` comes back as `rejected`, not `invalid` — the tracker sends it and lets the Worker rule.
 
-Resolution order for the endpoint, from `state.ts`:
+### Endpoint resolution
 
-| Condition                     | Endpoint used                                             |
-| ----------------------------- | --------------------------------------------------------- |
-| `data-api-url` / `apiUrl` set | that value (relative is resolved against the page origin) |
-| anything else                 | the built-in `API_URL`                                    |
+`data-api-url` / `apiUrl` wins if set (relative resolves against the page origin); otherwise the built-in `API_URL`, `https://analytics.tabsircg.com/api/events`. The Worker routes on method, not path, and would accept `POST` anywhere on that host; the path is kept so the endpoint stays addressable by firewall/WAF rules. **Where the script is loaded from does not influence this** — an earlier version inferred a self-hosted endpoint from the `<script src>` host and silently redirected events; that is gone.
 
-`API_URL` is `https://analytics.tabsircg.com/api/events` — the ingest Worker.
-The Worker itself routes on method, not path, and would accept `POST` anywhere
-on that host; the `/api/events` path is kept deliberately so the endpoint stays
-addressable by network-level rules (firewall, WAF, proxy allowlists) instead of
-being a bare origin. **Where the script is loaded from does not influence
-this.**
-An earlier version inferred a self-hosted endpoint whenever the `<script src>`
-host wasn't `admin.tabsircg.com`, which silently redirected events to
-`<the visitor's own origin>/api/events`; that inference is gone. Self-hosting is
-still fully supported — point `data-api-url` / `apiUrl` at your own collector.
+### Authorization
 
-Ingest is authorized by **`Origin`**, not by a token. The Worker looks up
-`website_<websiteId>` in its KV namespace, expects a JSON array of allowed
-origins, and 403s unless the request `Origin` is in it (or the array contains
-`"*"`). Admin writes that key for you — `syncOriginsToKV` runs whenever a website
-is created or its origins are edited. A website whose origins list is empty
-rejects every event.
+By **`Origin`**, not a token. The Worker looks up `website_<websiteId>` in KV, expects a JSON array of allowed origins, and 403s unless the request `Origin` is in it (or the array contains `"*"`). Admin writes that key via `syncOriginsToKV` whenever a website is created or its origins are edited. An empty origins list rejects every event.
 
-The Worker memoises each lookup in the isolate that served it, to avoid paying a
-billed KV read per analytics event. That memo is **not** a single global cache —
-each isolate (roughly, each colo, more under load) keeps its own and expires it
-independently, so propagation is eventual:
+Each lookup is memoised in the isolate that served it to avoid a billed KV read per event. This is **not** a global cache — each isolate keeps its own and expires independently, so propagation is eventual:
 
-| Lookup result     | Memo TTL | Why                                                                                          |
-| ----------------- | -------- | -------------------------------------------------------------------------------------------- |
-| website found     | 60 s     | matches KV's own edge-cache TTL, so nothing is staler than KV already is                     |
-| website not found | 10 s     | still collapses a flood of bogus IDs into one read, without making a newly-created site wait |
+| Lookup result     | Memo TTL | Why                                                             |
+| ----------------- | -------- | --------------------------------------------------------------- |
+| website found     | 60 s     | matches KV's own edge-cache TTL                                 |
+| website not found | 10 s     | collapses a flood of bogus IDs without making a new site wait   |
 
-So an origin edit in admin takes up to ~60 s to apply everywhere, and a brand
-new website starts accepting events within ~10 s.
+So an origin edit takes up to ~60s to apply everywhere; a new website starts accepting events within ~10s.
 
 ---
 
 ## 9. Crawler tracking (`@tabsircg/analytics/middleware`)
 
-The browser tracker cannot see crawlers. GPTBot, ClaudeBot, CCBot, PerplexityBot
-and every social unfurler request the HTML and leave — no JavaScript runs, so no
-event is ever sent. Only crawlers that render (Googlebot's WRS, Bingbot,
-Lighthouse) would ever reach the ingest endpoint through the tracker.
+The browser tracker cannot see crawlers. GPTBot, ClaudeBot, CCBot, PerplexityBot and every social unfurler request the HTML and leave — no JavaScript runs, so no event is sent. Only crawlers that render (Googlebot's WRS, Bingbot, Lighthouse) would reach ingest through the tracker.
 
-`@tabsircg/analytics/middleware` closes that gap from the server. It reads the
-`User-Agent` of the incoming request, and when it matches a known crawler it
-posts one event to the same ingest endpoint with `is_bot = 1`. Human traffic
-costs one lowercased substring scan and **no network call at all**.
+The middleware closes that gap from the server: it reads the request `User-Agent`, and on a known crawler posts one event to the same endpoint with `is_bot = 1`. Human traffic costs one lowercased substring scan and **no network call**.
 
-This is the only thing that writes `is_bot = 1`. The ingest Worker does no bot
-classification, so a crawler that both fetches and renders is counted once.
+This is the only thing that writes `is_bot = 1`. The Worker does no bot classification, so a crawler that both fetches and renders is counted once.
 
 ### Next.js
 
@@ -472,14 +316,10 @@ export function proxy(request: NextRequest, event: NextFetchEvent) {
   return NextResponse.next();
 }
 
-export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
-};
+export const config = { matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'] };
 ```
 
-Do **not** `await` it. Passing `event` schedules the POST with `event.waitUntil`
-and returns synchronously, so the page response never waits on ingest. To wrap
-a proxy you already have, use `withCrawlerTracking(handler, config)` instead.
+Do **not** `await` it. Passing `event` schedules the POST with `event.waitUntil` and returns synchronously. To wrap an existing proxy, use `withCrawlerTracking(handler, config)`.
 
 ### Express
 
@@ -501,38 +341,37 @@ app.use('*', honoCrawlerMiddleware({ websiteId: 'your-website-id' }));
 
 Uses `c.executionCtx.waitUntil` when the runtime provides one.
 
-### What gets skipped before any network call
+### Skipped before any network call
 
-Non-`GET`/`HEAD` methods, unrecognised user agents, subresource requests
-(`Sec-Fetch-Dest` of `image`, `script`, `style`, …), framework and asset path
-prefixes (`/api`, `/_next`, `/static`, …), and ~32 static file extensions.
-`/robots.txt`, `/llms.txt`, `/llms-full.txt` and `sitemap*.xml` are explicitly
-exempt from the path and extension filters, so crawler hits on those still
-register.
+Non-`GET`/`HEAD` methods, unrecognised user agents, subresource requests (`Sec-Fetch-Dest` of `image`, `script`, `style`, …), and anything `shouldTrack` rejects.
+
+**Path and extension filtering is not built in** — your framework's matcher already scopes which requests reach the middleware. If you want it anyway, `ignoreStaticPaths` is an opt-in preset covering `/api`, `/_next`, `/static` and ~32 static extensions, with `/robots.txt`, `/llms.txt`, `/llms-full.txt` and `sitemap*.xml` exempt:
+
+```ts
+import { ignoreStaticPaths, trackCrawler } from '@tabsircg/analytics/middleware';
+
+trackCrawler(request, event, { websiteId: '…', shouldTrack: ignoreStaticPaths });
+```
 
 ### Config
 
-| Option                                                  | Default                     | Purpose                                                    |
-| ------------------------------------------------------- | --------------------------- | ---------------------------------------------------------- |
-| `websiteId`                                             | required                    | Same id the browser tracker uses                           |
-| `apiUrl`                                                | the shared ingest endpoint  | Override for self-hosted ingest                            |
-| `domain`                                                | request hostname            | Value written to the `domain` column                       |
-| `publicOrigin`                                          | —                           | Rebuild URLs when the runtime exposes an internal hostname |
-| `enabled`                                               | `true`                      | Kill switch without touching middleware code               |
-| `excludeCategories`                                     | —                           | Drop whole categories, e.g. `['tooling', 'monitoring']`    |
-| `methods`                                               | `['GET', 'HEAD']`           | Methods worth recording                                    |
-| `ignoredPathPrefixes` / `additionalIgnoredPathPrefixes` | the defaults above          | Replace or extend the path filter                          |
-| `ignoredExtensions` / `additionalIgnoredExtensions`     | the defaults above          | Replace or extend the extension filter                     |
-| `shouldTrack(url, crawler)`                             | —                           | Final override after every built-in check                  |
-| `getIp(request)`                                        | standard forwarding headers | Override crawler IP extraction                             |
-| `timeoutMs`                                             | `1500`                      | Abort the ingest POST                                      |
-| `debug`                                                 | `false`                     | Log dropped events                                         |
+| Option                      | Default                     | Purpose                                                    |
+| --------------------------- | --------------------------- | ---------------------------------------------------------- |
+| `websiteId`                 | required                    | Same id the browser tracker uses                           |
+| `apiUrl`                    | the shared ingest endpoint  | Override for self-hosted ingest                            |
+| `domain`                    | request hostname            | Value written to the `domain` column                       |
+| `publicOrigin`              | —                           | Rebuild URLs when the runtime exposes an internal hostname |
+| `enabled`                   | `true`                      | Kill switch without touching middleware code               |
+| `excludeCategories`         | —                           | Drop whole categories, e.g. `['tooling', 'monitoring']`    |
+| `methods`                   | `['GET', 'HEAD']`           | Methods worth recording                                    |
+| `shouldTrack(url, crawler)` | —                           | Path policy; pass `ignoreStaticPaths` or your own          |
+| `getIp(request)`            | standard forwarding headers | Override crawler IP extraction                             |
+| `timeoutMs`                 | `1500`                      | Abort the ingest POST                                      |
+| `debug`                     | `false`                     | Log dropped events                                         |
 
-`classifyCrawler(userAgent)` is exported on its own if you want the
-`{ name, category }` verdict without sending anything.
+`classifyCrawler(userAgent)` is exported on its own for the `{ name, category }` verdict without sending anything.
 
-The middleware sends its own `Origin` header, so the website's origin must be
-registered in the Worker allowlist exactly as it is for browser events (§8).
+The middleware sends its own `Origin` header, so the website's origin must be registered in the Worker allowlist exactly as for browser events (§8).
 
 ---
 
