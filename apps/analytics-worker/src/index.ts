@@ -19,7 +19,10 @@ interface Env {
   ANALYTICS_DOMAINS_KV: KVNamespace;
   TINYBIRD_TOKEN: string;
   TINYBIRD_HOST: string;
+  INGEST_TOKEN?: string;
 }
+
+const INGEST_TOKEN_HEADER = "x-ingest-token";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 const UNKNOWN_GEO = "Unknown";
@@ -152,7 +155,20 @@ export default {
         );
       }
 
-      const tbRow = isCrawlPayload(payload)
+      const isCrawl = isCrawlPayload(payload);
+
+      if (
+        isCrawl &&
+        (!env.INGEST_TOKEN ||
+          request.headers.get(INGEST_TOKEN_HEADER) !== env.INGEST_TOKEN)
+      ) {
+        return new Response(
+          JSON.stringify({ error: "Crawl events require a valid ingest token" }),
+          { status: 403, headers: accessGuard.corsHeaders },
+        );
+      }
+
+      const tbRow = isCrawl
         ? crawlRow(payload, Date.now())
         : browserRow(
             payload,

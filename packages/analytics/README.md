@@ -358,6 +358,7 @@ trackCrawler(request, event, { websiteId: '…', shouldTrack: ignoreStaticPaths 
 | Option                      | Default                     | Purpose                                                    |
 | --------------------------- | --------------------------- | ---------------------------------------------------------- |
 | `websiteId`                 | required                    | Same id the browser tracker uses                           |
+| `ingestToken`               | required                    | Shared secret; must equal the Worker's `INGEST_TOKEN`      |
 | `apiUrl`                    | the shared ingest endpoint  | Override for self-hosted ingest                            |
 | `domain`                    | request hostname            | Value written to the `domain` column                       |
 | `publicOrigin`              | —                           | Rebuild URLs when the runtime exposes an internal hostname |
@@ -371,7 +372,11 @@ trackCrawler(request, event, { websiteId: '…', shouldTrack: ignoreStaticPaths 
 
 `classifyCrawler(userAgent)` is exported on its own for the `{ name, category }` verdict without sending anything.
 
-The middleware sends its own `Origin` header, so the website's origin must be registered in the Worker allowlist exactly as for browser events (§8).
+### Authorization
+
+Unlike the browser tracker, this path is server-to-server, so it authenticates with a shared secret rather than `Origin` alone. Set `ingestToken` in the config and the same value as the Worker's `INGEST_TOKEN` secret (`wrangler secret put INGEST_TOKEN`). The middleware sends it as `X-Ingest-Token`; the Worker rejects any payload carrying a `bot` object without a match, so crawl rows cannot be forged by anyone who merely knows a `websiteId`.
+
+Origin is still checked as for browser events (§8), so the website's origin must also be registered.
 
 ---
 

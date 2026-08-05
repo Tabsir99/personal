@@ -86,6 +86,18 @@ describe('trackCrawler', () => {
     });
   });
 
+  it('sends the ingest token only when configured', async () => {
+    const withToken = okFetch();
+    await trackCrawler(requestFor('/blog/foo'), { ...config, fetch: withToken, ingestToken: 'secret' });
+    const [, tokenInit] = withToken.mock.calls[0] as unknown as [string, RequestInit];
+    expect((tokenInit.headers as Record<string, string>)['X-Ingest-Token']).toBe('secret');
+
+    const withoutToken = okFetch();
+    await trackCrawler(requestFor('/blog/foo'), { ...config, fetch: withoutToken });
+    const [, plainInit] = withoutToken.mock.calls[0] as unknown as [string, RequestInit];
+    expect(plainInit.headers as Record<string, string>).not.toHaveProperty('X-Ingest-Token');
+  });
+
   it('sends nothing for human traffic', async () => {
     const fetchImpl = okFetch();
     const result = await trackCrawler(requestFor('/blog/foo', { 'user-agent': CHROME }), {

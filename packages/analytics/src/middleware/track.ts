@@ -4,6 +4,7 @@ import type { CrawlerCategory } from './signatures';
 
 export interface CrawlerTrackingConfig {
   websiteId: string;
+  ingestToken?: string;
   domain?: string;
   apiUrl?: string;
   publicOrigin?: string;
@@ -151,7 +152,11 @@ async function post(
     const response = await fetchImpl(config.apiUrl ?? API_URL, {
       method: 'POST',
       keepalive: true,
-      headers: { 'Content-Type': 'text/plain', Origin: url.origin },
+      headers: {
+        'Content-Type': 'text/plain',
+        Origin: url.origin,
+        ...(config.ingestToken ? { 'X-Ingest-Token': config.ingestToken } : {}),
+      },
       ...(controller ? { signal: controller.signal } : {}),
       body: JSON.stringify({
         websiteId: config.websiteId,

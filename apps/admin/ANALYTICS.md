@@ -52,7 +52,9 @@ The datasource also declares a `bloom_filter` skip index on `visitor_id`, solely
 
 The Worker enriches browser rows at ingest, so these arrive as real columns: **geo** (`country`/`region`/`city`/`ip` from the request) and **UA parse** (`browser`/`os`/`device` via `parseUA`).
 
-**The Worker does not classify bots.** `is_bot` / `bot_category` / `bot_name` arrive already decided in the request body, from `@tabsircg/analytics/middleware` running in the tracked app. A payload carrying a `bot` object is a crawl row: `is_bot = 1`, geo `Unknown`, nil-UUID visitor and session, and the crawler's real UA and IP taken from the body rather than the calling request's headers. Every other payload is a browser row with `is_bot = 0`.
+**The Worker does not classify bots.** `is_bot` / `bot_category` / `bot_name` arrive already decided in the request body, from `@tabsircg/analytics/middleware` running in the tracked app. A payload carrying a `bot` object is a crawl row: `is_bot = 1`, geo `Unknown`, nil-UUID visitor and session, and the crawler's real UA and IP taken from the body rather than the calling request's headers — the middleware reads them from the proxy's forwarding headers (`x-vercel-forwarded-for`, `cf-connecting-ip`, …) on the request the crawler actually made. Every other payload is a browser row with `is_bot = 0`.
+
+Because those fields are supplied rather than derived at ingest, crawl payloads must carry `X-Ingest-Token` matching the Worker's `INGEST_TOKEN` secret; `Origin` alone gates browser events, which cannot hold a secret. A payload with a `bot` object and no matching token is a 403.
 
 Why there and not here: the Worker only sees requests that executed JavaScript, so a UA check at ingest catches only crawlers that render — Googlebot's WRS, Bingbot, Lighthouse. GPTBot, ClaudeBot, CCBot and every social unfurler fetch HTML and leave. Middleware sees the fetch itself. Because the Worker classifies nothing, exactly one pipeline writes `is_bot = 1` and crawlers that do both are not double-counted.
 
