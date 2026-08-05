@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  BOT_CATEGORY_NAMES,
   extraDataSchema,
   UUID_PATTERN,
   VISITOR_ID_MAX_LENGTH,
@@ -24,7 +25,7 @@ const basePayloadSchema = z.object({
   screenHeight: z.number(),
 });
 
-export const payloadSchema = z.intersection(
+export const browserPayloadSchema = z.intersection(
   basePayloadSchema,
   z
     .discriminatedUnion("type", [
@@ -54,4 +55,26 @@ export const payloadSchema = z.intersection(
     ),
 );
 
+export const crawlPayloadSchema = z.object({
+  websiteId: z.string().min(1).max(96),
+  domain: z.string().nullable(),
+  href: z.string().max(2000),
+  referrer: z.string().nullable(),
+  type: z.literal("pageview"),
+  bot: z.object({
+    name: z.string().min(1).max(64),
+    category: z.enum(BOT_CATEGORY_NAMES),
+    userAgent: z.string().max(500),
+    ip: z.string().max(64),
+  }),
+});
+
+export const payloadSchema = z.union([crawlPayloadSchema, browserPayloadSchema]);
+
+export type BrowserPayload = z.infer<typeof browserPayloadSchema>;
+export type CrawlPayload = z.infer<typeof crawlPayloadSchema>;
 export type EventPayload = z.infer<typeof payloadSchema>;
+
+export function isCrawlPayload(payload: EventPayload): payload is CrawlPayload {
+  return "bot" in payload;
+}
