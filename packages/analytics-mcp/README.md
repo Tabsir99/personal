@@ -52,9 +52,11 @@ A model applying the key regex by hand gets this wrong sometimes, and the failur
 
 Scans a project root for the tracker: resolved version, where it is initialised, whether the script tag and SDK are both wired up, and flags that should not ship (`allowLocalhost`, `allowIframe`, `debug`).
 
+It also reports the server-side half. A site with only the browser tracker records no AI crawlers, unfurlers or SEO bots at all — they never run JavaScript — so a missing `@tabsircg/analytics/middleware` is called out, as is middleware configured without an `ingestToken`, which the Worker 403s silently.
+
 ### `analytics://reference` (resource)
 
-The instrumentation guide — install paths, what the tracker collects automatically so it is not re-sent, the event model, `extraData` rules, callback outcomes, and the Stripe revenue handoff.
+The instrumentation guide — the browser install paths, the crawler middleware, what each collects automatically so it is not re-sent, the event model, `extraData` rules, callback outcomes, and the Stripe revenue handoff.
 
 Documents belong in resources, not tools. Only the two things that *compute* something from your input are tools.
 

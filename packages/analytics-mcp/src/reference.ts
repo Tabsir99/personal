@@ -14,6 +14,10 @@ SDK - for typed calls, callbacks, or when a bundler owns your scripts:
 
 Both at once double every pageview.
 
+Server-side crawler tracking is a third install, and it is additive rather than an
+alternative - see "Crawlers" below. A site with only the browser tracker records
+no AI crawlers at all.
+
 ### Script tag attributes
 
 | Attribute | Effect |
@@ -130,6 +134,90 @@ to trackEvent.
 Headless - it clones its child and adds the data attributes, rendering no extra
 DOM. It needs the script tag present, because it only writes attributes; the
 listeners come from script-tag mode.
+
+## Crawlers - the browser tracker cannot see them
+
+GPTBot, ClaudeBot, CCBot, PerplexityBot and every social unfurler fetch the HTML
+and leave. No JavaScript runs, so the browser tracker never fires. Only crawlers
+that render (Googlebot's WRS, Bingbot, Lighthouse) would ever reach it.
+
+Crawler tracking runs in your server middleware instead. Install it alongside the
+browser tracker, not instead of it - they cover different traffic and cannot
+double count, because this is the only thing that writes is_bot=1.
+
+Next.js proxy.ts:
+
+    import { trackCrawler } from '@tabsircg/analytics/middleware';
+
+    export function proxy(request: NextRequest, event: NextFetchEvent) {
+      trackCrawler(request, event, { websiteId: 'ID', ingestToken: process.env.INGEST_TOKEN });
+      return NextResponse.next();
+    }
+
+    export const config = { matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'] };
+
+Express - expressCrawlerMiddleware(config), mounted with app.use().
+Hono - honoCrawlerMiddleware(config), mounted with app.use('*', ...).
+An existing Next proxy - wrap it with withCrawlerTracking(handler, config).
+
+Never await it. Pass the runtime's context (Next's event, Hono's c.executionCtx)
+and the POST is scheduled with waitUntil, returning synchronously. The
+two-argument trackCrawler(request, config) returns a promise, for runtimes with
+no waitUntil. It never throws: a failure loses the event, never the response.
+
+### ingestToken is required, and omitting it fails silently
+
+The crawler's IP and user agent travel in the body rather than being read from
+the caller's headers, so Origin alone cannot authorise these events. The
+middleware sends the token as X-Ingest-Token and the Worker refuses any payload
+carrying a bot object without a match - 403, event gone, nothing logged in the
+browser. It must equal the Worker's INGEST_TOKEN secret. This is a server secret:
+browser events do not use it, and it must never reach client code.
+
+### What a crawl event records
+
+Type is always pageview. There are no custom events and no properties on this
+path - trackEvent, extraData, goals and identify are browser-only. The row is
+written with is_bot=1, a nil-UUID visitor and session, and Unknown geo, so
+crawlers never enter visitor, session or funnel counts.
+
+### Filtered before any network call
+
+Methods outside GET and HEAD, an unrecognised user agent, an excluded category,
+an href over 2000 chars, and any Sec-Fetch-Dest in the subresource set (image,
+script, style, font, video, ...). Human traffic costs one lowercased substring
+scan and no fetch.
+
+Path filtering is not built in, because your framework's matcher already decides
+what reaches the middleware. ignoreStaticPaths is an opt-in preset covering /api,
+/_next, /static and ~32 static extensions, exempting /robots.txt, /llms.txt,
+/llms-full.txt and sitemap*.xml:
+
+    trackCrawler(request, event, { websiteId: 'ID', shouldTrack: ignoreStaticPaths });
+
+### Config
+
+| Option | Default | Purpose |
+| --- | --- | --- |
+| websiteId | required | the same id the browser tracker uses |
+| ingestToken | required | must equal the Worker's INGEST_TOKEN |
+| apiUrl | the shared ingest endpoint | override for self-hosted ingest |
+| domain | request hostname | value written to the domain column |
+| publicOrigin | - | rebuild URLs when the runtime exposes an internal hostname |
+| enabled | true | kill switch without editing middleware code |
+| excludeCategories | - | drop whole categories, e.g. ['tooling', 'monitoring'] |
+| methods | ['GET', 'HEAD'] | methods worth recording |
+| shouldTrack(url, crawler) | - | path policy; ignoreStaticPaths or your own |
+| getIp(request) | standard forwarding headers | override crawler IP extraction |
+| timeoutMs | 1500 | abort the ingest POST |
+| debug | false | log dropped events |
+
+The ten categories, exported as CRAWLER_CATEGORIES: search_index, answer_fetch,
+training, ai_crawler, seo, social, monitoring, tooling, archive, generic.
+
+classifyCrawler(userAgent) returns { name, category } or null, and
+inspectCrawlerRequest(request, config) returns the full skip decision. Both are
+pure - neither sends anything.
 
 ## Identify and revenue
 

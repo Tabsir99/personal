@@ -6,14 +6,15 @@ import { formatReport, validateEvent } from "./validate.js";
 import { inspectSetup } from "./inspect.js";
 import { REFERENCE } from "./reference.js";
 
-const server = new McpServer({ name: "tabsircg-analytics", version: "0.2.1" });
+const server = new McpServer({ name: "tabsircg-analytics", version: "0.3.0" });
 
 server.registerResource(
   "reference",
   "analytics://reference",
   {
     title: "@tabsircg/analytics instrumentation guide",
-    description: "How to install the tracker, what it collects automatically, the event model and the extraData rules",
+    description:
+      "How to install the browser tracker and the server-side crawler middleware, what each collects automatically, the event model and the extraData rules",
     mimeType: "text/markdown",
   },
   async (uri) => ({ contents: [{ uri: uri.href, mimeType: "text/markdown", text: REFERENCE }] }),
@@ -47,7 +48,7 @@ server.registerTool(
   {
     title: "Inspect the tracker setup in a project",
     description:
-      "Scan a project directory for the @tabsircg/analytics installation: the resolved version, where it is initialised, whether both the script tag and the SDK are wired up, and config flags that should not ship to production.",
+      "Scan a project directory for the @tabsircg/analytics installation: the resolved version, where it is initialised, whether both the script tag and the SDK are wired up, whether the crawler middleware is installed and carries an ingestToken, and config flags that should not ship to production.",
     inputSchema: {
       projectRoot: z.string().describe("Absolute path to the project root to scan"),
     },

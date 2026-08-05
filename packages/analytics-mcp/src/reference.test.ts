@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import * as sdk from "../../analytics/src/constants";
+import * as middleware from "../../analytics/src/middleware/index";
+import { CRAWLER_CATEGORIES } from "../../analytics/src/middleware/signatures";
 import { REFERENCE } from "./reference";
 
 const DECLARATIVE_ATTRIBUTES = [
@@ -54,5 +56,27 @@ describe("the reference covers the SDK surface", () => {
   it("does not describe the scroll threshold as a percentage", () => {
     expect(REFERENCE).toContain(`${sdk.SCROLL_THRESHOLD_ATTR}="0.75"`);
     expect(REFERENCE).not.toContain(`${sdk.SCROLL_THRESHOLD_ATTR}="75"`);
+  });
+});
+
+describe("the reference covers the crawler middleware", () => {
+  it("documents every entry point the middleware exports", () => {
+    const entryPoints = Object.keys(middleware);
+    expect(entryPoints.length).toBeGreaterThan(0);
+    for (const name of entryPoints) {
+      expect(REFERENCE, `${name} is undocumented`).toContain(name);
+    }
+  });
+
+  it("documents every crawler category", () => {
+    for (const category of CRAWLER_CATEGORIES) {
+      expect(REFERENCE, `${category} is undocumented`).toContain(category);
+    }
+  });
+
+  it("states that crawl events need the ingest token", () => {
+    expect(REFERENCE).toContain("ingestToken");
+    expect(REFERENCE).toContain("X-Ingest-Token");
+    expect(REFERENCE).toContain("INGEST_TOKEN");
   });
 });
