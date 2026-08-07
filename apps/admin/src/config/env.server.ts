@@ -27,6 +27,9 @@ export const env = {
 
   TINYBIRD_HOST: requireEnv("TINYBIRD_HOST"),
   TINYBIRD_TOKEN: requireEnv("TINYBIRD_TOKEN"),
+
+  MCP_TOKEN: requireEnv("MCP_TOKEN"),
+  MCP_ALLOW_DELETES: process.env.MCP_ALLOW_DELETES === "1",
 } as const;
 
 // Boot-time presence check; SDK reads ANTHROPIC_AUTH_TOKEN from process.env itself.

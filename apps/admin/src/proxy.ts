@@ -49,6 +49,12 @@ export default async function middleware(request: NextRequest) {
 
   if (pathname === "/api/stripe/webhook") return NextResponse.next();
 
+  if (pathname === "/api/mcp") {
+    return request.headers.get("authorization") === `Bearer ${env.MCP_TOKEN}`
+      ? NextResponse.next()
+      : unauthorizedResponse(request);
+  }
+
   const token = request.cookies.get(env.COOKIE_NAME)?.value;
   const serverToken = request.headers.get("serverToken");
 
