@@ -28,7 +28,11 @@ export function revenueSections(
           value: formatMoney(parts.net),
           color: "revenue",
           parts: [
-            { label: "Charged", value: formatMoney(parts.gross) },
+            {
+              label: "Charged",
+              value: formatMoney(parts.gross),
+              color: "charged",
+            },
             ...reversals.map((kind) => ({
               label: REVERSAL_TITLE[kind],
               value: `-${formatMoney(reversalAmount(parts, kind))}`,

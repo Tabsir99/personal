@@ -14,6 +14,7 @@ export const CHART = {
   returningVisitors:
     "color-mix(in oklab, var(--color-primary) 42%, var(--color-card))",
   revenue: money,
+  charged: money,
   refund:
     "color-mix(in oklab, var(--color-destructive) 52%, var(--color-card))",
   dispute:
@@ -54,6 +55,11 @@ export function isReversalColor(color: ChartColors): color is ReversalKind {
 }
 
 export function swatchStyle(color: ChartColors): CSSProperties {
+  if (color === "charged")
+    return {
+      background: "transparent",
+      border: `1px solid ${alpha(money, 0.5)}`,
+    };
   if (!isReversalColor(color)) return { background: CHART[color] };
   const { fill, stroke, borderStyle } = REVERSAL[color];
   return { background: fill, border: `1px ${borderStyle} ${stroke}` };
