@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { McpServer } from "@modelcontextprotocol/server";
+import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
 import { z } from "zod";
 import { formatReport, validateEvent } from "./validate.js";
 import { inspectSetup } from "./inspect.js";
@@ -26,13 +26,13 @@ server.registerTool(
     title: "Validate a custom event",
     description:
       "Check a trackEvent call against the rules the analytics Worker actually enforces, before writing the code. Returns the exact extra_data that would be sent, every transformation the tracker applies to your input, and any violation that would make the Worker reject the whole event with a 400. Use this whenever you add or change a trackEvent call.",
-    inputSchema: {
+    inputSchema: z.object({
       eventName: z.string().describe("The event name passed to trackEvent, e.g. 'checkout_completed'"),
       data: z
         .record(z.string(), z.unknown())
         .optional()
         .describe("The properties object passed to trackEvent. Values may be any type; the tracker stringifies them."),
-    },
+    }),
   },
   async ({ eventName, data }) => {
     const report = validateEvent(eventName, data ?? {});
@@ -49,9 +49,9 @@ server.registerTool(
     title: "Inspect the tracker setup in a project",
     description:
       "Scan a project directory for the @tabsircg/analytics installation: the resolved version, where it is initialised, whether both the script tag and the SDK are wired up, whether the crawler middleware is installed and carries an ingestToken, and config flags that should not ship to production.",
-    inputSchema: {
+    inputSchema: z.object({
       projectRoot: z.string().describe("Absolute path to the project root to scan"),
-    },
+    }),
   },
   async ({ projectRoot }) => ({
     content: [{ type: "text", text: await inspectSetup(projectRoot) }],

@@ -21,6 +21,7 @@
     "@aws-sdk/client-s3": "^3.1048.0",
     "@aws-sdk/s3-request-presigner": "^3.1048.0",
     "@devicon/react": "^0.0.3",
+    "@modelcontextprotocol/server": "^2.0.0",
     "@open-notion/editor": "catalog:",
     "@phosphor-icons/react": "catalog:",
     "@tabsircg/analytics": "workspace:*",
