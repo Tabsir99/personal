@@ -20,7 +20,12 @@ const stripeConfigSchema = z.object({
 });
 
 const STRIPE_WEBHOOK_EVENTS: Stripe.WebhookEndpointCreateParams.EnabledEvent[] =
-  ["payment_intent.succeeded", "refund.created", "charge.dispute.created"];
+  [
+    "payment_intent.succeeded",
+    "refund.created",
+    "charge.dispute.funds_withdrawn",
+    "charge.dispute.funds_reinstated",
+  ];
 
 export async function setupStripe(websiteId: string, rawKey: string) {
   const { restrictedKey } = stripeConfigSchema.parse({ restrictedKey: rawKey });

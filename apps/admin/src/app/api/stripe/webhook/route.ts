@@ -7,6 +7,7 @@ import {
   releaseStripeEvent,
 } from "@/lib/stripeStore";
 import { writePaymentEvent } from "@/lib/tinybird";
+import type { RevenueKind } from "@/lib/analyticsQuery";
 
 export const runtime = "nodejs";
 
@@ -21,14 +22,14 @@ interface ExtractedPayment {
   visitorId: string;
   sessionId: string;
   revenueCents: number;
-  kind: string;
+  kind: RevenueKind;
   identity: PaymentIdentity;
 }
 
 function fromMetadata(
   metadata: Stripe.Metadata | null | undefined,
   amountCents: number,
-  kind: string,
+  kind: RevenueKind,
   identity: PaymentIdentity,
 ): ExtractedPayment | null {
   const visitorId = metadata?.visitor_id ?? "";
@@ -91,12 +92,14 @@ async function extractPayment(
         identityFrom(pi),
       );
     }
-    case "charge.dispute.created": {
+    case "charge.dispute.funds_withdrawn":
+    case "charge.dispute.funds_reinstated": {
       const dispute = event.data.object as Stripe.Dispute;
       const pi = await retrievePaymentIntent(stripe, dispute.payment_intent);
+      const amount = dispute.amount ?? 0;
       return fromMetadata(
         pi?.metadata ?? dispute.metadata,
-        -(dispute.amount ?? 0),
+        event.type === "charge.dispute.funds_reinstated" ? amount : -amount,
         "dispute",
         identityFrom(pi),
       );

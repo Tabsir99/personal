@@ -165,10 +165,10 @@ function newestRowWithBrowserFields(rows: JourneyRow[]): JourneyRow {
   return [...rows].reverse().find(hasBrowserDerivedFields) ?? rows[0]!;
 }
 
-function newestRevenueRow(rows: JourneyRow[]): JourneyRow | undefined {
+function newestChargeRow(rows: JourneyRow[]): JourneyRow | undefined {
   return [...rows]
     .reverse()
-    .find((r) => r.type === "payment" && r.revenue_cents > 0);
+    .find((r) => r.type === "payment" && paymentKind(r) === "charge");
 }
 
 function synthesiseReferralEntry(entryRow: JourneyRow): JourneyEntry {
@@ -201,7 +201,7 @@ export function assembleVisitor(
     (r) => r.timestamp === goalCompletedAt && r.event_name === goalName,
   );
 
-  const identity = parseExtra(newestRevenueRow(rows)?.extra_data ?? "");
+  const identity = parseExtra(newestChargeRow(rows)?.extra_data ?? "");
   const entryParams = parseHref(entryRow.href).params;
 
   return {

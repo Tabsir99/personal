@@ -107,13 +107,18 @@ await stripe.checkout.sessions.create({
 await stripe.paymentIntents.create({ metadata: { visitor_id, session_id } });
 ```
 
-| Stripe event               | Effect              | Attribution                           |
-| -------------------------- | ------------------- | ------------------------------------- |
-| `payment_intent.succeeded` | `+ amount_received` | PaymentIntent metadata (direct)       |
-| `refund.created`           | `− refund.amount`   | resolved from refund → PaymentIntent  |
-| `charge.dispute.created`   | `− amount`          | resolved from dispute → PaymentIntent |
+| Stripe event                      | Effect              | `kind`    | Attribution                           |
+| --------------------------------- | ------------------- | --------- | ------------------------------------- |
+| `payment_intent.succeeded`        | `+ amount_received` | `charge`  | PaymentIntent metadata (direct)       |
+| `refund.created`                  | `− refund.amount`   | `refund`  | resolved from refund → PaymentIntent  |
+| `charge.dispute.funds_withdrawn`  | `− dispute.amount`  | `dispute` | resolved from dispute → PaymentIntent |
+| `charge.dispute.funds_reinstated` | `+ dispute.amount`  | `dispute` | resolved from dispute → PaymentIntent |
 
 Refunds and disputes resolve back to their PaymentIntent, so you never stamp them yourself. Missing `visitor_id` skips the row; `session_id` is optional. Deduplicated by Stripe event id.
+
+Disputes track the **ledger**, not the case. `charge.dispute.created` is deliberately not subscribed: it also fires for inquiries and early fraud warnings where no money ever moves, so booking it would record losses you never took. The funds events fire exactly when Stripe debits and credits your balance — at essentially the same moment as `created` for a real chargeback, and never for an inquiry.
+
+Both dispute events carry `kind: "dispute"` with opposite signs, so a won dispute nets to zero on its own and needs no fourth kind. A lost dispute leaves only the withdrawal. The Stripe dispute fee is not captured.
 
 ---
 
@@ -174,18 +179,18 @@ The `extraData` rules live in `EXTRA_DATA_*` in `@tabsircg/schemas/analytics` an
 
 **The tracker does not validate — it marshals.** `toEventData` lowercases keys, stringifies values and bounds their length, then sends whatever you gave it. A rule the browser enforces is a rule anyone can skip by posting to the Worker directly. The SDK publishes the numbers as constants and its tests assert they equal the shared contract, so published limits cannot drift from enforced ones.
 
-| Field                            | Limit                  | Enforced by                                                       |
-| -------------------------------- | ---------------------- | ----------------------------------------------------------------- |
-| `href`                           | 2000 chars             | tracker trims; Worker rejects beyond                              |
-| `type` (custom events)           | 64 chars               | Worker rejects                                                    |
-| derived `event_name`             | 255 chars              | Worker trims                                                      |
-| `extraData` — value              | 1000 chars             | tracker trims; Worker rejects beyond                              |
+| Field                            | Limit                  | Enforced by                                                           |
+| -------------------------------- | ---------------------- | --------------------------------------------------------------------- |
+| `href`                           | 2000 chars             | tracker trims; Worker rejects beyond                                  |
+| `type` (custom events)           | 64 chars               | Worker rejects                                                        |
+| derived `event_name`             | 255 chars              | Worker trims                                                          |
+| `extraData` — value              | 1000 chars             | tracker trims; Worker rejects beyond                                  |
 | `extraData` — whole object       | 4000 chars             | Worker rejects, drops trailing keys as a backstop (always valid JSON) |
-| `extraData` — key count          | 10                     | Worker rejects (`eventName` exempt)                               |
-| `extraData` — key name           | 32 chars, `[a-z0-9_-]` | tracker lowercases; Worker rejects                                |
-| `extraData` — value type         | string                 | tracker stringifies; Worker rejects non-strings                   |
-| `visitorId`, `sessionId`         | 100 chars              | Worker rejects; tracker drops an over-length handoff id           |
-| viewport, screen, session number | 0–65535                | Worker clamps (`UInt16` columns)                                  |
+| `extraData` — key count          | 10                     | Worker rejects (`eventName` exempt)                                   |
+| `extraData` — key name           | 32 chars, `[a-z0-9_-]` | tracker lowercases; Worker rejects                                    |
+| `extraData` — value type         | string                 | tracker stringifies; Worker rejects non-strings                       |
+| `visitorId`, `sessionId`         | 100 chars              | Worker rejects; tracker drops an over-length handoff id               |
+| viewport, screen, session number | 0–65535                | Worker clamps (`UInt16` columns)                                      |
 
 Every entry point routes through `toEventData`, so they all put the same shape on the wire. Values are trimmed and length-bounded but otherwise passed through verbatim — the tracker does **not** strip markup or URL schemes, which would corrupt legitimate data (`?w=64&h=64` losing its `&`) while protecting nothing. Escape on render, as the dashboard does.
 
@@ -226,8 +231,13 @@ Cookies cannot cross a registrable domain, so the tracker hands identity over **
 1. **List the other host** on every site involved:
 
    ```html
-   <script defer src="…" data-website-id="…" data-domain="example.com"
-     data-allowed-hostnames="app.other.com,shop.other.com"></script>
+   <script
+     defer
+     src="…"
+     data-website-id="…"
+     data-domain="example.com"
+     data-allowed-hostnames="app.other.com,shop.other.com"
+   ></script>
    ```
 
    ```ts
@@ -287,10 +297,10 @@ By **`Origin`**, not a token. The Worker looks up `website_<websiteId>` in KV, e
 
 Each lookup is memoised in the isolate that served it to avoid a billed KV read per event. This is **not** a global cache — each isolate keeps its own and expires independently, so propagation is eventual:
 
-| Lookup result     | Memo TTL | Why                                                             |
-| ----------------- | -------- | --------------------------------------------------------------- |
-| website found     | 60 s     | matches KV's own edge-cache TTL                                 |
-| website not found | 10 s     | collapses a flood of bogus IDs without making a new site wait   |
+| Lookup result     | Memo TTL | Why                                                           |
+| ----------------- | -------- | ------------------------------------------------------------- |
+| website found     | 60 s     | matches KV's own edge-cache TTL                               |
+| website not found | 10 s     | collapses a flood of bogus IDs without making a new site wait |
 
 So an origin edit takes up to ~60s to apply everywhere; a new website starts accepting events within ~10s.
 
