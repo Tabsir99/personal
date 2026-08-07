@@ -109,7 +109,7 @@ export function FunnelTab() {
 
   if (funnels === null || (funnelsLoading && funnels.length === 0)) {
     return (
-      <div className="h-full p-3">
+      <div className="h-110 p-3">
         <div className="h-full animate-pulse rounded-lg bg-foreground/3" />
       </div>
     );
@@ -117,7 +117,7 @@ export function FunnelTab() {
 
   if (funnels.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 text-center">
+      <div className="flex h-110 flex-col items-center justify-center gap-3 text-center">
         <div>
           <p className="text-sm font-medium text-foreground/80">
             No funnels yet

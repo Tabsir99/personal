@@ -1,5 +1,5 @@
 import type { JourneyEntry } from "@/lib/analyticsTypes";
-import { DOT_TINT } from "./journeyEntryStyle";
+import { dotStyle } from "./journeyEntryStyle";
 
 const VISIBLE_DOTS = 7;
 
@@ -10,7 +10,7 @@ export function JourneyDots({ entries }: { entries: JourneyEntry[] }) {
         <span
           key={`${entry.timestamp}-${i}`}
           className="size-1.5 rounded-full"
-          style={{ background: DOT_TINT[entry.eventType] }}
+          style={dotStyle(entry)}
         />
       ))}
     </span>

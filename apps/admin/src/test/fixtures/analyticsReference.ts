@@ -53,7 +53,7 @@ function paymentKind(raw: string): keyof Split | null {
 function goalNameOf(r: Row): string {
   if (r.type !== "payment") return r.event_name;
   const kind = paymentKind(r.extra_data);
-  return kind === "refund" || kind === "dispute" ? kind : r.event_name;
+  return kind === "refund" || kind === "dispute" ? "" : r.event_name;
 }
 
 function isCharge(r: Row): boolean {
@@ -476,6 +476,7 @@ export function referenceGoals(rows: Row[], w: Win, bucketMs: number) {
   const g = new Map<string, { vids: Set<string>; total: number }>();
   for (const r of nonPv) {
     const goal = goalNameOf(r);
+    if (!goal) continue;
     let e = g.get(goal);
     if (!e) g.set(goal, (e = { vids: new Set(), total: 0 }));
     e.vids.add(r.visitor_id);

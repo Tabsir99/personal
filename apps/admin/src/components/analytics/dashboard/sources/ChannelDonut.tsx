@@ -4,15 +4,21 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { getFaviconUrl } from "@/components/ui/favicon";
 import type { ChannelMetric, SourceMetric } from "@/lib/analyticsTypes";
-import { donutBand } from "../shared/chartTheme";
+import { alpha, donutBand, REVERSAL } from "../shared/chartTheme";
 import { FloatingTooltipPortal } from "../shared/AnalyticsTooltip";
 import { buildChannelSliceTooltip } from "../shared/tooltipBuilders";
+import {
+  activeReversals,
+  NO_REVENUE,
+  reversalAmount,
+  revenueParts,
+  type ReversalKind,
+} from "../shared/revenue";
 import type { MetricId } from "../shared/MetricToggle";
 
 interface ChannelDonutProps {
   channels: ChannelMetric[];
   referrers: SourceMetric[];
-  /** "all", or a channel name to break down by its referrers */
   channel: string;
   metric: MetricId;
   revealed: boolean;
@@ -20,19 +26,19 @@ interface ChannelDonutProps {
 }
 
 const MAX_SLICES = 8;
-const THICKEN = 7.5; // px the band grows on EACH edge on hover
-const CORNER = 7; // px corner radius on each ring segment
-const PAD = 0.04; // angular gap between slices (radians)
-const GAP = 26; // min vertical px between labels
-const DIM = 0.72; // opacity of non-hovered bands
-const MIN_LABEL_SHARE = 0.015; // smaller slices are tooltip-only
+const THICKEN = 7.5;
+const CORNER = 7;
+const PAD = 0.04;
+const GAP = 26;
+const DIM = 0.72;
+const MIN_LABEL_SHARE = 0.015;
+const RADIAL_GAP = 2;
 const LBL = "fill-foreground text-[12.5px] font-medium";
 const SLICE_TRANSITION = "d .55s cubic-bezier(.22,1,.36,1), opacity .25s";
 
 const uv = (v: { newVisitors: number; returningVisitors: number }) =>
   v.newVisitors + v.returningVisitors;
 
-// Ring labels live in a fixed side gutter, so hosts shed their scheme and `www.`.
 const hostLabel = (raw: string) =>
   /^(?:https?:\/\/)?(?:www\.)?([^/\s]+\.[^/\s]+)/i.exec(raw)?.[1] ?? raw;
 
@@ -51,7 +57,7 @@ const splitRow = (name: string, n: number, back: boolean): Row => ({
   id: name,
   name,
   visitors: n,
-  revenue: 0,
+  revenue: NO_REVENUE,
   newVisitors: back ? 0 : n,
   returningVisitors: back ? n : 0,
 });
@@ -66,7 +72,6 @@ function rowsFor(
   if (drill.length > 1) return drill.map(toRow);
   const c = channels.find((x) => x.name === channel);
   if (!c) return [];
-  // No referrers to split by, so fall back to the one axis every channel has.
   return [
     splitRow("New visitors", c.newVisitors, false),
     splitRow("Returning visitors", c.returningVisitors, true),
@@ -122,13 +127,15 @@ export function ChannelDonut({
   const [hover, setHover] = useState<number | null>(null);
 
   const sized = rowsFor(channels, referrers, channel)
-    .map((r) => ({ ...r, size: metric === "revenue" ? r.revenue : r.visitors }))
+    .map((r) => ({
+      ...r,
+      size: metric === "revenue" ? revenueParts(r.revenue).total : r.visitors,
+    }))
     .filter((r) => r.size > 0)
     .sort((a, b) => b.size - a.size);
 
   const data = sized.slice(0, MAX_SLICES);
   const total = data.reduce((s, i) => s + i.size, 0) || 1;
-  // Shares stay against every source, not just the ones that fit on the ring.
   const visitorTotal = sized.reduce((s, i) => s + i.visitors, 0) || 1;
 
   type Slice = (typeof data)[number] & {
@@ -150,7 +157,6 @@ export function ChannelDonut({
 
   const ready = revealed && w > 0 && slices.length > 0;
 
-  // Height derives from width: the donut sits in containers that collapse to content.
   const H = Math.round(Math.max(260, Math.min(w * 0.66, 400)));
   const CX = w / 2;
   const CY = H / 2;
@@ -176,38 +182,79 @@ export function ChannelDonut({
     a1: number,
     ri: number,
     ro: number,
-    rc: number,
+    rcOuter: number,
+    rcInner: number = rcOuter,
   ) => {
-    const daO = rc / ro;
-    const daI = rc / ri;
+    const daO = rcOuter / ro;
+    const daI = rcInner / ri;
     const largeO = a1 - daO - (a0 + daO) > Math.PI ? 1 : 0;
     const largeI = a1 - daI - (a0 + daI) > Math.PI ? 1 : 0;
     const P = (r: number, t: number) => {
       const p = polar(r, t);
       return `${p.x} ${p.y}`;
     };
-    const corner = `A ${rc} ${rc} 0 0 1`;
+    const outerCorner = `A ${rcOuter} ${rcOuter} 0 0 1`;
+    const innerCorner = `A ${rcInner} ${rcInner} 0 0 1`;
     return [
-      `M ${P(ro - rc, a0)}`,
-      `${corner} ${P(ro, a0 + daO)}`,
+      `M ${P(ro - rcOuter, a0)}`,
+      `${outerCorner} ${P(ro, a0 + daO)}`,
       `A ${ro} ${ro} 0 ${largeO} 1 ${P(ro, a1 - daO)}`,
-      `${corner} ${P(ro - rc, a1)}`,
-      `L ${P(ri + rc, a1)}`,
-      `${corner} ${P(ri, a1 - daI)}`,
+      `${outerCorner} ${P(ro - rcOuter, a1)}`,
+      `L ${P(ri + rcInner, a1)}`,
+      `${innerCorner} ${P(ri, a1 - daI)}`,
       `A ${ri} ${ri} 0 ${largeI} 0 ${P(ri, a0 + daI)}`,
-      `${corner} ${P(ri + rc, a0)}`,
+      `${innerCorner} ${P(ri + rcInner, a0)}`,
       "Z",
     ].join(" ");
   };
 
   const bandOf = (s: Slice) => donutBand(s.i, data.length, metric);
 
+  const radialBands = (
+    s: Slice,
+    ri: number,
+    ro: number,
+  ): {
+    kind: ReversalKind | null;
+    ri: number;
+    ro: number;
+    roundInner: boolean;
+    roundOuter: boolean;
+  }[] => {
+    const parts = revenueParts(s.revenue);
+    const reversals = activeReversals(parts);
+    if (metric !== "revenue" || reversals.length === 0 || parts.total <= 0) {
+      return [{ kind: null, ri, ro, roundInner: true, roundOuter: true }];
+    }
+
+    const stacked: { kind: ReversalKind | null; value: number }[] = [
+      ...(parts.kept > 0 ? [{ kind: null, value: parts.kept }] : []),
+      ...reversals.map((kind) => ({
+        kind,
+        value: reversalAmount(parts, kind),
+      })),
+    ];
+    const scale = (ro - ri - (stacked.length - 1) * RADIAL_GAP) / parts.total;
+
+    let edge = ri;
+    return stacked.map(({ kind, value }, i) => {
+      const band = {
+        kind,
+        ri: edge,
+        ro: edge + Math.max(1, value * scale),
+        roundInner: i === 0,
+        roundOuter: i === stacked.length - 1,
+      };
+      edge = band.ro + RADIAL_GAP;
+      return band;
+    });
+  };
+
   const chipsFor = (name: string) =>
     channel === "all"
       ? referrers.filter((r) => r.channel === name && r.name).map((r) => r.name)
       : [name];
 
-  // Axis-aligned, so the block reads the same wherever it lands on the ring.
   const chipOffset = (k: number, n: number): [number, number] => {
     if (n === 1) return [0, 0];
     if (n === 2) return [(k - 0.5) * PITCH, 0];
@@ -286,28 +333,46 @@ export function ChannelDonut({
                 const pad = Math.min(PAD, s.sweep * 0.5);
                 const a0 = s.t0 + pad / 2;
                 const a1 = s.t1 - pad / 2;
-                const rc = Math.max(
-                  0,
-                  Math.min(
-                    CORNER,
-                    THICK / 2 - 1,
-                    ((a1 - a0) / 2 - 0.02) * INNER,
-                  ),
-                );
                 const g = hover === s.i ? THICKEN : 0;
-                const d = sector(a0, a1, INNER - g, OUTER + g, rc);
                 const band = bandOf(s);
-                return (
-                  <path
-                    key={s.id}
-                    d={d}
-                    fill={band.fill}
-                    stroke={band.edge}
-                    strokeWidth={1}
-                    opacity={dimOf(s.i)}
-                    style={{ d: `path("${d}")`, transition: SLICE_TRANSITION }}
-                  />
-                );
+
+                return radialBands(s, INNER - g, OUTER + g).map((sub) => {
+                  const thickness = sub.ro - sub.ri;
+                  const rc = Math.max(
+                    0,
+                    Math.min(
+                      CORNER,
+                      (sub.roundInner && sub.roundOuter
+                        ? thickness / 2
+                        : thickness) - 0.5,
+                      ((a1 - a0) / 2 - 0.02) * sub.ri,
+                    ),
+                  );
+                  const d = sector(
+                    a0,
+                    a1,
+                    sub.ri,
+                    sub.ro,
+                    sub.roundOuter ? rc : 0,
+                    sub.roundInner ? rc : 0,
+                  );
+                  const reversal = sub.kind ? REVERSAL[sub.kind] : null;
+                  return (
+                    <path
+                      key={`${s.id}-${sub.kind ?? "kept"}`}
+                      d={d}
+                      fill={reversal ? alpha(band.edge, 0.16) : band.fill}
+                      stroke={band.edge}
+                      strokeWidth={1}
+                      {...(reversal ? { strokeDasharray: reversal.dash } : {})}
+                      opacity={dimOf(s.i)}
+                      style={{
+                        d: `path("${d}")`,
+                        transition: SLICE_TRANSITION,
+                      }}
+                    />
+                  );
+                });
               })}
             </g>
 

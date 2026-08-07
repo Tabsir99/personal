@@ -2,9 +2,10 @@ import type { Point, TooltipSection } from "../shared/AnalyticsTooltip";
 import {
   formatBounce,
   formatConversion,
-  formatCurrency,
   formatDuration,
 } from "../shared/chartFormat";
+import { revenueSections } from "../shared/tooltipBuilders";
+import { revenueParts } from "../shared/revenue";
 import type { Selection } from "./series";
 
 function visitorMeter(nw: number, rt: number): TooltipSection {
@@ -107,17 +108,11 @@ export function tooltipSections(selection: Selection, periodLabel: string) {
         const vis = p.raw("visitors");
         const nw = p.raw("newVisitors");
         const rt = p.raw("returningVisitors");
-        const rev = p.raw("revenue");
         return [
           p.date,
           { label: "Visitors", value: vis.toLocaleString(), color: "series" },
           visitorMeter(nw, rt),
-          { label: "Revenue", value: formatCurrency(rev), color: "revenue" },
-          {
-            label: "Revenue / visitor",
-            value: vis > 0 ? `$${(rev / vis).toFixed(2)}` : "$0.00",
-            dim: true,
-          },
+          ...revenueSections(revenueParts(p.revenue), vis),
           periodLabel,
         ];
       }

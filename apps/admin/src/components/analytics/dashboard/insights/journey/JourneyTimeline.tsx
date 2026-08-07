@@ -5,17 +5,23 @@ import { Collapse } from "premium-ds/collapse";
 import { Button } from "premium-ds/button";
 import {
   ArrowsDownUpIcon,
+  ArrowUUpLeftIcon,
   CaretDownIcon,
   CopyIcon,
   CheckIcon,
   CreditCardIcon,
   EyeIcon,
   MagnifyingGlassIcon,
+  SealWarningIcon,
   TargetIcon,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { JourneyEntry, JourneyEventType } from "@/lib/analyticsTypes";
-import { formatClock, formatDayHeading, formatMoney } from "./journeyFormat";
+import { REVERSAL } from "../../shared/chartTheme";
+import type { ReversalKind } from "../../shared/revenue";
+import { reversalKindOf } from "./journeyEntryStyle";
+import { formatMoney } from "../../shared/chartFormat";
+import { formatClock, formatDayHeading } from "./journeyFormat";
 
 const TIMELINE_WINDOW = 14;
 
@@ -25,6 +31,24 @@ const ENTRY_ICON: Record<JourneyEventType, typeof EyeIcon> = {
   custom: TargetIcon,
   payment: CreditCardIcon,
 };
+
+const REVERSAL_ICON: Record<ReversalKind, typeof EyeIcon> = {
+  refund: ArrowUUpLeftIcon,
+  dispute: SealWarningIcon,
+};
+
+const REVERSAL_VERB: Record<ReversalKind, string> = {
+  refund: "Refunded",
+  dispute: "Charged back",
+};
+
+function paymentVerb(entry: JourneyEntry): string {
+  const reversal = reversalKindOf(entry);
+  if (reversal) return REVERSAL_VERB[reversal];
+  return entry.eventType === "payment" && entry.data.kind === "dispute"
+    ? "Dispute reversed"
+    : "Paid";
+}
 
 function Chip({ children }: { children: ReactNode }) {
   return (
@@ -43,7 +67,7 @@ function entryText(entry: JourneyEntry): string {
     case "custom":
       return `Triggered event: ${entry.data.eventName}`;
     case "payment":
-      return `Paid ${formatMoney(entry.data.amount)}`;
+      return `${paymentVerb(entry)} ${formatMoney(Math.abs(entry.data.amount))}`;
   }
 }
 
@@ -85,15 +109,32 @@ function EntryContent({ entry }: { entry: JourneyEntry }) {
           <Chip>{entry.data.eventName}</Chip>
         </>
       );
-    case "payment":
+    case "payment": {
+      const reversal = reversalKindOf(entry);
       return (
         <>
-          <span className="font-medium text-destructive">Paid</span>
-          <code className="rounded-md bg-destructive/10 px-1.5 py-0.5 font-mono text-xs font-medium text-destructive">
-            {formatMoney(entry.data.amount)}
+          <span className="font-medium text-destructive">
+            {paymentVerb(entry)}
+          </span>
+          <code
+            className={cn(
+              "rounded-md px-1.5 py-0.5 font-mono text-xs font-medium text-destructive",
+              !reversal && "bg-destructive/10",
+            )}
+            {...(reversal
+              ? {
+                  style: {
+                    background: REVERSAL[reversal].fill,
+                    border: `1px ${REVERSAL[reversal].borderStyle} ${REVERSAL[reversal].stroke}`,
+                  },
+                }
+              : {})}
+          >
+            {formatMoney(Math.abs(entry.data.amount))}
           </code>
         </>
       );
+    }
   }
 }
 
@@ -117,7 +158,8 @@ function ParameterTable({ rows }: { rows: [string, string][] }) {
 function TimelineRow({ entry }: { entry: JourneyEntry }) {
   const [expanded, setExpanded] = useState(false);
 
-  const Icon = ENTRY_ICON[entry.eventType];
+  const reversal = reversalKindOf(entry);
+  const Icon = reversal ? REVERSAL_ICON[reversal] : ENTRY_ICON[entry.eventType];
   const isPayment = entry.eventType === "payment";
 
   const parameters: [string, string][] =
@@ -131,14 +173,20 @@ function TimelineRow({ entry }: { entry: JourneyEntry }) {
         : [];
 
   return (
-    <div className={cn(isPayment && "bg-destructive/6")}>
+    <div
+      className={cn(
+        isPayment && !reversal && "bg-destructive/6",
+        reversal && "border-l-2 border-dotted border-destructive/40",
+      )}
+      {...(reversal ? { style: { background: REVERSAL[reversal].fill } } : {})}
+    >
       <div className="flex items-center gap-3 px-4 py-2.5">
         <Icon
           className={cn(
             "size-4 shrink-0",
             isPayment ? "text-destructive" : "text-muted-foreground/50",
           )}
-          weight={isPayment ? "fill" : "regular"}
+          weight={isPayment && !reversal ? "fill" : "regular"}
         />
 
         <span className="flex min-w-0 flex-1 items-center gap-1.5 text-sm">

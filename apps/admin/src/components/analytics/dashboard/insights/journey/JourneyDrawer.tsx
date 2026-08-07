@@ -8,14 +8,16 @@ import { EyeIcon, SparkleIcon } from "@phosphor-icons/react";
 import { CountryFlag } from "@/lib/countryUtils";
 import type { JourneyVisitor } from "@/lib/analyticsTypes";
 import { SystemIcon } from "../../shared/SystemIcon";
+import {
+  activeReversals,
+  reversalAmount,
+  revenueParts,
+  REVERSAL_LABEL,
+} from "../../shared/revenue";
 import { ActivityCalendar } from "./ActivityCalendar";
 import { JourneyTimeline } from "./JourneyTimeline";
-import {
-  formatMoney,
-  humanizeDuration,
-  isAnonymous,
-  visitorLabel,
-} from "./journeyFormat";
+import { formatMoney } from "../../shared/chartFormat";
+import { humanizeDuration, isAnonymous, visitorLabel } from "./journeyFormat";
 
 function ProfileFact({
   icon,
@@ -50,7 +52,7 @@ function ProfilePanel({ visitor }: { visitor: JourneyVisitor }) {
         <span className="truncate text-base font-semibold text-foreground">
           {label}
         </span>
-        {visitor.amount > 0 && (
+        {visitor.revenue.charge > 0 && (
           <Badge tone="danger" variant="glass" size="sm">
             Customer
           </Badge>
@@ -142,6 +144,9 @@ function ProfilePanel({ visitor }: { visitor: JourneyVisitor }) {
 }
 
 function StatsPanel({ visitor }: { visitor: JourneyVisitor }) {
+  const parts = revenueParts(visitor.revenue);
+  const reversals = activeReversals(parts);
+
   return (
     <div className="flex min-h-0 w-96 shrink-0 flex-col overflow-y-auto px-14 py-8">
       <div className="flex items-start justify-between gap-4">
@@ -154,9 +159,11 @@ function StatsPanel({ visitor }: { visitor: JourneyVisitor }) {
         </div>
         <div>
           <div className="text-xl font-semibold text-foreground tabular-nums">
-            {formatMoney(visitor.amount)}
+            {formatMoney(parts.net)}
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">spent</div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            {reversals.length > 0 ? "net" : "spent"}
+          </div>
         </div>
         <div>
           <div className="text-xl font-semibold whitespace-nowrap text-foreground">
@@ -169,6 +176,17 @@ function StatsPanel({ visitor }: { visitor: JourneyVisitor }) {
           </div>
         </div>
       </div>
+
+      {reversals.length > 0 && (
+        <div className="mt-6 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span>{formatMoney(parts.gross)} charged</span>
+          {reversals.map((kind) => (
+            <span key={kind}>
+              -{formatMoney(reversalAmount(parts, kind))} {REVERSAL_LABEL[kind]}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="mt-9">
         <div className="mb-3.5 text-xs tracking-wide text-muted-foreground/60 uppercase">

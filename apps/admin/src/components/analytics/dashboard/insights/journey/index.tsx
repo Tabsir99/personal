@@ -12,11 +12,17 @@ import { CountryFlag } from "@/lib/countryUtils";
 import { getFaviconUrl } from "@/components/ui/favicon";
 import type { JourneyVisitor } from "@/lib/analyticsTypes";
 import { SystemIcon } from "../../shared/SystemIcon";
+import {
+  activeReversals,
+  reversalAmount,
+  revenueParts,
+  REVERSAL_LABEL,
+} from "../../shared/revenue";
 import { JourneyDots } from "./JourneyDots";
 import { JourneyDrawer } from "./JourneyDrawer";
+import { formatMoney } from "../../shared/chartFormat";
 import {
   formatCalendarMoment,
-  formatMoney,
   humanizeDuration,
   isAnonymous,
   sourceDomain,
@@ -39,7 +45,7 @@ function VisitorCell({ visitor }: { visitor: JourneyVisitor }) {
           <span className="truncate text-sm font-medium text-foreground">
             {label}
           </span>
-          {visitor.amount > 0 && (
+          {visitor.revenue.charge > 0 && (
             <Badge tone="success" variant="outline" size="sm">
               Customer
             </Badge>
@@ -99,6 +105,38 @@ function SourceCell({ visitor }: { visitor: JourneyVisitor }) {
   );
 }
 
+function SpentCell({ visitor }: { visitor: JourneyVisitor }) {
+  const parts = revenueParts(visitor.revenue);
+  const reversals = activeReversals(parts);
+
+  if (parts.total <= 0) {
+    return <span className="text-muted-foreground/50">—</span>;
+  }
+
+  return (
+    <span className="flex flex-col items-start gap-1.5">
+      <Badge
+        size="md"
+        variant="glass"
+        pill
+        tone={parts.net > 0 ? "success" : "danger"}
+      >
+        {formatMoney(parts.net)}
+      </Badge>
+      {reversals.length > 0 && (
+        <span className="text-xs whitespace-nowrap text-muted-foreground">
+          {reversals
+            .map(
+              (kind) =>
+                `-${formatMoney(reversalAmount(parts, kind))} ${REVERSAL_LABEL[kind]}`,
+            )
+            .join(" · ")}
+        </span>
+      )}
+    </span>
+  );
+}
+
 export function JourneyTab() {
   const {
     journey,
@@ -147,16 +185,9 @@ export function JourneyTab() {
         render: (v) => <SourceCell visitor={v} />,
       },
       {
-        key: "amount",
+        key: "revenue",
         label: <span className="pr-10">Spent</span>,
-        render: (v) =>
-          v.amount > 0 ? (
-            <Badge size="md" variant="glass" pill tone="success">
-              {formatMoney(v.amount)}
-            </Badge>
-          ) : (
-            <span className="text-muted-foreground/50">—</span>
-          ),
+        render: (v) => <SpentCell visitor={v} />,
       },
       {
         key: "timeBeforeGoal",

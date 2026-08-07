@@ -10,7 +10,9 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip, type TooltipContentProps } from "recharts";
-import { CHART, type ChartColors } from "./chartTheme";
+import type { RevenueSplit } from "@/lib/analyticsQuery";
+import { swatchStyle, type ChartColors } from "./chartTheme";
+import { NO_REVENUE } from "./revenue";
 import { cn } from "@/lib/utils";
 
 export interface Point {
@@ -18,6 +20,7 @@ export interface Point {
   date: string;
   get: (key?: string) => number;
   raw: (key: string) => number;
+  revenue: RevenueSplit;
 }
 
 export type TooltipRow = {
@@ -27,6 +30,8 @@ export type TooltipRow = {
   dim?: boolean;
 };
 
+export type TooltipGroup = TooltipRow & { parts: TooltipRow[] };
+
 export type TooltipMeterSegment = {
   value: number;
   color: ChartColors;
@@ -34,7 +39,8 @@ export type TooltipMeterSegment = {
 };
 export type TooltipMeter = { meter: TooltipMeterSegment[] };
 
-export type TooltipSection = TooltipRow | TooltipMeter | ReactNode;
+export type TooltipSection =
+  TooltipRow | TooltipGroup | TooltipMeter | ReactNode;
 
 function isRow(s: TooltipSection): s is TooltipRow {
   return (
@@ -44,6 +50,10 @@ function isRow(s: TooltipSection): s is TooltipRow {
     "label" in s &&
     "value" in s
   );
+}
+
+function isGroup(s: TooltipSection): s is TooltipGroup {
+  return isRow(s) && "parts" in s;
 }
 
 function isMeter(s: TooltipSection): s is TooltipMeter {
@@ -56,19 +66,19 @@ export function MeterBar({ segments }: { segments: TooltipMeterSegment[] }) {
   const total = segments.reduce((sum, s) => sum + s.value, 0) || 1;
   return (
     <div className="px-3.5 pt-1 pb-3">
-      <div className="flex h-1.5 gap-0.5 overflow-hidden rounded-full">
+      <div className="flex h-2 gap-0.5 overflow-hidden rounded-full">
         {segments.map((s, i) => (
           <span
             key={i}
             className="h-full first:rounded-l-full last:rounded-r-full"
             style={{
               width: `${(s.value / total) * 100}%`,
-              background: CHART[s.color],
+              ...swatchStyle(s.color),
             }}
           />
         ))}
       </div>
-      <div className="mt-1.5 flex justify-between text-xs text-background/55">
+      <div className="mt-1.5 flex justify-between gap-3 text-xs text-background/55">
         {segments.map((s, i) => (
           <span key={i}>{s.label}</span>
         ))}
@@ -77,16 +87,20 @@ export function MeterBar({ segments }: { segments: TooltipMeterSegment[] }) {
   );
 }
 
+function Swatch({ color }: { color?: ChartColors }) {
+  return (
+    <span
+      className="size-2.5 shrink-0 rounded-sm"
+      {...(color ? { style: swatchStyle(color) } : {})}
+    />
+  );
+}
+
 export function Row({ row }: { row: TooltipRow }) {
   return (
     <div className="flex items-center justify-between gap-8 px-3.5 py-2.5">
       <span className="flex items-center gap-2">
-        {row.color && (
-          <span
-            className="size-2.5 shrink-0 rounded-sm"
-            style={{ background: CHART[row.color] }}
-          />
-        )}
+        {row.color && <Swatch color={row.color} />}
         <span
           className={`text-sm ${row.dim ? "text-background/45" : "text-background/70"}`}
         >
@@ -102,6 +116,35 @@ export function Row({ row }: { row: TooltipRow }) {
   );
 }
 
+export function RowGroup({ group }: { group: TooltipGroup }) {
+  return (
+    <div className="px-3.5 py-2.5">
+      <div className="flex items-center justify-between gap-8">
+        <span className="flex items-center gap-2">
+          {group.color && <Swatch color={group.color} />}
+          <span className="text-sm text-background/70">{group.label}</span>
+        </span>
+        <span className="font-mono text-sm font-semibold text-background tabular-nums">
+          {group.value}
+        </span>
+      </div>
+      <div className="mt-2 ml-1 flex flex-col gap-2 border-l border-background/12 pl-3">
+        {group.parts.map((part, i) => (
+          <div key={i} className="flex items-center justify-between gap-8">
+            <span className="flex items-center gap-2">
+              <Swatch {...(part.color ? { color: part.color } : {})} />
+              <span className="text-xs text-background/45">{part.label}</span>
+            </span>
+            <span className="font-mono text-xs text-background/65 tabular-nums">
+              {part.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export interface AnalyticsTooltipCardProps {
   sections: TooltipSection[];
   className?: string;
@@ -111,6 +154,10 @@ export function AnalyticsTooltipCard({
   sections,
   className,
 }: AnalyticsTooltipCardProps) {
+  const items = sections.filter(
+    (s) => s !== null && s !== undefined && s !== false,
+  );
+
   return (
     <div
       className={cn(
@@ -118,13 +165,15 @@ export function AnalyticsTooltipCard({
         className,
       )}
     >
-      {sections.map((s, i) => {
+      {items.map((s, i) => {
         const divider = i > 0 && !isMeter(s);
         return (
           <Fragment key={i}>
             {divider && <div className="h-px bg-background/10" />}
             {isMeter(s) ? (
               <MeterBar segments={s.meter} />
+            ) : isGroup(s) ? (
+              <RowGroup group={s} />
             ) : isRow(s) ? (
               <Row row={s} />
             ) : isValidElement(s) ? (
@@ -145,12 +194,20 @@ export function AnalyticsTooltipCard({
   );
 }
 
-type CustomTooltipContentProps = TooltipContentProps<number | string, string> & {
+type CustomTooltipContentProps = TooltipContentProps<
+  number | string,
+  string
+> & {
   sections: (point: Point) => TooltipSection[];
 };
 
 const TooltipContent = memo(
-  function TooltipContent({ active, payload, label, sections }: CustomTooltipContentProps) {
+  function TooltipContent({
+    active,
+    payload,
+    label,
+    sections,
+  }: CustomTooltipContentProps) {
     if (!active || !payload?.length || label == null) return null;
 
     const point: Point = {
@@ -161,16 +218,16 @@ const TooltipContent = memo(
         day: "numeric",
       }),
       get: (key) => {
-        const entry = key
-          ? payload.find((p) => p.dataKey === key)
-          : payload[0];
+        const entry = key ? payload.find((p) => p.dataKey === key) : payload[0];
         return Number(entry?.value) || 0;
       },
       raw: (key) => {
-        const row = payload[0]?.payload as
-          Record<string, unknown> | undefined;
+        const row = payload[0]?.payload as Record<string, unknown> | undefined;
         return Number(row?.[key]) || 0;
       },
+      revenue:
+        (payload[0]?.payload as { revenue?: RevenueSplit } | undefined)
+          ?.revenue ?? NO_REVENUE,
     };
 
     const items = sections(point).filter(
@@ -193,19 +250,18 @@ interface AnalyticsTooltipProps {
   sections: (point: Point) => TooltipSection[];
 }
 
-export const AnalyticsTooltip = memo(
-  function AnalyticsTooltip({ sections }: AnalyticsTooltipProps) {
-    return (
-      <Tooltip
-        animationDuration={500}
-        animationEasing="ease-out"
-        offset={50}
-        content={(props) => <TooltipContent {...props} sections={sections} />}
-      />
-    );
-  },
-  () => true,
-);
+export const AnalyticsTooltip = memo(function AnalyticsTooltip({
+  sections,
+}: AnalyticsTooltipProps) {
+  return (
+    <Tooltip
+      animationDuration={500}
+      animationEasing="ease-out"
+      offset={50}
+      content={(props) => <TooltipContent {...props} sections={sections} />}
+    />
+  );
+});
 
 export function FloatingTooltipPortal({
   sections,
@@ -264,5 +320,3 @@ export function FloatingTooltipPortal({
     document.body,
   );
 }
-
-

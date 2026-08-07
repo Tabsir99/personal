@@ -2,7 +2,7 @@
 
 import { useShallow } from "zustand/react/shallow";
 import { useAnalyticsStore } from "../../../stores/analyticsStore";
-import { DataPanel, PANEL_HEIGHT } from "./shared/DataPanel";
+import { DataPanel, PANEL_HEIGHT, rankedMetrics } from "./shared/DataPanel";
 import { formatCountryName, CountryFlag } from "@/lib/countryUtils";
 
 export function LocationsPanel() {
@@ -30,7 +30,7 @@ export function LocationsPanel() {
           items: (locations?.countries ?? []).map((l) => ({
             name: formatCountryName(l.name),
             icon: <CountryFlag code={l.country} />,
-            values: { visitors: l.uv, revenue: l.revenue },
+            ...rankedMetrics(l.uv, l.revenue),
           })),
         },
         {
@@ -39,7 +39,7 @@ export function LocationsPanel() {
           items: (locations?.regions ?? []).map((l) => ({
             name: l.name,
             icon: <CountryFlag code={l.country} />,
-            values: { visitors: l.uv, revenue: l.revenue },
+            ...rankedMetrics(l.uv, l.revenue),
           })),
         },
         {
@@ -48,7 +48,7 @@ export function LocationsPanel() {
           items: (locations?.cities ?? []).map((l) => ({
             name: l.region ? `${l.name}, ${l.region}` : l.name,
             icon: <CountryFlag code={l.country} />,
-            values: { visitors: l.uv, revenue: l.revenue },
+            ...rankedMetrics(l.uv, l.revenue),
           })),
         },
       ]}

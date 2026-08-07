@@ -4,16 +4,24 @@ import { useMemo, useState } from "react";
 import { Tabs, TabPanel } from "premium-ds/tabs";
 import { UIMotion } from "premium-ds/motion-tokens";
 import { motion } from "motion/react";
+import type { RevenueSplit } from "@/lib/analyticsQuery";
 import { METRIC_IDS, MetricId, MetricToggle, METRICS } from "./MetricToggle";
 import { useReveal } from "./reveal";
 import { FloatingTooltipPortal } from "./AnalyticsTooltip";
 import { buildRankedItemTooltip } from "./tooltipBuilders";
+import { RevenueSplitBar } from "./RevenueSplitBar";
+import { netRevenue, revenueParts } from "./revenue";
 
 export interface RankedItem {
   name: string;
   icon?: React.ReactNode;
   values: Record<MetricId, number>;
+  revenue: RevenueSplit;
   raw?: Record<string, unknown>;
+}
+
+export function rankedMetrics(visitors: number, revenue: RevenueSplit) {
+  return { values: { visitors, revenue: netRevenue(revenue) }, revenue };
 }
 
 export type PanelTab = {
@@ -86,6 +94,10 @@ export function DataPanel({ tabs }: { tabs: PanelTab[] }) {
   );
 }
 
+function barExtent(item: RankedItem, id: MetricId): number {
+  return id === "revenue" ? revenueParts(item.revenue).total : item.values[id];
+}
+
 function RankedList({
   items,
   sortKey,
@@ -105,7 +117,7 @@ function RankedList({
   const max = useMemo(() => {
     const m = {} as Record<MetricId, number>;
     for (const id of METRIC_IDS)
-      m[id] = Math.max(1, ...visible.map((it) => it.values[id]));
+      m[id] = Math.max(1, ...visible.map((it) => barExtent(it, id)));
     return m;
   }, [visible]);
 
@@ -137,16 +149,26 @@ function RankedList({
                 initial={{ width: 0 }}
                 animate={{
                   width: revealed
-                    ? `${(item.values[id] / max[id]) * SCALE * 100}%`
+                    ? `${(barExtent(item, id) / max[id]) * SCALE * 100}%`
                     : 0,
                 }}
                 transition={UIMotion.t.layout}
                 style={{
                   order: id === sortKey ? 0 : 1,
-                  background: METRICS[id].color,
+                  ...(id === "revenue"
+                    ? {}
+                    : { background: METRICS[id].color }),
                 }}
                 className={`h-full shrink-0 ${id === sortKey ? "rounded-none" : "rounded-r-sm"}`}
-              />
+              >
+                {id === "revenue" && (
+                  <RevenueSplitBar
+                    parts={revenueParts(item.revenue)}
+                    keptColor={METRICS.revenue.color}
+                    className="h-full rounded-r-sm"
+                  />
+                )}
+              </motion.div>
             ))}
           </div>
           <motion.div

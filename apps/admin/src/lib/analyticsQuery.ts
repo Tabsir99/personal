@@ -71,7 +71,7 @@ export const REVERSAL_KINDS = ["refund", "dispute"] as const;
 
 export const GOAL_NAME = `multiIf(
   ${F.type} != 'payment', ${F.eventName},
-  ${PAYMENT_KIND} IN (${REVERSAL_KINDS.map((k) => `'${k}'`).join(", ")}), ${PAYMENT_KIND},
+  ${PAYMENT_KIND} IN (${REVERSAL_KINDS.map((k) => `'${k}'`).join(", ")}), '',
   ${F.eventName}
 )`;
 

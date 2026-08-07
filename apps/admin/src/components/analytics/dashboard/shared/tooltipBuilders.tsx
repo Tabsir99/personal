@@ -1,13 +1,59 @@
 "use client";
 
 import type { ReactNode } from "react";
+import type { RevenueSplit } from "@/lib/analyticsQuery";
 import type { TooltipSection } from "./AnalyticsTooltip";
-import { formatCount, formatCurrency } from "./chartFormat";
+import { formatCount, formatMoney } from "./chartFormat";
+import {
+  activeReversals,
+  netRevenue,
+  reversalAmount,
+  revenueParts,
+  REVERSAL_TITLE,
+  type RevenueParts,
+} from "./revenue";
+
+export function revenueSections(
+  parts: RevenueParts,
+  visitors: number,
+): TooltipSection[] {
+  if (parts.total <= 0) return [];
+
+  const reversals = activeReversals(parts);
+  const sections: TooltipSection[] = [
+    reversals.length === 0
+      ? { label: "Revenue", value: formatMoney(parts.net), color: "revenue" }
+      : {
+          label: "Net revenue",
+          value: formatMoney(parts.net),
+          color: "revenue",
+          parts: [
+            { label: "Charged", value: formatMoney(parts.gross) },
+            ...reversals.map((kind) => ({
+              label: REVERSAL_TITLE[kind],
+              value: `-${formatMoney(reversalAmount(parts, kind))}`,
+              color: kind,
+            })),
+          ],
+        },
+  ];
+
+  if (visitors > 0) {
+    sections.push({
+      label: "Revenue / visitor",
+      value: formatMoney(parts.net / visitors),
+      dim: true,
+    });
+  }
+
+  return sections;
+}
 
 export interface RankedTooltipItem {
   name: string;
   icon?: ReactNode;
   values: Record<string, number>;
+  revenue: RevenueSplit;
   raw?: Record<string, unknown>;
 }
 
@@ -16,7 +62,6 @@ export function buildRankedItemTooltip(
   totalVisitors: number,
 ): TooltipSection[] {
   const vis = item.values.visitors || 0;
-  const rev = item.values.revenue || 0;
   const share = ((vis / totalVisitors) * 100).toFixed(1);
   const nw = Number(item.raw?.newVisitors);
   const rt = Number(item.raw?.returningVisitors);
@@ -77,16 +122,7 @@ export function buildRankedItemTooltip(
     );
   }
 
-  if (rev > 0 && vis > 0) {
-    sections.push(
-      { label: "Revenue", value: formatCurrency(rev), color: "revenue" },
-      {
-        label: "Revenue / visitor",
-        value: `$${(rev / vis).toFixed(2)}`,
-        dim: true,
-      },
-    );
-  }
+  sections.push(...revenueSections(revenueParts(item.revenue), vis));
 
   return sections;
 }
@@ -96,7 +132,7 @@ export interface ChannelSliceTooltipData {
   value: number;
   newVisitors?: number;
   returningVisitors?: number;
-  revenue?: number;
+  revenue: RevenueSplit;
 }
 
 export function buildChannelSliceTooltip(
@@ -139,15 +175,8 @@ export function buildChannelSliceTooltip(
     });
   }
 
-  if (typeof slice.revenue === "number" && slice.revenue > 0) {
-    sections.push(
-      { label: "Revenue", value: formatCurrency(slice.revenue), color: "revenue" },
-      {
-        label: "Revenue / visitor",
-        value: slice.value > 0 ? `$${(slice.revenue / slice.value).toFixed(2)}` : "$0.00",
-        dim: true,
-      },
-    );
+  if (netRevenue(slice.revenue) !== 0 || slice.revenue.charge > 0) {
+    sections.push(...revenueSections(revenueParts(slice.revenue), slice.value));
   }
 
   return sections;

@@ -68,7 +68,6 @@ export function GoalsTab({ query, entryKey, className }: GoalsTabProps) {
             granularity={granularity}
             yMax={yMax}
           />
-          {/* Inset to GoalsChart's plot rect (YAxis 36, margin r12/t8, XAxis 30) so the wipe covers only the lines. */}
           <div
             key={entryKey}
             aria-hidden

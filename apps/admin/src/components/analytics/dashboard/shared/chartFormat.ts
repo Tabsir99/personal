@@ -12,6 +12,17 @@ export function formatCurrency(n: number): string {
   return `$${Math.round(n)}`;
 }
 
+export function formatSignedCurrency(value: number): string {
+  return value < 0 ? `-${formatCurrency(-value)}` : formatCurrency(value);
+}
+
+export function formatMoney(value: number): string {
+  return `${value < 0 ? "-" : ""}$${Math.abs(value).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
 export function formatDuration(seconds: number): string {
   const s = Math.round(seconds);
   if (s < 60) return `${s}s`;
@@ -37,7 +48,6 @@ export type FormattableMetric =
   | "sessionDuration"
   | "revenue";
 
-/** Single source of truth for turning a metric value into display text. */
 export function formatMetric(metric: FormattableMetric, value: number): string {
   switch (metric) {
     case "visitors":
@@ -55,7 +65,6 @@ export function formatMetric(metric: FormattableMetric, value: number): string {
   }
 }
 
-/** Round `raw` up to the nearest 1/2/5 × 10ⁿ — a human-friendly axis step. */
 export function niceStep(raw: number): number {
   if (raw <= 0) return 1;
   const pow = 10 ** Math.floor(Math.log10(raw));
@@ -63,8 +72,6 @@ export function niceStep(raw: number): number {
   return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * pow;
 }
 
-/** YAxis domain-max with ~10% headroom, so the line cap and active dot are
- * never clipped at the top edge. Use as `domain={[0, headroomTop]}`. */
 export const headroomTop = (dataMax: number): number =>
   dataMax > 0 ? dataMax * 1.1 : 1;
 
@@ -76,7 +83,6 @@ export const PERIOD_LABEL: Record<Period, string> = {
   last90d: "Last 90 days",
 };
 
-/** Axis tick label for a bucket timestamp: time for hourly, date otherwise. */
 export function formatTimestamp(ts: number, granularity: Granularity): string {
   const d = new Date(ts);
   if (granularity === "hourly") {

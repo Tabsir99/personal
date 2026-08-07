@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-const STEP = 200;
+const STEP = 300;
 
 const batch: {
   top: number;

@@ -5,6 +5,7 @@ import { UIMotion } from "premium-ds/motion-tokens";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowsDownUp } from "@phosphor-icons/react";
 import { CHART, alpha } from "./chartTheme";
+import { formatMoney } from "./chartFormat";
 
 export const METRICS = {
   visitors: {
@@ -14,8 +15,8 @@ export const METRICS = {
   },
   revenue: {
     label: "Revenue",
-    format: (n: number) => `$${n.toLocaleString()}`,
-    color: alpha(CHART["revenue"], 0.2),
+    format: (n: number) => formatMoney(n),
+    color: alpha(CHART["revenue"], 0.22),
   },
 } as const satisfies Record<
   string,
@@ -29,8 +30,6 @@ export const METRICS = {
 export const METRIC_IDS = Object.keys(METRICS) as MetricId[];
 export type MetricId = keyof typeof METRICS;
 
-// Sort control for a ranked list: shows the active metric's label and cycles to
-// the next on click. The label rolls up as it changes.
 export function MetricToggle({
   active,
   setActive,

@@ -1,4 +1,6 @@
 "use server";
+import { randomUUID } from "crypto";
+import { z } from "zod";
 import { FieldValue } from "firebase-admin/firestore";
 import { wrap } from "@/lib/appUtils";
 import { requireAuth } from "@/lib/requireAuth";
@@ -6,10 +8,14 @@ import { setupStripe } from "@/lib/stripeStore";
 import {
   websitesDocRef,
   websiteSchema,
+  websiteInputSchema,
+  websitePatchSchema,
   readWebsiteConfig,
-  slugify,
   syncOriginsToKV,
   deleteWebsiteFromKV,
+  type AnalyticsWebsite,
+  type WebsiteInput,
+  type WebsitePatch,
 } from "@/lib/analyticsWebsites";
 
 export type { AnalyticsWebsite } from "@/lib/analyticsWebsites";
@@ -19,75 +25,65 @@ export const getAnalyticsWebsites = wrap(async () => {
   return (await readWebsiteConfig()).websites;
 });
 
-export const addAnalyticsWebsite = wrap(
-  async (input: {
-    name: string;
-    origins: string[];
-    restrictedKey?: string;
-  }) => {
-    await requireAuth();
+export const addAnalyticsWebsite = wrap(async (rawInput: WebsiteInput) => {
+  await requireAuth();
 
-    const baseId = slugify(input.name);
-    if (!baseId) throw new Error("Name must produce a valid ID");
+  const { name, origins, restrictedKey } = websiteInputSchema.parse(rawInput);
 
-    const config = await readWebsiteConfig();
+  const config = await readWebsiteConfig();
 
-    let id = baseId;
-    let suffix = 1;
-    while (config.websites.some((w) => w.id === id)) {
-      id = `${baseId}-${suffix++}`;
-    }
+  let id = randomUUID();
+  while (config.websites.some((w) => w.id === id)) id = randomUUID();
 
-    const setup = input.restrictedKey
-      ? await setupStripe(id, input.restrictedKey)
-      : null;
+  const setup = restrictedKey ? await setupStripe(id, restrictedKey) : null;
 
-    const website = websiteSchema.parse({
-      id,
-      name: input.name,
-      origins: input.origins,
-      createdAt: Date.now(),
-      ...(setup ? { stripe: setup.marker } : {}),
-    });
+  const website = websiteSchema.parse({
+    id,
+    name,
+    origins,
+    createdAt: Date.now(),
+    ...(setup ? { stripe: setup.marker } : {}),
+  });
 
-    config.websites.push(website);
-    await websitesDocRef.set(
-      {
-        websites: config.websites,
-        ...(setup ? { stripeSecrets: { [id]: setup.secret } } : {}),
-      },
-      { merge: true },
-    );
-    await syncOriginsToKV(website.id, website.origins);
+  config.websites.push(website);
+  await websitesDocRef.set(
+    {
+      websites: config.websites,
+      ...(setup ? { stripeSecrets: { [id]: setup.secret } } : {}),
+    },
+    { merge: true },
+  );
+  await syncOriginsToKV(website.id, website.origins);
 
-    return website;
-  },
-);
+  return website;
+});
 
 export const updateAnalyticsWebsite = wrap(
-  async (
-    websiteId: string,
-    patch: { name?: string; origins?: string[]; restrictedKey?: string },
-  ) => {
+  async (rawWebsiteId: string, rawPatch: WebsitePatch) => {
     await requireAuth();
 
-    const config = await readWebsiteConfig();
-    const idx = config.websites.findIndex((w) => w.id === websiteId);
-    if (idx === -1) throw new Error(`Website "${websiteId}" not found`);
+    const websiteId = z.uuid().parse(rawWebsiteId);
+    const { name, origins, restrictedKey } = websitePatchSchema.parse(rawPatch);
 
-    const { restrictedKey, ...websitePatch } = patch;
+    const config = await readWebsiteConfig();
+    const existing = config.websites.find((w) => w.id === websiteId);
+    if (!existing) throw new Error(`Website "${websiteId}" not found`);
 
     const setup = restrictedKey
       ? await setupStripe(websiteId, restrictedKey)
       : null;
 
-    const updated = {
-      ...config.websites[idx],
-      ...websitePatch,
-      ...(setup ? { stripe: setup.marker } : {}),
-    };
-    websiteSchema.parse(updated);
-    config.websites[idx] = updated;
+    const updated: AnalyticsWebsite = websiteSchema.parse({
+      id: existing.id,
+      createdAt: existing.createdAt,
+      name: name ?? existing.name,
+      origins: origins ?? existing.origins,
+      ...((setup?.marker ?? existing.stripe)
+        ? { stripe: setup?.marker ?? existing.stripe }
+        : {}),
+    });
+
+    config.websites[config.websites.indexOf(existing)] = updated;
 
     await websitesDocRef.set(
       {
@@ -96,17 +92,16 @@ export const updateAnalyticsWebsite = wrap(
       },
       { merge: true },
     );
-    if (websitePatch.origins) {
-      await syncOriginsToKV(websiteId, websitePatch.origins);
-    }
+    if (origins) await syncOriginsToKV(websiteId, origins);
 
     return updated;
   },
 );
 
-export const deleteAnalyticsWebsite = wrap(async (websiteId: string) => {
+export const deleteAnalyticsWebsite = wrap(async (rawWebsiteId: string) => {
   await requireAuth();
 
+  const websiteId = z.uuid().parse(rawWebsiteId);
   const config = await readWebsiteConfig();
   if (!config.websites.some((w) => w.id === websiteId)) {
     throw new Error(`Website "${websiteId}" not found`);

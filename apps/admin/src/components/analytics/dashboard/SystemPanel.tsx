@@ -2,7 +2,7 @@
 
 import { useShallow } from "zustand/react/shallow";
 import { useAnalyticsStore } from "../../../stores/analyticsStore";
-import { DataPanel, PANEL_HEIGHT } from "./shared/DataPanel";
+import { DataPanel, PANEL_HEIGHT, rankedMetrics } from "./shared/DataPanel";
 import { SystemIcon } from "./shared/SystemIcon";
 
 export function SystemPanel() {
@@ -30,7 +30,7 @@ export function SystemPanel() {
           items: (system?.browsers ?? []).map((s) => ({
             name: s.name,
             icon: <SystemIcon kind="browser" name={s.name} />,
-            values: { visitors: s.uv, revenue: s.revenue },
+            ...rankedMetrics(s.uv, s.revenue),
           })),
         },
         {
@@ -39,7 +39,7 @@ export function SystemPanel() {
           items: (system?.os ?? []).map((s) => ({
             name: s.name,
             icon: <SystemIcon kind="os" name={s.name} />,
-            values: { visitors: s.uv, revenue: s.revenue },
+            ...rankedMetrics(s.uv, s.revenue),
           })),
         },
         {
@@ -48,7 +48,7 @@ export function SystemPanel() {
           items: (system?.devices ?? []).map((s) => ({
             name: s.name,
             icon: <SystemIcon kind="device" name={s.name} />,
-            values: { visitors: s.uv, revenue: s.revenue },
+            ...rankedMetrics(s.uv, s.revenue),
           })),
         },
       ]}

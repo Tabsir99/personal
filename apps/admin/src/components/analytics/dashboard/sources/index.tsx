@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useAnalyticsStore } from "@/stores/analyticsStore";
-import { DataPanel, PANEL_HEIGHT } from "../shared/DataPanel";
+import { DataPanel, PANEL_HEIGHT, rankedMetrics } from "../shared/DataPanel";
 import { ChannelDonut } from "./ChannelDonut";
 import { formatCount } from "../shared/chartFormat";
 import { Favicon } from "@/components/ui/favicon";
@@ -16,9 +16,9 @@ import {
 type CampaignSelection = CampaignDimension | "all";
 
 const dimLabel = (text: string, count: number) => (
-  <span className="flex w-full items-center justify-between gap-3 text-xs py-0.5">
+  <span className="flex w-full items-center justify-between gap-3 py-0.5 text-xs">
     <span className="truncate font-semibold">{text}</span>
-    <span className="shrink-0 text-muted-foreground tabular-nums font-mono">
+    <span className="shrink-0 font-mono text-muted-foreground tabular-nums">
       ({formatCount(count)})
     </span>
   </span>
@@ -45,7 +45,6 @@ export function SourcesPanel() {
   const channels = sources?.channels ?? [];
   const uvOf = (c: { newVisitors: number; returningVisitors: number }) =>
     c.newVisitors + c.returningVisitors;
-  // A channel can vanish when the range changes; don't leave the trigger empty.
   const picked = channels.some((c) => c.name === channel) ? channel : "all";
 
   const channelOptions = [
@@ -67,7 +66,7 @@ export function SourcesPanel() {
     dim === "all" ? (camp?.all ?? []) : (camp?.dims[dim] ?? [])
   ).map((c) => ({
     name: c.name,
-    values: { visitors: c.uv, revenue: c.revenue },
+    ...rankedMetrics(c.uv, c.revenue),
   }));
 
   const dimOptions = [
@@ -112,10 +111,7 @@ export function SourcesPanel() {
           items: (sources?.referrers ?? []).map((r) => ({
             name: r.name || r.channel,
             icon: <Favicon source={r.name} />,
-            values: {
-              visitors: r.newVisitors + r.returningVisitors,
-              revenue: r.revenue,
-            },
+            ...rankedMetrics(r.newVisitors + r.returningVisitors, r.revenue),
             raw: {
               newVisitors: r.newVisitors,
               returningVisitors: r.returningVisitors,

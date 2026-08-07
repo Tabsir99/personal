@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import type { OverviewMetrics } from "@/lib/analyticsTypes";
-import { formatMetric } from "../shared/chartFormat";
+import { formatMetric, formatSignedCurrency } from "../shared/chartFormat";
+import {
+  activeReversals,
+  netRevenue,
+  revenueParts,
+  type RevenueParts,
+} from "../shared/revenue";
 
 export type ChartMetric =
   | "visitors"
@@ -73,10 +79,9 @@ export function MetricsBar({
         false,
         true,
       )}
-      <StaticCell
-        label="Revenue"
-        value={formatMetric("revenue", current.revenue)}
-        delta={delta(current.revenue, previous.revenue)}
+      <RevenueCell
+        current={revenueParts(current.revenue)}
+        delta={delta(netRevenue(current.revenue), netRevenue(previous.revenue))}
         onEnter={clearHover}
       />
       {metricCell(
@@ -152,26 +157,24 @@ function DeltaBadge({
   );
 }
 
-function StaticCell({
-  label,
-  value,
+function RevenueCell({
+  current,
   delta,
   onEnter,
 }: {
-  label: string;
-  value: string;
-  delta?: Delta;
+  current: RevenueParts;
+  delta: Delta;
   onEnter: () => void;
 }) {
   return (
     <span className="relative flex flex-col p-6" onMouseEnter={onEnter}>
       <span className="absolute inset-y-4 left-0 w-px bg-foreground/8" />
       <span className="flex items-center gap-1.5 pb-0.5 text-xs font-medium tracking-wide text-muted-foreground capitalize">
-        {label}
+        {activeReversals(current).length > 0 ? "Net revenue" : "Revenue"}
       </span>
       <span className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
-        {value}
-        {delta && <DeltaBadge delta={delta} />}
+        {formatSignedCurrency(current.net)}
+        <DeltaBadge delta={delta} />
       </span>
     </span>
   );

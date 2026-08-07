@@ -15,7 +15,12 @@ import { CHART } from "../shared/chartTheme";
 import { AnalyticsTooltip } from "../shared/AnalyticsTooltip";
 import { useReveal } from "../shared/reveal";
 import { formatCurrency, headroomTop, niceStep } from "../shared/chartFormat";
-import { renderSeries, leftAxisFormat, type Selection } from "./series";
+import {
+  renderSeries,
+  leftAxisFormat,
+  toChartRow,
+  type Selection,
+} from "./series";
 import { ChartDefs } from "./chartDefs";
 import { tooltipSections } from "./tooltipSections";
 
@@ -63,9 +68,11 @@ export function MainChart({
   const selection: Selection = metric;
   const isBounce = selection === "bounceRate";
 
+  const rows = useMemo(() => data.map(toChartRow), [data]);
+
   const { ticks: revenueTicks, domain: revenueDomain } = useMemo(
-    () => revenueAxis(Math.max(0, ...data.map((d) => d.revenue))),
-    [data],
+    () => revenueAxis(Math.max(0, ...rows.map((r) => r.revenueExtent))),
+    [rows],
   );
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -126,7 +133,7 @@ export function MainChart({
     [selection, front],
   );
 
-  const xTicks = useMemo(() => data.map((d) => d.timestamp), [data]);
+  const xTicks = useMemo(() => rows.map((r) => r.timestamp), [rows]);
 
   return (
     <div ref={setRefs} className={`${enter} bg-card px-4 pt-2 pb-4`}>
@@ -134,7 +141,7 @@ export function MainChart({
         {revealed && (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
-              data={data}
+              data={rows}
               margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}

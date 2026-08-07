@@ -49,8 +49,9 @@ function isCrawlEvent(event: SeedEvent): event is SeedCrawlEvent {
   return "crawler" in event;
 }
 
-const WEBSITE_ID = "portfolio-and-blog";
-const DOMAIN = "tabsircg.com";
+const WEBSITE_ID =
+  process.env.SEED_WEBSITE_ID ?? "3c2896b2-ce03-4bed-a2f9-91409bf37bc7";
+const DOMAIN = process.env.SEED_DOMAIN ?? "tabsircg.com";
 const TOTAL_EVENTS_TARGET = Number(process.env.SEED_EVENTS ?? 100_00);
 
 console.log(`🚀 Seeding analytics for ${WEBSITE_ID} (${DOMAIN})\n`);

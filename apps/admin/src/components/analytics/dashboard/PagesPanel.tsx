@@ -2,7 +2,7 @@
 
 import { useShallow } from "zustand/react/shallow";
 import { useAnalyticsStore } from "../../../stores/analyticsStore";
-import { DataPanel, PANEL_HEIGHT } from "./shared/DataPanel";
+import { DataPanel, PANEL_HEIGHT, rankedMetrics } from "./shared/DataPanel";
 
 import { Favicon } from "../../ui/favicon";
 
@@ -31,7 +31,7 @@ export function PagesPanel() {
           items: (pages?.hostnames ?? []).map((h) => ({
             name: h.name,
             icon: <Favicon source={h.name} />,
-            values: { visitors: h.uv, revenue: h.revenue },
+            ...rankedMetrics(h.uv, h.revenue),
           })),
         },
         {
@@ -39,7 +39,7 @@ export function PagesPanel() {
           label: "Page",
           items: (pages?.pages ?? []).map((p) => ({
             name: p.name,
-            values: { visitors: p.uv, revenue: p.revenue },
+            ...rankedMetrics(p.uv, p.revenue),
             raw: { pageviews: p.pageviews },
           })),
         },
@@ -48,7 +48,7 @@ export function PagesPanel() {
           label: "Entry page",
           items: (pages?.entryPages ?? []).map((p) => ({
             name: p.name,
-            values: { visitors: p.uv, revenue: p.revenue },
+            ...rankedMetrics(p.uv, p.revenue),
           })),
         },
         {
@@ -57,7 +57,7 @@ export function PagesPanel() {
           items: (pages?.exitLinks ?? []).map((l) => ({
             name: l.name,
             icon: <Favicon source={l.name} />,
-            values: { visitors: l.uv, revenue: l.revenue },
+            ...rankedMetrics(l.uv, l.revenue),
             raw: { exits: l.exits },
           })),
         },

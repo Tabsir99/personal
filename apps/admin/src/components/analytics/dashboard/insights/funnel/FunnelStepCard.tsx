@@ -2,8 +2,14 @@
 
 import { ArrowElbowDownRightIcon } from "@phosphor-icons/react";
 import type { RiverStep } from "./FunnelRiver";
-import { formatCount } from "../../shared/chartFormat";
+import { formatCount, formatMoney } from "../../shared/chartFormat";
 import { AnalyticsTooltipCard } from "../../shared/AnalyticsTooltip";
+import {
+  activeReversals,
+  reversalAmount,
+  revenueParts,
+  REVERSAL_TITLE,
+} from "../../shared/revenue";
 import { Favicon } from "@/components/ui/favicon";
 import { formatCountryName, CountryFlag } from "@/lib/countryUtils";
 
@@ -62,7 +68,9 @@ export function FunnelStepCard({
 }) {
   const step = steps[index];
   const prev = index > 0 ? steps[index - 1] : null;
-  const revPerVisitor = step.value > 0 ? step.revenue / step.value : 0;
+  const parts = revenueParts(step.revenue);
+  const reversals = activeReversals(parts);
+  const revPerVisitor = step.value > 0 ? parts.net / step.value : 0;
   const convFromPrev =
     prev && prev.value > 0 ? (step.value / prev.value) * 100 : 0;
   const hasBreakdown =
@@ -107,11 +115,22 @@ export function FunnelStepCard({
       value: (
         <span className="tabular-nums">
           <span className="font-semibold text-background">
-            ${revPerVisitor.toFixed(2)}
+            {formatMoney(revPerVisitor)}
           </span>
           <span className="text-background/45"> /visitor</span>
         </span>
       ),
+    },
+
+    reversals.length > 0 && {
+      label: "Charged",
+      value: formatMoney(parts.gross),
+      color: "revenue" as const,
+      parts: reversals.map((kind) => ({
+        label: REVERSAL_TITLE[kind],
+        value: `-${formatMoney(reversalAmount(parts, kind))}`,
+        color: kind,
+      })),
     },
 
     hasBreakdown && (

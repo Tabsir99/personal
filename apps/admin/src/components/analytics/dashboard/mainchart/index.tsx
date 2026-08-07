@@ -8,6 +8,7 @@ import { MetricsBar } from "./MetricsBar";
 import { MainChart } from "./MainChartGraph";
 import { PERIOD_LABEL } from "../shared/chartFormat";
 import type { ChartMetric } from "./MetricsBar";
+import { NO_REVENUE } from "../shared/revenue";
 import type { OverviewMetrics } from "@/lib/analyticsTypes";
 
 const EMPTY_METRICS: OverviewMetrics = {
@@ -16,7 +17,7 @@ const EMPTY_METRICS: OverviewMetrics = {
   sessions: 0,
   bounceRate: 0,
   sessionDuration: 0,
-  revenue: 0,
+  revenue: NO_REVENUE,
   payingVisitors: 0,
   conversionRate: 0,
 };
@@ -33,7 +34,6 @@ export function OverviewCard() {
     })),
   );
 
-  // Re-clicking the active metric returns to the default overview.
   const selectMetric = (m: ChartMetric) =>
     setChartMetric((cur) => (cur === m ? null : m));
 

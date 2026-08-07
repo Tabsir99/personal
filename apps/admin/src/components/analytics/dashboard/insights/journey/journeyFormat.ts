@@ -82,12 +82,6 @@ export function formatDayHeading(timestamp: number): string {
   return `${weekday}, ${month} ${ordinal(date.getDate())} ${date.getFullYear()}`;
 }
 
-export function formatMoney(amount: number): string {
-  return amount % 1 === 0
-    ? `$${amount.toLocaleString("en-US")}`
-    : `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
 export function visitorLabel(visitor: JourneyVisitor): string {
   return (
     visitor.customerName ||

@@ -13,35 +13,30 @@ const stripeMarkerSchema = z.object({
 });
 
 export const websiteSchema = z.object({
-  id: z
-    .string()
-    .min(1)
-    .max(96)
-    .regex(/^[\w-]+$/, "Only alphanumeric, dashes, and underscores"),
+  id: z.uuid(),
   name: z.string().min(1).max(100),
   origins: z
-    .array(z.string().url().or(z.string().regex(/^\*$/)))
+    .array(z.url().or(z.literal("*")))
     .min(1, "At least one origin required"),
   createdAt: z.number(),
   stripe: stripeMarkerSchema.optional(),
 });
 
+export const websiteInputSchema = websiteSchema
+  .pick({ name: true, origins: true })
+  .extend({ restrictedKey: z.string().min(1).optional() });
+
+export const websitePatchSchema = websiteInputSchema.partial();
+
 export type AnalyticsWebsite = z.infer<typeof websiteSchema>;
+export type WebsiteInput = z.infer<typeof websiteInputSchema>;
+export type WebsitePatch = z.infer<typeof websitePatchSchema>;
 
 export async function readWebsiteConfig(): Promise<{
   websites: AnalyticsWebsite[];
 }> {
   const snap = await websitesDocRef.get();
   return { websites: snap.data()?.websites ?? [] };
-}
-
-export function slugify(text: string) {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w-]/g, "")
-    .replace(/-{2,}/g, "-");
 }
 
 export async function syncOriginsToKV(websiteId: string, origins: string[]) {

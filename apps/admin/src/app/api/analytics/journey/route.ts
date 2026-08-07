@@ -24,8 +24,6 @@ const EVERY_VISITOR = "all";
 
 const GOAL_NAME_TO_EVENT_TYPE: Record<string, string> = {
   payment: "payment",
-  refund: "payment",
-  dispute: "payment",
   identify: "identify",
   external_link: "external_link",
   pageview: "pageview",
