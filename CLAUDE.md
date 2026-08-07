@@ -126,6 +126,24 @@ Any project-owned `@utility` must be added to `tailwindcss.whitelist` in `apps/a
 - Admin pushes fresh content by POSTing tags to portfolio's `/api/revalidate` (`sendRevalidateRequest` in [blogUtils.ts](apps/admin/src/lib/blogUtils.ts)). Tags portfolio listens on: `blogs` + `blog:${slug}` (via `revalidateBlog`), `page-data`, `site-config`, `blog-config`. Add a portfolio-visible config write and you must emit its tag, or the public site stays stale until a redeploy.
 - Route handlers return errors through `wrapRoute`: `ZodError` → 400, `throw new HttpError(status, msg)` → that status, anything else → a generic 500 with the real cause logged server-side. Don't `throw new Error("Not found")` expecting a 404 — use `HttpError`.
 
+## Agent access (MCP)
+
+Admin exposes an MCP server at `POST /api/mcp` ([route.ts](apps/admin/src/app/api/mcp/route.ts), 22 lines) so Claude and other agents get admin-privileged reads and writes. Implementation lives in [src/mcp/](apps/admin/src/mcp/).
+
+**It does not go through the REST routes.** Tools import `src/lib/*` and `src/actions/*` and call them in-process — the same functions the routes call. So a route's params or response shape can change freely without touching MCP, and a change *inside* `lib`/`actions` reaches both callers at once. A signature change breaks `pnpm tc` on the MCP file, which is the intended sync mechanism. Never add a parallel `/api/agent/*` REST surface for this; there'd be a second copy of every schema and nothing to catch drift.
+
+Auth is a bearer token (`MCP_TOKEN`), checked in [proxy.ts](apps/admin/src/proxy.ts) in a branch of its own — deliberately **not** `SERVER_TOKEN`, and portfolio's `serverToken` is rejected on `/api/mcp`. Covered by [proxyAuth.test.ts](apps/admin/src/test/mcp/proxyAuth.test.ts).
+
+⚠️ `BYPASS_AUTH=1` short-circuits proxy.ts *before* the MCP branch, leaving `/api/mcp` fully open. That's fine for local dev, fatal if it ever reaches a public host.
+
+`analytics_query` runs caller-supplied SQL against Tinybird behind [sql.ts](apps/admin/src/mcp/sql.ts): SELECT/WITH only, single statement, forced LIMIT, keyword denylist. It strips comments *and* string literals before scanning, so `WHERE event_name = 'delete'` passes while `SELECT 1; DROP …` does not. Both directions are tested — keep it that way if you touch the guard.
+
+Deletes are registered only when `MCP_ALLOW_DELETES=1`. Everything mutating carries MCP `annotations` (`destructiveHint`, `openWorldHint`) that drive the client's permission prompt.
+
+Resources are **generated, not hand-written**: the analytics schema comes from `@tabsircg/schemas/analytics`, the Firestore doc from `Collections`, the site list from Firestore at request time. Adding a column or collection needs no MCP edit.
+
+Both MCP packages are on the v2 SDK (`@modelcontextprotocol/server@^2.0.0`), which replaced the monolithic `@modelcontextprotocol/sdk@1.x`. v2 requires zod v4 and takes `inputSchema` as a `z.object(...)` — the bare `{ field: z.string() }` raw-shape form is deprecated. `createMcpHandler` returns a Web-standard `fetch(Request) → Response`, so no Next adapter is needed.
+
 ## Schema migration policy
 
 Adding an optional field with a Zod `.default(...)` is non-breaking for existing Firestore docs — Zod fills the default on read. No migration needed unless you want existing docs *backfilled* with a meaningful value.

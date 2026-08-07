@@ -3,6 +3,13 @@
     "tabsircg-analytics-dev": {
       "command": "node",
       "args": ["./packages/analytics-mcp/dist/index.js"]
+    },
+    "tabsircg-admin": {
+      "type": "http",
+      "url": "http://localhost:5000/api/mcp",
+      "headers": {
+        "Authorization": "Bearer ${ADMIN_MCP_TOKEN}"
+      }
     }
   }
 }
