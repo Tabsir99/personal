@@ -11,6 +11,7 @@ import {
 } from "@/lib/tinybird";
 import type { JourneyResponse, JourneyVisitor } from "@/lib/analyticsTypes";
 import { buildChannelSQL } from "../sources/channels";
+import { GOAL_NAME } from "@/lib/analyticsQuery";
 import {
   assembleVisitor,
   groupByVisitor,
@@ -21,12 +22,14 @@ import {
 
 const EVERY_VISITOR = "all";
 
-const TYPES_WHOSE_EVENT_NAME_IS_THE_TYPE = new Set([
-  "payment",
-  "identify",
-  "external_link",
-  "pageview",
-]);
+const GOAL_NAME_TO_EVENT_TYPE: Record<string, string> = {
+  payment: "payment",
+  refund: "payment",
+  dispute: "payment",
+  identify: "identify",
+  external_link: "external_link",
+  pageview: "pageview",
+};
 
 const optionsSchema = z.object({
   goal: z.string().min(1).default("payment"),
@@ -38,7 +41,7 @@ const optionsSchema = z.object({
 const channelExpr = buildChannelSQL(F.referrer);
 
 const sortKeyTypeFor = (goalName: string) =>
-  TYPES_WHOSE_EVENT_NAME_IS_THE_TYPE.has(goalName) ? goalName : "custom";
+  GOAL_NAME_TO_EVENT_TYPE[goalName] ?? "custom";
 
 export const GET = wrapRoute<JourneyResponse>(async (req: NextRequest) => {
   await requireAuth();
@@ -57,7 +60,7 @@ export const GET = wrapRoute<JourneyResponse>(async (req: NextRequest) => {
   const activeInPeriod = `${F.timestamp} >= ${start} AND ${F.timestamp} < ${end}`;
 
   const completedGoal = goalName
-    ? `${F.eventName} = '${escapeSQL(goalName)}' AND ${activeInPeriod}`
+    ? `${GOAL_NAME} = '${escapeSQL(goalName)}' AND ${activeInPeriod}`
     : "";
   const sortKeyTypePin = goalName
     ? `AND ${F.type} = '${escapeSQL(sortKeyTypeFor(goalName))}'`

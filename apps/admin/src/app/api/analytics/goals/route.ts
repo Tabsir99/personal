@@ -9,6 +9,7 @@ import {
   F,
 } from "@/lib/tinybird";
 import { CUSTOM_EVENT_TYPE } from "@/lib/analyticsTypes";
+import { GOAL_NAME } from "@/lib/analyticsQuery";
 import type {
   GoalMetric,
   GoalSeriesPoint,
@@ -108,7 +109,7 @@ export const GET = wrapRoute<GoalsResponse>(async (req: NextRequest) => {
       FROM (
         SELECT
           intDiv(${F.timestamp}, ${bucketMs}) * ${bucketMs} AS bucket,
-          ${F.eventName} AS name,
+          ${GOAL_NAME} AS name,
           ${F.visitorId} AS vid,
           COUNT() AS cnt
         FROM ${F.engine}

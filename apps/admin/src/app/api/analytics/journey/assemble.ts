@@ -3,6 +3,11 @@ import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
 import { formatCountryName } from "@/lib/countryUtils";
 import { parseHref } from "@/lib/tinybird";
 import { CAMPAIGN_DIMENSIONS } from "@/lib/analyticsTypes";
+import {
+  REVENUE_KINDS,
+  type RevenueSplit,
+  type RevenueKind,
+} from "@/lib/analyticsQuery";
 import type {
   JourneyEntry,
   JourneyPageviewEntry,
@@ -39,6 +44,22 @@ interface QueryComputedColumns {
 }
 
 export type JourneyRow = StoredColumns & QueryComputedColumns;
+
+function paymentKind(row: JourneyRow): RevenueKind | "" {
+  const kind = parseExtra(row.extra_data).kind;
+  return REVENUE_KINDS.find((known) => known === kind) ?? "";
+}
+
+function revenueSplitOf(rows: JourneyRow[]): RevenueSplit {
+  const totals: RevenueSplit = { charge: 0, refund: 0, dispute: 0 };
+
+  for (const row of rows) {
+    if (row.type !== "payment") continue;
+    const kind = paymentKind(row);
+    if (kind) totals[kind] += row.revenue_cents / 100;
+  }
+  return totals;
+}
 
 function parseExtra(raw: string): Record<string, unknown> {
   if (!raw) return {};
@@ -87,7 +108,7 @@ function toEntry(row: JourneyRow, isGoal: boolean): JourneyEntry {
       timestamp: row.timestamp,
       eventType: "payment",
       isGoal,
-      data: { amount: row.revenue_cents / 100 },
+      data: { amount: row.revenue_cents / 100, kind: paymentKind(row) },
     };
   }
 
@@ -195,7 +216,7 @@ export function assembleVisitor(
     customerName: str(identity.customer_name),
     customerEmail: str(identity.customer_email),
     profileMetadata: identity,
-    amount: rows.reduce((sum, r) => sum + r.revenue_cents, 0) / 100,
+    revenue: revenueSplitOf(rows),
     channel: entryRow.channel,
     sourceAttribution: {
       timestamp: entryRow.timestamp,

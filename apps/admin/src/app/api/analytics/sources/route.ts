@@ -12,14 +12,14 @@ import {
   eventWhere,
   visitorRevenueSubquery,
   revenueDedupedByVisitor,
+  nestRevenue,
+  revenueSplit,
   type BreakdownRow,
 } from "@/lib/analyticsQuery";
 import {
   CAMPAIGN_DIMENSIONS,
   rollupCampaigns,
   type SourcesResponse,
-  type SourceMetric,
-  type ChannelMetric,
   type CampaignMetric,
   type CampaignDimension,
 } from "@/lib/analyticsTypes";
@@ -63,7 +63,7 @@ export const GET = wrapRoute<SourcesResponse>(async (req: NextRequest) => {
       if(GROUPING(s.referrer) = 0, any(s.chn), '') as channel,
       uniqExactIf(s.vid, s.minSess = 1) as newVisitors,
       uniqExactIf(s.vid, s.minSess > 1) as returningVisitors,
-      ${revenueDedupedByVisitor("s.vid", "pr.rev")}
+      ${revenueDedupedByVisitor("s.vid", "pr")}
     FROM (
       SELECT
         ${scanned.join(", ")},
@@ -106,14 +106,14 @@ export const GET = wrapRoute<SourcesResponse>(async (req: NextRequest) => {
         .map((r) => ({
           name: r.name,
           uv: r.newVisitors + r.returningVisitors,
-          revenue: r.revenue,
+          revenue: revenueSplit(r),
         })),
     ]),
   ) as Record<CampaignDimension, CampaignMetric[]>;
 
   return {
-    referrers: byLevel.referrers as SourceMetric[],
-    channels: byLevel.channels as ChannelMetric[],
+    referrers: byLevel.referrers.map(nestRevenue),
+    channels: byLevel.channels.map(nestRevenue),
     campaigns: rollupCampaigns(dims),
   };
 });

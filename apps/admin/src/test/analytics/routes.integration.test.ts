@@ -61,6 +61,14 @@ const rows = generateSeed({
 
 type Rowish = Record<string, unknown>;
 
+const REVENUE = ["revenue.charge", "revenue.refund", "revenue.dispute"];
+
+function at(row: Rowish, path: string): unknown {
+  return path
+    .split(".")
+    .reduce<unknown>((acc, key) => (acc as Rowish | undefined)?.[key], row);
+}
+
 function indexBy(
   list: Rowish[],
   key: (r: Rowish) => string,
@@ -87,8 +95,8 @@ function expectRows(
   for (const [k, ev] of e) {
     const av = a.get(k)!;
     for (const f of numFields)
-      expect(Number(av[f]), `${k}.${f}`).toBeCloseTo(Number(ev[f]), 6);
-    for (const f of strFields) expect(av[f], `${k}.${f}`).toBe(ev[f]);
+      expect(Number(at(av, f)), `${k}.${f}`).toBeCloseTo(Number(at(ev, f)), 6);
+    for (const f of strFields) expect(at(av, f), `${k}.${f}`).toBe(at(ev, f));
   }
 }
 
@@ -130,7 +138,7 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
         "sessions",
         "bounceRate",
         "sessionDuration",
-        "revenue",
+        ...REVENUE,
         "payingVisitors",
         "conversionRate",
       ],
@@ -143,9 +151,11 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
     }
 
     for (const side of ["current", "previous"] as const) {
-      expect(Number(data[side].revenue), `${side}.revenue`).toBe(
-        ref[side].revenue,
-      );
+      for (const f of REVENUE)
+        expect(Number(at(data[side], f)), `${side}.${f}`).toBeCloseTo(
+          Number(at(ref[side] as unknown as Rowish, f)),
+          6,
+        );
       expect(Number(data[side].payingVisitors), `${side}.payingVisitors`).toBe(
         ref[side].payingVisitors,
       );
@@ -166,13 +176,13 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
       data.referrers as Rowish[],
       ref.referrers,
       (r) => String(r.name),
-      ["newVisitors", "returningVisitors", "revenue"],
+      ["newVisitors", "returningVisitors", ...REVENUE],
       ["channel"],
     );
     expectRows(data.channels as Rowish[], ref.channels, (r) => String(r.name), [
       "newVisitors",
       "returningVisitors",
-      "revenue",
+      ...REVENUE,
     ]);
 
     const campaigns = data.campaigns as unknown as {
@@ -186,7 +196,7 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
         campaigns.dims[dim],
         ref.campaigns.dims[dim] as unknown as Rowish[],
         (r) => String(r.name),
-        ["uv", "revenue"],
+        ["uv", ...REVENUE],
       );
     expect(campaigns.totals).toEqual(ref.campaigns.totals);
     expect(Number(campaigns.allTotal)).toBe(ref.campaigns.allTotal);
@@ -194,7 +204,7 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
       campaigns.all,
       ref.campaigns.all as unknown as Rowish[],
       (r) => String(r.name),
-      ["uv", "revenue"],
+      ["uv", ...REVENUE],
     );
   });
 
@@ -204,20 +214,20 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
     expectRows(data.pages, ref.pages, (r) => String(r.name), [
       "uv",
       "pageviews",
-      "revenue",
+      ...REVENUE,
     ]);
     expectRows(data.entryPages, ref.entryPages, (r) => String(r.name), [
       "uv",
-      "revenue",
+      ...REVENUE,
     ]);
     expectRows(data.hostnames, ref.hostnames, (r) => String(r.name), [
       "uv",
-      "revenue",
+      ...REVENUE,
     ]);
     expectRows(data.exitLinks, ref.exitLinks, (r) => String(r.name), [
       "uv",
       "exits",
-      "revenue",
+      ...REVENUE,
     ]);
   });
 
@@ -227,19 +237,19 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
     const countryKey = (r: Rowish) => String(r.country);
     const regionKey = (r: Rowish) => `${r.country}/${r.name}`;
     const cityKey = (r: Rowish) => `${r.country}/${r.region}/${r.name}`;
-    expectRows(data.countries, ref.countries, countryKey, ["uv", "revenue"]);
+    expectRows(data.countries, ref.countries, countryKey, ["uv", ...REVENUE]);
     expectRows(
       data.regions,
       ref.regions,
       regionKey,
-      ["uv", "revenue"],
+      ["uv", ...REVENUE],
       ["country"],
     );
     expectRows(
       data.cities,
       ref.cities,
       cityKey,
-      ["uv", "revenue"],
+      ["uv", ...REVENUE],
       ["country", "region"],
     );
   });
@@ -255,12 +265,12 @@ describeMaybe("analytics routes — real Tinybird, every route", () => {
     const ref = referenceSystem(rows, win);
     expectRows(data.browsers, ref.browsers, (r) => String(r.name), [
       "uv",
-      "revenue",
+      ...REVENUE,
     ]);
-    expectRows(data.os, ref.os, (r) => String(r.name), ["uv", "revenue"]);
+    expectRows(data.os, ref.os, (r) => String(r.name), ["uv", ...REVENUE]);
     expectRows(data.devices, ref.devices, (r) => String(r.name), [
       "uv",
-      "revenue",
+      ...REVENUE,
     ]);
   });
 

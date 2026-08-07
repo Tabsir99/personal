@@ -13,6 +13,8 @@ import {
   eventWhere,
   visitorRevenueSubquery,
   revenueDedupedByVisitor,
+  nestRevenue,
+  revenueSplit,
   type UvBreakdownRow,
 } from "@/lib/analyticsQuery";
 import type { LocationsResponse, LocationMetric } from "@/lib/analyticsTypes";
@@ -25,11 +27,11 @@ type Row = UvBreakdownRow<"countries" | "regions" | "cities"> & {
 };
 
 const withoutRegion = (rows: Omit<Row, "level">[]): LocationMetric[] =>
-  rows.map(({ name, uv, revenue, country }) => ({
-    name,
-    uv,
-    revenue,
-    country,
+  rows.map((row) => ({
+    name: row.name,
+    uv: row.uv,
+    country: row.country,
+    revenue: revenueSplit(row),
   }));
 
 export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
@@ -47,7 +49,7 @@ export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
       v.country as country,
       v.region as region,
       uniqExact(v.vid) as uv,
-      ${revenueDedupedByVisitor("v.vid", "pr.rev")}
+      ${revenueDedupedByVisitor("v.vid", "pr")}
     FROM (
       SELECT
         ${F.country} as country,
@@ -76,6 +78,6 @@ export const GET = wrapRoute<LocationsResponse>(async (req: NextRequest) => {
   return {
     countries: withoutRegion(countries),
     regions: withoutRegion(regions),
-    cities,
+    cities: cities.map(nestRevenue),
   };
 });

@@ -12,16 +12,18 @@ import {
   visitorRevenueSubquery,
   eventWhere,
   revenueDedupedByVisitor,
+  nestRevenue,
+  VISITOR_REVENUE_COLUMNS,
+  type RevenueColumns,
 } from "@/lib/analyticsQuery";
 import type { PagesResponse } from "@/lib/analyticsTypes";
 
-interface PagesRow {
+interface PagesRow extends RevenueColumns {
   level: "pages" | "entryPages" | "hostnames" | "exitLinks";
   name: string;
   uv: number;
   pageviews: number;
   exits: number;
-  revenue: number;
 }
 
 const HOSTNAMES_LIMIT = 3;
@@ -46,10 +48,11 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
         uniqExact(vid) AS uv,
         if(GROUPING(href) = 0, sum(cnt), 0) AS pageviews,
         0 AS exits,
-        ${revenueDedupedByVisitor("vid", "rev")}
+        ${revenueDedupedByVisitor("vid", "")}
       FROM (
         SELECT d.href AS href, d.host AS host, d.vid AS vid, d.cnt AS cnt,
-          d.entryHref AS entryHref, pr.rev AS rev
+          d.entryHref AS entryHref,
+          ${VISITOR_REVENUE_COLUMNS.map((c) => `pr.${c} AS ${c}`).join(",\n          ")}
         FROM (
           SELECT href, host, vid, cnt,
             first_value(href) OVER (PARTITION BY vid ORDER BY firstTs) AS entryHref
@@ -74,7 +77,7 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
     (
       SELECT 'exitLinks' AS level, JSONExtractString(${F.extraData}, 'url') AS name,
         uniqExact(${F.visitorId}) AS uv, 0 AS pageviews, COUNT() AS exits,
-        0 AS revenue
+        0 AS revCharge, 0 AS revRefund, 0 AS revDispute
       FROM ${F.engine} WHERE ${exitWhere} AND JSONExtractString(${F.extraData}, 'url') != ''
       GROUP BY name ORDER BY uv DESC LIMIT 20
     )
@@ -88,9 +91,9 @@ export const GET = wrapRoute<PagesResponse>(async (req: NextRequest) => {
   );
 
   return {
-    pages,
-    entryPages,
-    exitLinks,
-    hostnames: hostnames.slice(0, HOSTNAMES_LIMIT),
+    pages: pages.map(nestRevenue),
+    entryPages: entryPages.map(nestRevenue),
+    exitLinks: exitLinks.map(nestRevenue),
+    hostnames: hostnames.slice(0, HOSTNAMES_LIMIT).map(nestRevenue),
   };
 });

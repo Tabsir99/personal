@@ -9,14 +9,19 @@ import {
   granularityToMs,
   F,
 } from "@/lib/tinybird";
-import { eventWhere } from "@/lib/analyticsQuery";
+import {
+  eventWhere,
+  revenueSplit,
+  PAYMENT_KIND,
+  type RevenueColumns,
+} from "@/lib/analyticsQuery";
 import type {
   OverviewMetrics,
   TimeseriesPoint,
   MainResponse,
 } from "@/lib/analyticsTypes";
 
-interface MainRow {
+interface MainRow extends RevenueColumns {
   kind: "ov" | "ts" | "rev";
   k: string;
   visitors: number;
@@ -27,7 +32,6 @@ interface MainRow {
   bounces: number;
   totalDuration: number;
   payingVisitors: number;
-  revenue: number;
 }
 
 function toMetrics(
@@ -47,7 +51,7 @@ function toMetrics(
     bounceRate: sessions > 0 ? bounces / sessions : 0,
     sessionDuration:
       sessions > 0 ? Math.round(totalDuration / sessions / 1000) : 0,
-    revenue: Number(rev?.revenue ?? 0),
+    revenue: revenueSplit(rev),
     payingVisitors,
     conversionRate: visitors > 0 ? payingVisitors / visitors : 0,
   };
@@ -91,7 +95,9 @@ function buildSql(
       countIf(pvs = 1) AS bounces,
       sum(durMs) AS totalDuration,
       toUInt64(0) AS payingVisitors,
-      toFloat64(0) AS revenue
+      toFloat64(0) AS revCharge,
+      toFloat64(0) AS revRefund,
+      toFloat64(0) AS revDispute
     FROM sessions
     GROUP BY GROUPING SETS ((period), (bucket))`;
 
@@ -101,12 +107,15 @@ function buildSql(
       multiIf(GROUPING(bkt) = 0, toString(bkt), period) AS k,
       0 AS visitors, 0 AS newVisitors, 0 AS returningVisitors,
       0 AS pageviews, 0 AS sessions, 0 AS bounces, 0 AS totalDuration,
-      uniqExact(vid) AS payingVisitors,
-      sum(rev) / 100 AS revenue
+      uniqExactIf(vid, paymentKind = 'charge') AS payingVisitors,
+      sumIf(rev, paymentKind = 'charge') / 100 AS revCharge,
+      sumIf(rev, paymentKind = 'refund') / 100 AS revRefund,
+      sumIf(rev, paymentKind = 'dispute') / 100 AS revDispute
     FROM (
       SELECT
         ${F.visitorId} AS vid,
         ${F.revenueCents} AS rev,
+        ${PAYMENT_KIND} AS paymentKind,
         if(${F.timestamp} >= ${start}, intDiv(${F.timestamp}, ${bucketMs}) * ${bucketMs}, 0) AS bkt,
         if(${F.timestamp} >= ${start}, 'current', 'previous') AS period
       FROM ${F.engine}
@@ -138,11 +147,11 @@ export const GET = wrapRoute<MainResponse>(async (req: NextRequest) => {
     res.data.find((r) => r.kind === "rev" && r.k === "previous"),
   );
 
-  const revByBucket = new Map<number, number>();
+  const revByBucket = new Map<number, MainRow>();
   const payByBucket = new Map<number, number>();
   for (const r of res.data)
     if (r.kind === "rev" && Number(r.k) > 0) {
-      revByBucket.set(Number(r.k), Number(r.revenue));
+      revByBucket.set(Number(r.k), r);
       payByBucket.set(Number(r.k), Number(r.payingVisitors));
     }
 
@@ -164,7 +173,7 @@ export const GET = wrapRoute<MainResponse>(async (req: NextRequest) => {
         bounceRate: sessions > 0 ? Number(r.bounces) / sessions : 0,
         sessionDuration:
           sessions > 0 ? Math.round(totalDuration / sessions / 1000) : 0,
-        revenue: revByBucket.get(timestamp) ?? 0,
+        revenue: revenueSplit(revByBucket.get(timestamp)),
         payingVisitors,
         conversionRate: visitors > 0 ? payingVisitors / visitors : 0,
       };

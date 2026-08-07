@@ -16,8 +16,49 @@ export interface Win {
   end: number;
 }
 
-const round = (cents: number) => cents / 100;
 const uniq = (xs: string[]) => new Set(xs).size;
+
+export interface Split {
+  charge: number;
+  refund: number;
+  dispute: number;
+}
+
+const KINDS = ["charge", "refund", "dispute"] as const;
+
+const noCents = (): Split => ({ charge: 0, refund: 0, dispute: 0 });
+
+const round = (cents: Split): Split => ({
+  charge: cents.charge / 100,
+  refund: cents.refund / 100,
+  dispute: cents.dispute / 100,
+});
+
+function addCents(into: Split, from: Split | undefined): void {
+  if (!from) return;
+  for (const kind of KINDS) into[kind] += from[kind];
+}
+
+function paymentKind(raw: string): keyof Split | null {
+  let kind = "";
+  try {
+    const parsed = JSON.parse(raw || "{}") as Record<string, unknown>;
+    kind = typeof parsed.kind === "string" ? parsed.kind : "";
+  } catch {
+    kind = "";
+  }
+  return KINDS.includes(kind as keyof Split) ? (kind as keyof Split) : null;
+}
+
+function goalNameOf(r: Row): string {
+  if (r.type !== "payment") return r.event_name;
+  const kind = paymentKind(r.extra_data);
+  return kind === "refund" || kind === "dispute" ? kind : r.event_name;
+}
+
+function isCharge(r: Row): boolean {
+  return paymentKind(r.extra_data) === "charge";
+}
 
 function human(rows: Row[], type: string, w: Win): Row[] {
   return rows.filter(
@@ -52,16 +93,22 @@ function urlParam(href: string, key: string): string {
   return "";
 }
 
-function visitorRevenue(rows: Row[], w: Win): Map<string, number> {
-  const m = new Map<string, number>();
-  for (const r of rows)
+function visitorRevenue(rows: Row[], w: Win): Map<string, Split> {
+  const m = new Map<string, Split>();
+  for (const r of rows) {
     if (
-      r.is_bot === 0 &&
-      r.type === "payment" &&
-      r.timestamp >= w.start &&
-      r.timestamp < w.end
+      r.is_bot !== 0 ||
+      r.type !== "payment" ||
+      r.timestamp < w.start ||
+      r.timestamp >= w.end
     )
-      m.set(r.visitor_id, (m.get(r.visitor_id) ?? 0) + r.revenue_cents);
+      continue;
+    const kind = paymentKind(r.extra_data);
+    if (!kind) continue;
+    let split = m.get(r.visitor_id);
+    if (!split) m.set(r.visitor_id, (split = noCents()));
+    split[kind] += r.revenue_cents;
+  }
   return m;
 }
 
@@ -70,13 +117,13 @@ interface BreakRow {
   uv: number;
   newVisitors: number;
   returningVisitors: number;
-  revenue: number;
+  revenue: Split;
 }
 
 function breakdownRef(
   pv: Row[],
   dim: (r: Row) => string,
-  rev: Map<string, number>,
+  rev: Map<string, Split>,
 ): BreakRow[] {
   const minSess = new Map<string, number>();
   for (const r of pv)
@@ -97,11 +144,11 @@ function breakdownRef(
   for (const [name, vids] of groups) {
     let nv = 0;
     let rv = 0;
-    let cents = 0;
+    const cents = noCents();
     for (const vid of vids) {
       if ((minSess.get(vid) ?? 1) === 1) nv++;
       else rv++;
-      cents += rev.get(vid) ?? 0; // dedup: each visitor's revenue once per group
+      addCents(cents, rev.get(vid));
     }
     out.push({
       name,
@@ -174,21 +221,26 @@ export function referenceMain(
   const cur = all.filter((s) => s.startTs >= w.start);
   const prev = all.filter((s) => s.startTs < w.start);
 
-  const revByBucket = new Map<number, number>();
+  const revByBucket = new Map<number, Split>();
   const payVidsByBucket = new Map<number, Set<string>>();
-  for (const r of rows)
+  for (const r of rows) {
     if (
-      r.is_bot === 0 &&
-      r.type === "payment" &&
-      r.timestamp >= w.start &&
-      r.timestamp < w.end
-    ) {
-      const b = Math.floor(r.timestamp / bucketMs) * bucketMs;
-      revByBucket.set(b, (revByBucket.get(b) ?? 0) + r.revenue_cents);
-      let vids = payVidsByBucket.get(b);
-      if (!vids) payVidsByBucket.set(b, (vids = new Set()));
-      vids.add(r.visitor_id);
-    }
+      r.is_bot !== 0 ||
+      r.type !== "payment" ||
+      r.timestamp < w.start ||
+      r.timestamp >= w.end
+    )
+      continue;
+    const b = Math.floor(r.timestamp / bucketMs) * bucketMs;
+    let cents = revByBucket.get(b);
+    if (!cents) revByBucket.set(b, (cents = noCents()));
+    const kind = paymentKind(r.extra_data);
+    if (kind) cents[kind] += r.revenue_cents;
+    if (!isCharge(r)) continue;
+    let vids = payVidsByBucket.get(b);
+    if (!vids) payVidsByBucket.set(b, (vids = new Set()));
+    vids.add(r.visitor_id);
+  }
 
   const buckets = new Map<number, Sess[]>();
   for (const s of cur) {
@@ -212,7 +264,7 @@ export function referenceMain(
         sessions: o.sessions,
         bounceRate: o.bounceRate,
         sessionDuration: o.sessionDuration,
-        revenue: round(revByBucket.get(b) ?? 0),
+        revenue: round(revByBucket.get(b) ?? noCents()),
         payingVisitors: paying,
         conversionRate: o.visitors > 0 ? paying / o.visitors : 0,
       };
@@ -231,10 +283,15 @@ export function referenceMain(
         r.timestamp >= from &&
         r.timestamp < to,
     );
-    const payingVisitors = uniq(pay.map((r) => r.visitor_id));
+    const payingVisitors = uniq(pay.filter(isCharge).map((r) => r.visitor_id));
+    const cents = noCents();
+    for (const r of pay) {
+      const kind = paymentKind(r.extra_data);
+      if (kind) cents[kind] += r.revenue_cents;
+    }
     return {
       ...ov,
-      revenue: round(pay.reduce((s, r) => s + r.revenue_cents, 0)),
+      revenue: round(cents),
       payingVisitors,
       conversionRate: ov.visitors > 0 ? payingVisitors / ov.visitors : 0,
     };
@@ -284,8 +341,11 @@ export function referenceSources(rows: Row[], w: Win) {
 export function referencePages(rows: Row[], w: Win) {
   const pv = human(rows, "pageview", w);
   const rev = visitorRevenue(rows, w);
-  const sumRev = (vids: Set<string>) =>
-    round([...vids].reduce((a, v) => a + (rev.get(v) ?? 0), 0));
+  const sumRev = (vids: Set<string>) => {
+    const cents = noCents();
+    for (const vid of vids) addCents(cents, rev.get(vid));
+    return round(cents);
+  };
 
   const pageG = new Map<string, { vids: Set<string>; count: number }>();
   for (const r of pv) {
@@ -349,7 +409,7 @@ export function referencePages(rows: Row[], w: Win) {
     name,
     uv: g.vids.size,
     exits: g.count,
-    revenue: 0,
+    revenue: round(noCents()),
   }));
 
   return { pages, entryPages, hostnames, exitLinks };
@@ -415,8 +475,9 @@ export function referenceGoals(rows: Row[], w: Win, bucketMs: number) {
   );
   const g = new Map<string, { vids: Set<string>; total: number }>();
   for (const r of nonPv) {
-    let e = g.get(r.event_name);
-    if (!e) g.set(r.event_name, (e = { vids: new Set(), total: 0 }));
+    const goal = goalNameOf(r);
+    let e = g.get(goal);
+    if (!e) g.set(goal, (e = { vids: new Set(), total: 0 }));
     e.vids.add(r.visitor_id);
     e.total++;
   }
@@ -435,14 +496,14 @@ export function referenceGoals(rows: Row[], w: Win, bucketMs: number) {
 
   const byBucket = new Map<number, Record<string, number>>();
   for (const r of nonPv) {
-    if (!kept.has(r.event_name)) continue;
+    if (!kept.has(goalNameOf(r))) continue;
     const b = Math.floor(r.timestamp / bucketMs) * bucketMs;
     let point = byBucket.get(b);
     if (!point) {
       byBucket.set(b, (point = { timestamp: b }));
       for (const n of names) point[n] = 0;
     }
-    point[r.event_name] += 1;
+    point[goalNameOf(r)] += 1;
   }
 
   const series: Record<string, number>[] = [];

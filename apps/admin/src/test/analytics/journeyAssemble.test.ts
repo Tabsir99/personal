@@ -37,6 +37,7 @@ function row(over: Partial<JourneyRow> = {}): JourneyRow {
 }
 
 const PAYMENT_EXTRA = JSON.stringify({
+  kind: "charge",
   customer_name: "Andrew Smith",
   customer_email: "andrew.smith@gmail.com",
   customer_id: "cus_123",
@@ -76,6 +77,7 @@ describe("journey assembly", () => {
     expect(visitor.customerName).toBe("Andrew Smith");
     expect(visitor.customerEmail).toBe("andrew.smith@gmail.com");
     expect(visitor.profileMetadata).toEqual({
+      kind: "charge",
       customer_name: "Andrew Smith",
       customer_email: "andrew.smith@gmail.com",
       customer_id: "cus_123",
@@ -154,11 +156,14 @@ describe("journey assembly", () => {
 
   it("measures time to goal from first touch, however old", () => {
     const firstTouch = T0 - 30 * 86_400_000;
-    const visitor = assemble([
-      row({ timestamp: firstTouch }),
-      row({ timestamp: T0 - 5000 }),
-      paymentRow({ timestamp: T0 }),
-    ], T0);
+    const visitor = assemble(
+      [
+        row({ timestamp: firstTouch }),
+        row({ timestamp: T0 - 5000 }),
+        paymentRow({ timestamp: T0 }),
+      ],
+      T0,
+    );
 
     expect(visitor.goalCompletedAt).toBe(T0);
     expect(visitor.timeBeforeGoal).toBe(T0 - firstTouch);
@@ -177,15 +182,18 @@ describe("journey assembly", () => {
   });
 
   it("marks only the completion the query chose", () => {
-    const visitor = assemble([
-      row({ timestamp: T0 - 10_000 }),
-      paymentRow({ timestamp: T0 }),
-      paymentRow({ timestamp: T0 + 60_000 }),
-    ], T0);
+    const visitor = assemble(
+      [
+        row({ timestamp: T0 - 10_000 }),
+        paymentRow({ timestamp: T0 }),
+        paymentRow({ timestamp: T0 + 60_000 }),
+      ],
+      T0,
+    );
 
     expect(visitor.goalCompletedAt).toBe(T0);
     expect(visitor.completeJourney.filter((e) => e.isGoal)).toHaveLength(1);
-    expect(visitor.amount).toBe(598);
+    expect(visitor.revenue).toEqual({ charge: 598, refund: 0, dispute: 0 });
   });
 
   it("skips the profile-less payment row when it is the visitor's last event", () => {
@@ -235,7 +243,7 @@ describe("journey assembly", () => {
       isGoal: true,
       data: { amount: 169 },
     });
-    expect(visitor.amount).toBe(169);
+    expect(visitor.revenue).toEqual({ charge: 169, refund: 0, dispute: 0 });
   });
 
   it("drops the sentinel row and flags truncation past the cap", () => {
@@ -268,7 +276,7 @@ describe("journey assembly", () => {
     expect(visitor.timeBeforeGoal).toBeNull();
     expect(visitor.completeJourney.some((e) => e.isGoal)).toBe(false);
     expect(visitor.customerName).toBe("Andrew Smith");
-    expect(visitor.amount).toBe(299);
+    expect(visitor.revenue).toEqual({ charge: 299, refund: 0, dispute: 0 });
     expect(visitor.lastSeenAt).toBe(T0);
   });
 
@@ -278,7 +286,97 @@ describe("journey assembly", () => {
     expect(visitor.customerName).toBe("");
     expect(visitor.customerEmail).toBe("");
     expect(visitor.profileMetadata).toEqual({});
-    expect(visitor.amount).toBe(0);
+    expect(visitor.revenue).toEqual({ charge: 0, refund: 0, dispute: 0 });
+  });
+
+  it("splits a visitor's payments by kind and keeps every sign as stored", () => {
+    const visitor = assemble([
+      row({ timestamp: T0 - 9000 }),
+      paymentRow({ timestamp: T0 - 8000, revenue_cents: 10_000 }),
+      paymentRow({ timestamp: T0 - 7000, revenue_cents: 25_000 }),
+      paymentRow({
+        timestamp: T0 - 6000,
+        revenue_cents: -4_000,
+        extra_data: JSON.stringify({ kind: "refund" }),
+      }),
+      paymentRow({
+        timestamp: T0 - 5000,
+        revenue_cents: -1_500,
+        extra_data: JSON.stringify({ kind: "dispute" }),
+      }),
+    ]);
+
+    expect(visitor.revenue).toEqual({
+      charge: 350,
+      refund: -40,
+      dispute: -15,
+    });
+  });
+
+  it("tags each payment entry with the kind that produced it", () => {
+    const visitor = assemble([
+      paymentRow({ timestamp: T0, revenue_cents: 10_000 }),
+      paymentRow({
+        timestamp: T0 + 1000,
+        revenue_cents: -10_000,
+        extra_data: JSON.stringify({ kind: "refund" }),
+      }),
+    ]);
+
+    const payments = visitor.completeJourney.filter(
+      (e) => e.eventType === "payment",
+    );
+    expect(payments.map((p) => p.data)).toEqual([
+      { amount: 100, kind: "charge" },
+      { amount: -100, kind: "refund" },
+    ]);
+  });
+
+  it("banks no money for a kind it does not recognise", () => {
+    const visitor = assemble([
+      paymentRow({
+        timestamp: T0,
+        revenue_cents: 50_000,
+        extra_data: JSON.stringify({ kind: "chargeback_reversal" }),
+      }),
+    ]);
+
+    expect(visitor.revenue).toEqual({ charge: 0, refund: 0, dispute: 0 });
+    expect(visitor.completeJourney[1]).toMatchObject({
+      eventType: "payment",
+      data: { amount: 500, kind: "" },
+    });
+  });
+
+  it("banks no money for a payment row carrying no kind at all", () => {
+    const visitor = assemble([
+      paymentRow({
+        timestamp: T0,
+        revenue_cents: 50_000,
+        extra_data: JSON.stringify({ customer_name: "Andrew Smith" }),
+      }),
+      paymentRow({
+        timestamp: T0 + 1000,
+        revenue_cents: 50_000,
+        extra_data: "not json at all",
+      }),
+    ]);
+
+    expect(visitor.revenue).toEqual({ charge: 0, refund: 0, dispute: 0 });
+  });
+
+  it("reads identity from the charge rather than a later refund", () => {
+    const visitor = assemble([
+      paymentRow({ timestamp: T0, revenue_cents: 29_900 }),
+      paymentRow({
+        timestamp: T0 + 60_000,
+        revenue_cents: -29_900,
+        extra_data: JSON.stringify({ kind: "refund", customer_name: "Wrong" }),
+      }),
+    ]);
+
+    expect(visitor.customerName).toBe("Andrew Smith");
+    expect(visitor.revenue).toEqual({ charge: 299, refund: -299, dispute: 0 });
   });
 
   it("groups flat rows into per-visitor timelines in arrival order", () => {

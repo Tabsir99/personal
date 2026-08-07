@@ -231,6 +231,8 @@ const BLOG_PAGES = [
   "/blog/my-setup-2026",
 ] as const;
 const COFFEE_CENTS = [300, 500, 500, 1000, 1500, 2500, 5000] as const;
+const REFUND_RATE = 0.15;
+const DISPUTE_RATE = 0.07;
 const SUPPORTER_FIRST = ["Andrew", "Jakub", "Alejandro", "Mykolas"] as const;
 const SUPPORTER_LAST = ["Smith", "Nowak", "Garcia", "Petrauskas"] as const;
 
@@ -424,8 +426,12 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
           extra_data: JSON.stringify({ eventName: name }),
         });
 
-      const payment = (cents: number, extra: Record<string, string>) => {
-        if (ts >= windowEnd) return;
+      const paymentAt = (
+        at: number,
+        cents: number,
+        extra: Record<string, string>,
+      ) => {
+        if (at >= windowEnd) return;
         rows.push({
           ...row(dev, {}),
           type: "payment",
@@ -452,9 +458,12 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
           session_number: 0,
           revenue_cents: cents,
           extra_data: JSON.stringify(extra),
-          timestamp: Math.floor(ts),
+          timestamp: Math.floor(at),
         });
       };
+
+      const payment = (cents: number, extra: Record<string, string>) =>
+        paymentAt(ts, cents, extra);
       const advance = (min: number, max: number) =>
         (ts += int(min, max) * 1000);
 
@@ -517,14 +526,33 @@ export function generateSeed(opts: SeedOptions): AnalyticsEventRow[] {
         pageview("/success");
         const first = pick(SUPPORTER_FIRST);
         const last = pick(SUPPORTER_LAST);
-        payment(pick(COFFEE_CENTS), {
-          stripe_event_id: stripeId("evt_", 24),
-          kind: "charge",
+        const charged = pick(COFFEE_CENTS);
+        const identity = {
           customer_name: `${first} ${last}`,
           customer_email: `${first.toLowerCase()}.${last.toLowerCase()}@example.com`,
           customer_id: stripeId("cus_", 14),
           transaction_id: stripeId("pi_", 24),
+        };
+
+        payment(charged, {
+          stripe_event_id: stripeId("evt_", 24),
+          kind: "charge",
+          ...identity,
         });
+
+        const reversal = rng();
+        if (reversal < REFUND_RATE)
+          paymentAt(ts + int(1, 6) * DAY, -Math.round(charged / 2), {
+            stripe_event_id: stripeId("evt_", 24),
+            kind: "refund",
+            ...identity,
+          });
+        else if (reversal < REFUND_RATE + DISPUTE_RATE)
+          paymentAt(ts + int(2, 9) * DAY, -charged, {
+            stripe_event_id: stripeId("evt_", 24),
+            kind: "dispute",
+            ...identity,
+          });
         push("identify", "/success", {
           event_name: "identify",
           extra_data: identifyData(`${first} ${last}`),

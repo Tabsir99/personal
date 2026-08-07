@@ -16,9 +16,8 @@ export interface Win {
   end: number;
 }
 
-/** JS twin of stepPredicate in funnel/route.ts. */
 function stepMatches(row: AnalyticsEventRow, step: FunnelStep): boolean {
-  if (step.type === "goal") return row.event_name === step.goalName;
+  if (step.type === "goal") return goalNameOf(row) === step.goalName;
   if (row.type !== "pageview") return false;
   const href = row.href;
   switch (step.urlMatchType) {
@@ -33,11 +32,38 @@ function stepMatches(row: AnalyticsEventRow, step: FunnelStep): boolean {
   }
 }
 
+interface Split {
+  charge: number;
+  refund: number;
+  dispute: number;
+}
+
+const KINDS = ["charge", "refund", "dispute"] as const;
+
+const noCents = (): Split => ({ charge: 0, refund: 0, dispute: 0 });
+
+function paymentKind(raw: string): keyof Split | null {
+  let kind = "";
+  try {
+    const parsed = JSON.parse(raw || "{}") as Record<string, unknown>;
+    kind = typeof parsed.kind === "string" ? parsed.kind : "";
+  } catch {
+    kind = "";
+  }
+  return KINDS.includes(kind as keyof Split) ? (kind as keyof Split) : null;
+}
+
+function goalNameOf(row: AnalyticsEventRow): string {
+  if (row.type !== "payment") return row.event_name;
+  const kind = paymentKind(row.extra_data);
+  return kind === "refund" || kind === "dispute" ? kind : row.event_name;
+}
+
 interface Visitor {
   minTs: number;
   referrer: string;
   country: string;
-  revenueCents: number;
+  revenueCents: Split;
   reached: boolean[];
 }
 
@@ -58,7 +84,7 @@ export function referenceFunnel(
         minTs: r.timestamp,
         referrer: r.referrer,
         country: r.country,
-        revenueCents: 0,
+        revenueCents: noCents(),
         reached: funnel.steps.map(() => false),
       };
       visitors.set(r.visitor_id, v);
@@ -68,7 +94,8 @@ export function referenceFunnel(
       v.referrer = r.referrer;
       v.country = r.country;
     }
-    v.revenueCents += r.revenue_cents;
+    const kind = paymentKind(r.extra_data);
+    if (kind) v.revenueCents[kind] += r.revenue_cents;
     funnel.steps.forEach((step, i) => {
       if (stepMatches(r, step)) v.reached[i] = true;
     });
@@ -120,9 +147,17 @@ export function referenceFunnel(
     }));
   };
 
-  const revenueFor = (i: number): number =>
-    all.filter((v) => v.reached[i]).reduce((s, v) => s + v.revenueCents, 0) /
-    100;
+  const revenueFor = (i: number): Split => {
+    const cents = noCents();
+    for (const v of all)
+      if (v.reached[i])
+        for (const kind of KINDS) cents[kind] += v.revenueCents[kind];
+    return {
+      charge: cents.charge / 100,
+      refund: cents.refund / 100,
+      dispute: cents.dispute / 100,
+    };
+  };
 
   const data: FunnelStepData[] = funnel.steps.map((step, i) => {
     const value = counts[i];
@@ -143,7 +178,6 @@ export function referenceFunnel(
   });
 
   const completions = data.length ? data[data.length - 1].value : 0;
-  const totalRevenue = revenueFor(0);
 
   return {
     funnel,
@@ -153,8 +187,7 @@ export function referenceFunnel(
       completions,
       overallConversionRate:
         totalVisitors > 0 ? (completions / totalVisitors) * 100 : 0,
-      overallRevenuePerVisitor:
-        totalVisitors > 0 ? totalRevenue / totalVisitors : 0,
+      revenue: revenueFor(0),
       period: "",
       timezone: "UTC",
       lastUpdated: "",

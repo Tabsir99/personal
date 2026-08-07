@@ -12,6 +12,7 @@ import {
   eventWhere,
   visitorRevenueSubquery,
   revenueDedupedByVisitor,
+  nestRevenue,
   type UvBreakdownRow,
 } from "@/lib/analyticsQuery";
 import type { SystemResponse } from "@/lib/analyticsTypes";
@@ -28,7 +29,7 @@ export const GET = wrapRoute<SystemResponse>(async (req: NextRequest) => {
       multiIf(GROUPING(v.browser) = 0, 'browsers', GROUPING(v.os) = 0, 'os', 'devices') as level,
       multiIf(GROUPING(v.browser) = 0, v.browser, GROUPING(v.os) = 0, v.os, v.device) as name,
       uniqExact(v.vid) as uv,
-      ${revenueDedupedByVisitor("v.vid", "pr.rev")}
+      ${revenueDedupedByVisitor("v.vid", "pr")}
     FROM (
       SELECT
         ${F.browser} as browser,
@@ -56,5 +57,9 @@ export const GET = wrapRoute<SystemResponse>(async (req: NextRequest) => {
     "devices",
   ]);
 
-  return { browsers, os, devices };
+  return {
+    browsers: browsers.map(nestRevenue),
+    os: os.map(nestRevenue),
+    devices: devices.map(nestRevenue),
+  };
 });

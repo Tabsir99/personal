@@ -9,6 +9,13 @@ import {
   F,
 } from "@/lib/tinybird";
 import { getFunnel } from "@/actions/funnelActions";
+import {
+  GOAL_NAME,
+  PAYMENT_KIND,
+  REVENUE_KINDS,
+  type RevenueKind,
+  type RevenueSplit,
+} from "@/lib/analyticsQuery";
 import type {
   FunnelDetailResponse,
   FunnelStep,
@@ -17,9 +24,23 @@ import type {
   FunnelStepCountry,
 } from "@/lib/analyticsTypes";
 
+function stepRevenue(
+  total: Record<string, unknown>,
+  step: number,
+): RevenueSplit {
+  const dollars = (kind: RevenueKind) =>
+    Number(total[`rev${step}_${kind}`] ?? 0) / 100;
+
+  return {
+    charge: dollars("charge"),
+    refund: dollars("refund"),
+    dispute: dollars("dispute"),
+  };
+}
+
 function stepPredicate(step: FunnelStep): string {
   if (step.type === "goal") {
-    return `${F.eventName} = '${escapeSQL(step.goalName)}'`;
+    return `${GOAL_NAME} = '${escapeSQL(step.goalName)}'`;
   }
   const url = escapeSQL(step.url);
   const pageview = `${F.type} = 'pageview'`;
@@ -95,7 +116,11 @@ export const GET = wrapRoute<FunnelDetailResponse>(async (req: NextRequest) => {
     .join(",\n          ");
   const counts = preds.map((_, i) => `countIf(r${i} = 1) AS s${i}`).join(", ");
   const revenues = preds
-    .map((_, i) => `sumIf(vrev, r${i} = 1) AS rev${i}`)
+    .flatMap((_, i) =>
+      REVENUE_KINDS.map(
+        (kind) => `sumIf(vrev_${kind}, r${i} = 1) AS rev${i}_${kind}`,
+      ),
+    )
     .join(", ");
 
   const res = await queryTinybird<BreakdownRow>(
@@ -113,7 +138,10 @@ export const GET = wrapRoute<FunnelDetailResponse>(async (req: NextRequest) => {
           argMin(${F.referrer}, ${F.timestamp}) AS ref,
           argMin(${F.country}, ${F.timestamp}) AS cty,
           ${reached},
-          sum(${F.revenueCents}) AS vrev
+          ${REVENUE_KINDS.map(
+            (kind) =>
+              `sumIf(${F.revenueCents}, ${PAYMENT_KIND} = '${kind}') AS vrev_${kind}`,
+          ).join(",\n          ")}
         FROM ${F.engine}
         WHERE ${F.websiteId} = '${params.websiteId}'
           AND ${F.isBot} = 0
@@ -139,7 +167,7 @@ export const GET = wrapRoute<FunnelDetailResponse>(async (req: NextRequest) => {
       id: `step${i + 1}`,
       label: `Step ${i + 1}`,
       value,
-      revenue: Number(total[`rev${i}`] ?? 0) / 100,
+      revenue: stepRevenue(total, i),
       stepIndex: i,
       stepType: step.type,
       conversionRate: totalVisitors > 0 ? (value / totalVisitors) * 100 : 0,
@@ -151,7 +179,6 @@ export const GET = wrapRoute<FunnelDetailResponse>(async (req: NextRequest) => {
   });
 
   const completions = data.length ? data[data.length - 1].value : 0;
-  const totalRevenue = Number(total.rev0 ?? 0) / 100;
 
   return {
     funnel,
@@ -161,8 +188,7 @@ export const GET = wrapRoute<FunnelDetailResponse>(async (req: NextRequest) => {
       completions,
       overallConversionRate:
         totalVisitors > 0 ? (completions / totalVisitors) * 100 : 0,
-      overallRevenuePerVisitor:
-        totalVisitors > 0 ? totalRevenue / totalVisitors : 0,
+      revenue: stepRevenue(total, 0),
       period: params.period,
       timezone: "UTC",
       lastUpdated: new Date().toISOString(),

@@ -141,7 +141,9 @@ describeMaybe("analytics funnel route — real Tinybird", () => {
     expect(
       ref.data.some((d, i) => i > 0 && d.value > ref.data[i - 1].value),
     ).toBe(true);
-    expect(ref.data.some((d) => d.revenue > 0)).toBe(true);
+    expect(ref.data.some((d) => d.revenue.charge > 0)).toBe(true);
+    expect(ref.data.some((d) => d.revenue.refund < 0)).toBe(true);
+    expect(ref.data.some((d) => d.revenue.dispute < 0)).toBe(true);
     expect(ref.data[0].topReferrers.length).toBeGreaterThan(0);
     expect(ref.data[0].topCountries.length).toBeGreaterThan(0);
 
@@ -159,7 +161,11 @@ describeMaybe("analytics funnel route — real Tinybird", () => {
         r.dropoffFromPrevious,
         6,
       );
-      expect(step.revenue, `step ${i} revenue`).toBeCloseTo(r.revenue, 4);
+      for (const kind of ["charge", "refund", "dispute"] as const)
+        expect(step.revenue[kind], `step ${i} revenue.${kind}`).toBeCloseTo(
+          r.revenue[kind],
+          4,
+        );
       expect(step.topReferrers, `step ${i} topReferrers`).toEqual(
         r.topReferrers,
       );
@@ -174,10 +180,11 @@ describeMaybe("analytics funnel route — real Tinybird", () => {
       ref.metrics.overallConversionRate,
       6,
     );
-    expect(data.metrics.overallRevenuePerVisitor).toBeCloseTo(
-      ref.metrics.overallRevenuePerVisitor,
-      6,
-    );
+    for (const kind of ["charge", "refund", "dispute"] as const)
+      expect(data.metrics.revenue[kind], `metrics.revenue.${kind}`).toBeCloseTo(
+        ref.metrics.revenue[kind],
+        4,
+      );
   });
 });
 

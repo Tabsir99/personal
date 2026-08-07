@@ -190,7 +190,7 @@ describeMaybe("journey route — real Tinybird", () => {
 
     expect(payer.goalCompletedAt).toBe(PAID_AT);
     expect(payer.timeBeforeGoal).toBe(PAID_AT - FIRST_TOUCH);
-    expect(payer.amount).toBe(169);
+    expect(payer.revenue).toEqual({ charge: 169, refund: 0, dispute: 0 });
     expect(payer.customerName).toBe("Andrew Smith");
     expect(payer.customerEmail).toBe("andrew.smith@example.com");
   });
@@ -239,7 +239,7 @@ describeMaybe("journey route — real Tinybird", () => {
     expect(data.visitors.map((v) => v.visitorId)).toEqual([SIGNER]);
     const signer = data.visitors[0]!;
     expect(signer.goalCompletedAt).toBe(now - 4 * DAY + 1000);
-    expect(signer.amount).toBe(0);
+    expect(signer.revenue).toEqual({ charge: 0, refund: 0, dispute: 0 });
     expect(signer.customerName).toBe("");
   });
 

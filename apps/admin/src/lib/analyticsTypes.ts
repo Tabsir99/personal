@@ -1,17 +1,17 @@
 import type { BotCategory } from "@tabsircg/schemas/analytics";
+import type { WithRevenue, RevenueKind } from "./analyticsQuery";
 
-export interface OverviewMetrics {
+export interface OverviewMetrics extends WithRevenue {
   visitors: number;
   pageviews: number;
   sessions: number;
   bounceRate: number;
   sessionDuration: number;
-  revenue: number;
   payingVisitors: number;
   conversionRate: number;
 }
 
-export interface TimeseriesPoint {
+export interface TimeseriesPoint extends WithRevenue {
   timestamp: number;
   visitors: number;
   newVisitors: number;
@@ -20,7 +20,6 @@ export interface TimeseriesPoint {
   sessions: number;
   bounceRate: number;
   sessionDuration: number;
-  revenue: number;
   payingVisitors: number;
   conversionRate: number;
 }
@@ -32,15 +31,13 @@ interface VisitorSplit {
   returningVisitors: number;
 }
 
-export interface SourceMetric extends VisitorSplit {
+export interface SourceMetric extends VisitorSplit, WithRevenue {
   name: string;
   channel: string;
-  revenue: number;
 }
 
-export interface ChannelMetric extends VisitorSplit {
+export interface ChannelMetric extends VisitorSplit, WithRevenue {
   name: string;
-  revenue: number;
 }
 
 export const CAMPAIGN_DIMENSIONS = [
@@ -53,50 +50,43 @@ export const CAMPAIGN_DIMENSIONS = [
 ] as const;
 export type CampaignDimension = (typeof CAMPAIGN_DIMENSIONS)[number];
 
-export interface CampaignMetric {
+export interface CampaignMetric extends WithRevenue {
   name: string;
   uv: number;
-  revenue: number;
 }
 
-export interface PageMetric {
+export interface PageMetric extends WithRevenue {
   name: string;
   uv: number;
   pageviews: number;
-  revenue: number;
 }
 
-export interface EntryPageMetric {
+export interface EntryPageMetric extends WithRevenue {
   name: string;
   uv: number;
-  revenue: number;
 }
 
-export interface LocationMetric {
+export interface LocationMetric extends WithRevenue {
   name: string;
   uv: number;
-  revenue: number;
   country?: string;
   region?: string;
 }
 
-export interface SystemMetric {
+export interface SystemMetric extends WithRevenue {
   name: string;
   uv: number;
-  revenue: number;
 }
 
-export interface ExitLinkMetric {
+export interface ExitLinkMetric extends WithRevenue {
   name: string;
   uv: number;
   exits: number;
-  revenue: number;
 }
 
-export interface HostnameMetric {
+export interface HostnameMetric extends WithRevenue {
   name: string;
   uv: number;
-  revenue: number;
 }
 
 export interface GoalMetric {
@@ -107,11 +97,7 @@ export interface GoalMetric {
 }
 
 export type PresetPeriod =
-  | "today"
-  | "yesterday"
-  | "last7d"
-  | "last30d"
-  | "last90d";
+  "today" | "yesterday" | "last7d" | "last30d" | "last90d";
 export type Period = PresetPeriod | `custom:${string}:${string}`;
 export type Granularity = "hourly" | "daily" | "weekly" | "monthly";
 
@@ -184,6 +170,8 @@ export { CUSTOM_EVENT_TYPE } from "@tabsircg/schemas/analytics";
 
 export const RESERVED_GOALS = [
   { name: "payment", label: "Payment" },
+  { name: "refund", label: "Refund" },
+  { name: "dispute", label: "Dispute" },
   { name: "identify", label: "Identify" },
   { name: "external_link", label: "External link" },
 ] as const;
@@ -280,11 +268,10 @@ export interface FunnelStepCountry {
   percentage: number;
 }
 
-export interface FunnelStepData {
+export interface FunnelStepData extends WithRevenue {
   id: string;
   label: string;
   value: number;
-  revenue: number;
   stepIndex: number;
   stepType: FunnelStep["type"];
   conversionRate: number;
@@ -293,11 +280,10 @@ export interface FunnelStepData {
   topCountries: FunnelStepCountry[];
 }
 
-export interface FunnelMetrics {
+export interface FunnelMetrics extends WithRevenue {
   totalVisitors: number;
   completions: number;
   overallConversionRate: number;
-  overallRevenuePerVisitor: number;
   period: string;
   timezone: string;
   lastUpdated: string;
@@ -340,6 +326,7 @@ export interface JourneyCustomData {
 
 export interface JourneyPaymentData {
   amount: number;
+  kind: RevenueKind | "";
 }
 
 interface JourneyEntryBase {
@@ -380,12 +367,11 @@ export interface JourneySourceAttribution {
   params: Record<string, string>;
 }
 
-export interface JourneyVisitor {
+export interface JourneyVisitor extends WithRevenue {
   visitorId: string;
   customerName: string;
   customerEmail: string;
   profileMetadata: Record<string, unknown>;
-  amount: number;
   channel: string;
   sourceAttribution: JourneySourceAttribution;
   countryCode: string;
