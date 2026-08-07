@@ -28,7 +28,9 @@ export function encodeExtraData(extraData: unknown): string {
   const capped: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(extraData)) {
     capped[key] =
-      typeof value === "string" ? value.slice(0, EXTRA_DATA_MAX_VALUE_LENGTH) : value;
+      typeof value === "string"
+        ? value.slice(0, EXTRA_DATA_MAX_VALUE_LENGTH)
+        : value;
   }
 
   const full = JSON.stringify(capped);
@@ -36,7 +38,9 @@ export function encodeExtraData(extraData: unknown): string {
 
   const kept: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(capped)) {
-    if (JSON.stringify({ ...kept, [key]: value }).length > EXTRA_DATA_MAX_BYTES) {
+    if (
+      JSON.stringify({ ...kept, [key]: value }).length > EXTRA_DATA_MAX_BYTES
+    ) {
       break;
     }
     kept[key] = value;
@@ -45,9 +49,9 @@ export function encodeExtraData(extraData: unknown): string {
 }
 
 export interface EventMetadata {
-  country: string;
-  region: string;
-  city: string;
+  country: string | undefined;
+  region: string | undefined;
+  city: string | undefined;
   ipAddress: string;
   timestamp: number;
   userAgent: string;
@@ -60,9 +64,9 @@ export function getEventMetadata(
 ): EventMetadata {
   const cf = request.cf ?? {};
   return {
-    country: (cf.country as string) || "Unknown",
-    region: (cf.region as string) || "Unknown",
-    city: (cf.city as string) || "Unknown",
+    country: (cf.country as string) || undefined,
+    region: (cf.region as string) || undefined,
+    city: (cf.city as string) || undefined,
     ipAddress: defaultIp,
     timestamp: Date.now(),
     userAgent: defaultUserAgent,

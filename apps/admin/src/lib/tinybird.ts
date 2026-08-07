@@ -6,8 +6,9 @@ import {
   COLUMNS,
   ANALYTICS_TABLE,
   isUuid,
-  type AnalyticsEventRow,
+  type PaymentEventInput,
 } from "@tabsircg/schemas/analytics";
+import type { RevenueKind } from "./analyticsQuery";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { logQuery, logQueryError, type QueryStats } from "./queryLog";
 
@@ -73,7 +74,7 @@ export async function writePaymentEvent(row: {
   sessionId: string;
   revenueCents: number;
   eventName?: string;
-  extra?: Record<string, unknown>;
+  extra: { kind: RevenueKind } & Record<string, unknown>;
   timestamp: number;
 }): Promise<void> {
   if (!isUuid(row.visitorId)) {
@@ -83,15 +84,15 @@ export async function writePaymentEvent(row: {
     throw new Error("Payment event sessionId is not a UUID");
   }
 
-  const payload: Partial<AnalyticsEventRow> = {
+  const payload: PaymentEventInput = {
     website_id: row.websiteId,
     type: "payment",
     visitor_id: row.visitorId,
     session_id: row.sessionId,
     revenue_cents: row.revenueCents,
-    event_name: row.eventName ?? "payment",
-    extra_data: JSON.stringify(row.extra ?? {}),
+    extra_data: JSON.stringify(row.extra),
     timestamp: row.timestamp,
+    ...(row.eventName ? { event_name: row.eventName } : {}),
   };
   const body = JSON.stringify(payload);
 

@@ -13,7 +13,10 @@ import {
 } from "./utils";
 import { sendToTinybirdWithRetry } from "./tinybird";
 import { parseUA } from "./parseUA";
-import type { AnalyticsEventRow } from "@tabsircg/schemas/analytics";
+import type {
+  BrowserEventInput,
+  CrawlEventInput,
+} from "@tabsircg/schemas/analytics";
 
 interface Env {
   ANALYTICS_DOMAINS_KV: KVNamespace;
@@ -24,38 +27,17 @@ interface Env {
 
 const INGEST_TOKEN_HEADER = "x-ingest-token";
 
-const NIL_UUID = "00000000-0000-0000-0000-000000000000";
-const UNKNOWN_GEO = "Unknown";
-
-function crawlRow(payload: CrawlPayload, timestamp: number): AnalyticsEventRow {
+function crawlRow(payload: CrawlPayload, timestamp: number): CrawlEventInput {
   return {
     website_id: payload.websiteId,
     type: payload.type,
-    domain: payload.domain || "unknown",
+    domain: payload.domain,
     href: payload.href,
-    referrer: payload.referrer || "",
-    visitor_id: NIL_UUID,
-    session_id: NIL_UUID,
-    language: "",
-    timezone: "",
-    event_name: payload.type,
-    extra_data: "{}",
-    country: UNKNOWN_GEO,
-    region: UNKNOWN_GEO,
-    city: UNKNOWN_GEO,
-    browser: "",
-    os: "",
-    device: "",
+    referrer: payload.referrer,
     is_bot: 1,
     bot_category: payload.bot.category,
     bot_name: payload.bot.name,
     ip: payload.bot.ip,
-    viewport_w: 0,
-    viewport_h: 0,
-    screen_w: 0,
-    screen_h: 0,
-    session_number: 0,
-    revenue_cents: 0,
     timestamp,
   };
 }
@@ -65,7 +47,7 @@ function browserRow(
   request: Request,
   ipAddress: string,
   rawUserAgent: string,
-): AnalyticsEventRow {
+): BrowserEventInput {
   const { country, region, city, timestamp, userAgent } = getEventMetadata(
     request,
     ipAddress,
@@ -76,9 +58,9 @@ function browserRow(
   return {
     website_id: payload.websiteId,
     type: payload.type,
-    domain: payload.domain || "unknown",
+    domain: payload.domain,
     href: payload.href,
-    referrer: payload.referrer || "",
+    referrer: payload.referrer,
     visitor_id: payload.visitorId,
     session_id: payload.sessionId,
     language: payload.language,
@@ -91,16 +73,12 @@ function browserRow(
     browser,
     os,
     device,
-    is_bot: 0,
-    bot_category: "",
-    bot_name: "",
     ip: ipAddress,
     viewport_w: toUint16(payload.viewport.width),
     viewport_h: toUint16(payload.viewport.height),
     screen_w: toUint16(payload.screenWidth),
     screen_h: toUint16(payload.screenHeight),
     session_number: toUint16(payload.visitorSessionNumber),
-    revenue_cents: 0,
     timestamp,
   };
 }
@@ -163,7 +141,9 @@ export default {
           request.headers.get(INGEST_TOKEN_HEADER) !== env.INGEST_TOKEN)
       ) {
         return new Response(
-          JSON.stringify({ error: "Crawl events require a valid ingest token" }),
+          JSON.stringify({
+            error: "Crawl events require a valid ingest token",
+          }),
           { status: 403, headers: accessGuard.corsHeaders },
         );
       }

@@ -8,9 +8,9 @@ import {
 
 const basePayloadSchema = z.object({
   websiteId: z.string().min(1).max(96),
-  domain: z.string().nullable(),
+  domain: z.string().min(1).max(253),
   href: z.string().max(2000),
-  referrer: z.string().nullable(),
+  referrer: z.string().optional(),
   viewport: z.object({
     width: z.number(),
     height: z.number(),
@@ -57,9 +57,9 @@ export const browserPayloadSchema = z.intersection(
 
 export const crawlPayloadSchema = z.object({
   websiteId: z.string().min(1).max(96),
-  domain: z.string().nullable(),
+  domain: z.string().min(1).max(253),
   href: z.string().max(2000),
-  referrer: z.string().nullable(),
+  referrer: z.string().optional(),
   type: z.literal("pageview"),
   bot: z.object({
     name: z.string().min(1).max(64),
@@ -69,7 +69,10 @@ export const crawlPayloadSchema = z.object({
   }),
 });
 
-export const payloadSchema = z.union([crawlPayloadSchema, browserPayloadSchema]);
+export const payloadSchema = z.union([
+  crawlPayloadSchema,
+  browserPayloadSchema,
+]);
 
 export type BrowserPayload = z.infer<typeof browserPayloadSchema>;
 export type CrawlPayload = z.infer<typeof crawlPayloadSchema>;

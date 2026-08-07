@@ -1,5 +1,3 @@
-
-
 import { z } from "zod";
 
 export const ANALYTICS_TABLE = "analytics_events";
@@ -123,3 +121,41 @@ export interface AnalyticsEventRow {
   revenue_cents: number;
   timestamp: number;
 }
+
+type Columns<K extends keyof AnalyticsEventRow> = Pick<AnalyticsEventRow, K>;
+
+type Identity = "website_id" | "timestamp";
+
+export type BrowserEventInput = Columns<
+  | Identity
+  | "type"
+  | "domain"
+  | "href"
+  | "visitor_id"
+  | "session_id"
+  | "language"
+  | "timezone"
+  | "event_name"
+  | "extra_data"
+  | "browser"
+  | "os"
+  | "device"
+  | "ip"
+  | "viewport_w"
+  | "viewport_h"
+  | "screen_w"
+  | "screen_h"
+  | "session_number"
+> &
+  Partial<Columns<"referrer" | "country" | "region" | "city">>;
+
+export type CrawlEventInput = Columns<
+  Identity | "type" | "domain" | "href" | "bot_category" | "bot_name" | "ip"
+> & { is_bot: 1 } & Partial<Columns<"referrer">>;
+
+export type PaymentEventInput = Columns<
+  Identity | "visitor_id" | "session_id" | "revenue_cents" | "extra_data"
+> & { type: "payment" } & Partial<Columns<"event_name">>;
+
+export type AnalyticsEventInput =
+  BrowserEventInput | CrawlEventInput | PaymentEventInput;
