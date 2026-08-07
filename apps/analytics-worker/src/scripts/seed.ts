@@ -1,30 +1,53 @@
-
 /// <reference types="node" />
 import nodeCrypto from "crypto";
 import { existsSync, readFileSync } from "fs";
 import { join, dirname } from "path";
 import { type BrowserPayload } from "../schema";
 import { parseUA } from "../parseUA";
+import { toUint16, toEventName, encodeExtraData } from "../utils";
 import {
   ANALYTICS_TABLE,
   type BotCategory,
-  type AnalyticsEventRow,
+  type AnalyticsEventInput,
+  type BrowserEventInput,
+  type CrawlEventInput,
+  type PaymentEventInput,
 } from "@tabsircg/schemas/analytics";
 
-type SeedEvent = BrowserPayload & {
-  crawler?: {
-    name: string;
-    category: BotCategory;
-  };
-  cfOverride?: {
-    country: string;
-    region: string;
-    city: string;
-    ip: string;
-    timestamp: number;
-    userAgent: string;
-  };
-};
+interface SeedCrawler {
+  name: string;
+  category: BotCategory;
+}
+
+interface SeedContext {
+  ip: string;
+  timestamp: number;
+}
+
+interface SeedVisitorContext extends SeedContext {
+  country: string;
+  region: string;
+  city: string;
+  userAgent: string;
+}
+
+type SeedBrowserEvent = BrowserPayload & { at: SeedVisitorContext };
+
+interface SeedCrawlEvent {
+  websiteId: string;
+  domain: string;
+  href: string;
+  referrer?: string;
+  type: "pageview";
+  crawler: SeedCrawler;
+  at: SeedContext;
+}
+
+type SeedEvent = SeedBrowserEvent | SeedCrawlEvent;
+
+function isCrawlEvent(event: SeedEvent): event is SeedCrawlEvent {
+  return "crawler" in event;
+}
 
 const WEBSITE_ID = "portfolio-and-blog";
 const DOMAIN = "tabsircg.com";
@@ -97,6 +120,34 @@ const SUBJECTS = [
   "Love your blog!",
 ];
 const COFFEE_AMOUNTS_CENTS = [300, 500, 500, 500, 1000, 1000, 1500, 2500, 5000];
+
+const DAY_MS = 86_400_000;
+const DISPUTE_RATE = 0.07;
+const REFUND_RATE = 0.15;
+const MAX_REVERSAL_DELAY_DAYS = 20;
+
+const stripeEventId = () =>
+  `evt_${generateUUID().replace(/-/g, "").slice(0, 24)}`;
+
+interface Reversal {
+  kind: "refund" | "dispute";
+  cents: number;
+  delay: number;
+}
+
+function reversalFor(chargeCents: number): Reversal | null {
+  const roll = Math.random();
+  const delay =
+    (1 + Math.floor(Math.random() * MAX_REVERSAL_DELAY_DAYS)) * DAY_MS;
+
+  if (roll < DISPUTE_RATE) {
+    return { kind: "dispute", cents: chargeCents, delay };
+  }
+  if (roll < DISPUTE_RATE + REFUND_RATE) {
+    return { kind: "refund", cents: Math.round(chargeCents / 2), delay };
+  }
+  return null;
+}
 
 interface AcquisitionSource {
   referrer: string | null;
@@ -509,7 +560,9 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
     ) => {
       const url = `https://${DOMAIN}${path}`;
       const referrer =
-        sNum === 1 && currentOffset === 0 ? visitor.firstReferrer : null;
+        sNum === 1 && currentOffset === 0
+          ? (visitor.firstReferrer ?? undefined)
+          : undefined;
 
       let finalHref = url;
       if (sNum === 1 && currentOffset === 0 && visitor.firstQuery) {
@@ -534,7 +587,7 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
         screenHeight: visitor.screenHeight,
         type,
         extraData,
-        cfOverride: {
+        at: {
           country: visitor.country,
           region: visitor.region,
           city: visitor.city,
@@ -730,29 +783,45 @@ while (allEvents.length < TOTAL_EVENTS_TARGET + 500) {
           COFFEE_AMOUNTS_CENTS[
             Math.floor(Math.random() * COFFEE_AMOUNTS_CENTS.length)
           ];
-        allEvents.push(
-          buildPayload("pageview", `/success?session_id=${stripeSessionId}`),
-        );
+        const successPath = `/success?session_id=${stripeSessionId}`;
+        const identity = {
+          customer_name: `${visitor.firstName} ${visitor.lastName}`,
+          customer_email: visitor.email,
+          customer_id: `cus_${generateUUID().replace(/-/g, "").slice(0, 14)}`,
+          transaction_id: `pi_${generateUUID().replace(/-/g, "").slice(0, 24)}`,
+        };
+
+        allEvents.push(buildPayload("pageview", successPath));
         currentOffset += 4000;
         allEvents.push(
-          buildPayload("payment", `/success?session_id=${stripeSessionId}`, {
-            stripe_event_id: `evt_${generateUUID().replace(/-/g, "").slice(0, 24)}`,
+          buildPayload("payment", successPath, {
+            stripe_event_id: stripeEventId(),
             kind: "charge",
-            customer_name: `${visitor.firstName} ${visitor.lastName}`,
-            customer_email: visitor.email,
-            customer_id: `cus_${generateUUID().replace(/-/g, "").slice(0, 14)}`,
-            transaction_id: `pi_${generateUUID().replace(/-/g, "").slice(0, 24)}`,
+            ...identity,
             amount_cents: String(amountCents),
           }),
         );
         currentOffset += 2000;
         allEvents.push(
-          buildPayload("identify", `/success?session_id=${stripeSessionId}`, {
+          buildPayload("identify", successPath, {
             user_id: visitor.userId,
             name: `${visitor.firstName} ${visitor.lastName}`,
             image: "",
           }),
         );
+
+        const reversal = reversalFor(amountCents);
+        if (reversal && sessionTime + currentOffset + reversal.delay <= NOW) {
+          currentOffset += reversal.delay;
+          allEvents.push(
+            buildPayload("payment", successPath, {
+              stripe_event_id: stripeEventId(),
+              kind: reversal.kind,
+              ...identity,
+              amount_cents: String(-reversal.cents),
+            }),
+          );
+        }
       } else {
         allEvents.push(buildPayload("pageview", "/"));
         currentOffset += 15000;
@@ -784,7 +853,8 @@ const SEED_CRAWLERS: Array<{
   category: BotCategory;
 }> = [
   {
-    userAgent: "Mozilla/5.0 (compatible; GPTBot/1.0; +https://openai.com/gptbot)",
+    userAgent:
+      "Mozilla/5.0 (compatible; GPTBot/1.0; +https://openai.com/gptbot)",
     name: "GPTBot",
     category: "training",
   },
@@ -795,12 +865,14 @@ const SEED_CRAWLERS: Array<{
     category: "training",
   },
   {
-    userAgent: "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+    userAgent:
+      "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
     name: "Googlebot",
     category: "search_index",
   },
   {
-    userAgent: "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
+    userAgent:
+      "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
     name: "Bingbot",
     category: "search_index",
   },
@@ -811,7 +883,8 @@ const SEED_CRAWLERS: Array<{
     category: "ai_crawler",
   },
   {
-    userAgent: "Mozilla/5.0 (compatible; Bytespider; spider-feedback@bytedance.com)",
+    userAgent:
+      "Mozilla/5.0 (compatible; Bytespider; spider-feedback@bytedance.com)",
     name: "Bytespider",
     category: "training",
   },
@@ -821,7 +894,8 @@ const SEED_CRAWLERS: Array<{
     category: "training",
   },
   {
-    userAgent: "ChatGPT-User Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko)",
+    userAgent:
+      "ChatGPT-User Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko)",
     name: "ChatGPT-User",
     category: "answer_fetch",
   },
@@ -847,40 +921,25 @@ for (let i = 0; i < botEventCount; i++) {
     websiteId: WEBSITE_ID,
     domain: DOMAIN,
     href: `https://${DOMAIN}${page}`,
-    referrer: null,
-    viewport: { width: 0, height: 0 },
-    visitorId: generateUUID(),
-    sessionId: generateUUID(),
-    visitorSessionNumber: 1,
-    language: "en-US",
-    timezone: "UTC",
-    screenWidth: 0,
-    screenHeight: 0,
     type: "pageview",
     crawler: { name: crawler.name, category: crawler.category },
-    cfOverride: {
-      country: "US",
-      region: "Unknown",
-      city: "Unknown",
+    at: {
       ip: `10.0.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
       timestamp: botTimestamp,
-      userAgent: crawler.userAgent,
     },
   });
 }
 
 console.log("🧹 Sorting events chronologically...");
-allEvents.sort(
-  (a, b) => (a.cfOverride?.timestamp ?? 0) - (b.cfOverride?.timestamp ?? 0),
-);
+allEvents.sort((a, b) => a.at.timestamp - b.at.timestamp);
 
 function applyPageviewThrottle(events: SeedEvent[]): SeedEvent[] {
   const lastSeen = new Map<string, number>();
 
   return events.filter((e) => {
-    if (e.type !== "pageview") return true;
-    const key = `${e.visitorId} ${e.href}`;
-    const at = e.cfOverride?.timestamp ?? 0;
+    if (isCrawlEvent(e) || e.type !== "pageview") return true;
+    const key = `${e.visitorId}|${e.href}`;
+    const at = e.at.timestamp;
     const previous = lastSeen.get(key);
     if (previous !== undefined && at - previous < 60_000) return false;
     lastSeen.set(key, at);
@@ -898,96 +957,77 @@ console.log(
   `   ${droppedByThrottle} repeat pageviews dropped by the SDK's 60s throttle.`,
 );
 console.log(
-  `Timeline spans from: ${new Date(finalEvents[0].cfOverride?.timestamp ?? 0).toLocaleString()} to ${new Date(finalEvents[finalEvents.length - 1].cfOverride?.timestamp ?? 0).toLocaleString()}\n`,
+  `Timeline spans from: ${new Date(finalEvents[0].at.timestamp).toLocaleString()} to ${new Date(finalEvents[finalEvents.length - 1].at.timestamp).toLocaleString()}\n`,
 );
 
-function emptyRow(websiteId: string, timestamp: number): AnalyticsEventRow {
-  return {
-    website_id: websiteId,
-    type: "",
-    domain: "",
-    href: "",
-    referrer: "",
-    visitor_id: "",
-    session_id: "",
-    language: "",
-    timezone: "",
-    event_name: "",
-    extra_data: "{}",
-    country: "",
-    region: "",
-    city: "",
-    browser: "",
-    os: "",
-    device: "",
-    is_bot: 0,
-    bot_category: "",
-    bot_name: "",
-    ip: "",
-    viewport_w: 0,
-    viewport_h: 0,
-    screen_w: 0,
-    screen_h: 0,
-    session_number: 0,
-    revenue_cents: 0,
-    timestamp,
-  };
-}
-
-function toPaymentRow(p: SeedEvent): AnalyticsEventRow {
+function toPaymentRow(p: SeedBrowserEvent): PaymentEventInput {
   const { amount_cents, ...extra } = (p.extraData ?? {}) as Record<
     string,
     string
   >;
 
   return {
-    ...emptyRow(p.websiteId, p.cfOverride!.timestamp),
+    website_id: p.websiteId,
     type: "payment",
     visitor_id: p.visitorId,
     session_id: p.sessionId,
-    event_name: "payment",
-    extra_data: JSON.stringify(extra).slice(0, 4000),
+    extra_data: encodeExtraData(extra),
     revenue_cents: Number(amount_cents ?? 0),
+    timestamp: p.at.timestamp,
   };
 }
 
-function toRow(p: SeedEvent): AnalyticsEventRow {
-  if (p.type === "payment") return toPaymentRow(p);
+function toCrawlRow(p: SeedCrawlEvent): CrawlEventInput {
+  return {
+    website_id: p.websiteId,
+    type: p.type,
+    domain: p.domain,
+    href: p.href,
+    ...(p.referrer ? { referrer: p.referrer } : {}),
+    is_bot: 1,
+    bot_category: p.crawler.category,
+    bot_name: p.crawler.name,
+    ip: p.at.ip,
+    timestamp: p.at.timestamp,
+  };
+}
 
-  const cf = p.cfOverride!;
-  const { browser, os, device } = parseUA(cf.userAgent);
+function toBrowserRow(p: SeedBrowserEvent): BrowserEventInput {
+  const { browser, os, device } = parseUA(p.at.userAgent);
   const extra = (p.extraData ?? {}) as Record<string, string>;
 
   return {
     website_id: p.websiteId,
     type: p.type,
-    domain: p.domain || "unknown",
+    domain: p.domain,
     href: p.href,
-    referrer: p.referrer || "",
+    ...(p.referrer ? { referrer: p.referrer } : {}),
     visitor_id: p.visitorId,
     session_id: p.sessionId,
     language: p.language,
     timezone: p.timezone,
-    event_name: extra.eventName || p.type,
-    extra_data: JSON.stringify(extra).slice(0, 4000),
-    country: cf.country,
-    region: cf.region,
-    city: cf.city,
+    event_name: toEventName(extra, p.type),
+    extra_data: encodeExtraData(extra),
+    country: p.at.country,
+    region: p.at.region,
+    city: p.at.city,
     browser,
     os,
     device,
-    is_bot: p.crawler ? 1 : 0,
-    bot_category: p.crawler?.category ?? "",
-    bot_name: p.crawler?.name ?? "",
-    ip: cf.ip,
-    viewport_w: p.viewport.width,
-    viewport_h: p.viewport.height,
-    screen_w: p.screenWidth,
-    screen_h: p.screenHeight,
-    session_number: p.visitorSessionNumber,
-    revenue_cents: 0,
-    timestamp: cf.timestamp,
+    ip: p.at.ip,
+    viewport_w: toUint16(p.viewport.width),
+    viewport_h: toUint16(p.viewport.height),
+    screen_w: toUint16(p.screenWidth),
+    screen_h: toUint16(p.screenHeight),
+    session_number: toUint16(p.visitorSessionNumber),
+    timestamp: p.at.timestamp,
   };
+}
+
+function toRow(p: SeedEvent): AnalyticsEventInput {
+  if (isCrawlEvent(p)) return toCrawlRow(p);
+  if (p.type === "payment") return toPaymentRow(p);
+  return toBrowserRow(p);
 }
 
 function findRepoRoot(start: string): string {
