@@ -1,9 +1,9 @@
 import { cache } from "react";
-import { env } from "@/config/env";
+import { adminFetch } from "@/lib/adminFetch";
 import type { ApiResponse } from "@tabsircg/schemas/api";
 import type { PageData } from "@tabsircg/schemas/portfolio";
 
-const FALLBACK: PageData = {
+const UNCONFIGURED: PageData = {
   title: "",
   description: "",
   keywords: [],
@@ -21,20 +21,19 @@ const FALLBACK: PageData = {
   credentials: [],
 };
 
-// ISR, revalidated on-demand via the "page-data" tag. cache() dedupes within a
-// request — home and footer both call it.
 export const getPageData = cache(async (): Promise<PageData> => {
-  try {
-    const response = await fetch(`${env.ADMIN_ORIGIN}/api/page-data`, {
-      cache: "force-cache",
-      next: { tags: ["page-data"] },
-      headers: { serverToken: env.SERVER_TOKEN },
-    });
-    const res = (await response.json()) as ApiResponse<PageData | null>;
-    if (res.status === "error") throw new Error(res.message);
-    return res.data ?? FALLBACK;
-  } catch (error) {
-    console.error(error);
-    return FALLBACK;
+  const response = await adminFetch("/api/page-data", ["page-data"]);
+
+  if (!response.ok) {
+    throw new Error(
+      `page-data unavailable: admin responded ${response.status}`,
+    );
   }
+
+  const res = (await response.json()) as ApiResponse<PageData | null>;
+  if (res.status === "error") {
+    throw new Error(`page-data unavailable: ${res.message}`);
+  }
+
+  return res.data ?? UNCONFIGURED;
 });

@@ -48,6 +48,24 @@ This only works because the package is internal-only. Publishing it would need a
 
 Commands from the workspace root: `pnpm tc`, `pnpm dev`, `pnpm dev:admin`, `pnpm dev:portfolio`, `pnpm build`.
 
+### Which push rebuilds which app (`ignoreCommand`)
+
+Both apps delegate to [scripts/vercel-should-build.sh](scripts/vercel-should-build.sh) — `"ignoreCommand": "bash ../../scripts/vercel-should-build.sh <app>"`. The logic does **not** live inline in `vercel.json`: Vercel's schema caps `ignoreCommand`, `buildCommand`, `installCommand` and `devCommand` at **256 characters**, and the admin rule is 385 inline. Editors flag it against `https://openapi.vercel.sh/vercel.json`. Keep the JSON values short and put any real logic in the script.
+
+Vercel semantics are inverted and easy to get backwards: **exit 0 skips the build, non-zero runs it.** `git diff --quiet` exits 0 when nothing changed, so the rule reads "nothing I depend on changed → skip". Every failure path in the script (no argument, no parent commit, script missing → exit 127) lands on non-zero, i.e. *build* — never silently skip.
+
+The watch list is **default-include with a small exclude list**, never an enumeration of source paths — a new directory must fail toward building, not toward shipping stale.
+
+Each app watches its own dir, `packages/schemas`, the lockfile, `pnpm-workspace.yaml` and the root `package.json`. **Admin also watches `packages/analytics`**, because its `next.config.ts` sets `transpilePackages` *and* aliases `@tabsircg/analytics{,/sdk,/react}` to that package's `src` — admin compiles it from source, so an edit there changes admin's output. Portfolio does not depend on it. Neither app depends on `apps/analytics-worker`, so worker-only pushes build nothing.
+
+Excluded via `:(exclude)` pathspecs: `*.md` (no app imports markdown — verified, no mdx dep anywhere), `.claude/`, admin's `src/test/` (all 10 test files live there and no app code imports them), and `packages/analytics/**/*.test.ts`.
+
+Two consequences, both intended: a docs-only push deploys nothing, and a type error in an excluded test file surfaces on the next real build rather than immediately. `pnpm test` is what guards tests.
+
+This is not cosmetic. Commit `4941f20` (2026-08-05) changed only `README`/docs in both apps plus `packages/analytics/src` — under the old rule it rebuilt **portfolio**, which is what shipped the empty site. Under the current rule that same commit builds admin only.
+
+Editing the script itself rebuilds nothing, by design: it decides *whether* to build, it never changes build output.
+
 ## Wire contracts (admin → portfolio)
 
 Every admin REST response is wrapped by `wrapRoute` ([appUtils.ts](apps/admin/src/lib/appUtils.ts)):
@@ -91,6 +109,22 @@ Firestore composite index on `(status, featuredAt desc)` is required; it lives i
 - `getPost(slug)` — the post plus its `prev`/`next`, both computed server-side by `/api/blogs/[slug]`.
 
 Neighbours are no longer computed by paginating every blog on the portfolio side, so `/blog/:slug` renders don't scale with post count.
+
+### A failed admin fetch must fail the build — never fall back to empty
+
+`fetchJson` in posts.ts and `getPageData` in [pageData.ts](apps/portfolio/src/lib/pageData.ts) **throw** on a transport error or a non-OK/`status: "error"` response. Only a literal 404 returns `null` (a genuinely absent post), and only `data: null` yields the empty `UNCONFIGURED` page shape (a CMS with nothing in it yet).
+
+This is load-bearing. Both used to `catch` and return an empty value, which silently turned a bad admin response during `next build` into a **permanently empty static site**: the build went green, Next prerendered `/`, `/blog` and `/sitemap.xml` with no content, and — because those pages only revalidate on the `page-data`/`blogs` tags that admin POSTs on a *content mutation* — nothing ever regenerated them. It shipped that way on 2026-08-05 and stayed empty until manually rebuilt. Throwing instead makes the build exit non-zero, so Vercel keeps the last good deployment live.
+
+Note the API never had to be *unreachable*. `wrapRoute` turns any unexpected error into a 500 carrying `{status: "error"}`, and the old code treated that identically to success-with-no-data. A single Firestore hiccup was enough.
+
+**Do not "fix" this with a time-based `export const revalidate`.** On-demand tag revalidation is the design; a timer duplicates it, and it does not address the build-time hole at all — the throw does.
+
+### The intro overlay must not gate the page
+
+`#intro-root` is server-rendered, so it is `display: none` by default and only shown under `html[data-intro="running"]`; `--hero-stagger` is likewise `0ms` by default and only `5000ms` under that attribute. The pre-paint inline script in [layout.tsx](apps/portfolio/src/app/layout.tsx) sets `data-intro="running"` synchronously in `<head>`, before `#intro-root` is parsed — so a real visitor gets an opaque intro from the first frame, while any client that doesn't run that script (crawlers, JS off) paints the hero immediately instead of a full-bleed backdrop it cannot dismiss.
+
+**If you move or defer that script, the intro flashes.** If you invert either default back to "on", every crawler sees a black screen again and LCP returns to ~5.3s. The same `data-intro="running"` gate gates `[data-brand]`, so the header brand is visible without JS too.
 
 ## Design system (premium-ds) — read before writing any UI
 

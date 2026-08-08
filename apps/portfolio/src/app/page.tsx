@@ -13,6 +13,9 @@ import { getRecentBlogs } from "@/lib/posts";
 import { Intro } from "@/components/portfolio/intro";
 import { Header } from "@/components/portfolio/header";
 
+const SITE_URL = "https://tabsircg.com";
+const BRAND_ALIASES = ["tabsircg", "TabsirCG", "Tabsir", "tabsircg.com"];
+
 export default async function Home() {
   const [pageData, recent] = await Promise.all([
     getPageData(),
@@ -33,22 +36,49 @@ export default async function Home() {
     (t) => t.isActive && t.displaySlot === "voices",
   );
 
-  const personLd = {
+  const personId = `${SITE_URL}/#person`;
+
+  const structuredData = {
     "@context": "https://schema.org",
-    "@type": "Person",
-    name: "Tabsir CG",
-    url: "https://tabsircg.com",
-    jobTitle: "Full-Stack Developer",
-    description: pageData.description || undefined,
-    image: pageData.profilePicture || undefined,
-    ...(pageData.contact.email
-      ? { email: `mailto:${pageData.contact.email}` }
-      : {}),
-    sameAs: pageData.contact.social.map((s) => s.url).filter(Boolean),
-    knowsAbout: pageData.skills.flatMap((g) => g.skills.map((s) => s.name)),
-    ...(pageData.studioName
-      ? { worksFor: { "@type": "Organization", name: pageData.studioName } }
-      : {}),
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
+        url: SITE_URL,
+        name: "Tabsir CG",
+        alternateName: BRAND_ALIASES,
+        description: pageData.description || undefined,
+        inLanguage: "en",
+        publisher: { "@id": personId },
+      },
+      {
+        "@type": "Person",
+        "@id": personId,
+        name: "Tabsir CG",
+        alternateName: BRAND_ALIASES,
+        url: SITE_URL,
+        mainEntityOfPage: SITE_URL,
+        jobTitle: "Full-Stack Developer",
+        description: pageData.description || undefined,
+        image: pageData.profilePicture || undefined,
+        ...(pageData.contact.email
+          ? { email: `mailto:${pageData.contact.email}` }
+          : {}),
+        sameAs: pageData.contact.social.map((s) => s.url).filter(Boolean),
+        knowsAbout: pageData.skills.flatMap((g) => g.skills.map((s) => s.name)),
+        ...(pageData.studioName
+          ? { worksFor: { "@type": "Organization", name: pageData.studioName } }
+          : {}),
+      },
+      {
+        "@type": "ProfilePage",
+        "@id": `${SITE_URL}/#profilepage`,
+        url: SITE_URL,
+        name: pageData.title || "Tabsir CG",
+        isPartOf: { "@id": `${SITE_URL}/#website` },
+        mainEntity: { "@id": personId },
+      },
+    ],
   };
 
   return (
@@ -56,7 +86,7 @@ export default async function Home() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(personLd).replace(/</g, "\\u003c"),
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
         }}
       />
 

@@ -3,7 +3,7 @@ import type { ApiResponse, CursorPage } from "@tabsircg/schemas/api";
 import type { PublishedBlogDB } from "@tabsircg/schemas/blog";
 import type { SiteConfig } from "@tabsircg/schemas/site";
 import { cache } from "react";
-import { env } from "@/config/env";
+import { adminFetch } from "@/lib/adminFetch";
 
 // Mirrors `fieldsToRead` in apps/admin/src/app/api/blogs/route.ts.
 type BlogListItem = Pick<
@@ -70,24 +70,22 @@ export function formatDate(iso: string): string {
   });
 }
 
-const ADMIN_HEADERS = { serverToken: env.SERVER_TOKEN } as const;
-
 // ISR via force-cache, revalidated by tag. Admin POSTs the tags to
 // /api/revalidate after a mutation (blogUtils.ts revalidateBlog).
 async function fetchJson<T>(path: string, tags: string[]): Promise<T | null> {
-  try {
-    const res = await fetch(`${env.ADMIN_ORIGIN}${path}`, {
-      headers: ADMIN_HEADERS,
-      cache: "force-cache",
-      next: { tags },
-    });
-    const json = (await res.json()) as ApiResponse<T>;
-    if (json.status === "error") return null;
-    return json.data;
-  } catch (err) {
-    console.error(`fetch ${path} failed:`, err);
-    return null;
+  const res = await adminFetch(path, tags);
+
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`${path} unavailable: admin responded ${res.status}`);
   }
+
+  const json = (await res.json()) as ApiResponse<T>;
+  if (json.status === "error") {
+    throw new Error(`${path} unavailable: ${json.message}`);
+  }
+
+  return json.data;
 }
 
 const toIsoDate = (ms: number) => new Date(ms).toISOString();

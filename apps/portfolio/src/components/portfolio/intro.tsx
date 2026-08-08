@@ -1,6 +1,12 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import {
+  HERO_HANDOFF_MS,
+  INTRO_DURATION_MS,
+  MORPH_AT_MS,
+  RING_STAGGER_MS,
+} from "./intro-timing";
 
 /* Mirrors ContourSVG's Summit A so rings align with Atmosphere on fade. */
 function IntroRings() {
@@ -9,7 +15,7 @@ function IntroRings() {
     ry: 50 + i * 42,
     rot: -14 + i * 0.6,
     opacity: 0.25,
-    delay: 0.04 + i * 0.05,
+    delay: RING_STAGGER_MS(i),
   }));
   return (
     <svg
@@ -29,7 +35,7 @@ function IntroRings() {
             transform={`rotate(${r.rot} 420 780)`}
             opacity={r.opacity}
             pathLength="1"
-            style={{ "--ring-d": `${r.delay}s` } as React.CSSProperties}
+            style={{ "--ring-d": `${r.delay}ms` } as React.CSSProperties}
           />
         ))}
       </g>
@@ -38,14 +44,7 @@ function IntroRings() {
   );
 }
 
-/* Total intro length; must outlast the longest animation in intro.css and
-   stay in step with --hero-stagger. */
-const INTRO_DURATION = 6000;
-/* When the word starts flying to the header — slightly before the rings fade,
-   so it's clearly travelling (not lingering) as they clear. */
-const MORPH_AT = 4850;
-
-function IntroInner({ onDone }: { onDone: () => void }) {
+function IntroInner({ onDone }: { onDone: (immediate: boolean) => void }) {
   const wordWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,12 +62,20 @@ function IntroInner({ onDone }: { onDone: () => void }) {
         const dy = br.top + br.height / 2 - (sr.top + sr.height / 2);
         src.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${scale})`;
       }
-    }, MORPH_AT);
+    }, MORPH_AT_MS);
 
-    const done = setTimeout(onDone, INTRO_DURATION);
+    const done = setTimeout(() => onDone(false), INTRO_DURATION_MS);
+
+    const skip = () => onDone(true);
+    const events = ["pointerdown", "keydown", "wheel", "touchstart"] as const;
+    for (const type of events) {
+      window.addEventListener(type, skip, { once: true, passive: true });
+    }
+
     return () => {
       clearTimeout(morph);
       clearTimeout(done);
+      for (const type of events) window.removeEventListener(type, skip);
     };
   }, [onDone]);
 
@@ -106,6 +113,16 @@ function IntroInner({ onDone }: { onDone: () => void }) {
           </span>
         ))}
       </div>
+
+      <p
+        className={cn(
+          "intro-hint pointer-events-none absolute inset-x-0 bottom-[12vh] z-10",
+          "flex items-center justify-center gap-4 text-cream",
+          "text-[10px] tracking-[0.28em] uppercase",
+        )}
+      >
+        Click or press any key to skip
+      </p>
     </div>
   );
 }
@@ -125,17 +142,23 @@ export function Intro() {
     }
   }, []);
 
-  const handleDone = useCallback(() => {
+  const handleDone = useCallback((immediate: boolean) => {
     localStorage.setItem("intro-played", String(Date.now()));
     /* Reveal the brand in the SAME commit that unmounts the overlay, so the
        two swap on one frame and are never both visible. */
-    document.documentElement.dataset.introDone = "1";
+    const root = document.documentElement;
+    root.dataset.introDone = "1";
     setShow(false);
-    /* Deferred: flipping --hero-stagger to 0ms mid-handoff would recompute the
-       hero delays into the past and snap them in. */
-    window.setTimeout(() => {
-      document.documentElement.dataset.skipIntro = "1";
-    }, 2000);
+
+    const settle = () => {
+      delete root.dataset.intro;
+      root.dataset.skipIntro = "1";
+    };
+    /* On a skip the hero has not started rising yet, so zero the stagger now
+       and let it appear at once. Letting the intro run its course instead
+       hands off mid-animation, and recomputing the delays would snap it in. */
+    if (immediate) settle();
+    else window.setTimeout(settle, HERO_HANDOFF_MS);
   }, []);
 
   if (!show) return null;

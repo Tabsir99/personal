@@ -1,15 +1,33 @@
-/* Hero entrance is gated so it begins as the intro backdrop clears (~5s) — not
-   after the overlay fully unmounts (6s) — so the revealed page is already
-   alive instead of blank. Override to 0 when the intro is skipped. */
 :root {
-  --hero-stagger: 5000ms;
-}
-html[data-skip-intro="1"] {
   --hero-stagger: 0ms;
 }
 
-html[data-skip-intro="1"] #intro-root {
+/* --intro-duration is set pre-paint by layout.tsx from INTRO_DURATION_MS, so
+   every phase below is a fraction of that one value. It is only ever read
+   under [data-intro="running"], which the same script sets in the same branch. */
+html[data-intro="running"] {
+  --intro-scan-delay: calc(var(--intro-duration) * 0.06);
+  --intro-scan-dur: calc(var(--intro-duration) * 0.42);
+  --intro-rings-delay: calc(var(--intro-duration) * 0.1);
+  --intro-rings-dur: calc(var(--intro-duration) * 0.22);
+  --intro-ring-draw-dur: calc(var(--intro-duration) * 0.38);
+  --intro-chars-delay: calc(var(--intro-duration) * 0.14);
+  --intro-char-step: calc(var(--intro-duration) * 0.012);
+  --intro-char-dur: calc(var(--intro-duration) * 0.04);
+  --intro-hint-delay: calc(var(--intro-duration) * 0.2);
+  --intro-hint-dur: calc(var(--intro-duration) * 0.16);
+  --intro-morph-dur: calc(var(--intro-duration) * 0.3);
+  --intro-out-delay: calc(var(--intro-duration) * 0.74);
+  --intro-out-dur: calc(var(--intro-duration) * 0.26);
+
+  --hero-stagger: calc(var(--intro-duration) * 0.72);
+}
+
+#intro-root {
   display: none;
+}
+html[data-intro="running"] #intro-root {
+  display: block;
 }
 
 @keyframes intro-scan-sweep {
@@ -53,12 +71,26 @@ html[data-skip-intro="1"] #intro-root {
     opacity: 1;
   }
 }
+@keyframes intro-hint-in {
+  to {
+    opacity: 0.38;
+  }
+}
+@keyframes intro-hint-out {
+  from {
+    opacity: 0.38;
+  }
+  to {
+    opacity: 0;
+  }
+}
 .intro-overlay {
   z-index: 9999;
 }
 
 .intro-bg {
-  animation: intro-bg-out 800ms cubic-bezier(0.4, 0, 0.2, 1) 5100ms forwards;
+  animation: intro-bg-out var(--intro-out-dur) cubic-bezier(0.4, 0, 0.2, 1)
+    var(--intro-out-delay) forwards;
 }
 
 .intro-scan {
@@ -69,21 +101,23 @@ html[data-skip-intro="1"] #intro-root {
     rgba(232, 148, 85, 0)
   );
   box-shadow: 0 0 24px rgba(232, 148, 85, 0.35);
-  animation: intro-scan-sweep 1.6s cubic-bezier(0.22, 1, 0.36, 1) 1000ms both;
+  animation: intro-scan-sweep var(--intro-scan-dur)
+    cubic-bezier(0.22, 1, 0.36, 1) var(--intro-scan-delay) both;
 }
 
 .intro-rings {
   opacity: 0;
   animation:
-    intro-rings-in 800ms ease 1900ms forwards,
-    intro-rings-out 850ms ease 5100ms forwards;
+    intro-rings-in var(--intro-rings-dur) ease var(--intro-rings-delay) forwards,
+    intro-rings-out var(--intro-out-dur) ease var(--intro-out-delay) forwards;
 }
 .intro-rings ellipse {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  animation: intro-ring-draw 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: intro-ring-draw var(--intro-ring-draw-dur)
+    cubic-bezier(0.22, 1, 0.36, 1) forwards;
   /* Per-ellipse stagger from inline --ring-d composes onto the base. */
-  animation-delay: calc(1900ms + var(--ring-d, 0s));
+  animation-delay: calc(var(--intro-rings-delay) + var(--ring-d, 0ms));
 }
 
 /* Outer element owns position + the morph: JS sets an inline transform that
@@ -95,24 +129,36 @@ html[data-skip-intro="1"] #intro-root {
   transform: translate(-50%, -50%) scale(1);
   font-size: clamp(40px, 10vw, 150px);
   will-change: transform;
-  /* Quick, prompt start so the word is clearly travelling while the rings
-     fade, then eases to rest on the brand. */
-  transition: transform 720ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  transition: transform var(--intro-morph-dur) cubic-bezier(0.2, 0.75, 0.25, 1);
 }
 
 /* Entrance: each character types in one at a time. Opacity-only (compositor
-   cheap, no blur), starting after the rings have drawn so the word doesn't
-   sit idle at center for seconds. --char-i staggers left-to-right. */
+   cheap, no blur). --char-i staggers left-to-right. */
 .intro-char {
   opacity: 0;
-  animation: intro-char-in 90ms ease forwards;
-  animation-delay: calc(2800ms + var(--char-i, 0) * 70ms);
+  animation: intro-char-in var(--intro-char-dur) ease forwards;
+  animation-delay: calc(
+    var(--intro-chars-delay) + var(--char-i, 0) * var(--intro-char-step)
+  );
 }
 
-/* Header brand stays hidden through the intro; it's revealed by data-intro-done
-   in the same commit the overlay unmounts, so the landed word and the real
-   brand swap on a single frame — never both visible at once. */
-html:not([data-intro-done]):not([data-skip-intro="1"]) [data-brand] {
+.intro-hint {
+  opacity: 0;
+  animation:
+    intro-hint-in var(--intro-hint-dur) ease var(--intro-hint-delay) forwards,
+    intro-hint-out var(--intro-out-dur) ease var(--intro-out-delay) forwards;
+}
+.intro-hint::before,
+.intro-hint::after {
+  content: "";
+  display: block;
+  width: clamp(18px, 5vw, 44px);
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+html[data-intro="running"]:not([data-intro-done]) [data-brand] {
   opacity: 0;
 }
 

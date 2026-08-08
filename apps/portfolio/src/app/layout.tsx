@@ -8,6 +8,7 @@ import {
 } from "next/font/google";
 import { Footer } from "@/components/portfolio/footer";
 import { ScrollIsland } from "@/components/ui/scroll-island";
+import { INTRO_DURATION_MS } from "@/components/portfolio/intro-timing";
 import { getPageData } from "@/lib/pageData";
 
 const instrumentSansFont = Instrument_Sans({
@@ -101,10 +102,12 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{
-        var p = parseInt(localStorage.getItem("intro-played") || "0");
-        var recent = p > Date.now() - 6048e5;            // 7 days
-        var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-        if (recent || reduced) document.documentElement.dataset.skipIntro = "1";
+        var seenBefore = localStorage.getItem("intro-played") !== null;
+        var reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var root = document.documentElement;
+        if (seenBefore || reducedMotion) { root.dataset.skipIntro = "1"; return; }
+        root.dataset.intro = "running";
+        root.style.setProperty("--intro-duration", "${INTRO_DURATION_MS}ms");
       } catch(e){} })();`,
           }}
         />
